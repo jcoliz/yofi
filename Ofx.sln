@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibOfx", "LibOfx\LibOfx.csproj", "{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ofx.Tests", "Ofx.Tests\Ofx.Tests.csproj", "{5E334C32-FE96-4F4F-954E-34681222DB9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E334C32-FE96-4F4F-954E-34681222DB9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E334C32-FE96-4F4F-954E-34681222DB9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E334C32-FE96-4F4F-954E-34681222DB9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E334C32-FE96-4F4F-954E-34681222DB9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
