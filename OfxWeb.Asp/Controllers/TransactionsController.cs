@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
+using Microsoft.AspNetCore.Http;
+using OfxSharpLib;
 
 namespace OfxWeb.Asp.Controllers
 {
@@ -54,7 +56,7 @@ namespace OfxWeb.Asp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
+        public async Task<IActionResult> Create([Bind("ID,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
             if (ModelState.IsValid)
             {
@@ -86,7 +88,7 @@ namespace OfxWeb.Asp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
             if (id != transaction.ID)
             {
@@ -144,6 +146,37 @@ namespace OfxWeb.Asp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Upload(List<IFormFile> files)
+        {
+            var result = new List<Models.Transaction>();
+            try
+            {
+                long size = files.Sum(f => f.Length);
+
+                foreach (var formFile in files)
+                {
+                    using (var stream = formFile.OpenReadStream())
+                    {
+                        var parser = new OfxDocumentParser();
+                        var Document = parser.Import(stream);
+
+                        foreach(var tx in Document.Transactions)
+                        {
+                            result.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo, BankReference = tx.ReferenceNumber });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+
+            return View(result);
+        }
+
 
         private bool TransactionExists(int id)
         {

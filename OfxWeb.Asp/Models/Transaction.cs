@@ -9,6 +9,7 @@ namespace OfxWeb.Asp.Models
     {
         public int ID { get; set; }
         public decimal Amount { get; set; }
+        public DateTime Timestamp { get; set; }
         public string Memo { get; set; }
         public string Payee { get; set; }
         public string Category { get; set; }
