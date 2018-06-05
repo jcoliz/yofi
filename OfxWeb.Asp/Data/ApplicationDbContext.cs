@@ -22,5 +22,8 @@ namespace OfxWeb.Asp.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
+
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Account> Accounts { get; set; }
     }
 }
