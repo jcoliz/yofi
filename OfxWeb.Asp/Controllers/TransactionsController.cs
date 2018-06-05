@@ -162,10 +162,13 @@ namespace OfxWeb.Asp.Controllers
                         var parser = new OfxDocumentParser();
                         var Document = parser.Import(stream);
 
-                        foreach(var tx in Document.Transactions)
+                        await Task.Run(() => 
                         {
-                            result.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo, BankReference = tx.ReferenceNumber });
-                        }
+                            foreach (var tx in Document.Transactions)
+                            {
+                                result.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo, BankReference = tx.ReferenceNumber, Timestamp = tx.Date });
+                            }
+                        });
                     }
                 }
             }
