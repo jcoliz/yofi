@@ -24,7 +24,7 @@ namespace OfxWeb.Asp.Controllers
         // GET: Transactions
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Transactions.ToListAsync());
+            return View(await _context.Transactions.OrderByDescending(x=>x.Timestamp).ToListAsync());
         }
 
         // GET: Transactions/Details/5
@@ -193,7 +193,7 @@ namespace OfxWeb.Asp.Controllers
                 return BadRequest(ex);
             }
 
-            return View(incoming);
+            return View(incoming.OrderByDescending(x=>x.Timestamp));
         }
 
         private bool TransactionExists(int id)
