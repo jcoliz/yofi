@@ -177,7 +177,7 @@ namespace OfxWeb.Asp.Controllers
 
                 var keys = incoming.Select(x => x.BankReference).ToHashSet();
 
-                var existing = _context.Transactions.Where(x => keys.Contains(x.BankReference));
+                var existing = await _context.Transactions.Where(x => keys.Contains(x.BankReference)).ToListAsync();
 
                 // Removed duplicate transactions.
 
@@ -185,7 +185,7 @@ namespace OfxWeb.Asp.Controllers
 
                 // Add resulting transactions
 
-                _context.AddRange(incoming);
+                await _context.AddRangeAsync(incoming);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
