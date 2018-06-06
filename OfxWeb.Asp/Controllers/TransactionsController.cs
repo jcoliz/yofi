@@ -16,13 +16,15 @@ namespace OfxWeb.Asp.Controllers
     {
         private readonly ApplicationDbContext _context;
 
+        private const int pagesize = 100;
+
         public TransactionsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         // GET: Transactions
-        public async Task<IActionResult> Index(string sortOrder)
+        public async Task<IActionResult> Index(string sortOrder, int? page)
         {
             // Sort/Filter: https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/sort-filter-page?view=aspnetcore-2.1
 
@@ -34,6 +36,9 @@ namespace OfxWeb.Asp.Controllers
             ViewData["CategorySortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
             ViewData["AmountSortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
             ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
+
+            if (!page.HasValue)
+                page = 1;
 
             var result = from s in _context.Transactions
                            select s;
@@ -72,7 +77,22 @@ namespace OfxWeb.Asp.Controllers
                     result = result.OrderByDescending(s => s.Timestamp);
                     break;
             }
-            return View(await result.Take(100).AsNoTracking().ToListAsync());
+
+            var count = await result.CountAsync();
+
+            if (count > pagesize)
+            {
+                result = result.Skip((page.Value - 1) * pagesize).Take(pagesize);
+
+                if (page.Value > 1)
+                    ViewData["PreviousPage"] = page.Value - 1;
+                if (page * pagesize < count )
+                    ViewData["NextPage"] = page.Value + 1;
+
+                ViewData["CurrentSort"] = sortOrder;
+            }
+
+            return View(await result.AsNoTracking().ToListAsync());
         }
 
         // GET: Transactions/Details/5

@@ -9,6 +9,28 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+@{
+
+    var prevDisabled = ViewData["PreviousPage"] == null ? "disabled" : "";
+    var nextDisabled = ViewData["NextPage"] == null ? "disabled" : "";
+}
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-page="@ViewData["PreviousPage"]"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-page="@ViewData["NextPage"]"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
+
 <table class="table">
     <thead>
         <tr>
