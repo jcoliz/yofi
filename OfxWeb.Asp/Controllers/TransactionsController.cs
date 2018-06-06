@@ -22,9 +22,57 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder)
         {
-            return View(await _context.Transactions.OrderByDescending(x=>x.Timestamp).ToListAsync());
+            // Sort/Filter: https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/sort-filter-page?view=aspnetcore-2.1
+
+            if (string.IsNullOrEmpty(sortOrder))
+                sortOrder = "date_desc";
+
+            ViewData["DateSortParm"] = sortOrder == "date_desc" ? "date_asc" : "date_desc";
+            ViewData["PayeeSortParm"] = sortOrder == "payee_asc" ? "payee_desc" : "payee_asc";
+            ViewData["CategorySortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
+            ViewData["AmountSortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
+            ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
+
+            var result = from s in _context.Transactions
+                           select s;
+
+            switch (sortOrder)
+            {
+                case "amount_asc":
+                    result = result.OrderBy(s => s.Amount);
+                    break;
+                case "amount_desc":
+                    result = result.OrderByDescending(s => s.Amount);
+                    break;
+                case "ref_asc":
+                    result = result.OrderBy(s => s.BankReference);
+                    break;
+                case "ref_desc":
+                    result = result.OrderByDescending(s => s.BankReference);
+                    break;
+                case "payee_asc":
+                    result = result.OrderBy(s => s.Payee);
+                    break;
+                case "payee_desc":
+                    result = result.OrderByDescending(s => s.Payee);
+                    break;
+                case "category_asc":
+                    result = result.OrderBy(s => s.Category);
+                    break;
+                case "category_desc":
+                    result = result.OrderByDescending(s => s.Category);
+                    break;
+                case "date_asc":
+                    result = result.OrderBy(s => s.Timestamp);
+                    break;
+                case "date_desc":
+                default:
+                    result = result.OrderByDescending(s => s.Timestamp);
+                    break;
+            }
+            return View(await result.Take(100).AsNoTracking().ToListAsync());
         }
 
         // GET: Transactions/Details/5
