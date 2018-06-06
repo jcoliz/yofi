@@ -175,9 +175,9 @@ namespace OfxWeb.Asp.Controllers
 
                 // Query for matching transactions.
 
-                var keys = incoming.Select(x => x.BankReference);
+                var keys = incoming.Select(x => x.BankReference).ToHashSet();
 
-                var existing = _context.Transactions.Where(x => incoming.Contains(x)).ToHashSet(new TransactionBankReferenceComparer());
+                var existing = _context.Transactions.Where(x => keys.Contains(x.BankReference));
 
                 // Removed duplicate transactions.
 
