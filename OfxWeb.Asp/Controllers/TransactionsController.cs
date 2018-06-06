@@ -150,10 +150,11 @@ namespace OfxWeb.Asp.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            var result = new List<Models.Transaction>();
+            var incoming = new HashSet<Models.Transaction>(new TransactionBankReferenceComparer());
             try
             {
-                long size = files.Sum(f => f.Length);
+
+                // Build the submitted file into a list of transactions
 
                 foreach (var formFile in files)
                 {
@@ -166,24 +167,56 @@ namespace OfxWeb.Asp.Controllers
                         {
                             foreach (var tx in Document.Transactions)
                             {
-                                result.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo, BankReference = tx.ReferenceNumber, Timestamp = tx.Date });
+                                incoming.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo, BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date });
                             }
                         });
                     }
                 }
+
+                // Query for matching transactions.
+
+                var keys = incoming.Select(x => x.BankReference);
+
+                var existing = _context.Transactions.Where(x => incoming.Contains(x)).ToHashSet(new TransactionBankReferenceComparer());
+
+                // Removed duplicate transactions.
+
+                incoming.ExceptWith(existing);
+
+                // Add resulting transactions
+
+                _context.AddRange(incoming);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 return BadRequest(ex);
             }
 
-            return View(result);
+            return View(incoming);
         }
-
 
         private bool TransactionExists(int id)
         {
             return _context.Transactions.Any(e => e.ID == id);
+        }
+    }
+
+    class TransactionBankReferenceComparer : IEqualityComparer<Models.Transaction>
+    {
+        public bool Equals(Models.Transaction x, Models.Transaction y)
+        {
+            return x.BankReference == y.BankReference;
+        }
+
+        public int GetHashCode(Models.Transaction obj)
+        {
+            int result;
+            if (!int.TryParse(obj.BankReference,out result))
+            {
+                result = obj.BankReference.GetHashCode();
+            }
+            return result;
         }
     }
 }
