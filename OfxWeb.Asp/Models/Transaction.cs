@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ namespace OfxWeb.Asp.Models
     {
         public int ID { get; set; }
         public decimal Amount { get; set; }
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime Timestamp { get; set; }
         public string Memo { get; set; }
         public string Payee { get; set; }
