@@ -273,7 +273,7 @@ namespace OfxWeb.Asp.Controllers
         // GET: Transactions/Pivot
         public async Task<IActionResult> Pivot()
         {
-            var result = new List<PivotLine>();
+            var result = new PivotTable();
 
             // Create a grouping of results.
             //
@@ -284,8 +284,7 @@ namespace OfxWeb.Asp.Controllers
             foreach (var group in groups)
             {
                 var sum = group.Sum(x => x.Amount);
-                var line = new PivotLine() { Amount = sum, Month = group.Key.ToString() };
-                result.Add(line);
+                result.SetCell(group.Key.ToString(), "Total", sum);
             }
 
             return View(result);
@@ -315,9 +314,66 @@ namespace OfxWeb.Asp.Controllers
         }
     }
 
-    public class PivotLine
+    public class SparseDictionary<K,V>: Dictionary<K,V>
+    {
+        public new V this[K key]
+        {
+            get
+            {
+                return base.ContainsKey(key) ? base[key] : default(V);
+            }
+            set
+            {
+                base[key] = value;
+            }
+        }
+    }
+
+    public class PivotLine__
     {
         public string Month { get; set; }
         public decimal Amount { get; set; }
+    }
+
+    public class PivotTable
+    {
+        // First order keys is row (category), second order is column (month)
+        public Dictionary<string, SparseDictionary<string, decimal>> Table = new Dictionary<string, SparseDictionary<string, decimal>>();
+
+        public HashSet<string> Columns = new HashSet<string>();
+
+        /// <summary>
+        /// Add a call
+        /// </summary>
+        /// <param name="month"></param>
+        /// <param name="category"></param>
+        /// <param name="amount"></param>
+        public void SetCell(string month, string category, decimal amount)
+        {
+            if (!Table.ContainsKey(category))
+            {
+                Table[category] = new SparseDictionary<string, decimal>();
+            }
+            var row = Table[category];
+
+            row[month] = amount;
+
+            Columns.Add(month);
+        }
+
+        /// <summary>
+        /// Prepare the tabel for display by placing it into a displayable
+        /// </summary>
+        public void Prepare()
+        {
+
+        }
+    }
+
+    public class PivotLine
+    {
+        public string Header;
+
+        public List<decimal> Amounts { get; } = new List<decimal>();
     }
 }

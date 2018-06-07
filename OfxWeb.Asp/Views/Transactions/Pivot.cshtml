@@ -1,4 +1,4 @@
-﻿@model IEnumerable<OfxWeb.Asp.Controllers.PivotLine>
+﻿@model OfxWeb.Asp.Controllers.PivotTable
 
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -9,24 +9,29 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Month)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Amount)
-            </th>
+        <tr>
+            <td></td>
+            @foreach (var column in Model.Columns)
+            {
+                <td>
+                    @column
+                </td>
+            }
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var row in Model.Table)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Month)
+                    @row.Key
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Amount)
-                </td>
+                @foreach (var column in Model.Columns)
+                {
+                    <td>
+                        @row.Value[column]
+                    </td>
+                }
             </tr>
         }
     </tbody>
