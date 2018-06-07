@@ -20,16 +20,16 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var row in Model.Table)
+        @foreach (var row in Model.RowLabels)
         {
             <tr>
                 <td>
-                    @row.Key
+                    @row
                 </td>
                 @foreach (var column in Model.Columns)
                 {
                     <td>
-                        @row.Value[column]
+                        @Model.Table[row][column]
                     </td>
                 }
             </tr>

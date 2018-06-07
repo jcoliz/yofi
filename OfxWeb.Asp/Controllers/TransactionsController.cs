@@ -363,6 +363,8 @@ namespace OfxWeb.Asp.Controllers
 
         public HashSet<string> Columns = new HashSet<string>();
 
+        public IEnumerable<string> RowLabels => Table.Keys.OrderBy(x=>x);
+
         /// <summary>
         /// Add a call
         /// </summary>
