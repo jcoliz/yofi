@@ -270,6 +270,27 @@ namespace OfxWeb.Asp.Controllers
             return View(incoming.OrderByDescending(x=>x.Timestamp));
         }
 
+        // GET: Transactions/Pivot
+        public async Task<IActionResult> Pivot()
+        {
+            var result = new List<PivotLine>();
+
+            // Create a grouping of results.
+            //
+            // For this one we want rows: Category, cols: Month, filter: Year
+
+            var groups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
+
+            foreach (var group in groups)
+            {
+                var sum = group.Sum(x => x.Amount);
+                var line = new PivotLine() { Amount = sum, Month = group.Key.ToString() };
+                result.Add(line);
+            }
+
+            return View(result);
+        }
+
         private bool TransactionExists(int id)
         {
             return _context.Transactions.Any(e => e.ID == id);
@@ -292,5 +313,11 @@ namespace OfxWeb.Asp.Controllers
             }
             return result;
         }
+    }
+
+    public class PivotLine
+    {
+        public string Month { get; set; }
+        public decimal Amount { get; set; }
     }
 }
