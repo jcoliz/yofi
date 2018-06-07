@@ -273,7 +273,7 @@ namespace OfxWeb.Asp.Controllers
         // GET: Transactions/Pivot
         public async Task<IActionResult> Pivot()
         {
-            var result = new PivotTable();
+            var result = new PivotTable<string,string>();
 
             // Create a grouping of results.
             //
@@ -359,53 +359,40 @@ namespace OfxWeb.Asp.Controllers
         }
     }
 
-    public class PivotLine__
+    public class Label: IComparable<Label>
     {
-        public string Month { get; set; }
-        public decimal Amount { get; set; }
+        public int Order { get; set; }
+        public string Value { get; set; }
+
+        public int CompareTo(Label other) => Order.CompareTo(other.Order);
     }
 
-    public class PivotTable
+    public class PivotTable<C,R>
     {
         // First order keys is row (category), second order is column (month)
-        public Dictionary<string, SparseDictionary<string, decimal>> Table = new Dictionary<string, SparseDictionary<string, decimal>>();
+        public Dictionary<R, SparseDictionary<C, decimal>> Table = new Dictionary<R, SparseDictionary<C, decimal>>();
 
-        public HashSet<string> Columns = new HashSet<string>();
+        public HashSet<C> Columns = new HashSet<C>();
 
-        public IEnumerable<string> RowLabels => Table.Keys.OrderBy(x=>x);
+        public IEnumerable<R> RowLabels => Table.Keys.OrderBy(x => x);
 
         /// <summary>
         /// Add a call
         /// </summary>
-        /// <param name="month"></param>
-        /// <param name="category"></param>
+        /// <param name="collabel"></param>
+        /// <param name="rowlabel"></param>
         /// <param name="amount"></param>
-        public void SetCell(string month, string category, decimal amount)
+        public void SetCell(C collabel, R rowlabel, decimal amount)
         {
-            if (!Table.ContainsKey(category))
+            if (!Table.ContainsKey(rowlabel))
             {
-                Table[category] = new SparseDictionary<string, decimal>();
+                Table[rowlabel] = new SparseDictionary<C, decimal>();
             }
-            var row = Table[category];
+            var row = Table[rowlabel];
 
-            row[month] = amount;
+            row[collabel] = amount;
 
-            Columns.Add(month);
+            Columns.Add(collabel);
         }
-
-        /// <summary>
-        /// Prepare the tabel for display by placing it into a displayable
-        /// </summary>
-        public void Prepare()
-        {
-
-        }
-    }
-
-    public class PivotLine
-    {
-        public string Header;
-
-        public List<decimal> Amounts { get; } = new List<decimal>();
     }
 }
