@@ -279,13 +279,34 @@ namespace OfxWeb.Asp.Controllers
             //
             // For this one we want rows: Category, cols: Month, filter: Year
 
-            var groups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
+            // This is not working :(
+            // https://docs.microsoft.com/en-us/dotnet/csharp/linq/create-a-nested-group
+            /*
+            var qq = from tx in _context.Transactions
+                     where tx.Timestamp.Year == 2018 && ! string.IsNullOrEmpty(tx.Category)
+                     group tx by tx.Timestamp.Month into months
+                     from categories in (from tx in months group tx by tx.Category)
+                     group categories by months.Key;
+            */
 
-            foreach (var group in groups)
-            {
-                var sum = group.Sum(x => x.Amount);
-                result.SetCell(group.Key.ToString(), "Total", sum);
-            }
+            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
+
+            if (outergroups != null)
+                foreach (var outergroup in outergroups)
+                {
+                    var month = outergroup.Key;
+
+                    if (outergroup.Count() > 0)
+                    {
+                        var innergroups = outergroup.GroupBy(x => x.Category);
+
+                        foreach (var innergroup in innergroups)
+                        {
+                            var sum = innergroup.Sum(x => x.Amount);
+                            result.SetCell(month.ToString(), innergroup.Key ?? "Empty", sum);
+                        }
+                    }
+                }
 
             return View(result);
         }
