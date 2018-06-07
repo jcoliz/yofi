@@ -9,9 +9,9 @@ namespace OfxWeb.Asp.Models
     public class Transaction
     {
         public int ID { get; set; }
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:C2}")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
         public decimal Amount { get; set; }
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime Timestamp { get; set; }
         public string Memo { get; set; }
         public string Payee { get; set; }

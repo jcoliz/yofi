@@ -130,7 +130,7 @@ namespace OfxWeb.Asp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
+        public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
             if (ModelState.IsValid)
             {
@@ -162,7 +162,7 @@ namespace OfxWeb.Asp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
             if (id != transaction.ID)
             {
