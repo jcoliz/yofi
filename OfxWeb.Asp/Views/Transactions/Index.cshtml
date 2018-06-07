@@ -48,13 +48,13 @@
                     <a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["DateSortParm"]">@Html.DisplayNameFor(model => model.Timestamp)</a>
                 </th>
                 <th>
+                    <a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
+                </th>
+                <th>
                     <a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Memo)
-                </th>
-                <th>
-                    <a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
                 </th>
                 <th>
                     <a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
@@ -75,13 +75,13 @@
                 @Html.DisplayFor(modelItem => item.Timestamp)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.Payee)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Amount)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Memo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Payee)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Category)
