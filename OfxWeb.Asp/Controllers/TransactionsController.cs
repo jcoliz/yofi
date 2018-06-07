@@ -298,15 +298,24 @@ namespace OfxWeb.Asp.Controllers
 
                     if (outergroup.Count() > 0)
                     {
+                        decimal outersum = 0.0M;
                         var innergroups = outergroup.GroupBy(x => x.Category);
 
                         foreach (var innergroup in innergroups)
                         {
                             var sum = innergroup.Sum(x => x.Amount);
-                            result.SetCell(month.ToString(), innergroup.Key ?? "Empty", sum);
+                            result.SetCell(month.ToString(), innergroup.Key ?? string.Empty, sum);
+                            outersum += sum;
                         }
+                        result.SetCell(month.ToString(), "Z_Total", outersum);
                     }
                 }
+
+            foreach(var row in result.Table)
+            {
+                var rowsum = row.Value.Values.Sum();
+                result.SetCell("Total", row.Key, rowsum);
+            }
 
             return View(result);
         }
