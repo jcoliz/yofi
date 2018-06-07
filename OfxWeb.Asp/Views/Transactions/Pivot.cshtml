@@ -6,16 +6,16 @@
 @{
 }
 
-<table class="table">
+<table class="table pivot-table">
     <thead>
         <tr>
         <tr>
-            <td></td>
+            <th></th>
             @foreach (var column in Model.Columns)
             {
-                <td>
+                <th>
                     @column.Value
-                </td>
+                </th>
             }
         </tr>
     </thead>
@@ -23,13 +23,13 @@
         @foreach (var row in Model.RowLabels)
         {
             <tr>
-                <td>
+                <th>
                     @row.Value
-                </td>
+                </th>
                 @foreach (var column in Model.Columns)
                 {
                     <td>
-                        @Model.Table[row][column]
+                        @Model.Table[row][column].ToString("C2")
                     </td>
                 }
             </tr>

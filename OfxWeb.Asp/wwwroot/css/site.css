@@ -26,6 +26,10 @@
     margin: 15px;
 }
 
+.pivot-table td {
+    text-align: right;
+}
+
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
     /* Hide captions */
