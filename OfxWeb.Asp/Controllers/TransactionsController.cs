@@ -273,7 +273,7 @@ namespace OfxWeb.Asp.Controllers
         // GET: Transactions/Pivot
         public async Task<IActionResult> Pivot()
         {
-            var result = new PivotTable<string,string>();
+            var result = new PivotTable<Label,Label>();
 
             // Create a grouping of results.
             //
@@ -289,12 +289,16 @@ namespace OfxWeb.Asp.Controllers
                      group categories by months.Key;
             */
 
+            var labeltotal = new Label() { Order = 10000, Value = "TOTAL" };
+            var labelempty = new Label() { Order = 9999, Value = "Blank" };
+
             var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
 
             if (outergroups != null)
                 foreach (var outergroup in outergroups)
                 {
                     var month = outergroup.Key;
+                    var labelrow = new Label() { Order = month, Value = new DateTime(2018,month,1).ToString("MMM") };
 
                     if (outergroup.Count() > 0)
                     {
@@ -304,17 +308,24 @@ namespace OfxWeb.Asp.Controllers
                         foreach (var innergroup in innergroups)
                         {
                             var sum = innergroup.Sum(x => x.Amount);
-                            result.SetCell(month.ToString(), innergroup.Key ?? string.Empty, sum);
+
+                            var labelcol = labelempty;
+                            if (! string.IsNullOrEmpty(innergroup.Key))
+                            {
+                                labelcol = new Label() { Order = 0, Value = innergroup.Key };
+                            }
+
+                            result.SetCell(labelrow, labelcol, sum);
                             outersum += sum;
                         }
-                        result.SetCell(month.ToString(), "Z_Total", outersum);
+                        result.SetCell(labelrow, labeltotal, outersum);
                     }
                 }
 
             foreach(var row in result.Table)
             {
                 var rowsum = row.Value.Values.Sum();
-                result.SetCell("Total", row.Key, rowsum);
+                result.SetCell(labeltotal, row.Key, rowsum);
             }
 
             return View(result);
@@ -364,7 +375,22 @@ namespace OfxWeb.Asp.Controllers
         public int Order { get; set; }
         public string Value { get; set; }
 
-        public int CompareTo(Label other) => Order.CompareTo(other.Order);
+        public int CompareTo(Label other) => (Order == 0 && other.Order == 0) ? Value.CompareTo(other.Value) : Order.CompareTo(other.Order);
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as Label;
+
+            if (other.Order == 0 && Order == 0)
+                return Value.Equals(other.Value);
+            else
+                return Order.Equals(other.Order);
+        }
+
+        public override int GetHashCode()
+        {
+            return Order == 0 ? Value.GetHashCode() : Order;
+        }
     }
 
     public class PivotTable<C,R>
