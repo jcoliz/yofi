@@ -50,6 +50,7 @@
                 <th>
                     <a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
                 </th>
+            <th></th>
                 <th>
                     <a asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
                 </th>
@@ -78,6 +79,10 @@
                 @Html.DisplayFor(modelItem => item.Payee)
             </td>
             <td>
+                <a asp-controller="Payees" asp-action="Create" asp-route-txid="@item.ID">Add</a> 
+                <a asp-action="ApplyPayee" asp-route-id="@item.ID">Apply</a>
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Amount)
             </td>
             <td>
@@ -93,7 +98,7 @@
                 @Html.DisplayFor(modelItem => item.BankReference)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> 
+                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a>
             </td>
         </tr>
 }

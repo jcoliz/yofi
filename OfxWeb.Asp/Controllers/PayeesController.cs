@@ -44,8 +44,19 @@ namespace OfxWeb.Asp
         }
 
         // GET: Payees/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? txid)
         {
+            if (txid.HasValue)
+            {
+                var transaction = await _context.Transactions.Where(x => x.ID == txid.Value).SingleOrDefaultAsync();
+
+                if (transaction == null)
+                    return NotFound();
+
+                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee, SubCategory = transaction.SubCategory };
+                return View(payee);
+            }
+
             return View();
         }
 
