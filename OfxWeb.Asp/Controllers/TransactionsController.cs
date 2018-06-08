@@ -342,7 +342,7 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
-        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel" };
+        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "App Development" };
 
         private async Task<PivotTable<Label, Label>> YearlyReport()
         {
@@ -518,7 +518,7 @@ namespace OfxWeb.Asp.Controllers
             if (Order == 0 && other.Order == 0)
             {
                 if (Value == other.Value)
-                    return SubValue.CompareTo(other.SubValue);
+                    return (SubValue ?? String.Empty).CompareTo(other.SubValue ?? string.Empty);
                 else
                     return Value.CompareTo(other.Value);
             }
@@ -531,7 +531,7 @@ namespace OfxWeb.Asp.Controllers
             var other = obj as Label;
 
             if (other.Order == 0 && Order == 0)
-                return Value.Equals(other.Value) && SubValue.Equals(other.SubValue);
+                return Value.Equals(other.Value) && (SubValue ?? String.Empty).Equals(other.SubValue ?? String.Empty) == true;
             else
                 return Order.Equals(other.Order);
         }
