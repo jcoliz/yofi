@@ -25,5 +25,6 @@ namespace OfxWeb.Asp.Data
 
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<Payee> Payees { get; set; }
     }
 }
