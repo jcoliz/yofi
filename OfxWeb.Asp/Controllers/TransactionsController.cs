@@ -154,6 +154,22 @@ namespace OfxWeb.Asp.Controllers
             {
                 return NotFound();
             }
+
+            // Handle payee auto-assignment
+
+            if (string.IsNullOrEmpty(transaction.Category) && string.IsNullOrEmpty(transaction.SubCategory))
+            {
+                // See if the payee exists
+                var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
+
+                if (payee != null)
+                {
+                    transaction.Category = payee.Category;
+                    transaction.SubCategory = payee.SubCategory;
+                    ViewData["AutoCategory"] = true;
+                }
+            }
+
             return View(transaction);
         }
 
