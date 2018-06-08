@@ -173,6 +173,37 @@ namespace OfxWeb.Asp.Controllers
             return View(transaction);
         }
 
+        // GET: Transactions/Edit/5
+        public async Task<IActionResult> ApplyPayee(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            // Handle payee auto-assignment
+
+            // See if the payee exists
+            var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
+
+            if (payee != null)
+            {
+                transaction.Category = payee.Category;
+                transaction.SubCategory = payee.SubCategory;
+                _context.Update(transaction);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
         // POST: Transactions/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
