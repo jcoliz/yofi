@@ -8,7 +8,7 @@ namespace OfxWeb.Asp.Models
 {
     public class Payee
     {
-        [Key]
+        public int ID { get; set; }
         public string Name { get; set; }
         public string Category { get; set; }
         public string SubCategory { get; set; }

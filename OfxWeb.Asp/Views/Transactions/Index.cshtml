@@ -102,6 +102,12 @@
     </tbody>
 </table>
 
+<!--
+    TODO: "Payee" column
+    * If cat/subcat empty, and payee exists in payee table, show payee cat/subcat and "apply" button
+        This will require a left join to payee table on transaction.payee == payee.name, then include payee.cat & .subcat here
+    * If cat/subcat set, and payee not exists in payee table, show "add" button -> Payees/Add
+-->
 
 <h2>Upload</h2>
 

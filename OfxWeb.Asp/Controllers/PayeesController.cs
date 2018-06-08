@@ -26,7 +26,7 @@ namespace OfxWeb.Asp
         }
 
         // GET: Payees/Details/5
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -34,7 +34,7 @@ namespace OfxWeb.Asp
             }
 
             var payee = await _context.Payees
-                .SingleOrDefaultAsync(m => m.Name == id);
+                .SingleOrDefaultAsync(m => m.ID == id);
             if (payee == null)
             {
                 return NotFound();
@@ -54,7 +54,7 @@ namespace OfxWeb.Asp
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Category,SubCategory")] Payee payee)
+        public async Task<IActionResult> Create([Bind("ID,Name,Category,SubCategory")] Payee payee)
         {
             if (ModelState.IsValid)
             {
@@ -66,14 +66,14 @@ namespace OfxWeb.Asp
         }
 
         // GET: Payees/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var payee = await _context.Payees.SingleOrDefaultAsync(m => m.Name == id);
+            var payee = await _context.Payees.SingleOrDefaultAsync(m => m.ID == id);
             if (payee == null)
             {
                 return NotFound();
@@ -86,9 +86,9 @@ namespace OfxWeb.Asp
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Name,Category,SubCategory")] Payee payee)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category,SubCategory")] Payee payee)
         {
-            if (id != payee.Name)
+            if (id != payee.ID)
             {
                 return NotFound();
             }
@@ -102,7 +102,7 @@ namespace OfxWeb.Asp
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PayeeExists(payee.Name))
+                    if (!PayeeExists(payee.ID))
                     {
                         return NotFound();
                     }
@@ -117,7 +117,7 @@ namespace OfxWeb.Asp
         }
 
         // GET: Payees/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -125,7 +125,7 @@ namespace OfxWeb.Asp
             }
 
             var payee = await _context.Payees
-                .SingleOrDefaultAsync(m => m.Name == id);
+                .SingleOrDefaultAsync(m => m.ID == id);
             if (payee == null)
             {
                 return NotFound();
@@ -137,17 +137,17 @@ namespace OfxWeb.Asp
         // POST: Payees/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var payee = await _context.Payees.SingleOrDefaultAsync(m => m.Name == id);
+            var payee = await _context.Payees.SingleOrDefaultAsync(m => m.ID == id);
             _context.Payees.Remove(payee);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PayeeExists(string id)
+        private bool PayeeExists(int id)
         {
-            return _context.Payees.Any(e => e.Name == id);
+            return _context.Payees.Any(e => e.ID == id);
         }
     }
 }
