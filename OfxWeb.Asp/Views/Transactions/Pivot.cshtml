@@ -23,9 +23,18 @@
         @foreach (var row in Model.RowLabels)
         {
             <tr>
-                <th>
-                    @row.Value
-                </th>
+                @if (string.IsNullOrEmpty(row.SubValue))
+                {
+                    <th>
+                        @row.Value
+                    </th>
+                }
+                else
+                {
+                    <td class="subhead">
+                        @row.SubValue
+                    </td>
+                }
                 @foreach (var column in Model.Columns)
                 {
                     <td>

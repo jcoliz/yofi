@@ -30,6 +30,11 @@
     text-align: right;
 }
 
+.pivot-table td.subhead {
+    text-align: left;
+    text-indent: 20px;
+}
+
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
     /* Hide captions */

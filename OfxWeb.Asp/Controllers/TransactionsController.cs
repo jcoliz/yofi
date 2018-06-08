@@ -341,7 +341,7 @@ namespace OfxWeb.Asp.Controllers
                                 labelrow = labelempty;
                                 if (!string.IsNullOrEmpty(innergroup.Key))
                                 {
-                                    labelrow = new Label() { Order = 0, Value = $"{innergroup.Key} / {subgroup.Key}" };
+                                    labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key };
                                 }
 
                                 result.SetCell(labelcol, labelrow, sum);
@@ -462,16 +462,28 @@ namespace OfxWeb.Asp.Controllers
     public class Label: IComparable<Label>
     {
         public int Order { get; set; }
-        public string Value { get; set; }
+        public string Value { get; set; } = string.Empty;
+        public string SubValue { get; set; } = string.Empty;
 
-        public int CompareTo(Label other) => (Order == 0 && other.Order == 0) ? Value.CompareTo(other.Value) : Order.CompareTo(other.Order);
+        public int CompareTo(Label other)
+        {
+            if (Order == 0 && other.Order == 0)
+            {
+                if (Value == other.Value)
+                    return SubValue.CompareTo(other.SubValue);
+                else
+                    return Value.CompareTo(other.Value);
+            }
+            else
+                return Order.CompareTo(other.Order);
+        }
 
         public override bool Equals(object obj)
         {
             var other = obj as Label;
 
             if (other.Order == 0 && Order == 0)
-                return Value.Equals(other.Value);
+                return Value.Equals(other.Value) && SubValue.Equals(other.SubValue);
             else
                 return Order.Equals(other.Order);
         }
