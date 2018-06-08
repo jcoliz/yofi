@@ -241,7 +241,7 @@ namespace OfxWeb.Asp.Controllers
                         {
                             foreach (var tx in Document.Transactions)
                             {
-                                incoming.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo, BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date });
+                                incoming.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date });
                             }
                         });
                     }
