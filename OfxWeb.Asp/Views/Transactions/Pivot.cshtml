@@ -22,6 +22,8 @@
     <tbody>
         @foreach (var row in Model.RowLabels)
         {
+            var emphasis = row.Emphasis ? "emphasis" : "";
+
             <tr>
                 @if (string.IsNullOrEmpty(row.SubValue))
                 {
@@ -31,14 +33,16 @@
                 }
                 else
                 {
-                    <td class="subhead">
+                    <td class="subhead @emphasis">
                         @row.SubValue
                     </td>
                 }
                 @foreach (var column in Model.Columns)
                 {
-                    <td>
-                        @Model.Table[row][column].ToString("C2")
+                    var cell = Model.Table[row][column];
+
+                    <td class="@emphasis">
+                        @cell.ToString("C2")
                     </td>
                 }
             </tr>

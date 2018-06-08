@@ -302,7 +302,7 @@ namespace OfxWeb.Asp.Controllers
             // This crazy report is THREE levels of grouping!! Months for columns, then rows and subrows for
             // categories and subcategories
 
-            var labeltotal = new Label() { Order = 10000, Value = "TOTAL" };
+            var labeltotal = new Label() { Order = 10000, Value = "TOTAL", Emphasis = true };
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
 
             var categoryfilter = new[] { "RV", "Yearly", "Travel" };
@@ -327,7 +327,7 @@ namespace OfxWeb.Asp.Controllers
                             var labelrow = labelempty;
                             if (!string.IsNullOrEmpty(innergroup.Key))
                             {
-                                labelrow = new Label() { Order = 0, Value = innergroup.Key };
+                                labelrow = new Label() { Order = 0, Value = innergroup.Key, Emphasis = true };
                             }
 
                             result.SetCell(labelcol, labelrow, sum);
@@ -464,6 +464,7 @@ namespace OfxWeb.Asp.Controllers
         public int Order { get; set; }
         public string Value { get; set; } = string.Empty;
         public string SubValue { get; set; } = string.Empty;
+        public bool Emphasis { get; set; } = false;
 
         public int CompareTo(Label other)
         {
