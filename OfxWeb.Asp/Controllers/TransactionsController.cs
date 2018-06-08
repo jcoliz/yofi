@@ -293,7 +293,7 @@ namespace OfxWeb.Asp.Controllers
 
             if (string.IsNullOrEmpty(report))
             {
-                report = "summary";
+                report = "monthly";
             }
 
             switch (report)
@@ -302,14 +302,16 @@ namespace OfxWeb.Asp.Controllers
                     result = await YearlyReport();
                     break;
 
-                case "summary":
+                case "monthly":
                 default:
-                    result = await SummaryReport();
+                    result = await MonthlyReport();
                     break;
             }
 
             return View(result);
         }
+
+        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel" };
 
         private async Task<PivotTable<Label, Label>> YearlyReport()
         {
@@ -321,9 +323,7 @@ namespace OfxWeb.Asp.Controllers
             var labeltotal = new Label() { Order = 10000, Value = "TOTAL", Emphasis = true };
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
 
-            var categoryfilter = new[] { "RV", "Yearly", "Travel" };
-
-            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x=>categoryfilter.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
+            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x=> YearlyCategories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
 
             if (outergroups != null)
                 foreach (var outergroup in outergroups)
@@ -376,7 +376,7 @@ namespace OfxWeb.Asp.Controllers
             return result;
         }
 
-        private async Task<PivotTable<Label, Label>> SummaryReport()
+        private async Task<PivotTable<Label, Label>> MonthlyReport()
         {
             var result = new PivotTable<Label, Label>();
 
@@ -397,7 +397,7 @@ namespace OfxWeb.Asp.Controllers
             var labeltotal = new Label() { Order = 10000, Value = "TOTAL" };
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
 
-            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
+            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && ! YearlyCategories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
 
             if (outergroups != null)
                 foreach (var outergroup in outergroups)
