@@ -42,7 +42,7 @@ namespace OfxWeb.Asp.Controllers
                 page = 1;
 
             var result = from s in _context.Transactions
-                           select s;
+                         select s;
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -92,7 +92,7 @@ namespace OfxWeb.Asp.Controllers
 
                 if (page.Value > 1)
                     ViewData["PreviousPage"] = page.Value - 1;
-                if (page * pagesize < count )
+                if (page * pagesize < count)
                     ViewData["NextPage"] = page.Value + 1;
 
                 ViewData["CurrentSort"] = sortOrder;
@@ -237,7 +237,7 @@ namespace OfxWeb.Asp.Controllers
                         var parser = new OfxDocumentParser();
                         var Document = parser.Import(stream);
 
-                        await Task.Run(() => 
+                        await Task.Run(() =>
                         {
                             foreach (var tx in Document.Transactions)
                             {
@@ -267,13 +267,102 @@ namespace OfxWeb.Asp.Controllers
                 return BadRequest(ex);
             }
 
-            return View(incoming.OrderByDescending(x=>x.Timestamp));
+            return View(incoming.OrderByDescending(x => x.Timestamp));
         }
 
         // GET: Transactions/Pivot
-        public async Task<IActionResult> Pivot()
+        public async Task<IActionResult> Pivot(string report)
         {
-            var result = new PivotTable<Label,Label>();
+            PivotTable<Label, Label> result = null;
+
+            if (string.IsNullOrEmpty(report))
+            {
+                report = "summary";
+            }
+
+            switch (report)
+            {
+                case "yearly":
+                    result = await YearlyReport();
+                    break;
+
+                case "summary":
+                default:
+                    result = await SummaryReport();
+                    break;
+            }
+
+            return View(result);
+        }
+
+        private async Task<PivotTable<Label, Label>> YearlyReport()
+        {
+            var result = new PivotTable<Label, Label>();
+
+            // This crazy report is THREE levels of grouping!! Months for columns, then rows and subrows for
+            // categories and subcategories
+
+            var labeltotal = new Label() { Order = 10000, Value = "TOTAL" };
+            var labelempty = new Label() { Order = 9999, Value = "Blank" };
+
+            var categoryfilter = new[] { "RV", "Yearly", "Travel" };
+
+            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x=>categoryfilter.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
+
+            if (outergroups != null)
+                foreach (var outergroup in outergroups)
+                {
+                    var month = outergroup.Key;
+                    var labelcol = new Label() { Order = month, Value = new DateTime(2018, month, 1).ToString("MMM") };
+
+                    if (outergroup.Count() > 0)
+                    {
+                        decimal outersum = 0.0M;
+                        var innergroups = outergroup.GroupBy(x => x.Category);
+
+                        foreach (var innergroup in innergroups)
+                        {
+                            var sum = innergroup.Sum(x => x.Amount);
+
+                            var labelrow = labelempty;
+                            if (!string.IsNullOrEmpty(innergroup.Key))
+                            {
+                                labelrow = new Label() { Order = 0, Value = innergroup.Key };
+                            }
+
+                            result.SetCell(labelcol, labelrow, sum);
+                            outersum += sum;
+
+                            var subgroups = innergroup.GroupBy(x => x.SubCategory);
+
+                            foreach (var subgroup in subgroups)
+                            {
+                                sum = subgroup.Sum(x => x.Amount);
+                                labelrow = labelempty;
+                                if (!string.IsNullOrEmpty(innergroup.Key))
+                                {
+                                    labelrow = new Label() { Order = 0, Value = $"{innergroup.Key} / {subgroup.Key}" };
+                                }
+
+                                result.SetCell(labelcol, labelrow, sum);
+                            }
+                        }
+                        result.SetCell(labelcol, labeltotal, outersum);
+                    }
+                }
+
+            foreach (var row in result.Table)
+            {
+                var rowsum = row.Value.Values.Sum();
+                result.SetCell(labeltotal, row.Key, rowsum);
+            }
+
+            return result;
+        }
+
+        private async Task<PivotTable<Label, Label>> SummaryReport()
+        {
+            var result = new PivotTable<Label, Label>();
 
             // Create a grouping of results.
             //
@@ -298,7 +387,7 @@ namespace OfxWeb.Asp.Controllers
                 foreach (var outergroup in outergroups)
                 {
                     var month = outergroup.Key;
-                    var labelrow = new Label() { Order = month, Value = new DateTime(2018,month,1).ToString("MMM") };
+                    var labelrow__ = new Label() { Order = month, Value = new DateTime(2018, month, 1).ToString("MMM") };
 
                     if (outergroup.Count() > 0)
                     {
@@ -309,26 +398,26 @@ namespace OfxWeb.Asp.Controllers
                         {
                             var sum = innergroup.Sum(x => x.Amount);
 
-                            var labelcol = labelempty;
-                            if (! string.IsNullOrEmpty(innergroup.Key))
+                            var labelrow = labelempty;
+                            if (!string.IsNullOrEmpty(innergroup.Key))
                             {
-                                labelcol = new Label() { Order = 0, Value = innergroup.Key };
+                                labelrow = new Label() { Order = 0, Value = innergroup.Key };
                             }
 
-                            result.SetCell(labelrow, labelcol, sum);
+                            result.SetCell(labelrow__, labelrow, sum);
                             outersum += sum;
                         }
-                        result.SetCell(labelrow, labeltotal, outersum);
+                        result.SetCell(labelrow__, labeltotal, outersum);
                     }
                 }
 
-            foreach(var row in result.Table)
+            foreach (var row in result.Table)
             {
                 var rowsum = row.Value.Values.Sum();
                 result.SetCell(labeltotal, row.Key, rowsum);
             }
 
-            return View(result);
+            return result;
         }
 
         private bool TransactionExists(int id)
