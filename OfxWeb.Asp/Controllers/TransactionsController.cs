@@ -149,7 +149,7 @@ namespace OfxWeb.Asp.Controllers
                 return NotFound();
             }
 
-            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+            var transaction = await _context.Transactions.Include(x=>x.Splits).SingleOrDefaultAsync(m => m.ID == id);
             if (transaction == null)
             {
                 return NotFound();

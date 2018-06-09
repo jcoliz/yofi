@@ -7,6 +7,11 @@
 <h2>Edit</h2>
 
 <h4>Transaction</h4>
+<div>
+    <a asp-action="Delete" asp-route-id="@Model.ID">Delete</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -55,10 +60,41 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Delete" asp-route-id="@Model.ID">Delete</a> | 
-    <a asp-action="Index">Back to List</a>
-</div>
+<h4>Splits</h4>
+    <a asp-controller="Splits" asp-action="Create" asp-route-txid="@Model.ID">Add</a>
+
+@if (Model.Splits != null)
+{
+    foreach (var split in Model.Splits)
+    {
+    <dl class="dl-horizontal">
+        <dt>
+            Category
+        </dt>
+        <dd>
+            @(split.Category ?? String.Empty)
+        </dd>
+        <dt>
+            SubCategory
+        </dt>
+        <dd>
+            @(split.SubCategory ?? String.Empty)
+        </dd>
+        <dt>
+            Amount
+        </dt>
+        <dd>
+            @split.Amount
+        </dd>
+        <dt>
+            Memo
+        </dt>
+        <dd>
+            @split.Memo
+        </dd>
+    </dl>
+    }
+}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
