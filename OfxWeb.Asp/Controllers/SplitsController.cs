@@ -91,7 +91,7 @@ namespace OfxWeb.Asp
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Category,SubCategory,Memo")] Split split)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
         {
             if (id != split.ID)
             {
