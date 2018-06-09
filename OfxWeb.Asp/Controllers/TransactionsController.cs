@@ -434,7 +434,7 @@ namespace OfxWeb.Asp.Controllers
                 foreach (var outergroup in outergroups)
                 {
                     var month = outergroup.Key;
-                    var labelrow__ = new Label() { Order = month, Value = new DateTime(2018, month, 1).ToString("MMM") };
+                    var labelcol = new Label() { Order = month, Value = new DateTime(2018, month, 1).ToString("MMM") };
 
                     if (outergroup.Count() > 0)
                     {
@@ -451,10 +451,10 @@ namespace OfxWeb.Asp.Controllers
                                 labelrow = new Label() { Order = 0, Value = innergroup.Key };
                             }
 
-                            result.SetCell(labelrow__, labelrow, sum);
+                            result.SetCell(labelcol, labelrow, sum);
                             outersum += sum;
                         }
-                        result.SetCell(labelrow__, labeltotal, outersum);
+                        result.SetCell(labelcol, labeltotal, outersum);
                     }
                 }
 
