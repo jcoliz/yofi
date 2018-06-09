@@ -9,9 +9,11 @@ using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using Microsoft.AspNetCore.Http;
 using OfxSharpLib;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OfxWeb.Asp.Controllers
 {
+    [Authorize(Roles = "Verified")]
     public class TransactionsController : Controller
     {
         private readonly ApplicationDbContext _context;
