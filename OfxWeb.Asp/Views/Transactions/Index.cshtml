@@ -84,7 +84,7 @@
 
                 <a asp-action="Index"
                    asp-route-sortOrder="@ViewData["CurrentSort"]"
-                   asp-route-searchString="@item.Payee">
+                   asp-route-searchString="@item.Payee.Trim()">
                     Search
                 </a>
 

@@ -53,7 +53,7 @@ namespace OfxWeb.Asp
                 if (transaction == null)
                     return NotFound();
 
-                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee, SubCategory = transaction.SubCategory };
+                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim(), SubCategory = transaction.SubCategory };
                 return View(payee);
             }
 
