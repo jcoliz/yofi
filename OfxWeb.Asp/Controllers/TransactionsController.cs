@@ -437,7 +437,7 @@ namespace OfxWeb.Asp.Controllers
             var labeltotal = new Label() { Order = 10000, Value = "TOTAL" };
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
 
-            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && ! YearlyCategories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
+            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && ( ! YearlyCategories.Contains(x.Category) || x.Category == null )).GroupBy(x => x.Timestamp.Month);
 
             if (outergroups != null)
                 foreach (var outergroup in outergroups)
