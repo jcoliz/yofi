@@ -79,8 +79,15 @@
                 @Html.DisplayFor(modelItem => item.Payee)
             </td>
             <td>
-                <a asp-controller="Payees" asp-action="Create" asp-route-txid="@item.ID">Add</a> 
+                <a asp-controller="Payees" asp-action="Create" asp-route-txid="@item.ID">Add</a>
                 <a asp-action="ApplyPayee" asp-route-id="@item.ID">Apply</a>
+
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-searchString="@item.Payee">
+                    Search
+                </a>
+
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Amount)
