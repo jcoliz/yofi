@@ -76,11 +76,11 @@ namespace OfxWeb.Asp.Controllers
                     result = result.OrderByDescending(s => s.Category);
                     break;
                 case "date_asc":
-                    result = result.OrderBy(s => s.Timestamp);
+                    result = result.OrderBy(s => s.Timestamp).ThenBy(s=>s.BankReference);
                     break;
                 case "date_desc":
                 default:
-                    result = result.OrderByDescending(s => s.Timestamp);
+                    result = result.OrderByDescending(s => s.Timestamp).ThenByDescending(s=>s.BankReference);
                     break;
             }
 
@@ -209,9 +209,9 @@ namespace OfxWeb.Asp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
+        public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
-            if (id != transaction.ID)
+            if (id != transaction.ID && duplicate != true)
             {
                 return NotFound();
             }
@@ -220,8 +220,17 @@ namespace OfxWeb.Asp.Controllers
             {
                 try
                 {
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
+                    if (duplicate == true)
+                    {
+                        transaction.ID = 0;
+                        _context.Add(transaction);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        _context.Update(transaction);
+                        await _context.SaveChangesAsync();
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
