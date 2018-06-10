@@ -24,7 +24,7 @@ namespace OfxWeb.Asp
         // GET: Payees
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Payees.ToListAsync());
+            return View(await _context.Payees.OrderBy(x=>x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync());
         }
 
         // GET: Payees/Details/5
