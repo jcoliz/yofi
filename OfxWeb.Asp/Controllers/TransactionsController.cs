@@ -445,18 +445,16 @@ namespace OfxWeb.Asp.Controllers
                             result.SetCell(labelcol, labelrow, sum);
                             outersum += sum;
 
-                            var subgroups = innergroup.GroupBy(x => x.SubCategory);
-
-                            foreach (var subgroup in subgroups)
+                            if (!string.IsNullOrEmpty(innergroup.Key))
                             {
-                                sum = subgroup.Sum(x => x.Amount);
-                                labelrow = labelempty;
-                                if (!string.IsNullOrEmpty(innergroup.Key))
-                                {
-                                    labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key };
-                                }
+                                var subgroups = innergroup.GroupBy(x => x.SubCategory);
 
-                                result.SetCell(labelcol, labelrow, sum);
+                                foreach (var subgroup in subgroups)
+                                {
+                                    sum = subgroup.Sum(x => x.Amount);
+                                    labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key ?? "-" };
+                                    result.SetCell(labelcol, labelrow, sum);
+                                }
                             }
                         }
                         result.SetCell(labelcol, labeltotal, outersum);
