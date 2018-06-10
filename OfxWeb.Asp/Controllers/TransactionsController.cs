@@ -27,7 +27,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions
-        public async Task<IActionResult> Index(string sortOrder, string searchString, int? page)
+        public async Task<IActionResult> Index(string sortOrder, string searchString, string searchCategory, int? page)
         {
             // Sort/Filter: https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/sort-filter-page?view=aspnetcore-2.1
 
@@ -50,6 +50,11 @@ namespace OfxWeb.Asp.Controllers
             if (!String.IsNullOrEmpty(searchString))
             {
                 result = result.Where(x => x.Payee.Contains(searchString));
+            }
+
+            if (!String.IsNullOrEmpty(searchCategory))
+            {
+                result = result.Where(x => x.Category.Contains(searchCategory));
             }
 
             switch (sortOrder)
@@ -405,7 +410,7 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
-        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "App Development", "Housing.Yearly", "James.Yearly", "Sheila.Yearly" };
+        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Housing.Yearly", "James.Yearly", "Sheila.Yearly" };
 
         private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities" };
 
