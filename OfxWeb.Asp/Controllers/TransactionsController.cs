@@ -318,7 +318,7 @@ namespace OfxWeb.Asp.Controllers
                         using (var stream = formFile.OpenReadStream())
                         {
                             var excel = new ExcelPackage(stream);
-                            var worksheet = excel.Workbook.Worksheets.Single();
+                            var worksheet = excel.Workbook.Worksheets.Where(x=>x.Name == "Transactions").Single();
 
                             var cols = new List<String>();
 
@@ -410,7 +410,7 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
-        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Housing.Yearly", "James.Yearly", "Sheila.Yearly" };
+        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping" };
 
         private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities" };
 
