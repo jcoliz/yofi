@@ -10,6 +10,7 @@ using OfxWeb.Asp.Models;
 using Microsoft.AspNetCore.Http;
 using OfxSharpLib;
 using Microsoft.AspNetCore.Authorization;
+using OfficeOpenXml;
 
 namespace OfxWeb.Asp.Controllers
 {
@@ -290,18 +291,65 @@ namespace OfxWeb.Asp.Controllers
 
                 foreach (var formFile in files)
                 {
-                    using (var stream = formFile.OpenReadStream())
+                    if (formFile.FileName.ToLower().EndsWith(".ofx"))
                     {
-                        var parser = new OfxDocumentParser();
-                        var Document = parser.Import(stream);
-
-                        await Task.Run(() =>
+                        using (var stream = formFile.OpenReadStream())
                         {
-                            foreach (var tx in Document.Transactions)
+                            var parser = new OfxDocumentParser();
+                            var Document = parser.Import(stream);
+
+                            await Task.Run(() =>
                             {
-                                incoming.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date });
+                                foreach (var tx in Document.Transactions)
+                                {
+                                    incoming.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date });
+                                }
+                            });
+                        }
+                    }
+                    else
+                    if (formFile.FileName.ToLower().EndsWith(".xlsx"))
+                    {
+                        using (var stream = formFile.OpenReadStream())
+                        {
+                            var excel = new ExcelPackage(stream);
+                            var worksheet = excel.Workbook.Worksheets.Single();
+
+                            var cols = new List<String>();
+
+                            // Read headers
+                            for (int i = 1; i <= worksheet.Dimension.Columns; i++)
+                            {
+                                cols.Add(worksheet.Cells[1, i].Text);
                             }
-                        });
+                            var EffectiveDateCol = 1 + cols.IndexOf("Effective Date");
+                            var AmountCol = 1 + cols.IndexOf("Amount");
+                            var ReferenceNumberCol = 1 + cols.IndexOf("Reference Number");
+                            var PayeeCol = 1 + cols.IndexOf("Payee");
+                            var TransactionCategoryCol = 1 + cols.IndexOf("Transaction Category");
+                            var SubtypeCol = 1 + cols.IndexOf("Subtype");
+
+                            // Read rows
+                            for (int i = 2; i <= worksheet.Dimension.Rows; i++)
+                            {
+                                var EffectiveDate = (DateTime)worksheet.Cells[i, EffectiveDateCol].Value;
+                                var Amount = Convert.ToDecimal((double)worksheet.Cells[i, AmountCol].Value);
+                                var ReferenceNumber = worksheet.Cells[i, ReferenceNumberCol].Text;
+                                var Payee = worksheet.Cells[i, PayeeCol].Text;
+                                var TransactionCategory = worksheet.Cells[i, TransactionCategoryCol].Text;
+                                var Subtype = worksheet.Cells[i, SubtypeCol].Text;
+
+                                var transaction = new Models.Transaction() { Amount = Amount, Payee = Payee.Trim(), BankReference = ReferenceNumber.Trim(), Timestamp = EffectiveDate };
+
+                                if (!string.IsNullOrEmpty(TransactionCategory))
+                                    transaction.Category = TransactionCategory;
+
+                                if (!string.IsNullOrEmpty(Subtype))
+                                    transaction.SubCategory = Subtype;
+
+                                incoming.Add(transaction);
+                            }
+                        }
                     }
                 }
 
