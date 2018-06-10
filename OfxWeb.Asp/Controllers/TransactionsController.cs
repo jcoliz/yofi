@@ -389,7 +389,11 @@ namespace OfxWeb.Asp.Controllers
             switch (report)
             {
                 case "yearly":
-                    result = await YearlyReport();
+                    result = await ThreeLevelReport(YearlyCategories);
+                    break;
+
+                case "details":
+                    result = await ThreeLevelReport(DetailCategories);
                     break;
 
                 case "monthly":
@@ -401,9 +405,11 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
-        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "App Development" };
+        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "App Development", "Housing.Yearly", "James.Yearly", "Sheila.Yearly" };
 
-        private async Task<PivotTable<Label, Label>> YearlyReport()
+        private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities" };
+
+        private async Task<PivotTable<Label, Label>> ThreeLevelReport(ICollection<string> categories)
         {
             var result = new PivotTable<Label, Label>();
 
@@ -413,7 +419,7 @@ namespace OfxWeb.Asp.Controllers
             var labeltotal = new Label() { Order = 10000, Value = "TOTAL", Emphasis = true };
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
 
-            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x=> YearlyCategories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
+            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x=> categories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
 
             if (outergroups != null)
                 foreach (var outergroup in outergroups)
