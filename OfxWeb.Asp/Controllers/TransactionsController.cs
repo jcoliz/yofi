@@ -181,7 +181,7 @@ namespace OfxWeb.Asp.Controllers
             return View(transaction);
         }
 
-        // GET: Transactions/Edit/5
+        // GET: Transactions/ApplyPayee/5
         public async Task<IActionResult> ApplyPayee(int? id)
         {
             if (id == null)
@@ -210,7 +210,6 @@ namespace OfxWeb.Asp.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
 
         // POST: Transactions/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 

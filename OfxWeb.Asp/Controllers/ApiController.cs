@@ -1,0 +1,97 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using OfxWeb.Asp.Data;
+
+namespace OfxWeb.Asp.Controllers
+{
+    [Produces("application/json")]
+    [Route("api/tx")]
+    public class ApiController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public ApiController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/Api
+        [HttpGet]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
+
+        // GET: api/Api/5
+        [HttpGet("{id}", Name = "Get")]
+        public async Task<string> Get(int id)
+        {
+            if (id == null)
+            {
+                return JsonConvert.SerializeObject(new ArgumentNullException("id"));
+            }
+
+            var transaction = await _context.Transactions
+                .SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return JsonConvert.SerializeObject(new KeyNotFoundException());
+            }
+
+            return JsonConvert.SerializeObject(transaction);
+        }
+
+        // GET: Transactions/ApplyPayee/5
+        [HttpGet("ApplyPayee/{id}")]
+        public async Task<string> ApplyPayee(int id)
+        {
+            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return JsonConvert.SerializeObject(new KeyNotFoundException("No such transaction"));
+            }
+
+            // Handle payee auto-assignment
+
+            // See if the payee exists
+            var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
+
+            if (payee == null)
+                return JsonConvert.SerializeObject(new KeyNotFoundException("Payee unknown"));
+
+            /*
+            transaction.Category = payee.Category;
+            transaction.SubCategory = payee.SubCategory;
+            _context.Update(transaction);
+            await _context.SaveChangesAsync();
+            */
+
+            return JsonConvert.SerializeObject(payee);
+        }
+
+
+        // POST: api/Api
+        [HttpPost]
+        public void Post([FromBody]string value)
+        {
+        }
+        
+        // PUT: api/Api/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody]string value)
+        {
+        }
+        
+        // DELETE: api/ApiWithActions/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+        }
+    }
+}
