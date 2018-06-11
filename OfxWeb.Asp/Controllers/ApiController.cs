@@ -65,12 +65,10 @@ namespace OfxWeb.Asp.Controllers
             if (payee == null)
                 return JsonConvert.SerializeObject(new KeyNotFoundException("Payee unknown"));
 
-            /*
             transaction.Category = payee.Category;
             transaction.SubCategory = payee.SubCategory;
             _context.Update(transaction);
             await _context.SaveChangesAsync();
-            */
 
             return JsonConvert.SerializeObject(payee);
         }
