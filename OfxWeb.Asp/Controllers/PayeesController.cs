@@ -164,8 +164,7 @@ namespace OfxWeb.Asp
             var incoming = new HashSet<Models.Payee>(new PayeeNameComparer());
             try
             {
-
-                // Build the submitted file into a list of transactions
+                // Extract submitted file into a list objects
 
                 foreach (var formFile in files)
                 {
@@ -175,44 +174,15 @@ namespace OfxWeb.Asp
                         {
                             var excel = new ExcelPackage(stream);
                             var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Payees").Single();
-
-                            var cols = new List<String>();
-
-                            // Read headers
-                            for (int i = 1; i <= worksheet.Dimension.Columns; i++)
-                            {
-                                cols.Add(worksheet.Cells[1, i].Text);
-                            }
-                            var NameCol = 1 + cols.IndexOf("Name");
-                            var CategoryCol = 1 + cols.IndexOf("Category");
-                            var SubCategoryCol = 1 + cols.IndexOf("SubCategory");
-
-                            // Read rows
-                            for (int i = 2; i <= worksheet.Dimension.Rows; i++)
-                            {
-                                var Name = worksheet.Cells[i, NameCol].Text.Trim();
-                                var Category = worksheet.Cells[i, CategoryCol].Text.Trim();
-                                var SubCategory = worksheet.Cells[i, SubCategoryCol].Text.Trim();
-
-                                var payee = new Models.Payee() { Name = Name, Category = Category };
-
-                                if (!string.IsNullOrEmpty(SubCategory))
-                                    payee.SubCategory = SubCategory;
-
-                                incoming.Add(payee);
-                            }
+                            worksheet.ExtractInto(incoming);
                         }
                     }
                 }
 
-                // Query for matching transactions.
-
-                var keys = incoming.Select(x => x.Name).ToHashSet();
-
-                var existing = await _context.Payees.Where(x => keys.Contains(x.Name)).ToListAsync();
-
                 // Removed duplicate transactions.
 
+                var keys = incoming.Select(x => x.Name).ToHashSet();
+                var existing = await _context.Payees.Where(x => keys.Contains(x.Name)).ToListAsync();
                 incoming.ExceptWith(existing);
 
                 // Add resulting transactions
