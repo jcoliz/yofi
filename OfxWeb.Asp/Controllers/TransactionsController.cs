@@ -342,7 +342,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Pivot
-        public async Task<IActionResult> Pivot(string report)
+        public IActionResult Pivot(string report)
         {
             PivotTable<Label, Label> result = null;
 
@@ -354,16 +354,16 @@ namespace OfxWeb.Asp.Controllers
             switch (report)
             {
                 case "yearly":
-                    result = await ThreeLevelReport(YearlyCategories);
+                    result = ThreeLevelReport(YearlyCategories);
                     break;
 
                 case "details":
-                    result = await ThreeLevelReport(DetailCategories);
+                    result = ThreeLevelReport(DetailCategories);
                     break;
 
                 case "monthly":
                 default:
-                    result = await MonthlyReport();
+                    result = MonthlyReport();
                     break;
             }
 
@@ -374,7 +374,7 @@ namespace OfxWeb.Asp.Controllers
 
         private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities" };
 
-        private async Task<PivotTable<Label, Label>> ThreeLevelReport(ICollection<string> categories)
+        private PivotTable<Label, Label> ThreeLevelReport(ICollection<string> categories)
         {
             var result = new PivotTable<Label, Label>();
 
@@ -435,7 +435,7 @@ namespace OfxWeb.Asp.Controllers
             return result;
         }
 
-        private async Task<PivotTable<Label, Label>> MonthlyReport()
+        private PivotTable<Label, Label> MonthlyReport()
         {
             var result = new PivotTable<Label, Label>();
 
