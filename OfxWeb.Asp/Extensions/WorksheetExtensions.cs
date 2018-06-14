@@ -15,9 +15,9 @@ namespace OfficeOpenXml
             var cols = new List<String>();
 
             // Read headers
-            for (int i = 1; i <= worksheet.Dimension.Columns; i++)
+            for (int col = 1; col <= worksheet.Dimension.Columns; col++)
             {
-                cols.Add(worksheet.Cells[1, i].Text);
+                cols.Add(worksheet.Cells[1, col].Text);
             }
 
             var columns = new Dictionary<string, int>();
@@ -28,7 +28,7 @@ namespace OfficeOpenXml
             }
 
             // Read rows
-            for (int i = 2; i <= worksheet.Dimension.Rows; i++)
+            for (int row = 2; row <= worksheet.Dimension.Rows; row++)
             {
                 var item = new T();
 
@@ -40,17 +40,17 @@ namespace OfficeOpenXml
 
                         if (property.PropertyType == typeof(DateTime))
                         {
-                            var value = (DateTime)worksheet.Cells[i, col].Value;
+                            var value = (DateTime)worksheet.Cells[row, col].Value;
                             property.SetValue(item, value);
                         }
                         else if (property.PropertyType == typeof(decimal))
                         {
-                            var value = Convert.ToDecimal((double)worksheet.Cells[i, col].Value);
+                            var value = Convert.ToDecimal((double)worksheet.Cells[row, col].Value);
                             property.SetValue(item, value);
                         }
                         else if (property.PropertyType == typeof(string))
                         {
-                            var value = worksheet.Cells[i, col].Text.Trim();
+                            var value = worksheet.Cells[row, col].Text?.Trim();
                             if (!string.IsNullOrEmpty(value))
                             {
                                 property.SetValue(item, value);
