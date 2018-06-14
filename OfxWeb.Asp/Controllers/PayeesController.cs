@@ -181,8 +181,7 @@ namespace OfxWeb.Asp
 
                 // Removed duplicate transactions.
 
-                var keys = incoming.Select(x => x.Name).ToHashSet();
-                var existing = await _context.Payees.Where(x => keys.Contains(x.Name)).ToListAsync();
+                var existing = await _context.Payees.Where(x => incoming.Contains(x)).ToListAsync();
                 incoming.ExceptWith(existing);
 
                 // Add resulting transactions
