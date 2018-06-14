@@ -160,29 +160,7 @@ namespace OfxWeb.Asp
                         {
                             var excel = new ExcelPackage(stream);
                             var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Budget Tx").Single();
-
-                            var cols = new List<String>();
-
-                            // Read headers
-                            for (int i = 1; i <= worksheet.Dimension.Columns; i++)
-                            {
-                                cols.Add(worksheet.Cells[1, i].Text);
-                            }
-                            var DateCol = 1 + cols.IndexOf("Date");
-                            var CategoryCol = 1 + cols.IndexOf("Category");
-                            var AmountCol = 1 + cols.IndexOf("Amount");
-
-                            // Read rows
-                            for (int i = 2; i <= worksheet.Dimension.Rows; i++)
-                            {
-                                var Date = (DateTime)worksheet.Cells[i, DateCol].Value;
-                                var Category = worksheet.Cells[i, CategoryCol].Text.Trim();
-                                var Amount = Convert.ToDecimal( (double)worksheet.Cells[i, AmountCol].Value );
-
-                                var tx = new Models.BudgetTx() { Timestamp = Date , Category = Category, Amount = Amount };
-
-                                incoming.Add(tx);
-                            }
+                            worksheet.ExtractInto(incoming);
                         }
                     }
                 }

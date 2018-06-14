@@ -37,11 +37,24 @@ namespace OfficeOpenXml
                     if (cols.Contains(property.Name))
                     {
                         var col = columns[property.Name];
-                        var value = worksheet.Cells[i, col].Text.Trim();
 
-                        if (!string.IsNullOrEmpty(value))
+                        if (property.PropertyType == typeof(DateTime))
                         {
+                            var value = (DateTime)worksheet.Cells[i, col].Value;
                             property.SetValue(item, value);
+                        }
+                        else if (property.PropertyType == typeof(decimal))
+                        {
+                            var value = Convert.ToDecimal((double)worksheet.Cells[i, col].Value);
+                            property.SetValue(item, value);
+                        }
+                        else if (property.PropertyType == typeof(string))
+                        {
+                            var value = worksheet.Cells[i, col].Text.Trim();
+                            if (!string.IsNullOrEmpty(value))
+                            {
+                                property.SetValue(item, value);
+                            }
                         }
                     }
                 }
