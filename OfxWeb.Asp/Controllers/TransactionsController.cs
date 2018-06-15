@@ -411,7 +411,7 @@ namespace OfxWeb.Asp.Controllers
                                 labelrow = new Label() { Order = 0, Value = innergroup.Key, Emphasis = true };
                             }
 
-                            result.SetCell(labelcol, labelrow, sum);
+                            result[labelcol, labelrow] = sum;
                             outersum += sum;
 
                             if (!string.IsNullOrEmpty(innergroup.Key))
@@ -422,18 +422,18 @@ namespace OfxWeb.Asp.Controllers
                                 {
                                     sum = subgroup.Sum(x => x.Amount);
                                     labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key ?? "-" };
-                                    result.SetCell(labelcol, labelrow, sum);
+                                    result[labelcol, labelrow] = sum;
                                 }
                             }
                         }
-                        result.SetCell(labelcol, labeltotal, outersum);
+                        result[labelcol, labeltotal] = outersum;
                     }
                 }
 
             foreach (var row in result.Table)
             {
                 var rowsum = row.Value.Values.Sum();
-                result.SetCell(labeltotal, row.Key, rowsum);
+                result[labeltotal, row.Key] = rowsum;
             }
 
             return result;
@@ -483,17 +483,17 @@ namespace OfxWeb.Asp.Controllers
                                 labelrow = new Label() { Order = 0, Value = innergroup.Key };
                             }
 
-                            result.SetCell(labelcol, labelrow, sum);
+                            result[labelcol, labelrow] = sum;
                             outersum += sum;
                         }
-                        result.SetCell(labelcol, labeltotal, outersum);
+                        result[labelcol, labeltotal] = outersum;
                     }
                 }
 
             foreach (var row in result.Table)
             {
                 var rowsum = row.Value.Values.Sum();
-                result.SetCell(labeltotal, row.Key, rowsum);
+                result[labeltotal, row.Key] = rowsum;
             }
 
             return result;
@@ -543,17 +543,17 @@ namespace OfxWeb.Asp.Controllers
                                 labelrow = new Label() { Order = 0, Value = innergroup.Key };
                             }
 
-                            result.SetCell(labelcol, labelrow, sum);
+                            result[labelcol, labelrow] = sum;
                             outersum += sum;
                         }
-                        result.SetCell(labelcol, labeltotal, outersum);
+                        result[labelcol, labeltotal] = outersum;
                     }
                 }
 
             foreach (var row in result.Table)
             {
                 var rowsum = row.Value.Values.Sum();
-                result.SetCell(labeltotal, row.Key, rowsum);
+                result[labeltotal, row.Key] = rowsum;
             }
 
             return result;
@@ -643,23 +643,31 @@ namespace OfxWeb.Asp.Controllers
 
         public IEnumerable<R> RowLabels => Table.Keys.OrderBy(x => x);
 
-        /// <summary>
-        /// Add a call
-        /// </summary>
-        /// <param name="collabel"></param>
-        /// <param name="rowlabel"></param>
-        /// <param name="amount"></param>
-        public void SetCell(C collabel, R rowlabel, decimal amount)
+        public decimal this[C collabel, R rowlabel]
         {
-            if (!Table.ContainsKey(rowlabel))
+            get
             {
-                Table[rowlabel] = new SparseDictionary<C, decimal>();
+                if (Table.ContainsKey(rowlabel))
+                {
+                    return Table[rowlabel][collabel];
+                }
+                else
+                {
+                    return 0;
+                }
             }
-            var row = Table[rowlabel];
+            set
+            {
+                if (!Table.ContainsKey(rowlabel))
+                {
+                    Table[rowlabel] = new SparseDictionary<C, decimal>();
+                }
+                var row = Table[rowlabel];
 
-            row[collabel] = amount;
+                row[collabel] = value;
 
-            Columns.Add(collabel);
+                Columns.Add(collabel);
+            }
         }
     }
 }
