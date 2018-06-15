@@ -361,6 +361,10 @@ namespace OfxWeb.Asp.Controllers
                     result = ThreeLevelReport(DetailCategories);
                     break;
 
+                case "budgettx":
+                    result = BudgetTxReport();
+                    break;
+
                 case "monthly":
                 default:
                     result = MonthlyReport();
@@ -384,7 +388,7 @@ namespace OfxWeb.Asp.Controllers
             var labeltotal = new Label() { Order = 10000, Value = "TOTAL", Emphasis = true };
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
 
-            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x=> categories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
+            var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => categories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
 
             if (outergroups != null)
                 foreach (var outergroup in outergroups)
@@ -457,6 +461,66 @@ namespace OfxWeb.Asp.Controllers
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
 
             var outergroups = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && ( ! YearlyCategories.Contains(x.Category) || x.Category == null )).GroupBy(x => x.Timestamp.Month);
+
+            if (outergroups != null)
+                foreach (var outergroup in outergroups)
+                {
+                    var month = outergroup.Key;
+                    var labelcol = new Label() { Order = month, Value = new DateTime(2018, month, 1).ToString("MMM") };
+
+                    if (outergroup.Count() > 0)
+                    {
+                        decimal outersum = 0.0M;
+                        var innergroups = outergroup.GroupBy(x => x.Category);
+
+                        foreach (var innergroup in innergroups)
+                        {
+                            var sum = innergroup.Sum(x => x.Amount);
+
+                            var labelrow = labelempty;
+                            if (!string.IsNullOrEmpty(innergroup.Key))
+                            {
+                                labelrow = new Label() { Order = 0, Value = innergroup.Key };
+                            }
+
+                            result.SetCell(labelcol, labelrow, sum);
+                            outersum += sum;
+                        }
+                        result.SetCell(labelcol, labeltotal, outersum);
+                    }
+                }
+
+            foreach (var row in result.Table)
+            {
+                var rowsum = row.Value.Values.Sum();
+                result.SetCell(labeltotal, row.Key, rowsum);
+            }
+
+            return result;
+        }
+
+        private PivotTable<Label, Label> BudgetTxReport()
+        {
+            var result = new PivotTable<Label, Label>();
+
+            // Create a grouping of results.
+            //
+            // For this one we want rows: Category, cols: Month, filter: Year
+
+            // This is not working :(
+            // https://docs.microsoft.com/en-us/dotnet/csharp/linq/create-a-nested-group
+            /*
+            var qq = from tx in _context.Transactions
+                     where tx.Timestamp.Year == 2018 && ! string.IsNullOrEmpty(tx.Category)
+                     group tx by tx.Timestamp.Month into months
+                     from categories in (from tx in months group tx by tx.Category)
+                     group categories by months.Key;
+            */
+
+            var labeltotal = new Label() { Order = 10000, Value = "TOTAL" };
+            var labelempty = new Label() { Order = 9999, Value = "Blank" };
+
+            var outergroups = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
 
             if (outergroups != null)
                 foreach (var outergroup in outergroups)
