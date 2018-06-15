@@ -11,4 +11,9 @@ namespace OfxWeb.Asp.Models
         DateTime Timestamp { get; }
         string Category { get; }
     }
+
+    public interface ISubReportable: IReportable
+    {
+        string SubCategory { get; }
+    }
 }
