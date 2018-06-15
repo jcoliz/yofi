@@ -370,6 +370,11 @@ namespace OfxWeb.Asp.Controllers
                     result = TwoLevelReport(groupsL1);
                     break;
 
+                case "budget":
+                    var labelcol = new Label() { Order = 5, Value = new DateTime(2018, 5, 1).ToString("MMM") };
+                    result = BudgetReport(labelcol);
+                    break;
+
                 case "monthly":
                 default:
                     groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && (!YearlyCategories.Contains(x.Category) || x.Category == null)).GroupBy(x => x.Timestamp.Month);
@@ -383,6 +388,42 @@ namespace OfxWeb.Asp.Controllers
         private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping" };
 
         private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities" };
+
+        private PivotTable<Label, Label, decimal> BudgetReport(Label month)
+        {
+            var result = new PivotTable<Label, Label, decimal>();
+
+            IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
+
+            groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
+            var budgettx = TwoLevelReport(groupsL1);
+
+            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && (!YearlyCategories.Contains(x.Category) || x.Category == null)).GroupBy(x => x.Timestamp.Month);
+            var monthlth = TwoLevelReport(groupsL1);
+
+            Label spentLabel = new Label() { Order = 1, Value = "Spent" };
+            Label budgetLabel = new Label() { Order = 2, Value = "Budget" };
+            Label remainingLabel = new Label() { Order = 3, Value = "Remaining" };
+            Label pctSpentLabel = new Label() { Order = 5, Value = "% Spent" };
+
+            foreach (var row in budgettx.Table)
+            {
+                if (monthlth.Table.ContainsKey(row.Key))
+                {
+                    var budgetval = - row.Value[month];
+                    var spentval = - monthlth[month,row.Key];
+                    var remaining = budgetval - spentval;
+                    var pct = spentval / budgetval;
+
+                    result[spentLabel, row.Key] = spentval;
+                    result[budgetLabel, row.Key] = budgetval;
+                    result[remainingLabel, row.Key] = remaining;
+                    result[pctSpentLabel, row.Key] = pct;
+                }
+            }
+
+            return result;
+        }
 
         private PivotTable<Label, Label, decimal> ThreeLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups)
         {
