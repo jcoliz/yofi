@@ -389,6 +389,8 @@ namespace OfxWeb.Asp.Controllers
 
         private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities" };
 
+        private string[] BudgetFocusCategories = new[] { "Auto & Transport", "Entertainment", "Food & Dining", "Groceries", "Kids", "Shoppping" };
+
         private PivotTable<Label, Label, decimal> BudgetReport(Label month)
         {
             var result = new PivotTable<Label, Label, decimal>();
@@ -398,7 +400,7 @@ namespace OfxWeb.Asp.Controllers
             groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
             var budgettx = TwoLevelReport(groupsL1);
 
-            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && (!YearlyCategories.Contains(x.Category) || x.Category == null)).GroupBy(x => x.Timestamp.Month);
+            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && BudgetFocusCategories.Contains(x.Category) ).GroupBy(x => x.Timestamp.Month);
             var monthlth = TwoLevelReport(groupsL1);
 
             Label spentLabel = new Label() { Order = 1, Value = "Spent" };
@@ -406,19 +408,21 @@ namespace OfxWeb.Asp.Controllers
             Label remainingLabel = new Label() { Order = 3, Value = "Remaining" };
             Label pctSpentLabel = new Label() { Order = 5, Value = "% Spent" };
 
-            foreach (var row in budgettx.Table)
+            foreach (var category in BudgetFocusCategories)
             {
-                if (monthlth.Table.ContainsKey(row.Key))
+                var labelrow = new Label() { Order = 0, Value = category };
+
+                if (monthlth.Table.ContainsKey(labelrow))
                 {
-                    var budgetval = - row.Value[month];
-                    var spentval = - monthlth[month,row.Key];
+                    var budgetval = - budgettx[month, labelrow];
+                    var spentval = - monthlth[month, labelrow];
                     var remaining = budgetval - spentval;
                     var pct = spentval / budgetval;
 
-                    result[spentLabel, row.Key] = spentval;
-                    result[budgetLabel, row.Key] = budgetval;
-                    result[remainingLabel, row.Key] = remaining;
-                    result[pctSpentLabel, row.Key] = pct;
+                    result[spentLabel, labelrow] = spentval;
+                    result[budgetLabel, labelrow] = budgetval;
+                    result[remainingLabel, labelrow] = remaining;
+                    result[pctSpentLabel, labelrow] = pct;
                 }
             }
 
