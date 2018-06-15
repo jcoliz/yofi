@@ -389,7 +389,7 @@ namespace OfxWeb.Asp.Controllers
 
         private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities" };
 
-        private string[] BudgetFocusCategories = new[] { "Auto & Transport", "Entertainment", "Food & Dining", "Groceries", "Kids", "Shoppping" };
+        private string[] BudgetFocusCategories = new[] { "Entertainment", "Food & Dining", "Groceries", "Kids", "Shopping" };
 
         private PivotTable<Label, Label, decimal> BudgetReport(Label month)
         {
