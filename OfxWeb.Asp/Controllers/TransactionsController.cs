@@ -342,7 +342,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Pivot
-        public IActionResult Pivot(string report)
+        public IActionResult Pivot(string report,int? month)
         {
             PivotTable<Label, Label, decimal> result = null;
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
@@ -352,6 +352,9 @@ namespace OfxWeb.Asp.Controllers
             {
                 report = "monthly";
             }
+
+            if (!month.HasValue)
+                month = DateTime.Now.Month;
 
             switch (report)
             {
@@ -371,7 +374,7 @@ namespace OfxWeb.Asp.Controllers
                     break;
 
                 case "budget":
-                    var labelcol = new Label() { Order = 5, Value = new DateTime(2018, 5, 1).ToString("MMM") };
+                    var labelcol = new Label() { Order = month.Value, Value = new DateTime(2018, month.Value, 1).ToString("MMM") };
                     result = BudgetReport(labelcol);
                     break;
 
