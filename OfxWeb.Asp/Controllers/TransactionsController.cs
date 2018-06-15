@@ -344,7 +344,7 @@ namespace OfxWeb.Asp.Controllers
         // GET: Transactions/Pivot
         public IActionResult Pivot(string report)
         {
-            PivotTable<Label, Label> result = null;
+            PivotTable<Label, Label, decimal> result = null;
 
             if (string.IsNullOrEmpty(report))
             {
@@ -378,9 +378,9 @@ namespace OfxWeb.Asp.Controllers
 
         private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities" };
 
-        private PivotTable<Label, Label> ThreeLevelReport(ICollection<string> categories)
+        private PivotTable<Label, Label, decimal> ThreeLevelReport(ICollection<string> categories)
         {
-            var result = new PivotTable<Label, Label>();
+            var result = new PivotTable<Label, Label, decimal>();
 
             // This crazy report is THREE levels of grouping!! Months for columns, then rows and subrows for
             // categories and subcategories
@@ -439,9 +439,9 @@ namespace OfxWeb.Asp.Controllers
             return result;
         }
 
-        private PivotTable<Label, Label> MonthlyReport()
+        private PivotTable<Label, Label, decimal> MonthlyReport()
         {
-            var result = new PivotTable<Label, Label>();
+            var result = new PivotTable<Label, Label, decimal>();
 
             // Create a grouping of results.
             //
@@ -499,9 +499,9 @@ namespace OfxWeb.Asp.Controllers
             return result;
         }
 
-        private PivotTable<Label, Label> BudgetTxReport()
+        private PivotTable<Label, Label, decimal> BudgetTxReport()
         {
-            var result = new PivotTable<Label, Label>();
+            var result = new PivotTable<Label, Label, decimal>();
 
             // Create a grouping of results.
             //
@@ -634,16 +634,16 @@ namespace OfxWeb.Asp.Controllers
         }
     }
 
-    public class PivotTable<C,R>
+    public class PivotTable<C,R,V>
     {
         // First order keys is row (category), second order is column (month)
-        public Dictionary<R, SparseDictionary<C, decimal>> Table = new Dictionary<R, SparseDictionary<C, decimal>>();
+        public Dictionary<R, SparseDictionary<C, V>> Table = new Dictionary<R, SparseDictionary<C, V>>();
 
         public HashSet<C> Columns = new HashSet<C>();
 
         public IEnumerable<R> RowLabels => Table.Keys.OrderBy(x => x);
 
-        public decimal this[C collabel, R rowlabel]
+        public V this[C collabel, R rowlabel]
         {
             get
             {
@@ -653,14 +653,14 @@ namespace OfxWeb.Asp.Controllers
                 }
                 else
                 {
-                    return 0;
+                    return default(V);
                 }
             }
             set
             {
                 if (!Table.ContainsKey(rowlabel))
                 {
-                    Table[rowlabel] = new SparseDictionary<C, decimal>();
+                    Table[rowlabel] = new SparseDictionary<C, V>();
                 }
                 var row = Table[rowlabel];
 
