@@ -362,7 +362,8 @@ namespace OfxWeb.Asp.Controllers
                     break;
 
                 case "budgettx":
-                    result = BudgetTxReport();
+                    var groups = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
+                    result = BudgetTxReport(groups);
                     break;
 
                 case "monthly":
@@ -498,8 +499,9 @@ namespace OfxWeb.Asp.Controllers
 
             return result;
         }
+        private Func<IGrouping<int, BudgetTx>, bool> X;
 
-        private PivotTable<Label, Label, decimal> BudgetTxReport()
+        private PivotTable<Label, Label, decimal> BudgetTxReport(IEnumerable<IGrouping<int,IReportable>> outergroups)
         {
             var result = new PivotTable<Label, Label, decimal>();
 
@@ -519,8 +521,6 @@ namespace OfxWeb.Asp.Controllers
 
             var labeltotal = new Label() { Order = 10000, Value = "TOTAL" };
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
-
-            var outergroups = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
 
             if (outergroups != null)
                 foreach (var outergroup in outergroups)

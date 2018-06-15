@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class Transaction
+    public class Transaction: IReportable
     {
         public int ID { get; set; }
         [DisplayFormat(DataFormatString = "{0:C2}")]
