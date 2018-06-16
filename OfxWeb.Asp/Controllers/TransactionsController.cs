@@ -342,7 +342,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Pivot
-        public IActionResult Pivot(string report,int? month)
+        public IActionResult Pivot(string report,int? month, int? weekspct)
         {
             PivotTable<Label, Label, decimal> result = null;
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
@@ -394,7 +394,7 @@ namespace OfxWeb.Asp.Controllers
 
                 case "budget":
                     var labelcol = new Label() { Order = month.Value, Value = new DateTime(2018, month.Value, 1).ToString("MMM") };
-                    result = BudgetReport(labelcol);
+                    result = BudgetReport(labelcol,weekspct);
                     ViewData["Title"] = "Budget vs Actuals Report";
                     ViewData["Subtitle"] = $"For {period.ToString("MMM yyyy")}";
                     break;
@@ -416,7 +416,7 @@ namespace OfxWeb.Asp.Controllers
 
         private string[] BudgetFocusCategories = new[] { "Entertainment", "Food & Dining", "Groceries", "Kids", "Shopping" };
 
-        private PivotTable<Label, Label, decimal> BudgetReport(Label month)
+        private PivotTable<Label, Label, decimal> BudgetReport(Label month, int? weekspct = null)
         {
             var result = new PivotTable<Label, Label, decimal>();
 
@@ -431,7 +431,9 @@ namespace OfxWeb.Asp.Controllers
             Label spentLabel = new Label() { Order = 1, Value = "Spent", Format = "C0" };
             Label budgetLabel = new Label() { Order = 2, Value = "Budget", Format = "C0" };
             Label remainingLabel = new Label() { Order = 3, Value = "Remaining", Format = "C0" };
-            Label pctSpentLabel = new Label() { Order = 5, Value = "% Spent", Format = "P0" };
+            Label pctSpentLabel = new Label() { Order = 4, Value = "% Spent", Format = "P0" };
+            Label pctStatusLabel = new Label() { Order = 5, Value = "Status", Format = "P0" };
+            Label iconStatusLabel = new Label() { Order = 6, Value = "Ok?", Format = "icon" };
 
             foreach (var category in BudgetFocusCategories)
             {
@@ -448,6 +450,22 @@ namespace OfxWeb.Asp.Controllers
                     result[budgetLabel, labelrow] = budgetval;
                     result[remainingLabel, labelrow] = remaining;
                     result[pctSpentLabel, labelrow] = pct;
+
+                    if (weekspct.HasValue)
+                    {
+                        var pctStatus = pct / (weekspct.Value / 100.0M);
+                        var icon = 0;
+                        if (pctStatus >= 1.0M)
+                        {
+                            icon = 2;
+                        }
+                        else if (pctStatus >= 0.8M)
+                        {
+                            icon = 1;
+                        }
+                        result[pctStatusLabel, labelrow] = pctStatus;
+                        result[iconStatusLabel, labelrow] = icon;
+                    }
                 }
             }
 
