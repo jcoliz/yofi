@@ -46,10 +46,22 @@
                     var cell = Model.Table[row][column];
                     var format = column.Format ?? row.Format ?? "C2";
 
-                    if (format == "icon")
+                    if (format == "P-warning")
                     {
-                        <td class="@emphasis">
-                            @Html.Raw( icons[(int)cell] )
+                        var warning = "";
+                        var icon = 0;
+                        if (cell >= 1.0M)
+                        {
+                            icon = 2;
+                            warning = "warningX";
+                        }
+                        else if (cell >= 0.8M)
+                        {
+                            icon = 1;
+                        }
+                        <td class="@emphasis @warning">
+                            @cell.ToString("P0")
+                            @Html.Raw( icons[icon] )
                         </td>
                     }
                     else

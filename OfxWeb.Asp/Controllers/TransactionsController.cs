@@ -434,8 +434,7 @@ namespace OfxWeb.Asp.Controllers
             Label budgetLabel = new Label() { Order = 2, Value = "Budget", Format = "C0" };
             Label remainingLabel = new Label() { Order = 3, Value = "Remaining", Format = "C0" };
             Label pctSpentLabel = new Label() { Order = 4, Value = "% Spent", Format = "P0" };
-            Label pctStatusLabel = new Label() { Order = 5, Value = "Status", Format = "P0" };
-            Label iconStatusLabel = new Label() { Order = 6, Value = "Ok?", Format = "icon" };
+            Label pctStatusLabel = new Label() { Order = 5, Value = "Status", Format = "P-warning" };
 
             foreach (var category in BudgetFocusCategories)
             {
@@ -456,17 +455,7 @@ namespace OfxWeb.Asp.Controllers
                     if (weekspct.HasValue)
                     {
                         var pctStatus = pct / (weekspct.Value / 100.0M);
-                        var icon = 0;
-                        if (pctStatus >= 1.0M)
-                        {
-                            icon = 2;
-                        }
-                        else if (pctStatus >= 0.8M)
-                        {
-                            icon = 1;
-                        }
                         result[pctStatusLabel, labelrow] = pctStatus;
-                        result[iconStatusLabel, labelrow] = icon;
                     }
                 }
             }
