@@ -397,6 +397,8 @@ namespace OfxWeb.Asp.Controllers
                     result = BudgetReport(labelcol,weekspct);
                     ViewData["Title"] = "Budget vs Actuals Report";
                     ViewData["Subtitle"] = $"For {period.ToString("MMM yyyy")}";
+                    if (weekspct.HasValue)
+                        ViewData["Subtitle"] += $" ({weekspct.Value}%)";
                     break;
 
                 case "monthly":
