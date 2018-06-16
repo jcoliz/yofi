@@ -354,7 +354,15 @@ namespace OfxWeb.Asp.Controllers
             }
 
             if (!month.HasValue)
+            {
                 month = DateTime.Now.Month;
+
+                // By default, budgetmo goes through LAST month, unless it's January
+                if (report == "budgetmo" && month > 1)
+                    --month;
+            }
+
+            var period = new DateTime(DateTime.Now.Year, month.Value, 1);
 
             ViewData["Subtitle"] = $"For {DateTime.Now.Year} year to date";
 
@@ -378,10 +386,15 @@ namespace OfxWeb.Asp.Controllers
                     ViewData["Title"] = "Budget Transaction Report";
                     break;
 
+                case "budgetmo":
+                    result = BudgetMonthlyReport(month.Value);
+                    ViewData["Title"] = "Monthly Budget Report";
+                    ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM yyyy")} ";
+                    break;
+
                 case "budget":
                     var labelcol = new Label() { Order = month.Value, Value = new DateTime(2018, month.Value, 1).ToString("MMM") };
                     result = BudgetReport(labelcol);
-                    var period = new DateTime(DateTime.Now.Year,month.Value,1);
                     ViewData["Title"] = "Budget vs Actuals Report";
                     ViewData["Subtitle"] = $"For {period.ToString("MMM yyyy")}";
                     break;
@@ -435,6 +448,39 @@ namespace OfxWeb.Asp.Controllers
                     result[budgetLabel, labelrow] = budgetval;
                     result[remainingLabel, labelrow] = remaining;
                     result[pctSpentLabel, labelrow] = pct;
+                }
+            }
+
+            return result;
+        }
+
+        private PivotTable<Label, Label, decimal> BudgetMonthlyReport(int monththrough)
+        {
+            var result = new PivotTable<Label, Label, decimal>();
+
+            IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
+
+            groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough).GroupBy(x => x.Timestamp.Month);
+            var budgettx = TwoLevelReport(groupsL1);
+
+            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough).GroupBy(x => x.Timestamp.Month);
+            var monthlth = TwoLevelReport(groupsL1);
+
+            foreach (var category in budgettx.RowLabels.Where(x=>x.Order == 0))
+            {
+                var labelrowbudget = new Label() { Order = 0, Value = category.Value, SubValue = "Budget" };
+                var labelrowactual = new Label() { Order = 0, Value = category.Value, SubValue = "Actual" };
+                var labelrow = new Label() { Order = 0, Value = category.Value, Emphasis = true };
+
+                foreach(var column in budgettx.Columns)
+                {
+                    var budgetval = budgettx[column, labelrow];
+                    var spentval = monthlth[column, labelrow];
+                    var remaining = spentval - budgetval;
+
+                    result[column, labelrow] = remaining;
+                    result[column, labelrowbudget] = budgetval;
+                    result[column, labelrowactual] = spentval;
                 }
             }
 
