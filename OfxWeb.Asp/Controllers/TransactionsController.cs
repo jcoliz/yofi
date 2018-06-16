@@ -460,17 +460,19 @@ namespace OfxWeb.Asp.Controllers
 
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
 
-            groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough).GroupBy(x => x.Timestamp.Month);
+            var budgettxquery = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough);
+            groupsL1 = budgettxquery.GroupBy(x => x.Timestamp.Month);
             var budgettx = TwoLevelReport(groupsL1);
 
-            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough).GroupBy(x => x.Timestamp.Month);
+            var categories = budgettxquery.Select(x => x.Category).Distinct().ToHashSet();
+            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough && categories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
             var monthlth = TwoLevelReport(groupsL1);
 
-            foreach (var category in budgettx.RowLabels.Where(x=>x.Order == 0))
+            foreach (var row in budgettx.RowLabels)
             {
-                var labelrowbudget = new Label() { Order = 0, Value = category.Value, SubValue = "Budget" };
-                var labelrowactual = new Label() { Order = 0, Value = category.Value, SubValue = "Actual" };
-                var labelrow = new Label() { Order = 0, Value = category.Value, Emphasis = true };
+                var labelrowbudget = new Label() { Order = row.Order + (row.Order > 0 ? 2 : 0), Value = row.Value, SubValue = "Budget" };
+                var labelrowactual = new Label() { Order = row.Order + (row.Order > 0 ? 1 : 0), Value = row.Value, SubValue = "Actual" };
+                var labelrow = new Label() { Order = row.Order, Value = row.Value, Emphasis = true };
 
                 foreach(var column in budgettx.Columns)
                 {
