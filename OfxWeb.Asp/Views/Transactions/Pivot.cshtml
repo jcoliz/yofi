@@ -49,9 +49,10 @@
                 @foreach (var column in Model.Columns)
                 {
                     var cell = Model.Table[row][column];
+                    var format = column.Format ?? row.Format ?? "C2";
 
                     <td class="@emphasis">
-                        @cell.ToString("C2")
+                        @cell.ToString(format)
                     </td>
                 }
             </tr>

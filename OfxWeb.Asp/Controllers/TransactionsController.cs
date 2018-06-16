@@ -406,10 +406,10 @@ namespace OfxWeb.Asp.Controllers
             groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && BudgetFocusCategories.Contains(x.Category) ).GroupBy(x => x.Timestamp.Month);
             var monthlth = TwoLevelReport(groupsL1);
 
-            Label spentLabel = new Label() { Order = 1, Value = "Spent" };
-            Label budgetLabel = new Label() { Order = 2, Value = "Budget" };
-            Label remainingLabel = new Label() { Order = 3, Value = "Remaining" };
-            Label pctSpentLabel = new Label() { Order = 5, Value = "% Spent" };
+            Label spentLabel = new Label() { Order = 1, Value = "Spent", Format = "C0" };
+            Label budgetLabel = new Label() { Order = 2, Value = "Budget", Format = "C0" };
+            Label remainingLabel = new Label() { Order = 3, Value = "Remaining", Format = "C0" };
+            Label pctSpentLabel = new Label() { Order = 5, Value = "% Spent", Format = "P0" };
 
             foreach (var category in BudgetFocusCategories)
             {
@@ -594,6 +594,7 @@ namespace OfxWeb.Asp.Controllers
         public string Value { get; set; } = string.Empty;
         public string SubValue { get; set; } = string.Empty;
         public bool Emphasis { get; set; } = false;
+        public string Format { get; set; } = null;
 
         public int CompareTo(Label other)
         {
