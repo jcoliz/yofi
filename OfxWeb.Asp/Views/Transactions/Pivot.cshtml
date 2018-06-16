@@ -5,15 +5,12 @@
 @{
 }
 
-<h2> Reports </h2>
-
-<p>
-    <a asp-action="Pivot" asp-route-report="monthly">Monthly</a> |
-    <a asp-action="Pivot" asp-route-report="details">Details</a> |
-    <a asp-action="Pivot" asp-route-report="yearly">Yearly</a> |
-    <a asp-action="Pivot" asp-route-report="budgettx">Budget Tx</a> |
-    <a asp-action="Pivot" asp-route-report="budget">Budget vs Actuals</a>
-</p>
+<h2>
+    @ViewData["Title"]
+</h2>
+<h3>
+    @ViewData["Subtitle"]
+</h3>
 
 <table class="table pivot-table">
     <thead>
@@ -59,3 +56,14 @@
         }
     </tbody>
 </table>
+
+<hr/>
+
+<p>
+    <a asp-action="Pivot" asp-route-report="monthly">Monthly</a> |
+    <a asp-action="Pivot" asp-route-report="details">Details</a> |
+    <a asp-action="Pivot" asp-route-report="yearly">Yearly</a> |
+    <a asp-action="Pivot" asp-route-report="budgettx">Budget Tx</a> |
+    <a asp-action="Pivot" asp-route-report="budget">Budget vs Actuals</a>
+</p>
+

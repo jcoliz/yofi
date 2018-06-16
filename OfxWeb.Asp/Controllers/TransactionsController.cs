@@ -356,32 +356,41 @@ namespace OfxWeb.Asp.Controllers
             if (!month.HasValue)
                 month = DateTime.Now.Month;
 
+            ViewData["Subtitle"] = $"For {DateTime.Now.Year} year to date";
+
             switch (report)
             {
                 case "yearly":
                     groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => YearlyCategories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
+                    ViewData["Title"] = "Yearly Report";
                     break;
 
                 case "details":
                     groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => DetailCategories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
+                    ViewData["Title"] = "Transaction Details Report";
                     break;
 
                 case "budgettx":
                     groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
+                    ViewData["Title"] = "Budget Transaction Report";
                     break;
 
                 case "budget":
                     var labelcol = new Label() { Order = month.Value, Value = new DateTime(2018, month.Value, 1).ToString("MMM") };
                     result = BudgetReport(labelcol);
+                    var period = new DateTime(DateTime.Now.Year,month.Value,1);
+                    ViewData["Title"] = "Budget vs Actuals Report";
+                    ViewData["Subtitle"] = $"For {period.ToString("MMM yyyy")}";
                     break;
 
                 case "monthly":
                 default:
                     groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && (!YearlyCategories.Contains(x.Category) || x.Category == null)).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
+                    ViewData["Title"] = "Monthly Report";
                     break;
             }
 
