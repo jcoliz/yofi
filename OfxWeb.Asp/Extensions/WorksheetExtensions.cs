@@ -63,7 +63,7 @@ namespace OfficeOpenXml
             }
         }
 
-        public static void PopulateFrom<T>(this ExcelWorksheet worksheet, ICollection<T> source) where T : class
+        public static void PopulateFrom<T>(this ExcelWorksheet worksheet, ICollection<T> source, out int rows, out int cols) where T : class
         {
             // First add the headers
 
@@ -84,6 +84,15 @@ namespace OfficeOpenXml
                 foreach (var property in properties)
                 {
                     worksheet.Cells[row, col].Value = property.GetValue(item);
+
+                    if (property.PropertyType == typeof(DateTime))
+                    {
+                        worksheet.Cells[row, col].Style.Numberformat.Format = "m/d/yyyy";
+                    }
+                    else if (property.PropertyType == typeof(decimal))
+                    {
+                        worksheet.Cells[row, col].Style.Numberformat.Format = "$#,##0.00";
+                    }
                     ++col;
                 }
                 ++row;
@@ -92,6 +101,9 @@ namespace OfficeOpenXml
             // AutoFitColumns
             worksheet.Cells[1, 1, row, col].AutoFitColumns();
 
+            // Result
+            rows = row - 1;
+            cols = col - 1;
         }
     }
 }
