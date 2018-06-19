@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using OfxSharpLib;
 using Microsoft.AspNetCore.Authorization;
 using OfficeOpenXml;
+using OfficeOpenXml.Table;
 
 namespace OfxWeb.Asp.Controllers
 {
@@ -339,6 +340,66 @@ namespace OfxWeb.Asp.Controllers
             }
 
             return View(incoming.OrderByDescending(x => x.Timestamp));
+        }
+
+
+        // GET: Transactions/Download
+        //<a asp-action="Download" asp-route-what="@ViewData["what"]" asp-route-who="@ViewData["who"]">Export</a> 
+
+        [ActionName("Download")]
+        public async Task<IActionResult> Download()
+        {
+            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            try
+            {
+                var transactions = await _context.Transactions.Where(x=>x.Timestamp.Year == 2018).OrderByDescending(x => x.Timestamp).ToListAsync();
+
+                byte[] reportBytes;
+                using (var package = createExcelPackage(transactions))
+                {
+                    reportBytes = package.GetAsByteArray();
+                }
+
+                return File(reportBytes, XlsxContentType, "Transactions.xlsx");
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
+
+        private ExcelPackage createExcelPackage(ICollection<Models.Transaction> transactions)
+        {
+            var package = new ExcelPackage();
+            package.Workbook.Properties.Title = "Bank Transactions";
+            package.Workbook.Properties.Author = "coliz.com";
+            package.Workbook.Properties.Subject = "Bank Transactions";
+            package.Workbook.Properties.Keywords = "Bank";
+
+            var worksheet = package.Workbook.Worksheets.Add("Transactions");
+
+            worksheet.PopulateFrom(transactions);
+
+            /*
+            var numberformat = "$#,##0.00";
+            var dataCellStyleName = "TableNumber";
+            var numStyle = package.Workbook.Styles.CreateNamedStyle(dataCellStyleName);
+            numStyle.Style.Numberformat.Format = numberformat;
+            */
+
+
+            // Add to table / Add summary row
+            /*
+            var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: row, toColumn: 5), "Transactions");
+            tbl.ShowHeader = true;
+            tbl.TableStyle = TableStyles.Dark9;
+            tbl.ShowTotal = true;
+            tbl.Columns[4].DataCellStyleName = dataCellStyleName;
+            tbl.Columns[4].TotalsRowFunction = RowFunctions.Sum;
+            worksheet.Cells[row + 1, 5].Style.Numberformat.Format = numberformat;
+            */
+
+            return package;
         }
 
         // GET: Transactions/Pivot

@@ -10,7 +10,7 @@ namespace OfficeOpenXml
 {
     public static class WorksheetExtensions
     {
-        public static void ExtractInto<T>(this ExcelWorksheet worksheet, ICollection<T> result) where T: new()
+        public static void ExtractInto<T>(this ExcelWorksheet worksheet, ICollection<T> result) where T : new()
         {
             var cols = new List<String>();
 
@@ -21,7 +21,7 @@ namespace OfficeOpenXml
             }
 
             var columns = new Dictionary<string, int>();
-            foreach(var property in typeof(T).GetProperties())
+            foreach (var property in typeof(T).GetProperties())
             {
                 if (cols.Contains(property.Name))
                     columns[property.Name] = 1 + cols.IndexOf(property.Name);
@@ -61,6 +61,37 @@ namespace OfficeOpenXml
 
                 result.Add(item);
             }
+        }
+
+        public static void PopulateFrom<T>(this ExcelWorksheet worksheet, ICollection<T> source) where T : class
+        {
+            // First add the headers
+
+            var properties = typeof(T).GetProperties();
+            int col = 1;
+            foreach (var property in properties)
+            {
+                worksheet.Cells[1, col].Value = property.Name;
+                ++col;
+            }
+
+            // Add values
+
+            int row = 2;
+            foreach (var item in source)
+            {
+                col = 1;
+                foreach (var property in properties)
+                {
+                    worksheet.Cells[row, col].Value = property.GetValue(item);
+                    ++col;
+                }
+                ++row;
+            }
+
+            // AutoFitColumns
+            worksheet.Cells[1, 1, row, col].AutoFitColumns();
+
         }
     }
 }
