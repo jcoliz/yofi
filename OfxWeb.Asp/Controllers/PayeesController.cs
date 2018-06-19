@@ -197,6 +197,43 @@ namespace OfxWeb.Asp
             return View(incoming.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory));
         }
 
+        // GET: Transactions/Download
+        [ActionName("Download")]
+        public async Task<IActionResult> Download()
+        {
+            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            try
+            {
+                var objecttype = "Payees";
+                var transactions = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync();
+
+                byte[] reportBytes;
+                using (var package = new ExcelPackage())
+                {
+                    package.Workbook.Properties.Title = objecttype;
+                    package.Workbook.Properties.Author = "coliz.com";
+                    package.Workbook.Properties.Subject = objecttype;
+                    package.Workbook.Properties.Keywords = objecttype;
+
+                    var worksheet = package.Workbook.Worksheets.Add(objecttype);
+                    int rows, cols;
+                    worksheet.PopulateFrom(transactions, out rows, out cols);
+
+                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), objecttype);
+                    tbl.ShowHeader = true;
+                    tbl.TableStyle = OfficeOpenXml.Table.TableStyles.Dark9;
+                    tbl.ShowTotal = true;
+
+                    reportBytes = package.GetAsByteArray();
+                }
+
+                return File(reportBytes, XlsxContentType, $"{objecttype}.xlsx");
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
 
         private bool PayeeExists(int id)
         {

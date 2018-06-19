@@ -186,6 +186,45 @@ namespace OfxWeb.Asp
             return View(incoming.OrderBy(x => x.Timestamp.Year).ThenBy(x=>x.Timestamp.Month).ThenBy(x => x.Category));
         }
 
+        // GET: Transactions/Download
+        [ActionName("Download")]
+        public async Task<IActionResult> Download()
+        {
+            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            try
+            {
+                var objecttype = "BudgetTxs";
+                var transactions = await _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).OrderBy(x => x.Timestamp).ThenBy(x=>x.Category).ToListAsync();
+
+                byte[] reportBytes;
+                using (var package = new ExcelPackage())
+                {
+                    package.Workbook.Properties.Title = objecttype;
+                    package.Workbook.Properties.Author = "coliz.com";
+                    package.Workbook.Properties.Subject = objecttype;
+                    package.Workbook.Properties.Keywords = objecttype;
+
+                    var worksheet = package.Workbook.Worksheets.Add(objecttype);
+                    int rows, cols;
+                    worksheet.PopulateFrom(transactions, out rows, out cols);
+
+                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), objecttype);
+                    tbl.ShowHeader = true;
+                    tbl.TableStyle = OfficeOpenXml.Table.TableStyles.Dark9;
+                    tbl.ShowTotal = true;
+
+                    reportBytes = package.GetAsByteArray();
+                }
+
+                return File(reportBytes, XlsxContentType, $"{objecttype}.xlsx");
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
+
+
         private bool BudgetTxExists(int id)
         {
             return _context.BudgetTxs.Any(e => e.ID == id);

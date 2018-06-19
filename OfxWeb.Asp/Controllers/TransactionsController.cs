@@ -342,7 +342,6 @@ namespace OfxWeb.Asp.Controllers
             return View(incoming.OrderByDescending(x => x.Timestamp));
         }
 
-
         // GET: Transactions/Download
         [ActionName("Download")]
         public async Task<IActionResult> Download()
