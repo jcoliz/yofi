@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
@@ -20,5 +21,14 @@ namespace OfxWeb.Asp.Models
         public string BankReference { get; set; }
 
         public ICollection<Split> Splits { get; set; }
+
+        /// <summary>
+        /// Remove all characters from payee which are not whitespace or alpha-numeric
+        /// </summary>
+        public void FixupPayee()
+        {
+            Regex rx = new Regex(@"[^\s\w\d]+");
+            Payee = rx.Replace(Payee, new MatchEvaluator(x => string.Empty));
+        }
     }
 }

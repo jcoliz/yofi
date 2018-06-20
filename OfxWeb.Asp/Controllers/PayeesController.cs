@@ -184,6 +184,11 @@ namespace OfxWeb.Asp
                 var existing = await _context.Payees.Where(x => incoming.Contains(x)).ToListAsync();
                 incoming.ExceptWith(existing);
 
+                // Fix up the remaining names
+
+                foreach (var item in incoming)
+                    item.FixupName();
+
                 // Add resulting transactions
 
                 await _context.AddRangeAsync(incoming);

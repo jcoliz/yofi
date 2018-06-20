@@ -329,6 +329,11 @@ namespace OfxWeb.Asp.Controllers
                 var existing = await _context.Transactions.Where(x => incoming.Contains(x)).ToListAsync();
                 incoming.ExceptWith(existing);
 
+                // Fix up the remaining payees
+
+                foreach (var item in incoming)
+                    item.FixupPayee();
+
                 // Add resulting transactions
 
                 await _context.AddRangeAsync(incoming);
