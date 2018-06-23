@@ -227,7 +227,6 @@ namespace OfxWeb.Asp
                     var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), objecttype);
                     tbl.ShowHeader = true;
                     tbl.TableStyle = OfficeOpenXml.Table.TableStyles.Dark9;
-                    tbl.ShowTotal = true;
 
                     reportBytes = package.GetAsByteArray();
                 }
