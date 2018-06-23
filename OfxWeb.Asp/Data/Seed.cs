@@ -32,23 +32,28 @@ namespace OfxWeb.Asp.Data
             }
 
             //creating a super user who could maintain the web app
-            var poweruser = new ApplicationUser
-            {
-                UserName = Configuration.GetSection("AdminUser")["Email"],
-                Email = Configuration.GetSection("AdminUser")["Email"]
-            };
+            var adminusersection = Configuration.GetSection("AdminUser");
 
-            string UserPassword = Configuration.GetSection("AdminUser")["Password"];
-            var _user = await UserManager.FindByEmailAsync(Configuration.GetSection("AdminUser")["Email"]);
-
-            if (_user == null)
+            if (null != adminusersection)
             {
-                var createPowerUser = await UserManager.CreateAsync(poweruser, UserPassword);
-                if (createPowerUser.Succeeded)
+                var poweruser = new ApplicationUser
                 {
-                    //here we tie the new user to the "Admin" role 
-                    await UserManager.AddToRoleAsync(poweruser, "Admin");
-                    await UserManager.AddToRoleAsync(poweruser, "Verified");
+                    UserName = adminusersection["Email"],
+                    Email = adminusersection["Email"]
+                };
+
+                string UserPassword = adminusersection["Password"];
+                var _user = await UserManager.FindByEmailAsync(adminusersection["Email"]);
+
+                if (_user == null)
+                {
+                    var createPowerUser = await UserManager.CreateAsync(poweruser, UserPassword);
+                    if (createPowerUser.Succeeded)
+                    {
+                        //here we tie the new user to the "Admin" role 
+                        await UserManager.AddToRoleAsync(poweruser, "Admin");
+                        await UserManager.AddToRoleAsync(poweruser, "Verified");
+                    }
                 }
             }
         }
