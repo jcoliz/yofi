@@ -30,5 +30,15 @@ namespace OfxWeb.Asp.Models
             Regex rx = new Regex(@"[^\s\w\d]+");
             Payee = rx.Replace(Payee, new MatchEvaluator(x => string.Empty));
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Transaction && !string.IsNullOrEmpty(BankReference) && !string.IsNullOrEmpty(((Transaction)obj).BankReference) && ((Transaction)obj).BankReference == BankReference;
+        }
+
+        public override int GetHashCode()
+        {
+            return string.IsNullOrEmpty(BankReference) ? base.GetHashCode() : BankReference.GetHashCode();
+        }
     }
 }

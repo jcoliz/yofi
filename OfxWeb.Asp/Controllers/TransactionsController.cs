@@ -288,7 +288,7 @@ namespace OfxWeb.Asp.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            var incoming = new HashSet<Models.Transaction>(new TransactionBankReferenceComparer());
+            var incoming = new HashSet<Models.Transaction>();
             try
             {
 
@@ -326,7 +326,9 @@ namespace OfxWeb.Asp.Controllers
 
                 // Remove duplicate transactions.
 
-                var existing = await _context.Transactions.Where(x => incoming.Contains(x)).ToListAsync();
+                var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
+
+                var existing = await _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToListAsync();
                 incoming.ExceptWith(existing);
 
                 // Fix up the remaining payees
@@ -662,24 +664,6 @@ namespace OfxWeb.Asp.Controllers
         private bool TransactionExists(int id)
         {
             return _context.Transactions.Any(e => e.ID == id);
-        }
-    }
-
-    class TransactionBankReferenceComparer : IEqualityComparer<Models.Transaction>
-    {
-        public bool Equals(Models.Transaction x, Models.Transaction y)
-        {
-            return x.BankReference == y.BankReference;
-        }
-
-        public int GetHashCode(Models.Transaction obj)
-        {
-            int result;
-            if (!int.TryParse(obj.BankReference,out result))
-            {
-                result = obj.BankReference.GetHashCode();
-            }
-            return result;
         }
     }
 
