@@ -490,17 +490,22 @@ namespace OfxWeb.Asp.Controllers
                     var budgetval = - budgettx[month, labelrow];
                     var spentval = - monthlth[month, labelrow];
                     var remaining = budgetval - spentval;
-                    var pct = spentval / budgetval;
 
                     result[spentLabel, labelrow] = spentval;
                     result[budgetLabel, labelrow] = budgetval;
                     result[remainingLabel, labelrow] = remaining;
-                    result[pctSpentLabel, labelrow] = pct;
 
-                    if (weekspct.HasValue)
+                    if (budgetval > 0)
                     {
-                        var pctStatus = pct / (weekspct.Value / 100.0M);
-                        result[pctStatusLabel, labelrow] = pctStatus;
+                        var pct = spentval / budgetval;
+
+                        result[pctSpentLabel, labelrow] = pct;
+
+                        if (weekspct.HasValue)
+                        {
+                            var pctStatus = pct / (weekspct.Value / 100.0M);
+                            result[pctStatusLabel, labelrow] = pctStatus;
+                        }
                     }
                 }
             }
