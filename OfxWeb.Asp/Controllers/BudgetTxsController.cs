@@ -159,7 +159,7 @@ namespace OfxWeb.Asp
                         using (var stream = formFile.OpenReadStream())
                         {
                             var excel = new ExcelPackage(stream);
-                            var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Budget Tx").Single();
+                            var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "BudgetTxs").Single();
                             worksheet.ExtractInto(incoming);
                         }
                     }
