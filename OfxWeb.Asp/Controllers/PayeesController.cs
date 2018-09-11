@@ -181,7 +181,13 @@ namespace OfxWeb.Asp
 
                 // Removed duplicate transactions.
 
-                var existing = await _context.Payees.Where(x => incoming.Contains(x)).ToListAsync();
+                // Trying a less efficient approach
+                // DESIRED:
+                // var existing = await _context.Payees.Where(x => incoming.Contains(x)).ToListAsync();
+                // ACTUAL:
+                var all = await _context.Payees.ToListAsync();
+                var existing = all.Where(x => incoming.Contains(x));
+
                 incoming.ExceptWith(existing);
 
                 // Fix up the remaining names
