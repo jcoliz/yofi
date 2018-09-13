@@ -40,7 +40,14 @@ namespace OfficeOpenXml
 
                         if (property.PropertyType == typeof(DateTime))
                         {
-                            var value = (DateTime)worksheet.Cells[row, col].Value;
+                            // Fix #767: Sometimes datetimes are datetimes, othertimes they're doubles
+                            DateTime value = DateTime.MinValue;
+                            var xlsvalue = worksheet.Cells[row, col].Value;
+                            var type = xlsvalue.GetType();
+                            if (type == typeof(DateTime))
+                                value = (DateTime)xlsvalue;
+                            else if (type == typeof(Double))
+                                value = new DateTime(1900, 1, 1) + TimeSpan.FromDays((Double)xlsvalue - 2.0);
                             property.SetValue(item, value);
                         }
                         else if (property.PropertyType == typeof(decimal))
