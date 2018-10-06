@@ -6,7 +6,13 @@
 <h2>Index</h2>
 
 <p>
-    <a asp-action="Create">Create New</a> | 
+    <a asp-action="Create">Create New</a> |
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-page="@ViewData["PreviousPage"]"
+       asp-route-search="@ViewData["CurrentFilterToggleHidden"]">
+        Show Hidden
+    </a> |
     <a asp-action="Download">Export</a>
 </p>
 
@@ -45,6 +51,12 @@
 <table class="table">
     <thead>
         <tr>
+            @if ((bool)(ViewData["ShowHidden"]))
+            {
+                <th>
+                    Hidden
+                </th>
+            }
             <th>
                 <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["DateSortParm"]">@Html.DisplayNameFor(model => model.Timestamp)</a>
             </th>
@@ -74,6 +86,12 @@
         @foreach (var item in Model)
         {
             <tr>
+                @if ((bool)(ViewData["ShowHidden"]))
+                {
+                <td>
+                    <input type="checkbox">
+                </td>
+                }
                 <td>
                     @Html.DisplayFor(modelItem => item.Timestamp)
                 </td>

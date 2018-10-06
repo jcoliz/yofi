@@ -41,6 +41,8 @@ namespace OfxWeb.Asp.Controllers
             ViewData["AmountSortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
             ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
 
+            bool showHidden = false;
+
             // 'search' parameter combines all search types
             if (!String.IsNullOrEmpty(search))
             {
@@ -55,9 +57,14 @@ namespace OfxWeb.Asp.Controllers
                     {
                         searchCategory = term.Substring(2);
                     }
+                    else if (term[0] == 'H')
+                    {
+                        showHidden = true;
+                    }
                 }
             }
 
+            ViewData["ShowHidden"] = showHidden;
             ViewData["CurrentSearchPayee"] = searchPayee;
             ViewData["CurrentSearchCategory"] = searchCategory;
 
@@ -67,7 +74,18 @@ namespace OfxWeb.Asp.Controllers
             if (!String.IsNullOrEmpty(searchCategory))
                 searchlist.Add($"C-{searchCategory}");
 
-            ViewData["CurrentFilter"] = string.Join(',', searchlist);
+            if (showHidden)
+            {
+                ViewData["CurrentFilterToggleHidden"] = string.Join(',', searchlist);
+                searchlist.Add("H");
+                ViewData["CurrentFilter"] = string.Join(',', searchlist);
+            }
+            else
+            {
+                ViewData["CurrentFilter"] = string.Join(',', searchlist);
+                searchlist.Add("H");
+                ViewData["CurrentFilterToggleHidden"] = string.Join(',', searchlist);
+            }
 
             if (!page.HasValue)
                 page = 1;
