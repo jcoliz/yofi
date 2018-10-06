@@ -18,4 +18,16 @@ $(document).ready(function () {
             }
         });
     });
+    $(".checkbox-hidden").on("click", function (event) {
+        var id = this.dataset.id;
+
+        var endpoint = "Show";
+        if ($(this).is(":checked"))
+            endpoint = "Hide";
+
+        var url = "/api/tx/" + endpoint + "/" + id;
+        $.ajax({
+            url: url,
+        });
+    });
 });

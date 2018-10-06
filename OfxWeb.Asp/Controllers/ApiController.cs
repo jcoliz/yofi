@@ -73,6 +73,40 @@ namespace OfxWeb.Asp.Controllers
             return JsonConvert.SerializeObject(payee);
         }
 
+        // GET: Transactions/Hide/5
+        [HttpGet("Hide/{id}")]
+        public async Task<string> Hide(int id)
+        {
+            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return JsonConvert.SerializeObject(new KeyNotFoundException("No such transaction"));
+            }
+
+            //transaction.Hidden = true;
+            //_context.Update(transaction);
+            //await _context.SaveChangesAsync();
+
+            return JsonConvert.SerializeObject("OK");
+        }
+
+        // GET: Transactions/Show/5
+        [HttpGet("Show/{id}")]
+        public async Task<string> Show(int id)
+        {
+            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return JsonConvert.SerializeObject(new KeyNotFoundException("No such transaction"));
+            }
+
+            //transaction.Hidden = false;
+            //_context.Update(transaction);
+            //await _context.SaveChangesAsync();
+
+            return JsonConvert.SerializeObject("OK");
+        }
+
 
         // POST: api/Api
         [HttpPost]
