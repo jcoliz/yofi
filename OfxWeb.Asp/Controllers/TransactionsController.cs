@@ -106,6 +106,11 @@ namespace OfxWeb.Asp.Controllers
                     result = result.Where(x => x.Category.Contains(searchCategory) || x.SubCategory.Contains(searchCategory));
             }
 
+            if (!showHidden)
+            {
+                result = result.Where(x => x.Hidden != true);
+            }
+
             switch (sortOrder)
             {
                 case "amount_asc":
