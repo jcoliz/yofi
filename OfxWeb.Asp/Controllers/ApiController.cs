@@ -83,9 +83,9 @@ namespace OfxWeb.Asp.Controllers
                 return JsonConvert.SerializeObject(new KeyNotFoundException("No such transaction"));
             }
 
-            //transaction.Hidden = true;
-            //_context.Update(transaction);
-            //await _context.SaveChangesAsync();
+            transaction.Hidden = true;
+            _context.Update(transaction);
+            await _context.SaveChangesAsync();
 
             return JsonConvert.SerializeObject("OK");
         }
@@ -100,9 +100,9 @@ namespace OfxWeb.Asp.Controllers
                 return JsonConvert.SerializeObject(new KeyNotFoundException("No such transaction"));
             }
 
-            //transaction.Hidden = false;
-            //_context.Update(transaction);
-            //await _context.SaveChangesAsync();
+            transaction.Hidden = false;
+            _context.Update(transaction);
+            await _context.SaveChangesAsync();
 
             return JsonConvert.SerializeObject("OK");
         }

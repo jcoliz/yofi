@@ -89,7 +89,8 @@
                 @if ((bool)(ViewData["ShowHidden"]))
                 {
                 <td>
-                    <input type="checkbox" class="checkbox-hidden" data-id="@item.ID">
+                    @{ var hiddenchecked = (item.Hidden == true) ? "checked" : string.Empty; }
+                    <input type="checkbox" class="checkbox-hidden" @hiddenchecked data-id="@item.ID">
                 </td>
                 }
                 <td>
