@@ -525,7 +525,7 @@ namespace OfxWeb.Asp.Controllers
             groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
             var budgettx = TwoLevelReport(groupsL1);
 
-            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && BudgetFocusCategories.Contains(x.Category) ).GroupBy(x => x.Timestamp.Month);
+            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && BudgetFocusCategories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
             var monthlth = TwoLevelReport(groupsL1);
 
             Label spentLabel = new Label() { Order = 1, Value = "Spent", Format = "C0" };
@@ -576,7 +576,7 @@ namespace OfxWeb.Asp.Controllers
             var budgettx = TwoLevelReport(groupsL1);
 
             var categories = budgettxquery.Select(x => x.Category).Distinct().ToHashSet();
-            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough && categories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
+            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough && categories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
             var monthlth = TwoLevelReport(groupsL1);
 
             foreach (var row in budgettx.RowLabels)
