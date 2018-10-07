@@ -237,7 +237,7 @@ namespace OfxWeb.Asp
 
     class BudgetTxComparer: IEqualityComparer<Models.BudgetTx>
     {
-        public bool Equals(Models.BudgetTx x, Models.BudgetTx y) => /* x.Timestamp.Year == y.Timestamp.Year && x.Timestamp.Month == y.Timestamp.Month && */ x.Category == y.Category;
-        public int GetHashCode(Models.BudgetTx obj) => /*(obj.Timestamp.Year * 12 + obj.Timestamp.Month ) ^*/ obj.Category.GetHashCode();
+        public bool Equals(Models.BudgetTx x, Models.BudgetTx y) => x.Timestamp.Year == y.Timestamp.Year && x.Timestamp.Month == y.Timestamp.Month && x.Category == y.Category;
+        public int GetHashCode(Models.BudgetTx obj) => (obj.Timestamp.Year * 12 + obj.Timestamp.Month ) ^ obj.Category.GetHashCode();
     }
 }
