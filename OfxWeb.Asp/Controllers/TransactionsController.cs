@@ -467,13 +467,13 @@ namespace OfxWeb.Asp.Controllers
             switch (report)
             {
                 case "yearly":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => YearlyCategories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => YearlyCategories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Yearly Report";
                     break;
 
                 case "details":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => DetailCategories.Contains(x.Category)).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => DetailCategories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Transaction Details Report";
                     break;
@@ -501,7 +501,7 @@ namespace OfxWeb.Asp.Controllers
 
                 case "monthly":
                 default:
-                    groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && (!YearlyCategories.Contains(x.Category) || x.Category == null)).GroupBy(x => x.Timestamp.Month);
+                    groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && (!YearlyCategories.Contains(x.Category) || x.Category == null) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
                     ViewData["Title"] = "Monthly Report";
                     break;
