@@ -334,11 +334,18 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(List<IFormFile> files)
+        public async Task<IActionResult> Upload(List<IFormFile> files,string date)
         {
             var incoming = new HashSet<Models.Transaction>();
             try
             {
+                DateTime cutoff = DateTime.MinValue;
+
+                // Check on the date we are sent
+                if (!string.IsNullOrEmpty(date))
+                {
+                    DateTime.TryParse(date, out cutoff);
+                }
 
                 // Build the submitted file into a list of transactions
 
@@ -370,6 +377,12 @@ namespace OfxWeb.Asp.Controllers
                             worksheet.ExtractInto(incoming);
                         }
                     }
+                }
+
+                // REmove too early transactions
+                if (cutoff > DateTime.MinValue)
+                {
+                    incoming.RemoveWhere(x => x.Timestamp < cutoff);
                 }
 
                 // Remove duplicate transactions.
