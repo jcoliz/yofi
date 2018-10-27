@@ -44,7 +44,7 @@ $(document).ready(function () {
             success: function (result) {
                 var tx = JSON.parse(result);
 
-                modal.find('.modal-body').text(tx.Payee);
+                modal.find('.modal-title').text(tx.Payee);
             }
         });
     })
