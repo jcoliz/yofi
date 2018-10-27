@@ -32,11 +32,6 @@ namespace OfxWeb.Asp.Controllers
         [HttpGet("{id}", Name = "Get")]
         public async Task<string> Get(int id)
         {
-            if (id == null)
-            {
-                return JsonConvert.SerializeObject(new ArgumentNullException("id"));
-            }
-
             var transaction = await _context.Transactions
                 .SingleOrDefaultAsync(m => m.ID == id);
             if (transaction == null)
