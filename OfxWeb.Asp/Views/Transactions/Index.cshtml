@@ -88,10 +88,10 @@
             <tr>
                 @if ((bool)(ViewData["ShowHidden"]))
                 {
-                <td>
-                    @{ var hiddenchecked = (item.Hidden == true) ? "checked" : string.Empty; }
-                    <input type="checkbox" class="checkbox-hidden" @hiddenchecked data-id="@item.ID">
-                </td>
+                    <td>
+                        @{ var hiddenchecked = (item.Hidden == true) ? "checked" : string.Empty; }
+                        <input type="checkbox" class="checkbox-hidden" @hiddenchecked data-id="@item.ID">
+                    </td>
                 }
                 <td>
                     @Html.DisplayFor(modelItem => item.Timestamp)
@@ -130,6 +130,10 @@
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.ID">Edit</a>
+
+                    <button type="button" class="btn btn-default" data-id="@item.ID" data-toggle="modal" data-target="#editModal">
+                        Modal
+                    </button>
                 </td>
             </tr>
         }
@@ -163,3 +167,25 @@
     </div>
 </form>
 
+<!-- Modal Edit -->
+<!-- https://getbootstrap.com/docs/4.0/components/modal/ -->
+
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Transaction</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
