@@ -33,6 +33,7 @@ $(document).ready(function () {
 
     $('#editModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget) // Button that triggered the modal
+        $(this).data('trigger',button);
         var id = button.data('id') // Extract info from data-* attributes
         // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
         // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
@@ -63,12 +64,20 @@ $(document).ready(function () {
         var data = $('#EditPartialForm').serialize();
         var url = "/api/tx/Edit/5";        
 
-        $.post(url, data, function (result)
+        $.post(url, data, function (resultjson)
         {
-            alert(result);
+            var result = JSON.parse(resultjson);
+            if (result.Item1 == "OK") {
+                // TODO: Need to refresh the item on the page :|
+                var trigger = $('#editModal').data('trigger');
+                var td = trigger.parent();
+                var payee = td.siblings('.display-payee');
+                payee.text(result.Item2.Payee);
+            }
+            else
+                alert(result);            
         });
 
-        // TODO: Need to refresh the item on the page :|
     });
 
 });

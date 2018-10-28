@@ -133,7 +133,7 @@ namespace OfxWeb.Asp.Controllers
                 {
                     return JsonConvert.SerializeObject(ex);
                 }
-                return JsonConvert.SerializeObject("OK");
+                return JsonConvert.SerializeObject(("OK", transaction));
             }
             else
                 return JsonConvert.SerializeObject(new Exception("invalid"));
