@@ -265,7 +265,7 @@ namespace OfxWeb.Asp.Controllers
                 }
             }
 
-            return PartialView("Edit",transaction);
+            return PartialView("EditPartial",transaction);
         }
 
         // GET: Transactions/ApplyPayee/5

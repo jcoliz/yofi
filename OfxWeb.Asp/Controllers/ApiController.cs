@@ -102,6 +102,43 @@ namespace OfxWeb.Asp.Controllers
             return JsonConvert.SerializeObject("OK");
         }
 
+        // POST: Transactions/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost("Edit/{id}")]
+        public async Task<string> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
+        {
+            if (id != transaction.ID && duplicate != true)
+            {
+                return JsonConvert.SerializeObject(new Exception("not found"));
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    if (duplicate == true)
+                    {
+                        transaction.ID = 0;
+                        _context.Add(transaction);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        _context.Update(transaction);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return JsonConvert.SerializeObject(ex);
+                }
+                return JsonConvert.SerializeObject("OK");
+            }
+            else
+                return JsonConvert.SerializeObject(new Exception("invalid"));
+        }
+
 
         // POST: api/Api
         [HttpPost]

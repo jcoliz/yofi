@@ -57,4 +57,18 @@ $(document).ready(function () {
             
         });
     })
+
+    $("#editModal .btn-primary").on("click", function (event) {
+
+        var data = $('#EditPartialForm').serialize();
+        var url = "/api/tx/Edit/5";        
+
+        $.post(url, data, function (result)
+        {
+            alert(result);
+        });
+
+        // TODO: Need to refresh the item on the page :|
+    });
+
 });

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibOfx", "LibOfx\LibOfx.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ofx.Tests", "Ofx.Tests\Ofx.Tests.csproj", "{5E334C32-FE96-4F4F-954E-34681222DB9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OfxWeb.Asp", "OfxWeb.Asp\OfxWeb.Asp.csproj", "{813D7788-D271-4932-A9BD-36DD24E2345D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OfxWeb.Asp", "OfxWeb.Asp\OfxWeb.Asp.csproj", "{813D7788-D271-4932-A9BD-36DD24E2345D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
