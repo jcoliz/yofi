@@ -108,7 +108,7 @@
 
                     <a asp-action="Index"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
-                       asp-route-searchString="@item.Payee.Trim()">
+                       asp-route-searchPayee="@item.Payee.Trim()">
                         Search
                     </a>
 
@@ -116,7 +116,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Amount)
                 </td>
-                <td>
+                <td class="display-memo">
                     @Html.DisplayFor(modelItem => item.Memo)
                 </td>
                 <td class="display-category">
@@ -129,10 +129,8 @@
                     @Html.DisplayFor(modelItem => item.BankReference)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.ID">Edit</a>
-
                     <button type="button" class="btn btn-default" data-id="@item.ID" data-toggle="modal" data-target="#editModal">
-                        Modal
+                        Edit
                     </button>
                 </td>
             </tr>

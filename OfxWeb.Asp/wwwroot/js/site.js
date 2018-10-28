@@ -68,11 +68,17 @@ $(document).ready(function () {
         {
             var result = JSON.parse(resultjson);
             if (result.Item1 == "OK") {
-                // TODO: Need to refresh the item on the page :|
                 var trigger = $('#editModal').data('trigger');
                 var td = trigger.parent();
                 var payee = td.siblings('.display-payee');
+                var memo = td.siblings('.display-memo');
+                var category = td.siblings(".display-category");
+                var subcategory = td.siblings(".display-subcategory");
                 payee.text(result.Item2.Payee);
+                memo.text(result.Item2.Memo);
+                category.text(result.Item2.Category);
+                subcategory.text(result.Item2.SubCategory);
+
             }
             else
                 alert(result);            
