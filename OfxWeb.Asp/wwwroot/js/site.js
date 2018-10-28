@@ -38,14 +38,23 @@ $(document).ready(function () {
         // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
         var modal = $(this);
 
-        var url = "/api/tx/" + id;
+        var url = "/Transactions/EditModal/" + id;
+        /*
+        $.get(url, function (data)
+        {
+            modal.find('.modal-body').html(data);
+        });
+        */
         $.ajax({
             url: url,
             success: function (result) {
-                var tx = JSON.parse(result);
-
-                modal.find('.modal-title').text(tx.Payee);
+                modal.find('.modal-body').html(result);
+            },
+            error: function (result) {
+                alert(result.responseText);
+                modal.find('.modal-body').text(result.responseText);
             }
+            
         });
     })
 });

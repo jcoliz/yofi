@@ -235,6 +235,39 @@ namespace OfxWeb.Asp.Controllers
             return View(transaction);
         }
 
+        // GET: Transactions/EditModal/5
+        public async Task<IActionResult> EditModal(int? id)
+        {
+            // TODO: Refactor to no duplicate between here and Edit
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var transaction = await _context.Transactions.Include(x => x.Splits).SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            // Handle payee auto-assignment
+
+            if (string.IsNullOrEmpty(transaction.Category) && string.IsNullOrEmpty(transaction.SubCategory))
+            {
+                // See if the payee exists
+                var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
+
+                if (payee != null)
+                {
+                    transaction.Category = payee.Category;
+                    transaction.SubCategory = payee.SubCategory;
+                    ViewData["AutoCategory"] = true;
+                }
+            }
+
+            return PartialView("Edit",transaction);
+        }
+
         // GET: Transactions/ApplyPayee/5
         public async Task<IActionResult> ApplyPayee(int? id)
         {
