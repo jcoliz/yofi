@@ -182,9 +182,11 @@
                 ...
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a asp-action="Edit" class="btn btn-default asp-route-id">More</a>
                 <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
             </div>
+            <!-- asp-route-id="@@item.ID"  -->
         </div>
     </div>
 </div>

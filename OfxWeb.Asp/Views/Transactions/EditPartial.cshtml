@@ -10,21 +10,6 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ID" />
             <div class="form-group">
-                <label asp-for="Amount" class="control-label"></label>
-                <input asp-for="Amount" class="form-control" />
-                <span asp-validation-for="Amount" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Timestamp" class="control-label"></label>
-                <input asp-for="Timestamp" class="form-control" />
-                <span asp-validation-for="Timestamp" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Memo" class="control-label"></label>
-                <input asp-for="Memo" class="form-control" />
-                <span asp-validation-for="Memo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="Payee" class="control-label"></label>
                 <input asp-for="Payee" class="form-control" />
                 <span asp-validation-for="Payee" class="text-danger"></span>
@@ -40,9 +25,9 @@
                 <span asp-validation-for="SubCategory" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="BankReference" class="control-label"></label>
-                <input asp-for="BankReference" class="form-control" />
-                <span asp-validation-for="BankReference" class="text-danger"></span>
+                <label asp-for="Memo" class="control-label"></label>
+                <input asp-for="Memo" class="form-control" />
+                <span asp-validation-for="Memo" class="text-danger"></span>
             </div>
         </form>
     </div>

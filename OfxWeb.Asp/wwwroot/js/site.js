@@ -39,6 +39,11 @@ $(document).ready(function () {
         // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
         var modal = $(this);
 
+        var needsid = modal.find('.asp-route-id'); 
+        var href = needsid.attr('href');
+        var newhref = href + '/' + id;
+        needsid.attr('href', newhref);
+
         var url = "/Transactions/EditModal/" + id;
         /*
         $.get(url, function (data)
