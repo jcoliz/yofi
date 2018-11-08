@@ -61,6 +61,22 @@ namespace OfxWeb.Asp
 
             return View();
         }
+        // GET: Payees/CreateModel/{txid}
+        public async Task<IActionResult> CreateModal(int id)
+        {
+            if (id > 0)
+            {
+                var transaction = await _context.Transactions.Where(x => x.ID == id).SingleOrDefaultAsync();
+
+                if (transaction == null)
+                    return NotFound();
+
+                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim(), SubCategory = transaction.SubCategory };
+                return PartialView("CreatePartial",payee);
+            }
+
+            return View();
+        }
 
         // POST: Payees/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
