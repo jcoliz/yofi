@@ -8,13 +8,16 @@ $(document).ready(function () {
         var url = "/api/tx/ApplyPayee/" + id;
         $.ajax({
             url: url,
-            success: function (result) {
-                var payee = JSON.parse(result);
+            success: function (jsonresult) {
+                var result = JSON.parse(jsonresult);
 
-                if ("Category" in payee)
-                    target_cat.html(payee.Category);
-                if ("SubCategory" in payee)
-                    target_subcat.html(payee.SubCategory);
+                if (result.Ok)
+                {
+                    target_cat.html(result.Payee.Category);
+                    target_subcat.html(result.Payee.SubCategory);
+                }
+                else
+                    alert(result.Exception);
             }
         });
     });
@@ -46,8 +49,8 @@ $(document).ready(function () {
         var url = "/Transactions/EditModal/" + id;
         $.ajax({
             url: url,
-            success: function (result) {
-                modal.find('.modal-body').html(result);
+            success: function (htmlresult) {
+                modal.find('.modal-body').html(htmlresult);
             },
             error: function (result) {
                 alert(result.responseText);
@@ -62,24 +65,24 @@ $(document).ready(function () {
         var data = $('#EditPartialForm').serialize();
         var url = "/api/tx/Edit/5";        
 
-        $.post(url, data, function (resultjson)
+        $.post(url, data, function (jsonresult)
         {
-            var result = JSON.parse(resultjson);
+            var result = JSON.parse(jsonresult);
 
-            if (result.Item1 == "OK") {
+            if (result.Ok) {
                 var trigger = $('#editModal').data('trigger');
                 var td = trigger.parent();
                 var payee = td.siblings('.display-payee');
                 var memo = td.siblings('.display-memo');
                 var category = td.siblings(".display-category");
                 var subcategory = td.siblings(".display-subcategory");
-                payee.text(result.Item2.Payee);
-                memo.text(result.Item2.Memo);
-                category.text(result.Item2.Category);
-                subcategory.text(result.Item2.SubCategory);
+                payee.text(result.Transaction.Payee);
+                memo.text(result.Transaction.Memo);
+                category.text(result.Transaction.Category);
+                subcategory.text(result.Transaction.SubCategory);
             }
             else
-                alert(result);            
+                alert(result.Exception);            
         });
 
     });
@@ -96,8 +99,8 @@ $(document).ready(function () {
 
         $.ajax({
             url: url,
-            success: function (result) {
-                modal.find('.modal-body').html(result);
+            success: function (htmlresult) {
+                modal.find('.modal-body').html(htmlresult);
             },
             error: function (result) {
                 alert(result.responseText);
@@ -112,32 +115,28 @@ $(document).ready(function () {
         var data = $('#CreatePartialForm').serialize();
         var url = "/api/tx/AddPayee/";
 
-        $.post(url, data, function (resultjson) {
-            var result = JSON.parse(resultjson);
-            if (result.Item1 == "OK") {
+        $.post(url, data, function (jsonresult) {
+            var result = JSON.parse(jsonresult);
+            if (result.Ok) {
 
                 // Apply it also!
-                var url = "/api/tx/ApplyPayee/" + result.Item3;
+                var url = "/api/tx/ApplyPayee/" + result.TxId;
                 $.ajax({
                     url: url,
-                    success: function (result) {
-                        var payee = JSON.parse(result);
+                    success: function (jsonresult) {
+                        var result = JSON.parse(jsonresult);
 
                         var trigger = $('#addPayeeModal').data('trigger');
                         var td = trigger.parent();
                         var category = td.siblings(".display-category");
                         var subcategory = td.siblings(".display-subcategory");
-                        category.text(payee.Category);
-                        subcategory.text(payee.SubCategory);
+                        category.text(result.Payee.Category);
+                        subcategory.text(result.Payee.SubCategory);
                     }
                 });
             }
             else
-                alert(result);
+                alert(result.Exception);
         });
-
     });
-
-
-
 });
