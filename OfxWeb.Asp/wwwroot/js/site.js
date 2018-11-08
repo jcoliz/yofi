@@ -63,14 +63,14 @@ $(document).ready(function () {
     $("#editModal .btn-primary").on("click", function (event) {
 
         var data = $('#EditPartialForm').serialize();
-        var url = "/api/tx/Edit/5";        
+        var trigger = $('#editModal').data('trigger');
 
+        var url = "/api/tx/Edit/5";        
         $.post(url, data, function (jsonresult)
         {
             var result = JSON.parse(jsonresult);
 
             if (result.Ok) {
-                var trigger = $('#editModal').data('trigger');
                 var td = trigger.parent();
                 var payee = td.siblings('.display-payee');
                 var memo = td.siblings('.display-memo');
@@ -91,12 +91,9 @@ $(document).ready(function () {
         var button = $(event.relatedTarget) // Button that triggered the modal
         $(this).data('trigger', button);
         var id = button.data('id') // Extract info from data-* attributes
-        var modal = $(this);
-        
-        //                 <a asp-controller="Payees" asp-action="Create" asp-route-txid="@item.ID">
+        var modal = $(this);        
 
         var url = "/Payees/CreateModal/" + id;
-
         $.ajax({
             url: url,
             success: function (htmlresult) {
@@ -113,20 +110,21 @@ $(document).ready(function () {
     $("#addPayeeModal .btn-primary").on("click", function (event) {
 
         var data = $('#CreatePartialForm').serialize();
-        var url = "/api/tx/AddPayee/";
+        var trigger = $('#addPayeeModal').data('trigger');
+        var id = trigger.data('id')
 
+        var url = "/api/tx/AddPayee/";
         $.post(url, data, function (jsonresult) {
             var result = JSON.parse(jsonresult);
             if (result.Ok) {
 
                 // Apply it also!
-                var url = "/api/tx/ApplyPayee/" + result.TxId;
+                var url = "/api/tx/ApplyPayee/" + id;
                 $.ajax({
                     url: url,
                     success: function (jsonresult) {
                         var result = JSON.parse(jsonresult);
 
-                        var trigger = $('#addPayeeModal').data('trigger');
                         var td = trigger.parent();
                         var category = td.siblings(".display-category");
                         var subcategory = td.siblings(".display-subcategory");

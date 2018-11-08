@@ -155,7 +155,7 @@ namespace OfxWeb.Asp.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("AddPayee")]
-        public async Task<string> AddPayee([Bind("Name,Category,SubCategory")] Payee payee, int TXID)
+        public async Task<string> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace OfxWeb.Asp.Controllers
 
                 _context.Add(payee);
                 await _context.SaveChangesAsync();
-                return new ApiPayeeResult(payee, TXID);
+                return new ApiPayeeResult(payee);
             }
             catch (Exception ex)
             {
@@ -172,8 +172,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-
-
+#if false
         // POST: api/Api
         [HttpPost]
         public void Post([FromBody]string value)
@@ -191,6 +190,7 @@ namespace OfxWeb.Asp.Controllers
         public void Delete(int id)
         {
         }
+#endif
     }
 
     public class ApiResult
@@ -225,12 +225,10 @@ namespace OfxWeb.Asp.Controllers
     public class ApiPayeeResult : ApiResult
     {
         public Payee Payee { get; }
-        public int? TxId{ get; }
 
-        public ApiPayeeResult(Payee p, int? txid = null)
+        public ApiPayeeResult(Payee p)
         {
             Payee = p;
-            TxId = txid;
         }
     }
 }
