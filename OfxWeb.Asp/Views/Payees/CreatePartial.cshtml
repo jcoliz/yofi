@@ -8,6 +8,7 @@
     <div class="col-md-12">
         <form asp-action="Create" id="CreatePartialForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" name="TXID" value="@ViewData["TXID"]" />
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />

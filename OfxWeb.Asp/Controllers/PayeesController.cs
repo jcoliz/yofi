@@ -66,6 +66,8 @@ namespace OfxWeb.Asp
         {
             if (id > 0)
             {
+                ViewData["TXID"] = id;
+
                 var transaction = await _context.Transactions.Where(x => x.ID == id).SingleOrDefaultAsync();
 
                 if (transaction == null)

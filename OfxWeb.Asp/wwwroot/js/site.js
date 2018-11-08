@@ -117,8 +117,7 @@ $(document).ready(function () {
             if (result.Item1 == "OK") {
 
                 // Apply it also!
-                /* TODO (How do we get the tx id here??)
-                var url = "/api/tx/ApplyPayee/" + id;
+                var url = "/api/tx/ApplyPayee/" + result.Item3;
                 $.ajax({
                     url: url,
                     success: function (result) {
@@ -128,11 +127,10 @@ $(document).ready(function () {
                         var td = trigger.parent();
                         var category = td.siblings(".display-category");
                         var subcategory = td.siblings(".display-subcategory");
-                        category.text(result.Item2.Category);
-                        subcategory.text(result.Item2.SubCategory);
+                        category.text(payee.Category);
+                        subcategory.text(payee.SubCategory);
                     }
                 });
-                */
             }
             else
                 alert(result);

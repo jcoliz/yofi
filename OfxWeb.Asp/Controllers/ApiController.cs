@@ -106,6 +106,7 @@ namespace OfxWeb.Asp.Controllers
         // POST: Transactions/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost("Edit/{id}")]
         public async Task<string> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
             if (id != transaction.ID && duplicate != true)
@@ -143,7 +144,7 @@ namespace OfxWeb.Asp.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("AddPayee")]
-        public async Task<string> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
+        public async Task<string> AddPayee([Bind("Name,Category,SubCategory")] Payee payee, int TXID)
         {
             try
             {
@@ -151,7 +152,7 @@ namespace OfxWeb.Asp.Controllers
                 {
                     _context.Add(payee);
                     await _context.SaveChangesAsync();
-                    return JsonConvert.SerializeObject(("OK", payee));
+                    return JsonConvert.SerializeObject(("OK", payee, TXID));
                 }
                 return JsonConvert.SerializeObject(new Exception("invalid"));
             }
