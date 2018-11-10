@@ -3,8 +3,8 @@ $(document).ready(function () {
     $(".apply-link").on("click", function (event) {
         event.preventDefault();
         var id = this.dataset.id;
-        var target_cat = $(this).parent().siblings(".display-category");
-        var target_subcat = $(this).parent().siblings(".display-subcategory");
+        var target = $(this).parent();
+
         var url = "/api/tx/ApplyPayee/" + id;
         $.ajax({
             url: url,
@@ -13,11 +13,13 @@ $(document).ready(function () {
 
                 if (result.Ok)
                 {
-                    target_cat.html(result.Payee.Category);
-                    target_subcat.html(result.Payee.SubCategory);
+                    var category = target.siblings(".display-category");
+                    var subcategory = target.siblings(".display-subcategory");
+                    category.text(result.Payee.Category);
+                    subcategory.text(result.Payee.SubCategory);
                 }
                 else
-                    alert(result.Exception);
+                    alert(result.Exception.Message);
             }
         });
     });
@@ -104,17 +106,22 @@ $(document).ready(function () {
             if (result.Ok) {
 
                 // Apply it also!
+                var target = trigger.parent();
+
                 var url = "/api/tx/ApplyPayee/" + id;
                 $.ajax({
                     url: url,
                     success: function (jsonresult) {
                         var result = JSON.parse(jsonresult);
 
-                        var td = trigger.parent();
-                        var category = td.siblings(".display-category");
-                        var subcategory = td.siblings(".display-subcategory");
-                        category.text(result.Payee.Category);
-                        subcategory.text(result.Payee.SubCategory);
+                        if (result.Ok) {
+                            var category = target.siblings(".display-category");
+                            var subcategory = target.siblings(".display-subcategory");
+                            category.text(result.Payee.Category);
+                            subcategory.text(result.Payee.SubCategory);
+                        }
+                        else
+                            alert(result.Exception);
                     }
                 });
             }
