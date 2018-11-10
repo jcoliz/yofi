@@ -69,20 +69,17 @@ $(document).ready(function () {
         var trigger = modal.data('trigger');
 
         var url = "/api/tx/Edit/5";        
+        var target = trigger.parent();
+
         $.post(url, data, function (jsonresult)
         {
             var result = JSON.parse(jsonresult);
 
             if (result.Ok) {
-                var td = trigger.parent();
-                var payee = td.siblings('.display-payee');
-                var memo = td.siblings('.display-memo');
-                var category = td.siblings(".display-category");
-                var subcategory = td.siblings(".display-subcategory");
-                payee.text(result.Transaction.Payee);
-                memo.text(result.Transaction.Memo);
-                category.text(result.Transaction.Category);
-                subcategory.text(result.Transaction.SubCategory);
+                target.siblings('.display-payee').text(result.Transaction.Payee);
+                target.siblings('.display-memo').text(result.Transaction.Memo);
+                target.siblings(".display-category").text(result.Transaction.Category);
+                target.siblings(".display-subcategory").text(result.Transaction.SubCategory);
             }
             else
                 alert(result.Exception.Message);            
