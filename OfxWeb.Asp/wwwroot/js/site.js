@@ -5,21 +5,7 @@ $(document).ready(function () {
         var id = this.dataset.id;
         var target = $(this).parent();
 
-        var url = "/api/tx/ApplyPayee/" + id;
-        $.ajax({
-            url: url,
-            success: function (jsonresult) {
-                var result = JSON.parse(jsonresult);
-
-                if (result.Ok)
-                {
-                    target.siblings(".display-category").text(result.Payee.Category);
-                    target.siblings(".display-subcategory").text(result.Payee.SubCategory);
-                }
-                else
-                    alert(result.Exception.Message);
-            }
-        });
+        applyPayee(id, target);
     });
     $(".checkbox-hidden").on("click", function (event) {
         var id = this.dataset.id;
@@ -99,27 +85,30 @@ $(document).ready(function () {
         $.post(url, data, function (jsonresult) {
             var result = JSON.parse(jsonresult);
             if (result.Ok) {
-
-                // Apply it also!
                 var target = trigger.parent();
-
-                var url = "/api/tx/ApplyPayee/" + id;
-                $.ajax({
-                    url: url,
-                    success: function (jsonresult) {
-                        var result = JSON.parse(jsonresult);
-
-                        if (result.Ok) {
-                            target.siblings(".display-category").text(result.Payee.Category);
-                            target.siblings(".display-subcategory").text(result.Payee.SubCategory);
-                        }
-                        else
-                            alert(result.Exception.Message);
-                    }
-                });
+                applyPayee(id, target);
             }
             else
                 alert(result.Exception.Message);
         });
     });
 });
+
+function applyPayee(id, target) {
+
+    var url = "/api/tx/ApplyPayee/" + id;
+
+    $.ajax({
+        url: url,
+        success: function (jsonresult) {
+            var result = JSON.parse(jsonresult);
+
+            if (result.Ok) {
+                target.siblings(".display-category").text(result.Payee.Category);
+                target.siblings(".display-subcategory").text(result.Payee.SubCategory);
+            }
+            else
+                alert(result.Exception.Message);
+        }
+    });
+}
