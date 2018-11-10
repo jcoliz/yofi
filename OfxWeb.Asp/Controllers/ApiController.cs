@@ -22,14 +22,14 @@ namespace OfxWeb.Asp.Controllers
             _context = context;
         }
 
-        // GET: api/Api
+        // GET: api/tx
         [HttpGet]
         public string Get()
         {
             return new ApiResult();
         }
 
-        // GET: api/Api/5
+        // GET: api/tx/5
         [HttpGet("{id}", Name = "Get")]
         public async Task<string> Get(int id)
         {
@@ -46,7 +46,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: Transactions/ApplyPayee/5
+        // GET: api/tx/ApplyPayee/5
         [HttpGet("ApplyPayee/{id}")]
         public async Task<string> ApplyPayee(int id)
         {
@@ -75,7 +75,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: Transactions/Hide/5
+        // GET: api/tx/Hide/5
         [HttpGet("Hide/{id}")]
         public async Task<string> Hide(int id)
         {
@@ -96,7 +96,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: Transactions/Show/5
+        // GET: api/tx/Show/5
         [HttpGet("Show/{id}")]
         public async Task<string> Show(int id)
         {
@@ -117,7 +117,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // POST: Transactions/Edit/5
+        // POST: api/tx/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("Edit/{id}")]
@@ -151,9 +151,10 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // POST: Payees/Create
+        // POST: api/tx/AddPayee
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // TODO: Move to a payee api controller and rename to POST api/payee/Create
         [HttpPost("AddPayee")]
         public async Task<string> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
         {
