@@ -63,8 +63,10 @@ $(document).ready(function () {
 
     $("#editModal .btn-primary").on("click", function (event) {
 
-        var data = $('#EditPartialForm').serialize();
-        var trigger = $('#editModal').data('trigger');
+        var modal = $('#editModal');
+        var form = modal.find('form');
+        var data = form.serialize();
+        var trigger = modal.data('trigger');
 
         var url = "/api/tx/Edit/5";        
         $.post(url, data, function (jsonresult)
