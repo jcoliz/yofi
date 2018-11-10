@@ -6,7 +6,7 @@
     var prevDisabled = ViewData["PreviousPage"] == null ? "disabled" : "";
     var nextDisabled = ViewData["NextPage"] == null ? "disabled" : "";
 }
-<div style="float:right">
+<div style="float:right; margin-bottom:15px">
     <a asp-action="Index"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
        asp-route-page="@ViewData["PreviousPage"]"
@@ -22,16 +22,16 @@
         Next
     </a>
 </div>
-<p>
-    <a asp-action="Create">Create New</a> |
-    <a asp-action="Index"
+<div style="margin-bottom:15px; background-color: lightgray">
+    <a asp-action="Create" class="btn btn-default">Create New</a> |
+    <a asp-action="Index" class="btn btn-default"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
        asp-route-page="@ViewData["PreviousPage"]"
        asp-route-search="@ViewData["CurrentFilterToggleHidden"]">
         Show Hidden
     </a> |
-    <a asp-action="Download">Export</a>
-</p>
+    <a asp-action="Download" class="btn btn-default">Export</a>
+</div>
 
 <form asp-action="Index" method="get">
     <div class="form-actions no-color">
