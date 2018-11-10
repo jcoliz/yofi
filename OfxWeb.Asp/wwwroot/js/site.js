@@ -34,11 +34,12 @@ $(document).ready(function () {
         });
     });
 
-    $('#editModal').on('show.bs.modal', function (event) {
+    $('.actiondialog').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget) // Button that triggered the modal
-        $(this).data('trigger',button);
-        var id = button.data('id') // Extract info from data-* attributes
         var modal = $(this);
+        modal.data('trigger',button);
+        var id = button.data('id')
+        var endpoint = modal.data('endpoint')
 
         // Fill om the "More..." button
         var needsid = modal.find('.asp-route-id'); 
@@ -46,7 +47,7 @@ $(document).ready(function () {
         var newhref = href + '/' + id;
         needsid.attr('href', newhref);
 
-        var url = "/Transactions/EditModal/" + id;
+        var url = endpoint + id;
         $.ajax({
             url: url,
             success: function (htmlresult) {
@@ -86,26 +87,6 @@ $(document).ready(function () {
         });
 
     });
-
-    $('#addPayeeModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget) // Button that triggered the modal
-        $(this).data('trigger', button);
-        var id = button.data('id') // Extract info from data-* attributes
-        var modal = $(this);        
-
-        var url = "/Payees/CreateModal/" + id;
-        $.ajax({
-            url: url,
-            success: function (htmlresult) {
-                modal.find('.modal-body').html(htmlresult);
-            },
-            error: function (result) {
-                alert(result.responseText);
-                modal.find('.modal-body').text(result.responseText);
-            }
-
-        });
-    })
 
     $("#addPayeeModal .btn-primary").on("click", function (event) {
 
