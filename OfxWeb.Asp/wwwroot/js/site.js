@@ -1,22 +1,13 @@
-﻿// Write your JavaScript code.
-$(document).ready(function () {
+﻿$(document).ready(function () {
     $(".apply-link").on("click", function (event) {
         event.preventDefault();
-        var id = this.dataset.id;
-        var target = $(this).parent();
-
-        applyPayee(id, target);
+        applyPayee(this.dataset.id, $(this).parent());
     });
+
     $(".checkbox-hidden").on("click", function (event) {
-        var id = this.dataset.id;
-
-        var endpoint = "Show";
-        if ($(this).is(":checked"))
-            endpoint = "Hide";
-
-        var url = "/api/tx/" + endpoint + "/" + id;
+        var endpoint = $(this).is(":checked") ? "Hide" : "Show";
         $.ajax({
-            url: url,
+            url: "/api/tx/" + endpoint + "/" + this.dataset.id
         });
     });
 
@@ -33,9 +24,8 @@ $(document).ready(function () {
         var newhref = href + '/' + id;
         needsid.attr('href', newhref);
 
-        var url = endpoint + id;
         $.ajax({
-            url: url,
+            url: endpoint + id,
             success: function (htmlresult) {
                 modal.find('.modal-body').html(htmlresult);
             },
@@ -79,27 +69,22 @@ $(document).ready(function () {
         var form = modal.find('form');
         var data = form.serialize();
         var trigger = modal.data('trigger');
-        var id = trigger.data('id')
 
         var url = "/api/tx/AddPayee/";
         $.post(url, data, function (jsonresult) {
             var result = JSON.parse(jsonresult);
-            if (result.Ok) {
-                var target = trigger.parent();
-                applyPayee(id, target);
-            }
+            if (result.Ok)
+                applyPayee(trigger.data('id'), trigger.parent());
             else
                 alert(result.Exception.Message);
         });
     });
 });
 
-function applyPayee(id, target) {
-
-    var url = "/api/tx/ApplyPayee/" + id;
-
+function applyPayee(id, target)
+{
     $.ajax({
-        url: url,
+        url: "/api/tx/ApplyPayee/" + id,
         success: function (jsonresult) {
             var result = JSON.parse(jsonresult);
 
