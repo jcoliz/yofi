@@ -92,8 +92,10 @@ $(document).ready(function () {
 
     $("#addPayeeModal .btn-primary").on("click", function (event) {
 
-        var data = $('#CreatePartialForm').serialize();
-        var trigger = $('#addPayeeModal').data('trigger');
+        var modal = $('#addPayeeModal');
+        var form = modal.find('form');
+        var data = form.serialize();
+        var trigger = modal.data('trigger');
         var id = trigger.data('id')
 
         var url = "/api/tx/AddPayee/";
