@@ -75,9 +75,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.SubCategory)
             </th>
-            <th>
-                <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
-            </th>
+            @if ((bool)(ViewData["ShowHidden"]))
+            {
+                <th>
+                    <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
+                </th>
+            }
         </tr>
     </thead>
     <tbody>
@@ -109,9 +112,12 @@
             <td class="display-subcategory">
                 @Html.DisplayFor(modelItem => item.SubCategory)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BankReference)
-            </td>
+            @if ((bool)(ViewData["ShowHidden"]))
+            {
+                <td>
+                    @Html.DisplayFor(modelItem => item.BankReference)
+                </td>
+            }
             <td style="padding-left:0; padding-right:5px">
                 <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#editModal">
                     <i class="fa fa-edit"></i>
