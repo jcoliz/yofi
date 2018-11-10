@@ -195,8 +195,9 @@ namespace OfxWeb.Asp.Controllers
 
     public class ApiResult
     {
-        public bool Ok { get; set; } = true;
-        public Exception Exception { get; set; } = null;
+        public bool Ok { get; } = true;
+
+        public Exception Exception { get; } = null;
 
         public ApiResult() { }
 
@@ -206,10 +207,7 @@ namespace OfxWeb.Asp.Controllers
             Ok = false;
         }
 
-        public static implicit operator string(ApiResult r)
-        {
-            return JsonConvert.SerializeObject(r);
-        }
+        public static implicit operator string(ApiResult r) => JsonConvert.SerializeObject(r);
     }
 
     public class ApiTransactionResult : ApiResult
