@@ -13,10 +13,8 @@ $(document).ready(function () {
 
                 if (result.Ok)
                 {
-                    var category = target.siblings(".display-category");
-                    var subcategory = target.siblings(".display-subcategory");
-                    category.text(result.Payee.Category);
-                    subcategory.text(result.Payee.SubCategory);
+                    target.siblings(".display-category").text(result.Payee.Category);
+                    target.siblings(".display-subcategory").text(result.Payee.SubCategory);
                 }
                 else
                     alert(result.Exception.Message);
@@ -87,7 +85,7 @@ $(document).ready(function () {
                 subcategory.text(result.Transaction.SubCategory);
             }
             else
-                alert(result.Exception);            
+                alert(result.Exception.Message);            
         });
 
     });
@@ -115,18 +113,16 @@ $(document).ready(function () {
                         var result = JSON.parse(jsonresult);
 
                         if (result.Ok) {
-                            var category = target.siblings(".display-category");
-                            var subcategory = target.siblings(".display-subcategory");
-                            category.text(result.Payee.Category);
-                            subcategory.text(result.Payee.SubCategory);
+                            target.siblings(".display-category").text(result.Payee.Category);
+                            target.siblings(".display-subcategory").text(result.Payee.SubCategory);
                         }
                         else
-                            alert(result.Exception);
+                            alert(result.Exception.Message);
                     }
                 });
             }
             else
-                alert(result.Exception);
+                alert(result.Exception.Message);
         });
     });
 });
