@@ -38,8 +38,8 @@
         <p>
             Find by: Payee <input type="text" name="searchPayee" value="@ViewData["CurrentSearchPayee"]" />
             Category <input type="text" name="searchCategory" value="@ViewData["CurrentSearchCategory"]" />
-            <input type="submit" value="Search" class="btn btn-default" /> |
-            <a asp-action="Index">Back to Full List</a>
+            <input type="submit" value="Search" class="btn btn-secondary" />
+            <a asp-action="Index" class="btn btn-light">Reset</a>
         </p>
     </div>
 </form>
@@ -177,8 +177,8 @@
                 ...
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <a asp-action="Edit" class="btn btn-default asp-route-id">More</a>
+                <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                <a asp-action="Edit" class="btn btn-secondary asp-route-id">More</a>
                 <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
             </div>
             <!-- asp-route-id="@@item.ID"  -->
@@ -193,7 +193,7 @@
                 ...
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
             </div>
             <!-- asp-route-id="@@item.ID"  -->
