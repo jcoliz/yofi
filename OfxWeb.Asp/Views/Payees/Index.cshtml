@@ -30,21 +30,23 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SubCategory)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
+            <tr>
+                <td class="display-category">
+                    @Html.DisplayFor(modelItem => item.Category)
+                </td>
+                <td class="display-subcategory">
+                    @Html.DisplayFor(modelItem => item.SubCategory)
+                </td>
+                <td class="display-payee">
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#editPayeeModal">
+                        <i class="fa fa-edit"></i>
+                    </a> | 
+                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                </td>
+            </tr>
         }
     </tbody>
 </table>
@@ -65,3 +67,20 @@
     </div>
 </form>
 
+<!-- Modal Edit -->
+<!-- https://getbootstrap.com/docs/4.0/components/modal/ -->
+<!-- Working on this: https://stackoverflow.com/questions/16011151/mvc-4-edit-modal-form-using-bootstrap -->
+
+<div class="actiondialog modal fade" id="editPayeeModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-endpoint="/Payees/EditModal/">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

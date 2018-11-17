@@ -63,6 +63,30 @@
         });
     });
 
+    $("#editPayeeModal .btn-primary").on("click", function (event) {
+        var modal = $('#editPayeeModal');
+        var form = modal.find('form');
+        var trigger = modal.data('trigger');
+        var target = trigger.parent();
+
+        $.ajax({
+            url: "/api/tx/EditPayee/5",
+            type: "POST",
+            data: form.serialize(),
+            success: function (jsonresult) {
+                var result = JSON.parse(jsonresult);
+
+                if (result.Ok) {
+                    target.siblings('.display-payee').text(result.Payee.Name);
+                    target.siblings(".display-category").text(result.Payee.Category);
+                    target.siblings(".display-subcategory").text(result.Payee.SubCategory);
+                }
+                else
+                    alert(result.Exception.Message);
+            }
+        });
+    });
+
     $("#addPayeeModal .btn-primary").on("click", function (event) {
 
         var modal = $('#addPayeeModal');

@@ -151,6 +151,41 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // POST: api/tx/EditPayee/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost("EditPayee/{id}")]
+        public async Task<string> EditPayee(int id, bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
+        {
+            try
+            {
+                if (id != payee.ID && duplicate != true)
+                    throw new Exception("not found");
+
+                if (!ModelState.IsValid)
+                    throw new Exception("invalid");
+
+                if (duplicate == true)
+                {
+                    payee.ID = 0;
+                    _context.Add(payee);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    _context.Update(payee);
+                    await _context.SaveChangesAsync();
+                }
+
+                return new ApiPayeeResult(payee);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult(ex);
+            }
+        }
+
+
         // POST: api/tx/AddPayee
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
