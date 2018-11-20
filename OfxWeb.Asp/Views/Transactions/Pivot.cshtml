@@ -3,6 +3,15 @@
     var icons = new[] { "&check;", "!!", "X" };
 }
 
+<div style="margin-bottom:15px; background-color: lightgray">
+    <a asp-action="Pivot" asp-route-report="monthly" class="btn btn-default">Monthly</a> |
+    <a asp-action="Pivot" asp-route-report="details" class="btn btn-default">Details</a> |
+    <a asp-action="Pivot" asp-route-report="yearly" class="btn btn-default">Yearly</a> |
+    <a asp-action="Pivot" asp-route-report="budgettx" class="btn btn-default">Budget Tx</a> |
+    <a asp-action="Pivot" asp-route-report="budgetmo" class="btn btn-default">Monthly Budget</a> |
+    <a asp-action="Pivot" asp-route-report="budget" class="btn btn-default">Budget vs Actuals</a>
+</div>
+
 <h2>
     @ViewData["Title"]
 </h2>
@@ -61,7 +70,7 @@
                         }
                         <td class="@emphasis @warning">
                             @cell.ToString("P0")
-                            @Html.Raw( icons[icon] )
+                            @Html.Raw(icons[icon])
                         </td>
                     }
                     else
@@ -76,14 +85,6 @@
     </tbody>
 </table>
 
-<hr/>
+<hr />
 
-<p>
-    <a asp-action="Pivot" asp-route-report="monthly">Monthly</a> |
-    <a asp-action="Pivot" asp-route-report="details">Details</a> |
-    <a asp-action="Pivot" asp-route-report="yearly">Yearly</a> |
-    <a asp-action="Pivot" asp-route-report="budgettx">Budget Tx</a> |
-    <a asp-action="Pivot" asp-route-report="budgetmo">Monthly Budget</a> |
-    <a asp-action="Pivot" asp-route-report="budget">Budget vs Actuals</a>
-</p>
 
