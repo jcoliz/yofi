@@ -509,6 +509,7 @@ namespace OfxWeb.Asp.Controllers
             var period = new DateTime(DateTime.Now.Year, month.Value, 1);
 
             ViewData["Subtitle"] = $"For {DateTime.Now.Year} year to date";
+            ViewData["report"] = report;
 
             switch (report)
             {

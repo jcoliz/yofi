@@ -1,6 +1,27 @@
 ﻿@model OfxWeb.Asp.Controllers.PivotTable<OfxWeb.Asp.Controllers.Label, OfxWeb.Asp.Controllers.Label, decimal>
 @{
     var icons = new[] { "&check;", "!!", "X" };
+    string report = (string)ViewData["report"];
+}
+
+@if ("budget" == report || "budgetmo" == report)
+{
+    <div class="dropdown" style="float:right; margin: 4px">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Month
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+            @{
+                int i = 1;
+                foreach (var month in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
+                {
+                    <a asp-action="Pivot" asp-route-report="@report" asp-route-month="@i" class="dropdown-item">@i @month</a>
+                    i++;
+                }
+            }
+        </div>
+    </div>
 }
 
 <div style="margin-bottom:15px; background-color: lightgray">
@@ -11,6 +32,7 @@
     <a asp-action="Pivot" asp-route-report="budgetmo" class="btn btn-default">Monthly Budget</a> |
     <a asp-action="Pivot" asp-route-report="budget" class="btn btn-default">Budget vs Actuals</a>
 </div>
+
 
 <h2>
     @ViewData["Title"]
