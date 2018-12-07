@@ -13,9 +13,12 @@
 
     $('.actiondialog').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget) // Button that triggered the modal
+        var tr = button.parents('tr');
+        var gp = button.parent().parent();
         var modal = $(this);
         var form = modal.find('form');
         form.data('trigger', button);
+        form.data('tr', tr);
         modal.data('trigger',button);
         var id = button.data('id')
         var endpoint = modal.data('endpoint')
@@ -39,29 +42,29 @@
         });
     })
 
-    $("#editModal form").submit( function (event)
+    $('#editModal form').submit( function (event)
     {
-        var form = $(this);
-        var trigger = form.data('trigger');
-        var target = trigger.parent();
+        event.preventDefault();
+        var tr = $(this).data('tr');
 
         $.ajax({
             url: "/api/tx/Edit/5",
             type: "POST",
-            data: form.serialize(),
+            data: $(this).serialize(),
             success: function (jsonresult) {
                 var result = JSON.parse(jsonresult);
 
                 if (result.Ok) {
-                    target.siblings('.display-payee').text(result.Transaction.Payee);
-                    target.siblings('.display-memo').text(result.Transaction.Memo);
-                    target.siblings(".display-category").text(result.Transaction.Category);
-                    target.siblings(".display-subcategory").text(result.Transaction.SubCategory);
+                    tr.find('.display-payee').text(result.Transaction.Payee);
+                    tr.find('.display-memo').text(result.Transaction.Memo);
+                    tr.find(".display-category").text(result.Transaction.Category);
+                    tr.find(".display-subcategory").text(result.Transaction.SubCategory);
                 }
                 else
                     alert(result.Exception.Message);
             }
         });
+        $('#editModal').modal('hide')
     });
 
     $("#editPayeeModal .btn-primary").on("click", function (event) {
