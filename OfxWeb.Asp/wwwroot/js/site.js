@@ -14,6 +14,8 @@
     $('.actiondialog').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget) // Button that triggered the modal
         var modal = $(this);
+        var form = modal.find('form');
+        form.data('trigger', button);
         modal.data('trigger',button);
         var id = button.data('id')
         var endpoint = modal.data('endpoint')
@@ -37,11 +39,10 @@
         });
     })
 
-    $("#editModal .btn-primary").on("click", function (event)
+    $("#editModal form").submit( function (event)
     {
-        var modal = $('#editModal');
-        var form = modal.find('form');
-        var trigger = modal.data('trigger');
+        var form = $(this);
+        var trigger = form.data('trigger');
         var target = trigger.parent();
 
         $.ajax({

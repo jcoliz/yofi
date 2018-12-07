@@ -176,14 +176,16 @@
 <div class="actiondialog modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-endpoint="/Transactions/EditModal/">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-body">
-                ...
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
-                <a asp-action="Edit" class="btn btn-secondary asp-route-id">More</a>
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
-            </div>
+            <form>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                    <a asp-action="Edit" class="btn btn-secondary asp-route-id">More</a>
+                    <button type="submit" class="btn btn-primary">Save</button><!--  data-dismiss="modal" -->
+                </div>
+            </form>
             <!-- asp-route-id="@@item.ID"  -->
         </div>
     </div>
