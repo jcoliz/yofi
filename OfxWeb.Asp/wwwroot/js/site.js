@@ -60,7 +60,7 @@
                     alert(result.Exception.Message);
             }
         });
-        $('#editModal').modal('hide')
+        $(this).parents('.modal').modal('hide');
     });
 
     $('#editPayeeModal form').submit( function (event)
@@ -84,7 +84,7 @@
                     alert(result.Exception.Message);
             }
         });
-        $('#editPayeeModal').modal('hide')
+        $(this).parents('.modal').modal('hide');
     });
 
     $('#addPayeeModal form').submit(function (event)
@@ -104,8 +104,7 @@
                     alert(result.Exception.Message);
             }
         });
-        $('#addPayeeModal').modal('hide')
-
+        $(this).parents('.modal').modal('hide');
     });
 });
 
