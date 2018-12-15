@@ -37,6 +37,10 @@ namespace OfxWeb.Asp
             services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
+
+            // https://andrewlock.net/an-introduction-to-session-storage-in-asp-net-core/
+            services.AddDistributedMemoryCache();
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +58,8 @@ namespace OfxWeb.Asp
             }
 
             app.UseStaticFiles();
+
+            app.UseSession();
 
             app.UseAuthentication();
 

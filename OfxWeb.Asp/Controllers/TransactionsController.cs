@@ -456,7 +456,7 @@ namespace OfxWeb.Asp.Controllers
             try
             {
                 var objecttype = "Transactions";
-                var transactions = await _context.Transactions.Where(x=>x.Timestamp.Year == 2018).OrderByDescending(x => x.Timestamp).ToListAsync();
+                var transactions = await _context.Transactions.Where(x=>x.Timestamp.Year == Year).OrderByDescending(x => x.Timestamp).ToListAsync();
 
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
@@ -485,6 +485,37 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        private int? _Year = null;
+        private int Year
+        {
+            get
+            {
+                if (!_Year.HasValue)
+                {
+                    var value = HttpContext.Session.GetString(nameof(Year));
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        Year = DateTime.Now.Year;
+                    }
+                    else
+                    {
+                        int y = DateTime.Now.Year;
+                        int.TryParse(value, out y);
+                        _Year = y;
+                    }
+                }
+
+                return _Year.Value;
+            }
+            set
+            {
+                _Year = value;
+
+                var serialisedDate = _Year.ToString();
+                HttpContext.Session.SetString(nameof(Year), serialisedDate);
+            }
+        }
+
         // GET: Transactions/Pivot
         public IActionResult Pivot(string report,int? month, int? weekspct)
         {
@@ -499,35 +530,40 @@ namespace OfxWeb.Asp.Controllers
 
             if (!month.HasValue)
             {
-                month = DateTime.Now.Month;
+                // By default, month is the current month when looking at the current year.
+                // When looking at previous years, default is the whole year (december)
+                if (Year == DateTime.Now.Year)
+                    month = DateTime.Now.Month;
+                else
+                    month = 12;
 
                 // By default, budgetmo goes through LAST month, unless it's January
                 if (report == "budgetmo" && month > 1)
                     --month;
             }
 
-            var period = new DateTime(DateTime.Now.Year, month.Value, 1);
+            var period = new DateTime(Year, month.Value, 1);
 
-            ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM")} ";
+            ViewData["Subtitle"] = $"For {Year} through {period.ToString("MMMM")} ";
             ViewData["report"] = report;
             ViewData["month"] = month;
 
             switch (report)
             {
                 case "yearly":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && YearlyCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && YearlyCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Yearly Report";
                     break;
 
                 case "details":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && DetailCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && DetailCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Transaction Details Report";
                     break;
 
                 case "budgettx":
-                    groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
+                    groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == Year && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
                     ViewData["Title"] = "Budget Transaction Report";
                     break;
@@ -535,11 +571,11 @@ namespace OfxWeb.Asp.Controllers
                 case "budgetmo":
                     result = BudgetMonthlyReport(month.Value);
                     ViewData["Title"] = "Monthly Budget Report";
-                    ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM")} ";
+                    ViewData["Subtitle"] = $"For {Year} through {period.ToString("MMMM")} ";
                     break;
 
                 case "budget":
-                    var labelcol = new Label() { Order = month.Value, Value = new DateTime(2018, month.Value, 1).ToString("MMM") };
+                    var labelcol = new Label() { Order = month.Value, Value = new DateTime(Year, month.Value, 1).ToString("MMM") };
                     result = BudgetReport(labelcol,weekspct);
                     ViewData["Title"] = "Budget vs Actuals Report";
                     ViewData["Subtitle"] = $"For {period.ToString("MMM yyyy")}";
@@ -549,7 +585,7 @@ namespace OfxWeb.Asp.Controllers
 
                 case "monthly":
                 default:
-                    groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= month && (!YearlyCategories.Contains(x.Category) || x.Category == null) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                    groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Timestamp.Month <= month && (!YearlyCategories.Contains(x.Category) || x.Category == null) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
                     ViewData["Title"] = "Monthly Report";
                     break;
@@ -570,10 +606,10 @@ namespace OfxWeb.Asp.Controllers
 
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
 
-            groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
+            groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == Year).GroupBy(x => x.Timestamp.Month);
             var budgettx = TwoLevelReport(groupsL1);
 
-            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && BudgetFocusCategories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == Year && BudgetFocusCategories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
             var monthlth = TwoLevelReport(groupsL1);
 
             Label spentLabel = new Label() { Order = 1, Value = "Spent", Format = "C0" };
@@ -619,12 +655,12 @@ namespace OfxWeb.Asp.Controllers
 
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
 
-            var budgettxquery = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough);
+            var budgettxquery = _context.BudgetTxs.Where(x => x.Timestamp.Year == Year && x.Timestamp.Month <= monththrough);
             groupsL1 = budgettxquery.GroupBy(x => x.Timestamp.Month);
             var budgettx = TwoLevelReport(groupsL1);
 
             var categories = budgettxquery.Select(x => x.Category).Distinct().ToHashSet();
-            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= monththrough && categories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+            groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Timestamp.Month <= monththrough && categories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
             var monthlth = TwoLevelReport(groupsL1);
 
             foreach (var row in budgettx.RowLabels)
@@ -662,7 +698,7 @@ namespace OfxWeb.Asp.Controllers
                 foreach (var outergroup in outergroups)
                 {
                     var month = outergroup.Key;
-                    var labelcol = new Label() { Order = month, Value = new DateTime(2018, month, 1).ToString("MMM") };
+                    var labelcol = new Label() { Order = month, Value = new DateTime(Year, month, 1).ToString("MMM") };
 
                     if (outergroup.Count() > 0)
                     {
@@ -719,7 +755,7 @@ namespace OfxWeb.Asp.Controllers
             // https://docs.microsoft.com/en-us/dotnet/csharp/linq/create-a-nested-group
             /*
             var qq = from tx in _context.Transactions
-                     where tx.Timestamp.Year == 2018 && ! string.IsNullOrEmpty(tx.Category)
+                     where tx.Timestamp.Year == Year && ! string.IsNullOrEmpty(tx.Category)
                      group tx by tx.Timestamp.Month into months
                      from categories in (from tx in months group tx by tx.Category)
                      group categories by months.Key;
@@ -732,7 +768,7 @@ namespace OfxWeb.Asp.Controllers
                 foreach (var outergroup in outergroups)
                 {
                     var month = outergroup.Key;
-                    var labelcol = new Label() { Order = month, Value = new DateTime(2018, month, 1).ToString("MMM") };
+                    var labelcol = new Label() { Order = month, Value = new DateTime(Year, month, 1).ToString("MMM") };
 
                     if (outergroup.Count() > 0)
                     {
