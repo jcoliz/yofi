@@ -515,9 +515,10 @@ namespace OfxWeb.Asp.Controllers
             switch (report)
             {
                 case "yearly":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => YearlyCategories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => YearlyCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Yearly Report";
+                    ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM")} ";
                     break;
 
                 case "details":
@@ -535,7 +536,7 @@ namespace OfxWeb.Asp.Controllers
                 case "budgetmo":
                     result = BudgetMonthlyReport(month.Value);
                     ViewData["Title"] = "Monthly Budget Report";
-                    ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM yyyy")} ";
+                    ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM")} ";
                     break;
 
                 case "budget":
