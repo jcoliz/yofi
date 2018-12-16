@@ -199,7 +199,7 @@ namespace OfxWeb.Asp
             try
             {
                 var objecttype = "BudgetTxs";
-                var transactions = await _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).OrderBy(x => x.Timestamp).ThenBy(x=>x.Category).ToListAsync();
+                var transactions = await _context.BudgetTxs.OrderBy(x => x.Timestamp).ThenBy(x=>x.Category).ToListAsync();
 
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
