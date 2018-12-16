@@ -517,7 +517,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Pivot
-        public IActionResult Pivot(string report,int? month, int? weekspct)
+        public IActionResult Pivot(string report,int? month, int? weekspct, int? setyear)
         {
             PivotTable<Label, Label, decimal> result = null;
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
@@ -527,6 +527,9 @@ namespace OfxWeb.Asp.Controllers
             {
                 report = "monthly";
             }
+
+            if (setyear.HasValue)
+                Year = setyear.Value;
 
             if (!month.HasValue)
             {
