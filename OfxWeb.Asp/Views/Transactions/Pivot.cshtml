@@ -5,25 +5,23 @@
     int month = (int)ViewData["month"];
 }
 
-@if ("budget" == report || "budgetmo" == report)
-{
-    <div class="dropdown" style="float:right; margin: 4px">
-        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Month
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+<div class="dropdown" style="float:right; margin: 4px">
+    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Month
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
-            @{
-                int i = 1;
-                foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
-                {
-                    <a asp-action="Pivot" asp-route-report="@report" asp-route-month="@i" class="dropdown-item">@i @monthname</a>
-                    i++;
-                }
+        @{
+            int i = 1;
+            foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
+            {
+                <a asp-action="Pivot" asp-route-report="@report" asp-route-month="@i" class="dropdown-item">@i @monthname</a>
+                i++;
             }
-        </div>
+        }
     </div>
-}
+</div>
+
 @if ("budget" == report)
 {
     <div class="dropdown" style="float:right; margin: 4px">

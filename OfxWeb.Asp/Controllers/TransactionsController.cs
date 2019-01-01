@@ -508,26 +508,26 @@ namespace OfxWeb.Asp.Controllers
 
             var period = new DateTime(DateTime.Now.Year, month.Value, 1);
 
-            ViewData["Subtitle"] = $"For {DateTime.Now.Year} year to date";
+            ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM")} ";
             ViewData["report"] = report;
             ViewData["month"] = month;
 
             switch (report)
             {
                 case "yearly":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => YearlyCategories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && YearlyCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Yearly Report";
                     break;
 
                 case "details":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018).Where(x => DetailCategories.Contains(x.Category) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && DetailCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Transaction Details Report";
                     break;
 
                 case "budgettx":
-                    groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018).GroupBy(x => x.Timestamp.Month);
+                    groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
                     ViewData["Title"] = "Budget Transaction Report";
                     break;
@@ -535,7 +535,7 @@ namespace OfxWeb.Asp.Controllers
                 case "budgetmo":
                     result = BudgetMonthlyReport(month.Value);
                     ViewData["Title"] = "Monthly Budget Report";
-                    ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM yyyy")} ";
+                    ViewData["Subtitle"] = $"For {DateTime.Now.Year} through {period.ToString("MMMM")} ";
                     break;
 
                 case "budget":
@@ -549,7 +549,7 @@ namespace OfxWeb.Asp.Controllers
 
                 case "monthly":
                 default:
-                    groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && (!YearlyCategories.Contains(x.Category) || x.Category == null) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                    groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == 2018 && x.Timestamp.Month <= month && (!YearlyCategories.Contains(x.Category) || x.Category == null) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
                     ViewData["Title"] = "Monthly Report";
                     break;
@@ -558,7 +558,7 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
-        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping" };
+        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping", "Yearly.Entertainment" };
 
         private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities", "Entertainment", "Kids", "Housing.Services" };
 
