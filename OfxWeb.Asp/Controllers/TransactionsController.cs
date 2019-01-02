@@ -460,7 +460,7 @@ namespace OfxWeb.Asp.Controllers
                 return BadRequest(ex);
             }
 
-            return View(incoming.OrderByDescending(x => x.Timestamp));
+            return RedirectToAction(nameof(Import));
         }
 
         // GET: Transactions/Download
