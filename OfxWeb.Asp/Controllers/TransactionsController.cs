@@ -182,12 +182,25 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Import
-        public async Task<IActionResult> Import()
+        public async Task<IActionResult> Import(string command)
         {
             var result = from s in _context.Transactions
                          where s.Imported == true
                          orderby s.Timestamp descending, s.BankReference ascending
                          select s;
+
+            if (command == "cancel")
+            {
+                _context.Transactions.RemoveRange(result);
+                _context.SaveChanges();
+            }
+            else if (command == "ok")
+            {
+                foreach (var item in result)
+                    item.Imported = item.Hidden = false;
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(await result.AsNoTracking().ToListAsync());
         }
