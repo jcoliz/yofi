@@ -149,26 +149,6 @@
     * If cat/subcat set, and payee not exists in payee table, show "add" button -> Payees/Add
 -->
 
-<h2>Upload</h2>
-
-<form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="Upload">
-    <div class="form-group">
-        <div class="col-md-10">
-            <p>Upload one or more files using this form:</p>
-            <input type="file" name="files" multiple size="50" />
-        </div>
-        <div class="col-md-10">
-            <label for="date" class="control-label">Ignore transactions before:</label>
-            <input name="date" class="form-control" width="50" />
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-10">
-            <input type="submit" value="Upload" class="btn btn-primary" />
-        </div>
-    </div>
-</form>
-
 <!-- Modal Edit -->
 <!-- https://getbootstrap.com/docs/4.0/components/modal/ -->
 <!-- Working on this: https://stackoverflow.com/questions/16011151/mvc-4-edit-modal-form-using-bootstrap -->
