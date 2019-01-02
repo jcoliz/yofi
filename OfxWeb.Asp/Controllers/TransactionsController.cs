@@ -182,9 +182,14 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Import
-        public IActionResult Import()
+        public async Task<IActionResult> Import()
         {
-            return View();
+            var result = from s in _context.Transactions
+                         where s.Imported == true
+                         orderby s.Timestamp descending, s.BankReference ascending
+                         select s;
+
+            return View(await result.AsNoTracking().ToListAsync());
         }
 
         // GET: Transactions/Create
@@ -436,10 +441,14 @@ namespace OfxWeb.Asp.Controllers
                 var existing = await _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToListAsync();
                 incoming.ExceptWith(existing);
 
-                // Fix up the remaining payees
+                // Fix up the remaining payees & hide them & flag them as imported
 
                 foreach (var item in incoming)
+                {
                     item.FixupPayee();
+                    item.Imported = true;
+                    item.Hidden = true;
+                }
 
                 // Add resulting transactions
 
