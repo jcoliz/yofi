@@ -181,6 +181,12 @@ namespace OfxWeb.Asp.Controllers
             return View(transaction);
         }
 
+        // GET: Transactions/Import
+        public IActionResult Import()
+        {
+            return View();
+        }
+
         // GET: Transactions/Create
         public IActionResult Create()
         {

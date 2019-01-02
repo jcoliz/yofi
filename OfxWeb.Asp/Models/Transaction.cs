@@ -20,6 +20,7 @@ namespace OfxWeb.Asp.Models
         public string SubCategory { get; set; }
         public string BankReference { get; set; }
         public bool? Hidden { get; set; }
+        public bool? Imported { get; set; }
 
         public ICollection<Split> Splits { get; set; }
 
