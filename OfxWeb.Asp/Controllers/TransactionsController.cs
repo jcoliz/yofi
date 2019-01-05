@@ -454,13 +454,25 @@ namespace OfxWeb.Asp.Controllers
                 var existing = await _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToListAsync();
                 incoming.ExceptWith(existing);
 
-                // Fix up the remaining payees & hide them & flag them as imported
+                // Load all categories into memory. This is an optimization. Rather than run a separate payee query for every 
+                // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
+
+                var payees = await _context.Payees.ToListAsync();
+
+                // Process each item
 
                 foreach (var item in incoming)
                 {
                     item.FixupPayee();
                     item.Imported = true;
                     item.Hidden = true;
+
+                    var payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
+                    if (null != payee)
+                    {
+                        item.Category = payee.Category;
+                        item.SubCategory = payee.SubCategory;
+                    }
                 }
 
                 // Add resulting transactions
