@@ -496,7 +496,7 @@ namespace OfxWeb.Asp.Controllers
             try
             {
                 var objecttype = "Transactions";
-                var transactions = await _context.Transactions.Where(x=>x.Timestamp.Year == Year).OrderByDescending(x => x.Timestamp).ToListAsync();
+                var transactions = await _context.Transactions.Where(x=>(x.Timestamp.Year == Year && x.Hidden != true)).OrderByDescending(x => x.Timestamp).ToListAsync();
 
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
