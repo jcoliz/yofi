@@ -24,7 +24,7 @@ namespace OfxWeb.Asp
         // GET: BudgetTxs
         public async Task<IActionResult> Index()
         {
-            return View(await _context.BudgetTxs.OrderBy(x => x.Timestamp.Year).ThenBy(x => x.Timestamp.Month).ThenBy(x => x.Category).ToListAsync());
+            return View(await _context.BudgetTxs.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).ToListAsync());
         }
 
         // GET: BudgetTxs/Details/5
