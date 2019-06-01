@@ -20,10 +20,15 @@
         var id = tr.data('id')
         var endpoint = modal.data('endpoint')
 
-        // Fill om the "More..." button
-        var needsid = modal.find('.asp-route-id'); 
-        var href = needsid.attr('href');
-        var newhref = href + '/' + id;
+        // Fill in the "More..." button
+        var needsid = modal.find('.asp-route-id');
+        var originalhref = needsid.attr('originalhref');
+        if (originalhref == null) {
+            originalhref = needsid.attr('href');
+            needsid.attr('originalhref',originalhref);
+        }
+
+        var newhref = originalhref + '/' + id;
         needsid.attr('href', newhref);
 
         $.ajax({
