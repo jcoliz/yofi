@@ -53,54 +53,71 @@
                 <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-default" style="float:right">Delete</a>
             </div>
         </form>
+
     </div>
 </div>
 
-@if(false)
-{ 
-<h4>Splits</h4>
-    <a asp-controller="Splits" asp-action="Create" asp-route-txid="@Model.ID">Add</a>
-}
+<div class="row">
+    <div class="col-md-6">
+        <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
+            <div class="form-group">
+                <p>Upload a receipt</p>
+                <input type="file" name="files" size="50" />
+                <input type="hidden" asp-for="ID" />
+            </div>
+            <div class="form-group">
+                    <input type="submit" value="Upload" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
 
-@if (Model.Splits != null)
-{
-    foreach (var split in Model.Splits)
-    {
-    <dl class="dl-horizontal">
-        <dt>
-            Category
-        </dt>
-        <dd>
-            @(split.Category ?? String.Empty)
-        </dd>
-        <dt>
-            SubCategory
-        </dt>
-        <dd>
-            @(split.SubCategory ?? String.Empty)
-        </dd>
-        <dt>
-            Amount
-        </dt>
-        <dd>
-            @split.Amount
-        </dd>
-        <dt>
-            Memo
-        </dt>
-        <dd>
-            @split.Memo
-        </dd>
-        <dt>
-            <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
-        </dt>
-        <dd>
 
-        </dd>
-    </dl>
-    }
-}
+        @if (false)
+        {
+            <h4>Splits</h4>
+            <a asp-controller="Splits" asp-action="Create" asp-route-txid="@Model.ID">Add</a>
+        }
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+        @if (Model.Splits != null)
+        {
+            foreach (var split in Model.Splits)
+            {
+                <dl class="dl-horizontal">
+                    <dt>
+                        Category
+                    </dt>
+                    <dd>
+                        @(split.Category ?? String.Empty)
+                    </dd>
+                    <dt>
+                        SubCategory
+                    </dt>
+                    <dd>
+                        @(split.SubCategory ?? String.Empty)
+                    </dd>
+                    <dt>
+                        Amount
+                    </dt>
+                    <dd>
+                        @split.Amount
+                    </dd>
+                    <dt>
+                        Memo
+                    </dt>
+                    <dd>
+                        @split.Memo
+                    </dd>
+                    <dt>
+                        <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
+                    </dt>
+                    <dd>
+
+                    </dd>
+                </dl>
+            }
+        }
+
+        @section Scripts {
+            @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        }
