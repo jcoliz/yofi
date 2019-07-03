@@ -397,6 +397,13 @@ namespace OfxWeb.Asp.Controllers
         [HttpPost]
         public async Task<IActionResult> UpReceipt(List<IFormFile> files, int id)
         {
+            // Save the file to blob storage
+            // Get the link to the file
+            // Save it in the Transaction
+
+            // Q. How will we securely serve the file up for user?
+            // A. https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1?toc=%2fazure%2fstorage%2fblobs%2ftoc.json
+
             return RedirectToAction(nameof(Index));
         }
 
