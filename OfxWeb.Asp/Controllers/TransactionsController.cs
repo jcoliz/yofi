@@ -394,6 +394,11 @@ namespace OfxWeb.Asp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+        [HttpPost]
+        public async Task<IActionResult> UpReceipt(List<IFormFile> files, int id)
+        {
+            return RedirectToAction(nameof(Index));
+        }
 
         [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> files,string date)
