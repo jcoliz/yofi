@@ -422,7 +422,7 @@ namespace OfxWeb.Asp.Controllers
                         var filename = $"{id}-{urlfilename}";
 
                         // Upload the file
-                        await storage.UploadToBlob("myfire", filename, stream);
+                        await storage.UploadToBlob("myfire", id.ToString(), stream);
 
                         // Remember the content type
                         contenttype = formFile.ContentType;
@@ -540,6 +540,32 @@ namespace OfxWeb.Asp.Controllers
             }
 
             return RedirectToAction(nameof(Import));
+        }
+
+        // GET: Transactions/Download
+        [ActionName("GetReceipt")]
+        public async Task<IActionResult> GetReceipt(int id)
+        {
+            try
+            {
+                /* TODO: Working on this!
+                var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+
+                IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
+                storage.Initialize();
+                var stream = new System.IO.Stream;
+                await storage.DownloadBlob("myfire", id.ToString(), stream);
+
+
+
+                return File (reportBytes, transaction.ReceiptUrl, $"{objecttype}.xlsx");
+                */
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
 
         // GET: Transactions/Download

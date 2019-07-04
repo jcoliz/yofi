@@ -59,17 +59,26 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
-            <div class="form-group">
-                <p>@Model.ReceiptUrl</p>
-                <p>Upload a receipt</p>
-                <input type="file" name="files" size="50" />
-                <input type="hidden" asp-for="ID" />
-            </div>
-            <div class="form-group">
+        @if (null == Model.ReceiptUrl)
+        {
+            <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
+                <div class="form-group">
+
+                    <p>@Model.ReceiptUrl</p>
+                    <p>Upload a receipt</p>
+                    <input type="file" name="files" size="50" />
+                    <input type="hidden" asp-for="ID" />
+                </div>
+                <div class="form-group">
                     <input type="submit" value="Upload" class="btn btn-primary" />
-            </div>
-        </form>
+                </div>
+            </form>
+        }
+        else
+        {
+            <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a>
+        }
+
     </div>
 </div>
 
