@@ -411,7 +411,7 @@ namespace OfxWeb.Asp.Controllers
                 IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
                 storage.Initialize();
 
-                Uri uri = null;
+                string contenttype = null;
 
                 foreach (var formFile in files)
                 {
@@ -421,16 +421,19 @@ namespace OfxWeb.Asp.Controllers
                         var urlfilename = HttpUtility.UrlEncode(infilename);
                         var filename = $"{id}-{urlfilename}";
 
-                        // Get the link to the file
-                        uri = await storage.UploadToBlob("myfire", filename,stream);
+                        // Upload the file
+                        await storage.UploadToBlob("myfire", filename, stream);
+
+                        // Remember the content type
+                        contenttype = formFile.ContentType;
                     }
                 }
 
                 // Save it in the Transaction
 
-                if (null != uri)
+                if (null != contenttype)
                 {
-                    transaction.ReceiptUrl = uri.OriginalString;
+                    transaction.ReceiptUrl = contenttype;
                     _context.Update(transaction);
                     await _context.SaveChangesAsync();
                 }
