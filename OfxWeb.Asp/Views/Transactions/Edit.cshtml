@@ -61,6 +61,7 @@
     <div class="col-md-6">
         <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
             <div class="form-group">
+                <p>@Model.ReceiptUrl</p>
                 <p>Upload a receipt</p>
                 <input type="file" name="files" size="50" />
                 <input type="hidden" asp-for="ID" />

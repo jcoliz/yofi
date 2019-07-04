@@ -402,12 +402,16 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
+                var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+
                 //
                 // Save the file to blob storage
                 //
 
                 IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
                 storage.Initialize();
+
+                Uri uri = null;
 
                 foreach (var formFile in files)
                 {
@@ -418,16 +422,23 @@ namespace OfxWeb.Asp.Controllers
                         var filename = $"{id}-{urlfilename}";
 
                         // Get the link to the file
-                        var uri = await storage.UploadToBlob("myfire", filename,stream);
+                        uri = await storage.UploadToBlob("myfire", filename,stream);
                     }
                 }
 
                 // Save it in the Transaction
 
+                if (null != uri)
+                {
+                    transaction.ReceiptUrl = uri.OriginalString;
+                    _context.Update(transaction);
+                    await _context.SaveChangesAsync();
+                }
+
                 // Q. How will we securely serve the file up for user?
                 // A. https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1?toc=%2fazure%2fstorage%2fblobs%2ftoc.json
 
-                return RedirectToAction(nameof(Index));
+                return Redirect($"/Transactions/Edit/{id}");
             }
             catch (Exception ex)
             {
