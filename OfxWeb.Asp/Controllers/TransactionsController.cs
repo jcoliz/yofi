@@ -12,6 +12,9 @@ using OfxSharpLib;
 using Microsoft.AspNetCore.Authorization;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
+using ManiaLabs.Portable.Base;
+using ManiaLabs.NET;
+using System.Web;
 
 namespace OfxWeb.Asp.Controllers
 {
@@ -397,14 +400,39 @@ namespace OfxWeb.Asp.Controllers
         [HttpPost]
         public async Task<IActionResult> UpReceipt(List<IFormFile> files, int id)
         {
-            // Save the file to blob storage
-            // Get the link to the file
-            // Save it in the Transaction
+            try
+            {
+                //
+                // Save the file to blob storage
+                //
 
-            // Q. How will we securely serve the file up for user?
-            // A. https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1?toc=%2fazure%2fstorage%2fblobs%2ftoc.json
+                IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
+                storage.Initialize();
 
-            return RedirectToAction(nameof(Index));
+                foreach (var formFile in files)
+                {
+                    using (var stream = formFile.OpenReadStream())
+                    {
+                        var infilename = System.IO.Path.GetFileName(formFile.FileName).ToLowerInvariant();
+                        var urlfilename = HttpUtility.UrlEncode(infilename);
+                        var filename = $"{id}-{urlfilename}";
+
+                        // Get the link to the file
+                        var uri = await storage.UploadToBlob("myfire", filename,stream);
+                    }
+                }
+
+                // Save it in the Transaction
+
+                // Q. How will we securely serve the file up for user?
+                // A. https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1?toc=%2fazure%2fstorage%2fblobs%2ftoc.json
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         [HttpPost]
