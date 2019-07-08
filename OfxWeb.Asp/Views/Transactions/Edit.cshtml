@@ -63,8 +63,6 @@
         {
             <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
                 <div class="form-group">
-
-                    <p>@Model.ReceiptUrl</p>
                     <p>Upload a receipt</p>
                     <input type="file" name="files" size="50" />
                     <input type="hidden" asp-for="ID" />
@@ -76,7 +74,8 @@
         }
         else
         {
-            <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a>
+            <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a><br />
+            <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a>
         }
 
     </div>

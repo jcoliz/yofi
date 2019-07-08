@@ -417,9 +417,11 @@ namespace OfxWeb.Asp.Controllers
                 {
                     using (var stream = formFile.OpenReadStream())
                     {
+                        /*
                         var infilename = System.IO.Path.GetFileName(formFile.FileName).ToLowerInvariant();
                         var urlfilename = HttpUtility.UrlEncode(infilename);
                         var filename = $"{id}-{urlfilename}";
+                        */
 
                         // Upload the file
                         await storage.UploadToBlob("myfire", id.ToString(), stream);
@@ -542,25 +544,23 @@ namespace OfxWeb.Asp.Controllers
             return RedirectToAction(nameof(Import));
         }
 
-        // GET: Transactions/Download
+        // GET: Transactions/GetReceipt/5
         [ActionName("GetReceipt")]
         public async Task<IActionResult> GetReceipt(int id)
         {
             try
             {
-                /* TODO: Working on this!
                 var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+
+                if (string.IsNullOrEmpty(transaction.ReceiptUrl))
+                    throw new ApplicationException("Transaction has no receipt");
 
                 IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
                 storage.Initialize();
-                var stream = new System.IO.Stream;
+                var stream = new System.IO.MemoryStream();
                 await storage.DownloadBlob("myfire", id.ToString(), stream);
-
-
-
-                return File (reportBytes, transaction.ReceiptUrl, $"{objecttype}.xlsx");
-                */
-                return NotFound();
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+                return File(stream, transaction.ReceiptUrl);
             }
             catch (Exception)
             {
