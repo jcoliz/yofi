@@ -57,6 +57,9 @@
     </div>
 </div>
 
+<h2>Receipt</h2>
+<hr />
+
 <div class="row">
     <div class="col-md-6">
         @if (null == Model.ReceiptUrl)
@@ -74,59 +77,59 @@
         }
         else
         {
-            <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a><br />
-            <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a>
+            <p><a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a> | 
+            <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a></p>
         }
 
     </div>
 </div>
 
 
-        @if (false)
-        {
-            <h4>Splits</h4>
-            <a asp-controller="Splits" asp-action="Create" asp-route-txid="@Model.ID">Add</a>
-        }
+@if (false)
+{
+    <h4>Splits</h4>
+    <a asp-controller="Splits" asp-action="Create" asp-route-txid="@Model.ID">Add</a>
+}
 
-        @if (Model.Splits != null)
-        {
-            foreach (var split in Model.Splits)
-            {
-                <dl class="dl-horizontal">
-                    <dt>
-                        Category
-                    </dt>
-                    <dd>
-                        @(split.Category ?? String.Empty)
-                    </dd>
-                    <dt>
-                        SubCategory
-                    </dt>
-                    <dd>
-                        @(split.SubCategory ?? String.Empty)
-                    </dd>
-                    <dt>
-                        Amount
-                    </dt>
-                    <dd>
-                        @split.Amount
-                    </dd>
-                    <dt>
-                        Memo
-                    </dt>
-                    <dd>
-                        @split.Memo
-                    </dd>
-                    <dt>
-                        <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
-                    </dt>
-                    <dd>
+@if (Model.Splits != null)
+{
+    foreach (var split in Model.Splits)
+    {
+        <dl class="dl-horizontal">
+            <dt>
+                Category
+            </dt>
+            <dd>
+                @(split.Category ?? String.Empty)
+            </dd>
+            <dt>
+                SubCategory
+            </dt>
+            <dd>
+                @(split.SubCategory ?? String.Empty)
+            </dd>
+            <dt>
+                Amount
+            </dt>
+            <dd>
+                @split.Amount
+            </dd>
+            <dt>
+                Memo
+            </dt>
+            <dd>
+                @split.Memo
+            </dd>
+            <dt>
+                <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
+            </dt>
+            <dd>
 
-                    </dd>
-                </dl>
-            }
-        }
+            </dd>
+        </dl>
+    }
+}
 
-        @section Scripts {
-            @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-        }
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
