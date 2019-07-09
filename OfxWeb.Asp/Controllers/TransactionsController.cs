@@ -45,6 +45,23 @@ namespace OfxWeb.Asp.Controllers
             ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
 
             bool showHidden = false;
+            bool? showHasReceipt = null;
+
+            if (!string.IsNullOrEmpty(searchPayee))
+            {
+                if (searchPayee.EndsWith("+R"))
+                {
+                    showHasReceipt = true;
+                }
+                else if (searchPayee.EndsWith("-R"))
+                {
+                    showHasReceipt = false;
+                }
+                if (showHasReceipt.HasValue)
+                {
+                    searchPayee = new string(searchPayee.SkipLast(2).ToArray());
+                }
+            }
 
             // 'search' parameter combines all search types
             if (!String.IsNullOrEmpty(search))
@@ -64,6 +81,10 @@ namespace OfxWeb.Asp.Controllers
                     {
                         showHidden = true;
                     }
+                    else if (term[0] == 'R')
+                    {
+                        showHasReceipt = (term[1] == '+');
+                    }
                 }
             }
 
@@ -76,6 +97,8 @@ namespace OfxWeb.Asp.Controllers
                 searchlist.Add($"P-{searchPayee}");
             if (!String.IsNullOrEmpty(searchCategory))
                 searchlist.Add($"C-{searchCategory}");
+            if (showHasReceipt.HasValue)
+                searchlist.Add($"R{(showHasReceipt.Value?'+':'-')}");
 
             if (showHidden)
             {
@@ -112,6 +135,14 @@ namespace OfxWeb.Asp.Controllers
             if (!showHidden)
             {
                 result = result.Where(x => x.Hidden != true);
+            }
+
+            if (showHasReceipt.HasValue)
+            {
+                if (showHasReceipt.Value)
+                    result = result.Where(x => x.ReceiptUrl != null);
+                else
+                    result = result.Where(x => x.ReceiptUrl == null);
             }
 
             switch (sortOrder)
