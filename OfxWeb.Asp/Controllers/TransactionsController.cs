@@ -455,7 +455,7 @@ namespace OfxWeb.Asp.Controllers
                         */
 
                         // Upload the file
-                        await storage.UploadToBlob("myfire", id.ToString(), stream);
+                        await storage.UploadToBlob(BlobStoreName, id.ToString(), stream);
 
                         // Remember the content type
                         contenttype = formFile.ContentType;
@@ -479,6 +479,18 @@ namespace OfxWeb.Asp.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex);
+            }
+        }
+
+        private string BlobStoreName
+        {
+            get
+            {
+                var receiptstore = Environment.GetEnvironmentVariable("RECEIPT_STORE");
+                if (string.IsNullOrEmpty(receiptstore))
+                    receiptstore = "myfire-undefined";
+
+                return receiptstore;
             }
         }
 
@@ -589,7 +601,7 @@ namespace OfxWeb.Asp.Controllers
                 IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
                 storage.Initialize();
                 var stream = new System.IO.MemoryStream();
-                await storage.DownloadBlob("myfire", id.ToString(), stream);
+                await storage.DownloadBlob(BlobStoreName, id.ToString(), stream);
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
                 return File(stream, transaction.ReceiptUrl);
             }

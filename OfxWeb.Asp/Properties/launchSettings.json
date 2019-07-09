@@ -17,14 +17,16 @@
       "launchBrowser": true,
       "launchUrl": "https://localhost:44323/",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RECEIPT_STORE": "myfire-iisexpress"
       }
     },
     "OfxWeb.Asp": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RECEIPT_STORE": "myfire-ofxweb"
       },
       "applicationUrl": "http://localhost:50419/"
     }
