@@ -603,6 +603,11 @@ namespace OfxWeb.Asp.Controllers
                 storage.Initialize();
                 var stream = new System.IO.MemoryStream();
                 var contenttype = await storage.DownloadBlob(BlobStoreName, id.ToString(), stream);
+
+                // Work around previous versions which did NOT store content type in blob store.
+                if ("application/octet-stream" == contenttype)
+                    contenttype = "application/pdf";
+
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
                 return File(stream, contenttype);
             }
