@@ -58,12 +58,13 @@ namespace ManiaLabs.NET
             return rowkey;
         }
 
-        async Task<Uri> IPlatformAzureStorage.UploadToBlob(string ContainerName, string FileName, Stream stream)
+        async Task<Uri> IPlatformAzureStorage.UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
         {
             CloudBlobContainer container = blobClient.GetContainerReference(ContainerName);
             await container.CreateIfNotExistsAsync();
 
             CloudBlockBlob blob = container.GetBlockBlobReference(FileName);
+            blob.Properties.ContentType = "application/pdf";
             await blob.UploadFromStreamAsync(stream);
 
             return blob.Uri;
@@ -94,17 +95,19 @@ namespace ManiaLabs.NET
         /// <param name="ContainerName">Name of the container</param>
         /// <param name="FileName">Name of file</param>
         /// <returns></returns>
-        async Task IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
+        async Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
         {
             CloudBlobContainer container = blobClient.GetContainerReference(ContainerName);
             if (!await container.ExistsAsync())
-                return;
+                return string.Empty;
 
             CloudBlockBlob blob = container.GetBlockBlobReference(FileName);
             if (!await blob.ExistsAsync())
-                return;
+                return string.Empty;
 
             await blob.DownloadToStreamAsync(stream);
+
+            return blob.Properties.ContentType;
         }
 
         private string Connection;

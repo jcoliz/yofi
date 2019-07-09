@@ -38,8 +38,9 @@ namespace ManiaLabs.Portable.Base
         /// <param name="ContainerName">Name of the container</param>
         /// <param name="FileName">Name of file</param>
         /// <param name="stream">Stream of data</param>
+        /// <param name="ContentType">content type of data</param>
         /// <returns>Uri to location of blob</returns>
-        Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream stream);
+        Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType);
 
         /// <summary>
         /// Check whether the given file exists
@@ -54,7 +55,7 @@ namespace ManiaLabs.Portable.Base
         /// </summary>
         /// <param name="ContainerName">Name of the container</param>
         /// <param name="FileName">Name of file</param>
-        /// <returns></returns>
-        Task DownloadBlob(string ContainerName, string FileName, Stream stream);
+        /// <returns>Content type of file</returns>
+        Task<string> DownloadBlob(string ContainerName, string FileName, Stream stream);
     }
 }
