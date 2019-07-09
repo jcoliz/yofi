@@ -77,7 +77,7 @@
                     <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
                 </th>
             }
-            <th colspan="4">
+            <th colspan="5">
                 Actions
             </th>
         </tr>
@@ -85,58 +85,64 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr data-id="@item.ID">
-                @if ((bool)(ViewData["ShowHidden"]))
-                {
-                    <td>
-                        @{ var hiddenchecked = (item.Hidden == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-hidden" @hiddenchecked data-id="@item.ID">
-                    </td>
-                }
+        <tr data-id="@item.ID">
+            @if ((bool)(ViewData["ShowHidden"]))
+            {
                 <td>
-                    @Html.DisplayFor(modelItem => item.Timestamp)
+                    @{ var hiddenchecked = (item.Hidden == true) ? "checked" : string.Empty; }
+                    <input type="checkbox" class="checkbox-hidden" @hiddenchecked data-id="@item.ID">
                 </td>
-                <td class="display-payee">
-                    @Html.DisplayFor(modelItem => item.Payee)
-                </td>
+            }
+            <td>
+                @Html.DisplayFor(modelItem => item.Timestamp)
+            </td>
+            <td class="display-payee">
+                @Html.DisplayFor(modelItem => item.Payee)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td class="display-category">
+                @Html.DisplayFor(modelItem => item.Category)
+            </td>
+            <td class="display-subcategory">
+                @Html.DisplayFor(modelItem => item.SubCategory)
+            </td>
+            <td class="display-memo">
+                @Html.DisplayFor(modelItem => item.Memo)
+            </td>
+            @if ((bool)(ViewData["ShowHidden"]))
+            {
                 <td>
-                    @Html.DisplayFor(modelItem => item.Amount)
+                    @Html.DisplayFor(modelItem => item.BankReference)
                 </td>
-                <td class="display-category">
-                    @Html.DisplayFor(modelItem => item.Category)
-                </td>
-                <td class="display-subcategory">
-                    @Html.DisplayFor(modelItem => item.SubCategory)
-                </td>
-                <td class="display-memo">
-                    @Html.DisplayFor(modelItem => item.Memo)
-                </td>
-                @if ((bool)(ViewData["ShowHidden"]))
+            }
+            <td style="padding-left:0; padding-right:5px">
+                <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#editModal">
+                    <i class="fa fa-edit"></i>
+                </a>
+            </td>
+            <td style="padding-left:0; padding-right:5px">
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-searchPayee="@item.Payee.Trim()">
+                    <i class="fa fa-search"></i>
+                </a>
+            </td>
+            <td style="padding-left:0; padding-right:5px">
+                <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#addPayeeModal">
+                    <i class="fa fa-plus"></i>
+                </a>
+            </td>
+            <td style="padding-left:0; padding-right:5px">
+                <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush"></i></a>
+            </td>
+            <td style="padding-left:0; padding-right:0">
+                @if (null != item.ReceiptUrl)
                 {
-                    <td>
-                        @Html.DisplayFor(modelItem => item.BankReference)
-                    </td>
+                    <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
                 }
-                <td style="padding-left:0; padding-right:5px">
-                    <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#editModal">
-                        <i class="fa fa-edit"></i>
-                    </a>
-                </td>
-                <td style="padding-left:0; padding-right:5px">
-                    <a asp-action="Index"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]"
-                       asp-route-searchPayee="@item.Payee.Trim()">
-                        <i class="fa fa-search"></i>
-                    </a>
-                </td>
-                <td style="padding-left:0; padding-right:5px">
-                    <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#addPayeeModal">
-                        <i class="fa fa-plus"></i>
-                    </a>
-                </td>
-                <td style="padding-left:0; padding-right:0">
-                    <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush"></i></a>
-                </td>
+            </td>
             </tr>
         }
     </tbody>
