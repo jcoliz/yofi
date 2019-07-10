@@ -151,6 +151,23 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // POST: api/tx/UpReceipt/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost("UpReceipt/{id}")]
+        public async Task<string> UpReceipt(int id, IFormFile file)
+        {
+            try
+            {
+                return new ApiResult();
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult(ex);
+            }
+        }
+
+
         // POST: api/tx/EditPayee/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.

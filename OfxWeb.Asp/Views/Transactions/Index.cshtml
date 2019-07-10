@@ -10,28 +10,6 @@
 @section scripts {
     <script type="text/javascript">
         function dropHandler(ev) {
-            alert("Drop");
-
-            ev.preventDefault();
-
-            // TODO: Actually upload the file
-            // https://css-tricks.com/drag-and-drop-file-uploading/
-
-            if (ev.dataTransfer.items) {
-                // Use DataTransferItemList interface to access the file(s)
-                for (var i = 0; i < ev.dataTransfer.items.length; i++) {
-                    // If dropped items aren't files, reject them
-                    if (ev.dataTransfer.items[i].kind === 'file') {
-                        var file = ev.dataTransfer.items[i].getAsFile();
-                        alert('... item file[' + i + '].name = ' + file.name);
-                    }
-                }
-            } else {
-                // Use DataTransfer interface to access the file(s)
-                for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-                    alert('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
-                }
-            }
         }
 
         function dragOverHandler(ev) {
@@ -122,7 +100,7 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr data-id="@item.ID"  ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+        <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);">
             @if ((bool)(ViewData["ShowHidden"]))
             {
                 <td>

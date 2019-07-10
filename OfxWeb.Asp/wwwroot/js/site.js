@@ -1,4 +1,10 @@
 ﻿$(document).ready(function () {
+
+    // jQuery creates it's own event object, and it doesn't have a
+    // dataTransfer property yet. This adds dataTransfer to the event object.
+    // Thanks to l4rk for figuring this out!
+    jQuery.event.props.push('dataTransfer');
+
     $(".apply-link").on("click", function (event) {
         event.preventDefault();
         applyPayee($(this).parents('tr'));
@@ -110,6 +116,63 @@
             }
         });
         $(this).parents('.modal').modal('hide');
+    });
+
+    $('.txdrop').on('drop', function (event) {
+
+        alert("Drop");
+
+        event.preventDefault();
+
+        // TODO: Actually upload the file
+        // https://css-tricks.com/drag-and-drop-file-uploading/
+
+        if (event.dataTransfer.items) {
+            // Use DataTransferItemList interface to access the file(s)
+            for (var i = 0; i < event.dataTransfer.items.length; i++) {
+                // If dropped items aren't files, reject them
+                if (event.dataTransfer.items[i].kind === 'file') {
+                    var file = event.dataTransfer.items[i].getAsFile();
+
+                    var tr = $(this);
+                    var id = tr.data('id');
+
+                    alert('... item ' + id + ' file[' + i + '].name = ' + file.name);
+
+                    let formData = new FormData()
+                    formData.append('file', file)
+                    formData.append('id', id)
+
+                    alert(formData);
+
+                    $.ajax({
+                        url: "/api/tx/UpReceipt/5",
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        error: function (result) {
+                            alert(result.responseText);
+                        },
+                        success: function (jsonresult) {
+                            var result = JSON.parse(jsonresult);
+
+                            if (result.Ok) {
+                                alert('Ok');
+                            }
+                            else
+                                alert(result.Exception.Message);
+                        }
+                    });
+
+                }
+            }
+        } else {
+            // Use DataTransfer interface to access the file(s)
+            for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+                alert('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
+            }
+        }
     });
 });
 
