@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ManiaLabs.NET;
+using ManiaLabs.Portable.Base;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -159,6 +161,38 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
+                var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+
+                //
+                // Save the file to blob storage
+                //
+
+                IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
+                storage.Initialize();
+
+                string contenttype = null;
+
+                using (var stream = file.OpenReadStream())
+                {
+
+                    // Upload the file
+                    await storage.UploadToBlob(BlobStoreName, id.ToString(), stream, file.ContentType);
+
+                    // Remember the content type
+                    // TODO: This can just be a true/false bool, cuz now we store content type in blob store.
+                    contenttype = file.ContentType;
+                }
+
+                // Save it in the Transaction
+
+                if (null != contenttype)
+                {
+                    transaction.ReceiptUrl = contenttype;
+                    _context.Update(transaction);
+                    await _context.SaveChangesAsync();
+                }
+
+
                 return new ApiResult();
             }
             catch (Exception ex)
@@ -224,6 +258,19 @@ namespace OfxWeb.Asp.Controllers
                 return new ApiResult(ex);
             }
         }
+
+        private string BlobStoreName
+        {
+            get
+            {
+                var receiptstore = Environment.GetEnvironmentVariable("RECEIPT_STORE");
+                if (string.IsNullOrEmpty(receiptstore))
+                    receiptstore = "myfire-undefined";
+
+                return receiptstore;
+            }
+        }
+
 
 #if false
         // POST: api/Api

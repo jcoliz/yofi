@@ -448,12 +448,6 @@ namespace OfxWeb.Asp.Controllers
                 {
                     using (var stream = formFile.OpenReadStream())
                     {
-                        /*
-                        var infilename = System.IO.Path.GetFileName(formFile.FileName).ToLowerInvariant();
-                        var urlfilename = HttpUtility.UrlEncode(infilename);
-                        var filename = $"{id}-{urlfilename}";
-                        */
-
                         // Upload the file
                         await storage.UploadToBlob(BlobStoreName, id.ToString(), stream, formFile.ContentType);
 
@@ -471,9 +465,6 @@ namespace OfxWeb.Asp.Controllers
                     _context.Update(transaction);
                     await _context.SaveChangesAsync();
                 }
-
-                // Q. How will we securely serve the file up for user?
-                // A. https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1?toc=%2fazure%2fstorage%2fblobs%2ftoc.json
 
                 return Redirect($"/Transactions/Edit/{id}");
             }
