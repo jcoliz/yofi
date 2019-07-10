@@ -120,13 +120,7 @@
 
     $('.txdrop').on('drop', function (event) {
 
-        alert("Drop");
-
         event.preventDefault();
-
-        // TODO: Actually upload the file
-        // https://css-tricks.com/drag-and-drop-file-uploading/
-
         if (event.dataTransfer.items) {
             // Use DataTransferItemList interface to access the file(s)
             for (var i = 0; i < event.dataTransfer.items.length; i++) {
@@ -137,13 +131,9 @@
                     var tr = $(this);
                     var id = tr.data('id');
 
-                    alert('... item ' + id + ' file[' + i + '].name = ' + file.name);
-
                     let formData = new FormData()
                     formData.append('file', file)
                     formData.append('id', id)
-
-                    alert(formData);
 
                     $.ajax({
                         url: "/api/tx/UpReceipt/5",

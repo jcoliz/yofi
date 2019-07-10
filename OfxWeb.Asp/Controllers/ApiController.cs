@@ -163,6 +163,12 @@ namespace OfxWeb.Asp.Controllers
             {
                 var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
 
+                if (null == transaction)
+                    throw new ApplicationException($"Unable to find transaction #{id}");
+
+                if (! string.IsNullOrEmpty(transaction.ReceiptUrl))
+                    throw new ApplicationException($"This transaction already has a receipt. Delete the current receipt before uploading a new one.");
+
                 //
                 // Save the file to blob storage
                 //
