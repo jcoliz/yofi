@@ -14,5 +14,14 @@ namespace OfxWeb.Asp.Models
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime Timestamp { get; set; }
         public string Category { get; set; }
+
+        public BudgetTx() { }
+
+        public BudgetTx(BudgetTx copy,DateTime dt)
+        {
+            Amount = copy.Amount;
+            Category = copy.Category;
+            Timestamp = dt;
+        }
     }
 }

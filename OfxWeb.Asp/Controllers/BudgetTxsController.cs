@@ -55,6 +55,24 @@ namespace OfxWeb.Asp
             return View(budgetTx);
         }
 
+        // GET: BudgetTxs/Generate
+        public async Task<IActionResult> Generate()
+        {
+            // Grab the whole first group
+            var result = await _context.BudgetTxs.GroupBy(x => x.Timestamp).OrderByDescending(x => x.Key).FirstOrDefaultAsync();
+
+            if (null == result)
+                return NotFound();
+
+            var timestamp = result.First().Timestamp.AddMonths(1);
+            var newmonth = result.Select(x => new BudgetTx(x, timestamp));
+
+            await _context.BudgetTxs.AddRangeAsync(newmonth);
+            await _context.SaveChangesAsync();
+
+            return Redirect("/BudgetTxs");
+        }
+
         // GET: BudgetTxs/Create
         public IActionResult Create()
         {
