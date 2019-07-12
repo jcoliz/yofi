@@ -152,10 +152,14 @@
             <td style="padding-left:0; padding-right:5px">
                 <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush"></i></a>
             </td>
-            <td style="padding-left:0; padding-right:0">
+            <td style="padding-left:0; padding-right:0" class="display-receipt">
                 @if (null != item.ReceiptUrl)
                 {
                     <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
+                }
+                else
+                {
+                    <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
                 }
             </td>
             </tr>
