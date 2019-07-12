@@ -148,6 +148,7 @@
                             var result = JSON.parse(jsonresult);
 
                             if (result.Ok) {
+                                tr.find('.display-receipt').children().show();
                                 alert('Ok');
                             }
                             else
