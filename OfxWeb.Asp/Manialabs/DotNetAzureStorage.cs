@@ -64,7 +64,7 @@ namespace ManiaLabs.NET
             await container.CreateIfNotExistsAsync();
 
             CloudBlockBlob blob = container.GetBlockBlobReference(FileName);
-            blob.Properties.ContentType = "application/pdf";
+            blob.Properties.ContentType = ContentType;
             await blob.UploadFromStreamAsync(stream);
 
             return blob.Uri;
