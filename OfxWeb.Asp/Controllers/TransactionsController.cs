@@ -474,6 +474,28 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // GET: Transactions/DeleteReceipt/5
+        public async Task<IActionResult> DeleteReceipt(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            transaction.ReceiptUrl = null;
+            _context.Update(transaction);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+
+
         private string BlobStoreName
         {
             get
