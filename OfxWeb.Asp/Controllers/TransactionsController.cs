@@ -15,6 +15,7 @@ using OfficeOpenXml.Table;
 using ManiaLabs.Portable.Base;
 using ManiaLabs.NET;
 using System.Web;
+using Microsoft.Extensions.Configuration;
 
 namespace OfxWeb.Asp.Controllers
 {
@@ -25,9 +26,13 @@ namespace OfxWeb.Asp.Controllers
 
         private const int pagesize = 100;
 
-        public TransactionsController(ApplicationDbContext context)
+        public TransactionsController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+
+            var StorageAccount = configuration["StorageAccount"];
+            Console.WriteLine(StorageAccount);
+
         }
 
         // GET: Transactions
