@@ -74,6 +74,12 @@
                     Hidden
                 </th>
             }
+            @if ((bool)(ViewData["ShowSelected"]))
+            {
+                <th>
+                    Edit
+                </th>
+            }
             <th>
                 <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["DateSortParm"]">@Html.DisplayNameFor(model => model.Timestamp)</a>
             </th>
@@ -110,8 +116,15 @@
             @if ((bool)(ViewData["ShowHidden"]))
             {
                 <td>
-                    @{ var hiddenchecked = (item.Hidden == true) ? "checked" : string.Empty; }
-                    <input type="checkbox" class="checkbox-hidden" @hiddenchecked data-id="@item.ID">
+                    @{ var checkedornot = (item.Hidden == true) ? "checked" : string.Empty; }
+                    <input type="checkbox" class="checkbox-hidden" @checkedornot data-id="@item.ID">
+                </td>
+            }
+            @if ((bool)(ViewData["ShowSelected"]))
+            {
+                <td>
+                    @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
+                    <input type="checkbox" class="checkbox-selected" @checkedornot data-id="@item.ID">
                 </td>
             }
             <td>
@@ -168,7 +181,7 @@
                     <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank"><i class="fa fa-file-pdf-o"></i></a>
                 }
             </td>
-            </tr>
+        </tr>
         }
     </tbody>
 </table>
