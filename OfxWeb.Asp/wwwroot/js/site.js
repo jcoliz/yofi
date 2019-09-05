@@ -17,6 +17,13 @@
         });
     });
 
+    $(".checkbox-selected").on("click", function (event) {
+        var endpoint = $(this).is(":checked") ? "Select" : "Deselect";
+        $.ajax({
+            url: "/api/tx/" + endpoint + "/" + this.dataset.id
+        });
+    });
+
     $('.actiondialog').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget) // Button that triggered the modal
         var modal = $(this);
