@@ -246,6 +246,28 @@ namespace OfxWeb.Asp.Controllers
             return View(await result.AsNoTracking().ToListAsync());
         }
 
+        // POST: Transactions/BulkEdit
+        [HttpPost]
+        public async Task<IActionResult> BulkEdit(string Category, string SubCategory)
+        {
+            var result = from s in _context.Transactions
+                         where s.Selected == true
+                         select s;
+
+            var list = await result.ToListAsync();
+
+            foreach (var item in list)
+            {
+                item.Category = Category;
+                item.SubCategory = SubCategory;
+                item.Selected = false;
+            }
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
         // GET: Transactions/Create
         public IActionResult Create()
         {
