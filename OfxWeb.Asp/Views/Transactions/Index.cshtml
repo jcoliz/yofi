@@ -45,6 +45,12 @@
        asp-route-search="@ViewData["CurrentFilterToggleHidden"]">
         Show Hidden
     </a> |
+    <a asp-action="Index" class="btn btn-default"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-page="@ViewData["PreviousPage"]"
+       asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
+        Bulk Edit
+    </a> |
     <a asp-action="Download" class="btn btn-default">Export</a>
 </div>
 

@@ -45,6 +45,7 @@ namespace OfxWeb.Asp.Controllers
             ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
 
             bool showHidden = false;
+            bool showSelected = false;
             bool? showHasReceipt = null;
 
             if (!string.IsNullOrEmpty(searchPayee))
@@ -79,7 +80,11 @@ namespace OfxWeb.Asp.Controllers
                     }
                     else if (term[0] == 'H')
                     {
-                        showHidden = true;
+                        showHidden = (term[1] == '+');
+                    }
+                    else if (term[0] == 'Z')
+                    {
+                        showSelected = (term[1] == '+');
                     }
                     else if (term[0] == 'R')
                     {
@@ -89,6 +94,7 @@ namespace OfxWeb.Asp.Controllers
             }
 
             ViewData["ShowHidden"] = showHidden;
+            ViewData["ShowSelected"] = showSelected;
             ViewData["CurrentSearchPayee"] = searchPayee;
             ViewData["CurrentSearchCategory"] = searchCategory;
 
@@ -99,19 +105,20 @@ namespace OfxWeb.Asp.Controllers
                 searchlist.Add($"C-{searchCategory}");
             if (showHasReceipt.HasValue)
                 searchlist.Add($"R{(showHasReceipt.Value?'+':'-')}");
-
             if (showHidden)
-            {
-                ViewData["CurrentFilterToggleHidden"] = string.Join(',', searchlist);
-                searchlist.Add("H");
-                ViewData["CurrentFilter"] = string.Join(',', searchlist);
-            }
-            else
-            {
-                ViewData["CurrentFilter"] = string.Join(',', searchlist);
-                searchlist.Add("H");
-                ViewData["CurrentFilterToggleHidden"] = string.Join(',', searchlist);
-            }
+                searchlist.Add("H+");
+            if (showSelected)
+                searchlist.Add("Z+");
+
+            ViewData["CurrentFilter"] = string.Join(',', searchlist);
+
+            var togglehiddensearchlist = new List<string>(searchlist);
+            togglehiddensearchlist.Add($"H{(showHidden ? '-' : '+')}");
+            ViewData["CurrentFilterToggleHidden"] = string.Join(',', togglehiddensearchlist);
+
+            var toggleselectedsearchlist = new List<string>(searchlist);
+            toggleselectedsearchlist.Add($"Z{(showSelected ? '-' : '+')}");
+            ViewData["CurrentFilterToggleSelected"] = string.Join(',', toggleselectedsearchlist);
 
             if (!page.HasValue)
                 page = 1;
