@@ -258,8 +258,21 @@ namespace OfxWeb.Asp.Controllers
 
             foreach (var item in list)
             {
-                item.Category = Category;
-                item.SubCategory = SubCategory;
+                if (!string.IsNullOrEmpty(Category))
+                    item.Category = Category;
+
+                if (!string.IsNullOrEmpty(SubCategory))
+                {
+                    if ("-" == SubCategory)
+                    {
+                        item.SubCategory = string.Empty;
+                    }
+                    else
+                    {
+                        item.SubCategory = SubCategory;
+                    }
+                }
+
                 item.Selected = false;
             }
             await _context.SaveChangesAsync();
