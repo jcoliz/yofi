@@ -161,6 +161,48 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // GET: api/tx/SelectPayee/5
+        [HttpGet("SelectPayee/{id}")]
+        public async Task<string> SelectPayee(int id)
+        {
+            try
+            {
+                var payee = await _context.Payees
+                    .SingleAsync(m => m.ID == id);
+
+                payee.Selected = true;
+                _context.Update(payee);
+                await _context.SaveChangesAsync();
+
+                return new ApiResult();
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult(ex);
+            }
+        }
+
+        // GET: api/tx/DeselectPayee/5
+        [HttpGet("DeselectPayee/{id}")]
+        public async Task<string> DeselectPayee(int id)
+        {
+            try
+            {
+                var payee = await _context.Payees
+                    .SingleAsync(m => m.ID == id);
+
+                payee.Selected = false;
+                _context.Update(payee);
+                await _context.SaveChangesAsync();
+
+                return new ApiResult();
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult(ex);
+            }
+        }
+
         // POST: api/tx/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
