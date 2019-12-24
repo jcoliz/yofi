@@ -22,9 +22,24 @@ namespace OfxWeb.Asp
         }
 
         // GET: Payees
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search)
         {
-            ViewData["ShowSelected"] = true;
+            bool showSelected = false;
+
+            if (!String.IsNullOrEmpty(search))
+            {
+                var terms = search.Split(',');
+                foreach (var term in terms)
+                {
+                    if (term[0] == 'Z')
+                    {
+                        showSelected = (term[1] == '+');
+                    }
+                }
+            }
+
+            ViewData["ShowSelected"] = showSelected;
+            ViewData["CurrentFilterToggleSelected"] = $"Z{(showSelected ? '-' : '+')}";
 
             return View(await _context.Payees.OrderBy(x=>x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync());
         }

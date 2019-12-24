@@ -8,6 +8,9 @@
 
 <p>
     <a asp-action="Create">Create New</a> |
+    <a asp-action="Index"
+       asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
+        Bulk Edit</a> |
     <a asp-action="Download">Export</a>
 </p>
 
