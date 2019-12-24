@@ -24,6 +24,8 @@ namespace OfxWeb.Asp
         // GET: Payees
         public async Task<IActionResult> Index()
         {
+            ViewData["ShowSelected"] = true;
+
             return View(await _context.Payees.OrderBy(x=>x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync());
         }
 
