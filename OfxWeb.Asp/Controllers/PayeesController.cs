@@ -165,6 +165,40 @@ namespace OfxWeb.Asp
             return View(payee);
         }
 
+        // POST: Payees/BulkEdit
+        [HttpPost]
+        public async Task<IActionResult> BulkEdit(string Category, string SubCategory)
+        {
+            var result = from s in _context.Payees
+                         where s.Selected == true
+                         select s;
+
+            var list = await result.ToListAsync();
+
+            foreach (var item in list)
+            {
+                if (!string.IsNullOrEmpty(Category))
+                    item.Category = Category;
+
+                if (!string.IsNullOrEmpty(SubCategory))
+                {
+                    if ("-" == SubCategory)
+                    {
+                        item.SubCategory = string.Empty;
+                    }
+                    else
+                    {
+                        item.SubCategory = SubCategory;
+                    }
+                }
+
+                item.Selected = false;
+            }
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: Payees/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
