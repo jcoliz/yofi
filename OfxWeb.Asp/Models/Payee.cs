@@ -13,6 +13,7 @@ namespace OfxWeb.Asp.Models
         public string Name { get; set; }
         public string Category { get; set; }
         public string SubCategory { get; set; }
+        public bool? Selected { get; set; }
 
         /// <summary>
         /// Remove all characters from payee which are not whitespace or alpha-numeric
