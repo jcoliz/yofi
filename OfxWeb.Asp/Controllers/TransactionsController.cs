@@ -821,11 +821,11 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
-        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping", "Yearly.Entertainment", "Yearly.Utilities" };
+        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Transportation", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping", "Yearly.Entertainment", "Yearly.Utilities" };
 
-        private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities", "Entertainment", "Kids", "Housing.Services" };
+        private string[] DetailCategories = new[] { "Auto & Transport", "Transportation", "Groceries", "Utilities", "Entertainment", "Kids", "Housing.Services" };
 
-        private string[] BudgetFocusCategories = new[] { "Entertainment", "Food & Dining", "Groceries", "Kids", "Shopping" };
+        private string[] BudgetFocusCategories = new[] { "Entertainment", "Food & Dining", "Dining Out", "Groceries", "Kids", "Shopping" };
 
         private PivotTable<Label, Label, decimal> BudgetReport(Label month, int? weekspct = null)
         {
