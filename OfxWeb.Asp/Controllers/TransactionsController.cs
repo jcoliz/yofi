@@ -757,15 +757,17 @@ namespace OfxWeb.Asp.Controllers
 
             if (!month.HasValue)
             {
+                bool iscurrentyear = (Year == DateTime.Now.Year);
+
                 // By default, month is the current month when looking at the current year.
                 // When looking at previous years, default is the whole year (december)
-                if (Year == DateTime.Now.Year)
+                if (iscurrentyear)
                     month = DateTime.Now.Month;
                 else
                     month = 12;
 
                 // By default, budgetmo goes through LAST month, unless it's January
-                if (report == "budgetmo" && month > 1)
+                if (report == "budgetmo" && month > 1 && iscurrentyear)
                     --month;
             }
 
