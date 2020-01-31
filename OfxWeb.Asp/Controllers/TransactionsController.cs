@@ -825,7 +825,7 @@ namespace OfxWeb.Asp.Controllers
 
         private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "Pets", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Transportation", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping", "Yearly.Entertainment", "Yearly.Utilities" };
 
-        private string[] DetailCategories = new[] { "Auto & Transport", "Transportation", "Groceries", "Utilities", "Entertainment", "Kids", "Housing.Services" };
+        private string[] DetailCategories = new[] { "Auto & Transport", "Transportation", "Groceries", "Utilities", "Entertainment", "Kids", "Housing.Services", "Shopping" };
 
         private string[] BudgetFocusCategories = new[] { "Entertainment", "Food & Dining", "Dining Out", "Groceries", "Kids", "Shopping" };
 
