@@ -179,6 +179,11 @@
             }
         }
     });
+
+    $('.btnDismissEditModal').click(function () {
+        $('#editModal').modal('hide');
+    });
+
 });
 
 function applyPayee(tr)
