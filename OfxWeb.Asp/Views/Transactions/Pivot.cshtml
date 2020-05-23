@@ -12,7 +12,7 @@
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
         @{
-                var years = new int[] { 2017, 2018, 2019 };
+                var years = new int[] { 2017, 2018, 2019, 2020 };
                 foreach (var year in years)
                 {
                     <a asp-action="Pivot" asp-route-report="@report" asp-route-setyear="@year" class="dropdown-item">@year</a>

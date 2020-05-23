@@ -50,6 +50,7 @@ namespace OfxWeb.Asp.Controllers
             ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
 
             bool showHidden = false;
+            bool showSelected = false;
             bool? showHasReceipt = null;
 
             if (!string.IsNullOrEmpty(searchPayee))
@@ -84,7 +85,11 @@ namespace OfxWeb.Asp.Controllers
                     }
                     else if (term[0] == 'H')
                     {
-                        showHidden = true;
+                        showHidden = (term[1] == '+');
+                    }
+                    else if (term[0] == 'Z')
+                    {
+                        showSelected = (term[1] == '+');
                     }
                     else if (term[0] == 'R')
                     {
@@ -94,6 +99,7 @@ namespace OfxWeb.Asp.Controllers
             }
 
             ViewData["ShowHidden"] = showHidden;
+            ViewData["ShowSelected"] = showSelected;
             ViewData["CurrentSearchPayee"] = searchPayee;
             ViewData["CurrentSearchCategory"] = searchCategory;
 
@@ -104,19 +110,20 @@ namespace OfxWeb.Asp.Controllers
                 searchlist.Add($"C-{searchCategory}");
             if (showHasReceipt.HasValue)
                 searchlist.Add($"R{(showHasReceipt.Value?'+':'-')}");
-
             if (showHidden)
-            {
-                ViewData["CurrentFilterToggleHidden"] = string.Join(',', searchlist);
-                searchlist.Add("H");
-                ViewData["CurrentFilter"] = string.Join(',', searchlist);
-            }
-            else
-            {
-                ViewData["CurrentFilter"] = string.Join(',', searchlist);
-                searchlist.Add("H");
-                ViewData["CurrentFilterToggleHidden"] = string.Join(',', searchlist);
-            }
+                searchlist.Add("H+");
+            if (showSelected)
+                searchlist.Add("Z+");
+
+            ViewData["CurrentFilter"] = string.Join(',', searchlist);
+
+            var togglehiddensearchlist = new List<string>(searchlist);
+            togglehiddensearchlist.Add($"H{(showHidden ? '-' : '+')}");
+            ViewData["CurrentFilterToggleHidden"] = string.Join(',', togglehiddensearchlist);
+
+            var toggleselectedsearchlist = new List<string>(searchlist);
+            toggleselectedsearchlist.Add($"Z{(showSelected ? '-' : '+')}");
+            ViewData["CurrentFilterToggleSelected"] = string.Join(',', toggleselectedsearchlist);
 
             if (!page.HasValue)
                 page = 1;
@@ -243,6 +250,41 @@ namespace OfxWeb.Asp.Controllers
 
             return View(await result.AsNoTracking().ToListAsync());
         }
+
+        // POST: Transactions/BulkEdit
+        [HttpPost]
+        public async Task<IActionResult> BulkEdit(string Category, string SubCategory)
+        {
+            var result = from s in _context.Transactions
+                         where s.Selected == true
+                         select s;
+
+            var list = await result.ToListAsync();
+
+            foreach (var item in list)
+            {
+                if (!string.IsNullOrEmpty(Category))
+                    item.Category = Category;
+
+                if (!string.IsNullOrEmpty(SubCategory))
+                {
+                    if ("-" == SubCategory)
+                    {
+                        item.SubCategory = string.Empty;
+                    }
+                    else
+                    {
+                        item.SubCategory = SubCategory;
+                    }
+                }
+
+                item.Selected = false;
+            }
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
 
         // GET: Transactions/Create
         public IActionResult Create()
@@ -479,6 +521,28 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // GET: Transactions/DeleteReceipt/5
+        public async Task<IActionResult> DeleteReceipt(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            transaction.ReceiptUrl = null;
+            _context.Update(transaction);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+
+
         private string BlobStoreName
         {
             get
@@ -698,15 +762,17 @@ namespace OfxWeb.Asp.Controllers
 
             if (!month.HasValue)
             {
+                bool iscurrentyear = (Year == DateTime.Now.Year);
+
                 // By default, month is the current month when looking at the current year.
                 // When looking at previous years, default is the whole year (december)
-                if (Year == DateTime.Now.Year)
+                if (iscurrentyear)
                     month = DateTime.Now.Month;
                 else
                     month = 12;
 
                 // By default, budgetmo goes through LAST month, unless it's January
-                if (report == "budgetmo" && month > 1)
+                if (report == "budgetmo" && month > 1 && iscurrentyear)
                     --month;
             }
 
@@ -762,11 +828,11 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
-        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping", "Yearly.Entertainment", "Yearly.Utilities" };
+        private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "Pets", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Transportation", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping", "Yearly.Entertainment", "Yearly.Utilities" };
 
-        private string[] DetailCategories = new[] { "Auto & Transport", "Groceries", "Utilities", "Entertainment", "Kids", "Housing.Services" };
+        private string[] DetailCategories = new[] { "Auto & Transport", "Transportation", "Groceries", "Utilities", "Entertainment", "Kids", "Housing.Services", "Shopping" };
 
-        private string[] BudgetFocusCategories = new[] { "Entertainment", "Food & Dining", "Groceries", "Kids", "Shopping" };
+        private string[] BudgetFocusCategories = new[] { "Entertainment", "Food & Dining", "Dining Out", "Groceries", "Kids", "Shopping" };
 
         private PivotTable<Label, Label, decimal> BudgetReport(Label month, int? weekspct = null)
         {

@@ -8,13 +8,35 @@
 
 <p>
     <a asp-action="Create">Create New</a> |
+    <a asp-action="Index"
+       asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
+        Bulk Edit</a> |
     <a asp-action="Download">Export</a>
 </p>
 
+@if ((bool)(ViewData["ShowSelected"]))
+{
+    <form asp-action="BulkEdit" method="post">
+        <div class="form-actions">
+            <p>
+                Category <input type="text" name="Category" />
+                SubCategory <input type="text" name="SubCategory" />
+                <input type="submit" value="OK" class="btn btn-secondary" />
+                <a asp-action="Index" class="btn btn-light">Cancel</a>
+            </p>
+        </div>
+    </form>
+}
 
 <table class="table">
     <thead>
         <tr>
+            @if ((bool)(ViewData["ShowSelected"]))
+            {
+                <th>
+                    Edit
+                </th>
+            }
             <th>
                 @Html.DisplayNameFor(model => model.Category)
             </th>
@@ -30,7 +52,14 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr  data-id="@item.ID">
+            <tr data-id="@item.ID">
+                @if ((bool)(ViewData["ShowSelected"]))
+                {
+                    <td>
+                        @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
+                        <input type="checkbox" class="checkbox-payee-selected" @checkedornot data-id="@item.ID">
+                    </td>
+                }
                 <td class="display-category">
                     @Html.DisplayFor(modelItem => item.Category)
                 </td>
@@ -43,7 +72,7 @@
                 <td>
                     <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#editPayeeModal">
                         <i class="fa fa-edit"></i>
-                    </a> | 
+                    </a> |
                     <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
                 </td>
             </tr>

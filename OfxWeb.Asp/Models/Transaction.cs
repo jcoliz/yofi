@@ -21,6 +21,7 @@ namespace OfxWeb.Asp.Models
         public string BankReference { get; set; }
         public bool? Hidden { get; set; }
         public bool? Imported { get; set; }
+        public bool? Selected { get; set; }
         public string ReceiptUrl { get; set; }
 
         public ICollection<Split> Splits { get; set; }

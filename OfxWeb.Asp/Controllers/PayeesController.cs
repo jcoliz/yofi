@@ -22,8 +22,25 @@ namespace OfxWeb.Asp
         }
 
         // GET: Payees
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search)
         {
+            bool showSelected = false;
+
+            if (!String.IsNullOrEmpty(search))
+            {
+                var terms = search.Split(',');
+                foreach (var term in terms)
+                {
+                    if (term[0] == 'Z')
+                    {
+                        showSelected = (term[1] == '+');
+                    }
+                }
+            }
+
+            ViewData["ShowSelected"] = showSelected;
+            ViewData["CurrentFilterToggleSelected"] = $"Z{(showSelected ? '-' : '+')}";
+
             return View(await _context.Payees.OrderBy(x=>x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync());
         }
 
@@ -161,6 +178,40 @@ namespace OfxWeb.Asp
                 return RedirectToAction(nameof(Index));
             }
             return View(payee);
+        }
+
+        // POST: Payees/BulkEdit
+        [HttpPost]
+        public async Task<IActionResult> BulkEdit(string Category, string SubCategory)
+        {
+            var result = from s in _context.Payees
+                         where s.Selected == true
+                         select s;
+
+            var list = await result.ToListAsync();
+
+            foreach (var item in list)
+            {
+                if (!string.IsNullOrEmpty(Category))
+                    item.Category = Category;
+
+                if (!string.IsNullOrEmpty(SubCategory))
+                {
+                    if ("-" == SubCategory)
+                    {
+                        item.SubCategory = string.Empty;
+                    }
+                    else
+                    {
+                        item.SubCategory = SubCategory;
+                    }
+                }
+
+                item.Selected = false;
+            }
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Payees/Delete/5

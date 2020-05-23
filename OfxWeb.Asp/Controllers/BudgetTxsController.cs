@@ -24,7 +24,17 @@ namespace OfxWeb.Asp
         // GET: BudgetTxs
         public async Task<IActionResult> Index()
         {
-            return View(await _context.BudgetTxs.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).ToListAsync());
+            // Assemble the results
+            var result = await _context.BudgetTxs.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).ToListAsync();
+
+            if (result.FirstOrDefault() != null)
+            {
+                var nextmonth = result.First().Timestamp.AddMonths(1);
+                ViewData["LastMonth"] = $"Generate {nextmonth:MMMM} Budget";
+            }
+
+            // Show the index
+            return View(result);
         }
 
         // GET: BudgetTxs/Details/5
@@ -43,6 +53,24 @@ namespace OfxWeb.Asp
             }
 
             return View(budgetTx);
+        }
+
+        // GET: BudgetTxs/Generate
+        public async Task<IActionResult> Generate()
+        {
+            // Grab the whole first group
+            var result = await _context.BudgetTxs.GroupBy(x => x.Timestamp).OrderByDescending(x => x.Key).FirstOrDefaultAsync();
+
+            if (null == result)
+                return NotFound();
+
+            var timestamp = result.First().Timestamp.AddMonths(1);
+            var newmonth = result.Select(x => new BudgetTx(x, timestamp));
+
+            await _context.BudgetTxs.AddRangeAsync(newmonth);
+            await _context.SaveChangesAsync();
+
+            return Redirect("/BudgetTxs");
         }
 
         // GET: BudgetTxs/Create

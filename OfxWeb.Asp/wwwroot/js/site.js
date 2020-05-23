@@ -17,6 +17,20 @@
         });
     });
 
+    $(".checkbox-selected").on("click", function (event) {
+        var endpoint = $(this).is(":checked") ? "Select" : "Deselect";
+        $.ajax({
+            url: "/api/tx/" + endpoint + "/" + this.dataset.id
+        });
+    });
+
+    $(".checkbox-payee-selected").on("click", function (event) {
+        var endpoint = $(this).is(":checked") ? "SelectPayee" : "DeselectPayee";
+        $.ajax({
+            url: "/api/tx/" + endpoint + "/" + this.dataset.id
+        });
+    });
+
     $('.actiondialog').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget) // Button that triggered the modal
         var modal = $(this);
@@ -148,6 +162,7 @@
                             var result = JSON.parse(jsonresult);
 
                             if (result.Ok) {
+                                tr.find('.display-receipt').children().show();
                                 alert('Ok');
                             }
                             else
