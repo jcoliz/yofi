@@ -791,6 +791,12 @@ namespace OfxWeb.Asp.Controllers
                     ViewData["Title"] = "Transaction Details Report";
                     break;
 
+                case "all":
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
+                    result = ThreeLevelReport(groupsL2);
+                    ViewData["Title"] = "All Details Report";
+                    break;
+
                 case "budgettx":
                     groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == Year && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
