@@ -1103,13 +1103,13 @@ namespace OfxWeb.Asp.Controllers
 
             foreach (var rowlabel in Model.RowLabels)
             {
-                // empasis rows are subtotals, which we do not want in this raw report
-                if (rowlabel.Emphasis)
-                    continue;
-
                 col = 1;
                 worksheet.Cells[row, col++].Value = rowlabel.Value;
-                worksheet.Cells[row, col++].Value = rowlabel.SubValue;
+
+                if (rowlabel.Emphasis)
+                    worksheet.Cells[row, col++].Value = "Total";
+                else
+                    worksheet.Cells[row, col++].Value = rowlabel.SubValue;
 
                 foreach(var column in Model.Columns)
                 {
