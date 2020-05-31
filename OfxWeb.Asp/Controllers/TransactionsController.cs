@@ -15,6 +15,7 @@ using OfficeOpenXml.Table;
 using ManiaLabs.Portable.Base;
 using ManiaLabs.NET;
 using System.Web;
+using Microsoft.Extensions.Configuration;
 
 namespace OfxWeb.Asp.Controllers
 {
@@ -25,9 +26,13 @@ namespace OfxWeb.Asp.Controllers
 
         private const int pagesize = 100;
 
-        public TransactionsController(ApplicationDbContext context)
+        public TransactionsController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+
+            var StorageAccount = configuration["StorageAccount"];
+            Console.WriteLine(StorageAccount);
+
         }
 
         // GET: Transactions
@@ -556,7 +561,9 @@ namespace OfxWeb.Asp.Controllers
             var incoming = new HashSet<Models.Transaction>();
             try
             {
-                DateTime cutoff = DateTime.MinValue;
+                // Unless otherwise specified, cut off transactions before
+                // 1/1/2020, in case there's a huge file of ancient transactions.
+                DateTime cutoff = new DateTime(2020,01,01);
 
                 // Check on the date we are sent
                 if (!string.IsNullOrEmpty(date))
