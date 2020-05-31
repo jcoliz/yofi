@@ -12,11 +12,11 @@
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
         @{
-                var years = new int[] { 2017, 2018, 2019, 2020 };
-                foreach (var year in years)
-                {
-                    <a asp-action="Pivot" asp-route-report="@report" asp-route-setyear="@year" class="dropdown-item">@year</a>
-                }
+            var years = new int[] { 2017, 2018, 2019, 2020 };
+            foreach (var year in years)
+            {
+                <a asp-action="Pivot" asp-route-report="@report" asp-route-setyear="@year" class="dropdown-item">@year</a>
+            }
         }
     </div>
 </div>
@@ -61,11 +61,11 @@
     <a asp-action="Pivot" asp-route-report="monthly" class="btn btn-default">Monthly</a> |
     <a asp-action="Pivot" asp-route-report="details" class="btn btn-default">Details</a> |
     <a asp-action="Pivot" asp-route-report="yearly" class="btn btn-default">Yearly</a> |
+    <a asp-action="Pivot" asp-route-report="all" class="btn btn-default">All</a> |
     <a asp-action="Pivot" asp-route-report="budgettx" class="btn btn-default">Budget Tx</a> |
     <a asp-action="Pivot" asp-route-report="budgetmo" class="btn btn-default">Monthly Budget</a> |
     <a asp-action="Pivot" asp-route-report="budget" class="btn btn-default">Budget vs Actuals</a>
 </div>
-
 
 <h2>
     @ViewData["Title"]
@@ -139,6 +139,12 @@
         }
     </tbody>
 </table>
+
+@if ("all" == report)
+{
+
+    <a asp-action="Pivot" asp-route-report="all" asp-route-download="true" class="btn btn-secondary">Download</a>
+}
 
 <hr />
 
