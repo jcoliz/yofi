@@ -709,6 +709,40 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        private async Task<IActionResult> DownloadReport(PivotTable<Label, Label, decimal> report, string title)
+        {
+            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            try
+            {
+                var transactions = await _context.Transactions.Where(x => (x.Timestamp.Year == Year && x.Hidden != true)).OrderByDescending(x => x.Timestamp).ToListAsync();
+
+                byte[] reportBytes;
+                using (var package = new ExcelPackage())
+                {
+                    package.Workbook.Properties.Title = title;
+                    package.Workbook.Properties.Author = "coliz.com";
+                    package.Workbook.Properties.Subject = title;
+                    package.Workbook.Properties.Keywords = title;
+
+                    var worksheet = package.Workbook.Worksheets.Add(title);
+                    int rows, cols;
+                    ExportRawReportTo(worksheet,report, out rows, out cols);
+
+                    var tablename = System.Text.RegularExpressions.Regex.Replace(title, @"\s+", "");
+                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), tablename);
+                    tbl.ShowHeader = true;
+                    tbl.TableStyle = TableStyles.Dark9;
+
+                    reportBytes = package.GetAsByteArray();
+                }
+
+                return File(reportBytes, XlsxContentType, $"{title}.xlsx");
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
         private int? _Year = null;
         private int Year
         {
@@ -741,7 +775,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Pivot
-        public IActionResult Pivot(string report,int? month, int? weekspct, int? setyear)
+        public async Task<IActionResult> Pivot(string report,int? month, int? weekspct, int? setyear, bool? download)
         {
             PivotTable<Label, Label, decimal> result = null;
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
@@ -794,7 +828,7 @@ namespace OfxWeb.Asp.Controllers
                 case "all":
                     groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = ThreeLevelReport(groupsL2);
-                    ViewData["Title"] = "All Details Report";
+                    ViewData["Title"] = "Transaction Summary";
                     break;
 
                 case "budgettx":
@@ -826,7 +860,14 @@ namespace OfxWeb.Asp.Controllers
                     break;
             }
 
-            return View(result);
+            if (download == true)
+            {
+                return await DownloadReport(result, (string)ViewData["Title"]);
+            }
+            else
+            {
+                return View(result);
+            }
         }
 
         private string[] YearlyCategories = new[] { "RV", "Yearly", "Travel", "Transfer", "Medical", "Pets", "App Development", "Yearly.Housing", "Yearly.James", "Yearly.Sheila", "Yearly.Transportation", "Yearly.Auto & Transport", "Yearly.Entertainment", "Yearly.Kids", "Yearly.Shopping", "Yearly.Entertainment", "Yearly.Utilities" };
@@ -1035,6 +1076,52 @@ namespace OfxWeb.Asp.Controllers
 
             return result;
         }
+
+        // 
+        public static void ExportRawReportTo(ExcelWorksheet worksheet, PivotTable<Label, Label, decimal> Model, out int rows, out int cols)
+        {
+            // First add the headers
+
+            int col = 1;
+            int row = 1;
+            worksheet.Cells[row, col++].Value = "Category";
+            worksheet.Cells[row, col++].Value = "SubCategory";
+            foreach (var column in Model.Columns)
+            {
+                worksheet.Cells[row, col++].Value = column.Value;
+            }
+            ++row;
+
+            // Add values
+
+            foreach (var rowlabel in Model.RowLabels)
+            {
+                // empasis rows are subtotals, which we do not want in this raw report
+                if (rowlabel.Emphasis)
+                    continue;
+
+                col = 1;
+                worksheet.Cells[row, col++].Value = rowlabel.Value;
+                worksheet.Cells[row, col++].Value = rowlabel.SubValue;
+
+                foreach(var column in Model.Columns)
+                {
+                    var cell = Model.Table[rowlabel][column];
+                    worksheet.Cells[row, col].Value = cell;
+                    worksheet.Cells[row, col].Style.Numberformat.Format = "$#,##0.00";
+                    ++col;
+                }
+                ++row;
+            }
+
+            // AutoFitColumns
+            worksheet.Cells[1, 1, row, col].AutoFitColumns();
+
+            // Result
+            rows = row - 1;
+            cols = col - 1;
+        }
+
 
         private bool TransactionExists(int id)
         {
