@@ -30,5 +30,6 @@ namespace OfxWeb.Asp.Data
         public DbSet<Payee> Payees { get; set; }
         public DbSet<Split> Splits { get; set; }
         public DbSet<BudgetTx> BudgetTxs { get; set; }
+        public DbSet<CategoryMap> CategoryMaps { get; set; }
     }
 }
