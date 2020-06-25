@@ -293,7 +293,7 @@ namespace OfxWeb.Asp
             return View(incoming.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory));
         }
 
-        // GET: Transactions/Download
+        // GET: Payees/Download
         [ActionName("Download")]
         public async Task<IActionResult> Download()
         {
@@ -301,7 +301,7 @@ namespace OfxWeb.Asp
             try
             {
                 var objecttype = "Payees";
-                var transactions = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync();
+                var lines = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync();
 
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
@@ -313,7 +313,7 @@ namespace OfxWeb.Asp
 
                     var worksheet = package.Workbook.Worksheets.Add(objecttype);
                     int rows, cols;
-                    worksheet.PopulateFrom(transactions, out rows, out cols);
+                    worksheet.PopulateFrom(lines, out rows, out cols);
 
                     var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), objecttype);
                     tbl.ShowHeader = true;

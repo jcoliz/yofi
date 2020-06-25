@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 
@@ -143,6 +144,43 @@ namespace OfxWeb.Asp.Controllers
             _context.CategoryMaps.Remove(categoryMap);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: CategoryMaps/Download
+        [ActionName("Download")]
+        public async Task<IActionResult> Download()
+        {
+            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            try
+            {
+                var objecttype = "CategoryMaps";
+                var lines = await _context.CategoryMaps.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Key1).ThenBy(x => x.Key2).ThenBy(x => x.Key3).ToListAsync();
+
+                byte[] reportBytes;
+                using (var package = new ExcelPackage())
+                {
+                    package.Workbook.Properties.Title = objecttype;
+                    package.Workbook.Properties.Author = "coliz.com";
+                    package.Workbook.Properties.Subject = objecttype;
+                    package.Workbook.Properties.Keywords = objecttype;
+
+                    var worksheet = package.Workbook.Worksheets.Add(objecttype);
+                    int rows, cols;
+                    worksheet.PopulateFrom(lines, out rows, out cols);
+
+                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), objecttype);
+                    tbl.ShowHeader = true;
+                    tbl.TableStyle = OfficeOpenXml.Table.TableStyles.Dark9;
+
+                    reportBytes = package.GetAsByteArray();
+                }
+
+                return File(reportBytes, XlsxContentType, $"{objecttype}.xlsx");
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
 
         private bool CategoryMapExists(int id)
