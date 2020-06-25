@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -144,6 +145,48 @@ namespace OfxWeb.Asp.Controllers
             _context.CategoryMaps.Remove(categoryMap);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Upload(List<IFormFile> files)
+        {
+            var incoming = new HashSet<Models.CategoryMap>();
+            try
+            {
+                // Extract submitted file into a list objects
+
+                foreach (var formFile in files)
+                {
+                    if (formFile.FileName.ToLower().EndsWith(".xlsx"))
+                    {
+                        using (var stream = formFile.OpenReadStream())
+                        {
+                            var excel = new ExcelPackage(stream);
+                            var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "CategoryMaps").Single();
+                            worksheet.ExtractInto(incoming);
+                        }
+                    }
+                }
+
+                // Remove lines which already have an ID
+                incoming.RemoveWhere(x => x.ID != 0);
+
+                // Fix up the remaining names
+
+                foreach (var item in incoming)
+                    item.Fixup();
+
+                // Add resulting transactions
+
+                await _context.AddRangeAsync(incoming);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+
+            return View(incoming.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Key1).ThenBy(x => x.Key2).ThenBy(x => x.Key3));
         }
 
         // GET: CategoryMaps/Download

@@ -23,6 +23,5 @@ namespace OfxWeb.Asp.Models
             Regex rx = new Regex(@"[^\s\w\d]+");
             Name = rx.Replace(Name, new MatchEvaluator(x => string.Empty));
         }
-
     }
 }
