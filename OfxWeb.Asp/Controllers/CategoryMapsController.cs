@@ -169,12 +169,8 @@ namespace OfxWeb.Asp.Controllers
                 }
 
                 // Remove lines which already have an ID
+                // TODO: This doesn't actually work. Not sure why, cuz debugger isn't working either :(
                 incoming.RemoveWhere(x => x.ID != 0);
-
-                // Fix up the remaining names
-
-                foreach (var item in incoming)
-                    item.Fixup();
 
                 // Add resulting transactions
 
