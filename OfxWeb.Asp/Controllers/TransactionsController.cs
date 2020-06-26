@@ -1014,7 +1014,7 @@ namespace OfxWeb.Asp.Controllers
                                     // Regular label values
 
                                     sum = subgroup.Sum(x => x.Amount);
-                                    labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key ?? "-" };
+                                    labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key, Key3 = subgroup.Key ?? "-" };
 
                                     // Add cateogory->Key mapping
 
@@ -1201,6 +1201,7 @@ namespace OfxWeb.Asp.Controllers
         public string SubValue { get; set; } = string.Empty;
         public string Key1 { get; set; } = string.Empty;
         public string Key2 { get; set; } = string.Empty;
+        public string Key3 { get; set; } = string.Empty;
         public bool Emphasis { get; set; } = false;
         public string Format { get; set; } = null;
 
@@ -1209,7 +1210,12 @@ namespace OfxWeb.Asp.Controllers
             if (Order == 0 && other.Order == 0)
             {
                 if (Value == other.Value)
-                    return (SubValue ?? String.Empty).CompareTo(other.SubValue ?? string.Empty);
+                {
+                    if (SubValue == other.SubValue)
+                        return (Key3 ?? String.Empty).CompareTo(other.Key3 ?? string.Empty);
+                    else
+                        return (SubValue ?? String.Empty).CompareTo(other.SubValue ?? string.Empty);
+                }
                 else
                     return Value.CompareTo(other.Value);
             }
@@ -1222,7 +1228,7 @@ namespace OfxWeb.Asp.Controllers
             var other = obj as Label;
 
             if (other.Order == 0 && Order == 0)
-                return Value.Equals(other.Value) && (SubValue ?? String.Empty).Equals(other.SubValue ?? String.Empty) == true;
+                return Value.Equals(other.Value) && (SubValue ?? String.Empty).Equals(other.SubValue ?? String.Empty) && (Key3 ?? String.Empty).Equals(other.Key3 ?? String.Empty) == true;
             else
                 return Order.Equals(other.Order);
         }
