@@ -721,8 +721,6 @@ namespace OfxWeb.Asp.Controllers
             const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             try
             {
-                var transactions = await _context.Transactions.Where(x => (x.Timestamp.Year == Year && x.Hidden != true)).OrderByDescending(x => x.Timestamp).ToListAsync();
-
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
                 {
@@ -1124,6 +1122,8 @@ namespace OfxWeb.Asp.Controllers
             int row = 1;
             worksheet.Cells[row, col++].Value = "Category";
             worksheet.Cells[row, col++].Value = "SubCategory";
+            worksheet.Cells[row, col++].Value = "Key1";
+            worksheet.Cells[row, col++].Value = "Key2";
             foreach (var column in Model.Columns)
             {
                 worksheet.Cells[row, col++].Value = column.Value;
@@ -1142,7 +1142,10 @@ namespace OfxWeb.Asp.Controllers
                 else
                     worksheet.Cells[row, col++].Value = rowlabel.SubValue;
 
-                foreach(var column in Model.Columns)
+                worksheet.Cells[row, col++].Value = rowlabel.Key1 ?? string.Empty;
+                worksheet.Cells[row, col++].Value = rowlabel.Key2 ?? string.Empty;
+
+                foreach (var column in Model.Columns)
                 {
                     var cell = Model.Table[rowlabel][column];
                     worksheet.Cells[row, col].Value = cell;
