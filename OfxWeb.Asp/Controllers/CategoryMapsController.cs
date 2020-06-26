@@ -24,7 +24,7 @@ namespace OfxWeb.Asp.Controllers
         // GET: CategoryMaps
         public async Task<IActionResult> Index()
         {
-            return View(await _context.CategoryMaps.ToListAsync());
+            return View(await _context.CategoryMaps.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Key1).ThenBy(x => x.Key2).ThenBy(x => x.Key3).ToListAsync());
         }
 
         // GET: CategoryMaps/Details/5
