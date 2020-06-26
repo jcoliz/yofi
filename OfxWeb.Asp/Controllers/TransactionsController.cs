@@ -836,6 +836,7 @@ namespace OfxWeb.Asp.Controllers
                     groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = await ThreeLevelReport(groupsL2,true);
                     ViewData["Title"] = "Transaction Summary";
+                    ViewData["Mapping"] = true;
                     break;
 
                 case "budgettx":

@@ -79,6 +79,11 @@
         <tr>
         <tr>
             <th></th>
+            @if (null != ViewData["Mapping"])
+            {
+                <th>Key1</th>
+                <th>Key2</th>
+            }
             @foreach (var column in Model.Columns)
             {
                 <th>
@@ -105,6 +110,12 @@
                         @row.SubValue
                     </td>
                 }
+                @if (null != ViewData["Mapping"])
+                {
+                    <td class="subhead @emphasis">@row.Key1</td>
+                    <td class="subhead @emphasis">@row.Key2</td>
+                }
+
                 @foreach (var column in Model.Columns)
                 {
                     var cell = Model.Table[row][column];
