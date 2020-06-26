@@ -73,7 +73,7 @@ namespace OfxWeb.Asp.Controllers
             if (!String.IsNullOrEmpty(search))
             {
                 var terms = search.Split(',');
-                foreach(var term in terms)
+                foreach (var term in terms)
                 {
                     if (term[0] == 'P')
                     {
@@ -109,7 +109,7 @@ namespace OfxWeb.Asp.Controllers
             if (!String.IsNullOrEmpty(searchCategory))
                 searchlist.Add($"C-{searchCategory}");
             if (showHasReceipt.HasValue)
-                searchlist.Add($"R{(showHasReceipt.Value?'+':'-')}");
+                searchlist.Add($"R{(showHasReceipt.Value ? '+' : '-')}");
             if (showHidden)
                 searchlist.Add("H+");
             if (showSelected)
@@ -184,11 +184,11 @@ namespace OfxWeb.Asp.Controllers
                     result = result.OrderByDescending(s => s.Category);
                     break;
                 case "date_asc":
-                    result = result.OrderBy(s => s.Timestamp).ThenBy(s=>s.BankReference);
+                    result = result.OrderBy(s => s.Timestamp).ThenBy(s => s.BankReference);
                     break;
                 case "date_desc":
                 default:
-                    result = result.OrderByDescending(s => s.Timestamp).ThenByDescending(s=>s.BankReference);
+                    result = result.OrderByDescending(s => s.Timestamp).ThenByDescending(s => s.BankReference);
                     break;
             }
 
@@ -316,7 +316,7 @@ namespace OfxWeb.Asp.Controllers
                 return NotFound();
             }
 
-            var transaction = await _context.Transactions.Include(x=>x.Splits).SingleOrDefaultAsync(m => m.ID == id);
+            var transaction = await _context.Transactions.Include(x => x.Splits).SingleOrDefaultAsync(m => m.ID == id);
             if (transaction == null)
             {
                 return NotFound();
@@ -370,7 +370,7 @@ namespace OfxWeb.Asp.Controllers
                 }
             }
 
-            return PartialView("EditPartial",transaction);
+            return PartialView("EditPartial", transaction);
         }
 
         // GET: Transactions/ApplyPayee/5
@@ -556,14 +556,14 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(List<IFormFile> files,string date)
+        public async Task<IActionResult> Upload(List<IFormFile> files, string date)
         {
             var incoming = new HashSet<Models.Transaction>();
             try
             {
                 // Unless otherwise specified, cut off transactions before
                 // 1/1/2020, in case there's a huge file of ancient transactions.
-                DateTime cutoff = new DateTime(2020,01,01);
+                DateTime cutoff = new DateTime(2020, 01, 01);
 
                 // Check on the date we are sent
                 if (!string.IsNullOrEmpty(date))
@@ -597,7 +597,7 @@ namespace OfxWeb.Asp.Controllers
                         using (var stream = formFile.OpenReadStream())
                         {
                             var excel = new ExcelPackage(stream);
-                            var worksheet = excel.Workbook.Worksheets.Where(x=>x.Name == "Transactions").Single();
+                            var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Transactions").Single();
                             worksheet.ExtractInto(incoming);
                         }
                     }
@@ -687,7 +687,7 @@ namespace OfxWeb.Asp.Controllers
             try
             {
                 var objecttype = "Transactions";
-                var transactions = await _context.Transactions.Where(x=>(x.Timestamp.Year == Year && x.Hidden != true)).OrderByDescending(x => x.Timestamp).ToListAsync();
+                var transactions = await _context.Transactions.Where(x => (x.Timestamp.Year == Year && x.Hidden != true)).OrderByDescending(x => x.Timestamp).ToListAsync();
 
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
@@ -733,7 +733,7 @@ namespace OfxWeb.Asp.Controllers
 
                     var worksheet = package.Workbook.Worksheets.Add(title);
                     int rows, cols;
-                    ExportRawReportTo(worksheet,report, out rows, out cols);
+                    ExportRawReportTo(worksheet, report, out rows, out cols);
 
                     var tablename = System.Text.RegularExpressions.Regex.Replace(title, @"\s+", "");
                     var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), tablename);
@@ -782,7 +782,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Pivot
-        public async Task<IActionResult> Pivot(string report,int? month, int? weekspct, int? setyear, bool? download)
+        public async Task<IActionResult> Pivot(string report, int? month, int? weekspct, int? setyear, bool? download)
         {
             PivotTable<Label, Label, decimal> result = null;
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
@@ -822,19 +822,19 @@ namespace OfxWeb.Asp.Controllers
             {
                 case "yearly":
                     groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && YearlyCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
-                    result = ThreeLevelReport(groupsL2);
+                    result = await ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Yearly Report";
                     break;
 
                 case "details":
                     groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && DetailCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
-                    result = ThreeLevelReport(groupsL2);
+                    result = await ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Transaction Details Report";
                     break;
 
                 case "all":
                     groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
-                    result = ThreeLevelReport(groupsL2);
+                    result = await ThreeLevelReport(groupsL2,true);
                     ViewData["Title"] = "Transaction Summary";
                     break;
 
@@ -852,7 +852,7 @@ namespace OfxWeb.Asp.Controllers
 
                 case "budget":
                     var labelcol = new Label() { Order = month.Value, Value = new DateTime(Year, month.Value, 1).ToString("MMM") };
-                    result = BudgetReport(labelcol,weekspct);
+                    result = BudgetReport(labelcol, weekspct);
                     ViewData["Title"] = "Budget vs Actuals Report";
                     ViewData["Subtitle"] = $"For {period.ToString("MMM yyyy")}";
                     if (weekspct.HasValue)
@@ -907,8 +907,8 @@ namespace OfxWeb.Asp.Controllers
 
                 if (monthlth.Table.ContainsKey(labelrow))
                 {
-                    var budgetval = - budgettx[month, labelrow];
-                    var spentval = - monthlth[month, labelrow];
+                    var budgetval = -budgettx[month, labelrow];
+                    var spentval = -monthlth[month, labelrow];
                     var remaining = budgetval - spentval;
 
                     result[spentLabel, labelrow] = spentval;
@@ -952,7 +952,7 @@ namespace OfxWeb.Asp.Controllers
                 var labelrowactual = new Label() { Order = row.Order + (row.Order > 0 ? 1 : 0), Value = row.Value, SubValue = "Actual" };
                 var labelrow = new Label() { Order = row.Order, Value = row.Value, Emphasis = true };
 
-                foreach(var column in budgettx.Columns)
+                foreach (var column in budgettx.Columns)
                 {
                     var budgetval = budgettx[column, labelrow];
                     var spentval = monthlth[column, labelrow];
@@ -967,9 +967,13 @@ namespace OfxWeb.Asp.Controllers
             return result;
         }
 
-        private PivotTable<Label, Label, decimal> ThreeLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups)
+        private async Task< PivotTable<Label, Label, decimal> > ThreeLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups, bool mapcategories = false)
         {
             var result = new PivotTable<Label, Label, decimal>();
+
+            Dictionary<string, CategoryMap> maptable = null;
+            if (mapcategories)
+                maptable = await _context.CategoryMaps.ToDictionaryAsync(x => x.Category + (string.IsNullOrEmpty(x.SubCategory) ? string.Empty : "&" + x.SubCategory), x => x);
 
             // This crazy report is THREE levels of grouping!! Months for columns, then rows and subrows for
             // categories and subcategories
@@ -1007,8 +1011,32 @@ namespace OfxWeb.Asp.Controllers
 
                                 foreach (var subgroup in subgroups)
                                 {
+                                    // Regular label values
+
                                     sum = subgroup.Sum(x => x.Amount);
                                     labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key ?? "-" };
+
+                                    // Add cateogory->Key mapping
+
+                                    if (mapcategories)
+                                    {
+                                        CategoryMap map = null;
+                                        string key = innergroup.Key;
+                                        if (maptable.ContainsKey(key))
+                                            map = maptable[key];
+                                        if (!string.IsNullOrEmpty(subgroup.Key))
+                                        {
+                                            key = innergroup.Key + "&" + subgroup.Key;
+                                            if (maptable.ContainsKey(key))
+                                                map = maptable[key];
+                                        }
+                                        if (null != map)
+                                        {
+                                            labelrow.Key1 = map.Key1;
+                                            labelrow.Key2 = map.Key2;
+                                        }
+                                    }
+
                                     result[labelcol, labelrow] = sum;
                                 }
                             }
@@ -1016,6 +1044,8 @@ namespace OfxWeb.Asp.Controllers
                         result[labelcol, labeltotal] = outersum;
                     }
                 }
+
+            // Add totals
 
             foreach (var row in result.Table)
             {
@@ -1026,7 +1056,7 @@ namespace OfxWeb.Asp.Controllers
             return result;
         }
 
-        private PivotTable<Label, Label, decimal> TwoLevelReport(IEnumerable<IGrouping<int,IReportable>> outergroups)
+        private PivotTable<Label, Label, decimal> TwoLevelReport(IEnumerable<IGrouping<int, IReportable>> outergroups)
         {
             var result = new PivotTable<Label, Label, decimal>();
 
@@ -1156,6 +1186,8 @@ namespace OfxWeb.Asp.Controllers
         public int Order { get; set; }
         public string Value { get; set; } = string.Empty;
         public string SubValue { get; set; } = string.Empty;
+        public string Key1 { get; set; } = string.Empty;
+        public string Key2 { get; set; } = string.Empty;
         public bool Emphasis { get; set; } = false;
         public string Format { get; set; } = null;
 
