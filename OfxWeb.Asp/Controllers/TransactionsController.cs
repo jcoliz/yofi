@@ -16,6 +16,7 @@ using ManiaLabs.Portable.Base;
 using ManiaLabs.NET;
 using System.Web;
 using Microsoft.Extensions.Configuration;
+using System.Text.RegularExpressions;
 
 namespace OfxWeb.Asp.Controllers
 {
@@ -1033,6 +1034,14 @@ namespace OfxWeb.Asp.Controllers
                                         {
                                             labelrow.Key1 = map.Key1;
                                             labelrow.Key2 = map.Key2;
+
+                                            if (!string.IsNullOrEmpty(map.Key3))
+                                            {
+                                                var re = new Regex(map.Key3);
+                                                var match = re.Match(subgroup.Key);
+                                                if (match.Success && match.Groups.Count > 1)
+                                                    labelrow.SubValue = match.Groups[1].Value;
+                                            }
                                         }
                                     }
 
