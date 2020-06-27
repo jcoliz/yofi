@@ -351,7 +351,7 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/report/2020
         [HttpGet("Report/{topic}")]
-        public async Task<string> Report(string topic, int year, string key)
+        public async Task<ActionResult> Report(string topic, int year, string key)
         {
             try
             {
@@ -369,11 +369,11 @@ namespace OfxWeb.Asp.Controllers
                 var report = await builder.ThreeLevelReport(transactions, true);
                 var result = new ApiSummaryReportResult(report);
 
-                return result;
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return new ApiResult(ex);
+                return BadRequest(ex);
             }
         }
 
