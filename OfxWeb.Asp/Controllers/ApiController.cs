@@ -355,7 +355,7 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
-                if ("j%2bdF48FhiU%2bDz83ZQYsoXw%3d%3d" != key)
+                if ("j+dF48FhiU+Dz83ZQYsoXw==" != key)
                     throw new ApplicationException("Invalid key");
 
                 if (year < 2019 || year > 2050)
@@ -476,16 +476,18 @@ namespace OfxWeb.Asp.Controllers
                 else
                     line.SubCategory = rowlabel.SubValue;
 
-                line.Key1 = rowlabel.Key1 ?? string.Empty;
-                line.Key1 = rowlabel.Key2 ?? string.Empty;
+                if (!string.IsNullOrEmpty(rowlabel.Key1))
+                    line.Key1 = rowlabel.Key1;
+                if (!string.IsNullOrEmpty(rowlabel.Key2))
+                    line.Key2 = rowlabel.Key2;
 
-                foreach (var column in report.Columns)
+                var column = report.Columns.Where(x => x.Value == "TOTAL").FirstOrDefault();
+
+                if (null != column)
                 {
-                    if ("TOTAL" == column.Value)
-                    {
-                        var cell = report.Table[rowlabel][column];
-                        line.Amount = cell;
-                    }
+                    var cell = report.Table[rowlabel][column];
+                    line.Amount = cell;
+                    Lines.Add(line);
                 }
             }
         }
