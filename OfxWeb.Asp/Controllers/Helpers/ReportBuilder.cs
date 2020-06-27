@@ -66,7 +66,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                     // Regular label values
 
                                     sum = subgroup.Sum(x => x.Amount);
-                                    labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key, Key3 = subgroup.Key ?? "-" };
+                                    labelrow = new Label() { Order = 0, Value = innergroup.Key, SubValue = subgroup.Key ?? "-" };
 
                                     // Add cateogory->Key mapping
 
@@ -92,8 +92,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                                 var re = new Regex(map.Key3);
                                                 var match = re.Match(subgroup.Key);
                                                 if (match.Success && match.Groups.Count > 1)
-                                                    labelrow.SubValue = match.Groups[1].Value;
+                                                    labelrow.Key3 = match.Groups[1].Value;
                                             }
+                                            else
+                                                labelrow.Key3 = subgroup.Key;
                                         }
                                     }
 

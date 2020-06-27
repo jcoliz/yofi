@@ -480,6 +480,8 @@ namespace OfxWeb.Asp.Controllers
                     line.Key1 = rowlabel.Key1;
                 if (!string.IsNullOrEmpty(rowlabel.Key2))
                     line.Key2 = rowlabel.Key2;
+                if (!string.IsNullOrEmpty(rowlabel.Key3))
+                    line.Key3 = rowlabel.Key3;
 
                 var column = report.Columns.Where(x => x.Value == "TOTAL").FirstOrDefault();
 
