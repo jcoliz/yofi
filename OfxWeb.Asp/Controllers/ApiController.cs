@@ -355,12 +355,14 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
+                // Poor-man's auth
                 if ("j+dF48FhiU+Dz83ZQYsoXw==" != key)
                     throw new ApplicationException("Invalid key");
 
                 if (year < 2019 || year > 2050)
                     throw new ApplicationException("Invalid year");
 
+                // The only report we can return via API is 'summary'
                 if ("summary" != topic)
                     throw new ApplicationException("Invalid topic");
 
@@ -368,6 +370,9 @@ namespace OfxWeb.Asp.Controllers
                 var builder = new Helpers.ReportBuilder(_context);
                 var report = await builder.ThreeLevelReport(transactions, true);
                 var result = new ApiSummaryReportResult(report);
+
+                // For the summary report via api, we don't want any Key1 blanks
+                result.Lines.RemoveAll(x => x.Key1 == null); 
 
                 return Ok(result);
             }
