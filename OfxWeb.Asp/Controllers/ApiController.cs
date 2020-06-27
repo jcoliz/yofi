@@ -349,6 +349,35 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // GET: api/tx/report/2020
+        [HttpGet("Report/{topic}")]
+        public async Task<string> Report(string topic, int year, string key)
+        {
+            try
+            {
+                if ("j%2bdF48FhiU%2bDz83ZQYsoXw%3d%3d" != key)
+                    throw new ApplicationException("Invalid key");
+
+                if (year < 2019 || year > 2050)
+                    throw new ApplicationException("Invalid year");
+
+                if ("summary" != topic)
+                    throw new ApplicationException("Invalid topic");
+
+                var transactions = _context.Transactions.Where(x => x.Timestamp.Year == year && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                var builder = new Helpers.ReportBuilder(_context);
+                var report = await builder.ThreeLevelReport(transactions, true);
+                var result = new ApiSummaryReportResult(report);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult(ex);
+            }
+        }
+
+
         private string BlobStoreName
         {
             get
@@ -417,6 +446,48 @@ namespace OfxWeb.Asp.Controllers
         public ApiPayeeResult(Payee p)
         {
             Payee = p;
+        }
+    }
+
+    public class ApiSummaryReportResult : ApiResult
+    {
+        public struct Line
+        {
+            public string Category;
+            public string SubCategory;
+            public string Key1;
+            public string Key2;
+            public string Key3;
+            public decimal Amount;
+        }
+
+        public List<Line> Lines = new List<Line>();
+
+        public ApiSummaryReportResult(PivotTable<Label, Label, decimal> report)
+        {
+            foreach (var rowlabel in report.RowLabels)
+            {
+                var line = new Line();
+
+                line.Category = rowlabel.Value;
+
+                if (rowlabel.Emphasis)
+                    line.SubCategory = "Total";
+                else
+                    line.SubCategory = rowlabel.SubValue;
+
+                line.Key1 = rowlabel.Key1 ?? string.Empty;
+                line.Key1 = rowlabel.Key2 ?? string.Empty;
+
+                foreach (var column in report.Columns)
+                {
+                    if ("TOTAL" == column.Value)
+                    {
+                        var cell = report.Table[rowlabel][column];
+                        line.Amount = cell;
+                    }
+                }
+            }
         }
     }
 }
