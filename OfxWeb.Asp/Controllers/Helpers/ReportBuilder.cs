@@ -87,7 +87,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                             labelrow.Key1 = map.Key1;
                                             labelrow.Key2 = map.Key2;
 
-                                            if (!string.IsNullOrEmpty(map.Key3))
+                                            if ("-" == map.Key3)
+                                            {
+                                                // Key3 remains blank
+                                            }
+                                            else if (!string.IsNullOrEmpty(map.Key3))
                                             {
                                                 var re = new Regex(map.Key3);
                                                 var match = re.Match(subgroup.Key);
