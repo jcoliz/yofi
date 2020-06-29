@@ -83,6 +83,7 @@
             {
                 <th>Key1</th>
                 <th>Key2</th>
+                <th>Key3</th>
             }
             @foreach (var column in Model.Columns)
             {
@@ -97,56 +98,57 @@
         {
             var emphasis = row.Emphasis ? "emphasis" : "";
 
-            <tr>
-                @if (string.IsNullOrEmpty(row.SubValue))
+        <tr>
+            @if (string.IsNullOrEmpty(row.SubValue))
+            {
+                <th>
+                    @row.Value
+                </th>
+            }
+            else
+            {
+                <td class="subhead @emphasis">
+                    @row.SubValue
+                </td>
+            }
+            @if (null != ViewData["Mapping"])
+            {
+                <td class="subhead @emphasis">@row.Key1</td>
+                <td class="subhead @emphasis">@row.Key2</td>
+                <td class="subhead @emphasis">@row.Key3</td>
+            }
+
+            @foreach (var column in Model.Columns)
+            {
+                var cell = Model.Table[row][column];
+                var format = column.Format ?? row.Format ?? "C2";
+
+                if (format == "P-warning")
                 {
-                    <th>
-                        @row.Value
-                    </th>
+                    var warning = "";
+                    var icon = 0;
+                    if (cell >= 1.0M)
+                    {
+                        icon = 2;
+                        warning = "warningX";
+                    }
+                    else if (cell >= 0.8M)
+                    {
+                        icon = 1;
+                    }
+                    <td class="@emphasis @warning">
+                        @cell.ToString("P0")
+                        @Html.Raw(icons[icon])
+                    </td>
                 }
                 else
                 {
-                    <td class="subhead @emphasis">
-                        @row.SubValue
+                    <td class="@emphasis">
+                        @cell.ToString(format)
                     </td>
                 }
-                @if (null != ViewData["Mapping"])
-                {
-                    <td class="subhead @emphasis">@row.Key1</td>
-                    <td class="subhead @emphasis">@row.Key2</td>
-                }
-
-                @foreach (var column in Model.Columns)
-                {
-                    var cell = Model.Table[row][column];
-                    var format = column.Format ?? row.Format ?? "C2";
-
-                    if (format == "P-warning")
-                    {
-                        var warning = "";
-                        var icon = 0;
-                        if (cell >= 1.0M)
-                        {
-                            icon = 2;
-                            warning = "warningX";
-                        }
-                        else if (cell >= 0.8M)
-                        {
-                            icon = 1;
-                        }
-                        <td class="@emphasis @warning">
-                            @cell.ToString("P0")
-                            @Html.Raw(icons[icon])
-                        </td>
-                    }
-                    else
-                    {
-                        <td class="@emphasis">
-                            @cell.ToString(format)
-                        </td>
-                    }
-                }
-            </tr>
+            }
+        </tr>
         }
     </tbody>
 </table>

@@ -351,16 +351,18 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/report/2020
         [HttpGet("Report/{topic}")]
-        public async Task<string> Report(string topic, int year, string key)
+        public async Task<ActionResult> Report(string topic, int year, string key)
         {
             try
             {
-                if ("j%2bdF48FhiU%2bDz83ZQYsoXw%3d%3d" != key)
+                // Poor-man's auth
+                if ("j+dF48FhiU+Dz83ZQYsoXw==" != key)
                     throw new ApplicationException("Invalid key");
 
                 if (year < 2017 || year > 2050)
                     throw new ApplicationException("Invalid year");
 
+                // The only report we can return via API is 'summary'
                 if ("summary" != topic)
                     throw new ApplicationException("Invalid topic");
 
@@ -369,11 +371,14 @@ namespace OfxWeb.Asp.Controllers
                 var report = await builder.ThreeLevelReport(transactions, true);
                 var result = new ApiSummaryReportResult(report);
 
-                return result;
+                // For the summary report via api, we don't want any Key1 blanks
+                result.Lines.RemoveAll(x => x.Key1 == null); 
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return new ApiResult(ex);
+                return BadRequest(ex);
             }
         }
 
@@ -476,16 +481,20 @@ namespace OfxWeb.Asp.Controllers
                 else
                     line.SubCategory = rowlabel.SubValue;
 
-                line.Key1 = rowlabel.Key1 ?? string.Empty;
-                line.Key1 = rowlabel.Key2 ?? string.Empty;
+                if (!string.IsNullOrEmpty(rowlabel.Key1))
+                    line.Key1 = rowlabel.Key1;
+                if (!string.IsNullOrEmpty(rowlabel.Key2))
+                    line.Key2 = rowlabel.Key2;
+                if (!string.IsNullOrEmpty(rowlabel.Key3))
+                    line.Key3 = rowlabel.Key3;
 
-                foreach (var column in report.Columns)
+                var column = report.Columns.Where(x => x.Value == "TOTAL").FirstOrDefault();
+
+                if (null != column)
                 {
-                    if ("TOTAL" == column.Value)
-                    {
-                        var cell = report.Table[rowlabel][column];
-                        line.Amount = cell;
-                    }
+                    var cell = report.Table[rowlabel][column];
+                    line.Amount = cell;
+                    Lines.Add(line);
                 }
             }
         }
