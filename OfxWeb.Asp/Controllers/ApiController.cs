@@ -358,7 +358,7 @@ namespace OfxWeb.Asp.Controllers
                 if ("j%2bdF48FhiU%2bDz83ZQYsoXw%3d%3d" != key)
                     throw new ApplicationException("Invalid key");
 
-                if (year < 2019 || year > 2050)
+                if (year < 2017 || year > 2050)
                     throw new ApplicationException("Invalid year");
 
                 if ("summary" != topic)
