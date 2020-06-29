@@ -85,7 +85,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                         if (null != map)
                                         {
                                             labelrow.Key1 = map.Key1;
-                                            labelrow.Key2 = map.Key2;
+
+
+                                            if (map.Key2.StartsWith('^'))
+                                            {
+                                                var re = new Regex(map.Key2);
+                                                var match = re.Match(subgroup.Key);
+                                                if (match.Success && match.Groups.Count > 1)
+                                                    labelrow.Key2 = match.Groups[1].Value;
+                                            }
+                                            else
+                                                labelrow.Key2 = map.Key2;
 
                                             if ("-" == map.Key3)
                                             {
