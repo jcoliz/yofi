@@ -97,8 +97,20 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                         {
                                             labelrow.Key1 = map.Key1;
 
-
-                                            if (map.Key2.StartsWith('^'))
+                                            bool skipkey3 = false;
+                                            if (string.IsNullOrEmpty(map.Key2))
+                                            {
+                                                if (string.IsNullOrEmpty(subgroup.Key))
+                                                {
+                                                    labelrow.Key2 = innergroup.Key;
+                                                }
+                                                else
+                                                {
+                                                    labelrow.Key2 = subgroup.Key;
+                                                }
+                                                skipkey3 = true;
+                                            }
+                                            else if (map.Key2.StartsWith('^'))
                                             {
                                                 var re = new Regex(map.Key2);
                                                 var match = re.Match(subgroup.Key);
@@ -108,7 +120,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                             else
                                                 labelrow.Key2 = map.Key2;
 
-                                            if ("-" == map.Key3)
+                                            if ("-" == map.Key3 || skipkey3)
                                             {
                                                 // Key3 remains blank
                                             }
