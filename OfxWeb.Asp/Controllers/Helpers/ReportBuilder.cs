@@ -124,7 +124,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                             {
                                                 // Key3 remains blank
                                             }
-                                            else if (!string.IsNullOrEmpty(map.Key3))
+                                            else if (string.IsNullOrEmpty(map.Key3))
+                                            {
+                                                labelrow.Key3 = subgroup.Key;
+                                            }
+                                            else if (map.Key3.StartsWith('^'))
                                             {
                                                 var re = new Regex(map.Key3);
                                                 var match = re.Match(subgroup.Key);
@@ -132,7 +136,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                                     labelrow.Key3 = match.Groups[1].Value;
                                             }
                                             else
-                                                labelrow.Key3 = subgroup.Key;
+                                                labelrow.Key3 = map.Key3;
                                         }
                                     }
 
