@@ -81,6 +81,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                             key = innergroup.Key + "&" + subgroup.Key;
                                             if (maptable.ContainsKey(key))
                                                 map = maptable[key];
+                                            else
+                                            {
+                                                var re = new Regex("^([^\\.]*)\\.");
+                                                var match = re.Match(subgroup.Key);
+                                                if (match.Success && match.Groups.Count > 1)
+                                                {
+                                                    key = innergroup.Key + "&^" + match.Groups[1].Value;
+                                                    if (maptable.ContainsKey(key))
+                                                        map = maptable[key];
+                                                }
+                                            }
                                         }
                                         if (null != map)
                                         {
