@@ -630,11 +630,14 @@ namespace OfxWeb.Asp.Controllers
                     item.Imported = true;
                     item.Hidden = true;
 
-                    var payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
-                    if (null != payee)
+                    if (string.IsNullOrEmpty(item.Category))
                     {
-                        item.Category = payee.Category;
-                        item.SubCategory = payee.SubCategory;
+                        var payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
+                        if (null != payee)
+                        {
+                            item.Category = payee.Category;
+                            item.SubCategory = payee.SubCategory;
+                        }
                     }
                 }
 
