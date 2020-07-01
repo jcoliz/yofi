@@ -53,22 +53,47 @@ namespace OfxWeb.Asp.Controllers
             bool showHidden = false;
             bool showSelected = false;
             bool? showHasReceipt = null;
+            int? filteryear = null;
 
-            if (!string.IsNullOrEmpty(searchPayee))
+            bool didfilter;
+
+            do
             {
-                if (searchPayee.EndsWith("+R"))
+                didfilter = false;
+
+                // Pull receipt filtering out of payee
+                if (!string.IsNullOrEmpty(searchPayee))
                 {
-                    showHasReceipt = true;
+                    if (searchPayee.EndsWith("+R"))
+                    {
+                        showHasReceipt = true;
+                        didfilter = true;
+                    }
+                    else if (searchPayee.EndsWith("-R"))
+                    {
+                        showHasReceipt = false;
+                        didfilter = true;
+                    }
+                    if (showHasReceipt.HasValue)
+                    {
+                        searchPayee = new string(searchPayee.SkipLast(2).ToArray());
+                    }
                 }
-                else if (searchPayee.EndsWith("-R"))
+
+                // Pull year filtering out of payee
+                if (!string.IsNullOrEmpty(searchPayee))
                 {
-                    showHasReceipt = false;
-                }
-                if (showHasReceipt.HasValue)
-                {
-                    searchPayee = new string(searchPayee.SkipLast(2).ToArray());
+                    var re = new Regex("Y(\\d{4})");
+                    var match = re.Match(searchPayee);
+                    if (match.Success)
+                    {
+                        filteryear = int.Parse(match.Groups[1].Value);
+                        didfilter = true;
+                        searchPayee = searchPayee.Remove(match.Index, match.Length);
+                    }
                 }
             }
+            while (didfilter);
 
             // 'search' parameter combines all search types
             if (!String.IsNullOrEmpty(search))
@@ -96,6 +121,15 @@ namespace OfxWeb.Asp.Controllers
                     {
                         showHasReceipt = (term[1] == '+');
                     }
+                    else if (term[0] == 'Y')
+                    {
+                        var termyear = new string(term.Skip(1).ToArray());
+                        int yearval = 0;
+                        if (int.TryParse(termyear,out yearval))
+                        {
+                            filteryear = yearval;
+                        }
+                    }
                 }
             }
 
@@ -115,6 +149,8 @@ namespace OfxWeb.Asp.Controllers
                 searchlist.Add("H+");
             if (showSelected)
                 searchlist.Add("Z+");
+            if (filteryear.HasValue)
+                searchlist.Add($"Y{filteryear.Value}");
 
             ViewData["CurrentFilter"] = string.Join(',', searchlist);
 
@@ -156,6 +192,11 @@ namespace OfxWeb.Asp.Controllers
                     result = result.Where(x => x.ReceiptUrl != null);
                 else
                     result = result.Where(x => x.ReceiptUrl == null);
+            }
+
+            if (filteryear.HasValue)
+            {
+                result = result.Where(x => x.Timestamp.Year == filteryear.Value);
             }
 
             switch (sortOrder)
