@@ -381,7 +381,7 @@ namespace OfxWeb.Asp.Controllers
                 if (beforedate.HasValue)
                     transactions = transactions.Where(x => x.Timestamp < beforedate.Value);
 
-                var groupings = _context.Transactions.Where(x => x.Timestamp.Year == year && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                var groupings = transactions.Where(x => x.Timestamp.Year == year && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
 
                 var builder = new Helpers.ReportBuilder(_context);
                 var report = await builder.ThreeLevelReport(groupings, true);
