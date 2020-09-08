@@ -351,7 +351,7 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/report/2020
         [HttpGet("Report/{topic}")]
-        public async Task<ActionResult> Report(string topic, int year, string key)
+        public async Task<ActionResult> Report(string topic, int year, string key, string constraint)
         {
             try
             {
@@ -366,9 +366,25 @@ namespace OfxWeb.Asp.Controllers
                 if ("summary" != topic)
                     throw new ApplicationException("Invalid topic");
 
-                var transactions = _context.Transactions.Where(x => x.Timestamp.Year == year && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                // The only constraint that's implemented is 'semimonthly'
+                DateTime? beforedate = null;
+                if (constraint?.ToLower() == "semimonthly")
+                {
+                    // Semimonthly constraint means return ONLY transactions before or equal to last payday,
+                    // which is day before 1st and 16th.
+                    var now = DateTime.Now;
+                    int beforeday = (now.Day > 15) ? 16 : 1;
+                    beforedate = new DateTime(now.Year, now.Month, beforeday);
+                }
+
+                IQueryable<Transaction> transactions = _context.Transactions;
+                if (beforedate.HasValue)
+                    transactions = transactions.Where(x => x.Timestamp < beforedate.Value);
+
+                var groupings = _context.Transactions.Where(x => x.Timestamp.Year == year && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+
                 var builder = new Helpers.ReportBuilder(_context);
-                var report = await builder.ThreeLevelReport(transactions, true);
+                var report = await builder.ThreeLevelReport(groupings, true);
                 var result = new ApiSummaryReportResult(report);
 
                 // For the summary report via api, we don't want any Key1 blanks
