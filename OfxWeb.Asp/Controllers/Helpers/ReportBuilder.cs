@@ -183,7 +183,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var row = report.Table[label];
 
                 // Create the mapped label
-                var rowlabel = new Label() { Value = label.Key1, SubValue = label.Key3 ?? "-" };
+                var rowlabel = new Label() { Value = label.Key1, SubValue = label.Key3 };
+                if (string.IsNullOrEmpty(label.Key3))
+                    rowlabel.SubValue = "-";
                 if (!string.IsNullOrEmpty(label.Key2))
                     rowlabel.Value += $"/{label.Key2}";
 
