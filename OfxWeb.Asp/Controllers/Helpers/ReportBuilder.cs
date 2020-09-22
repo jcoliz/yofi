@@ -183,13 +183,21 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var row = report.Table[label];
 
                 // Create the mapped label
-                var rowlabel = new Label() { Value = label.Key1, SubValue = label.Key2, Key3 = label.Key3 };
+                var rowlabel = new Label() { Value = label.Key1, SubValue = label.Key3 };
+                if (!string.IsNullOrEmpty(label.Key2))
+                    rowlabel.Value += $"/{label.Key2}";
+
+                // Create the totals label
+                var totalslabel = new Label() { Value = rowlabel.Value };
 
                 // Place each of the columns
                 foreach( var collabel in columns)
                 {
                     // Accumulate the result
                     result[collabel, rowlabel] += row[collabel];
+
+                    // Accumulate the total
+                    result[collabel, totalslabel] += row[collabel];
                 }
             }
 
