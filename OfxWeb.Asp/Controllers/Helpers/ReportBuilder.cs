@@ -180,6 +180,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
             // For each line in the initial report, collect the value by key1/key2/key3
             foreach (var label in report.Table.Keys)
             {
+                // Not mapped? Skip!
+                if (string.IsNullOrEmpty(label.Key1))
+                    continue;
+
                 var row = report.Table[label];
 
                 // Create the mapped label
