@@ -187,17 +187,23 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 if (!string.IsNullOrEmpty(label.Key2))
                     rowlabel.Value += $"/{label.Key2}";
 
-                // Create the totals label
+                // Create the Key2-totals label
                 var totalslabel = new Label() { Value = rowlabel.Value };
 
+                // Create the Key1-totals label
+                var toptotalslabel = new Label() { Value = label.Key1 };
+
                 // Place each of the columns
-                foreach( var collabel in columns)
+                foreach ( var collabel in columns)
                 {
                     // Accumulate the result
                     result[collabel, rowlabel] += row[collabel];
 
-                    // Accumulate the total
+                    // Accumulate the key2 total
                     result[collabel, totalslabel] += row[collabel];
+
+                    // Accumulate the key1 total
+                    result[collabel, toptotalslabel] += row[collabel];
                 }
             }
 
