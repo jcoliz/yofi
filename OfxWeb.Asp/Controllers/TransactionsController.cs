@@ -884,6 +884,13 @@ namespace OfxWeb.Asp.Controllers
                     ViewData["Mapping"] = true;
                     break;
 
+                case "mapped":
+                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
+                    result = await builder.FourLevelReport(groupsL2);
+                    ViewData["Title"] = "Transaction Summary";
+                    ViewData["Mapping"] = true;
+                    break;
+
                 case "budgettx":
                     groupsL1 = _context.BudgetTxs.Where(x => x.Timestamp.Year == Year && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);

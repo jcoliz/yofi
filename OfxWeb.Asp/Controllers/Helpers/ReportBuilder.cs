@@ -33,6 +33,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var labeltotal = new Label() { Order = 10000, Value = "TOTAL", Emphasis = true };
             var labelempty = new Label() { Order = 9999, Value = "Blank" };
 
+
+            // Step through the months, which is the outer grouping
             if (outergroups != null)
                 foreach (var outergroup in outergroups)
                 {
@@ -42,8 +44,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     if (outergroup.Count() > 0)
                     {
                         decimal outersum = 0.0M;
-                        var innergroups = outergroup.GroupBy(x => x.Category);
 
+                        // Step through the categories, which is the inner grouping
+
+                        var innergroups = outergroup.GroupBy(x => x.Category);
                         foreach (var innergroup in innergroups)
                         {
                             var sum = innergroup.Sum(x => x.Amount);
@@ -59,8 +63,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                             if (!string.IsNullOrEmpty(innergroup.Key))
                             {
+                                // Step through the subcategories, which is the sub-grouping (3rd level)
                                 var subgroups = innergroup.GroupBy(x => x.SubCategory);
-
                                 foreach (var subgroup in subgroups)
                                 {
                                     // Regular label values
@@ -158,6 +162,42 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             return result;
         }
+
+
+        // This is a three-level report, mapped, and reconsituted by Key1/Key2/Key3
+        public async Task<PivotTable<Label, Label, decimal>> FourLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups)
+        {
+            // Start with a new empty report as the result
+            var result = new PivotTable<Label, Label, decimal>();
+
+            // Run the initial report
+            var report = await ThreeLevelReport(outergroups,true);
+
+            // Collect the columns
+            var columns = report.Columns;
+            result.Columns = columns;
+
+            // For each line in the initial report, collect the value by key1/key2/key3
+            foreach (var label in report.Table.Keys)
+            {
+                var row = report.Table[label];
+
+                // Create the mapped label
+                var rowlabel = new Label() { Value = label.Key1, SubValue = label.Key2, Key3 = label.Key3 };
+
+                // Place each of the columns
+                foreach( var collabel in columns)
+                {
+                    // Accumulate the result
+                    result[collabel, rowlabel] += row[collabel];
+                }
+            }
+
+            // Next, we would need to make total rows. But let's start here for now!!
+
+            return result;
+        }
+
 
     }
 }
