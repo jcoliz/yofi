@@ -12,8 +12,8 @@
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
         @{
-            var years = new int[] { 2017, 2018, 2019, 2020 };
-            foreach (var year in years)
+            int currentyear = DateTime.Now.Year;
+            for( int year = 2017; year <= currentyear; ++year)
             {
                 <a asp-action="Pivot" asp-route-report="@report" asp-route-setyear="@year" class="dropdown-item">@year</a>
             }
