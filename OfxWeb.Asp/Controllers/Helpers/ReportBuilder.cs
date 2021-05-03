@@ -78,6 +78,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                     {
                                         CategoryMap map = null;
                                         string key = innergroup.Key;
+                                        if (CategoryMap.HasDefaultMapFor(key))
+                                            map = CategoryMap.DefaultFor(key);
                                         if (maptable.ContainsKey(key))
                                             map = maptable[key];
                                         if (!string.IsNullOrEmpty(subgroup.Key))
