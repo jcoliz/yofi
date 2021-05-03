@@ -833,7 +833,7 @@ namespace OfxWeb.Asp.Controllers
 
             if (string.IsNullOrEmpty(report))
             {
-                report = "monthly";
+                report = "all";
             }
 
             if (setyear.HasValue)
@@ -913,7 +913,6 @@ namespace OfxWeb.Asp.Controllers
                     break;
 
                 case "monthly":
-                default:
                     groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Timestamp.Month <= month && (!YearlyCategories.Contains(x.Category) || x.Category == null) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
                     ViewData["Title"] = "Monthly Report";
