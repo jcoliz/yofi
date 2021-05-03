@@ -118,10 +118,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                             }
                                             else if (map.Key2.StartsWith('^'))
                                             {
-                                                var re = new Regex(map.Key2);
-                                                var match = re.Match(subgroup.Key);
-                                                if (match.Success && match.Groups.Count > 1)
-                                                    labelrow.Key2 = match.Groups[1].Value;
+                                                if (!string.IsNullOrEmpty(subgroup.Key))
+                                                {
+                                                    var re = new Regex(map.Key2);
+                                                    var match = re.Match(subgroup.Key);
+                                                    if (match.Success && match.Groups.Count > 1)
+                                                        labelrow.Key2 = match.Groups[1].Value;
+                                                }
                                             }
                                             else
                                                 labelrow.Key2 = map.Key2;
@@ -136,10 +139,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                             }
                                             else if (map.Key3.StartsWith('^'))
                                             {
-                                                var re = new Regex(map.Key3);
-                                                var match = re.Match(subgroup.Key);
-                                                if (match.Success && match.Groups.Count > 1)
-                                                    labelrow.Key3 = match.Groups[1].Value;
+                                                if (!string.IsNullOrEmpty(subgroup.Key))
+                                                {
+                                                    var re = new Regex(map.Key3);
+                                                    var match = re.Match(subgroup.Key);
+                                                    if (match.Success && match.Groups.Count > 1)
+                                                        labelrow.Key3 = match.Groups[1].Value;
+                                                }
                                             }
                                             else
                                                 labelrow.Key3 = map.Key3;
