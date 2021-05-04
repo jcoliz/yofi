@@ -35,14 +35,36 @@ namespace OfxWeb.Asp.Models
             Payee = rx.Replace(Payee, new MatchEvaluator(x => string.Empty));
         }
 
+        //
+        // Feature #814: Remove duplicate transactions on import
+        //
+        // Transactions are substatially equal if they have the same Payee, Date, and Amount. They may still be duplicates in this case,
+        // but the user has to decide. This accounts for the world I'm in now where the bank stopped giving me a unique bank reference
+        // number :P
+        //
+
+        // Store the hashcode in the bank reference. This makes it easier to find the hashcodes in the database.
+        public void GenerateBankReference()
+        {
+            BankReference = GetHashCode().ToString("X");
+        }
+
         public override bool Equals(object obj)
         {
-            return obj is Transaction && !string.IsNullOrEmpty(BankReference) && !string.IsNullOrEmpty(((Transaction)obj).BankReference) && ((Transaction)obj).BankReference == BankReference;
+            bool result = false;
+
+            if (obj is Transaction)
+            {
+                var other = obj as Transaction;
+                result = string.Equals(Payee, other.Payee) && Amount == other.Amount && Timestamp.Date == other.Timestamp.Date;
+            }
+
+            return result;
         }
 
         public override int GetHashCode()
         {
-            return string.IsNullOrEmpty(BankReference) ? base.GetHashCode() : BankReference.GetHashCode();
+            return HashCode.Combine(Payee, Amount, Timestamp.Date);
         }
     }
 }

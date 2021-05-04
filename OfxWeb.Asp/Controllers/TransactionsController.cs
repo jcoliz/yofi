@@ -628,7 +628,11 @@ namespace OfxWeb.Asp.Controllers
                             {
                                 foreach (var tx in Document.Transactions)
                                 {
-                                    incoming.Add(new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date });
+                                    var txmodel = new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date };
+                                    if (string.IsNullOrEmpty(txmodel.BankReference))
+                                        txmodel.GenerateBankReference();
+
+                                    incoming.Add(txmodel);
                                 }
                             });
                         }
@@ -652,11 +656,7 @@ namespace OfxWeb.Asp.Controllers
                 }
 
                 // Remove duplicate transactions.
-
-                var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
-
-                var existing = await _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToListAsync();
-                incoming.ExceptWith(existing);
+                // TODO: Previous method is no longer working becasue my bank is not giving bank references!!
 
                 // Load all categories into memory. This is an optimization. Rather than run a separate payee query for every 
                 // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
