@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -46,7 +47,12 @@ namespace OfxWeb.Asp.Models
         // Store the hashcode in the bank reference. This makes it easier to find the hashcodes in the database.
         public void GenerateBankReference()
         {
-            BankReference = GetHashCode().ToString("X");
+            var signature = $"/{Payee ?? "Null"}/{Amount:C2}/{Timestamp.Date.ToShortDateString()}";
+            var buffer = UTF32Encoding.UTF32.GetBytes(signature);
+            var hash = new System.Security.Cryptography.MD5CryptoServiceProvider().ComputeHash(buffer);
+            var x = hash.Aggregate(new StringBuilder(), (sb, b) => sb.Append(b.ToString("X2")));
+
+            BankReference = x.ToString();
         }
 
         public override bool Equals(object obj)

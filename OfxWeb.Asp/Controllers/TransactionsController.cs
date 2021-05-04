@@ -658,6 +658,31 @@ namespace OfxWeb.Asp.Controllers
                 // Remove duplicate transactions.
                 // TODO: Previous method is no longer working becasue my bank is not giving bank references!!
 
+                // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
+
+                // TODO: We can make this a LOT more efficient by where-clause down the transactions to the range of transactions in incoming. We know we won't
+                // have a conflict outside that date range, by definition.
+                var mindate = incoming.Min(x => x.Timestamp);
+                var maxdate = incoming.Max(x => x.Timestamp);
+                // ...
+
+                var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
+                var conflicts = await _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToListAsync();
+
+                // Look at each incoming transaction, analyze against all matching conflicts
+                foreach (var tx in incoming)
+                {
+                    var myconflicts = conflicts.Where(x => x.BankReference == tx.BankReference);
+                    foreach (var myc in myconflicts)
+                    {
+                        if (myc.Equals(tx))
+                        {
+                            // How do we flag it??!
+                            Console.WriteLine($"{tx.Payee} has a conflict");
+                        }
+                    }
+                }
+
                 // Load all categories into memory. This is an optimization. Rather than run a separate payee query for every 
                 // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
 
