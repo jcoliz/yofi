@@ -29,6 +29,7 @@
 <table class="table">
     <thead>
         <tr>
+            <th>Import?</th>
             <th>
                 @Html.DisplayNameFor(model => model.Timestamp)
             </th>
@@ -55,29 +56,33 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Timestamp)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Amount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Memo)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Payee)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Category)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.SubCategory)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.BankReference)
-                </td>
-            </tr>
+        <tr>
+            <td>
+                @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
+                <input type="checkbox" class="checkbox-selected" @checkedornot data-id="@item.ID">
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Timestamp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Memo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Payee)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubCategory)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BankReference)
+            </td>
+        </tr>
         }
     </tbody>
 </table>

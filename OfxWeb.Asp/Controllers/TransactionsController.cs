@@ -628,7 +628,7 @@ namespace OfxWeb.Asp.Controllers
                             {
                                 foreach (var tx in Document.Transactions)
                                 {
-                                    var txmodel = new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date };
+                                    var txmodel = new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date, Selected = true };
                                     if (string.IsNullOrEmpty(txmodel.BankReference))
                                         txmodel.GenerateBankReference();
 
@@ -677,8 +677,10 @@ namespace OfxWeb.Asp.Controllers
                     {
                         if (myc.Equals(tx))
                         {
-                            // How do we flag it??!
-                            Console.WriteLine($"{tx.Payee} has a conflict");
+                            Console.WriteLine($"{tx.Payee} ({tx.BankReference}) has a conflict");
+
+                            // Deselect the transaction. User will have a chance later to re-select it
+                            tx.Selected = false;
                         }
                     }
                 }
