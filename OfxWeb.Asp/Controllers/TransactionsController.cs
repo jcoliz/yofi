@@ -659,32 +659,32 @@ namespace OfxWeb.Asp.Controllers
                     incoming.RemoveWhere(x => x.Timestamp < cutoff);
                 }
 
-                // Remove duplicate transactions.
-                // TODO: Previous method is no longer working becasue my bank is not giving bank references!!
+                // Deselect duplicate transactions. By default, deselected transactions will not be imported. User can override.
 
                 // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
+                var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
 
-                // TODO: We can make this a LOT more efficient by where-clause down the transactions to the range of transactions in incoming. We know we won't
+                // We can make this a LOT more efficient by where-clause down the transactions to the range of transactions in incoming. We know we won't
                 // have a conflict outside that date range, by definition.
                 var mindate = incoming.Min(x => x.Timestamp);
                 var maxdate = incoming.Max(x => x.Timestamp);
-                // ...
+                var conflicts = _context.Transactions.Where(x => x.Timestamp >= mindate && x.Timestamp <= maxdate).Where(x => uniqueids.Contains(x.BankReference));
 
-                var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
-                var conflicts = await _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToListAsync();
-
-                // Look at each incoming transaction, analyze against all matching conflicts
-                foreach (var tx in incoming)
+                if (await conflicts.AnyAsync())
                 {
-                    var myconflicts = conflicts.Where(x => x.BankReference == tx.BankReference);
-                    foreach (var myc in myconflicts)
+                    // Look at each incoming transaction, analyze against all matching conflicts
+                    foreach (var tx in incoming)
                     {
-                        if (myc.Equals(tx))
+                        var myconflicts = conflicts.Where(x => x.BankReference == tx.BankReference);
+                        foreach (var thisconflict in myconflicts)
                         {
-                            Console.WriteLine($"{tx.Payee} ({tx.BankReference}) has a conflict");
+                            if (thisconflict.Equals(tx))
+                            {
+                                Console.WriteLine($"{tx.Payee} ({tx.BankReference}) has a conflict");
 
-                            // Deselect the transaction. User will have a chance later to re-select it
-                            tx.Selected = false;
+                                // Deselect the transaction. User will have a chance later to re-select it
+                                tx.Selected = false;
+                            }
                         }
                     }
                 }
