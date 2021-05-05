@@ -22,16 +22,22 @@ namespace Ofx.Tests
         [TestInitialize]
         public void SetUp()
         {
-            if (null == controller)
-            {
-                var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                    .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
-                    .Options;
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
+                .Options;
 
-                context = new ApplicationDbContext(options);
+            context = new ApplicationDbContext(options);
 
-                controller = new CategoryMapsController(context);
-            }
+            controller = new CategoryMapsController(context);
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            // https://stackoverflow.com/questions/33490696/how-can-i-reset-an-ef7-inmemory-provider-between-unit-tests
+            context?.Database.EnsureDeleted();
+            context = null;
+            controller = null;
         }
 
         [TestMethod]
@@ -73,6 +79,29 @@ namespace Ofx.Tests
             Assert.AreEqual(1, model.Count);
             Assert.AreEqual(expected.Category, model[0].Category);
             Assert.AreEqual(expected.Key1, model[0].Key1);
+        }
+        [TestMethod]
+        public async Task IndexMany()
+        {            
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
+            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" }); ;
+            context.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" }); ;
+            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" }); ;
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" }); ;
+            await context.SaveChangesAsync();
+
+            var result = await controller.Index();
+            var actual = result as ViewResult;
+            var model = actual.Model as List<CategoryMap>;
+
+            Assert.AreEqual(5, model.Count);
+
+            // Test the sort order. Key3 (sneakily!) contains the expected sort order.
+            Assert.AreEqual("1", model[0].Key3);
+            Assert.AreEqual("2", model[1].Key3);
+            Assert.AreEqual("3", model[2].Key3);
+            Assert.AreEqual("4", model[3].Key3);
+            Assert.AreEqual("5", model[4].Key3);
         }
     }
 }
