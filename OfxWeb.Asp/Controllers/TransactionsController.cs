@@ -650,6 +650,12 @@ namespace OfxWeb.Asp.Controllers
                             var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Transactions").Single();
                             worksheet.ExtractInto(incoming);
                         }
+
+                        // Need to select all of these, so they import by default
+                        foreach (var import in incoming)
+                        {
+                            import.Selected = true;
+                        }
                     }
                 }
 
@@ -664,14 +670,29 @@ namespace OfxWeb.Asp.Controllers
                 // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
                 var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
 
-                // We can make this a LOT more efficient by where-clause down the transactions to the range of transactions in incoming. We know we won't
-                // have a conflict outside that date range, by definition.
+                // This is the set of transactions which overlap with the timeframe of the imported transactions.
+                // By definitions, all duplicate transactions (conflicts) will be in this set.
                 var mindate = incoming.Min(x => x.Timestamp);
                 var maxdate = incoming.Max(x => x.Timestamp);
+                var conflictrange = _context.Transactions.Where(x => x.Timestamp >= mindate && x.Timestamp <= maxdate);
+
+                // To handle the case where there may be transactions already in the system before the importer
+                // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
+                // transactions in the system.
+
+                var needbankrefs = conflictrange.Where(x => null == x.BankReference);
+                if (await needbankrefs.AnyAsync())
+                {
+                    foreach (var tx in needbankrefs)
+                    {
+                        tx.GenerateBankReference();
+                    }
+                    await _context.SaveChangesAsync();
+                }
 
                 // The approach is to create a lookup, from bankreference to a list of possible matching conflicts. Note that it is possible for multiple different
                 // transactions to collide on a single hash. We will have to step through all the possible conflicts to see if there is really a match.
-                var conflicts = _context.Transactions.Where(x => x.Timestamp >= mindate && x.Timestamp <= maxdate).Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
+                var conflicts = conflictrange.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
 
                 if (conflicts.Any())
                 {
@@ -679,6 +700,9 @@ namespace OfxWeb.Asp.Controllers
                     {
                         foreach (var conflict in conflicts[tx.BankReference])
                         {
+                            // You could debate this check. The chances of an MD5 hash collision on this data seem
+                            // astromically low. Oh the other hand, the chance is much higher of failing this check when in fact
+                            // it's the same transaction BECAUSE the user mae slight changes to payee or date.
                             if (tx.Equals(conflict))
                             {
                                 Console.WriteLine($"{tx.Payee} ({tx.BankReference}) has a conflict");
