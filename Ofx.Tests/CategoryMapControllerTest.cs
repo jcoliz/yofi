@@ -71,6 +71,8 @@ namespace Ofx.Tests
             var model = actual.Model as List<CategoryMap>;
 
             Assert.AreEqual(1, model.Count);
+            Assert.AreEqual(expected.Category, model[0].Category);
+            Assert.AreEqual(expected.Key1, model[0].Key1);
         }
     }
 }
