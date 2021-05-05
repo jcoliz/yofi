@@ -5,6 +5,7 @@ using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 //
@@ -34,10 +35,25 @@ namespace Ofx.Tests
         [TestCleanup]
         public void Cleanup()
         {
+            // Didn't actually solve anything. Keep it around for possible future problem
+            //DetachAllEntities();
+
             // https://stackoverflow.com/questions/33490696/how-can-i-reset-an-ef7-inmemory-provider-between-unit-tests
             context?.Database.EnsureDeleted();
             context = null;
             controller = null;
+        }
+
+        private void DetachAllEntities()
+        {
+            var changedEntriesCopy = context.ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added ||
+                            e.State == EntityState.Modified ||
+                            e.State == EntityState.Deleted)
+                .ToList();
+
+            foreach (var entry in changedEntriesCopy)
+                entry.State = EntityState.Detached;
         }
 
         [TestMethod]
@@ -83,11 +99,11 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task IndexMany()
         {
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
-            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" }); ;
-            context.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" }); ;
-            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" }); ;
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" }); ;
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); 
+            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" }); 
+            context.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" }); 
+            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" }); 
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" }); 
             await context.SaveChangesAsync();
 
             var result = await controller.Index();
@@ -106,18 +122,22 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task DetailsFound()
         {
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
-            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" }); ;
-            context.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" }); ;
-            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" }); ;
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" }); ;
+            var items = new List<CategoryMap>();
+            items.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" });
+            items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" });
+            items.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" });
+            items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" });
+            items.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" });
+            context.AddRange(items);
             await context.SaveChangesAsync();
 
-            var result = await controller.Details(3);
+            var expected = items[3];
+
+            var result = await controller.Details(expected.ID);
             var actual = result as ViewResult;
             var model = actual.Model as CategoryMap;
 
-            Assert.AreEqual("5", model.Key3);
+            Assert.AreEqual(expected.Key3, model.Key3);
         }
         [TestMethod]
         public async Task DetailsNotFound()
@@ -134,18 +154,22 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task EditFound()
         {
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
-            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" }); ;
-            context.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" }); ;
-            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" }); ;
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" }); ;
+            var items = new List<CategoryMap>();
+            items.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" });
+            items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" });
+            items.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" });
+            items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" });
+            items.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" });
+            context.AddRange(items);
             await context.SaveChangesAsync();
 
-            var result = await controller.Edit(3);
+            var expected = items[3];
+
+            var result = await controller.Edit(expected.ID);
             var actual = result as ViewResult;
             var model = actual.Model as CategoryMap;
 
-            Assert.AreEqual("5", model.Key3);
+            Assert.AreEqual(expected.Key3, model.Key3);
         }
         [TestMethod]
         public async Task EditNotFound()
@@ -178,6 +202,26 @@ namespace Ofx.Tests
             var count = await context.CategoryMaps.CountAsync();
 
             Assert.AreEqual(2, count);
+        }
+        [TestMethod]
+        public async Task EditObjectValues()
+        {
+            var initial = new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" };
+            context.Add(initial);
+            await context.SaveChangesAsync();
+            var id = initial.ID;
+
+            // Need to detach the entity we originally created, to set up the same state the controller would be
+            // in with not already haveing a tracked object.
+            context.Entry(initial).State = EntityState.Detached;
+
+            var updated = new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2", ID = id };
+
+            var result = await controller.Edit(id,updated);
+
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
         }
     }
 }
