@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfxSharpLib;
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
+using OfxWeb.Asp.Controllers;
+
+//
+// This is my first controller unit test. I am going to start with an easy controller, the category map controller.
+//
 
 namespace Ofx.Tests
 {
@@ -11,8 +11,11 @@ namespace Ofx.Tests
     public class CategoryMapControllerTest
     {
         [TestMethod]
-        public void Empty()
+        public void Null()
         {
+            var tested = new CategoryMapsController(null);
+
+            Assert.IsNotNull(tested);
         }
     }
 }
