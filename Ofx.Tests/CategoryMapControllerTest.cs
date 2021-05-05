@@ -132,6 +132,34 @@ namespace Ofx.Tests
         }
 
         [TestMethod]
+        public async Task EditFound()
+        {
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
+            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" }); ;
+            context.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" }); ;
+            context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" }); ;
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" }); ;
+            await context.SaveChangesAsync();
+
+            var result = await controller.Edit(3);
+            var actual = result as ViewResult;
+            var model = actual.Model as CategoryMap;
+
+            Assert.AreEqual("5", model.Key3);
+        }
+        [TestMethod]
+        public async Task EditNotFound()
+        {
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
+            await context.SaveChangesAsync();
+
+            var result = await controller.Edit(3);
+            var actual = result as NotFoundResult;
+
+            Assert.AreEqual(404, actual.StatusCode);
+        }
+
+        [TestMethod]
         public async Task Create()
         {
             context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
