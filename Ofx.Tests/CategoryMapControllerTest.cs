@@ -17,6 +17,7 @@ namespace Ofx.Tests
     public class CategoryMapControllerTest
     {
         CategoryMapsController controller = null;
+        ApplicationDbContext context = null;
 
         [TestInitialize]
         public void SetUp()
@@ -27,7 +28,7 @@ namespace Ofx.Tests
                     .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
                     .Options;
 
-                var context = new ApplicationDbContext(options);
+                context = new ApplicationDbContext(options);
 
                 controller = new CategoryMapsController(context);
             }
@@ -55,6 +56,21 @@ namespace Ofx.Tests
             var model = actual.Model as List<CategoryMap>;
 
             Assert.AreEqual(0, model.Count);
+        }
+
+        [TestMethod]
+        public async Task IndexSingle()
+        {
+            var expected = new CategoryMap() { Category = "Testing", Key1 = "123" };
+
+            context.Add(expected);
+            await context.SaveChangesAsync();
+
+            var result = await controller.Index();
+            var actual = result as ViewResult;
+            var model = actual.Model as List<CategoryMap>;
+
+            Assert.AreEqual(1, model.Count);
         }
     }
 }
