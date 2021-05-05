@@ -1,12 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SampleData\ExportedTransactions.ofx" />
+    <None Remove="SampleData\First10.ofx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SampleData\ExportedTransactions.ofx" />
+    <EmbeddedResource Include="SampleData\First10.ofx" />
     <EmbeddedResource Include="SampleData\Second10.ofx" />
   </ItemGroup>
 
@@ -15,6 +22,10 @@
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.18" />
     <PackageReference Include="MSTest.TestFramework" Version="1.1.18" />
     <PackageReference Include="OfxSharpLib" Version="0.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OfxWeb.Asp\OfxWeb.Asp.csproj" />
   </ItemGroup>
 
 </Project>

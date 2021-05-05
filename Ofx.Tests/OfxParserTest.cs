@@ -41,7 +41,7 @@ namespace Ofx.Tests
             var actual = Document.Transactions.First();
 
             Assert.AreEqual(-49.68M, actual.Amount);
-            Assert.AreEqual("Ext Credit Card Debit SAFEWAY FUEL 0490       BELLEVUE     WA USA", actual.Memo.Trim());
+            Assert.AreEqual("Ext Credit Card Debit SAFEWAY FUEL 0490       WINNEMUCCA     NV USA", actual.Memo.Trim());
             Assert.AreEqual("476365570", actual.ReferenceNumber.Trim());
             Assert.AreEqual(new DateTime(2018, 6, 2), actual.Date);
         }

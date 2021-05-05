@@ -12,8 +12,9 @@ namespace Ofx.Tests
         public static Stream Open(string filename)
         {
             var assy = Assembly.GetExecutingAssembly();
+            var names = assy.GetManifestResourceNames();
 
-            var name = assy.GetManifestResourceNames().Where(x => x.Contains(filename)).Single();
+            var name = names.Where(x => x.Contains(filename)).Single();
 
             var stream = assy.GetManifestResourceStream(name);
 
