@@ -12,6 +12,23 @@ namespace Ofx.Tests
     [TestClass]
     public class CategoryMapControllerTest
     {
+        CategoryMapsController controller = null;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            if (null == controller)
+            {
+                var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                    .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
+                    .Options;
+
+                var context = new ApplicationDbContext(options);
+
+                controller = new CategoryMapsController(context);
+            }
+        }
+
         [TestMethod]
         public void Null()
         {
@@ -23,15 +40,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void Empty()
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
-                .Options;
-
-            var context = new ApplicationDbContext(options);
-
-            var tested = new CategoryMapsController(context);
-
-            Assert.IsNotNull(tested);
+            Assert.IsNotNull(controller);
         }
     }
 }
