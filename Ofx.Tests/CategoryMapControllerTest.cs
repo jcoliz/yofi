@@ -119,5 +119,17 @@ namespace Ofx.Tests
 
             Assert.AreEqual("5", model.Key3);
         }
+        [TestMethod]
+        public async Task DetailsNotFound()
+        {
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
+            await context.SaveChangesAsync();
+
+            var result = await controller.Details(3);
+            var actual = result as NotFoundResult;
+
+            Assert.AreEqual(404, actual.StatusCode);
+        }
+
     }
 }
