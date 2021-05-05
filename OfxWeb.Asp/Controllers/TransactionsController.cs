@@ -668,17 +668,20 @@ namespace OfxWeb.Asp.Controllers
                 // have a conflict outside that date range, by definition.
                 var mindate = incoming.Min(x => x.Timestamp);
                 var maxdate = incoming.Max(x => x.Timestamp);
-                var conflicts = _context.Transactions.Where(x => x.Timestamp >= mindate && x.Timestamp <= maxdate).Where(x => uniqueids.Contains(x.BankReference));
 
-                if (await conflicts.AnyAsync())
+                // The approach is to create a lookup, from bankreference to a list of possible matching conflicts. Note that it is possible for multiple different
+                // transactions to collide on a single hash. We will have to step through all the possible conflicts to see if there is really a match.
+                var conflicts = _context.Transactions.Where(x => x.Timestamp >= mindate && x.Timestamp <= maxdate).Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
+
+                if (conflicts.Any())
                 {
                     // Look at each incoming transaction, analyze against all matching conflicts
                     foreach (var tx in incoming)
                     {
-                        var myconflicts = conflicts.Where(x => x.BankReference == tx.BankReference);
-                        foreach (var thisconflict in myconflicts)
+                        var possibleconflicts = conflicts[tx.BankReference];
+                        foreach (var conflict in possibleconflicts)
                         {
-                            if (thisconflict.Equals(tx))
+                            if (tx.Equals(conflict))
                             {
                                 Console.WriteLine($"{tx.Payee} ({tx.BankReference}) has a conflict");
 
