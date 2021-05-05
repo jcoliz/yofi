@@ -82,7 +82,7 @@ namespace Ofx.Tests
         }
         [TestMethod]
         public async Task IndexMany()
-        {            
+        {
             context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
             context.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" }); ;
             context.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" }); ;
@@ -131,5 +131,25 @@ namespace Ofx.Tests
             Assert.AreEqual(404, actual.StatusCode);
         }
 
+        [TestMethod]
+        public async Task Create()
+        {
+            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
+            await context.SaveChangesAsync();
+
+            var expected = new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" };
+
+            var result = await controller.Create(expected);
+
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
+
+            Assert.AreEqual(2, expected.ID);
+
+            var count = await context.CategoryMaps.CountAsync();
+
+            Assert.AreEqual(2, count);
+        }
     }
 }
