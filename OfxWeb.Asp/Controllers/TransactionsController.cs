@@ -675,11 +675,9 @@ namespace OfxWeb.Asp.Controllers
 
                 if (conflicts.Any())
                 {
-                    // Look at each incoming transaction, analyze against all matching conflicts
                     foreach (var tx in incoming)
                     {
-                        var possibleconflicts = conflicts[tx.BankReference];
-                        foreach (var conflict in possibleconflicts)
+                        foreach (var conflict in conflicts[tx.BankReference])
                         {
                             if (tx.Equals(conflict))
                             {
