@@ -243,6 +243,30 @@ namespace Ofx.Tests
 
             Assert.AreEqual(expected.Key3, model.Key3);
         }
+        [TestMethod]
+        public async Task DeleteConfirmed()
+        {
+            var items = new List<CategoryMap>();
+            items.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" });
+            items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" });
+            items.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" });
+            items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" });
+            items.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" });
+            context.AddRange(items);
+            await context.SaveChangesAsync();
+
+            var expected = items[3];
+
+            var result = await controller.DeleteConfirmed(expected.ID);
+
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
+
+            var count = await context.CategoryMaps.CountAsync();
+
+            Assert.AreEqual(4, count);
+        }
 
     }
 }
