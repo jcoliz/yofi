@@ -234,5 +234,15 @@ namespace Ofx.Tests
 
             Assert.AreEqual(4, count);
         }
+        [TestMethod]
+        public async Task Download()
+        {
+            var items = await AddFiveItems();
+            var result = await controller.Download();
+            var actual = result as FileContentResult;
+            var data = actual.FileContents;
+
+            // TODO: Read this file!
+        }
     }
 }
