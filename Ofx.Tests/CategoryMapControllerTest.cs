@@ -124,6 +124,20 @@ namespace Ofx.Tests
             Assert.AreEqual(expected, model);
         }
 
+        public async Task DetailsNotFound()
+        {
+            context.Add(Items[0]);
+            await context.SaveChangesAsync();
+
+            var maxid = context.CategoryMaps.Max(x => x.ID);
+            var badid = maxid + 1;
+
+            var result = await controller.Details(badid);
+            var actual = result as NotFoundResult;
+
+            Assert.AreEqual(404, actual.StatusCode);
+        }
+
     }
 
     [TestClass]
@@ -204,16 +218,7 @@ namespace Ofx.Tests
         public async Task DetailsFound() => await helper.DetailsFound();
 
         [TestMethod]
-        public async Task DetailsNotFound()
-        {
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
-            await context.SaveChangesAsync();
-
-            var result = await controller.Details(3);
-            var actual = result as NotFoundResult;
-
-            Assert.AreEqual(404, actual.StatusCode);
-        }
+        public async Task DetailsNotFound() => await helper.DetailsNotFound();
 
         [TestMethod]
         public async Task EditFound()
