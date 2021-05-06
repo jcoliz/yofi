@@ -116,7 +116,7 @@ namespace Ofx.Tests
             Assert.AreEqual(expected, model.Single());
         }
 
-        public async Task<List<T>> IndexMany()
+        public async Task IndexMany()
         {
             await AddFiveItems();
             var result = await controller.Index();
@@ -125,7 +125,12 @@ namespace Ofx.Tests
 
             Assert.AreEqual(5, model.Count);
 
-            return model;
+            // Sort the original items by Key
+            Items.Sort((x,y) => KeyFor(x).CompareTo(KeyFor(y)));
+
+            // Test that the resulting items are in the same order
+            for (int i = 0; i < 5; ++i)
+                Assert.AreEqual(Items[i], model[i]);
         }
 
         public async Task DetailsFound()
@@ -382,23 +387,10 @@ namespace Ofx.Tests
 
         [TestMethod]
         public async Task IndexEmpty() => await helper.IndexEmpty();
-
         [TestMethod]
         public async Task IndexSingle() => await helper.IndexSingle();
-
         [TestMethod]
-        public async Task IndexMany()
-        {
-            var model = await helper.IndexMany();
-
-            // Test the sort order. Key3 (sneakily!) contains the expected sort order.
-            Assert.AreEqual("1", model[0].Key3);
-            Assert.AreEqual("2", model[1].Key3);
-            Assert.AreEqual("3", model[2].Key3);
-            Assert.AreEqual("4", model[3].Key3);
-            Assert.AreEqual("5", model[4].Key3);
-        }
-
+        public async Task IndexMany() => await helper.IndexMany();
         [TestMethod]
         public async Task DetailsFound() => await helper.DetailsFound();
         [TestMethod]
