@@ -252,6 +252,15 @@ namespace Ofx.Tests
 
             Assert.AreEqual(5, incoming.Count);
 
+            // pick an arbitrary item
+            var expected = Items[4];
+
+            // Find the matching item in the incoming
+            var actual = incoming.Where(x => KeyFor(x) == KeyFor(expected)).Single();
+
+            // And they should be the same
+            Assert.AreEqual(expected, actual);
+
             return incoming;
         }
         public async Task Upload()
@@ -398,7 +407,6 @@ namespace Ofx.Tests
         public async Task EditFound() => await helper.EditFound();
         [TestMethod]
         public async Task EditNotFound() => await helper.EditNotFound();
-
         [TestMethod]
         public async Task Create() => await helper.Create();
         [TestMethod]
@@ -408,15 +416,7 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task DeleteConfirmed() => await helper.DeleteConfirmed();
         [TestMethod]
-        public async Task Download()
-        {
-            var incoming = await helper.Download();
-
-            var expected = helper.Items.Where(x => x.Key3 == "2").Single();
-            var actual = incoming.Where(x => x.Key3 == "2").Single();
-
-            Assert.AreEqual(expected, actual);
-        }
+        public async Task Download() => await helper.Download();
         [TestMethod]
         public async Task Upload() => await helper.Upload();
         [TestMethod]
