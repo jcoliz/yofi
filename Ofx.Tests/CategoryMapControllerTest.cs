@@ -24,7 +24,7 @@ namespace Ofx.Tests
     /// </summary>
     /// <typeparam name="T">Type of object under test</typeparam>
     /// <typeparam name="C">Type of controller</typeparam>
-    class ControllerTestHelper<T, C> where C : IController<T> where T : class, IID
+    class ControllerTestHelper<T, C> where C : IController<T> where T : class, IID, new()
     {
         public C controller { set; get; } = default(C);
 
@@ -219,6 +219,26 @@ namespace Ofx.Tests
 
             Assert.AreEqual(4, count);
         }
+        public async Task<HashSet<T>> Download()
+        {
+            await AddFiveItems();
+            var result = await controller.Download();
+            var fcresult = result as FileContentResult;
+            var data = fcresult.FileContents;
+
+            var incoming = new HashSet<T>();
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                var sheetname = $"{typeof(T).Name}s";
+                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
+                worksheet.ExtractInto(incoming);
+            }
+
+            Assert.AreEqual(5, incoming.Count);
+
+            return incoming;
+        }
     }
 
     [TestClass]
@@ -316,22 +336,9 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task Download()
         {
-            var items = await AddFiveItems();
-            var result = await controller.Download();
-            var fcresult = result as FileContentResult;
-            var data = fcresult.FileContents;
+            var incoming = await helper.Download();
 
-            var incoming = new HashSet<CategoryMap>();
-            using (var stream = new MemoryStream(data))
-            {
-                var excel = new ExcelPackage(stream);
-                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "CategoryMaps").Single();
-                worksheet.ExtractInto(incoming);
-            }
-
-            Assert.AreEqual(5, incoming.Count);
-
-            var expected = items.Where(x => x.Key3 == "2").Single();
+            var expected = helper.Items.Where(x => x.Key3 == "2").Single();
             var actual = incoming.Where(x => x.Key3 == "2").Single();
 
             Assert.AreEqual(expected, actual);
