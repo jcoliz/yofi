@@ -68,6 +68,15 @@ namespace Ofx.Tests
                 entry.State = EntityState.Detached;
         }
 
+        private async Task AddFiveItems()
+        {
+            // context.AddRange(Items) doesn't work :(
+            foreach (var item in Items)
+                context.Add(item);
+
+            await context.SaveChangesAsync();
+        }
+
         public async Task IndexEmpty()
         {
             var result = await controller.Index();
@@ -89,9 +98,20 @@ namespace Ofx.Tests
             var model = actual.Model as List<T>;
 
             Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(expected, model[0]);
+            Assert.AreEqual(expected, model.Single());
         }
 
+        public async Task<List<T>> IndexMany()
+        {
+            await AddFiveItems();
+            var result = await controller.Index();
+            var actual = result as ViewResult;
+            var model = actual.Model as List<T>;
+
+            Assert.AreEqual(5, model.Count);
+
+            return model;
+        }
     }
 
     [TestClass]
@@ -159,12 +179,7 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task IndexMany()
         {
-            await AddFiveItems();
-            var result = await controller.Index();
-            var actual = result as ViewResult;
-            var model = actual.Model as List<CategoryMap>;
-
-            Assert.AreEqual(5, model.Count);
+            var model = await helper.IndexMany();
 
             // Test the sort order. Key3 (sneakily!) contains the expected sort order.
             Assert.AreEqual("1", model[0].Key3);
