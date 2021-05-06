@@ -51,6 +51,28 @@ namespace Ofx.Tests
             context = null;
             controller = default(C);
         }
+
+        private void DetachAllEntities()
+        {
+            var changedEntriesCopy = context.ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added ||
+                            e.State == EntityState.Modified ||
+                            e.State == EntityState.Deleted)
+                .ToList();
+
+            foreach (var entry in changedEntriesCopy)
+                entry.State = EntityState.Detached;
+        }
+
+        public async Task IndexEmpty()
+        {
+            var result = await controller.Index();
+            var actual = result as ViewResult;
+            var model = actual.Model as List<CategoryMap>;
+
+            Assert.AreEqual(0, model.Count);
+        }
+
     }
 
     [TestClass]
@@ -74,17 +96,6 @@ namespace Ofx.Tests
             helper.Cleanup();
         }
 
-        private void DetachAllEntities()
-        {
-            var changedEntriesCopy = context.ChangeTracker.Entries()
-                .Where(e => e.State == EntityState.Added ||
-                            e.State == EntityState.Modified ||
-                            e.State == EntityState.Deleted)
-                .ToList();
-
-            foreach (var entry in changedEntriesCopy)
-                entry.State = EntityState.Detached;
-        }
 
         private async Task<List<CategoryMap>> AddFiveItems()
         {
@@ -122,14 +133,7 @@ namespace Ofx.Tests
         }
 
         [TestMethod]
-        public async Task IndexEmpty()
-        {
-            var result = await controller.Index();
-            var actual = result as ViewResult;
-            var model = actual.Model as List<CategoryMap>;
-
-            Assert.AreEqual(0, model.Count);
-        }
+        public async Task IndexEmpty() => await helper.IndexEmpty();
 
         [TestMethod]
         public async Task IndexSingle()
