@@ -12,7 +12,12 @@ using OfxWeb.Asp.Models;
 
 namespace OfxWeb.Asp.Controllers
 {
-    public class CategoryMapsController : Controller
+    public interface IController<T>
+    {
+        Task<IActionResult> Index();
+    }
+
+    public class CategoryMapsController : Controller, IController<CategoryMap>
     {
         private readonly ApplicationDbContext _context;
 

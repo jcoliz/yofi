@@ -18,13 +18,18 @@ using System.Threading.Tasks;
 
 namespace Ofx.Tests
 {
-    [TestClass]
-    public class CategoryMapControllerTest
-    {
-        CategoryMapsController controller = null;
-        ApplicationDbContext context = null;
 
-        [TestInitialize]
+    /// <summary>
+    /// This is a container for base test functionality that is common to most or all controllers
+    /// </summary>
+    /// <typeparam name="T">Type of object under test</typeparam>
+    /// <typeparam name="C">Type of controller</typeparam>
+    class ControllerTestHelper<T, C> where C : IController<T>
+    {
+        public C controller { set; get; } = default(C);
+
+        public ApplicationDbContext context = null;
+
         public void SetUp()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -33,10 +38,9 @@ namespace Ofx.Tests
 
             context = new ApplicationDbContext(options);
 
-            controller = new CategoryMapsController(context);
+            //controller = new C();
         }
 
-        [TestCleanup]
         public void Cleanup()
         {
             // Didn't actually solve anything. Keep it around for possible future problem
@@ -45,7 +49,29 @@ namespace Ofx.Tests
             // https://stackoverflow.com/questions/33490696/how-can-i-reset-an-ef7-inmemory-provider-between-unit-tests
             context?.Database.EnsureDeleted();
             context = null;
-            controller = null;
+            controller = default(C);
+        }
+    }
+
+    [TestClass]
+    public class CategoryMapControllerTest
+    {
+        private ControllerTestHelper<CategoryMap, CategoryMapsController> helper = null;
+        CategoryMapsController controller => helper?.controller;
+        ApplicationDbContext context => helper?.context;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            helper = new ControllerTestHelper<CategoryMap, CategoryMapsController>();
+            helper.SetUp();
+            helper.controller = new CategoryMapsController(context);
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            helper.Cleanup();
         }
 
         private void DetachAllEntities()
