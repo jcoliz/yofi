@@ -22,6 +22,7 @@ namespace OfxWeb.Asp.Controllers
         Task<IActionResult> Delete(int? id);
         Task<IActionResult> DeleteConfirmed(int id);
         Task<IActionResult> Download();
+        Task<IActionResult> Upload(List<IFormFile> files);
     }
 
     public class CategoryMapsController : Controller, IController<CategoryMap>

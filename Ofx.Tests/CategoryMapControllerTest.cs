@@ -239,6 +239,31 @@ namespace Ofx.Tests
 
             return incoming;
         }
+        public async Task Upload()
+        {
+            // Build a spreadsheet with items
+            byte[] reportBytes;
+            var sheetname = $"{typeof(T).Name}s";
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add(sheetname);
+                worksheet.PopulateFrom(Items, out _, out _);
+                reportBytes = package.GetAsByteArray();
+            }
+
+            // Create a formfile with it
+            var stream = new MemoryStream(reportBytes);
+            IFormFile file = new FormFile(stream, 0, reportBytes.Length, sheetname, $"{sheetname}.xlsx");
+
+            // Upload that
+            var result = await controller.Upload(new List<IFormFile>() { file });
+
+            // Test the status
+            var actual = result as ViewResult;
+            var model = actual.Model as IEnumerable<T>;
+
+            Assert.AreEqual(5, model.Count());
+        }
     }
 
     [TestClass]
@@ -344,32 +369,7 @@ namespace Ofx.Tests
             Assert.AreEqual(expected, actual);
         }
         [TestMethod]
-        public async Task Upload()
-        {
-            // Build a spreadsheet with items
-            var items = MakeFiveItems();
-            byte[] reportBytes;
-            using (var package = new ExcelPackage())
-            {
-                var sheetname = $"{nameof(CategoryMap)}s";
-                var worksheet = package.Workbook.Worksheets.Add(sheetname);
-                worksheet.PopulateFrom(items, out _, out _);
-                reportBytes = package.GetAsByteArray();
-            }
-
-            // Create a formfile with it
-            var stream = new MemoryStream(reportBytes);
-            IFormFile file = new FormFile(stream, 0, reportBytes.Length, $"{nameof(CategoryMap)}s", $"{nameof(CategoryMap)}s.xlsx");
-
-            // Upload that
-            var result = await controller.Upload(new List<IFormFile>() { file });
-
-            // Test the status
-            var actual = result as ViewResult;
-            var model = actual.Model as IEnumerable<CategoryMap>;
-
-            Assert.AreEqual(5, model.Count());
-        }
+        public async Task Upload() => await helper.Upload();
         [TestMethod]
         public async Task UploadWithID()
         {
