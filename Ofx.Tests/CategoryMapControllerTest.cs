@@ -356,21 +356,6 @@ namespace Ofx.Tests
             helper.Cleanup();
         }
 
-
-        private async Task<List<CategoryMap>> AddFiveItems()
-        {
-            var items = MakeFiveItems();
-            context.AddRange(items);
-            await context.SaveChangesAsync();
-
-            return items;
-        }
-
-        private List<CategoryMap> MakeFiveItems()
-        {
-            return helper.Items;
-        }
-
         [TestMethod]
         public void Null()
         {
