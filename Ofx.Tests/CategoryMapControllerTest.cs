@@ -331,7 +331,7 @@ namespace Ofx.Tests
 
             Assert.AreEqual(5, incoming.Count);
 
-            var expected = incoming.Where(x => x.Key3 == "2").Single();
+            var expected = items.Where(x => x.Key3 == "2").Single();
             var actual = incoming.Where(x => x.Key3 == "2").Single();
 
             Assert.AreEqual(expected, actual);
