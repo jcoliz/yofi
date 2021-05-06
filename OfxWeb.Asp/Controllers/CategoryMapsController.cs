@@ -15,6 +15,7 @@ namespace OfxWeb.Asp.Controllers
     public interface IController<T>
     {
         Task<IActionResult> Index();
+        Task<IActionResult> Details(int? id);
     }
 
     public class CategoryMapsController : Controller, IController<CategoryMap>

@@ -24,7 +24,7 @@ namespace Ofx.Tests
     /// </summary>
     /// <typeparam name="T">Type of object under test</typeparam>
     /// <typeparam name="C">Type of controller</typeparam>
-    class ControllerTestHelper<T, C> where C : IController<T>
+    class ControllerTestHelper<T, C> where C : IController<T> where T : class, IID
     {
         public C controller { set; get; } = default(C);
 
@@ -112,6 +112,18 @@ namespace Ofx.Tests
 
             return model;
         }
+
+        public async Task DetailsFound()
+        {
+            await AddFiveItems();
+            var expected = Items[3];
+            var result = await controller.Details(expected.ID);
+            var actual = result as ViewResult;
+            var model = actual.Model as T;
+
+            Assert.AreEqual(expected, model);
+        }
+
     }
 
     [TestClass]
@@ -189,16 +201,8 @@ namespace Ofx.Tests
             Assert.AreEqual("5", model[4].Key3);
         }
         [TestMethod]
-        public async Task DetailsFound()
-        {
-            var items = await AddFiveItems();
-            var expected = items[3];
-            var result = await controller.Details(expected.ID);
-            var actual = result as ViewResult;
-            var model = actual.Model as CategoryMap;
+        public async Task DetailsFound() => await helper.DetailsFound();
 
-            Assert.AreEqual(expected.Key3, model.Key3);
-        }
         [TestMethod]
         public async Task DetailsNotFound()
         {

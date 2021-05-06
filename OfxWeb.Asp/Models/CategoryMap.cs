@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class CategoryMap
+    public interface IID
+    {
+        int ID { get; }
+    }
+
+    public class CategoryMap: IID
     {
         public int ID { get; set; }
         public string Category { get; set; }
