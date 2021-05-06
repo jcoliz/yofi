@@ -168,10 +168,6 @@ namespace OfxWeb.Asp.Controllers
                     }
                 }
 
-                // Remove lines which already have an ID
-                // TODO: This doesn't actually work. Not sure why, cuz debugger isn't working either :(
-                incoming.RemoveWhere(x => x.ID != 0);
-
                 // Add resulting transactions
 
                 await _context.AddRangeAsync(incoming);

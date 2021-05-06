@@ -40,6 +40,13 @@ namespace OfficeOpenXml
                         {
                             var col = columns[property.Name];
 
+                            // Note this excludes typeof(int), which excludes importing
+                            // the ID. So if you re-import items you already have, the IDs
+                            // will be stripped and ignored. Generally I think that's
+                            // good behaviour, but in other implementations, I have done
+                            // it the other way where duplicating the ID is a method of
+                            // bulk editing.
+
                             if (property.PropertyType == typeof(DateTime))
                             {
                                 // Fix #767: Sometimes datetimes are datetimes, othertimes they're doubles

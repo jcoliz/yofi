@@ -295,5 +295,57 @@ namespace Ofx.Tests
 
             Assert.AreEqual(5, model.Count());
         }
+        [TestMethod]
+        public async Task UploadWithID()
+        {
+            // Start out with one item in the DB
+            var initial = new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" };
+            context.Add(initial);
+            await context.SaveChangesAsync();
+
+            // One of the new items has an overlapping ID. What we expect is that the ID will get ignored and it will also get included
+            // For ease of figuring out the results, we are going to use the same data as the item which will be returned FIRST
+            // in the sorted view. Ergo the first and second of the later results should be identical, just with different IDs.
+            var items = MakeFiveItems();
+            items[0].ID = initial.ID;
+
+            // Build a spreadsheet with items
+            byte[] reportBytes;
+            using (var package = new ExcelPackage())
+            {
+                var sheetname = $"{nameof(CategoryMap)}s";
+                var worksheet = package.Workbook.Worksheets.Add(sheetname);
+                worksheet.PopulateFrom(items, out _, out _);
+                reportBytes = package.GetAsByteArray();
+            }
+
+            // Create a formfile with it
+            var stream = new MemoryStream(reportBytes);
+            IFormFile file = new FormFile(stream, 0, reportBytes.Length, $"{nameof(CategoryMap)}s", $"{nameof(CategoryMap)}s.xlsx");
+
+            // Upload that
+            var result = await controller.Upload(new List<IFormFile>() { file });
+
+            // Test the status
+            var actual = result as ViewResult;
+            var model = actual.Model as IEnumerable<CategoryMap>;
+
+            // Still, we only get 5 back because it is going to just give us a view of what we uploaded.
+            Assert.AreEqual(5, model.Count());
+
+            // So we need to dig into the database state to find the others.
+
+            var sortedstate = context.CategoryMaps.OrderBy(x => x.Key3);
+
+            // Now there should be SIX, cuz we started withe one and added five. 
+            Assert.AreEqual(6, sortedstate.Count());
+
+            // Further, the first two should be identical other than ID.
+            var first = sortedstate.Take(1).Single();
+            var second = sortedstate.Skip(1).Take(1).Single();
+
+            Assert.AreEqual(first.Key3, second.Key3);
+            Assert.AreNotEqual(first.ID, second.ID);
+        }
     }
 }
