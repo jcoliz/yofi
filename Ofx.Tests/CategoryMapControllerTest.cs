@@ -7,6 +7,7 @@ using OfficeOpenXml;
 using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,7 +31,21 @@ namespace Ofx.Tests
 
         public ApplicationDbContext context = null;
 
+        /// <summary>
+        /// List of test items which we will use for our test. Needs to be supplied by the user
+        /// becasue only use knows how Items should look
+        /// </summary>
         public List<T> Items;
+
+        /// <summary>
+        /// Function to return a sorting key for a given T object.
+        /// </summary>
+        public Func<T, string> KeyFor { private get; set; }
+
+        /// <summary>
+        /// Where in the context should we look for T items.
+        /// </summary>
+        public DbSet<T> dbset;
 
         public void SetUp()
         {
@@ -264,6 +279,35 @@ namespace Ofx.Tests
 
             Assert.AreEqual(5, model.Count());
         }
+        public async Task UploadWithID()
+        {
+            // Start out with one item in the DB
+            var expected = Items[0];
+            IModelObject imo = expected;
+            context.Add(expected);
+            await context.SaveChangesAsync();
+
+            // One of the new items has an overlapping ID. What we expect is that the ID will get ignored and it will also get included
+            // For ease of figuring out the results, we are going to use the same data as the item which will be returned FIRST
+            // in the sorted view. Ergo the first and second of the later results should be identical, just with different IDs.
+
+            await Upload();
+
+            // So we need to dig into the database state to find the others.
+
+            // There should be a single duplicate in key3 for items[0].key3
+            var lookup = dbset.ToLookup(x => KeyFor(x), x => x);
+
+            // tThese items should be identical other than ID.
+            var first = lookup[KeyFor(expected)].Take(1).Single();
+            var second = lookup[KeyFor(expected)].Skip(1).Take(1).Single();
+
+            Assert.AreEqual(2, lookup[KeyFor(expected)].Count());
+            Assert.AreEqual(expected, first);
+            Assert.AreEqual(expected, second);
+            Assert.AreNotEqual(first.ID, second.ID);
+        }
+
     }
 
     [TestClass]
@@ -285,6 +329,11 @@ namespace Ofx.Tests
             helper.Items.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" });
             helper.Items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" });
             helper.Items.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" });
+
+            helper.dbset = context.CategoryMaps;
+
+            // Sample data items will use 'key3' as a unique sort idenfitier
+            helper.KeyFor = (x => x.Key3);
         }
 
         [TestCleanup]
@@ -371,33 +420,6 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task Upload() => await helper.Upload();
         [TestMethod]
-        public async Task UploadWithID()
-        {
-            // Start out with one item in the DB
-            var expected = helper.Items[0];
-            IModelObject imo = expected;
-            context.Add(expected);
-            await context.SaveChangesAsync();
-
-            // One of the new items has an overlapping ID. What we expect is that the ID will get ignored and it will also get included
-            // For ease of figuring out the results, we are going to use the same data as the item which will be returned FIRST
-            // in the sorted view. Ergo the first and second of the later results should be identical, just with different IDs.
-
-            await helper.Upload();
-
-            // So we need to dig into the database state to find the others.
-
-            // There should be a single duplicate in key3 for items[0].key3
-            var lookup = context.CategoryMaps.ToLookup(x => ((IModelObject)x).TestSortKey, x => x);
-
-            // tThese items should be identical other than ID.
-            var first = lookup[imo.TestSortKey].Take(1).Single();
-            var second = lookup[imo.TestSortKey].Skip(1).Take(1).Single();
-
-            Assert.AreEqual(2, lookup[imo.TestSortKey].Count());
-            Assert.AreEqual(expected, first);
-            Assert.AreEqual(expected, second);
-            Assert.AreNotEqual(first.ID, second.ID);
-        }
+        public async Task UploadWithID() => await helper.UploadWithID();
     }
 }
