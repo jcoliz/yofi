@@ -37,5 +37,20 @@ namespace OfxWeb.Asp.Models
 
             return result;
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CategoryMap map &&
+                   Category == map.Category &&
+                   SubCategory == map.SubCategory &&
+                   Key1 == map.Key1 &&
+                   Key2 == map.Key2 &&
+                   Key3 == map.Key3;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Category, SubCategory, Key1, Key2, Key3);
+        }
     }
 }

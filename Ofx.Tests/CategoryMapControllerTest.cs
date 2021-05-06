@@ -30,6 +30,8 @@ namespace Ofx.Tests
 
         public ApplicationDbContext context = null;
 
+        public List<T> Items;
+
         public void SetUp()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -39,6 +41,8 @@ namespace Ofx.Tests
             context = new ApplicationDbContext(options);
 
             //controller = new C();
+
+            Items = new List<T>();
         }
 
         public void Cleanup()
@@ -68,9 +72,24 @@ namespace Ofx.Tests
         {
             var result = await controller.Index();
             var actual = result as ViewResult;
-            var model = actual.Model as List<CategoryMap>;
+            var model = actual.Model as List<T>;
 
             Assert.AreEqual(0, model.Count);
+        }
+
+        public async Task IndexSingle()
+        {
+            var expected = Items[0];
+
+            context.Add(expected);
+            await context.SaveChangesAsync();
+
+            var result = await controller.Index();
+            var actual = result as ViewResult;
+            var model = actual.Model as List<T>;
+
+            Assert.AreEqual(1, model.Count);
+            Assert.AreEqual(expected, model[0]);
         }
 
     }
@@ -88,6 +107,12 @@ namespace Ofx.Tests
             helper = new ControllerTestHelper<CategoryMap, CategoryMapsController>();
             helper.SetUp();
             helper.controller = new CategoryMapsController(context);
+
+            helper.Items.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" });
+            helper.Items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" });
+            helper.Items.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" });
+            helper.Items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" });
+            helper.Items.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" });
         }
 
         [TestCleanup]
@@ -108,14 +133,7 @@ namespace Ofx.Tests
 
         private List<CategoryMap> MakeFiveItems()
         {
-            var items = new List<CategoryMap>();
-            items.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" });
-            items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" });
-            items.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" });
-            items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" });
-            items.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" });
-
-            return items;
+            return helper.Items;
         }
 
         [TestMethod]
@@ -136,21 +154,8 @@ namespace Ofx.Tests
         public async Task IndexEmpty() => await helper.IndexEmpty();
 
         [TestMethod]
-        public async Task IndexSingle()
-        {
-            var expected = new CategoryMap() { Category = "Testing", Key1 = "123" };
+        public async Task IndexSingle() => await helper.IndexSingle();
 
-            context.Add(expected);
-            await context.SaveChangesAsync();
-
-            var result = await controller.Index();
-            var actual = result as ViewResult;
-            var model = actual.Model as List<CategoryMap>;
-
-            Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(expected.Category, model[0].Category);
-            Assert.AreEqual(expected.Key1, model[0].Key1);
-        }
         [TestMethod]
         public async Task IndexMany()
         {
