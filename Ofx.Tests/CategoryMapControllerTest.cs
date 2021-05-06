@@ -137,7 +137,64 @@ namespace Ofx.Tests
 
             Assert.AreEqual(404, actual.StatusCode);
         }
+        public async Task EditFound()
+        {
+            await AddFiveItems();
+            var expected = Items[3];
+            var result = await controller.Edit(expected.ID);
+            var actual = result as ViewResult;
+            var model = actual.Model as CategoryMap;
 
+            Assert.AreEqual(expected, model);
+        }
+        public async Task EditNotFound()
+        {
+            context.Add(Items[0]);
+            await context.SaveChangesAsync();
+
+            var maxid = context.CategoryMaps.Max(x => x.ID);
+            var badid = maxid + 1;
+
+            var result = await controller.Edit(badid);
+            var actual = result as NotFoundResult;
+
+            Assert.AreEqual(404, actual.StatusCode);
+        }
+        public async Task Create()
+        {
+            context.Add(Items[1]);
+            await context.SaveChangesAsync();
+
+            var expected = Items[2];
+            var result = await controller.Create(expected);
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
+
+            Assert.AreEqual(2, expected.ID);
+
+            var count = await context.CategoryMaps.CountAsync();
+
+            Assert.AreEqual(2, count);
+        }
+        public async Task EditObjectValues()
+        {
+            var initial = Items[3];
+            context.Add(initial);
+            await context.SaveChangesAsync();
+            var id = initial.ID;
+
+            // Need to detach the entity we originally created, to set up the same state the controller would be
+            // in with not already haveing a tracked object.
+            context.Entry(initial).State = EntityState.Detached;
+
+            var updated = Items[1];
+            updated.ID = id;
+            var result = await controller.Edit(id, updated);
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
+        }
     }
 
     [TestClass]
@@ -214,71 +271,20 @@ namespace Ofx.Tests
             Assert.AreEqual("4", model[3].Key3);
             Assert.AreEqual("5", model[4].Key3);
         }
+
         [TestMethod]
         public async Task DetailsFound() => await helper.DetailsFound();
-
         [TestMethod]
         public async Task DetailsNotFound() => await helper.DetailsNotFound();
+        [TestMethod]
+        public async Task EditFound() => await helper.EditFound();
+        [TestMethod]
+        public async Task EditNotFound() => await helper.EditNotFound();
 
         [TestMethod]
-        public async Task EditFound()
-        {
-            var items = await AddFiveItems();
-            var expected = items[3];
-            var result = await controller.Edit(expected.ID);
-            var actual = result as ViewResult;
-            var model = actual.Model as CategoryMap;
-
-            Assert.AreEqual(expected.Key3, model.Key3);
-        }
+        public async Task Create() => await helper.Create();
         [TestMethod]
-        public async Task EditNotFound()
-        {
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
-            await context.SaveChangesAsync();
-
-            var result = await controller.Edit(3);
-            var actual = result as NotFoundResult;
-
-            Assert.AreEqual(404, actual.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task Create()
-        {
-            context.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" }); ;
-            await context.SaveChangesAsync();
-
-            var expected = new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" };
-            var result = await controller.Create(expected);
-            var actual = result as RedirectToActionResult;
-
-            Assert.AreEqual("Index", actual.ActionName);
-
-            Assert.AreEqual(2, expected.ID);
-
-            var count = await context.CategoryMaps.CountAsync();
-
-            Assert.AreEqual(2, count);
-        }
-        [TestMethod]
-        public async Task EditObjectValues()
-        {
-            var initial = new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" };
-            context.Add(initial);
-            await context.SaveChangesAsync();
-            var id = initial.ID;
-
-            // Need to detach the entity we originally created, to set up the same state the controller would be
-            // in with not already haveing a tracked object.
-            context.Entry(initial).State = EntityState.Detached;
-
-            var updated = new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2", ID = id };
-            var result = await controller.Edit(id,updated);
-            var actual = result as RedirectToActionResult;
-
-            Assert.AreEqual("Index", actual.ActionName);
-        }
+        public async Task EditObjectValues() => await helper.EditObjectValues();
         [TestMethod]
         public async Task DeleteFound()
         {

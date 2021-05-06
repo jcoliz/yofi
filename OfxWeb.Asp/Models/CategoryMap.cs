@@ -8,7 +8,7 @@ namespace OfxWeb.Asp.Models
 {
     public interface IID
     {
-        int ID { get; }
+        int ID { get; set;  }
     }
 
     public class CategoryMap: IID
