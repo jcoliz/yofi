@@ -278,8 +278,7 @@ namespace Ofx.Tests
             {
                 var sheetname = $"{nameof(CategoryMap)}s";
                 var worksheet = package.Workbook.Worksheets.Add(sheetname);
-                int rows, cols;
-                worksheet.PopulateFrom(items, out rows, out cols);
+                worksheet.PopulateFrom(items, out _, out _);
                 reportBytes = package.GetAsByteArray();
             }
 
