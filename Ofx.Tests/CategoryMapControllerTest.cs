@@ -195,6 +195,30 @@ namespace Ofx.Tests
 
             Assert.AreEqual("Index", actual.ActionName);
         }
+
+        public async Task DeleteFound()
+        {
+            await AddFiveItems();
+            var expected = Items[3];
+            var result = await controller.Delete(expected.ID);
+            var actual = result as ViewResult;
+            var model = actual.Model as CategoryMap;
+
+            Assert.AreEqual(expected, model);
+        }
+        public async Task DeleteConfirmed()
+        {
+            await AddFiveItems();
+            var expected = Items[3];
+            var result = await controller.DeleteConfirmed(expected.ID);
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
+
+            var count = await context.CategoryMaps.CountAsync();
+
+            Assert.AreEqual(4, count);
+        }
     }
 
     [TestClass]
@@ -286,30 +310,9 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task EditObjectValues() => await helper.EditObjectValues();
         [TestMethod]
-        public async Task DeleteFound()
-        {
-            var items = await AddFiveItems();
-            var expected = items[3];
-            var result = await controller.Delete(expected.ID);
-            var actual = result as ViewResult;
-            var model = actual.Model as CategoryMap;
-
-            Assert.AreEqual(expected.Key3, model.Key3);
-        }
+        public async Task DeleteFound() => await helper.DeleteFound();
         [TestMethod]
-        public async Task DeleteConfirmed()
-        {
-            var items = await AddFiveItems();
-            var expected = items[3];
-            var result = await controller.DeleteConfirmed(expected.ID);
-            var actual = result as RedirectToActionResult;
-
-            Assert.AreEqual("Index", actual.ActionName);
-
-            var count = await context.CategoryMaps.CountAsync();
-
-            Assert.AreEqual(4, count);
-        }
+        public async Task DeleteConfirmed() => await helper.DeleteConfirmed();
         [TestMethod]
         public async Task Download()
         {

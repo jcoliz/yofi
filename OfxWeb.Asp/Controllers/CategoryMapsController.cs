@@ -19,6 +19,8 @@ namespace OfxWeb.Asp.Controllers
         Task<IActionResult> Edit(int? id);
         Task<IActionResult> Edit(int id, T item);
         Task<IActionResult> Create(T item);
+        Task<IActionResult> Delete(int? id);
+        Task<IActionResult> DeleteConfirmed(int id);
     }
 
     public class CategoryMapsController : Controller, IController<CategoryMap>
