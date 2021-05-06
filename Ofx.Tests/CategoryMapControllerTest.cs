@@ -24,7 +24,7 @@ namespace Ofx.Tests
     /// </summary>
     /// <typeparam name="T">Type of object under test</typeparam>
     /// <typeparam name="C">Type of controller</typeparam>
-    class ControllerTestHelper<T, C> where C : IController<T> where T : class, IID, new()
+    class ControllerTestHelper<T, C> where C : IController<T> where T : class, IModelObject, new()
     {
         public C controller { set; get; } = default(C);
 
@@ -375,6 +375,7 @@ namespace Ofx.Tests
         {
             // Start out with one item in the DB
             var expected = helper.Items[0];
+            IModelObject imo = expected;
             context.Add(expected);
             await context.SaveChangesAsync();
 
@@ -387,13 +388,13 @@ namespace Ofx.Tests
             // So we need to dig into the database state to find the others.
 
             // There should be a single duplicate in key3 for items[0].key3
-            var lookup = context.CategoryMaps.ToLookup(x => x.Key3, x => x);
+            var lookup = context.CategoryMaps.ToLookup(x => ((IModelObject)x).TestSortKey, x => x);
 
             // tThese items should be identical other than ID.
-            var first = lookup[expected.Key3].Take(1).Single();
-            var second = lookup[expected.Key3].Skip(1).Take(1).Single();
+            var first = lookup[imo.TestSortKey].Take(1).Single();
+            var second = lookup[imo.TestSortKey].Skip(1).Take(1).Single();
 
-            Assert.AreEqual(2, lookup[expected.Key3].Count());
+            Assert.AreEqual(2, lookup[imo.TestSortKey].Count());
             Assert.AreEqual(expected, first);
             Assert.AreEqual(expected, second);
             Assert.AreNotEqual(first.ID, second.ID);
