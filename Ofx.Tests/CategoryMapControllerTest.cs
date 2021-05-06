@@ -92,6 +92,11 @@ namespace Ofx.Tests
             await context.SaveChangesAsync();
         }
 
+        public void Empty()
+        {
+            Assert.IsNotNull(controller);
+        }
+
         public async Task IndexEmpty()
         {
             var result = await controller.Index();
@@ -328,15 +333,13 @@ namespace Ofx.Tests
     public class CategoryMapControllerTest
     {
         private ControllerTestHelper<CategoryMap, CategoryMapsController> helper = null;
-        CategoryMapsController controller => helper?.controller;
-        ApplicationDbContext context => helper?.context;
 
         [TestInitialize]
         public void SetUp()
         {
             helper = new ControllerTestHelper<CategoryMap, CategoryMapsController>();
             helper.SetUp();
-            helper.controller = new CategoryMapsController(context);
+            helper.controller = new CategoryMapsController(helper.context);
 
             helper.Items.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" });
             helper.Items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" });
@@ -344,32 +347,16 @@ namespace Ofx.Tests
             helper.Items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" });
             helper.Items.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" });
 
-            helper.dbset = context.CategoryMaps;
+            helper.dbset = helper.context.CategoryMaps;
 
             // Sample data items will use 'key3' as a unique sort idenfitier
             helper.KeyFor = (x => x.Key3);
         }
 
         [TestCleanup]
-        public void Cleanup()
-        {
-            helper.Cleanup();
-        }
-
+        public void Cleanup() => helper.Cleanup();
         [TestMethod]
-        public void Null()
-        {
-            var tested = new CategoryMapsController(null);
-
-            Assert.IsNotNull(tested);
-        }
-
-        [TestMethod]
-        public void Empty()
-        {
-            Assert.IsNotNull(controller);
-        }
-
+        public void Empty() => helper.Empty();
         [TestMethod]
         public async Task IndexEmpty() => await helper.IndexEmpty();
         [TestMethod]
