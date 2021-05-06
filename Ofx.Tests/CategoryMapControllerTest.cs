@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
@@ -60,14 +62,21 @@ namespace Ofx.Tests
 
         private async Task<List<CategoryMap>> AddFiveItems()
         {
+            var items = MakeFiveItems();
+            context.AddRange(items);
+            await context.SaveChangesAsync();
+
+            return items;
+        }
+
+        private List<CategoryMap> MakeFiveItems()
+        {
             var items = new List<CategoryMap>();
             items.Add(new CategoryMap() { Category = "B", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "3" });
             items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "2" });
             items.Add(new CategoryMap() { Category = "C", SubCategory = "A", Key1 = "1", Key2 = "2", Key3 = "5" });
             items.Add(new CategoryMap() { Category = "A", SubCategory = "A", Key1 = "1", Key2 = "1", Key3 = "1" });
             items.Add(new CategoryMap() { Category = "B", SubCategory = "B", Key1 = "1", Key2 = "2", Key3 = "4" });
-            context.AddRange(items);
-            await context.SaveChangesAsync();
 
             return items;
         }
@@ -258,6 +267,34 @@ namespace Ofx.Tests
             var actual = incoming.Where(x => x.Key3 == "2").Single();
 
             Assert.AreEqual(expected, actual);
+        }
+        [TestMethod]
+        public async Task Upload()
+        {
+            // Build a spreadsheet with items
+            var items = MakeFiveItems();
+            byte[] reportBytes;
+            using (var package = new ExcelPackage())
+            {
+                var sheetname = $"{nameof(CategoryMap)}s";
+                var worksheet = package.Workbook.Worksheets.Add(sheetname);
+                int rows, cols;
+                worksheet.PopulateFrom(items, out rows, out cols);
+                reportBytes = package.GetAsByteArray();
+            }
+
+            // Create a formfile with it
+            var stream = new MemoryStream(reportBytes);
+            IFormFile file = new FormFile(stream, 0, reportBytes.Length, $"{nameof(CategoryMap)}s", $"{nameof(CategoryMap)}s.xlsx");
+
+            // Upload that
+            var result = await controller.Upload(new List<IFormFile>() { file });
+
+            // Test the status
+            var actual = result as ViewResult;
+            var model = actual.Model as IEnumerable<CategoryMap>;
+
+            Assert.AreEqual(5, model.Count());
         }
     }
 }
