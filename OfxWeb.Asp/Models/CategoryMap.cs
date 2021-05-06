@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public interface IModelObject
+    public interface IID
     {
         int ID { get; set;  }
-        string TestSortKey { get; }
     }
 
-    public class CategoryMap: IModelObject
+    public class CategoryMap: IID
     {
         public int ID { get; set; }
         public string Category { get; set; }
@@ -20,11 +19,6 @@ namespace OfxWeb.Asp.Models
         public string Key1 { get; set; }
         public string Key2 { get; set; }
         public string Key3 { get; set; }
-
-        // For unit tests, this is the key where we will inject unique sortable
-        // values in our sample data.
-        string IModelObject.TestSortKey => Key3;
-
 
         // See Product Backlog Item #801: Add an automatic mapping rule for categories with a colon
         // If Category contains a colon, then we don't need a hard-coded mapping rule for it, 

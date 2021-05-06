@@ -25,7 +25,7 @@ namespace Ofx.Tests
     /// </summary>
     /// <typeparam name="T">Type of object under test</typeparam>
     /// <typeparam name="C">Type of controller</typeparam>
-    class ControllerTestHelper<T, C> where C : IController<T> where T : class, IModelObject, new()
+    class ControllerTestHelper<T, C> where C : IController<T> where T : class, IID, new()
     {
         public C controller { set; get; } = default(C);
 
@@ -302,7 +302,6 @@ namespace Ofx.Tests
         {
             // Start out with one item in the DB
             var expected = Items[0];
-            IModelObject imo = expected;
             context.Add(expected);
             await context.SaveChangesAsync();
 
