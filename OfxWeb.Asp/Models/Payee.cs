@@ -7,13 +7,21 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class Payee
+    public class Payee: IID
     {
         public int ID { get; set; }
         public string Name { get; set; }
         public string Category { get; set; }
         public string SubCategory { get; set; }
         public bool? Selected { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Payee payee &&
+                   Name == payee.Name &&
+                   Category == payee.Category &&
+                   SubCategory == payee.SubCategory;
+        }
 
         /// <summary>
         /// Remove all characters from payee which are not whitespace or alpha-numeric
@@ -24,5 +32,9 @@ namespace OfxWeb.Asp.Models
             Name = rx.Replace(Name, new MatchEvaluator(x => string.Empty));
         }
 
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Category, SubCategory);
+        }
     }
 }

@@ -181,6 +181,17 @@ namespace OfxWeb.Asp.Controllers
                     }
                 }
 
+                // Remove duplicate entries.
+
+                // Trying a less efficient approach
+                // DESIRED:
+                // var existing = await _context.Payees.Where(x => incoming.Contains(x)).ToListAsync();
+                // ACTUAL:
+                var all = await _context.CategoryMaps.ToListAsync();
+                var existing = all.Where(x => incoming.Contains(x));
+
+                incoming.ExceptWith(existing);
+
                 // Add resulting transactions
 
                 await _context.AddRangeAsync(incoming);

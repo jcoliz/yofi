@@ -121,9 +121,10 @@ namespace Ofx.Tests
             Assert.AreEqual(expected, model.Single());
         }
 
-        public async Task IndexMany()
+        public async Task IndexMany(bool additems = true)
         {
-            await AddFiveItems();
+            if (additems)
+                await AddFiveItems();
             var result = await controller.Index();
             var actual = result as ViewResult;
             var model = actual.Model as List<T>;
@@ -273,15 +274,21 @@ namespace Ofx.Tests
 
             return incoming;
         }
+
+        /// <summary>
+        /// Test uploading a file
+        /// </summary>
+        /// <param name="duplicates">How many of the uploaded items were really duplicates, so we shouldn't expect to see them back</param>
+        /// <returns></returns>
         public async Task Upload()
         {
-            // Build a spreadsheet with items
+            // Build a spreadsheet with only the first four items. (We'll use the fifth in UPload with ID)
             byte[] reportBytes;
             var sheetname = $"{typeof(T).Name}s";
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add(sheetname);
-                worksheet.PopulateFrom(Items, out _, out _);
+                worksheet.PopulateFrom(Items.Take(4).ToList(), out _, out _);
                 reportBytes = package.GetAsByteArray();
             }
 
@@ -296,20 +303,28 @@ namespace Ofx.Tests
             var actual = result as ViewResult;
             var model = actual.Model as IEnumerable<T>;
 
-            Assert.AreEqual(5, model.Count());
+            Assert.AreEqual(4, model.Count());
         }
         public async Task UploadWithID()
         {
-            // Start out with one item in the DB
-            var expected = Items[0];
+            // Start out with one item in the DB. We are picking the ONE item that Upload doesn't upload.
+            var expected = Items[4];
             context.Add(expected);
             await context.SaveChangesAsync();
 
-            // One of the new items has an overlapping ID. What we expect is that the ID will get ignored and it will also get included
-            // For ease of figuring out the results, we are going to use the same data as the item which will be returned FIRST
-            // in the sorted view. Ergo the first and second of the later results should be identical, just with different IDs.
+            // One of the new items has an overlapping ID, but will be different in every way. We expect that
+            // The end result is that the database will == items
+            Items[0].ID = expected.ID;
 
             await Upload();
+
+            // From here we can just use the Index test, but not add items. There should be the proper "items"
+            // all there now.
+
+            await IndexMany(false);
+
+#if false
+            // TODO: Write a different test that uses this.
 
             // So we need to dig into the database state to find the others.
 
@@ -324,6 +339,11 @@ namespace Ofx.Tests
             Assert.AreEqual(expected, first);
             Assert.AreEqual(expected, second);
             Assert.AreNotEqual(first.ID, second.ID);
+#endif
+        }
+        public async Task UploadDupes()
+        {
+            // TODO: Write a test which attempts to upload some dupes, and it don't happen!
         }
 
     }

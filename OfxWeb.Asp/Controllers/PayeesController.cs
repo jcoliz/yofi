@@ -7,12 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 
 namespace OfxWeb.Asp
 {
-    public class PayeesController : Controller
+    public class PayeesController : Controller, IController<Payee>
     {
         private readonly ApplicationDbContext _context;
 
@@ -43,6 +44,7 @@ namespace OfxWeb.Asp
 
             return View(await _context.Payees.OrderBy(x=>x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync());
         }
+        Task<IActionResult> IController<Payee>.Index() => Index(string.Empty);
 
         // GET: Payees/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -264,7 +266,7 @@ namespace OfxWeb.Asp
                     }
                 }
 
-                // Removed duplicate transactions.
+                // Remove duplicate entries.
 
                 // Trying a less efficient approach
                 // DESIRED:
@@ -334,6 +336,7 @@ namespace OfxWeb.Asp
         {
             return _context.Payees.Any(e => e.ID == id);
         }
+
     }
 
     class PayeeNameComparer : IEqualityComparer<Models.Payee>
