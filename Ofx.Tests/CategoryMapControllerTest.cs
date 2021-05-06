@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OfficeOpenXml;
 using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -239,10 +241,23 @@ namespace Ofx.Tests
         {
             var items = await AddFiveItems();
             var result = await controller.Download();
-            var actual = result as FileContentResult;
-            var data = actual.FileContents;
+            var fcresult = result as FileContentResult;
+            var data = fcresult.FileContents;
 
-            // TODO: Read this file!
+            var incoming = new HashSet<CategoryMap>();
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "CategoryMaps").Single();
+                worksheet.ExtractInto(incoming);
+            }
+
+            Assert.AreEqual(5, incoming.Count);
+
+            var expected = incoming.Where(x => x.Key3 == "2").Single();
+            var actual = incoming.Where(x => x.Key3 == "2").Single();
+
+            Assert.AreEqual(expected, actual);
         }
     }
 }
