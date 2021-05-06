@@ -149,7 +149,7 @@ namespace Ofx.Tests
             context.Add(Items[0]);
             await context.SaveChangesAsync();
 
-            var maxid = context.CategoryMaps.Max(x => x.ID);
+            var maxid = dbset.Max(x => x.ID);
             var badid = maxid + 1;
 
             var result = await controller.Details(badid);
@@ -163,7 +163,7 @@ namespace Ofx.Tests
             var expected = Items[3];
             var result = await controller.Edit(expected.ID);
             var actual = result as ViewResult;
-            var model = actual.Model as CategoryMap;
+            var model = actual.Model as T;
 
             Assert.AreEqual(expected, model);
         }
@@ -172,7 +172,7 @@ namespace Ofx.Tests
             context.Add(Items[0]);
             await context.SaveChangesAsync();
 
-            var maxid = context.CategoryMaps.Max(x => x.ID);
+            var maxid = dbset.Max(x => x.ID);
             var badid = maxid + 1;
 
             var result = await controller.Edit(badid);
@@ -193,7 +193,7 @@ namespace Ofx.Tests
 
             Assert.AreEqual(2, expected.ID);
 
-            var count = await context.CategoryMaps.CountAsync();
+            var count = await dbset.CountAsync();
 
             Assert.AreEqual(2, count);
         }
@@ -222,7 +222,7 @@ namespace Ofx.Tests
             var expected = Items[3];
             var result = await controller.Delete(expected.ID);
             var actual = result as ViewResult;
-            var model = actual.Model as CategoryMap;
+            var model = actual.Model as T;
 
             Assert.AreEqual(expected, model);
         }
@@ -235,7 +235,7 @@ namespace Ofx.Tests
 
             Assert.AreEqual("Index", actual.ActionName);
 
-            var count = await context.CategoryMaps.CountAsync();
+            var count = await dbset.CountAsync();
 
             Assert.AreEqual(4, count);
         }
