@@ -440,5 +440,9 @@ namespace Ofx.Tests
         public async Task UploadWithID() => await helper.UploadWithID();
         [TestMethod]
         public async Task UploadDuplicate() => await helper.UploadDuplicate();
+
+        // TODO Add a test to upload a new category map for an overlapping category/subcat pair with different
+        // Keys. This should be rejected, because having duplicate rules with same cat/subcat is wrong.
+        // I don't think the code rejects this, so I'll have to work on that.
     }
 }
