@@ -23,6 +23,19 @@ namespace Ofx.Tests
     /// <summary>
     /// This is a container for base test functionality that is common to most or all controllers
     /// </summary>
+    /// 
+    /// <remarks>
+    /// Steps to use these tests:
+    ///     1. Make your controller inherit from IController(ModelType). Handle any missing interface members.
+    ///     2. Make your model inherit from IID
+    ///     3. Implement Equals/GetHash on your Model, Ensure to exclude ID from equality.
+    ///     4. Create new controllertest,  use PayeeControllerTest as an example. 
+    ///     5. Add FIVE sample items to helper items. Be sure to order the sort key in the order that Index will return thenm
+    ///     6. Updaate the sort key function
+    ///     7. Create tests for any situations not covered by the base tests.
+    /// 
+    /// </remarks>
+    /// 
     /// <typeparam name="T">Type of object under test</typeparam>
     /// <typeparam name="C">Type of controller</typeparam>
     class ControllerTestHelper<T, C> where C : IController<T> where T : class, IID, new()
