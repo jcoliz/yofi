@@ -68,5 +68,7 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task UploadDuplicate() => await helper.UploadDuplicate();
 
+        // TODO: Generate next month's TXs
+        // TODO: Upload duplicate with same year/month/category but different amount
     }
 }
