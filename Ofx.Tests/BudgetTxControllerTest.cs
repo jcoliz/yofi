@@ -67,6 +67,31 @@ namespace Ofx.Tests
         public async Task UploadWithID() => await helper.UploadWithID();
         [TestMethod]
         public async Task UploadDuplicate() => await helper.UploadDuplicate();
+        [TestMethod]
+        public async Task UploadAddNewDuplicate()
+        {
+            // These items are not EXACTLY duplicates, just duplicate enough to trigger the
+            // hashset equality constraint on input.
+
+            // Start with a full set of data
+            await helper.AddFiveItems();
+
+            // Add some new items, and upload all of it.
+            // I think this shows the behaviour described in
+            // Product Backlog Item #769: De-dupe BudgetTxs on import
+            helper.Items.Add(new BudgetTx() { Timestamp = new System.DateTime(2020, 07, 01), Category = "A", Amount = 600m });
+            helper.Items.Add(new BudgetTx() { Timestamp = new System.DateTime(2020, 07, 01), Category = "B", Amount = 700m });
+            helper.Items.Add(new BudgetTx() { Timestamp = new System.DateTime(2020, 07, 01), Category = "C", Amount = 800m });
+
+            // Now upload all the items. What should happen here is that only items 1-4 (not 0) get
+            // uploaded, because item 0 is already there, so it gets removed as a duplicate.
+            var actual = await helper.Upload(8, 3);
+
+            // Let's make sure all three are the new items
+            var findinitial = actual.Where(x => x.Timestamp.Month == 7);
+
+            Assert.AreEqual(3, findinitial.Count());
+        }
 
         // TODO: Generate next month's TXs
         // TODO: Upload duplicate with same year/month/category but different amount
