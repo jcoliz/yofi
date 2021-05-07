@@ -92,8 +92,25 @@ namespace Ofx.Tests
 
             Assert.AreEqual(3, findinitial.Count());
         }
+        [TestMethod]
+        public async Task UploadMinmallyDuplicate()
+        {
+            // These items are not EXACTLY duplicates, just duplicate enough to trigger the
+            // hashset equality constraint on input.
+
+            // Start with a full set of data
+            await helper.AddFiveItems();
+
+            // Make some changes to the amounts
+            helper.Items[0].Amount = 1000m;
+            helper.Items[1].Amount = 2000m;
+            helper.Items[2].Amount = 3000m;
+
+            // Upload these three. They should be rejected.
+            var actual = await helper.Upload(3, 0);
+
+        }
 
         // TODO: Generate next month's TXs
-        // TODO: Upload duplicate with same year/month/category but different amount
     }
 }
