@@ -87,12 +87,33 @@ namespace Ofx.Tests
             Assert.AreEqual("EditPartial", actual.ViewName);
             Assert.AreEqual(expected, model);
         }
+        [TestMethod]
+        public async Task BulkEdit()
+        {
+            await helper.AddFiveItems();
+            helper.Items[2].Selected = true;
+            helper.Items[4].Selected = true;
+            await helper.context.SaveChangesAsync();
 
+            var result = await helper.controller.BulkEdit("Category", "SubCategory");
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
+
+            // Note that we can still use the 'items' objects here because they are tracking the DB
+
+            var lookup = helper.Items.ToLookup(x => x.Category, x => x);
+
+            var changeditems = lookup["Category"];
+
+            Assert.AreEqual(2, changeditems.Count());
+
+            Assert.AreEqual("Category", helper.Items[2].Category);
+            Assert.AreEqual("Category", helper.Items[4].Category);
+        }
 
         // TODO: Create from transaction ID
         // TODO: Create modal
-        // TODO: Edit modal
-        // TODO: BulkEdit
         // TODO: Upload duplicate where ONLY the NAME is the same
         // TODO: Upload payee name stripping
     }

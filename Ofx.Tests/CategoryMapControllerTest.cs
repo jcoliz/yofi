@@ -193,15 +193,16 @@ namespace Ofx.Tests
 
             var expected = Items[2];
             var result = await controller.Create(expected);
-            var actual = result as RedirectToActionResult;
+            var redir = result as RedirectToActionResult;
 
-            Assert.AreEqual("Index", actual.ActionName);
-
-            Assert.AreEqual(2, expected.ID);
+            Assert.AreEqual("Index", redir.ActionName);
 
             var count = await dbset.CountAsync();
-
             Assert.AreEqual(2, count);
+
+            // Single() will fail if there's a problem.
+            var actual1 = dbset.Where(x => KeyFor(x) == KeyFor(Items[1])).Single();
+            var actual2 = dbset.Where(x => KeyFor(x) == KeyFor(Items[2])).Single();
         }
         public async Task EditObjectValues()
         {
