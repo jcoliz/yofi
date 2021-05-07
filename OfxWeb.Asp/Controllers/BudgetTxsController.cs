@@ -178,6 +178,7 @@ namespace OfxWeb.Asp.Controllers
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var incoming = new HashSet<Models.BudgetTx>(new BudgetTxComparer());
+            IEnumerable<BudgetTx> result = new List<BudgetTx>();
             try
             {
                 foreach (var formFile in files)
@@ -193,22 +194,11 @@ namespace OfxWeb.Asp.Controllers
                     }
                 }
 
-                // Query for matching transactions.
+                // Remove duplicate transactions.
+                result = incoming.Except(_context.BudgetTxs).ToList();
 
-                // Trying a less efficient approach
-                // DESIRED:
-                // var existing = await _context.BudgetTxs.Where(x => incoming.Contains(x)).ToListAsync();
-                // ACTUAL:
-                var all = await _context.BudgetTxs.ToListAsync();
-                var existing = all.Where(x => incoming.Contains(x));
-
-                // Removed duplicate transactions.
-
-                incoming.ExceptWith(existing);
-
-                // Add resulting transactions
-
-                await _context.AddRangeAsync(incoming);
+                // Add remaining transactions
+                await _context.AddRangeAsync(result);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -216,7 +206,7 @@ namespace OfxWeb.Asp.Controllers
                 return BadRequest(ex);
             }
 
-            return View(incoming.OrderBy(x => x.Timestamp.Year).ThenBy(x=>x.Timestamp.Month).ThenBy(x => x.Category));
+            return View(result.OrderBy(x => x.Timestamp.Year).ThenBy(x=>x.Timestamp.Month).ThenBy(x => x.Category));
         }
 
         // GET: Transactions/Download
