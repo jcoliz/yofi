@@ -178,7 +178,7 @@ namespace OfxWeb.Asp.Controllers
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var incoming = new HashSet<Models.BudgetTx>(new BudgetTxComparer());
-            IEnumerable<BudgetTx> result = new List<BudgetTx>();
+            IEnumerable<BudgetTx> result = Enumerable.Empty<BudgetTx>();
             try
             {
                 foreach (var formFile in files)
