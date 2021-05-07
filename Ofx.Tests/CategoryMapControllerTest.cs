@@ -280,15 +280,15 @@ namespace Ofx.Tests
         /// </summary>
         /// <param name="duplicates">How many of the uploaded items were really duplicates, so we shouldn't expect to see them back</param>
         /// <returns></returns>
-        public async Task Upload()
+        public async Task<IEnumerable<T>> Upload(int numitems = 5, int expect = 5)
         {
-            // Build a spreadsheet with only the first four items. (We'll use the fifth in UPload with ID)
+            // Build a spreadsheet with the chosen number of items
             byte[] reportBytes;
             var sheetname = $"{typeof(T).Name}s";
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add(sheetname);
-                worksheet.PopulateFrom(Items.Take(4).ToList(), out _, out _);
+                worksheet.PopulateFrom(Items.Take(numitems).ToList(), out _, out _);
                 reportBytes = package.GetAsByteArray();
             }
 
@@ -303,7 +303,9 @@ namespace Ofx.Tests
             var actual = result as ViewResult;
             var model = actual.Model as IEnumerable<T>;
 
-            Assert.AreEqual(4, model.Count());
+            Assert.AreEqual(expect, model.Count());
+
+            return model;
         }
         public async Task UploadWithID()
         {
@@ -316,7 +318,8 @@ namespace Ofx.Tests
             // The end result is that the database will == items
             Items[0].ID = expected.ID;
 
-            await Upload();
+            // Just upload the first four items. The fifth, we already did above
+            await Upload(4,4);
 
             // From here we can just use the Index test, but not add items. There should be the proper "items"
             // all there now.
@@ -341,11 +344,28 @@ namespace Ofx.Tests
             Assert.AreNotEqual(first.ID, second.ID);
 #endif
         }
-        public async Task UploadDupes()
+        public async Task UploadDuplicate()
         {
-            // TODO: Write a test which attempts to upload some dupes, and it don't happen!
-        }
+            // Start out with one item in the DB. We are picking the ONE item that Upload doesn't upload.
+            var initial = Items[0];
+            context.Add(initial);
+            await context.SaveChangesAsync();
 
+            // Need to detach the entity we originally created, to set up the same state the controller would be
+            // in with not already haveing a tracked object.
+            context.Entry(initial).State = EntityState.Detached;
+
+            Items[0].ID = 0;
+
+            // Now upload all the items. What should happen here is that only items 1-4 (not 0) get
+            // uploaded, because item 0 is already there, so it gets removed as a duplicate.
+            var actual = await Upload(5,4);
+
+            // Let's make sure that Item[0] indeed did not get updated.
+            var findinitial = actual.Where(x => x == Items[0]);
+
+            Assert.AreEqual(0, findinitial.Count());
+        }
     }
 
     [TestClass]
@@ -404,5 +424,7 @@ namespace Ofx.Tests
         public async Task Upload() => await helper.Upload();
         [TestMethod]
         public async Task UploadWithID() => await helper.UploadWithID();
+        [TestMethod]
+        public async Task UploadDuplicate() => await helper.UploadDuplicate();
     }
 }

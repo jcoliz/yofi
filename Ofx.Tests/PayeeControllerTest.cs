@@ -72,5 +72,7 @@ namespace Ofx.Tests
         public async Task Upload() => await helper.Upload();
         [TestMethod]
         public async Task UploadWithID() => await helper.UploadWithID();
+        [TestMethod]
+        public async Task UploadDuplicate() => await helper.UploadDuplicate();
     }
 }
