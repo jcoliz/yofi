@@ -10,9 +10,9 @@ using OfficeOpenXml;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 
-namespace OfxWeb.Asp
+namespace OfxWeb.Asp.Controllers
 {
-    public class BudgetTxsController : Controller
+    public class BudgetTxsController : Controller, IController<BudgetTx>
     {
         private readonly ApplicationDbContext _context;
 

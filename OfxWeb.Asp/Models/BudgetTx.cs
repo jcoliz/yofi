@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class BudgetTx: IReportable
+    public class BudgetTx: IReportable, IID
     {
         public int ID { get; set; }
         [DisplayFormat(DataFormatString = "{0:C2}")]
@@ -22,6 +22,19 @@ namespace OfxWeb.Asp.Models
             Amount = copy.Amount;
             Category = copy.Category;
             Timestamp = dt;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is BudgetTx tx &&
+                   Amount == tx.Amount &&
+                   Timestamp == tx.Timestamp &&
+                   Category == tx.Category;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Amount, Timestamp, Category);
         }
     }
 }
