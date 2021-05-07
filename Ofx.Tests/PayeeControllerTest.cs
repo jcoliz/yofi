@@ -127,7 +127,23 @@ namespace Ofx.Tests
             Assert.AreEqual(tx.SubCategory, model.SubCategory);
         }
 
-        // TODO: Create modal
+        [TestMethod]
+        public async Task CreateModalFromTx()
+        {
+            var tx = new Transaction() { Payee = "A", SubCategory = "B", Category = "C" };
+            helper.context.Add(tx);
+            await helper.context.SaveChangesAsync();
+
+            var result = await helper.controller.CreateModal(tx.ID);
+            var actual = result as PartialViewResult;
+            var model = actual.Model as Payee;
+
+            Assert.AreEqual("CreatePartial", actual.ViewName);
+            Assert.AreEqual(tx.Payee, model.Name);
+            Assert.AreEqual(tx.Category, model.Category);
+            Assert.AreEqual(tx.SubCategory, model.SubCategory);
+        }
+
         // TODO: Upload duplicate where ONLY the NAME is the same
         // TODO: Upload payee name stripping
     }
