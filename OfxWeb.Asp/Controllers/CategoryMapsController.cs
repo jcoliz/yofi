@@ -164,6 +164,7 @@ namespace OfxWeb.Asp.Controllers
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var incoming = new HashSet<Models.CategoryMap>();
+            IEnumerable<CategoryMap> result = Enumerable.Empty<CategoryMap>();
             try
             {
                 // Extract submitted file into a list objects
@@ -181,20 +182,11 @@ namespace OfxWeb.Asp.Controllers
                     }
                 }
 
-                // Remove duplicate entries.
+                // Remove duplicate transactions.
+                result = incoming.Except(_context.CategoryMaps).ToList();
 
-                // Trying a less efficient approach
-                // DESIRED:
-                // var existing = await _context.Payees.Where(x => incoming.Contains(x)).ToListAsync();
-                // ACTUAL:
-                var all = await _context.CategoryMaps.ToListAsync();
-                var existing = all.Where(x => incoming.Contains(x));
-
-                incoming.ExceptWith(existing);
-
-                // Add resulting transactions
-
-                await _context.AddRangeAsync(incoming);
+                // Add remaining transactions
+                await _context.AddRangeAsync(result);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -202,7 +194,7 @@ namespace OfxWeb.Asp.Controllers
                 return BadRequest(ex);
             }
 
-            return View(incoming.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Key1).ThenBy(x => x.Key2).ThenBy(x => x.Key3));
+            return View(result.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Key1).ThenBy(x => x.Key2).ThenBy(x => x.Key3));
         }
 
         // GET: CategoryMaps/Download
