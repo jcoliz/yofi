@@ -249,6 +249,7 @@ namespace OfxWeb.Asp
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var incoming = new HashSet<Models.Payee>(new PayeeNameComparer());
+            IEnumerable<Payee> result = Enumerable.Empty<Payee>();
             try
             {
                 // Extract submitted file into a list objects
@@ -266,25 +267,15 @@ namespace OfxWeb.Asp
                     }
                 }
 
-                // Remove duplicate entries.
-
-                // Trying a less efficient approach
-                // DESIRED:
-                // var existing = await _context.Payees.Where(x => incoming.Contains(x)).ToListAsync();
-                // ACTUAL:
-                var all = await _context.Payees.ToListAsync();
-                var existing = all.Where(x => incoming.Contains(x));
-
-                incoming.ExceptWith(existing);
+                // Remove duplicate transactions.
+                result = incoming.Except(_context.Payees).ToList();
 
                 // Fix up the remaining names
-
-                foreach (var item in incoming)
+                foreach (var item in result)
                     item.FixupName();
 
-                // Add resulting transactions
-
-                await _context.AddRangeAsync(incoming);
+                // Add remaining transactions
+                await _context.AddRangeAsync(result);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -292,7 +283,7 @@ namespace OfxWeb.Asp
                 return BadRequest(ex);
             }
 
-            return View(incoming.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory));
+            return View(result.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory));
         }
 
         // GET: Payees/Download
