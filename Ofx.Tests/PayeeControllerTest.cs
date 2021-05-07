@@ -74,5 +74,26 @@ namespace Ofx.Tests
         public async Task UploadWithID() => await helper.UploadWithID();
         [TestMethod]
         public async Task UploadDuplicate() => await helper.UploadDuplicate();
+
+        [TestMethod]
+        public async Task EditModal()
+        {
+            await helper.AddFiveItems();
+            var expected = helper.Items[3];
+            var result = await helper.controller.EditModal(expected.ID);
+            var actual = result as PartialViewResult;
+            var model = actual.Model as Payee;
+
+            Assert.AreEqual("EditPartial", actual.ViewName);
+            Assert.AreEqual(expected, model);
+        }
+
+
+        // TODO: Create from transaction ID
+        // TODO: Create modal
+        // TODO: Edit modal
+        // TODO: BulkEdit
+        // TODO: Upload duplicate where ONLY the NAME is the same
+        // TODO: Upload payee name stripping
     }
 }

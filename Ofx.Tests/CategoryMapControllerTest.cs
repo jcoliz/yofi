@@ -83,7 +83,7 @@ namespace Ofx.Tests
                 entry.State = EntityState.Detached;
         }
 
-        private async Task AddFiveItems()
+        public async Task AddFiveItems()
         {
             // context.AddRange(Items) doesn't work :(
             foreach (var item in Items)
