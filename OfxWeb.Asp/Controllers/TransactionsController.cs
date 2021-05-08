@@ -31,7 +31,7 @@ namespace OfxWeb.Asp.Controllers
         {
             _context = context;
 
-            var StorageAccount = configuration["StorageAccount"];
+            var StorageAccount = configuration?["StorageAccount"];
             Console.WriteLine(StorageAccount);
 
         }
