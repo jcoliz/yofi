@@ -21,7 +21,7 @@ using System.Text.RegularExpressions;
 namespace OfxWeb.Asp.Controllers
 {
     [Authorize(Roles = "Verified")]
-    public class TransactionsController : Controller
+    public class TransactionsController : Controller, IController<Models.Transaction>
     {
         private readonly ApplicationDbContext _context;
 
@@ -1190,6 +1190,12 @@ namespace OfxWeb.Asp.Controllers
         {
             return _context.Transactions.Any(e => e.ID == id);
         }
+
+        Task<IActionResult> IController<Models.Transaction>.Index() => Index(string.Empty, string.Empty, string.Empty, string.Empty, null);
+
+        Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
+
+        Task<IActionResult> IController<Models.Transaction>.Upload(List<IFormFile> files) => Upload(files, string.Empty);
     }
 
     public class SparseDictionary<K,V>: Dictionary<K,V>
