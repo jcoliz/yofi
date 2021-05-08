@@ -856,7 +856,7 @@ namespace OfxWeb.Asp.Controllers
             {
                 if (!_Year.HasValue)
                 {
-                    var value = HttpContext.Session.GetString(nameof(Year));
+                    var value = HttpContext?.Session.GetString(nameof(Year));
                     if (string.IsNullOrEmpty(value))
                     {
                         Year = DateTime.Now.Year;
@@ -876,7 +876,7 @@ namespace OfxWeb.Asp.Controllers
                 _Year = value;
 
                 var serialisedDate = _Year.ToString();
-                HttpContext.Session.SetString(nameof(Year), serialisedDate);
+                HttpContext?.Session.SetString(nameof(Year), serialisedDate);
             }
         }
 

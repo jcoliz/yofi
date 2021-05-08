@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp;
 using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,11 +21,11 @@ namespace Ofx.Tests
             helper.SetUp();
             helper.controller = new TransactionsController(helper.context, null);
 
-            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "3", Timestamp = new System.DateTime(2020, 01, 03), Amount = 100m });
-            helper.Items.Add(new Transaction() { Category = "A", SubCategory = "A", Payee = "2", Timestamp = new System.DateTime(2020, 01, 04), Amount = 200m });
-            helper.Items.Add(new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new System.DateTime(2020, 01, 01), Amount = 300m });
-            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new System.DateTime(2020, 01, 05), Amount = 400m });
-            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new System.DateTime(2020, 01, 03), Amount = 500m });
+            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
+            helper.Items.Add(new Transaction() { Category = "A", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
+            helper.Items.Add(new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
+            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
+            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
 
             helper.dbset = helper.context.Transactions;
 
@@ -59,9 +60,9 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task DeleteConfirmed() => await helper.DeleteConfirmed();
         // TODO: Fix failing tests
-#if false
         [TestMethod]
         public async Task Download() => await helper.Download();
+#if false
         [TestMethod]
         public async Task Upload() => await helper.Upload();
         [TestMethod]
