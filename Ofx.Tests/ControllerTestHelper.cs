@@ -284,12 +284,7 @@ namespace Ofx.Tests
             return incoming;
         }
 
-        /// <summary>
-        /// Test uploading a file
-        /// </summary>
-        /// <param name="duplicates">How many of the uploaded items were really duplicates, so we shouldn't expect to see them back</param>
-        /// <returns></returns>
-        public async Task<IEnumerable<T>> Upload(int numitems = 5, int expect = 5)
+        public async Task<IActionResult> DoUpload(ICollection<T> what)
         {
             // Build a spreadsheet with the chosen number of items
             byte[] reportBytes;
@@ -297,7 +292,7 @@ namespace Ofx.Tests
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add(sheetname);
-                worksheet.PopulateFrom(Items.Take(numitems).ToList(), out _, out _);
+                worksheet.PopulateFrom(what, out _, out _);
                 reportBytes = package.GetAsByteArray();
             }
 
@@ -307,6 +302,18 @@ namespace Ofx.Tests
 
             // Upload that
             var result = await controller.Upload(new List<IFormFile>() { file });
+
+            return result;
+        }
+
+        /// <summary>
+        /// Test uploading a file
+        /// </summary>
+        /// <param name="duplicates">How many of the uploaded items were really duplicates, so we shouldn't expect to see them back</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<T>> Upload(int numitems = 5, int expect = 5)
+        {
+            var result = await DoUpload(Items.Take(numitems).ToList());
 
             // Test the status
             var actual = result as ViewResult;

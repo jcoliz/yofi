@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp;
 using OfxWeb.Asp.Controllers;
+using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +16,11 @@ namespace Ofx.Tests
     public class TransactionControllerTest
     {
         private ControllerTestHelper<Transaction, TransactionsController> helper = null;
+
+        TransactionsController controller => helper.controller;
+        ApplicationDbContext context => helper.context;
+        List<Transaction> Items => helper.Items;
+        DbSet<Transaction> dbset => helper.dbset;
 
         [TestInitialize]
         public void SetUp()
@@ -62,9 +70,23 @@ namespace Ofx.Tests
         // TODO: Fix failing tests
         [TestMethod]
         public async Task Download() => await helper.Download();
-#if false
         [TestMethod]
-        public async Task Upload() => await helper.Upload();
+        public async Task Upload()
+        {
+            // Can't use the helper's upload bevause Transaction upload does not return the uploaded items.
+
+            var result = await helper.DoUpload(Items);
+
+            // Test the status
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Import", actual.ActionName);
+
+            // Now check the state of the DB
+
+            Assert.AreEqual(Items.Count, dbset.Count());
+        }        
+#if false
         [TestMethod]
         public async Task UploadWithID() => await helper.UploadWithID();
         [TestMethod]
