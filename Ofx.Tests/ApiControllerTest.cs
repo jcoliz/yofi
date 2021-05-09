@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Data;
 using System;
@@ -43,6 +45,15 @@ namespace Ofx.Tests
         public void Empty()
         {
             Assert.IsNotNull(controller);
+        }
+
+        [TestMethod]
+        public void Get()
+        {
+            var json = controller.Get();
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsTrue(result.Ok);
         }
     }
 }
