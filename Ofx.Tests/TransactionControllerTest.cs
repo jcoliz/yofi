@@ -158,5 +158,22 @@ namespace Ofx.Tests
 
             Assert.AreEqual(initial, actual);
         }
+
+        //
+        // Long list of TODO tests!!
+        //
+        // TODO: OFX Upload
+        // TODO: Upload w/ date cutoff
+        // TODO: Edit, duplicate = true
+        // TODO: Index sort order
+        // TODO: Index payee search
+        // TODO: Index cat/subcat search
+        // TODO: Index pagination
+        // TODO: Bulk Edit
+        // TODO: Apply Payee
+        // TODO: UpReceipt
+        // TODO: DeleteReceipt
+        // TODO: GetReceipt
+        // TODO: Reports (yikes!)
     }
 }
