@@ -383,5 +383,4 @@ namespace Ofx.Tests
             Assert.AreEqual(0, findinitial.Count());
         }
     }
-
 }

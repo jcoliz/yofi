@@ -118,11 +118,45 @@ namespace Ofx.Tests
             for (int i = 0; i < 5; ++i)
                 Assert.AreEqual(Items[i], indexmany[i]);
         }
-#if false
+
         [TestMethod]
-        public async Task UploadWithID() => await helper.UploadWithID();
-        [TestMethod]
-        public async Task UploadDuplicate() => await helper.UploadDuplicate();
-#endif
+        public async Task UploadDuplicate()
+        {
+            // Start out with one item in the DB. We are picking the ONE item that Upload doesn't upload.
+            var initial = Items[0];
+            context.Add(initial);
+            await context.SaveChangesAsync();
+
+            // Need to detach the entity we originally created, to set up the same state the controller would be
+            // in with not already haveing a tracked object.
+            context.Entry(initial).State = EntityState.Detached;
+
+            Items[0].ID = 0;
+
+            // Now upload all the items. What should happen here is that only items 1-4 (not 0) get
+            // uploaded, because item 0 is already there, so it gets removed as a duplicate.
+            // Can't use the helper's upload bevause Transaction upload does not return the uploaded items.
+            var result = await helper.DoUpload(Items);
+            var redirectooactionresult = result as RedirectToActionResult;
+
+            Assert.AreEqual("Import", redirectooactionresult.ActionName);
+
+            // What's expected here? The new item IS uploaded, BUT it's deselected, where the rest are selected, right?
+            var indexmany = await dbset.OrderBy(x => x.Payee).ToListAsync();
+
+            Assert.AreEqual(1 + Items.Count(), indexmany.Count);
+
+            // We expect that FIVE items were imported.
+
+            var wasimported = dbset.Where(x => true == x.Imported);
+
+            Assert.AreEqual(5, wasimported.Count());
+
+            // Out of those, we expect that ONE is not selected, because it's a dupe of the initial.
+
+            var actual = wasimported.Where(x => false == x.Selected).Single();
+
+            Assert.AreEqual(initial, actual);
+        }
     }
 }

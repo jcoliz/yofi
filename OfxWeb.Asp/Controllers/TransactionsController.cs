@@ -655,6 +655,8 @@ namespace OfxWeb.Asp.Controllers
                         foreach (var import in incoming)
                         {
                             import.Selected = true;
+                            if (string.IsNullOrEmpty(import.BankReference))
+                                import.GenerateBankReference();
                         }
                     }
                 }
