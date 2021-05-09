@@ -74,7 +74,6 @@ namespace Ofx.Tests
         public async Task Upload()
         {
             // Can't use the helper's upload bevause Transaction upload does not return the uploaded items.
-
             var result = await helper.DoUpload(Items);
 
             // Test the status
@@ -85,7 +84,40 @@ namespace Ofx.Tests
             // Now check the state of the DB
 
             Assert.AreEqual(Items.Count, dbset.Count());
-        }        
+        }
+        [TestMethod]
+        public async Task UploadWithID()
+        {
+            // Can't use the helper's upload bevause Transaction upload does not return the uploaded items.
+
+            // Start out with one item in the DB. We are picking the ONE item that Upload doesn't upload.
+            var expected = Items[4];
+            context.Add(expected);
+            await context.SaveChangesAsync();
+
+            // One of the new items has an overlapping ID, but will be different in every way. We expect that
+            // The end result is that the database will == items
+            Items[0].ID = expected.ID;
+
+            // Just upload the first four items. The fifth, we already did above
+            // Can't use the helper's upload bevause Transaction upload does not return the uploaded items.
+            var result = await helper.DoUpload(Items.Take(4).ToList());
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Import", actual.ActionName);
+
+            // From here we can just use the Index test, but not add items. There should be the proper "items"
+            // all there now.
+
+            var indexmany = await dbset.OrderBy(x => x.Payee).ToListAsync();
+
+            // Sort the original items by Key
+            Items.Sort((x, y) => x.Payee.CompareTo(y.Payee));
+
+            // Test that the resulting items are in the same order
+            for (int i = 0; i < 5; ++i)
+                Assert.AreEqual(Items[i], indexmany[i]);
+        }
 #if false
         [TestMethod]
         public async Task UploadWithID() => await helper.UploadWithID();
