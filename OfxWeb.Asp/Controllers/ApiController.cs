@@ -452,7 +452,7 @@ namespace OfxWeb.Asp.Controllers
 
     public class ApiTransactionResult : ApiResult
     {
-        public Transaction Transaction { get; }
+        public Transaction Transaction { get; set; }
 
         public ApiTransactionResult(Transaction tx)
         {
