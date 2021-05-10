@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ManiaLabs.Portable.Tests;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -7,6 +10,7 @@ using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +24,8 @@ namespace Ofx.Tests
 
         public ApplicationDbContext context = null;
 
+        public TestAzureStorage storage = null;
+
         [TestInitialize]
         public void SetUp()
         {
@@ -29,7 +35,9 @@ namespace Ofx.Tests
 
             context = new ApplicationDbContext(options);
 
-            controller = new ApiController(context);
+            storage = new TestAzureStorage();
+
+            controller = new ApiController(context,storage);
         }
 
         [TestCleanup]
@@ -411,6 +419,27 @@ namespace Ofx.Tests
 
             var modified = await context.Payees.Where(x => x.Name == newitem.Name).SingleAsync();
             Assert.AreEqual(newitem, modified);
+        }
+        [TestMethod]
+        public async Task UpReceipt()
+        {
+            await AddFiveTransactions();
+            var original = await context.Transactions.LastAsync();
+
+            // Create a formfile with it
+            var contenttype = "text/html";
+            var bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            var stream = new MemoryStream(bytes);
+            var file = new FormFile(stream, 0, 10, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
+            
+            var json = await controller.UpReceipt(original.ID,file);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.AreEqual(contenttype, original.ReceiptUrl);
+
+            // TODO: This test could be a little more expansive and inspect the storage provider to make
+            // sure the bytes are there.
         }
     }
 }

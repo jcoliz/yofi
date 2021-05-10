@@ -46,9 +46,11 @@ namespace ManiaLabs.Portable.Tests
             throw new NotImplementedException();
         }
 
-        public Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
+        public async Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
         {
-            throw new NotImplementedException();
+            // For this test, we are just going to full ignore it.
+
+            return new Uri("http://www.nytimes.com/");
         }
 
         Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
