@@ -435,9 +435,9 @@ namespace OfxWeb.Asp.Controllers
 
     public class ApiResult
     {
-        public bool Ok { get; } = true;
+        public bool Ok { get; set; } = true;
 
-        public Exception Exception { get; } = null;
+        public Exception Exception { get; set; } = null;
 
         public ApiResult() { }
 

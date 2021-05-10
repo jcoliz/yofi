@@ -80,5 +80,17 @@ namespace Ofx.Tests
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(expected, result.Transaction);
         }
+        [TestMethod]
+        public async Task GetIdFails()
+        {
+            await AddFiveTransactions();
+            var maxid = await context.Transactions.MaxAsync(x=>x.ID);
+
+            var json = await controller.Get(maxid + 1);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
     }
 }
