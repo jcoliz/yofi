@@ -50,6 +50,17 @@ namespace Ofx.Tests
             context.Transactions.Add(new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
             context.Transactions.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
             context.Transactions.Add(new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
+            
+            await context.SaveChangesAsync();
+        }
+
+        async Task AddFivePayees()
+        {
+            context.Payees.Add(new Payee() { Category = "B", SubCategory = "A", Name = "3" });
+            context.Payees.Add(new Payee() { Category = "A", SubCategory = "A", Name = "2" });
+            context.Payees.Add(new Payee() { Category = "C", SubCategory = "A", Name = "5" });
+            context.Payees.Add(new Payee() { Category = "A", SubCategory = "A", Name = "1" });
+            context.Payees.Add(new Payee() { Category = "B", SubCategory = "B", Name = "4" });
 
             await context.SaveChangesAsync();
         }
@@ -187,6 +198,30 @@ namespace Ofx.Tests
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
             var json = await controller.Deselect(maxid + 1);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
+        [TestMethod]
+        public async Task SelectPayeeId()
+        {
+            await AddFivePayees();
+            var expected = await context.Payees.FirstAsync();
+
+            var json = await controller.SelectPayee(expected.ID);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.IsTrue(true == expected.Selected);
+        }
+        [TestMethod]
+        public async Task SelectPayeeIdFails()
+        {
+            await AddFivePayees();
+            var maxid = await context.Payees.MaxAsync(x => x.ID);
+
+            var json = await controller.SelectPayee(maxid + 1);
             var result = JsonConvert.DeserializeObject<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
