@@ -285,7 +285,20 @@ namespace Ofx.Tests
 
             Assert.AreEqual(expected.Category, tx.Category);
             Assert.AreEqual(expected.SubCategory, tx.SubCategory);
-
         }
+        [TestMethod]
+        public async Task ApplyPayeeFailsNoTxId()
+        {
+            await AddFivePayees();
+            await AddFiveTransactions();
+            var maxid = await context.Transactions.MaxAsync(x => x.ID);
+
+            var json = await controller.ApplyPayee(maxid + 1);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
+
     }
 }
