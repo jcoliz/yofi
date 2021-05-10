@@ -388,5 +388,29 @@ namespace Ofx.Tests
             Assert.AreEqual(newitem, actual);
             Assert.AreNotEqual(original, actual);
         }
+        [TestMethod]
+        public async Task EditPayeeDuplicate()
+        {
+            await AddFivePayees();
+            var original = await context.Payees.FirstAsync();
+
+            // detach the original so we have an unmodified copy around
+            context.Entry(original).State = EntityState.Detached;
+
+            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
+
+            var json = await controller.EditPayee(original.ID, true, newitem);
+            var result = JsonConvert.DeserializeObject<ApiPayeeResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.AreEqual(newitem, result.Payee);
+            Assert.AreNotEqual(original, result.Payee);
+
+            var unmodified = await context.Payees.Where(x => x.ID == original.ID).SingleAsync();
+            Assert.AreEqual(original, unmodified);
+
+            var modified = await context.Payees.Where(x => x.Name == newitem.Name).SingleAsync();
+            Assert.AreEqual(newitem, modified);
+        }
     }
 }
