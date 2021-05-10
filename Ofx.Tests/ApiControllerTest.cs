@@ -300,5 +300,25 @@ namespace Ofx.Tests
             Assert.IsNotNull(result.Exception);
         }
 
+        [TestMethod]
+        public async Task ApplyPayeeFailsNoPayee()
+        {
+            await AddFivePayees();
+            await AddFiveTransactions();
+
+            // Pick an aribtrary transaction
+            var tx = await context.Transactions.LastAsync();
+
+            // Now remove the matching payee
+            var payee = await context.Payees.Where(x => x.Name == tx.Payee).SingleAsync();
+            context.Payees.Remove(payee);
+            await context.SaveChangesAsync();
+
+            var json = await controller.ApplyPayee(tx.ID);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
     }
 }
