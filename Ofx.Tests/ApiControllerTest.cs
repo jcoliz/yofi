@@ -116,5 +116,81 @@ namespace Ofx.Tests
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
         }
+        [TestMethod]
+        public async Task ShowId()
+        {
+            await AddFiveTransactions();
+            var expected = await context.Transactions.FirstAsync();
+            expected.Hidden = true;
+            await context.SaveChangesAsync();
+
+            var json = await controller.Show(expected.ID);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.IsTrue(false == expected.Hidden);
+        }
+        [TestMethod]
+        public async Task ShowIdFails()
+        {
+            await AddFiveTransactions();
+            var maxid = await context.Transactions.MaxAsync(x => x.ID);
+
+            var json = await controller.Show(maxid + 1);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
+        [TestMethod]
+        public async Task SelectId()
+        {
+            await AddFiveTransactions();
+            var expected = await context.Transactions.FirstAsync();
+
+            var json = await controller.Select(expected.ID);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.IsTrue(true == expected.Selected);
+        }
+        [TestMethod]
+        public async Task SelectIdFails()
+        {
+            await AddFiveTransactions();
+            var maxid = await context.Transactions.MaxAsync(x => x.ID);
+
+            var json = await controller.Select(maxid + 1);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
+        [TestMethod]
+        public async Task DeselectId()
+        {
+            await AddFiveTransactions();
+            var expected = await context.Transactions.FirstAsync();
+            expected.Selected = true;
+            await context.SaveChangesAsync();
+
+            var json = await controller.Deselect(expected.ID);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.IsTrue(false == expected.Selected);
+        }
+        [TestMethod]
+        public async Task DeselectIdFails()
+        {
+            await AddFiveTransactions();
+            var maxid = await context.Transactions.MaxAsync(x => x.ID);
+
+            var json = await controller.Deselect(maxid + 1);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
     }
 }
