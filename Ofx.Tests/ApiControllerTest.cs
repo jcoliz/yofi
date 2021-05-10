@@ -7,6 +7,7 @@ using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -45,22 +46,22 @@ namespace Ofx.Tests
 
         async Task AddFiveTransactions()
         {            
-            context.Transactions.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
-            context.Transactions.Add(new Transaction() { Category = "A", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
-            context.Transactions.Add(new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
-            context.Transactions.Add(new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
+            context.Transactions.Add(new Transaction() { Category = "BB", SubCategory = "AA", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
+            context.Transactions.Add(new Transaction() { Category = "AA", SubCategory = "AA", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
+            context.Transactions.Add(new Transaction() { Category = "CC", SubCategory = "AA", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "BB", SubCategory = "AA", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
+            context.Transactions.Add(new Transaction() { Category = "BB", SubCategory = "BB", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
             
             await context.SaveChangesAsync();
         }
 
         async Task AddFivePayees()
         {
-            context.Payees.Add(new Payee() { Category = "B", SubCategory = "A", Name = "3" });
-            context.Payees.Add(new Payee() { Category = "A", SubCategory = "A", Name = "2" });
-            context.Payees.Add(new Payee() { Category = "C", SubCategory = "A", Name = "5" });
-            context.Payees.Add(new Payee() { Category = "A", SubCategory = "A", Name = "1" });
-            context.Payees.Add(new Payee() { Category = "B", SubCategory = "B", Name = "4" });
+            context.Payees.Add(new Payee() { Category = "Y", SubCategory = "E", Name = "3" });
+            context.Payees.Add(new Payee() { Category = "X", SubCategory = "E", Name = "2" });
+            context.Payees.Add(new Payee() { Category = "Z", SubCategory = "E", Name = "5" });
+            context.Payees.Add(new Payee() { Category = "X", SubCategory = "E", Name = "1" });
+            context.Payees.Add(new Payee() { Category = "Y", SubCategory = "F", Name = "4" });
 
             await context.SaveChangesAsync();
         }
@@ -263,6 +264,27 @@ namespace Ofx.Tests
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(expected, result.Payee);
+        }
+        [TestMethod]
+        public async Task ApplyPayee()
+        {
+            await AddFivePayees();
+            await AddFiveTransactions();
+
+            // Pick an aribtrary transaction
+            var tx = await context.Transactions.LastAsync();           
+
+            var json = await controller.ApplyPayee(tx.ID);
+            var result = JsonConvert.DeserializeObject<ApiPayeeResult>(json);
+
+            Assert.IsTrue(result.Ok);
+
+            var expected = await context.Payees.Where(x => x.Name == tx.Payee).SingleAsync();
+
+            Assert.AreEqual(expected, result.Payee);
+
+            Assert.AreEqual(expected.Category, tx.Category);
+            Assert.AreEqual(expected.SubCategory, tx.SubCategory);
 
         }
     }
