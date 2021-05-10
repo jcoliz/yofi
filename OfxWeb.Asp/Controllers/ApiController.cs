@@ -19,9 +19,16 @@ namespace OfxWeb.Asp.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public ApiController(ApplicationDbContext context)
+        private IPlatformAzureStorage _storage;
+
+        public ApiController(ApplicationDbContext context, IPlatformAzureStorage storage)
         {
             _context = context;
+            _storage = storage;
+        }
+
+        public ApiController(ApplicationDbContext context): this(context, new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg=="))
+        {
         }
 
         // GET: api/tx
@@ -257,8 +264,7 @@ namespace OfxWeb.Asp.Controllers
                 // Save the file to blob storage
                 //
 
-                IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
-                storage.Initialize();
+                _storage.Initialize();
 
                 string contenttype = null;
 
@@ -266,7 +272,7 @@ namespace OfxWeb.Asp.Controllers
                 {
 
                     // Upload the file
-                    await storage.UploadToBlob(BlobStoreName, id.ToString(), stream, file.ContentType);
+                    await _storage.UploadToBlob(BlobStoreName, id.ToString(), stream, file.ContentType);
 
                     // Remember the content type
                     // TODO: This can just be a true/false bool, cuz now we store content type in blob store.
@@ -281,7 +287,6 @@ namespace OfxWeb.Asp.Controllers
                     _context.Update(transaction);
                     await _context.SaveChangesAsync();
                 }
-
 
                 return new ApiResult();
             }
