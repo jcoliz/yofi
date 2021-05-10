@@ -92,5 +92,29 @@ namespace Ofx.Tests
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
         }
+        [TestMethod]
+        public async Task HideId()
+        {
+            await AddFiveTransactions();
+            var expected = await context.Transactions.FirstAsync();
+
+            var json = await controller.Hide(expected.ID);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.IsTrue(true == expected.Hidden);
+        }
+        [TestMethod]
+        public async Task HideIdFails()
+        {
+            await AddFiveTransactions();
+            var maxid = await context.Transactions.MaxAsync(x => x.ID);
+
+            var json = await controller.Hide(maxid + 1);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
     }
 }
