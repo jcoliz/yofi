@@ -227,5 +227,43 @@ namespace Ofx.Tests
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
         }
+        [TestMethod]
+        public async Task DeselectPayeeId()
+        {
+            await AddFivePayees();
+            var expected = await context.Payees.FirstAsync();
+            expected.Selected = true;
+            await context.SaveChangesAsync();
+
+            var json = await controller.DeselectPayee(expected.ID);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.IsTrue(false == expected.Selected);
+        }
+        [TestMethod]
+        public async Task DeselectPayeeIdFails()
+        {
+            await AddFivePayees();
+            var maxid = await context.Payees.MaxAsync(x => x.ID);
+
+            var json = await controller.DeselectPayee(maxid + 1);
+            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsNotNull(result.Exception);
+        }
+        [TestMethod]
+        public async Task AddPayee()
+        {
+            var expected = new Payee() { Category = "B", SubCategory = "A", Name = "3" };
+            
+            var json = await controller.AddPayee(expected);
+            var result = JsonConvert.DeserializeObject<ApiPayeeResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.AreEqual(expected, result.Payee);
+
+        }
     }
 }

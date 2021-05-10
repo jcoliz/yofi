@@ -462,7 +462,7 @@ namespace OfxWeb.Asp.Controllers
 
     public class ApiPayeeResult : ApiResult
     {
-        public Payee Payee { get; }
+        public Payee Payee { get; set;  }
 
         public ApiPayeeResult(Payee p)
         {
