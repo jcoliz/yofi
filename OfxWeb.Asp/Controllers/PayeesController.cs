@@ -260,7 +260,6 @@ namespace OfxWeb.Asp
                     {
                         using (var stream = formFile.OpenReadStream())
                         {
-                            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                             var excel = new ExcelPackage(stream);
                             var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Payees").Single();
                             worksheet.ExtractInto(incoming);

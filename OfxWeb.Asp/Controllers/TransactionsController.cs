@@ -658,7 +658,6 @@ namespace OfxWeb.Asp.Controllers
                     {
                         using (var stream = formFile.OpenReadStream())
                         {
-                            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                             var excel = new ExcelPackage(stream);
                             var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Transactions").Single();
                             worksheet.ExtractInto(incoming);
@@ -806,7 +805,6 @@ namespace OfxWeb.Asp.Controllers
                 var transactions = await _context.Transactions.Where(x => (x.Timestamp.Year == Year && x.Hidden != true)).OrderByDescending(x => x.Timestamp).ToListAsync();
 
                 byte[] reportBytes;
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (var package = new ExcelPackage())
                 {
                     package.Workbook.Properties.Title = objecttype;
@@ -839,7 +837,6 @@ namespace OfxWeb.Asp.Controllers
             try
             {
                 byte[] reportBytes;
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (var package = new ExcelPackage())
                 {
                     package.Workbook.Properties.Title = title;
