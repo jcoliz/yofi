@@ -454,7 +454,7 @@ namespace OfxWeb.Asp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
+        public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
             if (id != transaction.ID && duplicate != true)
             {
@@ -473,6 +473,18 @@ namespace OfxWeb.Asp.Controllers
                     }
                     else
                     {
+                        // Bug #846: This Edit function is not allowed to alter the
+                        // ReceiptUrl. So we much preserve whatever was there.
+
+                        var old = await _context.Transactions.Include(x => x.Splits).SingleOrDefaultAsync(m => m.ID == id);
+                        if (old == null)
+                        {
+                            return NotFound();
+                        }
+                        _context.Entry(old).State = EntityState.Detached;
+
+                        transaction.ReceiptUrl = old.ReceiptUrl;
+
                         _context.Update(transaction);
                         await _context.SaveChangesAsync();
                     }

@@ -174,6 +174,42 @@ namespace Ofx.Tests
             Assert.AreEqual(0, numselected);
         }
 
+        [TestMethod]
+        public async Task Bug846()
+        {
+            // Bug 846: Save edited item overwrites uploaded receipt
+
+            // So what is happening here is we are calling Edit(id) to get the item first, which has no receipturl
+
+            await helper.AddFiveItems();
+            var expected = Items[3];
+            var result = await controller.Edit(expected.ID);
+            var viewresult = result as ViewResult;
+            var editing = viewresult.Model as Transaction;
+
+            // Detach so our edits won't show up
+            context.Entry(editing).State = EntityState.Detached;
+
+            // Then separately we are committing a change to set the receipturl
+
+            var dbversion = dbset.Where(x => x.ID == editing.ID).Single();
+            dbversion.ReceiptUrl = "SET";
+            context.SaveChanges();
+
+            // Detach so the editing operation can work on this item
+            context.Entry(dbversion).State = EntityState.Detached;
+
+            // And THEN we are posting the original item :P
+            await controller.Edit(editing.ID, false, editing);
+
+            // What SHOULD happen is that the "blank" recepturl in the updated object does not overwrite
+            // the receitpurl we set above.
+
+            var actual = dbset.Where(x => x.ID == editing.ID).Single();
+
+            Assert.AreEqual("SET", actual.ReceiptUrl);
+        }
+
         //
         // Long list of TODO tests!!
         //
