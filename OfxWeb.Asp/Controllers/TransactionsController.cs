@@ -277,8 +277,8 @@ namespace OfxWeb.Asp.Controllers
                          orderby s.Timestamp descending, s.BankReference ascending
                          select s;
 
-            var selected = allimported.Where(x => true == x.Selected);
-            var unselected = allimported.Where(x => true != x.Selected);
+            var selected = await allimported.Where(x => true == x.Selected).ToListAsync();
+            var unselected = await allimported.Where(x => true != x.Selected).ToListAsync();
 
             if (command == "cancel")
             {
@@ -288,7 +288,7 @@ namespace OfxWeb.Asp.Controllers
             else if (command == "ok")
             {
                 foreach (var item in selected)
-                    item.Imported = item.Hidden = false;
+                    item.Imported = item.Hidden = item.Selected = false;
                 _context.Transactions.RemoveRange(unselected);
                 _context.SaveChanges();
                 return RedirectToAction(nameof(Index));

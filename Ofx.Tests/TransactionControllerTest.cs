@@ -159,9 +159,25 @@ namespace Ofx.Tests
             Assert.AreEqual(initial, actual);
         }
 
+        [TestMethod]
+        public async Task Bug839()
+        {
+            // Bug 839: Imported items are selected automatically :(
+            await helper.DoUpload(Items);
+
+            await controller.Import("ok");
+
+            var numimported = await dbset.Where(x => x.Imported == true).CountAsync();
+            var numselected = await dbset.Where(x => x.Selected == true).CountAsync();
+
+            Assert.AreEqual(0, numimported);
+            Assert.AreEqual(0, numselected);
+        }
+
         //
         // Long list of TODO tests!!
         //
+        // TODO: Import (ok/cancel/deselect)
         // TODO: OFX Upload
         // TODO: Upload w/ date cutoff
         // TODO: Edit, duplicate = true
