@@ -819,7 +819,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        private async Task<IActionResult> DownloadReport(PivotTable<Label, Label, decimal> report, string title)
+        private IActionResult DownloadReport(PivotTable<Label, Label, decimal> report, string title)
         {
             const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             try
@@ -979,7 +979,7 @@ namespace OfxWeb.Asp.Controllers
 
             if (download == true)
             {
-                return await DownloadReport(result, (string)ViewData["Title"]);
+                return DownloadReport(result, (string)ViewData["Title"]);
             }
             else
             {
