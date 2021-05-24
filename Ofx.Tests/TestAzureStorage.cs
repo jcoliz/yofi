@@ -46,11 +46,14 @@ namespace ManiaLabs.Portable.Tests
             throw new NotImplementedException();
         }
 
-        public async Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
+        public Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
         {
+            // Note that in real-life this is always an async method. Here in test code, we aren't
+            // doing anything async. But the signature remains for the interface.
+
             // For this test, we are just going to full ignore it.
 
-            return new Uri("http://www.nytimes.com/");
+            return Task.FromResult<Uri>(new Uri("http://www.nytimes.com/"));
         }
 
         Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
