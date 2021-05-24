@@ -265,6 +265,7 @@ namespace Ofx.Tests
             using (var stream = new MemoryStream(data))
             {
                 var excel = new ExcelPackage(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 var sheetname = $"{typeof(T).Name}s";
                 var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
                 worksheet.ExtractInto(incoming);

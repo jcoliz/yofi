@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31229.75
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibOfx", "LibOfx\LibOfx.csproj", "{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ofx.Tests", "Ofx.Tests\Ofx.Tests.csproj", "{5E334C32-FE96-4F4F-954E-34681222DB9A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OfxWeb.Asp", "OfxWeb.Asp\OfxWeb.Asp.csproj", "{813D7788-D271-4932-A9BD-36DD24E2345D}"
@@ -15,10 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9FCEC6C4-6A87-4AD5-8780-074A6FBE3EEF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5E334C32-FE96-4F4F-954E-34681222DB9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5E334C32-FE96-4F4F-954E-34681222DB9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E334C32-FE96-4F4F-954E-34681222DB9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
