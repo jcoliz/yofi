@@ -187,6 +187,7 @@ namespace OfxWeb.Asp.Controllers
                     {
                         using (var stream = formFile.OpenReadStream())
                         {
+                            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                             var excel = new ExcelPackage(stream);
                             var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "BudgetTxs").Single();
                             worksheet.ExtractInto(incoming);
