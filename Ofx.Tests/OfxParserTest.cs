@@ -3,6 +3,7 @@ using OfxSharpLib;
 using System;
 using System.Linq;
 using System.Reflection;
+using Common.Test.Helper;
 
 namespace Ofx.Tests
 {

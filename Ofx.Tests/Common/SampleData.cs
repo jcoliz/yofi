@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Ofx.Tests
+namespace Common.Test.Helper
 {
     public static class SampleData
     {
