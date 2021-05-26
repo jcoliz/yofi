@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNetCore;
 
-namespace Ofx.Tests
+namespace Common.AspNetCore.Tests
 {
     /// <summary>
     /// This is a container for base test functionality that is common to most or all controllers
