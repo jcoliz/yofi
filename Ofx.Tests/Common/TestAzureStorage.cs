@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace ManiaLabs.Portable.Tests
+namespace Common.Test.Mock
 {
     public class TestAzureStorage : IPlatformAzureStorage
     {

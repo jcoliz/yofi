@@ -1,4 +1,4 @@
-﻿using ManiaLabs.Portable.Tests;
+﻿using Common.Test.Mock;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Test.Mock;
 
 namespace Ofx.Tests
 {

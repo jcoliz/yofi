@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Common.AspNetCore.Tests;
+using Common.AspNetCore.Test;
 
 //
 // This is my first controller unit test. I am going to start with an easy controller, the category map controller.
