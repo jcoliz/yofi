@@ -17,6 +17,7 @@ using ManiaLabs.NET;
 using System.Web;
 using Microsoft.Extensions.Configuration;
 using System.Text.RegularExpressions;
+using Common.AspNetCore;
 
 namespace OfxWeb.Asp.Controllers
 {

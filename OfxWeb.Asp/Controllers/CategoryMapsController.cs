@@ -9,22 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
+using Common.AspNetCore;
 
 namespace OfxWeb.Asp.Controllers
 {
-    public interface IController<T>
-    {
-        Task<IActionResult> Index();
-        Task<IActionResult> Details(int? id);
-        Task<IActionResult> Edit(int? id);
-        Task<IActionResult> Edit(int id, T item);
-        Task<IActionResult> Create(T item);
-        Task<IActionResult> Delete(int? id);
-        Task<IActionResult> DeleteConfirmed(int id);
-        Task<IActionResult> Download();
-        Task<IActionResult> Upload(List<IFormFile> files);
-    }
-
     public class CategoryMapsController : Controller, IController<CategoryMap>
     {
         private readonly ApplicationDbContext _context;
