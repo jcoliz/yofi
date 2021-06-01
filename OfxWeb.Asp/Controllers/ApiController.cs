@@ -27,10 +27,6 @@ namespace OfxWeb.Asp.Controllers
             _storage = storage;
         }
 
-        public ApiController(ApplicationDbContext context): this(context, new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg=="))
-        {
-        }
-
         // GET: api/tx
         [HttpGet]
         public string Get()

@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using OfxWeb.Asp.Services;
+using ManiaLabs.Portable.Base;
+using ManiaLabs.NET;
 
 namespace OfxWeb.Asp
 {
@@ -41,6 +43,8 @@ namespace OfxWeb.Asp
             // https://andrewlock.net/an-introduction-to-session-storage-in-asp-net-core/
             services.AddDistributedMemoryCache();
             services.AddSession();
+
+            services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg=="));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
