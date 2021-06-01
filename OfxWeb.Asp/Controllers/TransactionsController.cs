@@ -317,7 +317,7 @@ namespace OfxWeb.Asp.Controllers
                 {
                     if ("-" == SubCategory)
                     {
-                        item.SubCategory = string.Empty;
+                        item.SubCategory = null;
                     }
                     else
                     {
