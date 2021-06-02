@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using ManiaLabs.NET;
 using ManiaLabs.Portable.Base;
@@ -356,9 +357,21 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
-                // Poor-man's auth
-                if ("j+dF48FhiU+Dz83ZQYsoXw==" != key)
-                    throw new ApplicationException("Invalid key");
+                if (!Request.Headers.ContainsKey("Authorization"))
+                    throw new UnauthorizedAccessException();
+
+                var authorization = Request.Headers["Authorization"].Single();
+                if (!authorization.StartsWith("Basic "))
+                    throw new UnauthorizedAccessException();
+
+                var base64 = authorization.Substring(6);
+                var credentialBytes = Convert.FromBase64String(base64);
+                var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
+                var username = credentials[0];
+                var password = credentials[1];
+
+                if ("j+dF48FhiU+Dz83ZQYsoXw==" != password)
+                    throw new ApplicationException("Invalid password");
 
                 if (year < 2017 || year > 2050)
                     throw new ApplicationException("Invalid year");
@@ -392,6 +405,10 @@ namespace OfxWeb.Asp.Controllers
                 result.Lines.RemoveAll(x => x.Key1 == null); 
 
                 return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
             }
             catch (Exception ex)
             {
