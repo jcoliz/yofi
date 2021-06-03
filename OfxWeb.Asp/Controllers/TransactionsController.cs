@@ -275,6 +275,12 @@ namespace OfxWeb.Asp.Controllers
             split.Amount = remaining;
 
             transaction.Splits.Add(split);
+
+            // Remove the category information, that's now contained in the splits.
+
+            transaction.Category = null;
+            transaction.SubCategory = null;
+
             _context.Update(transaction);
             await _context.SaveChangesAsync();
 

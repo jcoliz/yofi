@@ -216,12 +216,16 @@ namespace Ofx.Tests
         {
             await helper.AddFiveItems();
             var item = Items[3];
+            var expectedcategory = new String(item.Category);
             var result = await controller.CreateSplit(item.ID);
             var viewresult = result as ViewResult;
             var actual = viewresult.Model as Split;
 
             Assert.AreEqual(item.ID, actual.TransactionID);
             Assert.AreEqual(item.Amount, actual.Amount);
+            Assert.AreEqual(expectedcategory, actual.Category);
+            Assert.IsNull(actual.Transaction.Category);
+            Assert.IsNull(actual.Transaction.SubCategory);
         }
 
         [TestMethod]
@@ -241,6 +245,10 @@ namespace Ofx.Tests
 
             Assert.AreEqual(item.ID, actual.TransactionID);
             Assert.AreEqual(75m, actual.Amount);
+
+            // Second split shouldn't have a category/subcat
+            Assert.IsNull(actual.Category);
+            Assert.IsNull(actual.SubCategory);
         }
 
         //
