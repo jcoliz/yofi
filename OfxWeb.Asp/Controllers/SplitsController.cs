@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.AspNetCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +12,7 @@ using OfxWeb.Asp.Models;
 
 namespace OfxWeb.Asp
 {
-    public class SplitsController : Controller
+    public class SplitsController : Controller, IController<Split>
     {
         private readonly ApplicationDbContext _context;
 
@@ -154,5 +156,11 @@ namespace OfxWeb.Asp
         {
             return _context.Splits.Any(e => e.ID == id);
         }
+
+        Task<IActionResult> IController<Split>.Download() =>
+            throw new NotImplementedException();
+
+        Task<IActionResult> IController<Split>.Upload(List<IFormFile> files) =>
+            throw new NotImplementedException();
     }
 }
