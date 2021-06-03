@@ -4,6 +4,7 @@ using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,6 +48,7 @@ namespace Ofx.Tests
 
             Assert.AreEqual(1, actual.Count);
             Assert.AreEqual(2, actual[0].Splits.Count);
+            Assert.AreEqual(75m, actual[0].Splits.Where(x => x.Category == "C").Single().Amount);
         }
     }
 }
