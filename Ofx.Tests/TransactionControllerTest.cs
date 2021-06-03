@@ -211,6 +211,19 @@ namespace Ofx.Tests
             Assert.AreEqual("SET", actual.ReceiptUrl);
         }
 
+        [TestMethod]
+        public async Task CreateSplit()
+        {
+            await helper.AddFiveItems();
+            var item = Items[3];
+            var result = await controller.CreateSplit(item.ID);
+            var viewresult = result as ViewResult;
+            var actual = viewresult.Model as Split;
+
+            Assert.AreEqual(item.ID, actual.TransactionID);
+            Assert.AreEqual(item.Amount, actual.Amount);
+        }
+
         //
         // Long list of TODO tests!!
         //

@@ -252,6 +252,32 @@ namespace OfxWeb.Asp.Controllers
             return View(await result.AsNoTracking().ToListAsync());
         }
 
+        public async Task<IActionResult> CreateSplit(int id)
+        {
+            /*
+				1) ADD a split to the transaction in the full amount needed to get back to total amount.
+				2) COPY the Category Information over from the main, if exists
+                3) NULL out the Cat/SubCat from the transaction
+             */
+            var transaction = await _context.Transactions.Include("Splits")
+                .SingleOrDefaultAsync(m => m.ID == id);
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            var split = new Split() { Amount = transaction.Amount, Category = transaction.Category, SubCategory = transaction.SubCategory };
+
+            if (transaction.Splits == null)
+                transaction.Splits = new List<Split>();
+
+            transaction.Splits.Add(split);
+            _context.Update(transaction);
+            await _context.SaveChangesAsync();
+
+            return View(split);
+        }
+
         // GET: Transactions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
