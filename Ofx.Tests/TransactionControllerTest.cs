@@ -251,6 +251,33 @@ namespace Ofx.Tests
             Assert.IsNull(actual.SubCategory);
         }
 
+        [TestMethod]
+        public async Task SplitsShownInEdit()
+        {
+            // Copied from SplitTest.Includes()
+
+            var splits = new List<Split>();
+            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
+            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
+
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            // Not using this line from SplitTest.Includes(), instead we'll test the controller
+            // edit.
+            //var actual = await context.Transactions.Include("Splits").ToListAsync();
+
+            // Copied from ControllerTestHelper.EditFound()
+            var result = await controller.Edit(item.ID);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as Transaction;
+
+            Assert.AreEqual(2, model.Splits.Count);
+            Assert.AreEqual(75m, model.Splits.Where(x => x.Category == "C").Single().Amount);
+        }
+
         //
         // Long list of TODO tests!!
         //
