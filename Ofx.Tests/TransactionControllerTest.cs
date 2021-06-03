@@ -276,6 +276,28 @@ namespace Ofx.Tests
 
             Assert.AreEqual(2, model.Splits.Count);
             Assert.AreEqual(75m, model.Splits.Where(x => x.Category == "C").Single().Amount);
+            Assert.AreEqual(true, viewresult.ViewData["SplitsOK"]);
+        }
+
+        [TestMethod]
+        public async Task SplitsDontAddUpInEdit()
+        {
+            // Copied from SplitTest.Includes()
+
+            var splits = new List<Split>();
+            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
+
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            // Copied from ControllerTestHelper.EditFound()
+            var result = await controller.Edit(item.ID);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as Transaction;
+
+            Assert.AreEqual(false, viewresult.ViewData["SplitsOK"]);
         }
 
         //

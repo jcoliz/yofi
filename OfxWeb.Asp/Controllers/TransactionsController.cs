@@ -419,6 +419,11 @@ namespace OfxWeb.Asp.Controllers
                 }
             }
 
+            // Handle error condition where splits don't add up
+
+            var splitstotal = transaction.Splits.Select(x => x.Amount).Sum();
+            ViewData["SplitsOK"] = (splitstotal == transaction.Amount);
+            
             return View(transaction);
         }
 
