@@ -224,6 +224,25 @@ namespace Ofx.Tests
             Assert.AreEqual(item.Amount, actual.Amount);
         }
 
+        [TestMethod]
+        public async Task CreateSecondSplit()
+        {
+            var splits = new List<Split>();
+            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
+
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            var result = await controller.CreateSplit(item.ID);
+            var viewresult = result as ViewResult;
+            var actual = viewresult.Model as Split;
+
+            Assert.AreEqual(item.ID, actual.TransactionID);
+            Assert.AreEqual(75m, actual.Amount);
+        }
+
         //
         // Long list of TODO tests!!
         //

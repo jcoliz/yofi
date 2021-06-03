@@ -266,10 +266,13 @@ namespace OfxWeb.Asp.Controllers
                 return NotFound();
             }
 
-            var split = new Split() { Amount = transaction.Amount, Category = transaction.Category, SubCategory = transaction.SubCategory };
+            var split = new Split() { Category = transaction.Category, SubCategory = transaction.SubCategory };
 
-            if (transaction.Splits == null)
-                transaction.Splits = new List<Split>();
+            // Calculate the amount based on how much is remaining.
+
+            var currentamount = transaction.Splits.Select(x => x.Amount).Sum();
+            var remaining = transaction.Amount - currentamount;
+            split.Amount = remaining;
 
             transaction.Splits.Add(split);
             _context.Update(transaction);
