@@ -15,5 +15,6 @@ namespace OfxWeb.Asp.Models
         public string SubCategory { get; set; }
         public string Memo { get; set; }
         public int TransactionID { get; set; }
+        public Transaction Transaction { get; set; }
     }
 }
