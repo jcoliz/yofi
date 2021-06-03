@@ -6,6 +6,9 @@ using OfxWeb.Asp.Models;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNetCore.Test;
+using OfxWeb.Asp.Data;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ofx.Tests
 {
@@ -13,6 +16,12 @@ namespace Ofx.Tests
     public class PayeeControllerTest
     {
         private ControllerTestHelper<Payee, PayeesController> helper = null;
+
+        PayeesController controller => helper.controller;
+        ApplicationDbContext context => helper.context;
+        List<Payee> Items => helper.Items;
+        DbSet<Payee> dbset => helper.dbset;
+
 
         [TestInitialize]
         public void SetUp()
@@ -72,8 +81,8 @@ namespace Ofx.Tests
         public async Task EditModal()
         {
             await helper.AddFiveItems();
-            var expected = helper.Items[3];
-            var result = await helper.controller.EditModal(expected.ID);
+            var expected = Items[3];
+            var result = await controller.EditModal(expected.ID);
             var actual = result as PartialViewResult;
             var model = actual.Model as Payee;
 
@@ -84,34 +93,34 @@ namespace Ofx.Tests
         public async Task BulkEdit()
         {
             await helper.AddFiveItems();
-            helper.Items[2].Selected = true;
-            helper.Items[4].Selected = true;
-            await helper.context.SaveChangesAsync();
+            Items[2].Selected = true;
+            Items[4].Selected = true;
+            await context.SaveChangesAsync();
 
-            var result = await helper.controller.BulkEdit("Category", "SubCategory");
+            var result = await controller.BulkEdit("Category", "SubCategory");
             var actual = result as RedirectToActionResult;
 
             Assert.AreEqual("Index", actual.ActionName);
 
             // Note that we can still use the 'items' objects here because they are tracking the DB
 
-            var lookup = helper.Items.ToLookup(x => x.Category, x => x);
+            var lookup = Items.ToLookup(x => x.Category, x => x);
 
             var changeditems = lookup["Category"];
 
             Assert.AreEqual(2, changeditems.Count());
 
-            Assert.AreEqual("Category", helper.Items[2].Category);
-            Assert.AreEqual("Category", helper.Items[4].Category);
+            Assert.AreEqual("Category", Items[2].Category);
+            Assert.AreEqual("Category", Items[4].Category);
         }
         [TestMethod]
         public async Task CreateFromTx()
         {
             var tx = new Transaction() { Payee = "A", SubCategory = "B", Category = "C" };
-            helper.context.Add(tx);
-            await helper.context.SaveChangesAsync();
+            context.Add(tx);
+            await context.SaveChangesAsync();
 
-            var result = await helper.controller.Create(tx.ID);
+            var result = await controller.Create(tx.ID);
             var actual = result as ViewResult;
             var model = actual.Model as Payee;
 
@@ -124,10 +133,10 @@ namespace Ofx.Tests
         public async Task CreateModalFromTx()
         {
             var tx = new Transaction() { Payee = "A", SubCategory = "B", Category = "C" };
-            helper.context.Add(tx);
-            await helper.context.SaveChangesAsync();
+            context.Add(tx);
+            await context.SaveChangesAsync();
 
-            var result = await helper.controller.CreateModal(tx.ID);
+            var result = await controller.CreateModal(tx.ID);
             var actual = result as PartialViewResult;
             var model = actual.Model as Payee;
 
