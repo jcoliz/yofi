@@ -61,80 +61,96 @@
     </div>
 </div>
 
-<h2>Receipt</h2>
-<hr />
-
-<div class="row">
-    <div class="col-md-6">
-        @if (null == Model.ReceiptUrl)
-        {
-            <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
-                <div class="form-group">
-                    <p>Upload a receipt</p>
-                    <input type="file" name="files" size="50" />
-                    <input type="hidden" asp-for="ID" />
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Upload" class="btn btn-primary" />
-                </div>
-            </form>
-        }
-        else
-        {
-            <p>
-                <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a> |
-                <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a>
-            </p>
-        }
-
-    </div>
-</div>
 
 <h2>Splits</h2>
 <hr />
 
-<a asp-action="CreateSplit" asp-route-id="@Model.ID" class="btn btn-primary">Add</a>
+<div class="row">
+    <div class="col-md-12">
 
-@if (Model.Splits != null)
-{
-    foreach (var split in Model.Splits)
-    {
-        <dl class="dl-horizontal">
-            <dt>
-                Category
-            </dt>
-            <dd>
-                @(split.Category ?? String.Empty)
-            </dd>
-            <dt>
-                SubCategory
-            </dt>
-            <dd>
-                @(split.SubCategory ?? String.Empty)
-            </dd>
-            <dt>
-                Amount
-            </dt>
-            <dd>
-                @split.Amount
-            </dd>
-            <dt>
-                Memo
-            </dt>
-            <dd>
-                @split.Memo
-            </dd>
-            <dt>
-                Actions
-            </dt>
-            <dd>
-                <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
-                <a asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID">Delete</a>
-            </dd>
-        </dl>
+        @if (Model.Splits != null)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(x => x.Category)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(x => x.SubCategory)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(x => x.Amount)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(x => x.Memo)
+                        </th>
+                        <th>
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var split in Model.Splits)
+                    {
+                        <tr>
+                            <td>
+                                @(split.Category ?? String.Empty)
+                            </td>
+                            <td>
+                                @(split.SubCategory ?? String.Empty)
+                            </td>
+                            <td>
+                                @split.Amount
+                            </td>
+                            <td>
+                                @split.Memo
+                            </td>
+                            <td>
+                                <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
+                                <a asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <a asp-action="CreateSplit" asp-route-id="@Model.ID" class="btn btn-primary">Add</a>
+    </div>
+    </div>
+
+<br />
+
+    <h2>Receipt</h2>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            @if (null == Model.ReceiptUrl)
+            {
+                <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
+                    <div class="form-group">
+                        <p>Upload a receipt</p>
+                        <input type="file" name="files" size="50" />
+                        <input type="hidden" asp-for="ID" />
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Upload" class="btn btn-primary" />
+                    </div>
+                </form>
+            }
+            else
+            {
+                <p>
+                    <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a> |
+                    <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a>
+                </p>
+            }
+
+        </div>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     }
-}
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
