@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class Split: IID
+    public class Split: IID, ISubReportable
     {
         public int ID { get; set; }
         [DisplayFormat(DataFormatString = "{0:C2}")]
@@ -16,6 +16,8 @@ namespace OfxWeb.Asp.Models
         public string Memo { get; set; }
         public int TransactionID { get; set; }
         public Transaction Transaction { get; set; }
+
+        DateTime IReportable.Timestamp => Transaction?.Timestamp ?? DateTime.MinValue;
 
         public override bool Equals(object obj)
         {
