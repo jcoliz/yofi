@@ -991,7 +991,7 @@ namespace OfxWeb.Asp.Controllers
 
                 case "all":
                     var txs = _context.Transactions.Where(inscope).Where(x => x.Splits?.Any() != true);
-                    var splits = _context.Splits.Include("Transaction").Where(x => inscope(x.Transaction));
+                    var splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction));
                     groupsL2 = txs.AsParallel<ISubReportable>().Union(splits.AsParallel<ISubReportable>()).OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
 
                     result = await builder.ThreeLevelReport(groupsL2,true);
