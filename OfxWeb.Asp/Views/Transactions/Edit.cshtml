@@ -122,10 +122,11 @@
                 @split.Memo
             </dd>
             <dt>
-                <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
+                Actions
             </dt>
             <dd>
-
+                <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
+                <a asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID">Delete</a>
             </dd>
         </dl>
     }
