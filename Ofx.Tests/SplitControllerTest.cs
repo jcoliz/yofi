@@ -108,25 +108,6 @@ namespace Ofx.Tests
             // Now let's check our transaction.
 
             Assert.AreEqual(updated.Amount, item.Splits.Single().Amount);
-
-            /*
-            var initial = Items[3];
-            context.Add(initial);
-            await context.SaveChangesAsync();
-            var id = initial.ID;
-
-            // Need to detach the entity we originally created, to set up the same state the controller would be
-            // in with not already haveing a tracked object.
-            context.Entry(initial).State = EntityState.Detached;
-
-            var updated = Items[1];
-            updated.ID = id;
-            var result = await controller.Edit(id, updated);
-            var actual = result as RedirectToActionResult;
-
-            Assert.AreEqual("Index", actual.ActionName);
-            */
         }
-
     }
 }

@@ -397,11 +397,13 @@ namespace OfxWeb.Asp.Controllers
                     beforedate = new DateTime(now.Year, now.Month, beforeday);
                 }
 
-                IQueryable<Transaction> transactions = _context.Transactions;
+                Func<Models.Transaction, bool> inscope = (x => x.Timestamp.Year == year && x.Hidden != true);
                 if (beforedate.HasValue)
-                    transactions = transactions.Where(x => x.Timestamp < beforedate.Value);
+                    inscope = (x => x.Timestamp < beforedate.Value && x.Timestamp.Year == year && x.Hidden != true); 
 
-                var groupings = transactions.Where(x => x.Timestamp.Year == year && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                var txs = _context.Transactions.Where(inscope).Where(x => x.Splits?.Any() != true);
+                var splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction));
+                var groupings = txs.AsParallel<ISubReportable>().Union(splits.AsParallel<ISubReportable>()).OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
 
                 var builder = new Helpers.ReportBuilder(_context);
                 var report = await builder.ThreeLevelReport(groupings, true);
