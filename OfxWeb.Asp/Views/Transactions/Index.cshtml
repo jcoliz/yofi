@@ -186,11 +186,21 @@
                         @Html.DisplayFor(modelItem => item.BankReference)
                     </td>
                 }
-                <td style="padding-left:0; padding-right:5px">
+            <td style="padding-left:0; padding-right:5px">
+
+                @if (item.HasSplits)
+                {
+                    <a asp-action="Edit" asp-route-id="@item.ID" target="_blank">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                }
+                else
+                {
                     <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#editModal">
                         <i class="fa fa-edit"></i>
                     </a>
-                </td>
+                }
+            </td>
                 <td style="padding-left:0; padding-right:5px">
                     <a asp-action="Index"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
