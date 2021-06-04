@@ -453,19 +453,19 @@ namespace OfxWeb.Asp.Controllers
     {
         public Transaction Transaction { get; set; }
 
-        public ApiTransactionResult(Transaction tx)
+        public ApiTransactionResult(Transaction transaction)
         {
-            Transaction = tx;
+            Transaction = transaction;
         }
     }
 
     public class ApiPayeeResult : ApiResult
     {
-        public Payee Payee { get; set;  }
+        public Payee Payee { get; set; }
 
-        public ApiPayeeResult(Payee p)
+        public ApiPayeeResult(Payee payee)
         {
-            Payee = p;
+            Payee = payee;
         }
     }
 

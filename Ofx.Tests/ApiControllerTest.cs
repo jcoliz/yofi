@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
@@ -13,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Ofx.Tests
@@ -92,7 +92,7 @@ namespace Ofx.Tests
         public void Get()
         {
             var json = controller.Get();
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsTrue(result.Ok);
         }
@@ -103,7 +103,7 @@ namespace Ofx.Tests
             var expected = await context.Transactions.FirstAsync();
 
             var json = await controller.Get(expected.ID);
-            var result = JsonConvert.DeserializeObject<ApiTransactionResult>(json);
+            var result = JsonSerializer.Deserialize<ApiTransactionResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(expected, result.Transaction);
@@ -115,7 +115,7 @@ namespace Ofx.Tests
             var maxid = await context.Transactions.MaxAsync(x=>x.ID);
 
             var json = await controller.Get(maxid + 1);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -127,7 +127,7 @@ namespace Ofx.Tests
             var expected = await context.Transactions.FirstAsync();
 
             var json = await controller.Hide(expected.ID);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Hidden);
@@ -139,7 +139,7 @@ namespace Ofx.Tests
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
             var json = await controller.Hide(maxid + 1);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -153,7 +153,7 @@ namespace Ofx.Tests
             await context.SaveChangesAsync();
 
             var json = await controller.Show(expected.ID);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Hidden);
@@ -165,7 +165,7 @@ namespace Ofx.Tests
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
             var json = await controller.Show(maxid + 1);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -177,7 +177,7 @@ namespace Ofx.Tests
             var expected = await context.Transactions.FirstAsync();
 
             var json = await controller.Select(expected.ID);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Selected);
@@ -189,7 +189,7 @@ namespace Ofx.Tests
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
             var json = await controller.Select(maxid + 1);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -203,7 +203,7 @@ namespace Ofx.Tests
             await context.SaveChangesAsync();
 
             var json = await controller.Deselect(expected.ID);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Selected);
@@ -215,7 +215,7 @@ namespace Ofx.Tests
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
             var json = await controller.Deselect(maxid + 1);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -227,7 +227,7 @@ namespace Ofx.Tests
             var expected = await context.Payees.FirstAsync();
 
             var json = await controller.SelectPayee(expected.ID);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Selected);
@@ -239,7 +239,7 @@ namespace Ofx.Tests
             var maxid = await context.Payees.MaxAsync(x => x.ID);
 
             var json = await controller.SelectPayee(maxid + 1);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -253,7 +253,7 @@ namespace Ofx.Tests
             await context.SaveChangesAsync();
 
             var json = await controller.DeselectPayee(expected.ID);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Selected);
@@ -265,7 +265,7 @@ namespace Ofx.Tests
             var maxid = await context.Payees.MaxAsync(x => x.ID);
 
             var json = await controller.DeselectPayee(maxid + 1);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -276,7 +276,7 @@ namespace Ofx.Tests
             var expected = new Payee() { Category = "B", SubCategory = "A", Name = "3" };
             
             var json = await controller.AddPayee(expected);
-            var result = JsonConvert.DeserializeObject<ApiPayeeResult>(json);
+            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(expected, result.Payee);
@@ -291,7 +291,7 @@ namespace Ofx.Tests
             var tx = await context.Transactions.LastAsync();           
 
             var json = await controller.ApplyPayee(tx.ID);
-            var result = JsonConvert.DeserializeObject<ApiPayeeResult>(json);
+            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
 
             Assert.IsTrue(result.Ok);
 
@@ -310,7 +310,7 @@ namespace Ofx.Tests
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
             var json = await controller.ApplyPayee(maxid + 1);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -331,7 +331,7 @@ namespace Ofx.Tests
             await context.SaveChangesAsync();
 
             var json = await controller.ApplyPayee(tx.ID);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -348,7 +348,7 @@ namespace Ofx.Tests
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
 
             var json = await controller.Edit(original.ID, false, newtx);
-            var result = JsonConvert.DeserializeObject<ApiTransactionResult>(json);
+            var result = JsonSerializer.Deserialize<ApiTransactionResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newtx, result.Transaction);
@@ -370,7 +370,7 @@ namespace Ofx.Tests
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
 
             var json = await controller.Edit(original.ID, true, newtx);
-            var result = JsonConvert.DeserializeObject<ApiTransactionResult>(json);
+            var result = JsonSerializer.Deserialize<ApiTransactionResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newtx, result.Transaction);
@@ -394,7 +394,7 @@ namespace Ofx.Tests
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
 
             var json = await controller.EditPayee(original.ID, false, newitem);
-            var result = JsonConvert.DeserializeObject<ApiPayeeResult>(json);
+            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newitem, result.Payee);
@@ -416,7 +416,7 @@ namespace Ofx.Tests
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
 
             var json = await controller.EditPayee(original.ID, true, newitem);
-            var result = JsonConvert.DeserializeObject<ApiPayeeResult>(json);
+            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newitem, result.Payee);
@@ -441,7 +441,7 @@ namespace Ofx.Tests
             var file = new FormFile(stream, 0, 10, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
             
             var json = await controller.UpReceipt(original.ID,file);
-            var result = JsonConvert.DeserializeObject<ApiResult>(json);
+            var result = JsonSerializer.Deserialize<ApiResult>(json);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(contenttype, original.ReceiptUrl);
