@@ -973,25 +973,26 @@ namespace OfxWeb.Asp.Controllers
             ViewData["month"] = month;
 
             var builder = new Helpers.ReportBuilder(_context);
+            Func<Models.Transaction, bool> inscope = (x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month);
 
             switch (report)
             {
                 case "yearly":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && YearlyCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => YearlyCategories.Contains(x.Category)).Where(inscope).GroupBy(x => x.Timestamp.Month);
                     result = await builder.ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Yearly Report";
                     break;
 
                 case "details":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && DetailCategories.Contains(x.Category) && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(x => DetailCategories.Contains(x.Category)).Where(inscope).GroupBy(x => x.Timestamp.Month);
                     result = await builder.ThreeLevelReport(groupsL2);
                     ViewData["Title"] = "Transaction Details Report";
                     break;
 
                 case "all":
-                    var txs = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month && !x.Splits.Any());
-                    var splits = _context.Splits.Include("Transaction").Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= month);
-                    groupsL2 = txs.AsParallel<ISubReportable>().Union(splits.AsParallel<ISubReportable>()).GroupBy(x => x.Timestamp.Month);
+                    var txs = _context.Transactions.Where(inscope).Where(x => x.Splits?.Any() != true);
+                    var splits = _context.Splits.Include("Transaction").Where(x => inscope(x.Transaction));
+                    groupsL2 = txs.AsParallel<ISubReportable>().Union(splits.AsParallel<ISubReportable>()).OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
 
                     result = await builder.ThreeLevelReport(groupsL2,true);
                     ViewData["Title"] = "Transaction Summary";
@@ -999,7 +1000,7 @@ namespace OfxWeb.Asp.Controllers
                     break;
 
                 case "mapped":
-                    groupsL2 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month).GroupBy(x => x.Timestamp.Month);
+                    groupsL2 = _context.Transactions.Where(inscope).GroupBy(x => x.Timestamp.Month);
                     result = await builder.FourLevelReport(groupsL2);
                     ViewData["Title"] = "Transaction Summary";
                     ViewData["Mapping"] = true;
@@ -1027,7 +1028,7 @@ namespace OfxWeb.Asp.Controllers
                     break;
 
                 case "monthly":
-                    groupsL1 = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Timestamp.Month <= month && (!YearlyCategories.Contains(x.Category) || x.Category == null) && x.Hidden != true).GroupBy(x => x.Timestamp.Month);
+                    groupsL1 = _context.Transactions.Where(x => (!YearlyCategories.Contains(x.Category) || x.Category == null)).Where(inscope).GroupBy(x => x.Timestamp.Month);
                     result = TwoLevelReport(groupsL1);
                     ViewData["Title"] = "Monthly Report";
                     break;
