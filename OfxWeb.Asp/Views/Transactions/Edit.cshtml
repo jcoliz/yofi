@@ -65,6 +65,13 @@
 <h2>Splits</h2>
 <hr />
 
+@if (!Model.IsSplitsOK)
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>Incomplete Splits Balance</strong> Please <a asp-action="CreateSplit" asp-route-id="@Model.ID" class="alert-link">add another split</a> to contain the remaining balance.
+</div>
+}
+
 <div class="row">
     <div class="col-md-12">
 
@@ -118,39 +125,39 @@
 
         <a asp-action="CreateSplit" asp-route-id="@Model.ID" class="btn btn-primary">Add</a>
     </div>
-    </div>
+</div>
 
 <br />
 
-    <h2>Receipt</h2>
-    <hr />
+<h2>Receipt</h2>
+<hr />
 
-    <div class="row">
-        <div class="col-md-6">
-            @if (null == Model.ReceiptUrl)
-            {
-                <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
-                    <div class="form-group">
-                        <p>Upload a receipt</p>
-                        <input type="file" name="files" size="50" />
-                        <input type="hidden" asp-for="ID" />
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" value="Upload" class="btn btn-primary" />
-                    </div>
-                </form>
-            }
-            else
-            {
-                <p>
-                    <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a> |
-                    <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a>
-                </p>
-            }
+<div class="row">
+    <div class="col-md-6">
+        @if (null == Model.ReceiptUrl)
+        {
+            <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
+                <div class="form-group">
+                    <p>Upload a receipt</p>
+                    <input type="file" name="files" size="50" />
+                    <input type="hidden" asp-for="ID" />
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Upload" class="btn btn-primary" />
+                </div>
+            </form>
+        }
+        else
+        {
+            <p>
+                <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a> |
+                <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a>
+            </p>
+        }
 
-        </div>
     </div>
+</div>
 
-    @section Scripts {
-        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    }
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
