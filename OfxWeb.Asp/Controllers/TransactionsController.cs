@@ -249,7 +249,7 @@ namespace OfxWeb.Asp.Controllers
                 ViewData["CurrentSort"] = sortOrder;
             }
 
-            return View(await result.AsNoTracking().ToListAsync());
+            return View(await result.Include(x=>x.Splits).AsNoTracking().ToListAsync());
         }
 
         public async Task<IActionResult> CreateSplit(int id)

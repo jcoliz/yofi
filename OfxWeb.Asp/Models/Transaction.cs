@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class Transaction: ISubReportable, IID
+    public class Transaction : ISubReportable, IID
     {
         public int ID { get; set; }
         [DisplayFormat(DataFormatString = "{0:C2}")]
@@ -26,6 +26,9 @@ namespace OfxWeb.Asp.Models
         public string ReceiptUrl { get; set; }
 
         public ICollection<Split> Splits { get; set; }
+
+        public bool HasSplits => Splits?.Any() == true;
+        public bool IsSplitsOK => !HasSplits || ( Splits.Select(x=>x.Amount).Sum() == Amount );
 
         /// <summary>
         /// Remove all characters from payee which are not whitespace or alpha-numeric
