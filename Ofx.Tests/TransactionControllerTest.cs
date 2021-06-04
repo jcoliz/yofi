@@ -371,6 +371,7 @@ namespace Ofx.Tests
             var model = viewresult.Model as Transaction;
 
             Assert.AreEqual(false, viewresult.ViewData["SplitsOK"]);
+            Assert.IsFalse(model.IsSplitsOK);
         }
 
         //
