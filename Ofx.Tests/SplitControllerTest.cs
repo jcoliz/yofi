@@ -81,7 +81,7 @@ namespace Ofx.Tests
         [ExpectedException(typeof(NotImplementedException))]
         public async Task UploadDuplicate() => await helper.UploadDuplicate();
 
-        //[TestMethod]
+        [TestMethod]
         public async Task EditObjectValuesShowsInTransaction()
         {
             var splits = new List<Split>();
@@ -97,6 +97,7 @@ namespace Ofx.Tests
             // Need to detach the entity we originally created, to set up the same state the controller would be
             // in with not already haveing a tracked object.
             context.Entry(initial).State = EntityState.Detached;
+            context.Entry(item).State = EntityState.Detached;
 
             var updated = new Split() { ID = id, TransactionID = item.ID, Amount = 75m, Category = "C", SubCategory = "D" };
 
@@ -107,7 +108,9 @@ namespace Ofx.Tests
 
             // Now let's check our transaction.
 
-            Assert.AreEqual(updated.Amount, item.Splits.Single().Amount);
+            var tx = context.Transactions.Single();
+
+            Assert.AreEqual(updated.Amount, tx.Splits.Single().Amount);
         }
     }
 }
