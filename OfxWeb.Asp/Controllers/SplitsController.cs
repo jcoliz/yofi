@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 
-namespace OfxWeb.Asp
+namespace OfxWeb.Asp.Controllers
 {
     public class SplitsController : Controller, IController<Split>
     {
@@ -104,6 +104,8 @@ namespace OfxWeb.Asp
             {
                 try
                 {
+
+
                     _context.Update(split);
                     await _context.SaveChangesAsync();
                 }
@@ -118,7 +120,7 @@ namespace OfxWeb.Asp
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(TransactionsController.Edit),nameof(Transaction), new { id = id });
             }
             return View(split);
         }

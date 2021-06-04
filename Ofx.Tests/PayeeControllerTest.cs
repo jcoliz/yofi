@@ -22,7 +22,6 @@ namespace Ofx.Tests
         List<Payee> Items => helper.Items;
         DbSet<Payee> dbset => helper.dbset;
 
-
         [TestInitialize]
         public void SetUp()
         {
