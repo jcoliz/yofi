@@ -357,27 +357,21 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
-                // If there IS no request, then this is being called under test,
-                // so we shall skip the authorization.
+                if (!Request.Headers.ContainsKey("Authorization"))
+                    throw new UnauthorizedAccessException();
 
-                if (Request != null)
-                {
-                    if (!Request.Headers.ContainsKey("Authorization"))
-                        throw new UnauthorizedAccessException();
+                var authorization = Request.Headers["Authorization"].Single();
+                if (!authorization.StartsWith("Basic "))
+                    throw new UnauthorizedAccessException();
 
-                    var authorization = Request.Headers["Authorization"].Single();
-                    if (!authorization.StartsWith("Basic "))
-                        throw new UnauthorizedAccessException();
+                var base64 = authorization.Substring(6);
+                var credentialBytes = Convert.FromBase64String(base64);
+                var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
+                var username = credentials[0];
+                var password = credentials[1];
 
-                    var base64 = authorization.Substring(6);
-                    var credentialBytes = Convert.FromBase64String(base64);
-                    var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
-                    var username = credentials[0];
-                    var password = credentials[1];
-
-                    if ("j+dF48FhiU+Dz83ZQYsoXw==" != password)
-                        throw new ApplicationException("Invalid password");
-                }
+                if ("j+dF48FhiU+Dz83ZQYsoXw==" != password)
+                    throw new ApplicationException("Invalid password");
 
                 if (year < 2017 || year > 2050)
                     throw new ApplicationException("Invalid year");
