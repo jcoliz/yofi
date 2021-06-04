@@ -336,6 +336,35 @@ namespace Ofx.Tests
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
         }
+
+        [DataTestMethod]
+        [DataRow("1234567 Bobby XN April 2021 5 wks")]
+        [DataRow("1234567 Bobby MAR XN")]
+        [DataRow("1234567 Jan XN ")]
+        public async Task ApplyPayeeRegex_Pbi871(string name)
+        {
+            // Product Backlog Item 871: Match payee on regex, optionally
+
+            context.Transactions.Add(new Transaction() { Payee = name, Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
+
+            var expected = new Payee() { Category = "Y", SubCategory = "E", Name = "/1234567.*XN/" };
+            context.Payees.Add(expected);
+
+            await context.SaveChangesAsync();
+
+            var tx = context.Transactions.First();
+
+            var json = await controller.ApplyPayee(tx.ID);
+            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
+
+            Assert.IsTrue(result.Ok);
+
+            Assert.AreEqual(expected, result.Payee);
+
+            Assert.AreEqual(expected.Category, tx.Category);
+            Assert.AreEqual(expected.SubCategory, tx.SubCategory);
+        }
+
         [TestMethod]
         public async Task Edit()
         {

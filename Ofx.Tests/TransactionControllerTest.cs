@@ -391,7 +391,6 @@ namespace Ofx.Tests
         // TODO: Index cat/subcat search
         // TODO: Index pagination
         // TODO: Bulk Edit
-        // TODO: Apply Payee
         // TODO: UpReceipt
         // TODO: DeleteReceipt
         // TODO: GetReceipt

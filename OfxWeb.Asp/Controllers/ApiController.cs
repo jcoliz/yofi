@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ManiaLabs.NET;
 using ManiaLabs.Portable.Base;
@@ -64,6 +65,21 @@ namespace OfxWeb.Asp.Controllers
 
                 // See if the payee exists
                 var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
+
+                if (payee == null)
+                {
+                    // Product Backlog Item 871: Match payee on regex, optionally
+                    var regexpayees = _context.Payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
+                    foreach (var regexpayee in regexpayees)
+                    {
+                        var regex = new Regex(regexpayee.Name.Substring(1,regexpayee.Name.Length-2));
+                        if (regex.Match(transaction.Payee).Success)
+                        {
+                            payee = regexpayee;
+                            break;
+                        }
+                    }
+                }
 
                 if (payee == null)
                     throw new KeyNotFoundException("Payee unknown");
