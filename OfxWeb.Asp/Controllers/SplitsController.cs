@@ -149,9 +149,12 @@ namespace OfxWeb.Asp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var split = await _context.Splits.SingleOrDefaultAsync(m => m.ID == id);
+            var txid = split.TransactionID;
+
             _context.Splits.Remove(split);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Edit", "Transactions", new { id = txid });
+
         }
 
         private bool SplitExists(int id)

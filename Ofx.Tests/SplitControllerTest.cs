@@ -67,7 +67,7 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task DeleteFound() => await helper.DeleteFound();
         [TestMethod]
-        public async Task DeleteConfirmed() => await helper.DeleteConfirmed();
+        public async Task DeleteConfirmed() => await helper.DeleteConfirmed("Edit");
         [TestMethod]
         [ExpectedException(typeof(NotImplementedException))]
         public async Task Download() => await helper.Download();

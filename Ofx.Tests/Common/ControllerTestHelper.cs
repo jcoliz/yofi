@@ -242,14 +242,14 @@ namespace Common.AspNetCore.Test
 
             Assert.AreEqual(expected, model);
         }
-        public async Task DeleteConfirmed()
+        public async Task DeleteConfirmed(string actionname = "Index")
         {
             await AddFiveItems();
             var expected = Items[3];
             var result = await controller.DeleteConfirmed(expected.ID);
             var actual = result as RedirectToActionResult;
 
-            Assert.AreEqual("Index", actual.ActionName);
+            Assert.AreEqual(actionname, actual.ActionName);
 
             var count = await dbset.CountAsync();
 
