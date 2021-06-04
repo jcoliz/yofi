@@ -279,27 +279,33 @@ namespace Ofx.Tests
             Assert.AreEqual(true, viewresult.ViewData["SplitsOK"]);
         }
 
-        [TestMethod]
-        public async Task SplitsShownInReport()
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task SplitsShownInReport(bool usesplits)
         {
             int year = DateTime.Now.Year;
             var expected_ab = 25m;
             var expected_cd = 75m;
-#if true
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = expected_ab, Category = "A", SubCategory = "B" });
-            splits.Add(new Split() { Amount = expected_cd, Category = "C", SubCategory = "D" });
 
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m, Splits = splits };
+            if (usesplits)
+            {
+                var splits = new List<Split>();
+                splits.Add(new Split() { Amount = expected_ab, Category = "A", SubCategory = "B" });
+                splits.Add(new Split() { Amount = expected_cd, Category = "C", SubCategory = "D" });
 
-            context.Transactions.Add(item);
-#else
-            // This is how to create the list that this SHOULD look like
-            var items = new List<Transaction>();
-            items.Add(new Transaction() { Category = "A", SubCategory = "B", Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = expected_ab });
-            items.Add(new Transaction() { Category = "C", SubCategory = "D", Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = expected_cd });
-            context.Transactions.AddRange(items);
-#endif
+                var item = new Transaction() { Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m, Splits = splits };
+
+                context.Transactions.Add(item);
+            }
+            else
+            {
+                var items = new List<Transaction>();
+                items.Add(new Transaction() { Category = "A", SubCategory = "B", Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = expected_ab });
+                items.Add(new Transaction() { Category = "C", SubCategory = "D", Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = expected_cd });
+                context.Transactions.AddRange(items);
+            }
+
             context.SaveChanges();
 
             var result = await controller.Pivot("all", null, null, year, null);
