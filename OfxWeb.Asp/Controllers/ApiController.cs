@@ -63,22 +63,24 @@ namespace OfxWeb.Asp.Controllers
 
                 // Handle payee auto-assignment
 
-                // See if the payee exists
-                var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
+                Payee payee = null;
 
+                // Product Backlog Item 871: Match payee on regex, optionally
+                var regexpayees = _context.Payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
+                foreach (var regexpayee in regexpayees)
+                {
+                    var regex = new Regex(regexpayee.Name.Substring(1, regexpayee.Name.Length - 2));
+                    if (regex.Match(transaction.Payee).Success)
+                    {
+                        payee = regexpayee;
+                        break;
+                    }
+                }
+
+                // See if the payee exists outright
                 if (payee == null)
                 {
-                    // Product Backlog Item 871: Match payee on regex, optionally
-                    var regexpayees = _context.Payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
-                    foreach (var regexpayee in regexpayees)
-                    {
-                        var regex = new Regex(regexpayee.Name.Substring(1,regexpayee.Name.Length-2));
-                        if (regex.Match(transaction.Payee).Success)
-                        {
-                            payee = regexpayee;
-                            break;
-                        }
-                    }
+                    payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
                 }
 
                 if (payee == null)
