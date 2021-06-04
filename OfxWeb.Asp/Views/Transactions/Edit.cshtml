@@ -78,21 +78,19 @@
         }
         else
         {
-            <p><a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a> | 
-            <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a></p>
+            <p>
+                <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a> |
+                <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a>
+            </p>
         }
 
     </div>
 </div>
 
-<!--
-#if false
-{
-    <h4>Splits</h4>
-    <a asp-controller="Splits" asp-action="Create" asp-route-txid="@Model.ID">Add</a>
-}
-#endif
--->
+<h2>Splits</h2>
+<hr />
+
+<a asp-action="CreateSplit" asp-route-id="@Model.ID" class="btn btn-primary">Add</a>
 
 @if (Model.Splits != null)
 {
