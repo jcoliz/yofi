@@ -317,12 +317,11 @@ namespace Ofx.Tests
 
             Assert.AreEqual(expected_cd, actual_CD);
 
+            // Make sure the total is correct as well, no extra stuff in there.
             var row_total = model.RowLabels.Where(x => x.Value == "TOTAL").Single();
             var actual_total = model[col, row_total];
 
             Assert.AreEqual(expected_ab + expected_cd, actual_total);
-
-            // Make sure the total is correct as well, no extra stuff in there.
         }
 
         [TestMethod]

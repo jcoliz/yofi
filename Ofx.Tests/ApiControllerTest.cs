@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Test.Mock;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Ofx.Tests
 {
@@ -441,6 +442,76 @@ namespace Ofx.Tests
 
             // TODO: This test could be a little more expansive and inspect the storage provider to make
             // sure the bytes are there.
+        }
+
+        [TestMethod]
+        public async Task SplitsShownInReport()
+        {
+            int year = DateTime.Now.Year;
+            var expected_ab = 25m;
+            var expected_cd = 75m;
+#if false
+            var splits = new List<Split>();
+            splits.Add(new Split() { Amount = expected_ab, Category = "A:A", SubCategory = "B" });
+            splits.Add(new Split() { Amount = expected_cd, Category = "C:C", SubCategory = "D" });
+
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m, Splits = splits };
+
+            context.Transactions.Add(item);
+#else
+            // This is how to create the list that this SHOULD look like
+            var items = new List<Transaction>();
+            items.Add(new Transaction() { Category = "A:A", SubCategory = "B", Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = expected_ab });
+            items.Add(new Transaction() { Category = "C:C", SubCategory = "D", Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = expected_cd });
+            context.Transactions.AddRange(items);
+#endif
+            context.SaveChanges();
+
+            var actionresult = await controller.Report("summary", year, null, null);
+            var okresult = actionresult as OkObjectResult;
+            var report = okresult.Value as ApiSummaryReportResult;
+
+            Assert.AreEqual(2, report.Lines.Count);
+
+            var actual_AB = report.Lines.Where(x=>x.Category == "A:A" && x.SubCategory == "B").Single().Amount;
+
+            Assert.AreEqual(expected_ab, actual_AB);
+
+            var actual_CD = report.Lines.Where(x => x.Category == "C:C" && x.SubCategory == "D").Single().Amount;
+
+            Assert.AreEqual(expected_cd, actual_CD);
+
+            /*
+            var json = x.
+            var result = JsonConvert.DeserializeObject<ApiSummaryReportResult>(json);
+
+            Assert.IsTrue(result.Ok);
+            Assert.AreEqual(contenttype, original.ReceiptUrl);
+            */
+
+            /*
+
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as PivotTable<Label, Label, decimal>;
+
+            var row_AB = model.RowLabels.Where(x => x.Value == "A" && x.SubValue == "B").Single();
+            var col = model.Columns.First();
+            var actual_AB = model[col, row_AB];
+
+            Assert.AreEqual(expected_ab, actual_AB);
+
+            var row_CD = model.RowLabels.Where(x => x.Value == "C" && x.SubValue == "D").Single();
+            var actual_CD = model[col, row_CD];
+
+            Assert.AreEqual(expected_cd, actual_CD);
+
+            // Make sure the total is correct as well, no extra stuff in there.
+            var row_total = model.RowLabels.Where(x => x.Value == "TOTAL").Single();
+            var actual_total = model[col, row_total];
+
+            Assert.AreEqual(expected_ab + expected_cd, actual_total);
+
+            */
         }
     }
 }
