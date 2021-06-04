@@ -284,7 +284,7 @@ namespace OfxWeb.Asp.Controllers
             _context.Update(transaction);
             await _context.SaveChangesAsync();
 
-            return View("Edit",split);
+            return RedirectToAction("Edit", "Splits", new { id = split.ID });
         }
 
         // GET: Transactions/Details/5

@@ -120,7 +120,7 @@ namespace OfxWeb.Asp.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(TransactionsController.Edit),nameof(Transaction), new { id = id });
+                return RedirectToAction("Edit","Transactions", new { id = split.TransactionID });
             }
             return View(split);
         }
