@@ -989,13 +989,10 @@ namespace OfxWeb.Asp.Controllers
                     break;
 
                 case "all":
-                    var list = new List<ISubReportable>();
                     var txs = _context.Transactions.Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month && !x.Splits.Any());
-                    list.AddRange(txs);
                     var splits = _context.Splits.Include("Transaction").Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= month);
-                    list.AddRange(splits);
+                    groupsL2 = txs.AsParallel<ISubReportable>().Union(splits.AsParallel<ISubReportable>()).GroupBy(x => x.Timestamp.Month);
 
-                    groupsL2 = list.GroupBy(x => x.Timestamp.Month);
                     result = await builder.ThreeLevelReport(groupsL2,true);
                     ViewData["Title"] = "Transaction Summary";
                     ViewData["Mapping"] = true;
