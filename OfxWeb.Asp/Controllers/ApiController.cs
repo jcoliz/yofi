@@ -411,11 +411,12 @@ namespace OfxWeb.Asp.Controllers
 
                 Func<Models.Transaction, bool> inscope = (x => x.Timestamp.Year == year && x.Hidden != true);
                 if (beforedate.HasValue)
-                    inscope = (x => x.Timestamp < beforedate.Value && x.Timestamp.Year == year && x.Hidden != true); 
+                    inscope = (x => x.Timestamp < beforedate.Value && x.Timestamp.Year == year && x.Hidden != true);
 
-                var txs = _context.Transactions.Where(inscope).Where(x => x.Splits?.Any() != true);
-                var splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction));
-                var groupings = txs.AsParallel<ISubReportable>().Union(splits.AsParallel<ISubReportable>()).OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
+                var txs = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).AsQueryable<ISubReportable>();
+                var splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).AsQueryable<ISubReportable>();
+                var combined = txs.Concat(splits);
+                var groupings = combined.OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
 
                 var builder = new Helpers.ReportBuilder(_context);
                 var report = await builder.ThreeLevelReport(groupings, true);
