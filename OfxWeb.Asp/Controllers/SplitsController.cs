@@ -21,57 +21,6 @@ namespace OfxWeb.Asp.Controllers
             _context = context;
         }
 
-        // GET: Splits
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Splits.ToListAsync());
-        }
-
-        // GET: Splits/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var split = await _context.Splits
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (split == null)
-            {
-                return NotFound();
-            }
-
-            return View(split);
-        }
-
-        // GET: Splits/Create
-        public IActionResult Create(int? txid)
-        {
-            if (txid.HasValue)
-            {
-                return View(new Split() { TransactionID = txid.Value });
-            }
-            else
-                return View();
-        }
-
-        // POST: Splits/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(split);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(split);
-        }
-
         // GET: Splits/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -151,6 +100,15 @@ namespace OfxWeb.Asp.Controllers
             throw new NotImplementedException();
 
         Task<IActionResult> IController<Split>.Upload(List<IFormFile> files) =>
+            throw new NotImplementedException();
+
+        Task<IActionResult> IController<Split>.Index() =>
+            throw new NotImplementedException();
+
+        Task<IActionResult> IController<Split>.Details(int? id) =>
+            throw new NotImplementedException();
+
+        Task<IActionResult> IController<Split>.Create(Split item) =>
             throw new NotImplementedException();
     }
 }

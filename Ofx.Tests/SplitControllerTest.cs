@@ -46,21 +46,26 @@ namespace Ofx.Tests
         [TestMethod]
         public void Empty() => helper.Empty();
         [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
         public async Task IndexEmpty() => await helper.IndexEmpty();
         [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
         public async Task IndexSingle() => await helper.IndexSingle();
         //[TestMethod]
         // IndexMany doesn't make sense for splits
         public async Task IndexMany() => await helper.IndexMany();
         [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
         public async Task DetailsFound() => await helper.DetailsFound();
         [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
         public async Task DetailsNotFound() => await helper.DetailsNotFound();
         [TestMethod]
         public async Task EditFound() => await helper.EditFound();
         [TestMethod]
         public async Task EditNotFound() => await helper.EditNotFound();
         [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
         public async Task Create() => await helper.Create();
         //[TestMethod]
         public async Task EditObjectValues() => await helper.EditObjectValues();
