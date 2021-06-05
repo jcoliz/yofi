@@ -18,18 +18,5 @@ namespace OfxWeb.Asp.Models
         public Transaction Transaction { get; set; }
 
         DateTime IReportable.Timestamp => Transaction?.Timestamp ?? DateTime.MinValue;
-
-        public override bool Equals(object obj)
-        {
-            return obj is Split split &&
-                   Amount == split.Amount &&
-                   Category == split.Category &&
-                   SubCategory == split.SubCategory;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Amount, Category, SubCategory);
-        }
     }
 }
