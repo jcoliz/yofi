@@ -179,7 +179,7 @@ namespace OfxWeb.Asp.Controllers
                 if (searchCategory == "-")
                     result = result.Where(x => string.IsNullOrEmpty(x.Category));
                 else
-                    result = result.Where(x => x.Category.Contains(searchCategory) || x.SubCategory.Contains(searchCategory));
+                    result = result.Where(x => (x.Category != null && x.Category.Contains(searchCategory)) || (x.SubCategory != null && x.SubCategory.Contains(searchCategory)));
             }
 
             if (!showHidden)
