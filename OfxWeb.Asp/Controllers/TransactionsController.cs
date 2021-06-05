@@ -939,8 +939,6 @@ namespace OfxWeb.Asp.Controllers
         public async Task<IActionResult> Pivot(string report, int? month, int? weekspct, int? setyear, bool? download)
         {
             PivotTable<Label, Label, decimal> result = null;
-            IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
-            IEnumerable<IGrouping<int, ISubReportable>> groupsL2 = null;
 
             if (string.IsNullOrEmpty(report))
             {
@@ -973,6 +971,9 @@ namespace OfxWeb.Asp.Controllers
             ViewData["month"] = month;
 
             var builder = new Helpers.ReportBuilder(_context);
+            IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
+            IEnumerable<IGrouping<int, ISubReportable>> groupsL2 = null;
+            IQueryable<ISubReportable> txs, splits, combined;
             Func<Models.Transaction, bool> inscope = (x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month);
 
             switch (report)
@@ -990,9 +991,9 @@ namespace OfxWeb.Asp.Controllers
                     break;
 
                 case "all":
-                    var txs = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).AsQueryable<ISubReportable>();
-                    var splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).AsQueryable<ISubReportable>();
-                    var combined = txs.Concat(splits);
+                    txs = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).AsQueryable<ISubReportable>();
+                    splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).AsQueryable<ISubReportable>();
+                    combined = txs.Concat(splits);
                     groupsL2 = combined.OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
                     result = await builder.ThreeLevelReport(groupsL2,true);
                     ViewData["Title"] = "Transaction Summary";
@@ -1000,7 +1001,10 @@ namespace OfxWeb.Asp.Controllers
                     break;
 
                 case "mapped":
-                    groupsL2 = _context.Transactions.Where(inscope).GroupBy(x => x.Timestamp.Month);
+                    txs = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).AsQueryable<ISubReportable>();
+                    splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).AsQueryable<ISubReportable>();
+                    combined = txs.Concat(splits);
+                    groupsL2 = combined.OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
                     result = await builder.FourLevelReport(groupsL2);
                     ViewData["Title"] = "Transaction Summary";
                     ViewData["Mapping"] = true;
