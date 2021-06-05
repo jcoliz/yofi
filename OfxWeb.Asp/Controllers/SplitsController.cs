@@ -126,22 +126,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Splits/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var split = await _context.Splits
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (split == null)
-            {
-                return NotFound();
-            }
-
-            return View(split);
-        }
+        public async Task<IActionResult> Delete(int? id) => await Edit(id);
 
         // POST: Splits/Delete/5
         [HttpPost, ActionName("Delete")]
