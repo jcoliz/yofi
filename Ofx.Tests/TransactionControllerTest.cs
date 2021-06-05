@@ -305,7 +305,7 @@ namespace Ofx.Tests
             Assert.IsTrue(model.Single().HasSplits);
             Assert.IsTrue(model.Single().IsSplitsOK);
         }
-        // Fails [TestMethod]
+        [TestMethod]
         public async Task SplitsShownInIndexSearchCategory()
         {
             var splits = new List<Split>();

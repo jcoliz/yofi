@@ -166,8 +166,7 @@ namespace OfxWeb.Asp.Controllers
             if (!page.HasValue)
                 page = 1;
 
-            var result = from s in _context.Transactions
-                         select s;
+            var result = _context.Transactions.Include(x => x.Splits).AsQueryable<Models.Transaction>();
 
             if (!String.IsNullOrEmpty(searchPayee))
             {
@@ -177,9 +176,21 @@ namespace OfxWeb.Asp.Controllers
             if (!String.IsNullOrEmpty(searchCategory))
             {
                 if (searchCategory == "-")
-                    result = result.Where(x => string.IsNullOrEmpty(x.Category));
+                    result = result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any());
                 else
-                    result = result.Where(x => (x.Category != null && x.Category.Contains(searchCategory)) || (x.SubCategory != null && x.SubCategory.Contains(searchCategory)));
+                    result = result.Where(x => 
+                        (x.Category != null && x.Category.Contains(searchCategory)) 
+                        || 
+                        (x.SubCategory != null && x.SubCategory.Contains(searchCategory))
+                        ||
+                        (
+                            x.Splits.Any(s=> 
+                                (s.Category != null && s.Category.Contains(searchCategory))
+                                ||
+                                (s.SubCategory != null && s.SubCategory.Contains(searchCategory))
+                            )
+                        )
+                    );
             }
 
             if (!showHidden)
@@ -249,7 +260,7 @@ namespace OfxWeb.Asp.Controllers
                 ViewData["CurrentSort"] = sortOrder;
             }
 
-            return View(await result.Include(x=>x.Splits).AsNoTracking().ToListAsync());
+            return View(await result.AsNoTracking().ToListAsync());
         }
 
         public async Task<IActionResult> CreateSplit(int id)
