@@ -39,7 +39,7 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="ID" />
-        <input type="submit" value="Delete" class="btn btn-default" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Delete" class="btn btn-primary" />
+        <a asp-controller="Transactions" asp-action="Edit" asp-route-id="@Model.TransactionID" class="btn btn-outline-secondary">Cancel</a>
     </form>
 </div>
