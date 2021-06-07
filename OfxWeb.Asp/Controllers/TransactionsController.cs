@@ -694,7 +694,10 @@ namespace OfxWeb.Asp.Controllers
                 {
                     // Why no has AddRange??
                     foreach (var split in incoming)
+                    {
+                        split.FixupCategories();
                         transaction.Splits.Add(split);
+                    }
 
                     _context.Update(transaction);
                     await _context.SaveChangesAsync();
