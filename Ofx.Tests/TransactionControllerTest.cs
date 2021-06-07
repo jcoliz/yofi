@@ -161,6 +161,37 @@ namespace Ofx.Tests
             Assert.AreEqual(initial, actual);
         }
 
+        async Task AddFivePayees()
+        {
+            context.Payees.Add(new Payee() { Category = "Y", SubCategory = "E", Name = "3" });
+            context.Payees.Add(new Payee() { Category = "X", SubCategory = "E", Name = "2" });
+            context.Payees.Add(new Payee() { Category = "Z", SubCategory = "E", Name = "5" });
+            context.Payees.Add(new Payee() { Category = "X", SubCategory = "E", Name = "1" });
+            context.Payees.Add(new Payee() { Category = "Y", SubCategory = "F", Name = "4" });
+
+            await context.SaveChangesAsync();
+        }
+
+        [TestMethod]
+        public async Task UploadMatchPayees()
+        {
+            await AddFivePayees();
+
+            // Strip off the categories, so they'll match on input
+            var uploadme = Items.Select(x => { x.Category = null; x.SubCategory = null; return x; }).ToList();
+
+            // Then upload that
+            await helper.DoUpload(uploadme);
+
+            // This should have matched ALL the payees
+
+            foreach(var tx in context.Transactions)
+            {
+                var expectedpayee = context.Payees.Where(x => x.Name == tx.Payee).Single();
+                Assert.AreEqual(expectedpayee.Category, tx.Category);
+            }
+        }
+
         [TestMethod]
         public async Task Bug839()
         {
