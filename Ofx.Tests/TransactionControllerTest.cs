@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNetCore.Test;
+using Microsoft.AspNetCore.Http;
 
 namespace Ofx.Tests
 {
@@ -397,6 +398,31 @@ namespace Ofx.Tests
 
             Assert.AreEqual(false, viewresult.ViewData["SplitsOK"]);
             Assert.IsFalse(model.IsSplitsOK);
+        }
+
+        [TestMethod]
+        public async Task UploadSplitsForTransaction()
+        {
+            // Don't add the splits here, we'll upload them
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            var splits = new List<Split>();
+            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
+            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
+
+            // Make an HTML Form file containg an excel spreadsheet containing those splits
+            var file = ControllerTestHelper<Split, SplitsController>.PrepareUpload(splits);
+
+            // Upload that
+            var result = await controller.UpSplits(new List<IFormFile>() { file }, item.ID);
+            var redir = result as RedirectToActionResult;
+
+            Assert.IsNotNull(redir);
+            Assert.IsTrue(item.HasSplits);
+            Assert.IsTrue(item.IsSplitsOK);
         }
 
         //

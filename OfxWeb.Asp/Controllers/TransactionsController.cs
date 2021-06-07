@@ -585,6 +585,7 @@ namespace OfxWeb.Asp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
         [HttpPost]
         public async Task<IActionResult> UpReceipt(List<IFormFile> files, int id)
         {
@@ -664,6 +665,49 @@ namespace OfxWeb.Asp.Controllers
                 return receiptstore;
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpSplits(List<IFormFile> files, int id)
+        {
+            try
+            {
+                var transaction = await _context.Transactions.Include(x => x.Splits)
+                    .SingleAsync(m => m.ID == id);
+
+                var incoming = new HashSet<Models.Split>();
+                // Extract submitted file into a list objects
+
+                foreach(var file in files)
+                {
+                    if (file.FileName.ToLower().EndsWith(".xlsx"))
+                    {
+                        using (var stream = file.OpenReadStream())
+                        {
+                            var excel = new ExcelPackage(stream);
+                            var worksheet = excel.Workbook.Worksheets.First();
+                            worksheet.ExtractInto(incoming);
+                        }
+                    }
+                }
+
+                if (incoming.Any())
+                {
+                    // Why no has AddRange??
+                    foreach (var split in incoming)
+                        transaction.Splits.Add(split);
+
+                    _context.Update(transaction);
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction("Edit", new { id = id });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> files, string date)
