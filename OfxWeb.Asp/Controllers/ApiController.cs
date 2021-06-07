@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using OfficeOpenXml;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 
@@ -311,6 +312,44 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        public async Task<String> UpSplits(int id, IFormFile file)
+        {
+
+            try
+            {
+                var transaction = await _context.Transactions.Include(x=>x.Splits)
+                    .SingleAsync(m => m.ID == id);
+
+                var incoming = new HashSet<Models.Split>();
+                // Extract submitted file into a list objects
+
+                if (file.FileName.ToLower().EndsWith(".xlsx"))
+                {
+                    using (var stream = file.OpenReadStream())
+                    {
+                        var excel = new ExcelPackage(stream);
+                        var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Splits").Single();
+                        worksheet.ExtractInto(incoming);
+                    }
+                }
+
+                if (incoming.Any())
+                {
+                    // Why no has AddRange??
+                    foreach (var split in incoming)
+                        transaction.Splits.Add(split);
+
+                    _context.Update(transaction);
+                    await _context.SaveChangesAsync();
+                }
+
+                return new ApiTransactionResult(transaction);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult(ex);
+            }
+        }
 
         // POST: api/tx/EditPayee/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 

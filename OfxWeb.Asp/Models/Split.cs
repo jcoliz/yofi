@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace OfxWeb.Asp.Models
         public string SubCategory { get; set; }
         public string Memo { get; set; }
         public int TransactionID { get; set; }
+        [JsonIgnore]
         public Transaction Transaction { get; set; }
 
         DateTime IReportable.Timestamp => Transaction?.Timestamp ?? DateTime.MinValue;

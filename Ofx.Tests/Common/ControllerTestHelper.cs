@@ -286,7 +286,7 @@ namespace Common.AspNetCore.Test
             return incoming;
         }
 
-        public async Task<IActionResult> DoUpload(ICollection<T> what)
+        static public IFormFile PrepareUpload<X>(ICollection<X> what) where X: class
         {
             // Build a spreadsheet with the chosen number of items
             byte[] reportBytes;
@@ -299,8 +299,17 @@ namespace Common.AspNetCore.Test
             }
 
             // Create a formfile with it
+            // Note that we are not disposing the stream. User of the file will do so later.
             var stream = new MemoryStream(reportBytes);
             IFormFile file = new FormFile(stream, 0, reportBytes.Length, sheetname, $"{sheetname}.xlsx");
+
+            return file;
+        }
+
+        public async Task<IActionResult> DoUpload(ICollection<T> what)
+        {
+            // Make an HTML Form file containg an excel spreadsheet.
+            var file = PrepareUpload(what);
 
             // Upload that
             var result = await controller.Upload(new List<IFormFile>() { file });

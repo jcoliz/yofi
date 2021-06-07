@@ -10,6 +10,7 @@ using System;
 using OfxWeb.Asp.Data;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace Ofx.Tests
 {
