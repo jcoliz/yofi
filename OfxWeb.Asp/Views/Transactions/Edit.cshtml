@@ -77,6 +77,7 @@
 
         @if (Model.Splits != null)
         {
+            var splitorder = (Model.Amount < 0) ? Model.Splits.OrderBy(x => x.Amount) : Model.Splits.OrderByDescending(x => x.Amount);
             <table class="table">
                 <thead>
                     <tr>
@@ -98,7 +99,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var split in Model.Splits)
+                     
+                    @foreach (var split in splitorder)
                     {
                         <tr>
                             <td>
