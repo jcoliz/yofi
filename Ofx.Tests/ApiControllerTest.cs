@@ -71,6 +71,16 @@ namespace Ofx.Tests
             
             await context.SaveChangesAsync();
         }
+        async Task AddFiveTransactionsWithFourLevels(int year)
+        {
+            context.Transactions.Add(new Transaction() { SubCategory = "C:D", Category = "A:B", Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m });
+            context.Transactions.Add(new Transaction() { SubCategory = "C:D", Category = "A:B", Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = 100m });
+            context.Transactions.Add(new Transaction() { SubCategory = "E:F", Category = "A:B", Payee = "5", Timestamp = new DateTime(year, 01, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { SubCategory = "G", Category = "E:F", Payee = "1", Timestamp = new DateTime(year, 01, 05), Amount = 400m });
+            context.Transactions.Add(new Transaction() { SubCategory = "G:R", Category = "E:F", Payee = "4", Timestamp = new DateTime(year, 01, 03), Amount = 500m });
+
+            await context.SaveChangesAsync();
+        }
 
         async Task AddFivePayees()
         {
@@ -557,12 +567,8 @@ namespace Ofx.Tests
         public async Task Key4ShowsInReport()
         {
             int year = DateTime.Now.Year;
-            context.Transactions.Add(new Transaction() { SubCategory = "C:D", Category = "A:B", Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m });
-            context.Transactions.Add(new Transaction() { SubCategory = "C:D", Category = "A:B", Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = 100m });
-            context.Transactions.Add(new Transaction() { SubCategory = "E:F", Category = "A:B", Payee = "5", Timestamp = new DateTime(year, 01, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { SubCategory = "G:H", Category = "E:F", Payee = "1", Timestamp = new DateTime(year, 01, 05), Amount = 400m });
-            context.Transactions.Add(new Transaction() { SubCategory = "G:R", Category = "E:F", Payee = "4", Timestamp = new DateTime(year, 01, 03), Amount = 500m });
 
+            await AddFiveTransactionsWithFourLevels(year);
             await context.SaveChangesAsync();
 
             var actionresult = await controller.Report("summary", year, null, null);
@@ -582,5 +588,30 @@ namespace Ofx.Tests
             Assert.AreEqual(200m, abcd.Amount);
             Assert.AreEqual("D", abcd.Key4);
         }
+
+        [TestMethod]
+        public async Task KeysShowsInReport()
+        {
+            int year = DateTime.Now.Year;
+
+            await AddFiveTransactionsWithFourLevels(year);
+            await context.SaveChangesAsync();
+
+            var actionresult = await controller.Report("summary", year, null, null);
+            var okresult = actionresult as OkObjectResult;
+            var report = okresult.Value as ApiSummaryReportResult;
+
+            Console.WriteLine(report);
+
+            var efg = report.Lines.Where(x => x.SubCategory == "G").Single();
+            Assert.AreEqual("E:F:G", efg.Keys);
+
+            var efgr = report.Lines.Where(x => x.SubCategory == "G:R").Single();
+            Assert.AreEqual("E:F:G:R", efgr.Keys);
+
+            var abcd = report.Lines.Where(x => x.SubCategory == "C:D").Single();
+            Assert.AreEqual("A:B:C:D", abcd.Keys);
+        }
+
     }
 }

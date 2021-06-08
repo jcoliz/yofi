@@ -540,6 +540,7 @@ namespace OfxWeb.Asp.Controllers
             public string Key2;
             public string Key3;
             public string Key4;
+            public string Keys;
             public decimal Amount;
         }
 
@@ -558,14 +559,31 @@ namespace OfxWeb.Asp.Controllers
                 else
                     line.SubCategory = rowlabel.SubValue;
 
+                var keys = new List<string>();
                 if (!string.IsNullOrEmpty(rowlabel.Key1))
+                {
                     line.Key1 = rowlabel.Key1;
-                if (!string.IsNullOrEmpty(rowlabel.Key2))
-                    line.Key2 = rowlabel.Key2;
-                if (!string.IsNullOrEmpty(rowlabel.Key3))
-                    line.Key3 = rowlabel.Key3;
-                if (!string.IsNullOrEmpty(rowlabel.Key4))
-                    line.Key4 = rowlabel.Key4;
+                    keys.Add(line.Key1);
+                    if (!string.IsNullOrEmpty(rowlabel.Key2))
+                    {
+                        line.Key2 = rowlabel.Key2;
+                        keys.Add(line.Key2);
+                        if (!string.IsNullOrEmpty(rowlabel.Key3))
+                        {
+                            line.Key3 = rowlabel.Key3;
+                            keys.Add(line.Key3);
+                            if (!string.IsNullOrEmpty(rowlabel.Key4))
+                            {
+                                line.Key4 = rowlabel.Key4;
+                                keys.Add(line.Key4);
+                            }
+                        }
+                    }
+                }
+
+                // Prepare a single string of colon-separated keys, for future expansion where we
+                // remove the limit on ## of keys
+                line.Keys = string.Join(':', keys);
 
                 var column = report.Columns.Where(x => x.Value == "TOTAL").FirstOrDefault();
 
