@@ -199,7 +199,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 if (string.IsNullOrEmpty(label.Key3))
                     rowlabel.SubValue = "-";
                 if (!string.IsNullOrEmpty(label.Key2))
-                    rowlabel.Value += $"/{label.Key2}";
+                    rowlabel.Value += $":{label.Key2}";
 
                 // Create the Key2-totals label
                 var totalslabel = new Label() { Value = rowlabel.Value, Emphasis = true };
