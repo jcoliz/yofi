@@ -193,6 +193,27 @@ namespace Ofx.Tests
         }
 
         [TestMethod]
+        public async Task Bug880()
+        {
+            // Bug 880: Import applies substring matches before regex matches
+
+            var regexpayee = new Payee() { Category = "Y", SubCategory = "E", Name = "/DOG.*123/" };
+            var substrpayee = new Payee() { Category = "X", SubCategory = "E", Name = "BIGDOG" };
+
+            context.Payees.Add(regexpayee);
+            context.Payees.Add(substrpayee);
+            await context.SaveChangesAsync();
+
+            // This transaction will match EITHER of the payees. Preference is to match the regex first
+            // because the regex is a more precise specification of what we want.
+            await helper.DoUpload(new List<Transaction>() { new Transaction() { Payee = "BIGDOG SAYS 1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m } });
+
+            var tx = context.Transactions.Single();
+
+            Assert.AreEqual(regexpayee.Category, tx.Category);
+        }
+
+        [TestMethod]
         public async Task Bug839()
         {
             // Bug 839: Imported items are selected automatically :(

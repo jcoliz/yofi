@@ -831,6 +831,7 @@ namespace OfxWeb.Asp.Controllers
                 // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
 
                 var payees = await _context.Payees.ToListAsync();
+                var regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
 
                 // Process each item
 
@@ -842,7 +843,24 @@ namespace OfxWeb.Asp.Controllers
 
                     if (string.IsNullOrEmpty(item.Category))
                     {
-                        var payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
+                        Payee payee = null;
+
+                        // Product Backlog Item 871: Match payee on regex, optionally
+                        foreach (var regexpayee in regexpayees)
+                        {
+                            var regex = new Regex(regexpayee.Name.Substring(1, regexpayee.Name.Length - 2));
+                            if (regex.Match(item.Payee).Success)
+                            {
+                                payee = regexpayee;
+                                break;
+                            }
+                        }
+
+                        if (null == payee)
+                        {
+                            payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
+                        }
+
                         if (null != payee)
                         {
                             item.Category = payee.Category;
