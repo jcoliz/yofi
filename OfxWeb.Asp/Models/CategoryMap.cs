@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,6 +21,11 @@ namespace OfxWeb.Asp.Models
         public string Key2 { get; set; }
         public string Key3 { get; set; }
 
+        // As I am phasing out CategoryMap, Key4 is only supported for automatically-generated
+        // mapping rules
+        [NotMapped]
+        public string Key4 { get; private set; }
+
         // See Product Backlog Item #801: Add an automatic mapping rule for categories with a colon
         // If Category contains a colon, then we don't need a hard-coded mapping rule for it, 
         // we can figure it out by definition.
@@ -37,7 +43,7 @@ namespace OfxWeb.Asp.Models
                 result.Key1 = split[0];
                 result.Key2 = split[1];
                 result.Key3 = "^([^\\:]*)";
-                //result.Key4 = "^[^\\.]*\\:(.+)";
+                result.Key4 = "^[^\\:]*\\:([^\\:]+)";
             }
 
             return result;

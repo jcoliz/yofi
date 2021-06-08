@@ -552,5 +552,35 @@ namespace Ofx.Tests
 
             Assert.AreEqual(expected_cd, actual_CD);
         }
+
+        [TestMethod]
+        public async Task Key4ShowsInReport()
+        {
+            int year = DateTime.Now.Year;
+            context.Transactions.Add(new Transaction() { SubCategory = "C:D", Category = "A:B", Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m });
+            context.Transactions.Add(new Transaction() { SubCategory = "C:D", Category = "A:B", Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = 100m });
+            context.Transactions.Add(new Transaction() { SubCategory = "E:F", Category = "A:B", Payee = "5", Timestamp = new DateTime(year, 01, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { SubCategory = "G:H", Category = "E:F", Payee = "1", Timestamp = new DateTime(year, 01, 05), Amount = 400m });
+            context.Transactions.Add(new Transaction() { SubCategory = "G:R", Category = "E:F", Payee = "4", Timestamp = new DateTime(year, 01, 03), Amount = 500m });
+
+            await context.SaveChangesAsync();
+
+            var actionresult = await controller.Report("summary", year, null, null);
+            var okresult = actionresult as OkObjectResult;
+            var report = okresult.Value as ApiSummaryReportResult;
+
+            Console.WriteLine(report);
+
+            // There are 4 unique cat/subcats
+            Assert.AreEqual(4, report.Lines.Count);
+
+            var efgr = report.Lines.Where(x => x.SubCategory == "G:R").Single();
+            Assert.AreEqual(500m, efgr.Amount);
+            Assert.AreEqual("R", efgr.Key4);
+
+            var abcd = report.Lines.Where(x => x.SubCategory == "C:D").Single();
+            Assert.AreEqual(200m, abcd.Amount);
+            Assert.AreEqual("D", abcd.Key4);
+        }
     }
 }

@@ -149,6 +149,15 @@ namespace OfxWeb.Asp.Controllers.Helpers
                                             }
                                             else
                                                 labelrow.Key3 = map.Key3;
+
+                                            if (!string.IsNullOrEmpty(map.Key4) && !string.IsNullOrEmpty(subgroup.Key))
+                                            {
+                                                var re = new Regex(map.Key4);
+                                                var match = re.Match(subgroup.Key);
+                                                if (match.Success && match.Groups.Count > 1)
+                                                    labelrow.Key4 = match.Groups[1].Value;
+                                            }
+
                                         }
                                     }
 
@@ -225,7 +234,5 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             return result;
         }
-
-
     }
 }

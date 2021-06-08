@@ -1360,6 +1360,7 @@ namespace OfxWeb.Asp.Controllers
         public string Key1 { get; set; } = string.Empty;
         public string Key2 { get; set; } = string.Empty;
         public string Key3 { get; set; } = string.Empty;
+        public string Key4 { get; set; } = string.Empty;
         public bool Emphasis { get; set; } = false;
         public bool SuperHeading { get; set; } = false;
         public string Format { get; set; } = null;

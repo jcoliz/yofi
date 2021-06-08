@@ -539,6 +539,7 @@ namespace OfxWeb.Asp.Controllers
             public string Key1;
             public string Key2;
             public string Key3;
+            public string Key4;
             public decimal Amount;
         }
 
@@ -563,6 +564,8 @@ namespace OfxWeb.Asp.Controllers
                     line.Key2 = rowlabel.Key2;
                 if (!string.IsNullOrEmpty(rowlabel.Key3))
                     line.Key3 = rowlabel.Key3;
+                if (!string.IsNullOrEmpty(rowlabel.Key4))
+                    line.Key4 = rowlabel.Key4;
 
                 var column = report.Columns.Where(x => x.Value == "TOTAL").FirstOrDefault();
 
