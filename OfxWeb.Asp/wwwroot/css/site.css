@@ -43,6 +43,10 @@
     color: red;
 }
 
+.pivot-table tr.superhead {
+    background-color: #b0c4de7a;
+}
+
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
     /* Hide captions */

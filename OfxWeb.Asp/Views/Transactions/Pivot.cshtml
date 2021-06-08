@@ -98,8 +98,10 @@
         @foreach (var row in Model.RowLabels)
         {
             var emphasis = row.Emphasis ? "emphasis" : "";
+            var superhead = row.SuperHeading ? "superhead" : "";
 
-        <tr>
+        <tr class="@superhead">
+
             @if (string.IsNullOrEmpty(row.SubValue))
             {
                 <th>

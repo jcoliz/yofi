@@ -202,10 +202,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     rowlabel.Value += $"/{label.Key2}";
 
                 // Create the Key2-totals label
-                var totalslabel = new Label() { Value = rowlabel.Value };
+                var totalslabel = new Label() { Value = rowlabel.Value, Emphasis = true };
 
                 // Create the Key1-totals label
-                var toptotalslabel = new Label() { Value = label.Key1, Emphasis = true };
+                var toptotalslabel = new Label() { Value = label.Key1, Emphasis = true, SuperHeading = true };
 
                 // Place each of the columns
                 foreach ( var collabel in columns)
