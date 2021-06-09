@@ -4,14 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
-using Microsoft.WindowsAzure.Storage.Table;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage;
 
 namespace ManiaLabs.NET
 {
     public class DotNetAzureStorage : IPlatformAzureStorage
     {
+        /*
+         * AAARGH. The entire Azure storage SDK has updated, so this needs to be rewritten.
+         */
+        public DotNetAzureStorage(string _)
+        {
+        }
+
+#if false
         public DotNetAzureStorage(string connection)
         {
             Connection = connection;
@@ -113,5 +118,30 @@ namespace ManiaLabs.NET
         private string Connection;
         private CloudTableClient tableClient { set; get; }
         private CloudBlobClient blobClient { set; get; }
+#endif
+        Task<bool> IPlatformAzureStorage.DoesBlobExist(string ContainerName, string FileName)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IPlatformAzureStorage.Initialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<string> IPlatformAzureStorage.PostTableEntry(string TableName, IReadOnlyDictionary<string, string> Fields)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Uri> IPlatformAzureStorage.UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
