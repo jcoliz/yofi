@@ -716,6 +716,7 @@ namespace OfxWeb.Asp.Controllers
         public async Task<IActionResult> Upload(List<IFormFile> files, string date)
         {
             var incoming = new HashSet<Models.Transaction>();
+            ILookup<int, Models.Split> splits = null;
             try
             {
                 // Unless otherwise specified, cut off transactions before
@@ -759,7 +760,18 @@ namespace OfxWeb.Asp.Controllers
                         {
                             var excel = new ExcelPackage(stream);
                             var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Transactions").Single();
-                            worksheet.ExtractInto(incoming);
+                            worksheet.ExtractInto(incoming, includeids: true);
+
+                            // If there are also splits included here, let's grab those
+                            worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Splits").SingleOrDefault();
+                            if (null != worksheet)
+                            {
+                                var flatsplits = new List<Models.Split>();
+                                worksheet.ExtractInto(flatsplits,includeids:true);
+
+                                // Transform the flat data into something easier to use.
+                                splits = flatsplits.ToLookup(x => x.TransactionID);
+                            }
                         }
 
                         // Need to select all of these, so they import by default
@@ -867,6 +879,22 @@ namespace OfxWeb.Asp.Controllers
                             item.SubCategory = payee.SubCategory;
                         }
                     }
+
+                    // Product Backlog Item 870: Export & import transactions with splits
+
+                    if (splits?.Contains(item.ID) ?? false)
+                    {
+                        item.Splits = new List<Split>();
+                        foreach (var split in splits[item.ID])
+                        {
+                            split.ID = 0;
+                            split.TransactionID = 0;
+                            item.Splits.Add(split);
+                        }
+                    }
+
+                    // Clear any imported ID
+                    item.ID = 0;
                 }
 
                 // Add resulting transactions

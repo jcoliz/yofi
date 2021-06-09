@@ -13,6 +13,7 @@ using Common.AspNetCore.Test;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using OfficeOpenXml;
+using Microsoft.AspNetCore.Http.Internal;
 
 namespace Ofx.Tests
 {
@@ -509,6 +510,50 @@ namespace Ofx.Tests
             Assert.AreEqual(item.ID, incoming.First().TransactionID);
             Assert.AreEqual(item.ID, incoming.Last().TransactionID);
         }
+
+        [TestMethod]
+        public async Task UploadSplitsWithTransactions()
+        {
+            // This is the correlary to SplitsShownDownload(). The question is, now that we've
+            // DOWNLOADED transactions and splits, can we UPLOAD them and get the splits?
+
+            // Here's the test data set. Note that "Transaction ID" in this case is used just
+            // as a matching ID for the current spreadsheet. It should be discarded.
+            var transactions = new List<Transaction>();
+            var splits = new List<Split>();
+            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B", TransactionID = 1000 });
+            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D", TransactionID = 1000 });
+            splits.Add(new Split() { Amount = 175m, Category = "X", SubCategory = "Y", TransactionID = 12000 }); // Not going to be matched!
+
+            var item = new Transaction() { ID = 1000, Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+            transactions.Add(item);
+
+            // Build a spreadsheet with the chosen number of items
+            byte[] reportBytes;
+            var sheetname = "Transactions";
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add(sheetname);
+                worksheet.PopulateFrom(transactions, out _, out _);
+                worksheet = package.Workbook.Worksheets.Add("Splits");
+                worksheet.PopulateFrom(splits, out _, out _);
+                reportBytes = package.GetAsByteArray();
+            }
+
+            // Create a formfile with it
+            // Note that we are not disposing the stream. User of the file will do so later.
+            var stream = new MemoryStream(reportBytes);
+            IFormFile file = new FormFile(stream, 0, reportBytes.Length, sheetname, $"{sheetname}.xlsx");
+
+            // Upload it!
+            var result = await controller.Upload(new List<IFormFile>() { file },null);
+            Assert.IsTrue(result is RedirectToActionResult);
+
+            // Did the transaction and splits find each other?
+            var actual = context.Transactions.Include(x=>x.Splits).Single();
+            Assert.AreEqual(2,actual.Splits.Count);
+        }
+
 
         //
         // Long list of TODO tests!!
