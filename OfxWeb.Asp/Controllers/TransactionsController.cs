@@ -937,6 +937,14 @@ namespace OfxWeb.Asp.Controllers
                     tbl.ShowHeader = true;
                     tbl.TableStyle = TableStyles.Dark9;
 
+                    // Product Backlog Item 870: Export & import transactions with splits
+                    var splits = await _context.Splits.Include(x => x.Transaction).Where(x => (x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true)).OrderByDescending(x => x.Transaction.Timestamp).ToListAsync();
+                    worksheet = package.Workbook.Worksheets.Add("Splits");
+                    worksheet.PopulateFrom(splits, out rows, out cols);
+                    tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), "Splits");
+                    tbl.ShowHeader = true;
+                    tbl.TableStyle = TableStyles.Dark9;
+
                     reportBytes = package.GetAsByteArray();
                 }
 

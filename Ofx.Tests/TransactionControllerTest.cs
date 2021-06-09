@@ -11,6 +11,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNetCore.Test;
 using Microsoft.AspNetCore.Http;
+using System.IO;
+using OfficeOpenXml;
 
 namespace Ofx.Tests
 {
@@ -475,6 +477,37 @@ namespace Ofx.Tests
             Assert.IsNotNull(redir);
             Assert.IsTrue(item.HasSplits);
             Assert.IsTrue(item.IsSplitsOK);
+        }
+
+        [TestMethod]
+        public async Task SplitsShownDownload()
+        {
+            var splits = new List<Split>();
+            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
+            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
+
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            var result = await controller.Download();
+            var fcresult = result as FileContentResult;
+            var data = fcresult.FileContents;
+
+            var incoming = new HashSet<Split>();
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var sheetname = $"{typeof(Split).Name}s";
+                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
+                worksheet.ExtractInto(incoming,includeids:true);
+            }
+
+            Assert.AreEqual(2, incoming.Count);
+            Assert.AreEqual(item.ID, incoming.First().TransactionID);
+            Assert.AreEqual(item.ID, incoming.Last().TransactionID);
         }
 
         //

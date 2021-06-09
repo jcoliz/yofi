@@ -10,7 +10,7 @@ namespace OfficeOpenXml
 {
     public static class WorksheetExtensions
     {
-        public static void ExtractInto<T>(this ExcelWorksheet worksheet, ICollection<T> result) where T : new()
+        public static void ExtractInto<T>(this ExcelWorksheet worksheet, ICollection<T> result, bool? includeids = false) where T : new()
         {
             var cols = new List<String>();
 
@@ -46,6 +46,10 @@ namespace OfficeOpenXml
                             // good behaviour, but in other implementations, I have done
                             // it the other way where duplicating the ID is a method of
                             // bulk editing.
+                            //
+                            // ... And this runs up against Pbi #870 :) I now want to
+                            // export TransactionID for splits. This means I also need to
+                            // export ID for Transactions, so the TransactionID has meaning!
 
                             if (property.PropertyType == typeof(DateTime))
                             {
@@ -57,6 +61,11 @@ namespace OfficeOpenXml
                                     value = (DateTime)xlsvalue;
                                 else if (type == typeof(Double))
                                     value = new DateTime(1900, 1, 1) + TimeSpan.FromDays((Double)xlsvalue - 2.0);
+                                property.SetValue(item, value);
+                            }
+                            else if (property.PropertyType == typeof(Int32) && (includeids ?? false))
+                            {
+                                var value = Convert.ToInt32((double)worksheet.Cells[row, col].Value);
                                 property.SetValue(item, value);
                             }
                             else if (property.PropertyType == typeof(decimal))
@@ -88,7 +97,9 @@ namespace OfficeOpenXml
         {
             // First add the headers
 
-            var properties = typeof(T).GetProperties();
+            // If we don't want a property to show up when it's being json serialized, we also don't want 
+            // it to show up when we're exporting it.
+            var properties = typeof(T).GetProperties().Where(x => ! x.IsDefined(typeof(Newtonsoft.Json.JsonIgnoreAttribute)));
             int col = 1;
             foreach (var property in properties)
             {
