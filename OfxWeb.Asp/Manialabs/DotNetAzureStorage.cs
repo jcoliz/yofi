@@ -4,19 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 
 namespace ManiaLabs.NET
 {
     public class DotNetAzureStorage : IPlatformAzureStorage
     {
-        /*
-         * AAARGH. The entire Azure storage SDK has updated, so this needs to be rewritten.
-         */
-        public DotNetAzureStorage(string _)
-        {
-        }
-
-#if false
         public DotNetAzureStorage(string connection)
         {
             Connection = connection;
@@ -30,22 +24,16 @@ namespace ManiaLabs.NET
         /// </exception>
         void IPlatformAzureStorage.Initialize()
         {
-            if (tableClient != null && blobClient != null)
-                return;
 
-            // Retrieve storage account from connection string
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Connection);
-
-            // Create the table if it doesn't exist
-            if (tableClient == null)
-                tableClient = storageAccount.CreateCloudTableClient();
-
-            if (blobClient == null)
-                blobClient = storageAccount.CreateCloudBlobClient();
         }
 
         async Task<string> IPlatformAzureStorage.PostTableEntry(string TableName, IReadOnlyDictionary<string, string> Fields)
         {
+#if true
+            // Needs to be rewritten for SDK v12, but I don't use table entires here, so task for later.
+            throw new NotImplementedException();
+
+#else
             //var app = Platform.Get<IApp>();
             var table = tableClient.GetTableReference(TableName);
             await table.CreateIfNotExistsAsync();
@@ -61,18 +49,22 @@ namespace ManiaLabs.NET
                 throw new Exception($"Azure operation failed: Status {result.HttpStatusCode}");
 
             return rowkey;
+#endif
         }
 
         async Task<Uri> IPlatformAzureStorage.UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
         {
-            CloudBlobContainer container = blobClient.GetContainerReference(ContainerName);
+            BlobServiceClient blobServiceClient = new BlobServiceClient(Connection);
+            BlobContainerClient container = blobServiceClient.GetBlobContainerClient(ContainerName);
             await container.CreateIfNotExistsAsync();
 
-            CloudBlockBlob blob = container.GetBlockBlobReference(FileName);
-            blob.Properties.ContentType = ContentType;
-            await blob.UploadFromStreamAsync(stream);
+            BlobClient blobClient = container.GetBlobClient(FileName);
 
-            return blob.Uri;
+            var options = new BlobUploadOptions();
+            options.HttpHeaders = new BlobHttpHeaders() { ContentType = ContentType };
+
+            await blobClient.UploadAsync(stream,options);
+            return blobClient.Uri;
         }
 
         /// <summary>
@@ -83,11 +75,12 @@ namespace ManiaLabs.NET
         /// <returns>true if exists</returns>
         async Task<bool> IPlatformAzureStorage.DoesBlobExist(string ContainerName, string FileName)
         {
-            CloudBlobContainer container = blobClient.GetContainerReference(ContainerName);
+            BlobServiceClient blobServiceClient = new BlobServiceClient(Connection);
+            BlobContainerClient container = blobServiceClient.GetBlobContainerClient(ContainerName);
             if (!await container.ExistsAsync())
                 return false;
 
-            CloudBlockBlob blob = container.GetBlockBlobReference(FileName);
+            var blob = container.GetBlobClient(FileName);
             if (!await blob.ExistsAsync())
                 return false;
 
@@ -102,46 +95,22 @@ namespace ManiaLabs.NET
         /// <returns></returns>
         async Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
         {
-            CloudBlobContainer container = blobClient.GetContainerReference(ContainerName);
+            BlobServiceClient blobServiceClient = new BlobServiceClient(Connection);
+            BlobContainerClient container = blobServiceClient.GetBlobContainerClient(ContainerName);
             if (!await container.ExistsAsync())
                 return string.Empty;
 
-            CloudBlockBlob blob = container.GetBlockBlobReference(FileName);
+            var blob = container.GetBlobClient(FileName);
             if (!await blob.ExistsAsync())
                 return string.Empty;
 
-            await blob.DownloadToStreamAsync(stream);
+            await blob.DownloadToAsync(stream);
 
-            return blob.Properties.ContentType;
+            var props = await blob.GetPropertiesAsync();
+            return props.Value.ContentType;
         }
 
         private string Connection;
-        private CloudTableClient tableClient { set; get; }
-        private CloudBlobClient blobClient { set; get; }
-#endif
-        Task<bool> IPlatformAzureStorage.DoesBlobExist(string ContainerName, string FileName)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IPlatformAzureStorage.Initialize()
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<string> IPlatformAzureStorage.PostTableEntry(string TableName, IReadOnlyDictionary<string, string> Fields)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Uri> IPlatformAzureStorage.UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }
