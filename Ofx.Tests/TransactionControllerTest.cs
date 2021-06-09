@@ -196,6 +196,19 @@ namespace Ofx.Tests
         }
 
         [TestMethod]
+        public async Task Bug883()
+        {
+            // Bug 883: Apparantly duplicate transactions in import are coalesced to single transaction for input
+
+            var uploadme = new List<Transaction>() { Items[0], Items[0] };
+
+            // Then upload that
+            await helper.DoUpload(uploadme);
+
+            Assert.AreEqual(2, context.Transactions.Count());
+        }
+
+        [TestMethod]
         public async Task Bug880()
         {
             // Bug 880: Import applies substring matches before regex matches

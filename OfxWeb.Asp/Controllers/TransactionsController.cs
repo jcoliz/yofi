@@ -728,7 +728,7 @@ namespace OfxWeb.Asp.Controllers
         public async Task<IActionResult> Upload(List<IFormFile> files, string date)
         {
             var highlights = new List<Models.Transaction>();
-            var incoming = new HashSet<Models.Transaction>();
+            var incoming = new List<Models.Transaction>();
             ILookup<int, Models.Split> splits = null;
             try
             {
@@ -800,7 +800,7 @@ namespace OfxWeb.Asp.Controllers
                 // REmove too early transactions
                 if (cutoff > DateTime.MinValue)
                 {
-                    incoming.RemoveWhere(x => x.Timestamp < cutoff);
+                    incoming.RemoveAll(x => x.Timestamp < cutoff);
                 }
 
                 // Deselect duplicate transactions. By default, deselected transactions will not be imported. User can override.
