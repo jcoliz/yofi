@@ -56,7 +56,8 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
+            var highlight = ((ViewData["Highlight"] as HashSet<int>)?.Contains(item.ID) ?? false) ? "alert alert-warning" : string.Empty;
+        <tr class="@highlight">
             <td>
                 @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
                 <input type="checkbox" class="checkbox-selected" @checkedornot data-id="@item.ID">

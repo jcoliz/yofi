@@ -317,7 +317,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Import
-        public async Task<IActionResult> Import(string command)
+        public async Task<IActionResult> Import(string command, string highlight = null)
         {
             var allimported = from s in _context.Transactions
                          where s.Imported == true
@@ -339,6 +339,18 @@ namespace OfxWeb.Asp.Controllers
                 _context.Transactions.RemoveRange(unselected);
                 _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                if (!string.IsNullOrEmpty(highlight))
+                {
+                    ViewData["Highlight"] = highlight.Split(':').Select(x => Convert.ToInt32(x)).ToHashSet();
+                }
+            }
+            catch
+            {
+                // If this fails in any way, nevermind.
             }
 
             return View(await allimported.AsNoTracking().ToListAsync());
@@ -715,6 +727,7 @@ namespace OfxWeb.Asp.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> files, string date)
         {
+            var highlights = new List<Models.Transaction>();
             var incoming = new HashSet<Models.Transaction>();
             ILookup<int, Models.Split> splits = null;
             try
@@ -795,11 +808,19 @@ namespace OfxWeb.Asp.Controllers
                 // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
                 var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
 
+                /*
+                 * Rethinking this. If you later move a transaction to a new date, it will probably not be caught
+                 * by this check, because we are narrowing to only the imported dates.
+                 * 
+
                 // This is the set of transactions which overlap with the timeframe of the imported transactions.
                 // By definitions, all duplicate transactions (conflicts) will be in this set.
                 var mindate = incoming.Min(x => x.Timestamp);
                 var maxdate = incoming.Max(x => x.Timestamp);
                 var conflictrange = _context.Transactions.Where(x => x.Timestamp >= mindate && x.Timestamp <= maxdate);
+                */
+
+                var conflictrange = _context.Transactions;
 
                 // To handle the case where there may be transactions already in the system before the importer
                 // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
@@ -817,23 +838,39 @@ namespace OfxWeb.Asp.Controllers
 
                 // The approach is to create a lookup, from bankreference to a list of possible matching conflicts. Note that it is possible for multiple different
                 // transactions to collide on a single hash. We will have to step through all the possible conflicts to see if there is really a match.
+
+                // Note that this expression evaluates nicely into SQL. Nice job EF peeps!
+                /*
+                    SELECT [x].[ID], [x].[AccountID], [x].[Amount], [x].[BankReference], [x].[Category], [x].[Hidden], [x].[Imported], [x].[Memo], [x].[Payee], [x].[ReceiptUrl], [x].[Selected], [x].[SubCategory], [x].[Timestamp]
+                    FROM [Transactions] AS [x]
+                    WHERE [x].[BankReference] IN (N'A1ABC7FE34871F02304982126CAF5C5C', N'EE49717DE89A3D97A9003230734A94B7')
+                 */
+                //
                 var conflicts = conflictrange.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
 
                 if (conflicts.Any())
                 {
                     foreach (var tx in incoming)
                     {
-                        foreach (var conflict in conflicts[tx.BankReference])
-                        {
-                            // You could debate this check. The chances of an MD5 hash collision on this data seem
-                            // astromically low. Oh the other hand, the chance is much higher of failing this check when in fact
-                            // it's the same transaction BECAUSE the user mae slight changes to payee or date.
-                            if (tx.Equals(conflict))
-                            {
-                                Console.WriteLine($"{tx.Payee} ({tx.BankReference}) has a conflict");
+                        // If this has any bank ID conflict, we are doing to deselect it. The BY FAR most common case of a
+                        // Bankref collision is a duplicate transaction
 
-                                // Deselect the transaction. User will have a chance later to re-select it
-                                tx.Selected = false;
+                        if (conflicts[tx.BankReference].Any())
+                        {
+                            Console.WriteLine($"{tx.Payee} ({tx.BankReference}) has a conflict");
+
+                            // Deselect the transaction. User will have a chance later to re-select it
+                            tx.Selected = false;
+
+                            // That said, there IS a chance that this is honestly a new transaction with a bankref collision.
+                            // If we can't find the obvious collision, we'll flag it for the user to sort it out. Still, the
+                            // most likely case is it's a legit duplicate but the user made slight changes to the payee or
+                            // date.
+
+                            if ( ! conflicts[tx.BankReference].Any(x => x.Equals(tx)) )
+                            {
+                                Console.WriteLine($"Conflict may be a false positive, flagging for user.");
+                                highlights.Add(tx);
                             }
                         }
                     }
@@ -907,7 +944,10 @@ namespace OfxWeb.Asp.Controllers
                 return BadRequest(ex);
             }
 
-            return RedirectToAction(nameof(Import));
+            // This is kind of a crappy way to communicate the potential false negative conflicts.
+            // If user returns to Import page directly, these highlights will be lost. Really probably
+            // should persist this to the database somehow. Or at least stick it in the session??
+            return RedirectToAction(nameof(Import), new { highlight = string.Join(':',highlights.Select(x=>x.ID)) });
         }
 
         // GET: Transactions/GetReceipt/5
