@@ -469,8 +469,8 @@ namespace OfxWeb.Asp.Controllers
                 var report = await builder.ThreeLevelReport(groupings, true);
                 var result = new ApiSummaryReportResult(report);
 
-                // For the summary report via api, we don't want any Key1 blanks
-                result.Lines.RemoveAll(x => x.Key1 == null);
+                // For the summary report via api, we don't want any Key blanks
+                result.Lines.RemoveAll(x => x.Keys == null);
 
                 // User Story 889: Add BudgetTxs to API report
 
@@ -544,12 +544,6 @@ namespace OfxWeb.Asp.Controllers
     {
         public struct Line
         {
-            public string Category;
-            public string SubCategory;
-            public string Key1;
-            public string Key2;
-            public string Key3;
-            public string Key4;
             public string Keys;
             public decimal Amount;
             public decimal Budget;
@@ -563,30 +557,19 @@ namespace OfxWeb.Asp.Controllers
             {
                 var line = new Line();
 
-                line.Category = rowlabel.Value;
-
-                if (rowlabel.Emphasis)
-                    line.SubCategory = "Total";
-                else
-                    line.SubCategory = rowlabel.SubValue;
-
                 var keys = new List<string>();
                 if (!string.IsNullOrEmpty(rowlabel.Key1))
                 {
-                    line.Key1 = rowlabel.Key1;
-                    keys.Add(line.Key1);
+                    keys.Add(rowlabel.Key1);
                     if (!string.IsNullOrEmpty(rowlabel.Key2))
                     {
-                        line.Key2 = rowlabel.Key2;
-                        keys.Add(line.Key2);
+                        keys.Add(rowlabel.Key2);
                         if (!string.IsNullOrEmpty(rowlabel.Key3))
                         {
-                            line.Key3 = rowlabel.Key3;
-                            keys.Add(line.Key3);
+                            keys.Add(rowlabel.Key3);
                             if (!string.IsNullOrEmpty(rowlabel.Key4))
                             {
-                                line.Key4 = rowlabel.Key4;
-                                keys.Add(line.Key4);
+                                keys.Add(rowlabel.Key4);
                             }
                         }
                     }
@@ -594,7 +577,8 @@ namespace OfxWeb.Asp.Controllers
 
                 // Prepare a single string of colon-separated keys, for future expansion where we
                 // remove the limit on ## of keys
-                line.Keys = string.Join(':', keys);
+                if (keys.Any())
+                    line.Keys = string.Join(':', keys);
 
                 var column = report.Columns.Where(x => x.Value == "TOTAL").FirstOrDefault();
 

@@ -554,11 +554,11 @@ namespace Ofx.Tests
 
             Assert.AreEqual(2, report.Lines.Count);
 
-            var actual_AB = report.Lines.Where(x=>x.Category == "A:A" && x.SubCategory == "B").Single().Amount;
+            var actual_AB = report.Lines.Where(x=>x.Keys == "A:A:B").Single().Amount;
 
             Assert.AreEqual(expected_ab, actual_AB);
 
-            var actual_CD = report.Lines.Where(x => x.Category == "C:C" && x.SubCategory == "D").Single().Amount;
+            var actual_CD = report.Lines.Where(x => x.Keys == "C:C:D").Single().Amount;
 
             Assert.AreEqual(expected_cd, actual_CD);
         }
@@ -580,13 +580,13 @@ namespace Ofx.Tests
             // There are 4 unique cat/subcats
             Assert.AreEqual(4, report.Lines.Count);
 
-            var efgr = report.Lines.Where(x => x.SubCategory == "G:R").Single();
+            var efgr = report.Lines.Where(x => x.Keys.Contains("G:R")).Single();
             Assert.AreEqual(500m, efgr.Amount);
-            Assert.AreEqual("R", efgr.Key4);
+            Assert.AreEqual("E:F:G:R", efgr.Keys);
 
-            var abcd = report.Lines.Where(x => x.SubCategory == "C:D").Single();
+            var abcd = report.Lines.Where(x => x.Keys.Contains("C:D")).Single();
             Assert.AreEqual(200m, abcd.Amount);
-            Assert.AreEqual("D", abcd.Key4);
+            Assert.AreEqual("A:B:C:D", abcd.Keys);
         }
 
         [TestMethod]
@@ -603,13 +603,13 @@ namespace Ofx.Tests
 
             Console.WriteLine(report);
 
-            var efg = report.Lines.Where(x => x.SubCategory == "G").Single();
+            var efg = report.Lines.Where(x => x.Amount == 400m).Single();
             Assert.AreEqual("E:F:G", efg.Keys);
 
-            var efgr = report.Lines.Where(x => x.SubCategory == "G:R").Single();
+            var efgr = report.Lines.Where(x => x.Amount == 500m).Single();
             Assert.AreEqual("E:F:G:R", efgr.Keys);
 
-            var abcd = report.Lines.Where(x => x.SubCategory == "C:D").Single();
+            var abcd = report.Lines.Where(x => x.Amount == 200m).Single();
             Assert.AreEqual("A:B:C:D", abcd.Keys);
         }
 
