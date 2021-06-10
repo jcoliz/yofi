@@ -470,7 +470,12 @@ namespace OfxWeb.Asp.Controllers
                 var result = new ApiSummaryReportResult(report);
 
                 // For the summary report via api, we don't want any Key1 blanks
-                result.Lines.RemoveAll(x => x.Key1 == null); 
+                result.Lines.RemoveAll(x => x.Key1 == null);
+
+                // User Story 889: Add BudgetTxs to API report
+
+                var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == year);
+                result.AddBudgetTxs(budgettxs);
 
                 return Ok(result);
             }
@@ -547,6 +552,7 @@ namespace OfxWeb.Asp.Controllers
             public string Key4;
             public string Keys;
             public decimal Amount;
+            public decimal Budget;
         }
 
         public List<Line> Lines = new List<Line>();
@@ -599,6 +605,14 @@ namespace OfxWeb.Asp.Controllers
                     Lines.Add(line);
                 }
             }
+        }
+
+        public void AddBudgetTxs(IEnumerable<BudgetTx> budgettxs)
+        {
+            // User Story 889: Add BudgetTxs to API report
+
+            var newlines = budgettxs.Select(x => new Line() { Budget = x.Amount, Keys = x.Category });
+            Lines.AddRange(newlines);
         }
     }
 }

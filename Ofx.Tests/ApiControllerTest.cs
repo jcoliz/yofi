@@ -613,5 +613,32 @@ namespace Ofx.Tests
             Assert.AreEqual("A:B:C:D", abcd.Keys);
         }
 
+        [TestMethod]
+        public async Task BudgetTxsShowInReport()
+        {
+            // User Story 889: Add BudgetTxs to API report
+
+            var year = DateTime.Now.Year;
+            var items = new List<BudgetTx>();
+            items.Add(new BudgetTx() { Timestamp = new System.DateTime(year, 06, 01), Category = "A", Amount = 100m });
+            items.Add(new BudgetTx() { Timestamp = new System.DateTime(year, 06, 01), Category = "B:C", Amount = 200m });
+            items.Add(new BudgetTx() { Timestamp = new System.DateTime(year, 05, 01), Category = "X:Y:Z", Amount = 300m });
+
+            context.BudgetTxs.AddRange(items);
+            await context.SaveChangesAsync();
+
+            var actionresult = await controller.Report("summary", year, null, null);
+            var okresult = actionresult as OkObjectResult;
+            var report = okresult.Value as ApiSummaryReportResult;
+
+            Console.WriteLine(report);
+
+            foreach(var expected in items)
+            {
+                var actual = report.Lines.Where(x => x.Keys == expected.Category ).Single();
+                Assert.AreEqual(expected.Amount, actual.Budget);
+            }
+        }
+
     }
 }
