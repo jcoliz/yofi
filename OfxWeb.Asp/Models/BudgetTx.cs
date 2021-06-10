@@ -27,14 +27,13 @@ namespace OfxWeb.Asp.Models
         public override bool Equals(object obj)
         {
             return obj is BudgetTx tx &&
-                   Amount == tx.Amount &&
                    Timestamp == tx.Timestamp &&
                    Category == tx.Category;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Amount, Timestamp, Category);
+            return HashCode.Combine(Timestamp, Category);
         }
     }
 }

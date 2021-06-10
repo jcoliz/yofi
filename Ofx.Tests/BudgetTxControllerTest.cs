@@ -6,6 +6,7 @@ using OfxWeb.Asp.Models;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNetCore.Test;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ofx.Tests
 {
@@ -99,8 +100,23 @@ namespace Ofx.Tests
             // These items are not EXACTLY duplicates, just duplicate enough to trigger the
             // hashset equality constraint on input.
 
+            // *** This test has ALWAYS failed, we just didn't know it becasue we weren't
+            // detaching. But Why did we excpect this to work? Apparantly at one point we
+            // thought that BudgetTx wasn't checking for amount sameness.
+            //
+            // Hmm, that's probably right? If you have same timestamp/amount, you probabbly
+            // don't want TWO of the same. 
+            //
+            // OK so as the fix for #890, I removed 'amount' from the equality test for
+            // Budget Txs.
+
             // Start with a full set of data
             await helper.AddFiveItems();
+
+            // Detach, otherwise the next line will effectively update the DB
+            helper.context.Entry(helper.Items[0]).State = EntityState.Detached;
+            helper.context.Entry(helper.Items[1]).State = EntityState.Detached;
+            helper.context.Entry(helper.Items[2]).State = EntityState.Detached;
 
             // Make some changes to the amounts
             helper.Items[0].Amount = 1000m;
@@ -109,7 +125,24 @@ namespace Ofx.Tests
 
             // Upload these three. They should be rejected.
             var actual = await helper.Upload(3, 0);
+        }
+        [TestMethod]
+        public async Task Bug890()
+        {
+            // Bug 890: BudgetTxs upload fails to filter duplicates when source data has >2 digits
+            // Hah, this is fixed by getting UploadMinmallyDuplicate() test to properly pass.
 
+            // Start with a full set of data
+            await helper.AddFiveItems();
+
+            // Detach, otherwise the next line will effectively update the DB
+            helper.context.Entry(helper.Items[0]).State = EntityState.Detached;
+
+            // Make small changes to the amounts
+            helper.Items[0].Amount += 0.001m;
+
+            // Upload it. It should be rejected.
+            var actual = await helper.Upload(1, 0);
         }
 
         // TODO: Generate next month's TXs
