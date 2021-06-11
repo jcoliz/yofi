@@ -72,7 +72,11 @@ namespace OfxWeb.Asp
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(x => x.MapRazorPages());
+            //app.UseEndpoints(x => x.MapRazorPages());
+            app.UseEndpoints(routes =>
+            {
+                routes.MapDefaultControllerRoute();
+            });
         }
     }
 }
