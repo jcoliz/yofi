@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using OfxWeb.Asp.Services;
 using ManiaLabs.Portable.Base;
 using ManiaLabs.NET;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 
 namespace OfxWeb.Asp
 {
@@ -38,7 +40,7 @@ namespace OfxWeb.Asp
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
 
-            services.AddMvc();
+            services.AddRazorPages().AddRazorRuntimeCompilation();
 
             // https://andrewlock.net/an-introduction-to-session-storage-in-asp-net-core/
             services.AddDistributedMemoryCache();
@@ -48,7 +50,7 @@ namespace OfxWeb.Asp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -65,14 +67,12 @@ namespace OfxWeb.Asp
 
             app.UseSession();
 
-            app.UseAuthentication();
+            app.UseRouting();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Transactions}/{action=Index}/{id?}");
-            });
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(x => x.MapRazorPages());
         }
     }
 }
