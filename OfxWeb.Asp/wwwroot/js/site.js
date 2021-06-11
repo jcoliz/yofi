@@ -132,6 +132,10 @@
         $(this).parents('.modal').modal('hide');
     });
 
+    $('#exportHowModal form').submit(function (event) {
+        $(this).parents('.modal').modal('hide');
+    });
+
     $('.txdrop').on('drop', function (event) {
 
         event.preventDefault();

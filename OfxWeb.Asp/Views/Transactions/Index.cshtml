@@ -51,7 +51,8 @@
        asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
         Bulk Edit
     </a> |
-    <a asp-action="Download" class="btn btn-default">Export</a>
+    <!--<a asp-action="Download" class="btn btn-default">Export</a>-->
+    <a href="#" data-toggle="modal" data-target="#exportHowModal" class="btn btn-default">Export</a>
 </div>
 
 @if ((bool)(ViewData["ShowSelected"]))
@@ -186,21 +187,21 @@
                         @Html.DisplayFor(modelItem => item.BankReference)
                     </td>
                 }
-            <td style="padding-left:0; padding-right:5px">
+                <td style="padding-left:0; padding-right:5px">
 
-                @if (item.HasSplits)
-                {
-                    <a asp-action="Edit" asp-route-id="@item.ID" target="_blank">
-                        <i class="fa fa-edit"></i>
-                    </a>
-                }
-                else
-                {
-                    <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#editModal">
-                        <i class="fa fa-edit"></i>
-                    </a>
-                }
-            </td>
+                    @if (item.HasSplits)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.ID" target="_blank">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="#" data-id="@item.ID" data-toggle="modal" data-target="#editModal">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                    }
+                </td>
                 <td style="padding-left:0; padding-right:5px">
                     <a asp-action="Index"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
@@ -269,6 +270,23 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+            <!-- asp-route-id="@@item.ID"  -->
+        </div>
+    </div>
+</div>
+
+<div class="actiondialog modal fade" id="exportHowModal" tabindex="-1" role="dialog" aria-labelledby="exportHowModalLabel" aria-hidden="true" data-endpoint="/Transactions/DownloadPartial/">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form method="post" action="/Transactions/Download">
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Download</button>
                 </div>
             </form>
             <!-- asp-route-id="@@item.ID"  -->

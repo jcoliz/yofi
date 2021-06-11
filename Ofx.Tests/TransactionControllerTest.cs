@@ -505,7 +505,7 @@ namespace Ofx.Tests
             context.Transactions.Add(item);
             context.SaveChanges();
 
-            var result = await controller.Download();
+            var result = await controller.Download(false,false);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 

@@ -483,6 +483,11 @@ namespace OfxWeb.Asp.Controllers
             return PartialView("EditPartial", transaction);
         }
 
+        public IActionResult DownloadPartial()
+        {
+            return PartialView();
+        }
+
         // GET: Transactions/ApplyPayee/5
         public async Task<IActionResult> ApplyPayee(int? id)
         {
@@ -979,9 +984,10 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: Transactions/Download
-        [ActionName("Download")]
-        public async Task<IActionResult> Download()
+        // POST: Transactions/Download
+        //[ActionName("Download")]
+        [HttpPost]
+        public async Task<IActionResult> Download(bool allyears, bool mapcheck)
         {
             const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             try
@@ -1411,6 +1417,8 @@ namespace OfxWeb.Asp.Controllers
         Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
 
         Task<IActionResult> IController<Models.Transaction>.Upload(List<IFormFile> files) => Upload(files, string.Empty);
+
+        Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
     }
 
     public class SparseDictionary<K,V>: Dictionary<K,V>
