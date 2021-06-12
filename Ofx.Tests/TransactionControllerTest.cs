@@ -566,6 +566,62 @@ namespace Ofx.Tests
             var actual = context.Transactions.Include(x=>x.Splits).Single();
             Assert.AreEqual(2,actual.Splits.Count);
         }
+        // Not implemented yet [TestMethod]
+        public async Task DownloadMapped()
+        {
+            // TODO
+
+            var map = new CategoryMap() { Category = "Food", Key1 = "A", Key2 = "B" };
+            context.CategoryMaps.Add(map);
+
+            var item = new Transaction() { Category = "Food", SubCategory = "Stuff", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+            context.Transactions.Add(item);
+
+            context.SaveChanges();
+
+            var result = await controller.Download(false, true);
+            var fcresult = result as FileContentResult;
+            var data = fcresult.FileContents;
+
+            var incoming = new HashSet<Transaction>();
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var sheetname = $"{typeof(Transaction).Name}s";
+                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
+                worksheet.ExtractInto(incoming, includeids: true);
+            }
+
+            Assert.AreEqual(1, incoming.Count);
+            Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
+        }
+        [TestMethod]
+        public async Task DownloadAllYears()
+        {
+            var item_new = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+            var item_old = new Transaction() { Payee = "4", Timestamp = new DateTime(DateTime.Now.Year - 5, 01, 03), Amount = 200m };
+
+            context.Transactions.Add(item_old);
+            context.Transactions.Add(item_new);
+            context.SaveChanges();
+
+            var result = await controller.Download(true, false);
+            var fcresult = result as FileContentResult;
+            var data = fcresult.FileContents;
+
+            var incoming = new HashSet<Transaction>();
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var sheetname = $"{typeof(Transaction).Name}s";
+                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
+                worksheet.ExtractInto(incoming, includeids: true);
+            }
+
+            Assert.AreEqual(2, incoming.Count);
+        }
 
 
         //

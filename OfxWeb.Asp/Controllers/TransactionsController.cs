@@ -993,7 +993,11 @@ namespace OfxWeb.Asp.Controllers
             try
             {
                 var objecttype = "Transactions";
-                var transactions = await _context.Transactions.Where(x => (x.Timestamp.Year == Year && x.Hidden != true)).OrderByDescending(x => x.Timestamp).ToListAsync();
+                var transactionsquery = _context.Transactions.Where(x => x.Hidden != true);
+                if (!allyears)
+                    transactionsquery = transactionsquery.Where(x=> x.Timestamp.Year == Year);
+                transactionsquery = transactionsquery.OrderByDescending(x => x.Timestamp);
+                var transactions = await transactionsquery.ToListAsync();
 
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
@@ -1012,7 +1016,11 @@ namespace OfxWeb.Asp.Controllers
                     tbl.TableStyle = TableStyles.Dark9;
 
                     // Product Backlog Item 870: Export & import transactions with splits
-                    var splits = await _context.Splits.Include(x => x.Transaction).Where(x => (x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true)).OrderByDescending(x => x.Transaction.Timestamp).ToListAsync();
+                    var splitsquery = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true);
+                    if (!allyears)
+                        splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
+                    splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
+                    var splits = await splitsquery.ToListAsync();
                     worksheet = package.Workbook.Worksheets.Add("Splits");
                     worksheet.PopulateFrom(splits, out rows, out cols);
                     tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), "Splits");
