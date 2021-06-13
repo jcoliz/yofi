@@ -522,7 +522,9 @@ namespace Ofx.Tests
             Assert.AreEqual(2, incoming.Count);
             Assert.AreEqual(item.ID, incoming.First().TransactionID);
             Assert.AreEqual(item.ID, incoming.Last().TransactionID);
+
         }
+
 
         [TestMethod]
         public async Task UploadSplitsWithTransactions()
@@ -594,6 +596,32 @@ namespace Ofx.Tests
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
         }
+
+        [TestMethod]
+        public async Task NullTransactionsOKinMappedDownload()
+        {
+            var item = new Transaction() { Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            var result = await controller.Download(false, true);
+            var fcresult = result as FileContentResult;
+            var data = fcresult.FileContents;
+
+            var incoming = new HashSet<Transaction>();
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var sheetname = $"{typeof(Transaction).Name}s";
+                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
+                worksheet.ExtractInto(incoming, includeids: true);
+            }
+
+            Assert.AreEqual(1, incoming.Count);
+            Assert.AreEqual(null, incoming.Single().Category);
+        }
+
         [TestMethod]
         public async Task<FileContentResult> DownloadAllYears()
         {

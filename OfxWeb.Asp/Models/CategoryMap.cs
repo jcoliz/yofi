@@ -30,7 +30,7 @@ namespace OfxWeb.Asp.Models
         // If Category contains a colon, then we don't need a hard-coded mapping rule for it, 
         // we can figure it out by definition.
 
-        public static bool HasDefaultMapFor(string category) => category.Contains(':');
+        public static bool HasDefaultMapFor(string category) => category?.Contains(':') ?? false;
         public static CategoryMap DefaultFor(string category)
         {
             CategoryMap result = null;
@@ -87,6 +87,9 @@ namespace OfxWeb.Asp.Models
         public string[] KeysFor(string Category, string SubCategory)
         {
             var result = new string[] { null, null, null, null };
+
+            if (null == Category)
+                return result;
 
             CategoryMap map = null;
             if (CategoryMap.HasDefaultMapFor(Category))
