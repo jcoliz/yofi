@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class Payee: IID
+    public class Payee: IID, ICatSubcat
     {
         public int ID { get; set; }
         public string Name { get; set; }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class Transaction : ISubReportable, IID
+    public class Transaction : ICatSubcat, ISubReportable, IID
     {
         public int ID { get; set; }
         [DisplayFormat(DataFormatString = "{0:C2}")]

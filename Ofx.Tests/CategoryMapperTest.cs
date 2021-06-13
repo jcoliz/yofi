@@ -89,7 +89,7 @@ namespace Ofx.Tests
         public void MapTransaction(string category, string subcategory, string expected)
         {
             var transaction = new Transaction() { Category = category, SubCategory = subcategory };
-            mapper.MapTransaction(transaction);
+            mapper.MapObject(transaction);
 
             Assert.AreEqual(expected, transaction.Category);
             Assert.IsNotNull(expected, transaction.SubCategory);

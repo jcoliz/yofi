@@ -74,14 +74,14 @@ namespace OfxWeb.Asp.Models
             maptable = maps.ToDictionary(x => x.Category + (string.IsNullOrEmpty(x.SubCategory) ? string.Empty : "&" + x.SubCategory), x => x);
         }
 
-        public void MapTransaction(Models.Transaction transaction)
+        public void MapObject(ICatSubcat item)
         {
-            var keys = KeysFor(transaction.Category, transaction.SubCategory);
+            var keys = KeysFor(item.Category, item.SubCategory);
             var joined = string.Join(':', keys).AsEnumerable();
             while (joined.LastOrDefault() == ':')
                 joined = joined.SkipLast(1);
-            transaction.Category = new string(joined.ToArray());
-            transaction.SubCategory = null;
+            item.Category = new string(joined.ToArray());
+            item.SubCategory = null;
         }
 
         public string[] KeysFor(string Category, string SubCategory)

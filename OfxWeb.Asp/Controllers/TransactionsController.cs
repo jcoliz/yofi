@@ -1004,7 +1004,7 @@ namespace OfxWeb.Asp.Controllers
                 {
                     maptable = new CategoryMapper(_context.CategoryMaps);
                     foreach (var tx in transactions)
-                        maptable.MapTransaction(tx);
+                        maptable.MapObject(tx);
                 }
 
                 byte[] reportBytes;
@@ -1034,7 +1034,7 @@ namespace OfxWeb.Asp.Controllers
                     {
                         if (mapcheck)
                             foreach (var split in splits)
-                                maptable.MapTransaction(split.Transaction);
+                                maptable.MapObject(split);
 
                         worksheet = package.Workbook.Worksheets.Add("Splits");
                         worksheet.PopulateFrom(splits, out rows, out cols);

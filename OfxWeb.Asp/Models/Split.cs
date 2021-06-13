@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Models
 {
-    public class Split: IID, ISubReportable
+    public class Split: IID, ISubReportable, ICatSubcat
     {
         public int ID { get; set; }
         [DisplayFormat(DataFormatString = "{0:C2}")]

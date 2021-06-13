@@ -493,9 +493,17 @@ namespace Ofx.Tests
             Assert.IsTrue(item.IsSplitsOK);
         }
 
-        [TestMethod]
-        public async Task SplitsShownDownload()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task SplitsShownDownload(bool mapped)
         {
+            if (mapped)
+            {
+                context.CategoryMaps.Add(new CategoryMap() { Category = "A", Key1 = "X", Key2 = "Y" });
+                context.CategoryMaps.Add(new CategoryMap() { Category = "C", Key1 = "Z", Key2 = "R" });
+            }
+
             var splits = new List<Split>();
             splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
             splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
@@ -505,7 +513,7 @@ namespace Ofx.Tests
             context.Transactions.Add(item);
             context.SaveChanges();
 
-            var result = await controller.Download(false,false);
+            var result = await controller.Download(false,mapped);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 
@@ -522,6 +530,12 @@ namespace Ofx.Tests
             Assert.AreEqual(2, incoming.Count);
             Assert.AreEqual(item.ID, incoming.First().TransactionID);
             Assert.AreEqual(item.ID, incoming.Last().TransactionID);
+
+            if (mapped)
+            {
+                Assert.AreEqual("X:Y:B", incoming.First().Category);
+                Assert.AreEqual("Z:R:D", incoming.Last().Category);
+            }
 
         }
 
