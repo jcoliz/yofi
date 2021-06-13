@@ -64,4 +64,103 @@ namespace OfxWeb.Asp.Models
             return HashCode.Combine(Category, SubCategory, Key1, Key2, Key3);
         }
     }
+
+    public class CategoryMapper
+    {
+        Dictionary<string, CategoryMap> maptable;
+
+        public CategoryMapper(IQueryable<CategoryMap> maps)
+        {
+            maptable = maps.ToDictionary(x => x.Category + (string.IsNullOrEmpty(x.SubCategory) ? string.Empty : "&" + x.SubCategory), x => x);
+        }
+
+        public string[] KeysFor(string Category, string SubCategory)
+        {
+            var result = new string[] { null, null, null, null };
+
+            CategoryMap map = null;
+            if (CategoryMap.HasDefaultMapFor(Category))
+                map = CategoryMap.DefaultFor(Category);
+            if (maptable.ContainsKey(Category))
+                map = maptable[Category];
+            if (!string.IsNullOrEmpty(SubCategory))
+            {
+                var key = Category + "&" + SubCategory;
+                if (maptable.ContainsKey(key))
+                    map = maptable[key];
+                else
+                {
+                    var re = new Regex("^([^\\.]*)\\.");
+                    var match = re.Match(SubCategory);
+                    if (match.Success && match.Groups.Count > 1)
+                    {
+                        key = Category + "&^" + match.Groups[1].Value;
+                        if (maptable.ContainsKey(key))
+                            map = maptable[key];
+                    }
+                }
+            }
+            if (null != map)
+            {
+                result[0] = map.Key1;
+
+                bool skipkey3 = false;
+                if (string.IsNullOrEmpty(map.Key2))
+                {
+                    if (string.IsNullOrEmpty(SubCategory))
+                    {
+                        result[1] = Category;
+                    }
+                    else
+                    {
+                        result[1] = SubCategory;
+                    }
+                    skipkey3 = true;
+                }
+                else if (map.Key2.StartsWith('^'))
+                {
+                    if (!string.IsNullOrEmpty(SubCategory))
+                    {
+                        var re = new Regex(map.Key2);
+                        var match = re.Match(SubCategory);
+                        if (match.Success && match.Groups.Count > 1)
+                            result[1] = match.Groups[1].Value;
+                    }
+                }
+                else
+                    result[1] = map.Key2;
+
+                if ("-" == map.Key3 || skipkey3)
+                {
+                    // Key3 remains blank
+                }
+                else if (string.IsNullOrEmpty(map.Key3))
+                {
+                    result[2] = SubCategory;
+                }
+                else if (map.Key3.StartsWith('^'))
+                {
+                    if (!string.IsNullOrEmpty(SubCategory))
+                    {
+                        var re = new Regex(map.Key3);
+                        var match = re.Match(SubCategory);
+                        if (match.Success && match.Groups.Count > 1)
+                            result[2] = match.Groups[1].Value;
+                    }
+                }
+                else
+                    result[2] = map.Key3;
+
+                if (!string.IsNullOrEmpty(map.Key4) && !string.IsNullOrEmpty(SubCategory))
+                {
+                    var re = new Regex(map.Key4);
+                    var match = re.Match(SubCategory);
+                    if (match.Success && match.Groups.Count > 1)
+                        result[3] = match.Groups[1].Value;
+                }
+            }
+
+            return result;
+        }
+    }
 }

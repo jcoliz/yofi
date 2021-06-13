@@ -566,11 +566,9 @@ namespace Ofx.Tests
             var actual = context.Transactions.Include(x=>x.Splits).Single();
             Assert.AreEqual(2,actual.Splits.Count);
         }
-        // Not implemented yet [TestMethod]
+        //[TestMethod]
         public async Task DownloadMapped()
         {
-            // TODO
-
             var map = new CategoryMap() { Category = "Food", Key1 = "A", Key2 = "B" };
             context.CategoryMaps.Add(map);
 

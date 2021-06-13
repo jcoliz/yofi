@@ -23,9 +23,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
         {
             var result = new PivotTable<Label, Label, decimal>();
 
-            Dictionary<string, CategoryMap> maptable = null;
+            CategoryMapper maptable = null;
             if (mapcategories)
-                maptable = await _context.CategoryMaps.ToDictionaryAsync(x => x.Category + (string.IsNullOrEmpty(x.SubCategory) ? string.Empty : "&" + x.SubCategory), x => x);
+                maptable = new CategoryMapper(_context.CategoryMaps); //.ToDictionaryAsync(x => x.Category + (string.IsNullOrEmpty(x.SubCategory) ? string.Empty : "&" + x.SubCategory), x => x);
 
             // This crazy report is THREE levels of grouping!! Months for columns, then rows and subrows for
             // categories and subcategories
@@ -76,89 +76,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                                     if (mapcategories)
                                     {
-                                        CategoryMap map = null;
-                                        string key = innergroup.Key;
-                                        if (CategoryMap.HasDefaultMapFor(key))
-                                            map = CategoryMap.DefaultFor(key);
-                                        if (maptable.ContainsKey(key))
-                                            map = maptable[key];
-                                        if (!string.IsNullOrEmpty(subgroup.Key))
-                                        {
-                                            key = innergroup.Key + "&" + subgroup.Key;
-                                            if (maptable.ContainsKey(key))
-                                                map = maptable[key];
-                                            else
-                                            {
-                                                var re = new Regex("^([^\\.]*)\\.");
-                                                var match = re.Match(subgroup.Key);
-                                                if (match.Success && match.Groups.Count > 1)
-                                                {
-                                                    key = innergroup.Key + "&^" + match.Groups[1].Value;
-                                                    if (maptable.ContainsKey(key))
-                                                        map = maptable[key];
-                                                }
-                                            }
-                                        }
-                                        if (null != map)
-                                        {
-                                            labelrow.Key1 = map.Key1;
+                                        var keys = maptable.KeysFor(innergroup.Key, subgroup.Key);
 
-                                            bool skipkey3 = false;
-                                            if (string.IsNullOrEmpty(map.Key2))
-                                            {
-                                                if (string.IsNullOrEmpty(subgroup.Key))
-                                                {
-                                                    labelrow.Key2 = innergroup.Key;
-                                                }
-                                                else
-                                                {
-                                                    labelrow.Key2 = subgroup.Key;
-                                                }
-                                                skipkey3 = true;
-                                            }
-                                            else if (map.Key2.StartsWith('^'))
-                                            {
-                                                if (!string.IsNullOrEmpty(subgroup.Key))
-                                                {
-                                                    var re = new Regex(map.Key2);
-                                                    var match = re.Match(subgroup.Key);
-                                                    if (match.Success && match.Groups.Count > 1)
-                                                        labelrow.Key2 = match.Groups[1].Value;
-                                                }
-                                            }
-                                            else
-                                                labelrow.Key2 = map.Key2;
-
-                                            if ("-" == map.Key3 || skipkey3)
-                                            {
-                                                // Key3 remains blank
-                                            }
-                                            else if (string.IsNullOrEmpty(map.Key3))
-                                            {
-                                                labelrow.Key3 = subgroup.Key;
-                                            }
-                                            else if (map.Key3.StartsWith('^'))
-                                            {
-                                                if (!string.IsNullOrEmpty(subgroup.Key))
-                                                {
-                                                    var re = new Regex(map.Key3);
-                                                    var match = re.Match(subgroup.Key);
-                                                    if (match.Success && match.Groups.Count > 1)
-                                                        labelrow.Key3 = match.Groups[1].Value;
-                                                }
-                                            }
-                                            else
-                                                labelrow.Key3 = map.Key3;
-
-                                            if (!string.IsNullOrEmpty(map.Key4) && !string.IsNullOrEmpty(subgroup.Key))
-                                            {
-                                                var re = new Regex(map.Key4);
-                                                var match = re.Match(subgroup.Key);
-                                                if (match.Success && match.Groups.Count > 1)
-                                                    labelrow.Key4 = match.Groups[1].Value;
-                                            }
-
-                                        }
+                                        labelrow.Key1 = keys[0];
+                                        labelrow.Key2 = keys[1];
+                                        labelrow.Key3 = keys[2];
+                                        labelrow.Key4 = keys[3];
                                     }
 
                                     result[labelcol, labelrow] = sum;
