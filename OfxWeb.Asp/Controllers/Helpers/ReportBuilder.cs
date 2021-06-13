@@ -25,7 +25,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             CategoryMapper maptable = null;
             if (mapcategories)
-                maptable = new CategoryMapper(_context.CategoryMaps); //.ToDictionaryAsync(x => x.Category + (string.IsNullOrEmpty(x.SubCategory) ? string.Empty : "&" + x.SubCategory), x => x);
+                maptable = new CategoryMapper(_context.CategoryMaps);
 
             // This crazy report is THREE levels of grouping!! Months for columns, then rows and subrows for
             // categories and subcategories
