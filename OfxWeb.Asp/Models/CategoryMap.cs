@@ -100,7 +100,14 @@ namespace OfxWeb.Asp.Models
                     }
                 }
             }
-            if (null != map)
+            if (null == map)
+            {
+                result[0] = "Unmapped";
+                result[1] = Category;
+                if (!string.IsNullOrEmpty(SubCategory))
+                    result[2] = SubCategory;
+            }
+            else
             {
                 result[0] = map.Key1;
 
