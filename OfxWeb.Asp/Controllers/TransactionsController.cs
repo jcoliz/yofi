@@ -999,6 +999,14 @@ namespace OfxWeb.Asp.Controllers
                 transactionsquery = transactionsquery.OrderByDescending(x => x.Timestamp);
                 var transactions = await transactionsquery.ToListAsync();
 
+                CategoryMapper maptable = null;
+                if (mapcheck)
+                {
+                    maptable = new CategoryMapper(_context.CategoryMaps);
+                    foreach (var tx in transactions)
+                        maptable.MapTransaction(tx);
+                }
+
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
                 {
@@ -1021,11 +1029,19 @@ namespace OfxWeb.Asp.Controllers
                         splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
                     splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
                     var splits = await splitsquery.ToListAsync();
-                    worksheet = package.Workbook.Worksheets.Add("Splits");
-                    worksheet.PopulateFrom(splits, out rows, out cols);
-                    tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), "Splits");
-                    tbl.ShowHeader = true;
-                    tbl.TableStyle = TableStyles.Dark9;
+
+                    if (splits.Any())
+                    {
+                        if (mapcheck)
+                            foreach (var split in splits)
+                                maptable.MapTransaction(split.Transaction);
+
+                        worksheet = package.Workbook.Worksheets.Add("Splits");
+                        worksheet.PopulateFrom(splits, out rows, out cols);
+                        tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), "Splits");
+                        tbl.ShowHeader = true;
+                        tbl.TableStyle = TableStyles.Dark9;
+                    }
 
                     reportBytes = package.GetAsByteArray();
                 }

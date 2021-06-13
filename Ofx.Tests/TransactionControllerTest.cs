@@ -566,7 +566,7 @@ namespace Ofx.Tests
             var actual = context.Transactions.Include(x=>x.Splits).Single();
             Assert.AreEqual(2,actual.Splits.Count);
         }
-        //[TestMethod]
+        [TestMethod]
         public async Task DownloadMapped()
         {
             var map = new CategoryMap() { Category = "Food", Key1 = "A", Key2 = "B" };
@@ -595,7 +595,7 @@ namespace Ofx.Tests
             Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
         }
         [TestMethod]
-        public async Task DownloadAllYears()
+        public async Task<FileContentResult> DownloadAllYears()
         {
             var item_new = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
             var item_old = new Transaction() { Payee = "4", Timestamp = new DateTime(DateTime.Now.Year - 5, 01, 03), Amount = 200m };
@@ -619,6 +619,30 @@ namespace Ofx.Tests
             }
 
             Assert.AreEqual(2, incoming.Count);
+
+            return fcresult;
+        }
+
+        [TestMethod]
+        public async Task Bug895()
+        {
+            // Bug 895: Transaction download appears corrupt if no splits
+
+            // So if there are no SPLITS there should be do splits tab.
+            // For convenience we'll use a different test and just grab those results.
+
+            var fcresult = await DownloadAllYears();
+            var data = fcresult.FileContents;
+
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                // Only 1 worksheet, no "splits" worksheet
+                Assert.AreEqual(1, excel.Workbook.Worksheets.Count);
+                Assert.IsFalse(excel.Workbook.Worksheets.Where(x => x.Name == "Splits").Any());
+            }
         }
 
 

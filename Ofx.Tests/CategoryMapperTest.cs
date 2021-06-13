@@ -53,13 +53,46 @@ namespace Ofx.Tests
         [DataRow("X:Y", "Z", "X:Y:Z:")]
         [DataRow("X:Y", "Z:R", "X:Y:Z:R")]
         [DataTestMethod]
-        public void MapMe(string category, string subcategory, string expected)
+        public void MapCatSubcat(string category, string subcategory, string expected)
         {
             var result = mapper.KeysFor(category,subcategory);
 
             var actual = string.Join(':',result);
 
             Assert.AreEqual(expected, actual);
+        }
+
+        [DataRow("A", "B", "1:2:B")]
+        [DataRow("B", "C", "3:4:C")]
+        [DataRow("B", "X", "Unmapped:B:X")]
+        [DataRow("D", "E", "5:6:7")]
+        [DataRow("D", "X", "Unmapped:D:X")]
+        [DataRow("J", "K.FOO", "14:15:FOO")]
+        [DataRow("J", "X", "12:13:X")]
+        [DataRow("F", null, "12:F")]
+        [DataRow("F", "X", "12:X")]
+        [DataRow("H", "GOO.FOO", "10:GOO:FOO")]
+        [DataRow("H", "GOO", "10:GOO")]
+        [DataRow("H", "Bob Sauce", "10:Bob Sauce")]
+        [DataRow("H", null, "10")]
+        [DataRow("I", "J", "11:J")]
+        [DataRow("I", "X", "Unmapped:I:X")]
+        [DataRow("J", null, "12:13")]
+        [DataRow("J", "X", "12:13:X")]
+        [DataRow("X", null, "Unmapped:X")]
+        [DataRow("X", "Y", "Unmapped:X:Y")]
+        [DataRow("X:Y", null, "X:Y")]
+        [DataRow("X:Y", "Z", "X:Y:Z")]
+        [DataRow("X:Y", "Z:R", "X:Y:Z:R")]
+        [DataTestMethod]
+
+        public void MapTransaction(string category, string subcategory, string expected)
+        {
+            var transaction = new Transaction() { Category = category, SubCategory = subcategory };
+            mapper.MapTransaction(transaction);
+
+            Assert.AreEqual(expected, transaction.Category);
+            Assert.IsNotNull(expected, transaction.SubCategory);
         }
 
     }
