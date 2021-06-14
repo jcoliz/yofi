@@ -87,6 +87,12 @@ namespace Ofx.Tests
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 04, 01), Category = "Other:Something" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 05, 01), Category = "Other:Something" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 06, 01), Category = "Other:Something" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 06, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 06, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 07, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 08, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 08, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 08, 01), Category = "Other:Else" });
         }
 
         [TestMethod]
@@ -163,6 +169,18 @@ namespace Ofx.Tests
             Assert.AreEqual(500m, report[totalcol, namerow]);
             Assert.AreEqual(800m, report[totalcol, otherrow]);
             Assert.AreEqual(1300m, report[totalcol, totalrow]);
+        }
+        [TestMethod]
+        public void NoColsSubItems()
+        {
+            DoBuildNoCols(Items.Skip(9).Take(10));
+
+            var Other = GetRow(x => x.Name == "Other");
+
+            Assert.AreEqual(2, report.RowLabels.Count());
+            Assert.AreEqual(1, report.ColumnLabels.Count());
+            Assert.AreEqual(1000m, report[totalcol, Other]);
+            Assert.AreEqual(1000m, report[totalcol, totalrow]);
         }
     }
 }
