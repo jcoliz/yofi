@@ -106,40 +106,37 @@ namespace Ofx.Tests
         {
             DoBuild(Items.Take(1));
 
-            var expected = Items.First();
-            var row = GetRow(x => x.Name == expected.Category);
-            var col = GetColumn(x => x.Name == "Jan");
+            var Name = GetRow(x => x.Name == "Name");
+            var Jan = GetColumn(x => x.Name == "Jan");
 
             Assert.AreEqual(2, report.RowLabels.Count());
-            Assert.IsNotNull(row);
-            Assert.IsNotNull(col);
-            Assert.AreEqual(expected.Amount, report[col, row]);
+            Assert.AreEqual(100, report[Jan, Name]);
         }
         [TestMethod]
         public void ThreeMonths()
         {
             DoBuild(Items.Take(5));
 
-            var row = GetRow(x => x.Name == "Name");
-            var col = GetColumn(x => x.Name == "Feb");
+            var Name = GetRow(x => x.Name == "Name");
+            var Feb = GetColumn(x => x.Name == "Feb");
 
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(4, report.ColumnLabels.Count());
-            Assert.AreEqual(200m, report[col, row]);
-            Assert.AreEqual(500m, report[totalcol, row]);
+            Assert.AreEqual(200m, report[Feb, Name]);
+            Assert.AreEqual(500m, report[totalcol, Name]);
         }
         [TestMethod]
         public void TwoCategories()
         {
             DoBuild(Items.Take(9));
 
-            var row = GetRow(x => x.Name == "Other");
-            var col = GetColumn(x => x.Name == "Feb");
+            var Other = GetRow(x => x.Name == "Other");
+            var Feb = GetColumn(x => x.Name == "Feb");
 
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(5, report.ColumnLabels.Count());
-            Assert.AreEqual(200m, report[col, row]);
-            Assert.AreEqual(400m, report[totalcol, row]);
+            Assert.AreEqual(200m, report[Feb, Other]);
+            Assert.AreEqual(400m, report[totalcol, Other]);
             Assert.AreEqual(900m, report[totalcol, totalrow]);
         }
         [TestMethod]
@@ -147,13 +144,13 @@ namespace Ofx.Tests
         {
             DoBuild(Items.Skip(5).Take(8));
 
-            var row = GetRow(x => x.Name == "Other");
-            var col = GetColumn(x => x.Name == "Apr");
+            var Other = GetRow(x => x.Name == "Other");
+            var Apr = GetColumn(x => x.Name == "Apr");
 
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(6, report.ColumnLabels.Count());
-            Assert.AreEqual(300m, report[col, row]);
-            Assert.AreEqual(800m, report[totalcol, row]);
+            Assert.AreEqual(300m, report[Apr, Other]);
+            Assert.AreEqual(800m, report[totalcol, Other]);
             Assert.AreEqual(800m, report[totalcol, totalrow]);
         }
         [TestMethod]
@@ -161,13 +158,13 @@ namespace Ofx.Tests
         {
             DoBuildNoCols(Items.Take(13));
 
-            var namerow = GetRow(x => x.Name == "Name");
-            var otherrow = GetRow(x => x.Name == "Other");
+            var Name = GetRow(x => x.Name == "Name");
+            var Other = GetRow(x => x.Name == "Other");
 
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(500m, report[totalcol, namerow]);
-            Assert.AreEqual(800m, report[totalcol, otherrow]);
+            Assert.AreEqual(500m, report[totalcol, Name]);
+            Assert.AreEqual(800m, report[totalcol, Other]);
             Assert.AreEqual(1300m, report[totalcol, totalrow]);
         }
         [TestMethod]
