@@ -74,25 +74,25 @@ namespace Ofx.Tests
             report = new Report();
 
             Items = new List<Item>();
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 04, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 04, 01), Category = "Other:Something" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 04, 01), Category = "Other:Something" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 05, 01), Category = "Other:Something" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 06, 01), Category = "Other:Something" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 06, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 06, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 07, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 08, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 08, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 08, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 03, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Other" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Other" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 03, 01), Category = "Other" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 05, 01), Category = "Other:Something" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else" });
         }
 
         [TestMethod]
