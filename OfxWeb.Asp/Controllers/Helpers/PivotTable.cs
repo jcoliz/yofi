@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 namespace OfxWeb.Asp.Controllers.Helpers
 {
     /// <summary>
-    /// This is a standardized way for reports to be formulated
+    /// This is a standardized way for reports to be formulated. It is simply a
+    /// 2D dictionary of C,R to V.
     /// </summary>
     /// <remarks>
     /// The idea is that the "pivot" view can render many different kinds of reports
@@ -17,6 +18,24 @@ namespace OfxWeb.Asp.Controllers.Helpers
     /// <typeparam name="V">Class to represent each cell value</typeparam>
     public class PivotTable<C, R, V>
     {
+        class Key
+        {
+            public C col { get; set; }
+            public R row { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                return obj is Key key &&
+                       EqualityComparer<C>.Default.Equals(col, key.col) &&
+                       EqualityComparer<R>.Default.Equals(row, key.row);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(col, row);
+            }
+        }
+
         /// <summary>
         /// Primary representation of data.
         /// </summary>
@@ -24,8 +43,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// This is essentially a 2D dictionary, and could perhaps be improved to simply be a
         /// SparseDictionary of (Row,Col) Tuple to Values.
         /// </remarks>
-        Dictionary<R, SparseDictionary<C, V>> Table = new Dictionary<R, SparseDictionary<C, V>>();
-
+        Dictionary<Key,V> Table = new Dictionary<Key,V>();
 
         public IEnumerable<C> ColumnLabels
         {
@@ -42,15 +60,30 @@ namespace OfxWeb.Asp.Controllers.Helpers
         }
         HashSet<C> _ColumnLabels = new HashSet<C>();
 
-        public IEnumerable<R> RowLabels => Table.Keys.OrderBy(x => x);
+        public IEnumerable<R> RowLabels
+        {
+            get
+            {
+                return _RowLabels.OrderBy(x => x);
+            }
+            set
+            {
+                _RowLabels.Clear();
+                foreach (var label in value)
+                    _RowLabels.Add(label);
+            }
+        }
+        HashSet<R> _RowLabels = new HashSet<R>();
 
         public V this[C collabel, R rowlabel]
         {
             get
             {
-                if (Table.ContainsKey(rowlabel))
+                var key = new Key() { row = rowlabel, col = collabel };
+
+                if (Table.ContainsKey(key))
                 {
-                    return Table[rowlabel][collabel];
+                    return Table[key];
                 }
                 else
                 {
@@ -59,21 +92,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             set
             {
-                if (!Table.ContainsKey(rowlabel))
-                {
-                    Table[rowlabel] = new SparseDictionary<C, V>();
-                }
-                var row = Table[rowlabel];
+                var key = new Key() { row = rowlabel, col = collabel };
 
-                row[collabel] = value;
-
+                Table[key] = value;
                 _ColumnLabels.Add(collabel);
-            }
+                _RowLabels.Add(rowlabel);
+           }
         }
 
         public IEnumerable<V> RowValues(R row)
         {
-            return Table[row].Values;
+            return _ColumnLabels.Select(x => this[x, row]);
         }
     }
 
@@ -131,24 +160,4 @@ namespace OfxWeb.Asp.Controllers.Helpers
         }
     }
 
-    /// <summary>
-    /// A dictionary which will return a value for every key without having
-    /// to HOLD values for every day.
-    /// </summary>
-    /// <typeparam name="K">Key type</typeparam>
-    /// <typeparam name="V">Value type</typeparam>
-    public class SparseDictionary<K, V> : Dictionary<K, V>
-    {
-        public new V this[K key]
-        {
-            get
-            {
-                return base.ContainsKey(key) ? base[key] : default(V);
-            }
-            set
-            {
-                base[key] = value;
-            }
-        }
-    }
 }

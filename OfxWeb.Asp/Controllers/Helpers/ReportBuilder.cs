@@ -140,13 +140,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 foreach ( var collabel in initial.ColumnLabels )
                 {
                     // Accumulate the result
-                    result[collabel, rowlabel] += result[collabel,initialrow];
+                    result[collabel, rowlabel] += initial[collabel,initialrow];
 
                     // Accumulate the key2 total
-                    result[collabel, totalslabel] += result[collabel,initialrow];
+                    result[collabel, totalslabel] += initial[collabel,initialrow];
 
                     // Accumulate the key1 total
-                    result[collabel, toptotalslabel] += result[collabel,initialrow];
+                    result[collabel, toptotalslabel] += initial[collabel,initialrow];
                 }
             }
 
