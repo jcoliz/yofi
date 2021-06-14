@@ -1306,7 +1306,7 @@ namespace OfxWeb.Asp.Controllers
                 var labelrowactual = new Label() { Order = row.Order + (row.Order > 0 ? 1 : 0), Value = row.Value, SubValue = "Actual" };
                 var labelrow = new Label() { Order = row.Order, Value = row.Value, Emphasis = true };
 
-                foreach (var column in budgettx.Columns)
+                foreach (var column in budgettx.ColumnLabels)
                 {
                     var budgetval = budgettx[column, labelrow];
                     var spentval = monthlth[column, labelrow];
@@ -1391,7 +1391,7 @@ namespace OfxWeb.Asp.Controllers
             worksheet.Cells[row, col++].Value = "Key1";
             worksheet.Cells[row, col++].Value = "Key2";
             worksheet.Cells[row, col++].Value = "Key3";
-            foreach (var column in Model.Columns)
+            foreach (var column in Model.ColumnLabels)
             {
                 worksheet.Cells[row, col++].Value = column.Value;
             }
@@ -1413,7 +1413,7 @@ namespace OfxWeb.Asp.Controllers
                 worksheet.Cells[row, col++].Value = rowlabel.Key2 ?? string.Empty;
                 worksheet.Cells[row, col++].Value = rowlabel.Key3 ?? string.Empty;
 
-                foreach (var column in Model.Columns)
+                foreach (var column in Model.ColumnLabels)
                 {
                     var cell = Model[column,rowlabel];
                     worksheet.Cells[row, col].Value = cell;

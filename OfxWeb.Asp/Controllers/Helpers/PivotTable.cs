@@ -26,7 +26,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         Dictionary<R, SparseDictionary<C, V>> Table = new Dictionary<R, SparseDictionary<C, V>>();
 
-        public HashSet<C> Columns { get; }  = new HashSet<C>();
+        public HashSet<C> ColumnLabels { get; } = new HashSet<C>();
 
         public IEnumerable<R> RowLabels => Table.Keys.OrderBy(x => x);
 
@@ -53,7 +53,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                 row[collabel] = value;
 
-                Columns.Add(collabel);
+                ColumnLabels.Add(collabel);
             }
         }
 

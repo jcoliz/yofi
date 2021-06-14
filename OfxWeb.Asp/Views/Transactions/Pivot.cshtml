@@ -86,7 +86,7 @@
                 <th>Key2</th>
                 <th>Key3</th>
             }
-            @foreach (var column in Model.Columns)
+            @foreach (var column in Model.ColumnLabels)
             {
                 <th>
                     @column.Value
@@ -121,7 +121,7 @@
                 <td class="subhead @emphasis">@row.Key3</td>
             }
 
-            @foreach (var column in Model.Columns)
+            @foreach (var column in Model.ColumnLabels)
             {
                 var cell = Model[column,row];
                 var format = column.Format ?? row.Format ?? "C2";

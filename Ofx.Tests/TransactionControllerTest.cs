@@ -430,7 +430,7 @@ namespace Ofx.Tests
             var model = viewresult.Model as PivotTable<Label, Label, decimal>;
 
             var row_AB = model.RowLabels.Where(x => x.Value == "A" && x.SubValue == "B").Single();
-            var col = model.Columns.First();
+            var col = model.ColumnLabels.First();
             var actual_AB = model[col, row_AB];
 
             Assert.AreEqual(expected_ab, actual_AB);

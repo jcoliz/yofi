@@ -581,7 +581,7 @@ namespace OfxWeb.Asp.Controllers
                 if (keys.Any())
                     line.Keys = string.Join(':', keys);
 
-                var column = report.Columns.Where(x => x.Value == "TOTAL").FirstOrDefault();
+                var column = report.ColumnLabels.Where(x => x.Value == "TOTAL").FirstOrDefault();
 
                 if (null != column)
                 {

@@ -114,9 +114,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var initial = await ThreeLevelReport(outergroups,true);
 
             // Collect the columns
-            var columns = initial.Columns;
+            var columns = initial.ColumnLabels;
             foreach(var c in columns)
-                result.Columns.Add(c);
+                result.ColumnLabels.Add(c);
 
             // For each line in the initial report, collect the value by key1/key2/key3
             foreach (var initialrow in initial.RowLabels)
