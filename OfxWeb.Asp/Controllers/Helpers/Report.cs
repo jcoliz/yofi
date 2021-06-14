@@ -17,13 +17,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void Build(IQueryable<IReportable> items, bool nocols = false)
+        public void Build(IQueryable<IReportable> items, bool nocols = false, int categorylevel = 0)
         {
             var totalrow = new RowLabel() { IsTotal = true };
             var totalcolumn = new ColumnLabel() { IsTotal = true };
 
             // One row per top-level category
-            var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, 0));
+            var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, categorylevel));
             foreach (var categorygroup in categorygroups)
             {
                 var category = categorygroup.Key;

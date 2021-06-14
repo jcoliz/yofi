@@ -30,11 +30,11 @@ namespace Ofx.Tests
         ColumnLabel totalcol;
         RowLabel totalrow;
 
-        void DoBuild(IEnumerable<Item> these, bool flat = true, bool nocols = false)
+        void DoBuild(IEnumerable<Item> these, bool flat = true, bool nocols = false, int categorylevel = 0)
         {
             testitems = these;
             if (flat)
-                report.Build(testitems.AsQueryable(),nocols);
+                report.Build(testitems.AsQueryable(),nocols, categorylevel);
             else
                 report.BuildTwoLevel(testitems.AsQueryable(),nocols);
             totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
@@ -231,5 +231,20 @@ namespace Ofx.Tests
             Assert.AreEqual(400m, report[Jun, totalrow]);
             Assert.AreEqual(200m, report[Jun, Else]);
         }
+        [TestMethod]
+        public void NoColsSubItemsFromLevel2()
+        {
+            DoBuild(Items.Skip(9).Take(10),flat:true,nocols:true,categorylevel:1);
+
+            var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
+            var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
+
+            Assert.AreEqual(3, report.RowLabels.Count());
+            Assert.AreEqual(1, report.ColumnLabels.Count());
+            Assert.AreEqual(400m, report[totalcol, Something]);
+            Assert.AreEqual(600m, report[totalcol, Else]);
+            Assert.AreEqual(1000m, report[totalcol, totalrow]);
+        }
+
     }
 }
