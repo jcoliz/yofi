@@ -22,51 +22,6 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var totalrow = new RowLabel() { IsTotal = true };
             var totalcolumn = new ColumnLabel() { IsTotal = true };
 
-            // One column per month
-            var monthgroups = items.GroupBy(x => x.Timestamp.Month);
-            foreach (var monthgroup in monthgroups)
-            {
-                var month = monthgroup.Key;
-                var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
-
-                // One row per top-level category
-                var categorygroups = monthgroup.GroupBy(x => GetTokenByIndex(x.Category, 0));
-                foreach (var categorygroup in categorygroups)
-                {
-                    var category = categorygroup.Key;
-                    var row = new RowLabel() { Name = category };
-
-                    var sum = categorygroup.Sum(x => x.Amount);
-
-                    base[column, row] = sum;
-                    base[totalcolumn, row] += sum;
-                    base[column, totalrow] += sum;
-                    base[totalcolumn, totalrow] += sum;
-                }
-            }
-
-            if (nocols)
-                base.RemoveColumnsWhere(x => !x.IsTotal);
-        }
-
-        /// <summary>
-        /// This will build a one-level report with no columns, just totals,
-        /// and rows as first-level categories
-        /// </summary>
-        /// <remarks>
-        /// e.g. Transactions where category is X:Y or X:A:B will all be lumped on X.
-        /// </remarks>
-        /// <param name="items"></param>
-
-#if true
-        // Another way to do BuildNoCols is build it, and then take the columns OUT
-        public void BuildNoCols(IQueryable<IReportable> items) => Build(items, true);
-#else
-        public void BuildNoCols(IQueryable<IReportable> items)
-        {
-            var totalrow = new RowLabel() { IsTotal = true };
-            var totalcolumn = new ColumnLabel() { IsTotal = true };
-
             // One row per top-level category
             var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, 0));
             foreach (var categorygroup in categorygroups)
@@ -78,9 +33,36 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                 base[totalcolumn, row] += sum;
                 base[totalcolumn, totalrow] += sum;
+
+                // One column per month
+                if (!nocols)
+                {
+                    var monthgroups = categorygroup.GroupBy(x => x.Timestamp.Month);
+                    foreach (var monthgroup in monthgroups)
+                    {
+                        var month = monthgroup.Key;
+                        var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
+
+                        sum = monthgroup.Sum(x => x.Amount);
+
+                        base[column, row] = sum;
+                        base[column, totalrow] += sum;
+                    }
+                }
             }
         }
-#endif
+
+        /// <summary>
+        /// This will build a one-level report with no columns, just totals,
+        /// and rows as first-level categories
+        /// </summary>
+        /// <remarks>
+        /// e.g. Transactions where category is X:Y or X:A:B will all be lumped on X.
+        /// </remarks>
+        /// <param name="items"></param>
+
+        public void BuildNoCols(IQueryable<IReportable> items) => Build(items, true);
+
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,
