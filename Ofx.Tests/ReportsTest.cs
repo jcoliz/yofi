@@ -22,16 +22,28 @@ namespace Ofx.Tests
             public string Category { get; set; }
         }
 
+        List<Item> Items;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            Items = new List<Item>();
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Category = "Name" });
+        }
+
         [TestMethod]
         public void OneItem()
         {
             var report = new Report();
 
-            var items = new List<Item>();
-            var expected = new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Category = "Name" };
-            items.Add(expected);
+            var testitems = Items.Take(1);
+            var expected = testitems.Single();
 
-            report.Build(items.AsQueryable());
+            report.Build(testitems.AsQueryable());
 
             var row = report.RowLabels.Where(x => x.Name == expected.Category).SingleOrDefault();
             var col = report.ColumnLabels.Where(x => x.Name == "Jan").SingleOrDefault();
@@ -42,6 +54,28 @@ namespace Ofx.Tests
             Assert.IsNotNull(col);
             Assert.IsNotNull(report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault());
             Assert.AreEqual(expected.Amount, report[col, row]);
+        }
+        [TestMethod]
+        public void ThreeMonths()
+        {
+            var report = new Report();
+
+            var testitems = Items.Take(5);
+
+            report.Build(testitems.AsQueryable());
+
+            var row = report.RowLabels.Where(x => x.Name == "Name").SingleOrDefault();
+            var col = report.ColumnLabels.Where(x => x.Name == "Feb").SingleOrDefault();
+            var totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
+
+            Assert.AreEqual(2, report.RowLabels.Count());
+            Assert.AreEqual(4, report.ColumnLabels.Count());
+            Assert.IsNotNull(row);
+            Assert.IsNotNull(report.RowLabels.Where(x => x.IsTotal).SingleOrDefault());
+            Assert.IsNotNull(col);
+            Assert.IsNotNull(totalcol);
+            Assert.AreEqual(200m, report[col, row]);
+            Assert.AreEqual(500m, report[totalcol, row]);
         }
     }
 }

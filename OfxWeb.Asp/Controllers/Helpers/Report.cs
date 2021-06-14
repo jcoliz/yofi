@@ -62,17 +62,30 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// <summary>
         /// Display order. Lower values display before higher values
         /// </summary>
-        public string Order { get; set; }
+        public string Order { get; set; } = string.Empty;
 
         /// <summary>
         /// Display name of the label
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Final total-displaying column
         /// </summary>
         public bool IsTotal { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is BaseLabel label &&
+                   Order == label.Order &&
+                   Name == label.Name &&
+                   IsTotal == label.IsTotal;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Order, Name, IsTotal);
+        }
 
         int IComparable<BaseLabel>.CompareTo(BaseLabel other)
         {
