@@ -17,7 +17,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void Build(IQueryable<IReportable> items, bool nocols = false, int categorylevel = 0)
+        public void BuildFlat(IQueryable<IReportable> items, bool nocols = false, int categorylevel = 0)
         {
             var totalrow = new RowLabel() { IsTotal = true };
             var totalcolumn = new ColumnLabel() { IsTotal = true };
@@ -61,8 +61,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void BuildNoCols(IQueryable<IReportable> items) => Build(items, true);
+        public void BuildNoCols(IQueryable<IReportable> items) => BuildFlat(items, true);
 
+        RowLabel TotalRow = new RowLabel() { IsTotal = true };
+        ColumnLabel TotalColumn = new ColumnLabel() { IsTotal = true };
+
+        bool ShowCols = false;
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,
@@ -73,37 +77,35 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void BuildTwoLevel(IQueryable<IReportable> items, bool nocols = true, int categorylevel = 0)
+        public void BuildDeep(IQueryable<IReportable> items, bool nocols = true, int fromlevel = 0, int tolevel = 1)
         {
-            var totalrow = new RowLabel() { IsTotal = true };
-            var totalcolumn = new ColumnLabel() { IsTotal = true };
+            ShowCols = !nocols;
 
+            BuildDeepRecursive(items, fromlevel, tolevel);
+        }
+
+        void BuildDeepRecursive(IQueryable<IReportable> items, int fromlevel, int tolevel, string categorypath = null)
+        {
             // One heading per top-level category
-            var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, categorylevel));
-            foreach (var categorygroup in categorygroups)
+            var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
+            foreach (var group in groups)
             {
-                var category = categorygroup.Key;
-                var headingrow = new RowLabel() { Name = category, Level = 1, Order = category };
+                var token = group.Key;
+                var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
+                var row = new RowLabel() { Name = token, Level = tolevel - fromlevel, Order = newpath };
 
-                var sum = categorygroup.Sum(x => x.Amount);
-                base[totalcolumn, headingrow] = sum;
-                base[totalcolumn, totalrow] += sum;
+                var sum = group.Sum(x => x.Amount);
+                base[TotalColumn, row] = sum;
 
-                // One row per second -level category
-                var subcategorygroups = categorygroup.GroupBy(x => GetTokenByIndex(x.Category, categorylevel+1));
-                foreach (var subcategorygroup in subcategorygroups)
+                if (fromlevel == tolevel)
                 {
-                    var subcategory = subcategorygroup.Key ?? "-";
-                    var row = new RowLabel() { Name = subcategory, Order = $"{category}:{subcategory}" };
-
-                    sum = subcategorygroup.Sum(x => x.Amount);
-
-                    base[totalcolumn, row] += sum;
+                    // Terminal stage
+                    base[TotalColumn, TotalRow] += sum;
 
                     // One column per month
-                    if (!nocols)
+                    if (ShowCols)
                     {
-                        var monthgroups = subcategorygroup.GroupBy(x => x.Timestamp.Month);
+                        var monthgroups = group.GroupBy(x => x.Timestamp.Month);
                         foreach (var monthgroup in monthgroups)
                         {
                             var month = monthgroup.Key;
@@ -112,9 +114,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
                             sum = monthgroup.Sum(x => x.Amount);
 
                             base[column, row] = sum;
-                            base[column, totalrow] += sum;
+                            base[column, TotalRow] += sum;
                         }
                     }
+                }
+                else
+                {
+                    // Recurse!
+                    BuildDeepRecursive(group.AsQueryable(), fromlevel + 1, tolevel, newpath);
                 }
             }
         }

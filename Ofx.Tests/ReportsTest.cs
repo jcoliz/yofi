@@ -34,9 +34,9 @@ namespace Ofx.Tests
         {
             testitems = these;
             if (flat)
-                report.Build(testitems.AsQueryable(),nocols, categorylevel);
+                report.BuildFlat(testitems.AsQueryable(),nocols, categorylevel);
             else
-                report.BuildTwoLevel(testitems.AsQueryable(),nocols, categorylevel);
+                report.BuildDeep(testitems.AsQueryable(),nocols, categorylevel, categorylevel + 1);
             totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
             totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
 
