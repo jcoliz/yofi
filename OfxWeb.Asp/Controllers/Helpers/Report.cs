@@ -17,7 +17,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void Build(IQueryable<IReportable> items)
+        public void Build(IQueryable<IReportable> items, bool nocols = false)
         {
             var totalrow = new RowLabel() { IsTotal = true };
             var totalcolumn = new ColumnLabel() { IsTotal = true };
@@ -44,6 +44,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     base[totalcolumn, totalrow] += sum;
                 }
             }
+
+            if (nocols)
+                base.RemoveColumnsWhere(x => !x.IsTotal);
         }
 
         /// <summary>
@@ -57,11 +60,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
 #if true
         // Another way to do BuildNoCols is build it, and then take the columns OUT
-        public void BuildNoCols(IQueryable<IReportable> items)
-        {
-            Build(items);
-            base.RemoveColumnsWhere(x => !x.IsTotal);
-        }
+        public void BuildNoCols(IQueryable<IReportable> items) => Build(items, true);
 #else
         public void BuildNoCols(IQueryable<IReportable> items)
         {
