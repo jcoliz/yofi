@@ -60,18 +60,36 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public void WriteToConsole()
         {
-            foreach(var line in RowLabels)
-            {
-                var builder = new StringBuilder();
+            // Columns
 
-                var name = line.Name;
+            var builder = new StringBuilder();
+            var name = string.Empty;
+            builder.Append($"+ {name,15} ");
+
+            foreach (var col in ColumnLabels.OrderBy(x => x))
+            {
+                name = col.Name;
+                if (col.IsTotal)
+                    name = "TOTAL";
+                builder.Append($"| {name,10} ");
+            }
+
+            Console.WriteLine(builder.ToString());
+
+            // Rows
+
+            foreach (var line in RowLabels.OrderBy(x => x))
+            {
+                builder = new StringBuilder();
+
+                name = line.Name;
                 if (line.IsTotal)
                     name = "TOTAL";
                 if (name == null)
                     name = "-";
                 builder.Append($"{line.Level} {name,15} ");
 
-                foreach (var col in ColumnLabels)
+                foreach (var col in ColumnLabels.OrderBy(x=>x))
                 {
                     var val = this[col, line];
                     builder.Append($"| {val,10:C2} ");
