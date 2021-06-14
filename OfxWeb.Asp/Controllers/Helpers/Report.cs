@@ -30,7 +30,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
 
                 // One row per top-level category
-                var categorygroups = monthgroup.GroupBy(x => SplitCategory(x.Category, 1)[0]);
+                var categorygroups = monthgroup.GroupBy(x => GetTokenByIndex(x.Category, 0));
                 foreach (var categorygroup in categorygroups)
                 {
                     var category = categorygroup.Key;
@@ -61,7 +61,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var totalcolumn = new ColumnLabel() { IsTotal = true };
 
             // One row per top-level category
-            var categorygroups = items.GroupBy(x => SplitCategory(x.Category, 1)[0]);
+            var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, 0));
             foreach (var categorygroup in categorygroups)
             {
                 var category = categorygroup.Key;
@@ -89,7 +89,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var totalcolumn = new ColumnLabel() { IsTotal = true };
 
             // One heading per top-level category
-            var categorygroups = items.GroupBy(x => SplitCategory(x.Category, 1)[0]);
+            var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, 0));
             foreach (var categorygroup in categorygroups)
             {
                 var category = categorygroup.Key;
@@ -100,7 +100,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 base[totalcolumn, totalrow] += sum;
 
                 // One row per second -level category
-                var subcategorygroups = categorygroup.GroupBy(x => SplitCategory(x.Category, 2)[1]);
+                var subcategorygroups = categorygroup.GroupBy(x => GetTokenByIndex(x.Category, 1));
                 foreach (var subcategorygroup in subcategorygroups)
                 {
                     var subcategory = subcategorygroup.Key ?? "-";
@@ -113,15 +113,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
         }
 
-        static List<string> SplitCategory(string category, int minitems)
+        static string GetTokenByIndex(string category, int index)
         {
-            var result = new List<String>();
-            result.AddRange(category.Split(':'));
+            var split = category.Split(':');
 
-            if (result.Count < minitems)
-                result.AddRange(Enumerable.Repeat<string>(null, minitems - result.Count));
-
-            return result;
+            if (index >= split.Count() || split[index] == string.Empty)
+                return null;
+            else
+                return split[index];
         }
     }
 
