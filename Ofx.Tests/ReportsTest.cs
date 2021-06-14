@@ -36,7 +36,7 @@ namespace Ofx.Tests
             if (flat)
                 report.Build(testitems.AsQueryable(),nocols, categorylevel);
             else
-                report.BuildTwoLevel(testitems.AsQueryable(),nocols);
+                report.BuildTwoLevel(testitems.AsQueryable(),nocols, categorylevel);
             totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
             totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
 
@@ -79,16 +79,16 @@ namespace Ofx.Tests
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Other" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 03, 01), Category = "Other" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 05, 01), Category = "Other:Something" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something:A" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something:A" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 05, 01), Category = "Other:Something:A" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something:B" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Else" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else:X" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:X" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Name" });
         }
 
@@ -232,7 +232,7 @@ namespace Ofx.Tests
             Assert.AreEqual(200m, report[Jun, Else]);
         }
         [TestMethod]
-        public void NoColsSubItemsFromLevel2()
+        public void NoColsSubItemsFlatFromLevel2()
         {
             DoBuild(Items.Skip(9).Take(10),flat:true,nocols:true,categorylevel:1);
 
@@ -244,6 +244,26 @@ namespace Ofx.Tests
             Assert.AreEqual(400m, report[totalcol, Something]);
             Assert.AreEqual(600m, report[totalcol, Else]);
             Assert.AreEqual(1000m, report[totalcol, totalrow]);
+        }
+        [TestMethod]
+        public void SubItemsFromLevel2YesCols()
+        {
+            DoBuild(Items.Skip(9).Take(10), flat: false, nocols: false, categorylevel: 1);
+
+            var Something = GetRow(x => x.Name == "Something" && x.Level == 1);
+            var Else = GetRow(x => x.Name == "Else" && x.Level == 1);
+            var A = GetRow(x => x.Name == "A" && x.Level == 0);
+            var B = GetRow(x => x.Name == "B" && x.Level == 0);
+            var Jun = GetColumn(x => x.Name == "Jun");
+
+            Assert.AreEqual(8, report.RowLabels.Count());
+            Assert.AreEqual(6, report.ColumnLabels.Count());
+            Assert.AreEqual(400m, report[totalcol, Something]);
+            Assert.AreEqual(300m, report[totalcol, A]);
+            Assert.AreEqual(600m, report[totalcol, Else]);
+            Assert.AreEqual(1000m, report[totalcol, totalrow]);
+            Assert.AreEqual(300m, report[Jun, totalrow]);
+            Assert.AreEqual(100m, report[Jun, B]);
         }
 
     }

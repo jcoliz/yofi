@@ -73,13 +73,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void BuildTwoLevel(IQueryable<IReportable> items, bool nocols = true)
+        public void BuildTwoLevel(IQueryable<IReportable> items, bool nocols = true, int categorylevel = 0)
         {
             var totalrow = new RowLabel() { IsTotal = true };
             var totalcolumn = new ColumnLabel() { IsTotal = true };
 
             // One heading per top-level category
-            var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, 0));
+            var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, categorylevel));
             foreach (var categorygroup in categorygroups)
             {
                 var category = categorygroup.Key;
@@ -90,7 +90,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 base[totalcolumn, totalrow] += sum;
 
                 // One row per second -level category
-                var subcategorygroups = categorygroup.GroupBy(x => GetTokenByIndex(x.Category, 1));
+                var subcategorygroups = categorygroup.GroupBy(x => GetTokenByIndex(x.Category, categorylevel+1));
                 foreach (var subcategorygroup in subcategorygroups)
                 {
                     var subcategory = subcategorygroup.Key ?? "-";
