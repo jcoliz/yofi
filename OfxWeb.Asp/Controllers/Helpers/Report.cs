@@ -41,6 +41,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     base[column, row] = sum;
                     base[totalcolumn, row] += sum;
                     base[column, totalrow] += sum;
+                    base[totalcolumn, totalrow] += sum;
                 }
             }
         }

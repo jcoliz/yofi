@@ -33,6 +33,10 @@ namespace Ofx.Tests
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Name" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Name" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Other" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 02, 01), Category = "Other" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Category = "Other" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 04, 01), Category = "Other" });
         }
 
         [TestMethod]
@@ -76,6 +80,30 @@ namespace Ofx.Tests
             Assert.IsNotNull(totalcol);
             Assert.AreEqual(200m, report[col, row]);
             Assert.AreEqual(500m, report[totalcol, row]);
+        }
+        [TestMethod]
+        public void TwoCategories()
+        {
+            var report = new Report();
+
+            var testitems = Items.Take(9);
+
+            report.Build(testitems.AsQueryable());
+
+            var row = report.RowLabels.Where(x => x.Name == "Other").SingleOrDefault();
+            var col = report.ColumnLabels.Where(x => x.Name == "Feb").SingleOrDefault();
+            var totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
+            var totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
+
+            Assert.AreEqual(3, report.RowLabels.Count());
+            Assert.AreEqual(5, report.ColumnLabels.Count());
+            Assert.IsNotNull(row);
+            Assert.IsNotNull(report.RowLabels.Where(x => x.IsTotal).SingleOrDefault());
+            Assert.IsNotNull(col);
+            Assert.IsNotNull(totalcol);
+            Assert.AreEqual(200m, report[col, row]);
+            Assert.AreEqual(400m, report[totalcol, row]);
+            Assert.AreEqual(900m, report[totalcol, totalrow]);
         }
     }
 }
