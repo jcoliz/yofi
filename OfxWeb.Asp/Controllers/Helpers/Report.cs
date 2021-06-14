@@ -19,10 +19,45 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public void Build(IQueryable<IReportable> items)
         {
+            var totalrow = new RowLabel() { Order = 10000, Name = "TOTAL", IsTotal = true };
+            var totalcolumn = new ColumnLabel() { Order = 10000, Name = "TOTAL", IsTotal = true };
+
+            // One column per month
+            var monthgroups = items.GroupBy(x => x.Timestamp.Month);
+            foreach (var monthgroup in monthgroups)
+            {
+                var month = monthgroup.Key;
+                var column = new ColumnLabel() { Order = month, Name = new DateTime(2000, month, 1).ToString("MMM") };
+
+                // One row per top-level category
+                var categorygroups = monthgroup.GroupBy(x => SplitCategory(x.Category, 1)[0]);
+                foreach (var categorygroup in categorygroups)
+                {
+                    var category = categorygroup.Key;
+                    var row = new RowLabel() { Name = category };
+
+                    var sum = categorygroup.Sum(x => x.Amount);
+
+                    base[column, row] = sum;
+                    base[totalcolumn, row] += sum;
+                    base[column, totalrow] += sum;
+                }
+            }
+        }
+
+        static List<string> SplitCategory(string category, int minitems)
+        {
+            var result = new List<String>();
+            result.AddRange(category.Split(':'));
+
+            if (result.Count < minitems)
+                result.AddRange(Enumerable.Repeat<string>(null, minitems - result.Count));
+
+            return result;
         }
     }
 
-    public class BaseLabel
+    public class BaseLabel: IComparable<BaseLabel>
     {
         /// <summary>
         /// Display order. Lower values display before higher values
@@ -38,6 +73,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// Final total-displaying column
         /// </summary>
         public bool IsTotal { get; set; }
+
+        int IComparable<BaseLabel>.CompareTo(BaseLabel other)
+        {
+            int result = IsTotal.CompareTo(other.IsTotal);
+            if (result == 0)
+                result = Order.CompareTo(other.Order);
+            if (result == 0)
+                result = Name.CompareTo(other.Name);
+
+            return result;
+        }
     }
 
     public class RowLabel: BaseLabel
