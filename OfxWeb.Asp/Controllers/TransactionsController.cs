@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
+using OfxWeb.Asp.Controllers.Helpers;
 using Microsoft.AspNetCore.Http;
 using OfxSharpLib;
 using Microsoft.AspNetCore.Authorization;
@@ -1443,104 +1444,5 @@ namespace OfxWeb.Asp.Controllers
         Task<IActionResult> IController<Models.Transaction>.Upload(List<IFormFile> files) => Upload(files, string.Empty);
 
         Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
-    }
-
-    public class SparseDictionary<K,V>: Dictionary<K,V>
-    {
-        public new V this[K key]
-        {
-            get
-            {
-                return base.ContainsKey(key) ? base[key] : default(V);
-            }
-            set
-            {
-                base[key] = value;
-            }
-        }
-    }
-
-    public class Label: IComparable<Label>
-    {
-        public int Order { get; set; }
-        public string Value { get; set; } = string.Empty;
-        public string SubValue { get; set; } = string.Empty;
-        public string Key1 { get; set; } = string.Empty;
-        public string Key2 { get; set; } = string.Empty;
-        public string Key3 { get; set; } = string.Empty;
-        public string Key4 { get; set; } = string.Empty;
-        public bool Emphasis { get; set; } = false;
-        public bool SuperHeading { get; set; } = false;
-        public string Format { get; set; } = null;
-
-        public int CompareTo(Label other)
-        {
-            if (Order == 0 && other.Order == 0)
-            {
-                if (Value == other.Value)
-                {
-                    if (SubValue == other.SubValue)
-                        return (Key3 ?? String.Empty).CompareTo(other.Key3 ?? string.Empty);
-                    else
-                        return (SubValue ?? String.Empty).CompareTo(other.SubValue ?? string.Empty);
-                }
-                else
-                    return Value.CompareTo(other.Value);
-            }
-            else
-                return Order.CompareTo(other.Order);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as Label;
-
-            if (other.Order == 0 && Order == 0)
-                return Value.Equals(other.Value) && (SubValue ?? String.Empty).Equals(other.SubValue ?? String.Empty) && (Key3 ?? String.Empty).Equals(other.Key3 ?? String.Empty) == true;
-            else
-                return Order.Equals(other.Order);
-        }
-
-        public override int GetHashCode()
-        {
-            return Order == 0 ? Value.GetHashCode() : Order;
-        }
-    }
-
-    public class PivotTable<C,R,V>
-    {
-        // First order keys is row (category), second order is column (month)
-        public Dictionary<R, SparseDictionary<C, V>> Table = new Dictionary<R, SparseDictionary<C, V>>();
-
-        public HashSet<C> Columns = new HashSet<C>();
-
-        public IEnumerable<R> RowLabels => Table.Keys.OrderBy(x => x);
-
-        public V this[C collabel, R rowlabel]
-        {
-            get
-            {
-                if (Table.ContainsKey(rowlabel))
-                {
-                    return Table[rowlabel][collabel];
-                }
-                else
-                {
-                    return default(V);
-                }
-            }
-            set
-            {
-                if (!Table.ContainsKey(rowlabel))
-                {
-                    Table[rowlabel] = new SparseDictionary<C, V>();
-                }
-                var row = Table[rowlabel];
-
-                row[collabel] = value;
-
-                Columns.Add(collabel);
-            }
-        }
     }
 }
