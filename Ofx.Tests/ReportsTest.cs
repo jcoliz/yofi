@@ -51,6 +51,17 @@ namespace Ofx.Tests
             Assert.IsNotNull(totalcol);
         }
 
+        void DoBuildNoColsTwoLevel(IEnumerable<Item> these)
+        {
+            testitems = these;
+            report.BuildNoColsTwoLevel(testitems.AsQueryable());
+            totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
+            totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
+
+            Assert.IsNotNull(totalrow);
+            Assert.IsNotNull(totalcol);
+        }
+
         RowLabel GetRow(Func<RowLabel, bool> predicate)
         {
             var result = report.RowLabels.Where(predicate).SingleOrDefault();
@@ -177,6 +188,22 @@ namespace Ofx.Tests
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
             Assert.AreEqual(1000m, report[totalcol, Other]);
+            Assert.AreEqual(1000m, report[totalcol, totalrow]);
+        }
+        [TestMethod]
+        public void NoColsSubItemsTwoLevel()
+        {
+            DoBuildNoColsTwoLevel(Items.Skip(9).Take(10));
+
+            var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
+            var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
+            var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
+
+            Assert.AreEqual(4, report.RowLabels.Count());
+            Assert.AreEqual(1, report.ColumnLabels.Count());
+            Assert.AreEqual(1000m, report[totalcol, Other]);
+            Assert.AreEqual(400m, report[totalcol, Something]);
+            Assert.AreEqual(600m, report[totalcol, Else]);
             Assert.AreEqual(1000m, report[totalcol, totalrow]);
         }
     }
