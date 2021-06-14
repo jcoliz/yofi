@@ -40,6 +40,16 @@ namespace Ofx.Tests
             Assert.IsNotNull(totalrow);
             Assert.IsNotNull(totalcol);
         }
+        void DoBuildNoCols(IEnumerable<Item> these)
+        {
+            testitems = these;
+            report.BuildNoCols(testitems.AsQueryable());
+            totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
+            totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
+
+            Assert.IsNotNull(totalrow);
+            Assert.IsNotNull(totalcol);
+        }
 
         RowLabel GetRow(Func<RowLabel, bool> predicate)
         {
@@ -139,6 +149,20 @@ namespace Ofx.Tests
             Assert.AreEqual(300m, report[col, row]);
             Assert.AreEqual(800m, report[totalcol, row]);
             Assert.AreEqual(800m, report[totalcol, totalrow]);
+        }
+        [TestMethod]
+        public void NoCols()
+        {
+            DoBuildNoCols(Items.Take(13));
+
+            var namerow = GetRow(x => x.Name == "Name");
+            var otherrow = GetRow(x => x.Name == "Other");
+
+            Assert.AreEqual(3, report.RowLabels.Count());
+            Assert.AreEqual(1, report.ColumnLabels.Count());
+            Assert.AreEqual(500m, report[totalcol, namerow]);
+            Assert.AreEqual(800m, report[totalcol, otherrow]);
+            Assert.AreEqual(1300m, report[totalcol, totalrow]);
         }
     }
 }

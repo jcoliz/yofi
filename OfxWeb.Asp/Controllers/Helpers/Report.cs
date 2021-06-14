@@ -46,6 +46,34 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
         }
 
+        /// <summary>
+        /// This will build a one-level report with no columns, just totals,
+        /// and rows as first-level categories
+        /// </summary>
+        /// <remarks>
+        /// e.g. Transactions where category is X:Y or X:A:B will all be lumped on X.
+        /// </remarks>
+        /// <param name="items"></param>
+
+        public void BuildNoCols(IQueryable<IReportable> items)
+        {
+            var totalrow = new RowLabel() { IsTotal = true };
+            var totalcolumn = new ColumnLabel() { IsTotal = true };
+
+            // One row per top-level category
+            var categorygroups = items.GroupBy(x => SplitCategory(x.Category, 1)[0]);
+            foreach (var categorygroup in categorygroups)
+            {
+                var category = categorygroup.Key;
+                var row = new RowLabel() { Name = category };
+
+                var sum = categorygroup.Sum(x => x.Amount);
+
+                base[totalcolumn, row] += sum;
+                base[totalcolumn, totalrow] += sum;
+            }
+        }
+
         static List<string> SplitCategory(string category, int minitems)
         {
             var result = new List<String>();
