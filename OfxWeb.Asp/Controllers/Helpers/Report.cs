@@ -27,7 +27,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             foreach (var monthgroup in monthgroups)
             {
                 var month = monthgroup.Key;
-                var column = new ColumnLabel() { Order = month, Name = new DateTime(2000, month, 1).ToString("MMM") };
+                var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
 
                 // One row per top-level category
                 var categorygroups = monthgroup.GroupBy(x => SplitCategory(x.Category, 1)[0]);
@@ -62,7 +62,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// <summary>
         /// Display order. Lower values display before higher values
         /// </summary>
-        public int Order { get; set; }
+        public string Order { get; set; }
 
         /// <summary>
         /// Display name of the label
