@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Controllers.Helpers
@@ -32,35 +33,60 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
                 var row = new RowLabel() { Name = token, Level = tolevel - fromlevel, Order = newpath };
 
-                var sum = group.Sum(x => x.Amount);
-                base[TotalColumn, row] = sum;
+                var rowsum = group.Sum(x => x.Amount);
+                base[TotalColumn, row] = rowsum;
 
-                if (fromlevel == tolevel)
+                // Have we done as deep as we're doing to?
+                var done = ( fromlevel == tolevel || token == null );
+
+                if (done)
+                    base[TotalColumn, TotalRow] += rowsum;
+
+                // One column per month
+                if (ShowCols)
                 {
-                    // Terminal stage
-                    base[TotalColumn, TotalRow] += sum;
-
-                    // One column per month
-                    if (ShowCols)
+                    var monthgroups = group.GroupBy(x => x.Timestamp.Month);
+                    foreach (var monthgroup in monthgroups)
                     {
-                        var monthgroups = group.GroupBy(x => x.Timestamp.Month);
-                        foreach (var monthgroup in monthgroups)
-                        {
-                            var month = monthgroup.Key;
-                            var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
+                        var month = monthgroup.Key;
+                        var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
+                        var columnsum = monthgroup.Sum(x => x.Amount);
 
-                            sum = monthgroup.Sum(x => x.Amount);
+                        base[column, row] = columnsum;
 
-                            base[column, row] = sum;
-                            base[column, TotalRow] += sum;
-                        }
+                        if (done)
+                            base[column, TotalRow] += columnsum;
                     }
                 }
-                else
+
+                // Recurse!
+                if (!done)
                 {
-                    // Recurse!
                     Build(group.AsQueryable(), fromlevel + 1, tolevel, newpath);
                 }
+            }
+        }
+
+        public void WriteToConsole()
+        {
+            foreach(var line in RowLabels)
+            {
+                var builder = new StringBuilder();
+
+                var name = line.Name;
+                if (line.IsTotal)
+                    name = "TOTAL";
+                if (name == null)
+                    name = "-";
+                builder.Append($"{line.Level} {name,15} ");
+
+                foreach (var col in ColumnLabels)
+                {
+                    var val = this[col, line];
+                    builder.Append($"| {val,10:C2} ");
+                }
+
+                Console.WriteLine(builder.ToString());
             }
         }
 

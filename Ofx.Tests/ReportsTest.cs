@@ -256,5 +256,34 @@ namespace Ofx.Tests
             Assert.AreEqual(300m, report[Jun, report.TotalRow]);
             Assert.AreEqual(100m, report[Jun, B]);
         }
+        [TestMethod]
+        public void ThreeLevelsDeepAllCols()
+        {
+            report.ShowCols = true;
+            DoBuild(Items.Take(20), fromlevel: 0, tolevel: 2);
+
+            report.WriteToConsole();
+
+            var Name = GetRow(x => x.Name == "Name" && x.Level == 2);
+            var Other = GetRow(x => x.Name == "Other" && x.Level == 2);
+            var Something = GetRow(x => x.Name == "Something" && x.Level == 1);
+            var Else = GetRow(x => x.Name == "Else" && x.Level == 1);
+            var A = GetRow(x => x.Name == "A" && x.Level == 0);
+            var B = GetRow(x => x.Name == "B" && x.Level == 0);
+            var Jun = GetColumn(x => x.Name == "Jun");
+
+            Assert.AreEqual(12, report.RowLabels.Count());
+            Assert.AreEqual(9, report.ColumnLabels.Count());
+            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
+            Assert.AreEqual(300m, report[report.TotalColumn, A]);
+            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
+            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(400m, report[Jun, report.TotalRow]);
+            Assert.AreEqual(100m, report[Jun, B]);
+            Assert.AreEqual(200m, report[Jun, Else]);
+
+        }
     }
 }
