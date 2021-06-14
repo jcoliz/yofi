@@ -585,7 +585,7 @@ namespace OfxWeb.Asp.Controllers
 
                 if (null != column)
                 {
-                    var cell = report.Table[rowlabel][column];
+                    var cell = report[column,rowlabel];
                     line.Amount = cell;
                     Lines.Add(line);
                 }

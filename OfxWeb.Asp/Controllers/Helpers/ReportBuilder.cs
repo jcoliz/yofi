@@ -94,10 +94,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             // Add totals
 
-            foreach (var row in result.Table)
+            foreach (var row in result.RowLabels)
             {
-                var rowsum = row.Value.Values.Sum();
-                result[labeltotal, row.Key] = rowsum;
+                var rowsum = result.Row(row).Sum();
+                result[labeltotal, row] = rowsum;
             }
 
             return result;
@@ -111,45 +111,44 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var result = new PivotTable<Label, Label, decimal>();
 
             // Run the initial report
-            var report = await ThreeLevelReport(outergroups,true);
+            var initial = await ThreeLevelReport(outergroups,true);
 
             // Collect the columns
-            var columns = report.Columns;
-            result.Columns = columns;
+            var columns = initial.Columns;
+            foreach(var c in columns)
+                result.Columns.Add(c);
 
             // For each line in the initial report, collect the value by key1/key2/key3
-            foreach (var label in report.Table.Keys)
+            foreach (var initialrow in initial.RowLabels)
             {
                 // Not mapped? Skip!
-                if (string.IsNullOrEmpty(label.Key1))
+                if (string.IsNullOrEmpty(initialrow.Key1))
                     continue;
 
-                var row = report.Table[label];
-
                 // Create the mapped label
-                var rowlabel = new Label() { Value = label.Key1, SubValue = label.Key3 };
-                if (string.IsNullOrEmpty(label.Key3))
+                var rowlabel = new Label() { Value = initialrow.Key1, SubValue = initialrow.Key3 };
+                if (string.IsNullOrEmpty(initialrow.Key3))
                     rowlabel.SubValue = "-";
-                if (!string.IsNullOrEmpty(label.Key2))
-                    rowlabel.Value += $":{label.Key2}";
+                if (!string.IsNullOrEmpty(initialrow.Key2))
+                    rowlabel.Value += $":{initialrow.Key2}";
 
                 // Create the Key2-totals label
                 var totalslabel = new Label() { Value = rowlabel.Value, Emphasis = true };
 
                 // Create the Key1-totals label
-                var toptotalslabel = new Label() { Value = label.Key1, Emphasis = true, SuperHeading = true };
+                var toptotalslabel = new Label() { Value = initialrow.Key1, Emphasis = true, SuperHeading = true };
 
                 // Place each of the columns
-                foreach ( var collabel in columns)
+                foreach ( var collabel in columns )
                 {
                     // Accumulate the result
-                    result[collabel, rowlabel] += row[collabel];
+                    result[collabel, rowlabel] += result[collabel,initialrow];
 
                     // Accumulate the key2 total
-                    result[collabel, totalslabel] += row[collabel];
+                    result[collabel, totalslabel] += result[collabel,initialrow];
 
                     // Accumulate the key1 total
-                    result[collabel, toptotalslabel] += row[collabel];
+                    result[collabel, toptotalslabel] += result[collabel,initialrow];
                 }
             }
 

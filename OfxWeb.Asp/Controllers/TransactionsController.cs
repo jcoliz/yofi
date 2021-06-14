@@ -1259,7 +1259,7 @@ namespace OfxWeb.Asp.Controllers
             {
                 var labelrow = new Label() { Order = 0, Value = category };
 
-                if (monthlth.Table.ContainsKey(labelrow))
+                if (monthlth.RowLabels.Where(x=>x == labelrow).Any())
                 {
                     var budgetval = -budgettx[month, labelrow];
                     var spentval = -monthlth[month, labelrow];
@@ -1370,10 +1370,10 @@ namespace OfxWeb.Asp.Controllers
                     }
                 }
 
-            foreach (var row in result.Table)
+            foreach (var row in result.RowLabels)
             {
-                var rowsum = row.Value.Values.Sum();
-                result[labeltotal, row.Key] = rowsum;
+                var rowsum = result.Row(row).Sum();
+                result[labeltotal, row] = rowsum;
             }
 
             return result;
@@ -1415,7 +1415,7 @@ namespace OfxWeb.Asp.Controllers
 
                 foreach (var column in Model.Columns)
                 {
-                    var cell = Model.Table[rowlabel][column];
+                    var cell = Model[column,rowlabel];
                     worksheet.Cells[row, col].Value = cell;
                     worksheet.Cells[row, col].Style.Numberformat.Format = "$#,##0.00";
                     ++col;

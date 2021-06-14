@@ -24,9 +24,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// This is essentially a 2D dictionary, and could perhaps be improved to simply be a
         /// SparseDictionary of (Row,Col) Tuple to Values.
         /// </remarks>
-        public Dictionary<R, SparseDictionary<C, V>> Table = new Dictionary<R, SparseDictionary<C, V>>();
+        Dictionary<R, SparseDictionary<C, V>> Table = new Dictionary<R, SparseDictionary<C, V>>();
 
-        public HashSet<C> Columns = new HashSet<C>();
+        public HashSet<C> Columns { get; }  = new HashSet<C>();
 
         public IEnumerable<R> RowLabels => Table.Keys.OrderBy(x => x);
 
@@ -55,6 +55,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                 Columns.Add(collabel);
             }
+        }
+
+        public IEnumerable<V> Row(R row)
+        {
+            return Table[row].Values;
         }
     }
 
