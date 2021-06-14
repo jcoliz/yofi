@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Controllers.Helpers
 {
-    public class Report: PivotTable<ColumnLabel,RowLabel,decimal>
+    public class Report : PivotTable<ColumnLabel, RowLabel, decimal>
     {
         /// <summary>
         /// This will build a one-level report with columns as months,
@@ -55,6 +55,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
+#if true
+        // Another way to do BuildNoCols is build it, and then take the columns OUT
+        public void BuildNoCols(IQueryable<IReportable> items)
+        {
+            Build(items);
+            base.RemoveColumnsWhere(x => !x.IsTotal);
+        }
+#else
         public void BuildNoCols(IQueryable<IReportable> items)
         {
             var totalrow = new RowLabel() { IsTotal = true };
@@ -73,6 +81,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 base[totalcolumn, totalrow] += sum;
             }
         }
+#endif
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,

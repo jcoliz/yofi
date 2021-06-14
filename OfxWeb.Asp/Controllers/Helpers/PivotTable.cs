@@ -104,6 +104,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
         {
             return _ColumnLabels.Select(x => this[x, row]);
         }
+
+        protected void RemoveColumnsWhere(Predicate<C> predicate)
+        {
+            _ColumnLabels.RemoveWhere(predicate);
+        }
     }
 
     /// <summary>
