@@ -19,8 +19,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public void Build(IQueryable<IReportable> items)
         {
-            var totalrow = new RowLabel() { Order = 10000, Name = "TOTAL", IsTotal = true };
-            var totalcolumn = new ColumnLabel() { Order = 10000, Name = "TOTAL", IsTotal = true };
+            var totalrow = new RowLabel() { IsTotal = true };
+            var totalcolumn = new ColumnLabel() { IsTotal = true };
 
             // One column per month
             var monthgroups = items.GroupBy(x => x.Timestamp.Month);

@@ -38,9 +38,9 @@ namespace Ofx.Tests
 
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.IsNotNull(row);
-            Assert.IsNotNull(report.RowLabels.Where(x => x.Name == "TOTAL").SingleOrDefault());
+            Assert.IsNotNull(report.RowLabels.Where(x => x.IsTotal).SingleOrDefault());
             Assert.IsNotNull(col);
-            Assert.IsNotNull(report.ColumnLabels.Where(x => x.Name == "TOTAL").SingleOrDefault());
+            Assert.IsNotNull(report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault());
             Assert.AreEqual(expected.Amount, report[col, row]);
         }
     }
