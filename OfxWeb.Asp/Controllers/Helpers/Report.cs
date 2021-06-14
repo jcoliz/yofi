@@ -8,65 +8,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
 {
     public class Report : PivotTable<ColumnLabel, RowLabel, decimal>
     {
-        /// <summary>
-        /// This will build a one-level report with columns as months,
-        /// and rows as first-level categories
-        /// </summary>
-        /// <remarks>
-        /// e.g. Transactions where category is X:Y or X:A:B will all be lumped on X.
-        /// </remarks>
-        /// <param name="items"></param>
-
-        public void BuildFlat(IQueryable<IReportable> items, bool nocols = false, int categorylevel = 0)
-        {
-            var totalrow = new RowLabel() { IsTotal = true };
-            var totalcolumn = new ColumnLabel() { IsTotal = true };
-
-            // One row per top-level category
-            var categorygroups = items.GroupBy(x => GetTokenByIndex(x.Category, categorylevel));
-            foreach (var categorygroup in categorygroups)
-            {
-                var category = categorygroup.Key;
-                var row = new RowLabel() { Name = category };
-
-                var sum = categorygroup.Sum(x => x.Amount);
-
-                base[totalcolumn, row] += sum;
-                base[totalcolumn, totalrow] += sum;
-
-                // One column per month
-                if (!nocols)
-                {
-                    var monthgroups = categorygroup.GroupBy(x => x.Timestamp.Month);
-                    foreach (var monthgroup in monthgroups)
-                    {
-                        var month = monthgroup.Key;
-                        var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
-
-                        sum = monthgroup.Sum(x => x.Amount);
-
-                        base[column, row] = sum;
-                        base[column, totalrow] += sum;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// This will build a one-level report with no columns, just totals,
-        /// and rows as first-level categories
-        /// </summary>
-        /// <remarks>
-        /// e.g. Transactions where category is X:Y or X:A:B will all be lumped on X.
-        /// </remarks>
-        /// <param name="items"></param>
-
-        public void BuildNoCols(IQueryable<IReportable> items) => BuildFlat(items, true);
+        bool ShowCols = false;
 
         RowLabel TotalRow = new RowLabel() { IsTotal = true };
         ColumnLabel TotalColumn = new ColumnLabel() { IsTotal = true };
-
-        bool ShowCols = false;
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,
