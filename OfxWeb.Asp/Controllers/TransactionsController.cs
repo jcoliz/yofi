@@ -1372,7 +1372,7 @@ namespace OfxWeb.Asp.Controllers
 
             foreach (var row in result.RowLabels)
             {
-                var rowsum = result.Row(row).Sum();
+                var rowsum = result.RowValues(row).Sum();
                 result[labeltotal, row] = rowsum;
             }
 

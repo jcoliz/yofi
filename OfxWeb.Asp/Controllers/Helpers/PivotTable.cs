@@ -71,7 +71,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
         }
 
-        public IEnumerable<V> Row(R row)
+        public IEnumerable<V> RowValues(R row)
         {
             return Table[row].Values;
         }
