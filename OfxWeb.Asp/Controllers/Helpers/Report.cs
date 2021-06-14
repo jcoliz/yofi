@@ -73,7 +73,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void BuildNoColsTwoLevel(IQueryable<IReportable> items)
+        public void BuildTwoLevel(IQueryable<IReportable> items, bool nocols = true)
         {
             var totalrow = new RowLabel() { IsTotal = true };
             var totalcolumn = new ColumnLabel() { IsTotal = true };
@@ -99,6 +99,22 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     sum = subcategorygroup.Sum(x => x.Amount);
 
                     base[totalcolumn, row] += sum;
+
+                    // One column per month
+                    if (!nocols)
+                    {
+                        var monthgroups = subcategorygroup.GroupBy(x => x.Timestamp.Month);
+                        foreach (var monthgroup in monthgroups)
+                        {
+                            var month = monthgroup.Key;
+                            var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
+
+                            sum = monthgroup.Sum(x => x.Amount);
+
+                            base[column, row] = sum;
+                            base[column, totalrow] += sum;
+                        }
+                    }
                 }
             }
         }
