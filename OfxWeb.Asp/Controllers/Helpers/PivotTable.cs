@@ -26,7 +26,21 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         Dictionary<R, SparseDictionary<C, V>> Table = new Dictionary<R, SparseDictionary<C, V>>();
 
-        public HashSet<C> ColumnLabels { get; } = new HashSet<C>();
+
+        public IEnumerable<C> ColumnLabels
+        {
+            get
+            {
+                return _ColumnLabels;
+            }
+            set
+            {
+                _ColumnLabels.Clear();
+                foreach (var label in value)
+                    _ColumnLabels.Add(label);
+            }
+        }
+        HashSet<C> _ColumnLabels = new HashSet<C>();
 
         public IEnumerable<R> RowLabels => Table.Keys.OrderBy(x => x);
 
@@ -53,7 +67,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                 row[collabel] = value;
 
-                ColumnLabels.Add(collabel);
+                _ColumnLabels.Add(collabel);
             }
         }
 

@@ -114,9 +114,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var initial = await ThreeLevelReport(outergroups,true);
 
             // Collect the columns
-            var columns = initial.ColumnLabels;
-            foreach(var c in columns)
-                result.ColumnLabels.Add(c);
+            result.ColumnLabels = initial.ColumnLabels;
 
             // For each line in the initial report, collect the value by key1/key2/key3
             foreach (var initialrow in initial.RowLabels)
@@ -139,7 +137,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var toptotalslabel = new Label() { Value = initialrow.Key1, Emphasis = true, SuperHeading = true };
 
                 // Place each of the columns
-                foreach ( var collabel in columns )
+                foreach ( var collabel in initial.ColumnLabels )
                 {
                     // Accumulate the result
                     result[collabel, rowlabel] += result[collabel,initialrow];
