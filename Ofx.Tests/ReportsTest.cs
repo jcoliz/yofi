@@ -26,19 +26,10 @@ namespace Ofx.Tests
 
         Report report = null;
 
-        IEnumerable<Item> testitems;
-        ColumnLabel totalcol;
-        RowLabel totalrow;
 
         void DoBuild(IEnumerable<Item> these, int fromlevel = 0, int tolevel = 0)
         {
-            testitems = these;
-            report.Build(testitems.AsQueryable(), fromlevel, tolevel);
-            totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
-            totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
-
-            Assert.IsNotNull(totalrow);
-            Assert.IsNotNull(totalcol);
+            report.Build(these.AsQueryable(), fromlevel, tolevel);
         }
 
         RowLabel GetRow(Func<RowLabel, bool> predicate)
@@ -116,7 +107,7 @@ namespace Ofx.Tests
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(4, report.ColumnLabels.Count());
             Assert.AreEqual(200m, report[Feb, Name]);
-            Assert.AreEqual(500m, report[totalcol, Name]);
+            Assert.AreEqual(500m, report[report.TotalColumn, Name]);
         }
         [TestMethod]
         public void TwoCategoriesCols()
@@ -130,8 +121,8 @@ namespace Ofx.Tests
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(5, report.ColumnLabels.Count());
             Assert.AreEqual(200m, report[Feb, Other]);
-            Assert.AreEqual(400m, report[totalcol, Other]);
-            Assert.AreEqual(900m, report[totalcol, totalrow]);
+            Assert.AreEqual(400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(900m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
         public void SubCategoriesCols()
@@ -145,8 +136,8 @@ namespace Ofx.Tests
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(6, report.ColumnLabels.Count());
             Assert.AreEqual(300m, report[Apr, Other]);
-            Assert.AreEqual(800m, report[totalcol, Other]);
-            Assert.AreEqual(800m, report[totalcol, totalrow]);
+            Assert.AreEqual(800m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(800m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
         public void Simple()
@@ -158,9 +149,9 @@ namespace Ofx.Tests
 
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(500m, report[totalcol, Name]);
-            Assert.AreEqual(800m, report[totalcol, Other]);
-            Assert.AreEqual(1300m, report[totalcol, totalrow]);
+            Assert.AreEqual(500m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(800m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(1300m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
         public void SubItems()
@@ -171,8 +162,8 @@ namespace Ofx.Tests
 
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(1000m, report[totalcol, Other]);
-            Assert.AreEqual(1000m, report[totalcol, totalrow]);
+            Assert.AreEqual(1000m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
         public void SubItemsDeep()
@@ -185,10 +176,10 @@ namespace Ofx.Tests
 
             Assert.AreEqual(4, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(1000m, report[totalcol, Other]);
-            Assert.AreEqual(400m, report[totalcol, Something]);
-            Assert.AreEqual(600m, report[totalcol, Else]);
-            Assert.AreEqual(1000m, report[totalcol, totalrow]);
+            Assert.AreEqual(1000m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
+            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
+            Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
         public void SubItemsAllDeep()
@@ -202,11 +193,11 @@ namespace Ofx.Tests
 
             Assert.AreEqual(7, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(500m, report[totalcol, Name]);
-            Assert.AreEqual(1400m, report[totalcol, Other]);
-            Assert.AreEqual(400m, report[totalcol, Something]);
-            Assert.AreEqual(600m, report[totalcol, Else]);
-            Assert.AreEqual(1900m, report[totalcol, totalrow]);
+            Assert.AreEqual(500m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
+            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
+            Assert.AreEqual(1900m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
         public void SubItemsAllDeepCols()
@@ -222,12 +213,12 @@ namespace Ofx.Tests
 
             Assert.AreEqual(7, report.RowLabels.Count());
             Assert.AreEqual(9, report.ColumnLabels.Count());
-            Assert.AreEqual(600m, report[totalcol, Name]);
-            Assert.AreEqual(1400m, report[totalcol, Other]);
-            Assert.AreEqual(400m, report[totalcol, Something]);
-            Assert.AreEqual(600m, report[totalcol, Else]);
-            Assert.AreEqual(2000m, report[totalcol, totalrow]);
-            Assert.AreEqual(400m, report[Jun, totalrow]);
+            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
+            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
+            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(400m, report[Jun, report.TotalRow]);
             Assert.AreEqual(200m, report[Jun, Else]);
         }
         [TestMethod]
@@ -240,9 +231,9 @@ namespace Ofx.Tests
 
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(400m, report[totalcol, Something]);
-            Assert.AreEqual(600m, report[totalcol, Else]);
-            Assert.AreEqual(1000m, report[totalcol, totalrow]);
+            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
+            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
+            Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
         public void SubItemsFromL1Cols()
@@ -258,11 +249,11 @@ namespace Ofx.Tests
 
             Assert.AreEqual(8, report.RowLabels.Count());
             Assert.AreEqual(6, report.ColumnLabels.Count());
-            Assert.AreEqual(400m, report[totalcol, Something]);
-            Assert.AreEqual(300m, report[totalcol, A]);
-            Assert.AreEqual(600m, report[totalcol, Else]);
-            Assert.AreEqual(1000m, report[totalcol, totalrow]);
-            Assert.AreEqual(300m, report[Jun, totalrow]);
+            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
+            Assert.AreEqual(300m, report[report.TotalColumn, A]);
+            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
+            Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(300m, report[Jun, report.TotalRow]);
             Assert.AreEqual(100m, report[Jun, B]);
         }
     }

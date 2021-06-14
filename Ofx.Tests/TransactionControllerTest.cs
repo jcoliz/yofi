@@ -427,7 +427,7 @@ namespace Ofx.Tests
 
             var result = await controller.Pivot("all", null, null, year, null);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as PivotTable<Label, Label, decimal>;
+            var model = viewresult.Model as Table<Label, Label, decimal>;
 
             var row_AB = model.RowLabels.Where(x => x.Value == "A" && x.SubValue == "B").Single();
             var col = model.ColumnLabels.First();

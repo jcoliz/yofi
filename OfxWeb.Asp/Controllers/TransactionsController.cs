@@ -1055,7 +1055,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        private IActionResult DownloadReport(PivotTable<Label, Label, decimal> report, string title)
+        private IActionResult DownloadReport(Table<Label, Label, decimal> report, string title)
         {
             const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             try
@@ -1121,7 +1121,7 @@ namespace OfxWeb.Asp.Controllers
         // GET: Transactions/Pivot
         public async Task<IActionResult> Pivot(string report, int? month, int? weekspct, int? setyear, bool? download)
         {
-            PivotTable<Label, Label, decimal> result = null;
+            Table<Label, Label, decimal> result = null;
 
             if (string.IsNullOrEmpty(report))
             {
@@ -1237,9 +1237,9 @@ namespace OfxWeb.Asp.Controllers
 
         private string[] BudgetFocusCategories = new[] { "Entertainment", "Food & Dining", "Dining Out", "Groceries", "Kids", "Shopping" };
 
-        private PivotTable<Label, Label, decimal> BudgetReport(Label month, int? weekspct = null)
+        private Table<Label, Label, decimal> BudgetReport(Label month, int? weekspct = null)
         {
-            var result = new PivotTable<Label, Label, decimal>();
+            var result = new Table<Label, Label, decimal>();
 
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
 
@@ -1286,9 +1286,9 @@ namespace OfxWeb.Asp.Controllers
             return result;
         }
 
-        private PivotTable<Label, Label, decimal> BudgetMonthlyReport(int monththrough)
+        private Table<Label, Label, decimal> BudgetMonthlyReport(int monththrough)
         {
-            var result = new PivotTable<Label, Label, decimal>();
+            var result = new Table<Label, Label, decimal>();
 
             IEnumerable<IGrouping<int, IReportable>> groupsL1 = null;
 
@@ -1321,9 +1321,9 @@ namespace OfxWeb.Asp.Controllers
             return result;
         }
 
-        private PivotTable<Label, Label, decimal> TwoLevelReport(IEnumerable<IGrouping<int, IReportable>> outergroups)
+        private Table<Label, Label, decimal> TwoLevelReport(IEnumerable<IGrouping<int, IReportable>> outergroups)
         {
-            var result = new PivotTable<Label, Label, decimal>();
+            var result = new Table<Label, Label, decimal>();
 
             // Create a grouping of results.
             //
@@ -1380,7 +1380,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // 
-        public static void ExportRawReportTo(ExcelWorksheet worksheet, PivotTable<Label, Label, decimal> Model, out int rows, out int cols)
+        public static void ExportRawReportTo(ExcelWorksheet worksheet, Table<Label, Label, decimal> Model, out int rows, out int cols)
         {
             // First add the headers
 

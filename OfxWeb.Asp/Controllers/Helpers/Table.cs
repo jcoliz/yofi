@@ -16,7 +16,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
     /// <typeparam name="C">Class to represent each column</typeparam>
     /// <typeparam name="R">Class to represent each roww</typeparam>
     /// <typeparam name="V">Class to represent each cell value</typeparam>
-    public class PivotTable<C, R, V>
+    public class Table<C, R, V>
     {
         class Key
         {
@@ -43,7 +43,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// This is essentially a 2D dictionary, and could perhaps be improved to simply be a
         /// SparseDictionary of (Row,Col) Tuple to Values.
         /// </remarks>
-        Dictionary<Key,V> Table = new Dictionary<Key,V>();
+        Dictionary<Key,V> DataSet = new Dictionary<Key,V>();
 
         public IEnumerable<C> ColumnLabels
         {
@@ -81,9 +81,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 var key = new Key() { row = rowlabel, col = collabel };
 
-                if (Table.ContainsKey(key))
+                if (DataSet.ContainsKey(key))
                 {
-                    return Table[key];
+                    return DataSet[key];
                 }
                 else
                 {
@@ -94,7 +94,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 var key = new Key() { row = rowlabel, col = collabel };
 
-                Table[key] = value;
+                DataSet[key] = value;
                 _ColumnLabels.Add(collabel);
                 _RowLabels.Add(rowlabel);
            }

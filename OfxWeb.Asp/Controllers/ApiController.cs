@@ -552,7 +552,7 @@ namespace OfxWeb.Asp.Controllers
 
         public List<Line> Lines = new List<Line>();
 
-        public ApiSummaryReportResult(PivotTable<Label, Label, decimal> report)
+        public ApiSummaryReportResult(Table<Label, Label, decimal> report)
         {
             foreach (var rowlabel in report.RowLabels)
             {

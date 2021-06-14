@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Controllers.Helpers
 {
-    public class Report : PivotTable<ColumnLabel, RowLabel, decimal>
+    public class Report : Table<ColumnLabel, RowLabel, decimal>
     {
         public bool ShowCols { get; set; } = false;
 
-        RowLabel TotalRow = new RowLabel() { IsTotal = true };
-        ColumnLabel TotalColumn = new ColumnLabel() { IsTotal = true };
+        public RowLabel TotalRow { get; }  = new RowLabel() { IsTotal = true };
+        public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,

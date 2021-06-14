@@ -19,9 +19,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
             _context = context;
         }
 
-        public async Task<PivotTable<Label, Label, decimal>> ThreeLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups, bool mapcategories = false)
+        public async Task<Table<Label, Label, decimal>> ThreeLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups, bool mapcategories = false)
         {
-            var result = new PivotTable<Label, Label, decimal>();
+            var result = new Table<Label, Label, decimal>();
 
             CategoryMapper maptable = null;
             if (mapcategories)
@@ -105,10 +105,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
 
         // This is a three-level report, mapped, and reconsituted by Key1/Key2/Key3
-        public async Task<PivotTable<Label, Label, decimal>> FourLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups)
+        public async Task<Table<Label, Label, decimal>> FourLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups)
         {
             // Start with a new empty report as the result
-            var result = new PivotTable<Label, Label, decimal>();
+            var result = new Table<Label, Label, decimal>();
 
             // Run the initial report
             var initial = await ThreeLevelReport(outergroups,true);
