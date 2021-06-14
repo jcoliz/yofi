@@ -23,47 +23,38 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void Build(IQueryable<IReportable> items, int fromlevel, int tolevel, string categorypath = null)
+        public void Build(IQueryable<IReportable> items, int fromlevel, int tolevel)
         {
-            // One heading per top-level category
-            var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
-            foreach (var group in groups)
+            BuildInternal(items, fromlevel, tolevel, null);
+
+            // Calculate column totals from top-level headings
+            foreach (var row in base.RowLabels.Where(x => x.Level == tolevel - fromlevel))
+                foreach (var col in base.ColumnLabels)
+                    base[col, TotalRow] += base[col, row];
+        }
+
+        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int tolevel, string categorypath)
+        {
+            foreach (var group in items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel)))
             {
                 var token = group.Key;
                 var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
                 var row = new RowLabel() { Name = token, Level = tolevel - fromlevel, Order = newpath };
+                base[TotalColumn, row] = group.Sum(x => x.Amount);
 
-                var rowsum = group.Sum(x => x.Amount);
-                base[TotalColumn, row] = rowsum;
-
-                // Have we done as deep as we're doing to?
-                var done = ( fromlevel == tolevel || token == null );
-
-                if (done)
-                    base[TotalColumn, TotalRow] += rowsum;
-
-                // One column per month
                 if (ShowCols)
                 {
-                    var monthgroups = group.GroupBy(x => x.Timestamp.Month);
-                    foreach (var monthgroup in monthgroups)
+                    foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
                     {
                         var month = monthgroup.Key;
                         var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
-                        var columnsum = monthgroup.Sum(x => x.Amount);
-
-                        base[column, row] = columnsum;
-
-                        if (done)
-                            base[column, TotalRow] += columnsum;
+                        base[column, row] = monthgroup.Sum(x => x.Amount);
                     }
                 }
 
-                // Recurse!
-                if (!done)
-                {
-                    Build(group.AsQueryable(), fromlevel + 1, tolevel, newpath);
-                }
+                // Build next level down
+                if (fromlevel < tolevel && token != null)
+                    BuildInternal(group.AsQueryable(), fromlevel + 1, tolevel, newpath);
             }
         }
 

@@ -30,6 +30,7 @@ namespace Ofx.Tests
         void DoBuild(IEnumerable<Item> these, int fromlevel = 0, int tolevel = 0)
         {
             report.Build(these.AsQueryable(), fromlevel, tolevel);
+            report.WriteToConsole();
         }
 
         RowLabel GetRow(Func<RowLabel, bool> predicate)
@@ -261,8 +262,6 @@ namespace Ofx.Tests
         {
             report.ShowCols = true;
             DoBuild(Items.Take(20), fromlevel: 0, tolevel: 2);
-
-            report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 2);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 2);
