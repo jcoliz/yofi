@@ -24,9 +24,45 @@ namespace Ofx.Tests
 
         List<Item> Items;
 
+        Report report = null;
+
+        IEnumerable<Item> testitems;
+        ColumnLabel totalcol;
+        RowLabel totalrow;
+
+        void DoBuild(IEnumerable<Item> these)
+        {
+            testitems = these;
+            report.Build(testitems.AsQueryable());
+            totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
+            totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
+
+            Assert.IsNotNull(totalrow);
+            Assert.IsNotNull(totalcol);
+        }
+
+        RowLabel GetRow(Func<RowLabel, bool> predicate)
+        {
+            var result = report.RowLabels.Where(predicate).SingleOrDefault();
+
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+        ColumnLabel GetColumn(Func<ColumnLabel, bool> predicate)
+        {
+            var result = report.ColumnLabels.Where(predicate).SingleOrDefault();
+
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+
         [TestInitialize]
         public void SetUp()
         {
+            report = new Report();
+
             Items = new List<Item>();
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Category = "Name" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Category = "Name" });
@@ -44,68 +80,48 @@ namespace Ofx.Tests
         }
 
         [TestMethod]
+        public void Empty()
+        {
+            Assert.IsNotNull(report);
+        }
+
+        [TestMethod]
         public void OneItem()
         {
-            var report = new Report();
+            DoBuild(Items.Take(1));
 
-            var testitems = Items.Take(1);
-            var expected = testitems.Single();
-
-            report.Build(testitems.AsQueryable());
-
-            var row = report.RowLabels.Where(x => x.Name == expected.Category).SingleOrDefault();
-            var col = report.ColumnLabels.Where(x => x.Name == "Jan").SingleOrDefault();
+            var expected = Items.First();
+            var row = GetRow(x => x.Name == expected.Category);
+            var col = GetColumn(x => x.Name == "Jan");
 
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.IsNotNull(row);
-            Assert.IsNotNull(report.RowLabels.Where(x => x.IsTotal).SingleOrDefault());
             Assert.IsNotNull(col);
-            Assert.IsNotNull(report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault());
             Assert.AreEqual(expected.Amount, report[col, row]);
         }
         [TestMethod]
         public void ThreeMonths()
         {
-            var report = new Report();
+            DoBuild(Items.Take(5));
 
-            var testitems = Items.Take(5);
-
-            report.Build(testitems.AsQueryable());
-
-            var row = report.RowLabels.Where(x => x.Name == "Name").SingleOrDefault();
-            var col = report.ColumnLabels.Where(x => x.Name == "Feb").SingleOrDefault();
-            var totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
-            var totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
+            var row = GetRow(x => x.Name == "Name");
+            var col = GetColumn(x => x.Name == "Feb");
 
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(4, report.ColumnLabels.Count());
-            Assert.IsNotNull(row);
-            Assert.IsNotNull(totalrow);
-            Assert.IsNotNull(col);
-            Assert.IsNotNull(totalcol);
             Assert.AreEqual(200m, report[col, row]);
             Assert.AreEqual(500m, report[totalcol, row]);
         }
         [TestMethod]
         public void TwoCategories()
         {
-            var report = new Report();
+            DoBuild(Items.Take(9));
 
-            var testitems = Items.Take(9);
-
-            report.Build(testitems.AsQueryable());
-
-            var row = report.RowLabels.Where(x => x.Name == "Other").SingleOrDefault();
-            var col = report.ColumnLabels.Where(x => x.Name == "Feb").SingleOrDefault();
-            var totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
-            var totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
+            var row = GetRow(x => x.Name == "Other");
+            var col = GetColumn(x => x.Name == "Feb");
 
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(5, report.ColumnLabels.Count());
-            Assert.IsNotNull(row);
-            Assert.IsNotNull(totalrow);
-            Assert.IsNotNull(col);
-            Assert.IsNotNull(totalcol);
             Assert.AreEqual(200m, report[col, row]);
             Assert.AreEqual(400m, report[totalcol, row]);
             Assert.AreEqual(900m, report[totalcol, totalrow]);
@@ -113,23 +129,13 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubCategories()
         {
-            var report = new Report();
+            DoBuild(Items.Skip(5).Take(8));
 
-            var testitems = Items.Skip(5).Take(8);
-
-            report.Build(testitems.AsQueryable());
-
-            var row = report.RowLabels.Where(x => x.Name == "Other").SingleOrDefault();
-            var col = report.ColumnLabels.Where(x => x.Name == "Apr").SingleOrDefault();
-            var totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
-            var totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
+            var row = GetRow(x => x.Name == "Other");
+            var col = GetColumn(x => x.Name == "Apr");
 
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(6, report.ColumnLabels.Count());
-            Assert.IsNotNull(row);
-            Assert.IsNotNull(totalrow);
-            Assert.IsNotNull(col);
-            Assert.IsNotNull(totalcol);
             Assert.AreEqual(300m, report[col, row]);
             Assert.AreEqual(800m, report[totalcol, row]);
             Assert.AreEqual(800m, report[totalcol, totalrow]);
