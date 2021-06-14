@@ -206,5 +206,23 @@ namespace Ofx.Tests
             Assert.AreEqual(600m, report[totalcol, Else]);
             Assert.AreEqual(1000m, report[totalcol, totalrow]);
         }
+        [TestMethod]
+        public void NoColsSubItemsTwoLevelAll()
+        {
+            DoBuildNoColsTwoLevel(Items.Take(19));
+
+            var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
+            var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
+            var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
+            var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
+
+            Assert.AreEqual(7, report.RowLabels.Count());
+            Assert.AreEqual(1, report.ColumnLabels.Count());
+            Assert.AreEqual(500m, report[totalcol, Name]);
+            Assert.AreEqual(1400m, report[totalcol, Other]);
+            Assert.AreEqual(400m, report[totalcol, Something]);
+            Assert.AreEqual(600m, report[totalcol, Else]);
+            Assert.AreEqual(1900m, report[totalcol, totalrow]);
+        }
     }
 }

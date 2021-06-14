@@ -93,18 +93,18 @@ namespace OfxWeb.Asp.Controllers.Helpers
             foreach (var categorygroup in categorygroups)
             {
                 var category = categorygroup.Key;
-                var headingrow = new RowLabel() { Name = category, Level = 1 };
+                var headingrow = new RowLabel() { Name = category, Level = 1, Order = category };
 
                 var sum = categorygroup.Sum(x => x.Amount);
                 base[totalcolumn, headingrow] = sum;
                 base[totalcolumn, totalrow] += sum;
 
                 // One row per second -level category
-                var subcategorygroups = categorygroup.GroupBy(x => SplitCategory(x.Category, 1)[1]);
+                var subcategorygroups = categorygroup.GroupBy(x => SplitCategory(x.Category, 2)[1]);
                 foreach (var subcategorygroup in subcategorygroups)
                 {
-                    var subcategory = subcategorygroup.Key;
-                    var row = new RowLabel() { Name = subcategory ?? "-" };
+                    var subcategory = subcategorygroup.Key ?? "-";
+                    var row = new RowLabel() { Name = subcategory, Order = $"{category}:{subcategory}" };
 
                     sum = subcategorygroup.Sum(x => x.Amount);
 
