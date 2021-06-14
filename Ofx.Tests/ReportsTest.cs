@@ -30,22 +30,16 @@ namespace Ofx.Tests
         ColumnLabel totalcol;
         RowLabel totalrow;
 
-        void DoBuild(IEnumerable<Item> these, bool flat = true, bool nocols = false, int categorylevel = 0)
+        void DoBuild(IEnumerable<Item> these, int fromlevel = 0, int tolevel = 0)
         {
             testitems = these;
-            if (flat)
-                report.BuildDeep(testitems.AsQueryable(),nocols, categorylevel, categorylevel);
-            else
-                report.BuildDeep(testitems.AsQueryable(),nocols, categorylevel, categorylevel + 1);
+            report.Build(testitems.AsQueryable(), fromlevel, tolevel);
             totalcol = report.ColumnLabels.Where(x => x.IsTotal).SingleOrDefault();
             totalrow = report.RowLabels.Where(x => x.IsTotal).SingleOrDefault();
 
             Assert.IsNotNull(totalrow);
             Assert.IsNotNull(totalcol);
         }
-        void DoBuildNoCols(IEnumerable<Item> these) => DoBuild(these, nocols: true);
-
-        void DoBuildNoColsTwoLevel(IEnumerable<Item> these) => DoBuild(these, flat: false, nocols:true);
 
         RowLabel GetRow(Func<RowLabel, bool> predicate)
         {
@@ -99,8 +93,9 @@ namespace Ofx.Tests
         }
 
         [TestMethod]
-        public void OneItem()
+        public void OneItemCols()
         {
+            report.ShowCols = true;
             DoBuild(Items.Take(1));
 
             var Name = GetRow(x => x.Name == "Name");
@@ -110,8 +105,9 @@ namespace Ofx.Tests
             Assert.AreEqual(100, report[Jan, Name]);
         }
         [TestMethod]
-        public void ThreeMonths()
+        public void ThreeMonthsCols()
         {
+            report.ShowCols = true;
             DoBuild(Items.Take(5));
 
             var Name = GetRow(x => x.Name == "Name");
@@ -123,8 +119,9 @@ namespace Ofx.Tests
             Assert.AreEqual(500m, report[totalcol, Name]);
         }
         [TestMethod]
-        public void TwoCategories()
+        public void TwoCategoriesCols()
         {
+            report.ShowCols = true;
             DoBuild(Items.Take(9));
 
             var Other = GetRow(x => x.Name == "Other");
@@ -137,8 +134,9 @@ namespace Ofx.Tests
             Assert.AreEqual(900m, report[totalcol, totalrow]);
         }
         [TestMethod]
-        public void SubCategories()
+        public void SubCategoriesCols()
         {
+            report.ShowCols = true;
             DoBuild(Items.Skip(5).Take(8));
 
             var Other = GetRow(x => x.Name == "Other");
@@ -151,9 +149,9 @@ namespace Ofx.Tests
             Assert.AreEqual(800m, report[totalcol, totalrow]);
         }
         [TestMethod]
-        public void NoCols()
+        public void Simple()
         {
-            DoBuildNoCols(Items.Take(13));
+            DoBuild(Items.Take(13));
 
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
@@ -165,9 +163,9 @@ namespace Ofx.Tests
             Assert.AreEqual(1300m, report[totalcol, totalrow]);
         }
         [TestMethod]
-        public void NoColsSubItems()
+        public void SubItems()
         {
-            DoBuildNoCols(Items.Skip(9).Take(10));
+            DoBuild(Items.Skip(9).Take(10));
 
             var Other = GetRow(x => x.Name == "Other");
 
@@ -177,9 +175,9 @@ namespace Ofx.Tests
             Assert.AreEqual(1000m, report[totalcol, totalrow]);
         }
         [TestMethod]
-        public void NoColsSubItemsTwoLevel()
+        public void SubItemsDeep()
         {
-            DoBuildNoColsTwoLevel(Items.Skip(9).Take(10));
+            DoBuild(Items.Skip(9).Take(10), fromlevel: 0, tolevel: 1);
 
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
@@ -193,9 +191,9 @@ namespace Ofx.Tests
             Assert.AreEqual(1000m, report[totalcol, totalrow]);
         }
         [TestMethod]
-        public void NoColsSubItemsTwoLevelAll()
+        public void SubItemsAllDeep()
         {
-            DoBuildNoColsTwoLevel(Items.Take(19));
+            DoBuild(Items.Take(19), fromlevel: 0, tolevel: 1);
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -211,9 +209,10 @@ namespace Ofx.Tests
             Assert.AreEqual(1900m, report[totalcol, totalrow]);
         }
         [TestMethod]
-        public void SubItemsTwoLevelAllYesCols()
+        public void SubItemsAllDeepCols()
         {
-            DoBuild(Items.Take(20), nocols:false, flat:false);
+            report.ShowCols = true;
+            DoBuild(Items.Take(20), fromlevel:0, tolevel:1);
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -232,9 +231,9 @@ namespace Ofx.Tests
             Assert.AreEqual(200m, report[Jun, Else]);
         }
         [TestMethod]
-        public void NoColsSubItemsFlatFromLevel2()
+        public void SubItemsFromL1()
         {
-            DoBuild(Items.Skip(9).Take(10),flat:true,nocols:true,categorylevel:1);
+            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, tolevel:1);
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
@@ -246,9 +245,10 @@ namespace Ofx.Tests
             Assert.AreEqual(1000m, report[totalcol, totalrow]);
         }
         [TestMethod]
-        public void SubItemsFromLevel2YesCols()
+        public void SubItemsFromL1Cols()
         {
-            DoBuild(Items.Skip(9).Take(10), flat: false, nocols: false, categorylevel: 1);
+            report.ShowCols = true;
+            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, tolevel: 2);
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 1);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 1);
@@ -265,6 +265,5 @@ namespace Ofx.Tests
             Assert.AreEqual(300m, report[Jun, totalrow]);
             Assert.AreEqual(100m, report[Jun, B]);
         }
-
     }
 }

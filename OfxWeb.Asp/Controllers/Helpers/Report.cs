@@ -8,7 +8,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 {
     public class Report : PivotTable<ColumnLabel, RowLabel, decimal>
     {
-        bool ShowCols = false;
+        public bool ShowCols { get; set; } = false;
 
         RowLabel TotalRow = new RowLabel() { IsTotal = true };
         ColumnLabel TotalColumn = new ColumnLabel() { IsTotal = true };
@@ -22,14 +22,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void BuildDeep(IQueryable<IReportable> items, bool nocols = true, int fromlevel = 0, int tolevel = 1)
-        {
-            ShowCols = !nocols;
-
-            BuildDeepRecursive(items, fromlevel, tolevel);
-        }
-
-        void BuildDeepRecursive(IQueryable<IReportable> items, int fromlevel, int tolevel, string categorypath = null)
+        public void Build(IQueryable<IReportable> items, int fromlevel, int tolevel, string categorypath = null)
         {
             // One heading per top-level category
             var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
@@ -66,7 +59,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 else
                 {
                     // Recurse!
-                    BuildDeepRecursive(group.AsQueryable(), fromlevel + 1, tolevel, newpath);
+                    Build(group.AsQueryable(), fromlevel + 1, tolevel, newpath);
                 }
             }
         }
