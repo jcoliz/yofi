@@ -39,9 +39,9 @@ namespace Ofx.Tests
         Report report = null;
 
 
-        void DoBuild(IEnumerable<Item> these, int fromlevel = 0, int tolevel = 0)
+        void DoBuild(IEnumerable<Item> these, int fromlevel = 0, int numlevels = 1)
         {
-            report.Build(these.AsQueryable(), fromlevel, tolevel);
+            report.Build(these.AsQueryable(), fromlevel, numlevels);
             report.WriteToConsole();
         }
 
@@ -181,7 +181,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsDeep()
         {
-            DoBuild(Items.Skip(9).Take(10), fromlevel: 0, tolevel: 1);
+            DoBuild(Items.Skip(9).Take(10), fromlevel: 0, numlevels: 2);
 
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
@@ -197,7 +197,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsAllDeep()
         {
-            DoBuild(Items.Take(19), fromlevel: 0, tolevel: 1);
+            DoBuild(Items.Take(19), fromlevel: 0, numlevels: 2);
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -216,7 +216,7 @@ namespace Ofx.Tests
         public void SubItemsAllDeepCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Take(20), fromlevel: 0, tolevel: 1);
+            DoBuild(Items.Take(20), fromlevel: 0, numlevels: 2);
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -237,7 +237,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsFromL1()
         {
-            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, tolevel: 1);
+            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, numlevels: 1);
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
@@ -252,7 +252,7 @@ namespace Ofx.Tests
         public void SubItemsFromL1Cols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, tolevel: 2);
+            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, numlevels: 2);
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 1);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 1);
@@ -273,7 +273,7 @@ namespace Ofx.Tests
         public void ThreeLevelsDeepAllCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Take(20), fromlevel: 0, tolevel: 2);
+            DoBuild(Items.Take(20), fromlevel: 0, numlevels: 3);
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 2);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 2);
@@ -308,11 +308,40 @@ namespace Ofx.Tests
 
             var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
 
-            report.BuildMulti(serieslist, 0, 0);
+            report.BuildMulti(serieslist, fromlevel: 0, numlevels: 1);
             report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name" );
             var Other = GetRow(x => x.Name == "Other" );
+            var Else = GetRow(x => x.Name == "Else");
+            var One = GetColumn(x => x.Name == "One");
+            var Two = GetColumn(x => x.Name == "Two");
+
+            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(700m, report[One, report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+            Assert.AreEqual(200m, report[One, Else]);
+            Assert.AreEqual(400m, report[Two, Else]);
+        }
+        [TestMethod]
+        public void TwoSeriesDeep()
+        {
+            // Divide the transactios into two imbalanced partitions, each partition will be a series
+            // ToList() needed to execute the index % 3 calculations NOW not later
+            int index = 0;
+            var seriesone = new ReportSeries() { Key = "One", Items = Items.Take(20).Where(x => index++ % 3 == 0).ToList() };
+            index = 0;
+            var seriestwo = new ReportSeries() { Key = "Two", Items = Items.Take(20).Where(x => index++ % 3 != 0).ToList() };
+
+            var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
+
+            report.BuildMulti(serieslist, fromlevel: 0, numlevels: 2);
+            report.WriteToConsole();
+
+            var Name = GetRow(x => x.Name == "Name");
+            var Other = GetRow(x => x.Name == "Other");
             var One = GetColumn(x => x.Name == "One");
             var Two = GetColumn(x => x.Name == "Two");
 

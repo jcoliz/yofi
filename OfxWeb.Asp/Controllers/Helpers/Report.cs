@@ -24,30 +24,33 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void Build(IQueryable<IReportable> items, int fromlevel, int tolevel)
+        public void Build(IQueryable<IReportable> items, int fromlevel, int numlevels)
         {
-            BuildInternal(items, fromlevel, tolevel, null);
-            CalculateTotals(tolevel - fromlevel);
+            if (numlevels < 1)
+                throw new ArgumentOutOfRangeException(nameof(numlevels), "Must be 1 or greater");
+
+            BuildInternal(items, fromlevel, numlevels, null);
+            CalculateTotalRow(numlevels - 1);
         }
 
-        public void BuildMulti(IEnumerable<IGrouping<string, IReportable>> serieslist, int fromlevel, int tolevel)
+        public void BuildMulti(IEnumerable<IGrouping<string, IReportable>> serieslist, int fromlevel, int numlevels)
         {
             if (WithMonthColumns)
                 throw new NotImplementedException("BuildMulti is not implemented for reports with month columns");
 
             foreach (var series in serieslist)
-                BuildInternal(series.AsQueryable(), fromlevel, tolevel, null, new ColumnLabel() { Name = series.Key });
+                BuildInternal(series.AsQueryable(), fromlevel, numlevels, null, new ColumnLabel() { Name = series.Key });
 
-            CalculateTotals(tolevel - fromlevel);
+            CalculateTotalRow(numlevels - 1);
         }
 
-        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int tolevel, string categorypath, ColumnLabel seriescolumn = null)
+        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int numlevels, string categorypath, ColumnLabel seriescolumn = null)
         {
             foreach (var group in items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel)))
             {
                 var token = group.Key;
                 var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
-                var row = new RowLabel() { Name = token, Level = tolevel - fromlevel, Order = newpath };
+                var row = new RowLabel() { Name = token, Level = numlevels - 1, Order = newpath };
 
                 var sum = group.Sum(x => x.Amount);
                 base[TotalColumn, row] += sum;
@@ -63,12 +66,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     }
 
                 // Build next level down
-                if (fromlevel < tolevel && token != null)
-                    BuildInternal(group.AsQueryable(), fromlevel + 1, tolevel, newpath);
+                if (numlevels > 1 && token != null)
+                    BuildInternal(group.AsQueryable(), fromlevel + 1, numlevels - 1, newpath, seriescolumn);
             }
         }
 
-        void CalculateTotals(int usinglevel)
+        void CalculateTotalRow(int usinglevel)
         {
             // Calculate column totals from top-level headings
             foreach (var row in base.RowLabels.Where(x => x.Level == usinglevel))
