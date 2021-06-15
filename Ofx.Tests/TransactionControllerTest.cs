@@ -429,13 +429,13 @@ namespace Ofx.Tests
             var viewresult = result as ViewResult;
             var model = viewresult.Model as Table<Label, Label, decimal>;
 
-            var row_AB = model.RowLabels.Where(x => x.Value == "A" && x.SubValue == "B").Single();
+            var row_AB = model.RowLabels.Where(x => x.Key1 == "A" && x.Key2 == "B").Single();
             var col = model.ColumnLabels.First();
             var actual_AB = model[col, row_AB];
 
             Assert.AreEqual(expected_ab, actual_AB);
 
-            var row_CD = model.RowLabels.Where(x => x.Value == "C" && x.SubValue == "D").Single();
+            var row_CD = model.RowLabels.Where(x => x.Key1 == "C" && x.Key2 == "D").Single();
             var actual_CD = model[col, row_CD];
 
             Assert.AreEqual(expected_cd, actual_CD);

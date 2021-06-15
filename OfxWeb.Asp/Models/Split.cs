@@ -21,6 +21,17 @@ namespace OfxWeb.Asp.Models
 
         DateTime IReportable.Timestamp => Transaction?.Timestamp ?? DateTime.MinValue;
 
+        string IReportable.Category
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(SubCategory))
+                    return Category;
+                else
+                    return $"{Category}:{SubCategory}";
+            }
+        }
+
         /// <summary>
         /// If category has >2 colon-divided parts, move items 3+ into subcategory
         /// </summary>
