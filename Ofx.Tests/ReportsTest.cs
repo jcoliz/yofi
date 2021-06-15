@@ -4,6 +4,7 @@ using OfxWeb.Asp.Controllers.Helpers;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,17 @@ namespace Ofx.Tests
             public DateTime Timestamp { get; set; }
 
             public string Category { get; set; }
+        }
+
+        public class ReportSeries : IGrouping<string, IReportable>
+        {
+            public string Key { get; set; }
+
+            public IEnumerable<IReportable> Items { get; set; }
+
+            public IEnumerator<IReportable> GetEnumerator() => Items.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => Items.GetEnumerator();
         }
 
         List<Item> Items;
@@ -204,7 +216,7 @@ namespace Ofx.Tests
         public void SubItemsAllDeepCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Take(20), fromlevel:0, tolevel:1);
+            DoBuild(Items.Take(20), fromlevel: 0, tolevel: 1);
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -225,7 +237,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsFromL1()
         {
-            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, tolevel:1);
+            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, tolevel: 1);
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
@@ -283,6 +295,32 @@ namespace Ofx.Tests
             Assert.AreEqual(100m, report[Jun, B]);
             Assert.AreEqual(200m, report[Jun, Else]);
 
+        }
+        [TestMethod]
+        public void TwoSeries()
+        {
+            // Divide the transactios into two imbalanced partitions, each partition will be a series
+            // ToList() needed to execute the index % 3 calculations NOW not later
+            int index = 0;
+            var seriesone = new ReportSeries() { Key = "One", Items = Items.Take(20).Where(x => index++ % 3 == 0).ToList() };
+            index = 0;
+            var seriestwo = new ReportSeries() { Key = "Two", Items = Items.Take(20).Where(x => index++ % 3 != 0).ToList() };
+
+            var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
+
+            report.BuildMulti(serieslist, 0, 0);
+            report.WriteToConsole();
+
+            var Name = GetRow(x => x.Name == "Name" );
+            var Other = GetRow(x => x.Name == "Other" );
+            var One = GetColumn(x => x.Name == "One");
+            var Two = GetColumn(x => x.Name == "Two");
+
+            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(700m, report[One, report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using OfxWeb.Asp.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,21 +27,32 @@ namespace OfxWeb.Asp.Controllers.Helpers
         public void Build(IQueryable<IReportable> items, int fromlevel, int tolevel)
         {
             BuildInternal(items, fromlevel, tolevel, null);
-
-            // Calculate column totals from top-level headings
-            foreach (var row in base.RowLabels.Where(x => x.Level == tolevel - fromlevel))
-                foreach (var col in base.ColumnLabels)
-                    base[col, TotalRow] += base[col, row];
+            CalculateTotals(tolevel - fromlevel);
         }
 
-        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int tolevel, string categorypath)
+        public void BuildMulti(IEnumerable<IGrouping<string, IReportable>> serieslist, int fromlevel, int tolevel)
+        {
+            if (WithMonthColumns)
+                throw new NotImplementedException("BuildMulti is not implemented for reports with month columns");
+
+            foreach (var series in serieslist)
+                BuildInternal(series.AsQueryable(), fromlevel, tolevel, null, new ColumnLabel() { Name = series.Key });
+
+            CalculateTotals(tolevel - fromlevel);
+        }
+
+        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int tolevel, string categorypath, ColumnLabel seriescolumn = null)
         {
             foreach (var group in items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel)))
             {
                 var token = group.Key;
                 var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
                 var row = new RowLabel() { Name = token, Level = tolevel - fromlevel, Order = newpath };
-                base[TotalColumn, row] = group.Sum(x => x.Amount);
+
+                var sum = group.Sum(x => x.Amount);
+                base[TotalColumn, row] += sum;
+                if (seriescolumn != null)
+                    base[seriescolumn, row] += sum;
 
                 if (WithMonthColumns)
                     foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
@@ -54,6 +66,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 if (fromlevel < tolevel && token != null)
                     BuildInternal(group.AsQueryable(), fromlevel + 1, tolevel, newpath);
             }
+        }
+
+        void CalculateTotals(int usinglevel)
+        {
+            // Calculate column totals from top-level headings
+            foreach (var row in base.RowLabels.Where(x => x.Level == usinglevel))
+                foreach (var col in base.ColumnLabels)
+                    base[col, TotalRow] += base[col, row];
         }
 
         public void WriteToConsole()
@@ -172,5 +192,4 @@ namespace OfxWeb.Asp.Controllers.Helpers
     public class ColumnLabel : BaseLabel
     { 
     }
-
 }
