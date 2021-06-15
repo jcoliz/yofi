@@ -16,6 +16,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public string Description { get; set; }
 
+        public int FromLevel { get; set; }
+
+        public int NumLevels { get; set; } = 1;
+
+        public IQueryable<IReportable> SingleSource { get; set; }
+
+        public IEnumerable<IGrouping<string, IReportable>> SeriesSource { get; set; }
+
         public RowLabel TotalRow { get; }  = new RowLabel() { IsTotal = true };
         public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
 
@@ -28,21 +36,23 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         /// <param name="items"></param>
 
-        public void Build(IQueryable<IReportable> items, int fromlevel, int numlevels)
+        public void Build()
         {
-            if (numlevels < 1)
-                throw new ArgumentOutOfRangeException(nameof(numlevels), "Must be 1 or greater");
+            if (NumLevels < 1)
+                throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
-            BuildInternal(items, fromlevel, numlevels, null);
-            CalculateTotalRow(numlevels - 1);
-        }
+            if (SingleSource != null)
+            {
+                BuildInternal(SingleSource, FromLevel, NumLevels, null);
+            }
 
-        public void BuildMulti(IEnumerable<IGrouping<string, IReportable>> serieslist, int fromlevel, int numlevels)
-        {
-            foreach (var series in serieslist)
-                BuildInternal(series.AsQueryable(), fromlevel, numlevels, null, new ColumnLabel() { Name = series.Key });
+            if (SeriesSource != null)
+            {
+                foreach (var series in SeriesSource)
+                    BuildInternal(series.AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.Key });
+            }
 
-            CalculateTotalRow(numlevels - 1);
+            CalculateTotalRow(NumLevels - 1);
         }
 
         void BuildInternal(IQueryable<IReportable> items, int fromlevel, int numlevels, string categorypath, ColumnLabel seriescolumn = null)

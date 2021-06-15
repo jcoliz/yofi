@@ -1158,9 +1158,9 @@ namespace OfxWeb.Asp.Controllers
             if (report == "all")
             {
                 result.WithMonthColumns = true;
-                result.Build(txandsplits, fromlevel: 0, numlevels: 4);
+                result.NumLevels = 4;
+                result.SingleSource = txandsplits;
                 result.Name = "All Transactions";
-                result.WriteToConsole();
             }
             else if (report == "income")
             {
@@ -1169,10 +1169,14 @@ namespace OfxWeb.Asp.Controllers
                 var txandsplitsI = txsI.Concat(splitsI);
 
                 //var source = txandsplits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
-                result.Build(txandsplitsI, fromlevel: 1, numlevels: 1);
+                result.SingleSource = txandsplitsI;
+                result.FromLevel = 1;
                 result.Name = "Income";
                 result.WriteToConsole();
             }
+
+            result.Build();
+            result.WriteToConsole();
 
             return View(result);
         }

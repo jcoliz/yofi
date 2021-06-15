@@ -38,13 +38,6 @@ namespace Ofx.Tests
 
         Report report = null;
 
-
-        void DoBuild(IEnumerable<Item> these, int fromlevel = 0, int numlevels = 1)
-        {
-            report.Build(these.AsQueryable(), fromlevel, numlevels);
-            report.WriteToConsole();
-        }
-
         RowLabel GetRow(Func<RowLabel, bool> predicate)
         {
             var result = report.RowLabels.Where(predicate).SingleOrDefault();
@@ -100,7 +93,8 @@ namespace Ofx.Tests
         public void OneItemCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Take(1));
+            report.SingleSource = Items.Take(1).AsQueryable();
+            report.Build();
 
             var Name = GetRow(x => x.Name == "Name");
             var Jan = GetColumn(x => x.Name == "Jan");
@@ -112,7 +106,8 @@ namespace Ofx.Tests
         public void ThreeMonthsCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Take(5));
+            report.SingleSource = Items.Take(5).AsQueryable();
+            report.Build();
 
             var Name = GetRow(x => x.Name == "Name");
             var Feb = GetColumn(x => x.Name == "Feb");
@@ -126,7 +121,8 @@ namespace Ofx.Tests
         public void TwoCategoriesCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Take(9));
+            report.SingleSource = Items.Take(9).AsQueryable();
+            report.Build();
 
             var Other = GetRow(x => x.Name == "Other");
             var Feb = GetColumn(x => x.Name == "Feb");
@@ -141,7 +137,8 @@ namespace Ofx.Tests
         public void SubCategoriesCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Skip(5).Take(8));
+            report.SingleSource = Items.Skip(5).Take(8).AsQueryable();
+            report.Build();
 
             var Other = GetRow(x => x.Name == "Other");
             var Apr = GetColumn(x => x.Name == "Apr");
@@ -155,7 +152,8 @@ namespace Ofx.Tests
         [TestMethod]
         public void Simple()
         {
-            DoBuild(Items.Take(13));
+            report.SingleSource = Items.Take(13).AsQueryable();
+            report.Build();
 
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
@@ -169,7 +167,8 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItems()
         {
-            DoBuild(Items.Skip(9).Take(10));
+            report.SingleSource = Items.Skip(9).Take(10).AsQueryable();
+            report.Build();
 
             var Other = GetRow(x => x.Name == "Other");
 
@@ -181,7 +180,9 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsDeep()
         {
-            DoBuild(Items.Skip(9).Take(10), fromlevel: 0, numlevels: 2);
+            report.SingleSource = Items.Skip(9).Take(10).AsQueryable();
+            report.NumLevels = 2;
+            report.Build();
 
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
@@ -197,7 +198,9 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsAllDeep()
         {
-            DoBuild(Items.Take(19), fromlevel: 0, numlevels: 2);
+            report.SingleSource = Items.Take(19).AsQueryable();
+            report.NumLevels = 2;
+            report.Build();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -216,7 +219,9 @@ namespace Ofx.Tests
         public void SubItemsAllDeepCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Take(20), fromlevel: 0, numlevels: 2);
+            report.NumLevels = 2;
+            report.SingleSource = Items.Take(20).AsQueryable();
+            report.Build();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -237,7 +242,9 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsFromL1()
         {
-            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, numlevels: 1);
+            report.SingleSource = Items.Skip(9).Take(10).AsQueryable();
+            report.FromLevel = 1;
+            report.Build();
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
@@ -252,7 +259,10 @@ namespace Ofx.Tests
         public void SubItemsFromL1Cols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Skip(9).Take(10), fromlevel: 1, numlevels: 2);
+            report.SingleSource = Items.Skip(9).Take(10).AsQueryable();
+            report.FromLevel = 1;
+            report.NumLevels = 2;
+            report.Build();
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 1);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 1);
@@ -273,7 +283,9 @@ namespace Ofx.Tests
         public void ThreeLevelsDeepAllCols()
         {
             report.WithMonthColumns = true;
-            DoBuild(Items.Take(20), fromlevel: 0, numlevels: 3);
+            report.SingleSource = Items.Take(20).AsQueryable();
+            report.NumLevels = 3;
+            report.Build();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 2);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 2);
@@ -308,7 +320,8 @@ namespace Ofx.Tests
 
             var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
 
-            report.BuildMulti(serieslist, fromlevel: 0, numlevels: 1);
+            report.SeriesSource = serieslist;
+            report.Build();
             report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name" );
@@ -334,7 +347,9 @@ namespace Ofx.Tests
 
             var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
 
-            report.BuildMulti(serieslist, fromlevel: 0, numlevels: 2);
+            report.SeriesSource = serieslist;
+            report.NumLevels = 2;
+            report.Build();
             report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name");
@@ -364,7 +379,9 @@ namespace Ofx.Tests
             var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
 
             report.WithMonthColumns = true;
-            report.BuildMulti(serieslist, fromlevel: 0, numlevels: 2);
+            report.SeriesSource = serieslist;
+            report.NumLevels = 2;
+            report.Build();
             report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name");
@@ -393,7 +410,9 @@ namespace Ofx.Tests
                 serieslist.Add(new ReportSeries() { Key = i.ToString("D2"), Items = Items.Skip(i).Take(1) });
             }
 
-            report.BuildMulti(serieslist, fromlevel: 0, numlevels: 2);
+            report.SeriesSource = serieslist;
+            report.NumLevels = 2;
+            report.Build();
             report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name");
