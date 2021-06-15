@@ -43,14 +43,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 base[TotalColumn, row] = group.Sum(x => x.Amount);
 
                 if (ShowCols)
-                {
                     foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
                     {
                         var month = monthgroup.Key;
                         var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
                         base[column, row] = monthgroup.Sum(x => x.Amount);
                     }
-                }
 
                 // Build next level down
                 if (fromlevel < tolevel && token != null)
@@ -60,11 +58,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public void WriteToConsole()
         {
+            var maxlevel = RowLabels.Max(x => x.Level);
+
             // Columns
 
             var builder = new StringBuilder();
             var name = string.Empty;
-            builder.Append($"+ {name,15} ");
+            var padding = String.Concat(Enumerable.Repeat<char>(' ', maxlevel));
+            builder.Append($"+ {name,15}{padding} ");
 
             foreach (var col in ColumnLabels.OrderBy(x => x))
             {
@@ -87,7 +88,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     name = "TOTAL";
                 if (name == null)
                     name = "-";
-                builder.Append($"{line.Level} {name,15} ");
+
+                var padding_before = String.Concat( Enumerable.Repeat<char>('>', line.IsTotal ? 0 : maxlevel - line.Level));
+                var padding_after = String.Concat( Enumerable.Repeat<char>(' ', line.IsTotal ? maxlevel : line.Level));
+
+                builder.Append($"{line.Level} {padding_before}{name,-15}{padding_after} ");
 
                 foreach (var col in ColumnLabels.OrderBy(x=>x))
                 {
