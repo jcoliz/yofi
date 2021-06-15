@@ -1149,30 +1149,27 @@ namespace OfxWeb.Asp.Controllers
             ViewData["report"] = report;
             ViewData["month"] = month;
 
-            Func<Models.Transaction, bool> inscope = (x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month);
+            Func<Models.Transaction, bool> inscope_t = (x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month);
+            Func<Models.Split, bool> inscope_s = (x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= month);
 
-            var txs = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).AsQueryable<IReportable>();
-            var splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).AsQueryable<IReportable>();
-            var txandsplits = txs.Concat(splits);
+            var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any()); 
+            var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s); 
 
             if (report == "all")
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 4;
-                result.SingleSource = txandsplits;
+                result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
                 result.Name = "All Transactions";
             }
             else if (report == "income")
             {
-                var txsI = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).Where(x => x.Category == "Income" || x.Category.StartsWith("Income:")).AsQueryable<IReportable>();
-                var splitsI = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).Where(x => x.Category == "Income" || x.Category.StartsWith("Income:")).AsQueryable<IReportable>();
-                var txandsplitsI = txsI.Concat(splitsI);
+                var txsI = txs.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
+                var splitsI = splits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
 
-                //var source = txandsplits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
-                result.SingleSource = txandsplitsI;
+                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
                 result.FromLevel = 1;
                 result.Name = "Income";
-                result.WriteToConsole();
             }
 
             result.Build();
