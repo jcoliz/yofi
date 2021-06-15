@@ -1119,13 +1119,13 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Report
-        public async Task<IActionResult> Report(string report, int? month, int? weekspct, int? setyear, bool? download)
+        public async Task<IActionResult> Report(string id, int? month, int? weekspct, int? setyear, bool? download)
         {
             Report result = new Report();
 
-            if (string.IsNullOrEmpty(report))
+            if (string.IsNullOrEmpty(id))
             {
-                report = "all";
+                id = "all";
             }
 
             if (setyear.HasValue)
@@ -1146,7 +1146,7 @@ namespace OfxWeb.Asp.Controllers
             var period = new DateTime(Year, month.Value, 1);
 
             result.Description = $"For {Year} through {period.ToString("MMMM")} ";
-            ViewData["report"] = report;
+            ViewData["report"] = id;
             ViewData["month"] = month;
 
             Func<Models.Transaction, bool> inscope_t = (x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month);
@@ -1155,14 +1155,14 @@ namespace OfxWeb.Asp.Controllers
             var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any()); 
             var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s); 
 
-            if (report == "all")
+            if (id == "all")
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 4;
                 result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
                 result.Name = "All Transactions";
             }
-            else if (report == "income")
+            else if (id == "income")
             {
                 var txsI = txs.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
                 var splitsI = splits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
