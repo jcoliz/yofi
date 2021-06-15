@@ -9,7 +9,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 {
     public class Report : Table<ColumnLabel, RowLabel, decimal>
     {
-        public bool ShowCols { get; set; } = false;
+        public bool WithMonthColumns { get; set; } = false;
 
         public RowLabel TotalRow { get; }  = new RowLabel() { IsTotal = true };
         public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
@@ -42,7 +42,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var row = new RowLabel() { Name = token, Level = tolevel - fromlevel, Order = newpath };
                 base[TotalColumn, row] = group.Sum(x => x.Amount);
 
-                if (ShowCols)
+                if (WithMonthColumns)
                     foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
                     {
                         var month = monthgroup.Key;

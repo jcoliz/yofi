@@ -87,7 +87,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void OneItemCols()
         {
-            report.ShowCols = true;
+            report.WithMonthColumns = true;
             DoBuild(Items.Take(1));
 
             var Name = GetRow(x => x.Name == "Name");
@@ -99,7 +99,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void ThreeMonthsCols()
         {
-            report.ShowCols = true;
+            report.WithMonthColumns = true;
             DoBuild(Items.Take(5));
 
             var Name = GetRow(x => x.Name == "Name");
@@ -113,7 +113,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void TwoCategoriesCols()
         {
-            report.ShowCols = true;
+            report.WithMonthColumns = true;
             DoBuild(Items.Take(9));
 
             var Other = GetRow(x => x.Name == "Other");
@@ -128,7 +128,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubCategoriesCols()
         {
-            report.ShowCols = true;
+            report.WithMonthColumns = true;
             DoBuild(Items.Skip(5).Take(8));
 
             var Other = GetRow(x => x.Name == "Other");
@@ -203,7 +203,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsAllDeepCols()
         {
-            report.ShowCols = true;
+            report.WithMonthColumns = true;
             DoBuild(Items.Take(20), fromlevel:0, tolevel:1);
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
@@ -239,7 +239,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsFromL1Cols()
         {
-            report.ShowCols = true;
+            report.WithMonthColumns = true;
             DoBuild(Items.Skip(9).Take(10), fromlevel: 1, tolevel: 2);
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 1);
@@ -260,7 +260,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void ThreeLevelsDeepAllCols()
         {
-            report.ShowCols = true;
+            report.WithMonthColumns = true;
             DoBuild(Items.Take(20), fromlevel: 0, tolevel: 2);
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 2);
