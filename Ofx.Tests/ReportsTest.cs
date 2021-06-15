@@ -382,5 +382,33 @@ namespace Ofx.Tests
             Assert.AreEqual(400m, report[Two, Else]);
             Assert.AreEqual(200m, report[JunTwo, Else]);
         }
+        [TestMethod]
+        public void ManySeriesDeep()
+        {
+            // This crazy test creates a series for every single transaction
+
+            var serieslist = new List<ReportSeries>();
+            for (int i = 0; i<20; i++)
+            {
+                serieslist.Add(new ReportSeries() { Key = i.ToString("D2"), Items = Items.Skip(i).Take(1) });
+            }
+
+            report.BuildMulti(serieslist, fromlevel: 0, numlevels: 2);
+            report.WriteToConsole();
+
+            var Name = GetRow(x => x.Name == "Name");
+            var Other = GetRow(x => x.Name == "Other");
+
+            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+
+            for (int i = 0; i < 20; i++)
+            {
+                var key = i.ToString("D2");
+                var Column = GetColumn(x => x.Name == key);
+                Assert.AreEqual(100m, report[Column, report.TotalRow]);
+            }
+        }
     }
 }
