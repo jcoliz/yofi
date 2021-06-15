@@ -57,33 +57,38 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         void BuildInternal(IQueryable<IReportable> items, int fromlevel, int numlevels, string categorypath, ColumnLabel seriescolumn = null)
         {
-            foreach (var group in items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel)))
+            var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
+
+            if (groups.Count() > 1 || groups.Single().Key != null) // Skip empty sub-levels
             {
-                var token = group.Key;
-                var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
-                var row = new RowLabel() { Name = token, Level = numlevels - 1, Order = newpath };
+                foreach (var group in groups)
+                {
+                    var token = group.Key;
+                    var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
+                    var row = new RowLabel() { Name = token, Level = numlevels - 1, Order = newpath };
 
-                var sum = group.Sum(x => x.Amount);
-                base[TotalColumn, row] += sum;
-                if (seriescolumn != null)
-                    base[seriescolumn, row] += sum;
+                    var sum = group.Sum(x => x.Amount);
+                    base[TotalColumn, row] += sum;
+                    if (seriescolumn != null)
+                        base[seriescolumn, row] += sum;
 
-                if (WithMonthColumns)
-                    foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
-                    {
-                        var month = monthgroup.Key;
-                        var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
-                        if (seriescolumn != null)
+                    if (WithMonthColumns)
+                        foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
                         {
-                            column.Order += ":" + seriescolumn.Name;
-                            column.Name += " " + seriescolumn.Name;
+                            var month = monthgroup.Key;
+                            var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
+                            if (seriescolumn != null)
+                            {
+                                column.Order += ":" + seriescolumn.Name;
+                                column.Name += " " + seriescolumn.Name;
+                            }
+                            base[column, row] = monthgroup.Sum(x => x.Amount);
                         }
-                        base[column, row] = monthgroup.Sum(x => x.Amount);
-                    }
 
-                // Build next level down
-                if (numlevels > 1 && token != null)
-                    BuildInternal(group.AsQueryable(), fromlevel + 1, numlevels - 1, newpath, seriescolumn);
+                    // Build next level down
+                    if (numlevels > 1 && token != null)
+                        BuildInternal(group.AsQueryable(), fromlevel + 1, numlevels - 1, newpath, seriescolumn);
+                }
             }
         }
 

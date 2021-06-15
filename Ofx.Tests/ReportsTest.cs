@@ -201,13 +201,14 @@ namespace Ofx.Tests
             report.SingleSource = Items.Take(19).AsQueryable();
             report.NumLevels = 2;
             report.Build();
+            report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
 
-            Assert.AreEqual(7, report.RowLabels.Count());
+            Assert.AreEqual(6, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
             Assert.AreEqual(500m, report[report.TotalColumn, Name]);
             Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
@@ -222,6 +223,7 @@ namespace Ofx.Tests
             report.NumLevels = 2;
             report.SingleSource = Items.Take(20).AsQueryable();
             report.Build();
+            report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -229,7 +231,7 @@ namespace Ofx.Tests
             var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
             var Jun = GetColumn(x => x.Name == "Jun");
 
-            Assert.AreEqual(7, report.RowLabels.Count());
+            Assert.AreEqual(6, report.RowLabels.Count());
             Assert.AreEqual(9, report.ColumnLabels.Count());
             Assert.AreEqual(600m, report[report.TotalColumn, Name]);
             Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
@@ -286,6 +288,7 @@ namespace Ofx.Tests
             report.SingleSource = Items.Take(20).AsQueryable();
             report.NumLevels = 3;
             report.Build();
+            report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 2);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 2);
@@ -295,7 +298,7 @@ namespace Ofx.Tests
             var B = GetRow(x => x.Name == "B" && x.Level == 0);
             var Jun = GetColumn(x => x.Name == "Jun");
 
-            Assert.AreEqual(12, report.RowLabels.Count());
+            Assert.AreEqual(11, report.RowLabels.Count());
             Assert.AreEqual(9, report.ColumnLabels.Count());
             Assert.AreEqual(600m, report[report.TotalColumn, Name]);
             Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
