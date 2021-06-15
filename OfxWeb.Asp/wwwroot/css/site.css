@@ -26,6 +26,38 @@
     margin: 15px;
 }
 
+.report tr.report-row-3 {
+    font-weight: bold;
+    background-color: #38ace5;
+    border-top-style: solid;
+    border-bottom-style: solid;
+}
+
+.report tr.report-row-2 {
+    font-weight: bold;
+    background-color: #caebfa;
+}
+
+.report tr.report-row-1 {
+    font-weight: bold;
+}
+
+.report tr.report-row-0 td.report-col-name {
+    text-indent: 20px;
+}
+
+.report tr.report-total {
+    font-weight: bold;
+}
+
+.pivot-table td.report-col-amount {
+    text-align: right;
+}
+
+.report td.report-col-total {
+    font-weight: bold;
+}
+
 .pivot-table td {
     text-align: right;
 }

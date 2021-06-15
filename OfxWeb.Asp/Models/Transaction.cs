@@ -30,6 +30,17 @@ namespace OfxWeb.Asp.Models
         public bool HasSplits => Splits?.Any() == true;
         public bool IsSplitsOK => !HasSplits || ( Splits.Select(x=>x.Amount).Sum() == Amount );
 
+        string IReportable.Category
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(SubCategory))
+                    return Category;
+                else
+                    return $"{Category}:{SubCategory}";
+            }
+        }
+
         /// <summary>
         /// Remove all characters from payee which are not whitespace or alpha-numeric
         /// </summary>

@@ -1118,6 +1118,64 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // GET: Transactions/Report
+        public async Task<IActionResult> Report(string report, int? month, int? weekspct, int? setyear, bool? download)
+        {
+            Report result = new Report();
+
+            if (string.IsNullOrEmpty(report))
+            {
+                report = "all";
+            }
+
+            if (setyear.HasValue)
+                Year = setyear.Value;
+
+            if (!month.HasValue)
+            {
+                bool iscurrentyear = (Year == DateTime.Now.Year);
+
+                // By default, month is the current month when looking at the current year.
+                // When looking at previous years, default is the whole year (december)
+                if (iscurrentyear)
+                    month = DateTime.Now.Month;
+                else
+                    month = 12;
+            }
+
+            var period = new DateTime(Year, month.Value, 1);
+
+            ViewData["Subtitle"] = $"For {Year} through {period.ToString("MMMM")} ";
+            ViewData["report"] = report;
+            ViewData["month"] = month;
+
+            Func<Models.Transaction, bool> inscope = (x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= month);
+
+            var txs = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).AsQueryable<IReportable>();
+            var splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).AsQueryable<IReportable>();
+            var txandsplits = txs.Concat(splits);
+
+            if (report == "all")
+            {
+                result.WithMonthColumns = true;
+                result.Build(txandsplits, fromlevel: 0, numlevels: 4);
+                result.WriteToConsole();
+                ViewData["Title"] = "All Transactions";
+            }
+            else if (report == "income")
+            {
+                var txsI = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).Where(x => x.Category == "Income" || x.Category.StartsWith("Income:")).AsQueryable<IReportable>();
+                var splitsI = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).Where(x => x.Category == "Income" || x.Category.StartsWith("Income:")).AsQueryable<IReportable>();
+                var txandsplitsI = txsI.Concat(splitsI);
+
+                //var source = txandsplits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
+                result.Build(txandsplitsI, fromlevel: 1, numlevels: 1);
+                ViewData["Title"] = "Income";
+            }
+
+            return View(result);
+        }
+
         // GET: Transactions/Pivot
         public async Task<IActionResult> Pivot(string report, int? month, int? weekspct, int? setyear, bool? download)
         {
