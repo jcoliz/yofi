@@ -313,7 +313,6 @@ namespace Ofx.Tests
 
             var Name = GetRow(x => x.Name == "Name" );
             var Other = GetRow(x => x.Name == "Other" );
-            var Else = GetRow(x => x.Name == "Else");
             var One = GetColumn(x => x.Name == "One");
             var Two = GetColumn(x => x.Name == "Two");
 
@@ -322,8 +321,6 @@ namespace Ofx.Tests
             Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
             Assert.AreEqual(700m, report[One, report.TotalRow]);
             Assert.AreEqual(1300m, report[Two, report.TotalRow]);
-            Assert.AreEqual(200m, report[One, Else]);
-            Assert.AreEqual(400m, report[Two, Else]);
         }
         [TestMethod]
         public void TwoSeriesDeep()
@@ -342,6 +339,7 @@ namespace Ofx.Tests
 
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
+            var Else = GetRow(x => x.Name == "Else");
             var One = GetColumn(x => x.Name == "One");
             var Two = GetColumn(x => x.Name == "Two");
 
@@ -350,6 +348,39 @@ namespace Ofx.Tests
             Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
             Assert.AreEqual(700m, report[One, report.TotalRow]);
             Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+            Assert.AreEqual(200m, report[One, Else]);
+            Assert.AreEqual(400m, report[Two, Else]);
+        }
+        [TestMethod]
+        public void TwoSeriesDeepCols()
+        {
+            // Divide the transactios into two imbalanced partitions, each partition will be a series
+            // ToList() needed to execute the index % 3 calculations NOW not later
+            int index = 0;
+            var seriesone = new ReportSeries() { Key = "One", Items = Items.Take(20).Where(x => index++ % 3 == 0).ToList() };
+            index = 0;
+            var seriestwo = new ReportSeries() { Key = "Two", Items = Items.Take(20).Where(x => index++ % 3 != 0).ToList() };
+
+            var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
+
+            report.WithMonthColumns = true;
+            report.BuildMulti(serieslist, fromlevel: 0, numlevels: 2);
+            report.WriteToConsole();
+
+            var Name = GetRow(x => x.Name == "Name");
+            var Other = GetRow(x => x.Name == "Other");
+            var Else = GetRow(x => x.Name == "Else");
+            var One = GetColumn(x => x.Name == "One");
+            var Two = GetColumn(x => x.Name == "Two");
+            var JunTwo = GetColumn(x => x.Name == "Jun Two");
+
+            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(700m, report[One, report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+            Assert.AreEqual(400m, report[Two, Else]);
+            Assert.AreEqual(200m, report[JunTwo, Else]);
         }
     }
 }

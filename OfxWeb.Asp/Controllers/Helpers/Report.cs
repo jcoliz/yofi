@@ -35,9 +35,6 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public void BuildMulti(IEnumerable<IGrouping<string, IReportable>> serieslist, int fromlevel, int numlevels)
         {
-            if (WithMonthColumns)
-                throw new NotImplementedException("BuildMulti is not implemented for reports with month columns");
-
             foreach (var series in serieslist)
                 BuildInternal(series.AsQueryable(), fromlevel, numlevels, null, new ColumnLabel() { Name = series.Key });
 
@@ -62,6 +59,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     {
                         var month = monthgroup.Key;
                         var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
+                        if (seriescolumn != null)
+                        {
+                            column.Order += ":" + seriescolumn.Name;
+                            column.Name += " " + seriescolumn.Name;
+                        }
                         base[column, row] = monthgroup.Sum(x => x.Amount);
                     }
 
@@ -171,6 +173,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
         int IComparable<BaseLabel>.CompareTo(BaseLabel other)
         {
             int result = IsTotal.CompareTo(other.IsTotal);
+            if (result == 0) // Empty orders sort at the END
+                result = string.IsNullOrEmpty(Order).CompareTo(string.IsNullOrEmpty(other.Order));
             if (result == 0)
                 result = Order.CompareTo(other.Order);
             if (result == 0)
