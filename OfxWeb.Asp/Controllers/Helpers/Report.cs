@@ -67,7 +67,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var padding = String.Concat(Enumerable.Repeat<char>(' ', maxlevel));
             builder.Append($"+ {name,15}{padding} ");
 
-            foreach (var col in ColumnLabels.OrderBy(x => x))
+            foreach (var col in ColumnLabels)
             {
                 name = col.Name;
                 if (col.IsTotal)
@@ -79,7 +79,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             // Rows
 
-            foreach (var line in RowLabels.OrderBy(x => x))
+            foreach (var line in RowLabels)
             {
                 builder = new StringBuilder();
 
@@ -94,7 +94,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                 builder.Append($"{line.Level} {padding_before}{name,-15}{padding_after} ");
 
-                foreach (var col in ColumnLabels.OrderBy(x=>x))
+                foreach (var col in ColumnLabels)
                 {
                     var val = this[col, line];
                     builder.Append($"| {val,10:C2} ");

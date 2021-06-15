@@ -20,8 +20,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
     {
         class Key
         {
-            public C col { get; set; }
-            public R row { get; set; }
+            public C col { get; }
+            public R row { get; }
+
+            public Key(C _col, R _row)
+            {
+                col = _col;
+                row = _row;
+            }
 
             public override bool Equals(object obj)
             {
@@ -49,7 +55,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         {
             get
             {
-                return _ColumnLabels;
+                return _ColumnLabels.OrderBy(x => x);
             }
             set
             {
@@ -79,7 +85,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         {
             get
             {
-                var key = new Key() { row = rowlabel, col = collabel };
+                var key = new Key(_col: collabel, _row: rowlabel);
 
                 if (DataSet.ContainsKey(key))
                 {
@@ -92,7 +98,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             set
             {
-                var key = new Key() { row = rowlabel, col = collabel };
+                var key = new Key(_col: collabel, _row: rowlabel);
 
                 DataSet[key] = value;
                 _ColumnLabels.Add(collabel);
