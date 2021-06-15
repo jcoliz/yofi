@@ -1145,7 +1145,7 @@ namespace OfxWeb.Asp.Controllers
 
             var period = new DateTime(Year, month.Value, 1);
 
-            ViewData["Subtitle"] = $"For {Year} through {period.ToString("MMMM")} ";
+            result.Description = $"For {Year} through {period.ToString("MMMM")} ";
             ViewData["report"] = report;
             ViewData["month"] = month;
 
@@ -1159,8 +1159,8 @@ namespace OfxWeb.Asp.Controllers
             {
                 result.WithMonthColumns = true;
                 result.Build(txandsplits, fromlevel: 0, numlevels: 4);
+                result.Name = "All Transactions";
                 result.WriteToConsole();
-                ViewData["Title"] = "All Transactions";
             }
             else if (report == "income")
             {
@@ -1170,7 +1170,8 @@ namespace OfxWeb.Asp.Controllers
 
                 //var source = txandsplits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
                 result.Build(txandsplitsI, fromlevel: 1, numlevels: 1);
-                ViewData["Title"] = "Income";
+                result.Name = "Income";
+                result.WriteToConsole();
             }
 
             return View(result);

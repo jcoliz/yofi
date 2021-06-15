@@ -14,7 +14,7 @@
 
         @{
             int currentyear = DateTime.Now.Year;
-            for( int year = 2017; year <= currentyear; ++year)
+            for (int year = 2017; year <= currentyear; ++year)
             {
                 <a asp-action="Pivot" asp-route-report="@report" asp-route-setyear="@year" class="dropdown-item">@year</a>
             }
@@ -52,11 +52,14 @@
 </div>
 
 <h2>
-    @ViewData["Title"]
+    @Model.Name
 </h2>
-<h3>
-    @ViewData["Subtitle"]
-</h3>
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <h3>
+        @Model.Description
+    </h3>
+}
 
 <table class="table report">
     <thead>
@@ -75,23 +78,23 @@
         @foreach (var row in Model.RowLabels)
         {
             var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level}";
-        <tr class="@rowformat">
+            <tr class="@rowformat">
 
-            <td class="report-col-name">
-                @(row.Name ?? "-")
-            </td>
-
-            @foreach (var column in Model.ColumnLabels)
-            {
-                var cell = Model[column,row];
-
-                var colformat = "report-col-amount" + (column.IsTotal ? " report-col-total" : string.Empty);
-
-                <td class="@colformat">
-                    @cell.ToString("C2")
+                <td class="report-col-name">
+                    @(row.Name ?? "-")
                 </td>
-            }
-        </tr>
+
+                @foreach (var column in Model.ColumnLabels)
+                {
+                    var cell = Model[column, row];
+
+                    var colformat = "report-col-amount" + (column.IsTotal ? " report-col-total" : string.Empty);
+
+                    <td class="@colformat">
+                        @cell.ToString("C2")
+                    </td>
+                }
+            </tr>
         }
     </tbody>
 </table>

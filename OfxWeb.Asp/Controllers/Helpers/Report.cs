@@ -12,6 +12,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
     {
         public bool WithMonthColumns { get; set; } = false;
 
+        public string Name { get; set; } = "Report";
+
+        public string Description { get; set; }
+
         public RowLabel TotalRow { get; }  = new RowLabel() { IsTotal = true };
         public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
 
