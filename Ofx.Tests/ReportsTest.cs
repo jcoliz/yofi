@@ -481,11 +481,7 @@ namespace Ofx.Tests
         {
             // This crazy test creates a series for every single transaction
 
-            var serieslist = new List<ReportSeries>();
-            for (int i = 0; i<20; i++)
-                serieslist.Add(new ReportSeries() { Key = i.ToString("D2"), Items = Items.Skip(i).Take(1) });
-
-            report.SeriesSource = serieslist;
+            report.SeriesSource = Enumerable.Range(0, 20).Select(i => new ReportSeries() { Key = i.ToString("D2"), Items = Items.Skip(i).Take(1) });
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();
