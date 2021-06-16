@@ -154,6 +154,7 @@ namespace Ofx.Tests
             report.WithMonthColumns = true;
             report.SingleSource = Items.Take(9).AsQueryable();
             report.Build();
+            report.WriteToConsole();
 
             var Other = GetRow(x => x.Name == "Other");
             var Feb = GetColumn(x => x.Name == "Feb");
@@ -163,6 +164,41 @@ namespace Ofx.Tests
             Assert.AreEqual(6, report.ColumnLabels.Count());
             Assert.AreEqual(200m, report[Feb, Other]);
             Assert.AreEqual(10000m, report[Custom, Other]);
+            Assert.AreEqual(400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(900m, report[report.TotalColumn, report.TotalRow]);
+        }
+        [TestMethod]
+        public void TwoCategoriesColsCustomComplex()
+        {
+            Func<Dictionary<string, decimal>, decimal> func = (cols) =>
+            {
+                var feb = cols["02"];
+                var mar = cols["03"];
+
+                return feb + mar;
+            };
+
+            var custom = new ColumnLabel()
+            {
+                Name = "Custom",
+                UniqueID = "Z",
+                Custom = func
+            };
+
+            report.AddCustomColumn(custom);
+            report.WithMonthColumns = true;
+            report.SingleSource = Items.Take(9).AsQueryable();
+            report.Build();
+            report.WriteToConsole();
+
+            var Other = GetRow(x => x.Name == "Other");
+            var Feb = GetColumn(x => x.Name == "Feb");
+            var Custom = GetColumn(x => x.Name == "Custom");
+
+            Assert.AreEqual(3, report.RowLabels.Count());
+            Assert.AreEqual(6, report.ColumnLabels.Count());
+            Assert.AreEqual(200m, report[Feb, Other]);
+            Assert.AreEqual(300m, report[Custom, Other]);
             Assert.AreEqual(400m, report[report.TotalColumn, Other]);
             Assert.AreEqual(900m, report[report.TotalColumn, report.TotalRow]);
         }
