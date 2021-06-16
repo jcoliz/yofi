@@ -1153,7 +1153,14 @@ namespace OfxWeb.Asp.Controllers
             Func<Models.Split, bool> inscope_s = (x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= month);
 
             var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any()); 
-            var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s); 
+            var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s);
+            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == Year);
+
+            var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer" };
+            var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
+            var txsExpenses = txs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
+            var splitsExpenses = splits.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
+            var budgettxsExpenses = budgettxs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
 
             if (id == "all")
             {
@@ -1171,6 +1178,14 @@ namespace OfxWeb.Asp.Controllers
                 result.SortOrder = Helpers.Report.SortOrders.NameAscending;
                 result.Name = "All Transactions (Deep)";
             }
+            else if (id == "summary")
+            {
+                result.WithMonthColumns = true;
+                result.NumLevels = 2;
+                result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "All Transactions (Summary)";
+            }
             else if (id == "income")
             {
                 var txsI = txs.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
@@ -1181,6 +1196,57 @@ namespace OfxWeb.Asp.Controllers
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
                 result.Name = "Income";
+            }
+            else if (id == "taxes")
+            {
+                var txsI = txs.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
+                var splitsI = splits.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
+
+                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
+                result.FromLevel = 1;
+                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Taxes";
+            }
+            else if (id == "savings")
+            {
+                var txsI = txs.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
+                var splitsI = splits.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
+
+                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
+                result.FromLevel = 1;
+                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Savings";
+            }
+            else if (id == "expenses-summary")
+            {
+                result.SingleSource = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
+                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Expenses Top-Level";
+            }
+            else if (id == "expenses-detail")
+            {
+                result.SingleSource = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Expenses Detail";
+            }
+            else if (id == "expenses-budget")
+            {
+                result.SingleSource = budgettxsExpenses.AsQueryable<IReportable>();
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Expenses Budget";
+            }
+            else if (id == "budget")
+            {
+                result.NumLevels = 3;
+                result.SingleSource = budgettxs.AsQueryable<IReportable>();
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Description = $"For {Year}";
+                result.Name = "Complete Budget";
             }
 
             result.Build();
