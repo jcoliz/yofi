@@ -64,7 +64,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     _ColumnLabels.Add(label);
             }
         }
-        HashSet<TColumn> _ColumnLabels = new HashSet<TColumn>();
+        protected HashSet<TColumn> _ColumnLabels = new HashSet<TColumn>();
 
         public IEnumerable<TRow> RowLabels
         {

@@ -49,9 +49,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
         {
             get
             {
-                return base[collabel, rowlabel];
+                if (collabel.IsCalculated)
+                    return collabel.Custom(RowDetails(rowlabel));
+                else
+                    return base[collabel, rowlabel];
             }
         }
+
+        Dictionary<string,decimal> RowDetails(RowLabel rowLabel) => ColumnLabels.ToDictionary(x => x.UniqueID, x => base[x, rowLabel]);
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,
@@ -130,6 +135,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
             foreach (var row in base.RowLabels.Where(x => x.Level == usinglevel))
                 foreach (var col in base.ColumnLabels)
                     base[col, TotalRow] += base[col, row];
+        }
+
+        public void AddCustomColumn(ColumnLabel column)
+        {
+            if (column.Custom == null)
+                throw new ArgumentOutOfRangeException(nameof(column), "Column must contain a custom function");
+
+            column.IsCalculated = true;
+            column.IsTotal = false;
+            base._ColumnLabels.Add(column);
         }
 
         public void WriteToConsole(bool sorted = false)
@@ -370,6 +385,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
     }
 
     public class ColumnLabel : BaseLabel
-    { 
+    {
+        public bool IsCalculated { get; set; } = false;
+
+        public Func<Dictionary<string,decimal>, decimal> Custom { get; set; }
     }
 }
