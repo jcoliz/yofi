@@ -45,6 +45,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public ColumnLabel OrderingColumn => WithTotalColumn ? TotalColumn : base.ColumnLabels.SkipLast(1).Last();
 
+        public new decimal this[ColumnLabel collabel, RowLabel rowlabel]
+        {
+            get
+            {
+                return base[collabel, rowlabel];
+            }
+        }
+
         /// <summary>
         /// This will build a one-level report with no columns, just totals,
         /// headings as first-level categories, rows as second-level categories
