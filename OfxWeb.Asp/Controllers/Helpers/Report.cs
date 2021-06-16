@@ -32,6 +32,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public IEnumerable<IGrouping<string, IReportable>> SeriesSource { get; set; }
 
+        public IEnumerable<IQueryable<IGrouping<string, IReportable>>> SeriesQuerySource { get; set; }
+
         public RowLabel TotalRow { get; }  = new RowLabel() { IsTotal = true };
         public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
 
@@ -60,6 +62,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 foreach (var series in SeriesSource)
                     BuildInternal(series.AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.Key });
+            }
+
+            if (SeriesQuerySource != null)
+            {
+                foreach (var series in SeriesQuerySource)
+                    BuildInternal(series.First().AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.First().Key });
             }
 
             CalculateTotalRow(NumLevels - 1);

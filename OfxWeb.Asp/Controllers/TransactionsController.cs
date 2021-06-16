@@ -1154,13 +1154,21 @@ namespace OfxWeb.Asp.Controllers
 
             var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any()); 
             var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s);
+            var txscomplete = txs.AsQueryable<IReportable>().Concat(splits);
             var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == Year);
 
             var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer" };
             var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
             var txsExpenses = txs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
             var splitsExpenses = splits.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
+            var txscompleteExpenses = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
             var budgettxsExpenses = budgettxs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
+
+            var budgetexpseries = budgettxsExpenses.GroupBy(x => "Budget");
+            var expenseseries = txscompleteExpenses.GroupBy(x => "Actual");
+            var serieslist = new List<IQueryable<IGrouping<string, IReportable>>>();
+            serieslist.Add(budgetexpseries);
+            serieslist.Add(expenseseries);
 
             if (id == "all")
             {
@@ -1239,6 +1247,13 @@ namespace OfxWeb.Asp.Controllers
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses Budget";
+            }
+            else if (id == "expenses-v-budget")
+            {
+                result.SeriesQuerySource = serieslist;
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Expenses vs. Budget";
             }
             else if (id == "budget")
             {
