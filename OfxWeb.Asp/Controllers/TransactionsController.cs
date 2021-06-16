@@ -1166,9 +1166,13 @@ namespace OfxWeb.Asp.Controllers
 
             var budgetexpseries = budgettxsExpenses.GroupBy(x => "Budget");
             var expenseseries = txscompleteExpenses.GroupBy(x => "Actual");
-            var serieslist = new List<IQueryable<IGrouping<string, IReportable>>>();
-            serieslist.Add(budgetexpseries);
-            serieslist.Add(expenseseries);
+            var serieslistexpenses = new List<IQueryable<IGrouping<string, IReportable>>>();
+            serieslistexpenses.Add(budgetexpseries);
+            serieslistexpenses.Add(expenseseries);
+
+            var serieslistall = new List<IQueryable<IGrouping<string, IReportable>>>();
+            serieslistall.Add(txscomplete.GroupBy(x => "Actual"));
+            serieslistall.Add(budgettxs.GroupBy(x => "Budget"));
 
             if (id == "all")
             {
@@ -1250,7 +1254,14 @@ namespace OfxWeb.Asp.Controllers
             }
             else if (id == "expenses-v-budget")
             {
-                result.SeriesQuerySource = serieslist;
+                result.SeriesQuerySource = serieslistexpenses;
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Expenses vs. Budget";
+            }
+            else if (id == "all-v-budget")
+            {
+                result.SeriesQuerySource = serieslistall;
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses vs. Budget";

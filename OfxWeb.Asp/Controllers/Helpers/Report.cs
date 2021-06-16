@@ -120,6 +120,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public void WriteToConsole(bool sorted = false)
         {
+            if (!RowLabels.Any())
+                return;
+
             var maxlevel = RowLabels.Max(x => x.Level);
 
             // Columns
