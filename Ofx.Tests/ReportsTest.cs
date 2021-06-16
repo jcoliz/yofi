@@ -81,6 +81,11 @@ namespace Ofx.Tests
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Name" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else:X" });
+            Items.Add(new Item() { Amount = 1000, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something:B" });
         }
 
         [TestMethod]
@@ -245,6 +250,41 @@ namespace Ofx.Tests
             Assert.AreEqual(400m, report[report.TotalColumn, Something]);
             Assert.AreEqual(600m, report[report.TotalColumn, Else]);
             Assert.AreEqual(1900m, report[report.TotalColumn, report.TotalRow]);
+        }
+        [TestMethod]
+        public void SubItemsAllDeepSorted()
+        {
+            report.SingleSource = Items.Take(24).AsQueryable();
+            report.NumLevels = 2;
+            report.Build();
+            report.WriteToConsole(sorted:true);
+
+            var actual = report.RowLabelsOrdered.ToList();
+
+            // Default explicit sort order is Descending by Total amount
+
+            Assert.AreEqual("Other", actual.First().Name);
+            Assert.AreEqual("Else", actual.Skip(1).First().Name); // First place with 900
+            Assert.AreEqual("Name", actual.Skip(4).First().Name); // Last with 600
+            Assert.IsTrue(actual.Last().IsTotal);
+        }
+        [TestMethod]
+        public void SubItemsAllThreeDeepSorted()
+        {
+            report.SingleSource = Items.Take(25).AsQueryable();
+            report.NumLevels = 3;
+            report.Build();
+            report.WriteToConsole(sorted: true);
+
+            var actual = report.RowLabelsOrdered.ToList();
+
+            // Default explicit sort order is Descending by Total amount
+
+            Assert.AreEqual("Other", actual.First().Name);
+            Assert.AreEqual("Something", actual.Skip(1).First().Name);
+            Assert.AreEqual("A", actual.Skip(3).First().Name);
+            Assert.AreEqual("X", actual.Skip(6).First().Name);
+            Assert.IsTrue(actual.Last().IsTotal);
         }
         [TestMethod]
         public void SubItemsAllDeepCols()

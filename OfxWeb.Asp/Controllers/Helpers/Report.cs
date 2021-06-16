@@ -166,27 +166,126 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         int IComparer<BaseLabel>.Compare(BaseLabel x, BaseLabel y)
         {
-            // Real rows always come before non-existant rows
+            int result = 0;
+            var n = new RowLabel() { Name = "null" };
 
-            if (x == null && y == null)
-                return 0;
-            if (x == null)
-                return -1;
-            if (y == null)
-                return 1;
+            Console.WriteLine($"Compare [{x??n}] vs [{y??n}]");
 
-            // Total rows always come after other rows
+            // (1) Total rows always come after other rows
             if (x.IsTotal && y.IsTotal)
-                return 0;
+                goto done;
             if (x.IsTotal)
-                return 1;
+            {
+                result = 1;
+                goto done;
+            }
             if (y.IsTotal)
-                return -1;
+            {
+                result = -1;
+                goto done;
+            }
 
-            var result = ((IComparer<BaseLabel>)this).Compare(x.Parent, y.Parent);
+            // (2) If these two share a common parent, we can compare based on totals
+            if (x.Parent == y.Parent)
+            {
+                var yval = base[TotalColumn, y as RowLabel];
+                var xval = base[TotalColumn, x as RowLabel];
+                Console.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
+                result = base[TotalColumn, y as RowLabel].CompareTo(base[TotalColumn, x as RowLabel]);
+                goto done;
+            }
+
+            // (3) Parents always come before their own children
+
+            if (x.Parent == y)
+            {
+                Console.WriteLine("Parent relationship");
+                result = 1;
+                goto done;
+            }
+            if (y.Parent == x)
+            {
+                Console.WriteLine("Parent relationship");
+                result = -1;
+                goto done;
+            }
+
+            // (4) we can also check grandparents
+            // TODO
+
+            // We need to start searching upward
+            if (x.Parent != null)
+            {
+                Console.WriteLine($"Try {x} Parent vs {y}");
+                result = ((IComparer<BaseLabel>)this).Compare(x.Parent, y);
+                if (result != 0)
+                    goto done;
+            }
+            if (y.Parent != null)
+            {
+                Console.WriteLine($"Try {x} vs {y} Parent");
+                result = ((IComparer<BaseLabel>)this).Compare(x, y.Parent);
+                if (result != 0)
+                    goto done;
+            }
+
+            /*
+             * This is broken. In this case, we needed to have checked Other:Something vs Other.Else
+             * and done a totals check at that point. In this case it got the answer right because
+             * Other:Something DOES have the higher total, but the logic is wrong.
+             * 
+                Compare [ID:Other:Something] vs [ID:Other:Else:]
+                Try ID:Other:Something Parent vs ID:Other:Else:
+                Compare [ID:Other] vs [ID:Other:Else:]
+                Try ID:Other vs ID:Other:Else: Parent
+                Compare [ID:Other] vs [ID:Other:Else]
+                Parent relationship
+                >> ID:Other is before ID:Other:Else
+                >> ID:Other is before ID:Other:Else:
+                >> ID:Other:Something is before ID:Other:Else:
+             */
+
+
+        // Otherwise we have no idea
+#if false
+            if (x == null && y == null)
+                goto done;
+
+            if (x == null)
+            {
+                result = -1;
+                goto done;
+            }
+
+            if (y == null)
+            {
+                result = 1;
+                goto done;
+            }
+
+
+            Console.WriteLine("Checking parents...");
+            result = ((IComparer<BaseLabel>)this).Compare(x.Parent, y.Parent);
 
             if (result == 0)
-                result = base[TotalColumn, y as RowLabel].CompareTo(base[TotalColumn,x as RowLabel]);
+            {
+                // The only way to compare two rows at different levels of the hierarchy is to
+                // compare children of a common parent.
+
+                var yval = base[TotalColumn, y as RowLabel];
+                var xval = base[TotalColumn, x as RowLabel];
+                Console.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
+                result = base[TotalColumn, y as RowLabel].CompareTo(base[TotalColumn, x as RowLabel]);
+            }
+#endif
+        done:
+
+            if (result < 0)
+                Console.WriteLine($">> {x??n} is before {y??n}");
+            else if (result > 0)
+                Console.WriteLine($">> {x??n} is after {y??n}");
+            else
+                Console.WriteLine($">> {x??n} is same as {y??n}");
 
             return result;
         }
@@ -228,6 +327,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
         public override int GetHashCode()
         {
             return HashCode.Combine(UniqueID, Name, IsTotal);
+        }
+
+        public override string ToString()
+        {
+            if (IsTotal)
+                return "TOTAL";
+            if (!string.IsNullOrEmpty(UniqueID))
+                return $"ID:{UniqueID}";
+            else
+                return $"Name:{Name}";
         }
 
         int IComparable<BaseLabel>.CompareTo(BaseLabel other)
