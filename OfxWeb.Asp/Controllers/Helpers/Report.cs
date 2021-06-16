@@ -20,6 +20,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public int NumLevels { get; set; } = 1;
 
+        public int DisplayLevelAdjustment { get; set; }
+
         public IQueryable<IReportable> SingleSource { get; set; }
 
         public IEnumerable<IGrouping<string, IReportable>> SeriesSource { get; set; }

@@ -41,6 +41,7 @@
 
 <div style="margin-bottom:15px; background-color: lightgray">
     <a asp-action="Report" asp-route-id="all" class="btn btn-default">All</a> |
+    <a asp-action="Report" asp-route-id="deep" class="btn btn-default">All Deep</a> |
     <a asp-action="Report" asp-route-id="expenses-detail" class="btn btn-default">Expenses Detail</a> |
     <a asp-action="Report" asp-route-id="income" class="btn btn-default">Income</a> |
     <a asp-action="Report" asp-route-id="taxes" class="btn btn-default">Taxes</a> |
@@ -65,7 +66,7 @@
     <thead>
         <tr>
         <tr class="report-header">
-            <th></th>
+            <th>@Model.Name</th>
             @foreach (var column in Model.ColumnLabels)
             {
                 <th>
@@ -77,11 +78,23 @@
     <tbody>
         @foreach (var row in Model.RowLabels)
         {
-            var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level}";
+            var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level+Model.DisplayLevelAdjustment}";
             <tr class="@rowformat">
 
                 <td class="report-col-name">
-                    @(row.Name ?? "-")
+                    @{
+                        var name = row.Name;
+                        if (row.IsTotal)
+                        {
+                            name = "TOTAL";
+
+                        }
+                        if (name == null)
+                        {
+                            name = "-";
+                        }
+                    }
+                    @name
                 </td>
 
                 @foreach (var column in Model.ColumnLabels)

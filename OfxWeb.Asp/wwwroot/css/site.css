@@ -46,7 +46,7 @@
     text-indent: 20px;
 }
 
-.report tr.report-total {
+.report tr.report-row-total {
     font-weight: bold;
 }
 
