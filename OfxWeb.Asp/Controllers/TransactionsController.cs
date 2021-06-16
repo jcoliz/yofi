@@ -1164,15 +1164,17 @@ namespace OfxWeb.Asp.Controllers
             var txscompleteExpenses = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
             var budgettxsExpenses = budgettxs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
 
-            var budgetexpseries = budgettxsExpenses.GroupBy(x => "Budget");
-            var expenseseries = txscompleteExpenses.GroupBy(x => "Actual");
-            var serieslistexpenses = new List<IQueryable<IGrouping<string, IReportable>>>();
-            serieslistexpenses.Add(budgetexpseries);
-            serieslistexpenses.Add(expenseseries);
+            var serieslistexpenses = new List<IQueryable<IGrouping<string, IReportable>>>() 
+            {
+                txscompleteExpenses.GroupBy(x => "Actual"),
+                budgettxsExpenses.GroupBy(x => "Budget")
+            };
 
-            var serieslistall = new List<IQueryable<IGrouping<string, IReportable>>>();
-            serieslistall.Add(txscomplete.GroupBy(x => "Actual"));
-            serieslistall.Add(budgettxs.GroupBy(x => "Budget"));
+            var serieslistall = new List<IQueryable<IGrouping<string, IReportable>>>()
+            {
+                txscomplete.GroupBy(x => "Actual"),
+                budgettxs.GroupBy(x => "Budget")
+            };
 
             if (id == "all")
             {
