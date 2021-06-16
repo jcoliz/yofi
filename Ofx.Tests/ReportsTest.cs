@@ -165,6 +165,18 @@ namespace Ofx.Tests
             Assert.AreEqual(1300m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
+        public void SimpleSorted()
+        {
+            report.SingleSource = Items.Skip(3).Take(6).AsQueryable();
+            report.Build();
+            report.WriteToConsole(sorted:true);
+
+            var actual = report.RowLabelsOrdered;
+
+            Assert.AreEqual("Other", actual.First().Name);
+            Assert.IsTrue(actual.Last().IsTotal);
+        }
+        [TestMethod]
         public void SubItems()
         {
             report.SingleSource = Items.Skip(9).Take(10).AsQueryable();
@@ -194,6 +206,24 @@ namespace Ofx.Tests
             Assert.AreEqual(400m, report[report.TotalColumn, Something]);
             Assert.AreEqual(600m, report[report.TotalColumn, Else]);
             Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
+        }
+        [TestMethod]
+        public void SubItemsDeepSorted()
+        {
+            report.SingleSource = Items.Skip(9).Take(6).AsQueryable();
+            report.NumLevels = 2;
+            report.Build();
+            report.WriteToConsole(sorted: true);
+
+            var actual = report.RowLabelsOrdered.ToList();
+
+            // Default explicit sort order is Descending by Total amount
+
+            Assert.AreEqual("Other", actual.First().Name);
+            Assert.AreEqual("Something", actual.Skip(1).First().Name); // Comes in first with 400
+            Assert.AreEqual("Else", actual.Skip(2).First().Name); // Second place with 200
+            Assert.IsTrue(actual.Last().IsTotal);
+
         }
         [TestMethod]
         public void SubItemsAllDeep()
@@ -311,6 +341,18 @@ namespace Ofx.Tests
             Assert.AreEqual(200m, report[Jun, Else]);
 
         }
+        //[TestMethod]
+        public void ThreeLevelsDeepSorted()
+        {
+            report.SingleSource = Items.Take(20).AsQueryable();
+            report.NumLevels = 3;
+            report.Build();
+            report.WriteToConsole();
+
+            var sortedrows = report.RowLabelsOrdered;
+            Console.WriteLine(string.Join(',', sortedrows.Select(x => x.Name)));
+        }
+
         [TestMethod]
         public void TwoSeries()
         {

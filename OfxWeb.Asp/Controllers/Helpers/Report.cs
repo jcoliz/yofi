@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Controllers.Helpers
 {
-    public class Report : Table<ColumnLabel, RowLabel, decimal>
+    public class Report : Table<ColumnLabel, RowLabel, decimal>, IComparer<BaseLabel>
     {
+
         public bool WithMonthColumns { get; set; } = false;
 
         public string Name { get; set; } = "Report";
@@ -28,6 +29,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public RowLabel TotalRow { get; }  = new RowLabel() { IsTotal = true };
         public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
+
+        public IEnumerable<RowLabel> RowLabelsOrdered => base.RowLabels.OrderBy(x => x, this);
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,
@@ -57,7 +60,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             CalculateTotalRow(NumLevels - 1);
         }
 
-        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int numlevels, string categorypath, ColumnLabel seriescolumn = null)
+        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int numlevels, RowLabel parent, ColumnLabel seriescolumn = null)
         {
             var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
 
@@ -66,8 +69,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 foreach (var group in groups)
                 {
                     var token = group.Key;
-                    var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
-                    var row = new RowLabel() { Name = token, Level = numlevels - 1, UniqueID = newpath };
+                    var newpath = parent == null ? token : $"{parent.UniqueID}:{token}";
+                    var row = new RowLabel() { Name = token, Level = numlevels - 1, UniqueID = newpath, Parent = parent };
 
                     var sum = group.Sum(x => x.Amount);
                     base[TotalColumn, row] += sum;
@@ -89,7 +92,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                     // Build next level down
                     if (numlevels > 1 && token != null)
-                        BuildInternal(group.AsQueryable(), fromlevel + 1, numlevels - 1, newpath, seriescolumn);
+                        BuildInternal(group.AsQueryable(), fromlevel + 1, numlevels - 1, row, seriescolumn);
                 }
             }
         }
@@ -102,7 +105,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     base[col, TotalRow] += base[col, row];
         }
 
-        public void WriteToConsole()
+        public void WriteToConsole(bool sorted = false)
         {
             var maxlevel = RowLabels.Max(x => x.Level);
 
@@ -125,7 +128,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             // Rows
 
-            foreach (var line in RowLabels)
+            var rows = sorted ? RowLabelsOrdered : RowLabels;
+            foreach (var line in rows)
             {
                 builder = new StringBuilder();
 
@@ -159,6 +163,33 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else
                 return split[index];
         }
+
+        int IComparer<BaseLabel>.Compare(BaseLabel x, BaseLabel y)
+        {
+            // Real rows always come before non-existant rows
+
+            if (x == null && y == null)
+                return 0;
+            if (x == null)
+                return -1;
+            if (y == null)
+                return 1;
+
+            // Total rows always come after other rows
+            if (x.IsTotal && y.IsTotal)
+                return 0;
+            if (x.IsTotal)
+                return 1;
+            if (y.IsTotal)
+                return -1;
+
+            var result = ((IComparer<BaseLabel>)this).Compare(x.Parent, y.Parent);
+
+            if (result == 0)
+                result = base[TotalColumn, y as RowLabel].CompareTo(base[TotalColumn,x as RowLabel]);
+
+            return result;
+        }
     }
 
     public class BaseLabel: IComparable<BaseLabel>
@@ -180,6 +211,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// Final total-displaying column
         /// </summary>
         public bool IsTotal { get; set; }
+
+        /// <summary>
+        /// In a multi-level report, whom are we under? or null for top-level
+        /// </summary>
+        public BaseLabel Parent { get; set; }
 
         public override bool Equals(object obj)
         {
