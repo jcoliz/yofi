@@ -13,17 +13,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
     /// The idea is that the "pivot" view can render many different kinds of reports
     /// without knowing the details, because the details are all in here.
     /// </remarks>
-    /// <typeparam name="C">Class to represent each column</typeparam>
-    /// <typeparam name="R">Class to represent each roww</typeparam>
-    /// <typeparam name="V">Class to represent each cell value</typeparam>
-    public class Table<C, R, V>
+    /// <typeparam name="TColumn">Class to represent each column</typeparam>
+    /// <typeparam name="TRow">Class to represent each roww</typeparam>
+    /// <typeparam name="TValue">Class to represent each cell value</typeparam>
+    public class Table<TColumn, TRow, TValue>
     {
         class Key
         {
-            public C col { get; }
-            public R row { get; }
+            public TColumn col { get; }
+            public TRow row { get; }
 
-            public Key(C _col, R _row)
+            public Key(TColumn _col, TRow _row)
             {
                 col = _col;
                 row = _row;
@@ -32,8 +32,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
             public override bool Equals(object obj)
             {
                 return obj is Key key &&
-                       EqualityComparer<C>.Default.Equals(col, key.col) &&
-                       EqualityComparer<R>.Default.Equals(row, key.row);
+                       EqualityComparer<TColumn>.Default.Equals(col, key.col) &&
+                       EqualityComparer<TRow>.Default.Equals(row, key.row);
             }
 
             public override int GetHashCode()
@@ -49,9 +49,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// This is essentially a 2D dictionary, and could perhaps be improved to simply be a
         /// SparseDictionary of (Row,Col) Tuple to Values.
         /// </remarks>
-        Dictionary<Key,V> DataSet = new Dictionary<Key,V>();
+        Dictionary<Key,TValue> DataSet = new Dictionary<Key,TValue>();
 
-        public IEnumerable<C> ColumnLabels
+        public IEnumerable<TColumn> ColumnLabels
         {
             get
             {
@@ -64,9 +64,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     _ColumnLabels.Add(label);
             }
         }
-        HashSet<C> _ColumnLabels = new HashSet<C>();
+        HashSet<TColumn> _ColumnLabels = new HashSet<TColumn>();
 
-        public IEnumerable<R> RowLabels
+        public IEnumerable<TRow> RowLabels
         {
             get
             {
@@ -79,9 +79,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     _RowLabels.Add(label);
             }
         }
-        HashSet<R> _RowLabels = new HashSet<R>();
+        HashSet<TRow> _RowLabels = new HashSet<TRow>();
 
-        public V this[C collabel, R rowlabel]
+        public TValue this[TColumn collabel, TRow rowlabel]
         {
             get
             {
@@ -93,7 +93,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 }
                 else
                 {
-                    return default(V);
+                    return default(TValue);
                 }
             }
             set
@@ -106,12 +106,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
            }
         }
 
-        public IEnumerable<V> RowValues(R row)
+        public IEnumerable<TValue> RowValues(TRow row)
         {
             return _ColumnLabels.Select(x => this[x, row]);
         }
 
-        protected void RemoveColumnsWhere(Predicate<C> predicate)
+        protected void RemoveColumnsWhere(Predicate<TColumn> predicate)
         {
             _ColumnLabels.RemoveWhere(predicate);
         }
