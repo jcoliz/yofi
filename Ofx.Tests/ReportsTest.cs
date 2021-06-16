@@ -431,6 +431,32 @@ namespace Ofx.Tests
             Assert.AreEqual(1300m, report[Two, report.TotalRow]);
         }
         [TestMethod]
+        public void TwoSeriesQuerySource()
+        {
+            var ts = TwoSeriesSource;
+
+            var budgetexpseries = ts.First().GroupBy(x => "One").AsQueryable();
+            var expenseseries = ts.Skip(1).First().GroupBy(x => "Two").AsQueryable();
+            var serieslistexpenses = new List<IQueryable<IGrouping<string, IReportable>>>();
+            serieslistexpenses.Add(budgetexpseries);
+            serieslistexpenses.Add(expenseseries);
+
+            report.SeriesQuerySource = serieslistexpenses;
+            report.Build();
+            report.WriteToConsole();
+
+            var Name = GetRow(x => x.Name == "Name");
+            var Other = GetRow(x => x.Name == "Other");
+            var One = GetColumn(x => x.Name == "One");
+            var Two = GetColumn(x => x.Name == "Two");
+
+            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(700m, report[One, report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+        }
+        [TestMethod]
         public void TwoSeriesDeep()
         {
             report.SeriesSource = TwoSeriesSource;
