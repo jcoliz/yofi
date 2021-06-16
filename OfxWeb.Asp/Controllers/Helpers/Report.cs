@@ -67,7 +67,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 {
                     var token = group.Key;
                     var newpath = string.IsNullOrEmpty(categorypath) ? token : $"{categorypath}:{token}";
-                    var row = new RowLabel() { Name = token, Level = numlevels - 1, Order = newpath };
+                    var row = new RowLabel() { Name = token, Level = numlevels - 1, UniqueID = newpath };
 
                     var sum = group.Sum(x => x.Amount);
                     base[TotalColumn, row] += sum;
@@ -78,10 +78,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
                         foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
                         {
                             var month = monthgroup.Key;
-                            var column = new ColumnLabel() { Order = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
+                            var column = new ColumnLabel() { UniqueID = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
                             if (seriescolumn != null)
                             {
-                                column.Order += ":" + seriescolumn.Name;
+                                column.UniqueID += ":" + seriescolumn.Name;
                                 column.Name += " " + seriescolumn.Name;
                             }
                             base[column, row] = monthgroup.Sum(x => x.Amount);
@@ -164,9 +164,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
     public class BaseLabel: IComparable<BaseLabel>
     {
         /// <summary>
-        /// Display order. Lower values display before higher values
+        /// Tag to uniquely identify the column
         /// </summary>
-        public string Order { get; set; } = string.Empty;
+        /// <remarks>
+        /// Currently used to sort, but that will change.
+        /// </remarks>
+        public string UniqueID { get; set; } = string.Empty;
 
         /// <summary>
         /// Display name of the label
@@ -181,23 +184,23 @@ namespace OfxWeb.Asp.Controllers.Helpers
         public override bool Equals(object obj)
         {
             return obj is BaseLabel label &&
-                   Order == label.Order &&
+                   UniqueID == label.UniqueID &&
                    Name == label.Name &&
                    IsTotal == label.IsTotal;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Order, Name, IsTotal);
+            return HashCode.Combine(UniqueID, Name, IsTotal);
         }
 
         int IComparable<BaseLabel>.CompareTo(BaseLabel other)
         {
             int result = IsTotal.CompareTo(other.IsTotal);
             if (result == 0) // Empty orders sort at the END
-                result = string.IsNullOrEmpty(Order).CompareTo(string.IsNullOrEmpty(other.Order));
+                result = string.IsNullOrEmpty(UniqueID).CompareTo(string.IsNullOrEmpty(other.UniqueID));
             if (result == 0)
-                result = Order.CompareTo(other.Order);
+                result = UniqueID.CompareTo(other.UniqueID);
             if (result == 0)
                 result = Name.CompareTo(other.Name);
 
