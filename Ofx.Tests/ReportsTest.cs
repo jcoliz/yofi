@@ -397,19 +397,25 @@ namespace Ofx.Tests
             Console.WriteLine(string.Join(',', sortedrows.Select(x => x.Name)));
         }
 
+        IEnumerable<IGrouping<string, IReportable>> TwoSeriesSource
+        {
+            get
+            {
+                // Divide the transactios into two imbalanced partitions, each partition will be a series
+                // ToList() needed to execute the index % 3 calculations NOW not later
+                int index = 0;
+                var seriesone = new ReportSeries() { Key = "One", Items = Items.Take(20).Where(x => index++ % 3 == 0).ToList() };
+                index = 0;
+                var seriestwo = new ReportSeries() { Key = "Two", Items = Items.Take(20).Where(x => index++ % 3 != 0).ToList() };
+
+                return new List<ReportSeries>() { seriesone, seriestwo };
+            }
+        }
+
         [TestMethod]
         public void TwoSeries()
         {
-            // Divide the transactios into two imbalanced partitions, each partition will be a series
-            // ToList() needed to execute the index % 3 calculations NOW not later
-            int index = 0;
-            var seriesone = new ReportSeries() { Key = "One", Items = Items.Take(20).Where(x => index++ % 3 == 0).ToList() };
-            index = 0;
-            var seriestwo = new ReportSeries() { Key = "Two", Items = Items.Take(20).Where(x => index++ % 3 != 0).ToList() };
-
-            var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
-
-            report.SeriesSource = serieslist;
+            report.SeriesSource = TwoSeriesSource;
             report.Build();
             report.WriteToConsole();
 
@@ -427,16 +433,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void TwoSeriesDeep()
         {
-            // Divide the transactios into two imbalanced partitions, each partition will be a series
-            // ToList() needed to execute the index % 3 calculations NOW not later
-            int index = 0;
-            var seriesone = new ReportSeries() { Key = "One", Items = Items.Take(20).Where(x => index++ % 3 == 0).ToList() };
-            index = 0;
-            var seriestwo = new ReportSeries() { Key = "Two", Items = Items.Take(20).Where(x => index++ % 3 != 0).ToList() };
-
-            var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
-
-            report.SeriesSource = serieslist;
+            report.SeriesSource = TwoSeriesSource;
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();
@@ -458,17 +455,8 @@ namespace Ofx.Tests
         [TestMethod]
         public void TwoSeriesDeepCols()
         {
-            // Divide the transactios into two imbalanced partitions, each partition will be a series
-            // ToList() needed to execute the index % 3 calculations NOW not later
-            int index = 0;
-            var seriesone = new ReportSeries() { Key = "One", Items = Items.Take(20).Where(x => index++ % 3 == 0).ToList() };
-            index = 0;
-            var seriestwo = new ReportSeries() { Key = "Two", Items = Items.Take(20).Where(x => index++ % 3 != 0).ToList() };
-
-            var serieslist = new List<ReportSeries>() { seriesone, seriestwo };
-
             report.WithMonthColumns = true;
-            report.SeriesSource = serieslist;
+            report.SeriesSource = TwoSeriesSource;
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();
@@ -495,9 +483,7 @@ namespace Ofx.Tests
 
             var serieslist = new List<ReportSeries>();
             for (int i = 0; i<20; i++)
-            {
                 serieslist.Add(new ReportSeries() { Key = i.ToString("D2"), Items = Items.Skip(i).Take(1) });
-            }
 
             report.SeriesSource = serieslist;
             report.NumLevels = 2;
