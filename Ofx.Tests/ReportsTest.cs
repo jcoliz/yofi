@@ -433,15 +433,8 @@ namespace Ofx.Tests
         [TestMethod]
         public void TwoSeriesQuerySource()
         {
-            var ts = TwoSeriesSource;
-
-            var budgetexpseries = ts.First().GroupBy(x => "One").AsQueryable();
-            var expenseseries = ts.Skip(1).First().GroupBy(x => "Two").AsQueryable();
-            var serieslistexpenses = new List<IQueryable<IGrouping<string, IReportable>>>();
-            serieslistexpenses.Add(budgetexpseries);
-            serieslistexpenses.Add(expenseseries);
-
-            report.SeriesQuerySource = serieslistexpenses;
+            // Contort our data into the form it will take in production use
+            report.SeriesQuerySource = TwoSeriesSource.Select(x => x.GroupBy(y => x.Key).AsQueryable());
             report.Build();
             report.WriteToConsole();
 
