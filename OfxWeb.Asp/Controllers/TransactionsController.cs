@@ -1242,7 +1242,7 @@ namespace OfxWeb.Asp.Controllers
                 result.SeriesQuerySource = serieslistall;
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
-                result.Name = "Expenses vs. Budget";
+                result.Name = "All vs. Budget";
             }
             else if (id == "budget")
             {
@@ -1250,7 +1250,7 @@ namespace OfxWeb.Asp.Controllers
                 result.SingleSource = budgettxs.AsQueryable<IReportable>();
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Description = $"For {Year}";
-                result.Name = "Complete Budget";
+                result.Name = "Full Budget";
             }
 
             if (level.HasValue)
