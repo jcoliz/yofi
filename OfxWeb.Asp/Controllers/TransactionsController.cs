@@ -1119,7 +1119,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Report
-        public async Task<IActionResult> Report(string id, int? month, int? weekspct, int? setyear, bool? download)
+        public async Task<IActionResult> Report(string id, int? month, int? weekspct, int? setyear, bool? download, int? level, bool? showmonths)
         {
             Report result = new Report();
 
@@ -1177,26 +1177,10 @@ namespace OfxWeb.Asp.Controllers
             if (id == "all")
             {
                 result.WithMonthColumns = true;
-                result.NumLevels = 3;
-                result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
-                result.Name = "All Transactions";
-            }
-            else if (id == "deep")
-            {
-                result.WithMonthColumns = true;
-                result.NumLevels = 4;
-                result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
-                result.SortOrder = Helpers.Report.SortOrders.NameAscending;
-                result.Name = "All Transactions (Deep)";
-            }
-            else if (id == "summary")
-            {
-                result.WithMonthColumns = true;
                 result.NumLevels = 2;
                 result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
-                result.Name = "All Transactions (Summary)";
+                result.Name = "All Transactions";
             }
             else if (id == "income")
             {
@@ -1231,19 +1215,13 @@ namespace OfxWeb.Asp.Controllers
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Savings";
             }
-            else if (id == "expenses-summary")
+            else if (id == "expenses")
             {
+                result.WithMonthColumns = true;
                 result.SingleSource = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
-                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.NumLevels = 2;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
-                result.Name = "Expenses Top-Level";
-            }
-            else if (id == "expenses-detail")
-            {
-                result.SingleSource = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
-                result.NumLevels = 3;
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
-                result.Name = "Expenses Detail";
+                result.Name = "Expenses";
             }
             else if (id == "expenses-budget")
             {
@@ -1274,6 +1252,21 @@ namespace OfxWeb.Asp.Controllers
                 result.Description = $"For {Year}";
                 result.Name = "Complete Budget";
             }
+
+            if (level.HasValue)
+            {
+                result.NumLevels = level.Value;
+                if (result.NumLevels == 1)
+                    result.DisplayLevelAdjustment = 1;
+            }
+
+            if (showmonths.HasValue)
+            {
+                result.WithMonthColumns = showmonths.Value;
+            }
+
+            ViewData["level"] = result.NumLevels;
+            ViewData["showmonths"] = result.WithMonthColumns;
 
             result.Build();
             result.WriteToConsole();

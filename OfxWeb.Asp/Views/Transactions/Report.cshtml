@@ -41,14 +41,11 @@
 
 <div style="margin-bottom:15px; background-color: lightgray">
     <a asp-action="Report" asp-route-id="all" class="btn btn-default">All</a> |
-    <a asp-action="Report" asp-route-id="deep" class="btn btn-default">All Deep</a> |
-    <a asp-action="Report" asp-route-id="summary" class="btn btn-default">All Summary</a> |
-    <a asp-action="Report" asp-route-id="expenses-detail" class="btn btn-default">Expenses Detail</a> |
+    <a asp-action="Report" asp-route-id="expenses" class="btn btn-default">Expenses</a> |
     <a asp-action="Report" asp-route-id="income" class="btn btn-default">Income</a> |
     <a asp-action="Report" asp-route-id="taxes" class="btn btn-default">Taxes</a> |
     <a asp-action="Report" asp-route-id="savings" class="btn btn-default">Savings</a> |
-    <a asp-action="Report" asp-route-id="expenses-summary" class="btn btn-default">Expenses Summary</a> |
-    <a asp-action="Report" asp-route-id="budget" class="btn btn-default">Complete Budget</a> |
+    <a asp-action="Report" asp-route-id="budget" class="btn btn-default">Full Budget</a> |
     <a asp-action="Report" asp-route-id="expenses-budget" class="btn btn-default">Expenses Budget</a> |
     <a asp-action="Report" asp-route-id="all-v-budget" class="btn btn-default">All v Budget</a> |
     <a asp-action="Report" asp-route-id="expenses-v-budget" class="btn btn-default">Expenses v Budget</a> |
@@ -56,6 +53,29 @@
 
 </div>
 
+<div class="dropdown" style="float:right; margin: 4px">
+    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Depth
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+        @{
+            for (i = 1; i <= 4; i++)
+            {
+                <a asp-action="Report" asp-route-id="@report" asp-route-level="@i" asp-route-showmonths="@ViewData["showmonths"]" class="dropdown-item">@i-Level</a>
+            }
+        }
+    </div>
+</div>
+<div class="dropdown" style="float:right; margin: 4px">
+    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Show Months
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="true" class="dropdown-item">Show</a>
+        <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="false" class="dropdown-item">Hide</a>
+    </div>
+</div>
 <h2>
     @Model.Name
 </h2>
@@ -65,6 +85,7 @@
         @Model.Description
     </h3>
 }
+
 
 <table class="table report">
     <thead>
@@ -82,7 +103,7 @@
     <tbody>
         @foreach (var row in Model.RowLabelsOrdered)
         {
-            var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level+Model.DisplayLevelAdjustment}";
+            var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level + Model.DisplayLevelAdjustment}";
             <tr class="@rowformat">
 
                 <td class="report-col-name">
