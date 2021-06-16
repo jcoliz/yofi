@@ -170,7 +170,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             int result = 0;
             var n = new RowLabel() { Name = "null" };
 
-            Debug.WriteLine($"Compare [{x??n}] vs [{y??n}]");
+            //Debug.WriteLine($"Compare [{x??n}] vs [{y??n}]");
 
             // (1) Total rows always come after other rows
             if (x.IsTotal && y.IsTotal)
@@ -191,7 +191,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 var yval = base[TotalColumn, y as RowLabel];
                 var xval = base[TotalColumn, x as RowLabel];
-                Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
+                //Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
                 result = base[TotalColumn, y as RowLabel].CompareTo(base[TotalColumn, x as RowLabel]);
                 goto done;
             }
@@ -200,13 +200,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             if (x.Parent == y)
             {
-                Debug.WriteLine("Parent relationship");
+                //Debug.WriteLine("Parent relationship");
                 result = 1;
                 goto done;
             }
             if (y.Parent == x)
             {
-                Debug.WriteLine("Parent relationship");
+                //Debug.WriteLine("Parent relationship");
                 result = -1;
                 goto done;
             }
@@ -216,14 +216,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
             // If one is deeper than the other, run up that parent chain
             if (x.Level < y.Level)
             {
-                Debug.WriteLine($"Try {x} Parent vs {y}");
+                //Debug.WriteLine($"Try {x} Parent vs {y}");
                 result = ((IComparer<RowLabel>)this).Compare(x.Parent as RowLabel, y);
                 if (result != 0)
                     goto done;
             }
             else if (y.Level < x.Level)
             {
-                Debug.WriteLine($"Try {x} vs {y} Parent");
+                //Debug.WriteLine($"Try {x} vs {y} Parent");
                 result = ((IComparer<RowLabel>)this).Compare(x, y.Parent as RowLabel);
                 if (result != 0)
                     goto done;
@@ -231,22 +231,24 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else
             {
                 // If we're at the SAME level, run both parents upwards
-                Debug.WriteLine($"Try {x} Parent vs {y} Parent");
+                //Debug.WriteLine($"Try {x} Parent vs {y} Parent");
                 result = ((IComparer<RowLabel>)this).Compare(x.Parent as RowLabel, y.Parent as RowLabel);
                 if (result != 0)
                     goto done;
             }
 
-            Debug.WriteLine($"??? Unable to resolve");
+            //Debug.WriteLine($"??? Unable to resolve");
 
         done:
 
+            /*
             if (result < 0)
                 Debug.WriteLine($">> {x??n} is before {y??n}");
             else if (result > 0)
                 Debug.WriteLine($">> {x??n} is after {y??n}");
             else
                 Debug.WriteLine($">> {x??n} is same as {y??n}");
+            */
 
             return result;
         }

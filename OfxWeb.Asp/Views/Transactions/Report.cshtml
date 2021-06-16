@@ -76,7 +76,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var row in Model.RowLabels)
+        @foreach (var row in Model.RowLabelsOrdered)
         {
             var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level+Model.DisplayLevelAdjustment}";
             <tr class="@rowformat">
