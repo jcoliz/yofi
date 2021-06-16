@@ -1235,6 +1235,7 @@ namespace OfxWeb.Asp.Controllers
             else if (id == "expenses-v-budget")
             {
                 result.SeriesQuerySource = serieslistexpenses;
+                result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses vs. Budget";
@@ -1242,6 +1243,7 @@ namespace OfxWeb.Asp.Controllers
             else if (id == "all-v-budget")
             {
                 result.SeriesQuerySource = serieslistall;
+                result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "All vs. Budget";

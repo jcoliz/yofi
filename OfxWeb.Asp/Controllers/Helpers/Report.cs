@@ -14,6 +14,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public bool WithMonthColumns { get; set; } = false;
 
+        public bool WithTotalColumn { get; set; } = true;
+
         public string Name { get; set; } = "Report";
 
         public string Description { get; set; }
@@ -38,6 +40,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
         public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
 
         public IEnumerable<RowLabel> RowLabelsOrdered => base.RowLabels.OrderBy(x => x, this);
+
+        public IEnumerable<ColumnLabel> ColumnLabelsFiltered => base.ColumnLabels.Where(x=>WithTotalColumn || !x.IsTotal);
+
+        public ColumnLabel OrderingColumn => WithTotalColumn ? TotalColumn : base.ColumnLabels.SkipLast(1).Last();
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,
@@ -132,7 +138,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var padding = String.Concat(Enumerable.Repeat<char>(' ', maxlevel));
             builder.Append($"+ {name,15}{padding} ");
 
-            foreach (var col in ColumnLabels)
+            foreach (var col in ColumnLabelsFiltered)
             {
                 name = col.Name;
                 if (col.IsTotal)
@@ -160,7 +166,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                 builder.Append($"{line.Level} {padding_before}{name,-15}{padding_after} ");
 
-                foreach (var col in ColumnLabels)
+                foreach (var col in ColumnLabelsFiltered)
                 {
                     var val = this[col, line];
                     builder.Append($"| {val,10:C2} ");
@@ -204,17 +210,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
             // (2) If these two share a common parent, we can compare based on SortOrder
             if (x.Parent == y.Parent)
             {
-                var yval = base[TotalColumn, y as RowLabel];
-                var xval = base[TotalColumn, x as RowLabel];
+                var yval = base[OrderingColumn, y as RowLabel];
+                var xval = base[OrderingColumn, x as RowLabel];
                 switch (SortOrder)
                 {
                     case SortOrders.TotalAscending:
                         //Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
-                        result = base[TotalColumn, y as RowLabel].CompareTo(base[TotalColumn, x as RowLabel]);
+                        result = yval.CompareTo(xval);
                         break;
                     case SortOrders.TotalDescending:
                         //Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
-                        result = base[TotalColumn, x as RowLabel].CompareTo(base[TotalColumn, y as RowLabel]);
+                        result = xval.CompareTo(yval);
                         break;
                     case SortOrders.NameAscending:
                         result = x.Name?.CompareTo(y.Name) ?? -1;

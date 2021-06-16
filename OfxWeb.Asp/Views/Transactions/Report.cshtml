@@ -92,7 +92,7 @@
         <tr>
         <tr class="report-header">
             <th>@Model.Name</th>
-            @foreach (var column in Model.ColumnLabels)
+            @foreach (var column in Model.ColumnLabelsFiltered)
             {
                 <th>
                     @(column.IsTotal ? "TOTAL" : column.Name)
@@ -122,7 +122,7 @@
                     @name
                 </td>
 
-                @foreach (var column in Model.ColumnLabels)
+                @foreach (var column in Model.ColumnLabelsFiltered)
                 {
                     var cell = Model[column, row];
 
