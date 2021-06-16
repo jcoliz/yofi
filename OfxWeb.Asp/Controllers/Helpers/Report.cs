@@ -24,6 +24,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public int DisplayLevelAdjustment { get; set; }
 
+        public enum SortOrders { NameAscending, TotalAscending, TotalDescending };
+
+        public SortOrders SortOrder { get; set; } = SortOrders.TotalDescending;
+
         public IQueryable<IReportable> SingleSource { get; set; }
 
         public IEnumerable<IGrouping<string, IReportable>> SeriesSource { get; set; }
@@ -186,13 +190,25 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 goto done;
             }
 
-            // (2) If these two share a common parent, we can compare based on totals
+            // (2) If these two share a common parent, we can compare based on SortOrder
             if (x.Parent == y.Parent)
             {
                 var yval = base[TotalColumn, y as RowLabel];
                 var xval = base[TotalColumn, x as RowLabel];
-                //Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
-                result = base[TotalColumn, y as RowLabel].CompareTo(base[TotalColumn, x as RowLabel]);
+                switch (SortOrder)
+                {
+                    case SortOrders.TotalAscending:
+                        //Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
+                        result = base[TotalColumn, y as RowLabel].CompareTo(base[TotalColumn, x as RowLabel]);
+                        break;
+                    case SortOrders.TotalDescending:
+                        //Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
+                        result = base[TotalColumn, x as RowLabel].CompareTo(base[TotalColumn, y as RowLabel]);
+                        break;
+                    case SortOrders.NameAscending:
+                        result = x.Name?.CompareTo(y.Name) ?? -1;
+                        break;
+                }
                 goto done;
             }
 

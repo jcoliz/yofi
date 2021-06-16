@@ -1160,6 +1160,7 @@ namespace OfxWeb.Asp.Controllers
                 result.WithMonthColumns = true;
                 result.NumLevels = 3;
                 result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "All Transactions";
             }
             else if (id == "deep")
@@ -1167,6 +1168,7 @@ namespace OfxWeb.Asp.Controllers
                 result.WithMonthColumns = true;
                 result.NumLevels = 4;
                 result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
+                result.SortOrder = Helpers.Report.SortOrders.NameAscending;
                 result.Name = "All Transactions (Deep)";
             }
             else if (id == "income")
@@ -1177,6 +1179,7 @@ namespace OfxWeb.Asp.Controllers
                 result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
                 result.FromLevel = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
                 result.Name = "Income";
             }
 

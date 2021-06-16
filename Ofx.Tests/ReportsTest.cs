@@ -173,6 +173,7 @@ namespace Ofx.Tests
         public void SimpleSorted()
         {
             report.SingleSource = Items.Skip(3).Take(6).AsQueryable();
+            report.SortOrder = Report.SortOrders.TotalAscending;
             report.Build();
             report.WriteToConsole(sorted:true);
 
@@ -217,6 +218,7 @@ namespace Ofx.Tests
         {
             report.SingleSource = Items.Skip(9).Take(6).AsQueryable();
             report.NumLevels = 2;
+            report.SortOrder = Report.SortOrders.TotalAscending;
             report.Build();
             report.WriteToConsole(sorted: true);
 
@@ -256,6 +258,7 @@ namespace Ofx.Tests
         {
             report.SingleSource = Items.Take(24).AsQueryable();
             report.NumLevels = 2;
+            report.SortOrder = Report.SortOrders.TotalAscending;
             report.Build();
             report.WriteToConsole(sorted:true);
 
@@ -273,6 +276,7 @@ namespace Ofx.Tests
         {
             report.SingleSource = Items.Take(25).AsQueryable();
             report.NumLevels = 3;
+            report.SortOrder = Report.SortOrders.TotalAscending;
             report.Build();
             report.WriteToConsole(sorted: true);
 
