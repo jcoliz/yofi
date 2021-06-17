@@ -43,7 +43,23 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public IEnumerable<ColumnLabel> ColumnLabelsFiltered => base.ColumnLabels.Where(x=>WithTotalColumn || !x.IsTotal);
 
-        public ColumnLabel OrderingColumn => WithTotalColumn ? TotalColumn : base.ColumnLabels.SkipLast(1).Last();
+        public ColumnLabel OrderingColumn
+        {
+            get
+            {
+                if (_OrderingColumn != null)
+                    return _OrderingColumn;
+                if (WithTotalColumn)
+                    return TotalColumn;
+
+                return ColumnLabels.First();
+            }
+            set
+            {
+                _OrderingColumn = value;
+            }
+        }
+        ColumnLabel _OrderingColumn;
 
         public new decimal this[ColumnLabel collabel, RowLabel rowlabel]
         {
@@ -103,6 +119,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     var token = group.Key;
                     var newpath = parent == null ? token : $"{parent.UniqueID}:{token}";
                     var row = new RowLabel() { Name = token, Level = numlevels - 1, UniqueID = newpath, Parent = parent };
+
+                    // Bug 900: Rows out of order on multi-series deep lists
+                    if (RowLabels.Contains(row))
+                        row = RowLabels.Single(x => x.Equals(row));
 
                     var sum = group.Sum(x => x.Amount);
                     base[TotalColumn, row] += sum;
