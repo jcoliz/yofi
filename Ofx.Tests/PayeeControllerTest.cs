@@ -9,6 +9,8 @@ using Common.AspNetCore.Test;
 using OfxWeb.Asp.Data;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
+using OfficeOpenXml;
 
 namespace Ofx.Tests
 {
@@ -143,6 +145,35 @@ namespace Ofx.Tests
             Assert.AreEqual(tx.Payee, model.Name);
             Assert.AreEqual(tx.Category, model.Category);
             Assert.AreEqual(tx.SubCategory, model.SubCategory);
+        }
+
+        [TestMethod]
+        public async Task DownloadMapped()
+        {
+            var map = new CategoryMap() { Category = "Food", Key1 = "A", Key2 = "B" };
+            context.CategoryMaps.Add(map);
+
+            var item = new Payee() { Category = "Food", SubCategory = "Stuff", Name = "3" };
+            context.Payees.Add(item);
+
+            context.SaveChanges();
+
+            var result = await controller.Download(mapped:true);
+            var fcresult = result as FileContentResult;
+            var data = fcresult.FileContents;
+
+            var incoming = new HashSet<Transaction>();
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var sheetname = $"{typeof(Payee).Name}s";
+                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
+                worksheet.ExtractInto(incoming, includeids: true);
+            }
+
+            Assert.AreEqual(1, incoming.Count);
+            Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
         }
 
         // TODO: Upload duplicate where ONLY the NAME is the same

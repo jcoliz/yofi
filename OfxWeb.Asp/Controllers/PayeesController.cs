@@ -289,13 +289,20 @@ namespace OfxWeb.Asp
 
         // GET: Payees/Download
         [ActionName("Download")]
-        public async Task<IActionResult> Download()
+        public async Task<IActionResult> Download(bool? mapped = false)
         {
             const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             try
             {
                 var objecttype = "Payees";
                 var lines = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync();
+
+                if (mapped ?? false)
+                {
+                    var maptable = new CategoryMapper(_context.CategoryMaps);
+                    foreach (var item in lines)
+                        maptable.MapObject(item);
+                }
 
                 byte[] reportBytes;
                 using (var package = new ExcelPackage())
@@ -329,6 +336,7 @@ namespace OfxWeb.Asp
             return _context.Payees.Any(e => e.ID == id);
         }
 
+        Task<IActionResult> IController<Payee>.Download() => Download(false);
     }
 
     class PayeeNameComparer : IEqualityComparer<Models.Payee>
