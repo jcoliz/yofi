@@ -640,5 +640,32 @@ namespace Ofx.Tests
             }
         }
 
+        [TestMethod]
+        public async Task Key3and4ShowInReportFromCategory()
+        {
+            // User Story 874: Automatically split key3 out of category if enough separators
+
+            var year = DateTime.Now.Year;
+
+            var items = new List<Transaction>();
+            items.Add(new Transaction() { Timestamp = new System.DateTime(year, 06, 01), Category = "A:B:C", Amount = 100m });
+            items.Add(new Transaction() { Timestamp = new System.DateTime(year, 06, 01), Category = "A:B:C:D", Amount = 200m });
+
+            context.Transactions.AddRange(items);
+
+            await context.SaveChangesAsync();
+
+            var actionresult = await controller.Report("summary", year, null, null);
+            var okresult = actionresult as OkObjectResult;
+            var report = okresult.Value as ApiSummaryReportResult;
+
+            Console.WriteLine(report);
+
+            foreach (var expected in items)
+            {
+                var actual = report.Lines.Where(x => x.Keys == expected.Category).Single();
+                Assert.AreEqual(expected.Amount, actual.Amount);
+            }
+        }
     }
 }

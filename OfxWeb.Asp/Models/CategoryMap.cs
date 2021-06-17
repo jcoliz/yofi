@@ -44,6 +44,12 @@ namespace OfxWeb.Asp.Models
                 result.Key2 = split[1];
                 result.Key3 = "^([^\\:]*)";
                 result.Key4 = "^[^\\:]*\\:([^\\:]+)";
+
+                // User Story 874: Automatically split key3 out of category if enough separators
+                if (split.Count() >= 3)
+                    result.Key3 = split[2];
+                if (split.Count() >= 4)
+                    result.Key4 = split[3];
             }
 
             return result;
@@ -56,12 +62,13 @@ namespace OfxWeb.Asp.Models
                    SubCategory == map.SubCategory &&
                    Key1 == map.Key1 &&
                    Key2 == map.Key2 &&
-                   Key3 == map.Key3;
+                   Key3 == map.Key3 &&
+                   Key4 == map.Key4; ;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Category, SubCategory, Key1, Key2, Key3);
+            return HashCode.Combine(Category, SubCategory, Key1, Key2, Key3, Key4);
         }
     }
 
@@ -171,12 +178,24 @@ namespace OfxWeb.Asp.Models
                 else
                     result[2] = map.Key3;
 
-                if (!string.IsNullOrEmpty(map.Key4) && !string.IsNullOrEmpty(SubCategory))
+                if (!string.IsNullOrEmpty(map.Key4))
                 {
-                    var re = new Regex(map.Key4);
-                    var match = re.Match(SubCategory);
-                    if (match.Success && match.Groups.Count > 1)
-                        result[3] = match.Groups[1].Value;
+                    if ("-" == map.Key4 || skipkey3)
+                    {
+                        // Key4 remains blank
+                    }
+                    else if (map.Key4.StartsWith('^'))
+                    {
+                        if (!string.IsNullOrEmpty(SubCategory))
+                        {
+                            var re = new Regex(map.Key4);
+                            var match = re.Match(SubCategory);
+                            if (match.Success && match.Groups.Count > 1)
+                                result[3] = match.Groups[1].Value;
+                        }
+                    }
+                    else
+                        result[3] = map.Key4;
                 }
             }
 

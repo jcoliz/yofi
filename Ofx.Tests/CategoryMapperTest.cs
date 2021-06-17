@@ -52,6 +52,8 @@ namespace Ofx.Tests
         [DataRow("X:Y", null, "X:Y::")]
         [DataRow("X:Y", "Z", "X:Y:Z:")]
         [DataRow("X:Y", "Z:R", "X:Y:Z:R")]
+        [DataRow("X:Y:Z", null, "X:Y:Z:")]
+        [DataRow("X:Y:Z:R", null, "X:Y:Z:R")]
         [DataTestMethod]
         public void MapCatSubcat(string category, string subcategory, string expected)
         {
@@ -84,6 +86,8 @@ namespace Ofx.Tests
         [DataRow("X:Y", null, "X:Y")]
         [DataRow("X:Y", "Z", "X:Y:Z")]
         [DataRow("X:Y", "Z:R", "X:Y:Z:R")]
+        [DataRow("X:Y:Z", null, "X:Y:Z")]
+        [DataRow("X:Y:Z:R", null, "X:Y:Z:R")]
         [DataTestMethod]
 
         public void MapTransaction(string category, string subcategory, string expected)
