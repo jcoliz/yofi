@@ -9,40 +9,103 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Controllers.Helpers
 {
+    /// <summary>
+    /// Table-based report: Arranges IReportable items into tables
+    /// </summary>
+    /// <remarks>
+    /// General usage: 
+    /// 1. Set the Source
+    /// 2. Set any needed configuration properties
+    /// 3. Build the report
+    /// 4. Iterate over rows/columns to display the report
+    /// </remarks>
     public class Report : Table<ColumnLabel, RowLabel, decimal>, IComparer<RowLabel>
     {
+        #region Configuration Properties
 
-        public bool WithMonthColumns { get; set; } = false;
-
-        public bool WithTotalColumn { get; set; } = true;
-
+        /// <summary>
+        /// Display name of the report
+        /// </summary>
         public string Name { get; set; } = "Report";
 
+        /// <summary>
+        /// In-depth description of the report for display
+        /// </summary>
         public string Description { get; set; }
 
-        public int FromLevel { get; set; }
-
-        public int NumLevels { get; set; } = 1;
-
-        public int DisplayLevelAdjustment { get; set; }
-
-        public enum SortOrders { NameAscending, TotalAscending, TotalDescending };
-
-        public SortOrders SortOrder { get; set; } = SortOrders.TotalDescending;
-
+        /// <summary>
+        /// Single sources of items
+        /// </summary>
+        /// <remarks>
+        /// Must set at least one source of data
+        /// </remarks>
         public IQueryable<IReportable> SingleSource { get; set; }
 
+        /// <summary>
+        /// Multiple sources of items
+        /// </summary>
+        /// <remarks>
+        /// Must set at least one source of data
+        /// </remarks>
         public IEnumerable<IGrouping<string, IReportable>> SeriesSource { get; set; }
 
+        /// <summary>
+        /// Multiple sources of items (IQueryable)
+        /// </summary>
+        /// <remarks>
+        /// Must set at least one source of data
+        /// </remarks>
         public IEnumerable<IQueryable<IGrouping<string, IReportable>>> SeriesQuerySource { get; set; }
 
-        public RowLabel TotalRow { get; }  = new RowLabel() { IsTotal = true };
-        public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
+        /// <summary>
+        /// Whether to include columns for individual months
+        /// </summary>
+        public bool WithMonthColumns { get; set; } = false;
 
-        public IEnumerable<RowLabel> RowLabelsOrdered => base.RowLabels.OrderBy(x => x, this);
+        /// <summary>
+        /// Whether to include a total column
+        /// </summary>
+        public bool WithTotalColumn { get; set; } = true;
 
-        public IEnumerable<ColumnLabel> ColumnLabelsFiltered => base.ColumnLabels.Where(x=>WithTotalColumn || !x.IsTotal);
+        /// <summary>
+        /// How deep into the tree to start showing, where 0 is the top level,
+        /// 1 is the 2nd level down
+        /// </summary>
+        public int FromLevel { get; set; }
 
+        /// <summary>
+        /// How many levels deep to include
+        /// </summary>
+        public int NumLevels { get; set; } = 1;
+
+        /// <summary>
+        /// When displaying the report, how many levels higher to show as
+        /// </summary>
+        /// <remarks>
+        /// Typically the lowest-level of display formatting doesn't look great on its
+        /// own, so when NumLevels is 1, it's good to set DisplayLevelAdjustment to 1
+        /// and make it look like a heading.
+        /// </remarks>
+        public int DisplayLevelAdjustment { get; set; }
+
+        /// <summary>
+        /// All the possible ways you can sort the report
+        /// </summary>
+        public enum SortOrders { NameAscending, TotalAscending, TotalDescending };
+
+        /// <summary>
+        /// In what order should the report be sorted
+        /// </summary>
+        public SortOrders SortOrder { get; set; } = SortOrders.TotalDescending;
+
+        /// <summary>
+        /// Which column to use for ordering when SortOrder is set to TotalAscending or 
+        /// TotalDescending. 
+        /// </summary>
+        /// <remarks>
+        /// By default TotalColumn is used, unless it isn't being shown, in which case the
+        /// first column is used
+        /// </remarks>
         public ColumnLabel OrderingColumn
         {
             get
@@ -61,6 +124,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
         }
         ColumnLabel _OrderingColumn;
 
+        #endregion
+
+        #region Informative Properties
+
+        /// <summary>
+        /// Indexer to retrieve report cells
+        /// </summary>
+        /// <param name="collabel">Which column</param>
+        /// <param name="rowlabel">Which row</param>
+        /// <returns>Value at that column,row position </returns>
         public new decimal this[ColumnLabel collabel, RowLabel rowlabel]
         {
             get
@@ -72,17 +145,47 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
         }
 
-        Dictionary<string,decimal> RowDetails(RowLabel rowLabel) => ColumnLabels.ToDictionary(x => x.ToString(), x => base[x, rowLabel]);
+        /// <summary>
+        /// All the row labels, in the correct order as specified by SortOrder
+        /// </summary>
+        public IEnumerable<RowLabel> RowLabelsOrdered => base.RowLabels.OrderBy(x => x, this);
 
         /// <summary>
-        /// This will build a one-level report with no columns, just totals,
-        /// headings as first-level categories, rows as second-level categories
+        /// All the column labels which should be shown, as modified by configuration properties
         /// </summary>
-        /// <remarks>
-        /// e.g. Transactions where category is X:A:C or X:A:B will all be lumped on X:A.
-        /// </remarks>
-        /// <param name="items"></param>
+        public IEnumerable<ColumnLabel> ColumnLabelsFiltered => base.ColumnLabels.Where(x => WithTotalColumn || !x.IsTotal);
 
+        /// <summary>
+        /// The row which contains the total for columns
+        /// </summary>
+        public RowLabel TotalRow { get; } = new RowLabel() { IsTotal = true };
+
+        /// <summary>
+        /// The column which contains the total for rows
+        /// </summary>
+        public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Add a custom calculated column 
+        /// </summary>
+        /// <param name="column"></param>
+        public void AddCustomColumn(ColumnLabel column)
+        {
+            if (column.Custom == null)
+                throw new ArgumentOutOfRangeException(nameof(column), "Column must contain a custom function");
+
+            column.IsCalculated = true;
+            column.IsTotal = false;
+            base._ColumnLabels.Add(column);
+        }
+
+        /// <summary>
+        /// Build the report
+        /// </summary>
         public void Build()
         {
             if (NumLevels < 1)
@@ -108,65 +211,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
             CalculateTotalRow(NumLevels - 1);
         }
 
-        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int numlevels, RowLabel parent, ColumnLabel seriescolumn = null)
-        {
-            var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
-
-            if (groups.Count() > 1 || groups.Single().Key != null) // Skip empty sub-levels
-            {
-                foreach (var group in groups)
-                {
-                    var token = group.Key;
-                    var newpath = parent == null ? token : $"{parent.UniqueID}:{token}";
-                    var row = new RowLabel() { Name = token, Level = numlevels - 1, UniqueID = newpath, Parent = parent };
-
-                    // Bug 900: Rows out of order on multi-series deep lists
-                    if (RowLabels.Contains(row))
-                        row = RowLabels.Single(x => x.Equals(row));
-
-                    var sum = group.Sum(x => x.Amount);
-                    base[TotalColumn, row] += sum;
-                    if (seriescolumn != null)
-                        base[seriescolumn, row] += sum;
-
-                    if (WithMonthColumns)
-                        foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
-                        {
-                            var month = monthgroup.Key;
-                            var column = new ColumnLabel() { UniqueID = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
-                            if (seriescolumn != null)
-                            {
-                                column.UniqueID += ":" + seriescolumn.Name;
-                                column.Name += " " + seriescolumn.Name;
-                            }
-                            base[column, row] = monthgroup.Sum(x => x.Amount);
-                        }
-
-                    // Build next level down
-                    if (numlevels > 1 && token != null)
-                        BuildInternal(group.AsQueryable(), fromlevel + 1, numlevels - 1, row, seriescolumn);
-                }
-            }
-        }
-
-        void CalculateTotalRow(int usinglevel)
-        {
-            // Calculate column totals from top-level headings
-            foreach (var row in base.RowLabels.Where(x => x.Level == usinglevel))
-                foreach (var col in base.ColumnLabels)
-                    base[col, TotalRow] += base[col, row];
-        }
-
-        public void AddCustomColumn(ColumnLabel column)
-        {
-            if (column.Custom == null)
-                throw new ArgumentOutOfRangeException(nameof(column), "Column must contain a custom function");
-
-            column.IsCalculated = true;
-            column.IsTotal = false;
-            base._ColumnLabels.Add(column);
-        }
-
+        /// <summary>
+        /// Render the report to console
+        /// </summary>
+        /// <param name="sorted">Whether to show rows in sorted order</param>
         public void WriteToConsole(bool sorted = false)
         {
             if (!RowLabels.Any())
@@ -220,6 +268,84 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
         }
 
+        #endregion
+
+        #region Internal Methods
+
+        /// <summary>
+        /// Build the report.
+        /// </summary>
+        /// <remarks>
+        /// This is the heart of this class.
+        /// </remarks>
+        /// <param name="items">Which items to build into the report</param>
+        /// <param name="fromlevel">How many levels deep into the source data do these items start at</param>
+        /// <param name="numlevels">How many further levels do render build into the report</param>
+        /// <param name="parent">The row which will be the parent of all the rows generated by this call</param>
+        /// <param name="seriescolumn">If we're coming from an individual series, where do we accumulate the series total</param>
+        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int numlevels, RowLabel parent, ColumnLabel seriescolumn = null)
+        {
+            var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
+
+            if (groups.Count() > 1 || groups.Single().Key != null) // Skip empty sub-levels
+            {
+                foreach (var group in groups)
+                {
+                    var token = group.Key;
+                    var newpath = parent == null ? token : $"{parent.UniqueID}:{token}";
+                    var row = new RowLabel() { Name = token, Level = numlevels - 1, UniqueID = newpath, Parent = parent };
+
+                    // Bug 900: Rows out of order on multi-series deep lists
+                    if (RowLabels.Contains(row))
+                        row = RowLabels.Single(x => x.Equals(row));
+
+                    var sum = group.Sum(x => x.Amount);
+                    base[TotalColumn, row] += sum;
+                    if (seriescolumn != null)
+                        base[seriescolumn, row] += sum;
+
+                    if (WithMonthColumns)
+                        foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
+                        {
+                            var month = monthgroup.Key;
+                            var column = new ColumnLabel() { UniqueID = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
+                            if (seriescolumn != null)
+                            {
+                                column.UniqueID += ":" + seriescolumn.Name;
+                                column.Name += " " + seriescolumn.Name;
+                            }
+                            base[column, row] = monthgroup.Sum(x => x.Amount);
+                        }
+
+                    // Build next level down
+                    if (numlevels > 1 && token != null)
+                        BuildInternal(group.AsQueryable(), fromlevel + 1, numlevels - 1, row, seriescolumn);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Calculate the total row, from all the columns above
+        /// </summary>
+        /// <remarks>
+        /// We are only totally up the top-level rows, because all the lower-level rows
+        /// are accumlated into the top-level rows
+        /// </remarks>
+        /// <param name="usinglevel">What level are the top-levels at</param>
+        void CalculateTotalRow(int usinglevel)
+        {
+            foreach (var row in base.RowLabels.Where(x => x.Level == usinglevel))
+                foreach (var col in base.ColumnLabels)
+                    base[col, TotalRow] += base[col, row];
+        }
+
+        /// <summary>
+        /// Retrieve all the columns for a certain row in a focused way
+        /// </summary>
+        /// <param name="rowLabel">Which row</param>
+        /// <returns>Dictionary of column identifier strings to the value in that column</returns>
+        Dictionary<string, decimal> RowDetails(RowLabel rowLabel) => ColumnLabels.ToDictionary(x => x.ToString(), x => base[x, rowLabel]);
+
         static string GetTokenByIndex(string category, int index)
         {
             var split = category.Split(':');
@@ -230,12 +356,24 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 return split[index];
         }
 
+        /// <summary>
+        /// Row comparer
+        /// </summary>
+        /// <remarks>
+        /// This is the row-sorter. It's somewhat of a challenge to sort a tree of values to sort
+        /// within each level but keep the tree sructure intact
+        /// </remarks>
+        /// <param name="x">First row for comparison</param>
+        /// <param name="y">Second row for comparison</param>
+        /// <returns>Comparsion value. -1 if first row sorts before second row</returns>
         int IComparer<RowLabel>.Compare(RowLabel x, RowLabel y)
         {
             int result = 0;
             var n = new RowLabel() { Name = "null" };
 
-            //Debug.WriteLine($"Compare [{x??n}] vs [{y??n}]");
+            // Turn this on if need to trace the sort logic
+            bool debugout = false;
+            Debug.WriteLineIf(debugout,$"Compare [{x??n}] vs [{y??n}]");
 
             // (1) Total rows always come after other rows
             if (x.IsTotal && y.IsTotal)
@@ -259,11 +397,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 switch (SortOrder)
                 {
                     case SortOrders.TotalAscending:
-                        //Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
+                        Debug.WriteLineIf(debugout, $"Checking Totals: {xval:C2} vs {yval:C2}...");
                         result = yval.CompareTo(xval);
                         break;
                     case SortOrders.TotalDescending:
-                        //Debug.WriteLine($"Checking Totals: {xval:C2} vs {yval:C2}...");
+                        Debug.WriteLineIf(debugout, $"Checking Totals: {xval:C2} vs {yval:C2}...");
                         result = xval.CompareTo(yval);
                         break;
                     case SortOrders.NameAscending:
@@ -277,61 +415,59 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             if (x.Parent == y)
             {
-                //Debug.WriteLine("Parent relationship");
+                Debug.WriteLineIf(debugout, "Parent relationship");
                 result = 1;
                 goto done;
             }
-            if (y.Parent == x)
+            else if (y.Parent == x)
             {
-                //Debug.WriteLine("Parent relationship");
+                Debug.WriteLineIf(debugout, "Parent relationship");
                 result = -1;
                 goto done;
             }
 
-            // We need to start searching upward
+            // (4) Search upward if can't resolve at this level
 
             // If one is deeper than the other, run up that parent chain
             if (x.Level < y.Level)
             {
-                //Debug.WriteLine($"Try {x} Parent vs {y}");
+                Debug.WriteLineIf(debugout, $"Try {x} Parent vs {y}");
                 result = ((IComparer<RowLabel>)this).Compare(x.Parent as RowLabel, y);
-                if (result != 0)
-                    goto done;
             }
             else if (y.Level < x.Level)
             {
-                //Debug.WriteLine($"Try {x} vs {y} Parent");
+                Debug.WriteLineIf(debugout, $"Try {x} vs {y} Parent");
                 result = ((IComparer<RowLabel>)this).Compare(x, y.Parent as RowLabel);
-                if (result != 0)
-                    goto done;
             }
             else
             {
                 // If we're at the SAME level, run both parents upwards
-                //Debug.WriteLine($"Try {x} Parent vs {y} Parent");
+                Debug.WriteLineIf(debugout, $"Try {x} Parent vs {y} Parent");
                 result = ((IComparer<RowLabel>)this).Compare(x.Parent as RowLabel, y.Parent as RowLabel);
-                if (result != 0)
-                    goto done;
             }
 
-            //Debug.WriteLine($"??? Unable to resolve");
+            if (result == 0)
+                Debug.WriteLineIf(debugout, $"??? Unable to resolve");
 
         done:
 
-            /*
             if (result < 0)
-                Debug.WriteLine($">> {x??n} is before {y??n}");
+                Debug.WriteLineIf(debugout, $">> {x??n} is before {y??n}");
             else if (result > 0)
-                Debug.WriteLine($">> {x??n} is after {y??n}");
+                Debug.WriteLineIf(debugout, $">> {x??n} is after {y??n}");
             else
-                Debug.WriteLine($">> {x??n} is same as {y??n}");
-            */
+                Debug.WriteLineIf(debugout, $">> {x??n} is same as {y??n}");
 
             return result;
         }
+
+        #endregion
     }
 
-    public class BaseLabel: IComparable<BaseLabel>
+    /// <summary>
+    /// Common elements which are shared by both rows and columns
+    /// </summary>
+    public abstract class BaseLabel: IComparable<BaseLabel>
     {
         /// <summary>
         /// Tag to uniquely identify the column
@@ -356,6 +492,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </summary>
         public BaseLabel Parent { get; set; }
 
+        /// <summary>
+        /// Determins whether this instance and the specified object have the same value
+        /// </summary>
+        /// <param name="obj">Another object for comparison</param>
+        /// <returns>True if this instance is the same as the specified object</returns>
         public override bool Equals(object obj)
         {
             return obj is BaseLabel label &&
@@ -364,11 +505,19 @@ namespace OfxWeb.Asp.Controllers.Helpers
                    IsTotal == label.IsTotal;
         }
 
+        /// <summary>
+        /// Returns the hash code for this object
+        /// </summary>
+        /// <returns>A 32-bit integer hash code</returns>
         public override int GetHashCode()
         {
             return HashCode.Combine(UniqueID, Name, IsTotal);
         }
 
+        /// <summary>
+        /// Converts the value of this instance to its equivalent string representation
+        /// </summary>
+        /// <returns>String representation</returns>
         public override string ToString()
         {
             if (IsTotal)
@@ -379,6 +528,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 return $"Name:{Name}";
         }
 
+        /// <summary>
+        /// Default comparison between base labels
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         int IComparable<BaseLabel>.CompareTo(BaseLabel other)
         {
             int result = IsTotal.CompareTo(other.IsTotal);
@@ -393,6 +547,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
         }
     }
 
+    /// <summary>
+    /// Describes a row
+    /// </summary>
     public class RowLabel: BaseLabel
     {
         /// <summary>
@@ -405,12 +562,31 @@ namespace OfxWeb.Asp.Controllers.Helpers
         public int Level { get; set; }
     }
 
+    /// <summary>
+    /// Describes a column 
+    /// </summary>
     public class ColumnLabel : BaseLabel
     {
+        /// <summary>
+        /// Whether this is a calculated column, using 'Custom' property
+        /// </summary>
+        /// <remarks>
+        /// Otherwise it's a regular column with data in the table
+        /// </remarks>
         public bool IsCalculated { get; set; } = false;
 
+        /// <summary>
+        /// Whether this should be rendered as a percentage
+        /// </summary>
+        /// <remarks>
+        /// Otherwise it's a regular dollar figure
+        /// </remarks>
         public bool DisplayAsPercent { get; set; } = false;
 
+        /// <summary>
+        /// Custom function which will calculate values for this column based
+        /// on values in other columns
+        /// </summary>
         public Func<Dictionary<string,decimal>, decimal> Custom { get; set; }
     }
 }
