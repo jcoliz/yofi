@@ -1157,7 +1157,7 @@ namespace OfxWeb.Asp.Controllers
             var txscomplete = txs.AsQueryable<IReportable>().Concat(splits);
             var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == Year);
 
-            var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer" };
+            var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
             var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
             var txsExpenses = txs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category?.StartsWith(y) ?? false));
             var splitsExpenses = splits.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
