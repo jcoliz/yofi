@@ -1266,6 +1266,37 @@ namespace OfxWeb.Asp.Controllers
                 result.Description = $"For {Year}";
                 result.Name = "Full Budget";
             }
+            else if (id == "yoy")
+            {
+                // What we can't do is execute a GroupBy AFTER the Concat
+                //
+                // Looks like this won't be supported until 3.0.
+                // https://github.com/dotnet/efcore/issues/12289
+                // "However, groupby after set operation has been fixed in 3.0. However, currently we have a bug when result
+                // selector is used and grouping key is part of that result selector. #18267 Workaround is to use .Select
+                // rather than result selector"
+                //
+                // Instead, I am going to call Build TWICE with two different series lists (!!)
+
+
+                var txsyoy = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true).Where(x => !x.Splits.Any());
+                var splitsyoy = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true);
+                var txscompleteyoy = txsyoy.AsQueryable<IReportable>().Concat(splitsyoy);
+                var serieslistyoy = txscompleteyoy.GroupBy(x => x.Timestamp.Year.ToString());
+
+                var serieslisttxsyoy = txsyoy.GroupBy(x => x.Timestamp.Year.ToString());
+                var serieslistsplitsyoy = splitsyoy.GroupBy(x => x.Transaction.Timestamp.Year.ToString());
+
+                var years = serieslisttxsyoy.Select(x => x.Key);
+                result.Description = $"For {years.Min()} to {years.Max()}";
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Year over Year";
+
+                result.SeriesSource = serieslisttxsyoy;
+                result.Build();
+                result.SeriesSource = serieslistsplitsyoy;
+            }
 
             if (level.HasValue)
             {

@@ -542,9 +542,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (result == 0) // Empty orders sort at the END
                 result = string.IsNullOrEmpty(UniqueID).CompareTo(string.IsNullOrEmpty(other.UniqueID));
             if (result == 0)
-                result = UniqueID.CompareTo(other.UniqueID);
+                result = UniqueID?.CompareTo(other.UniqueID) ?? -1;
             if (result == 0)
-                result = Name.CompareTo(other.Name);
+                result = Name?.CompareTo(other.Name) ?? -1;
 
             return result;
         }
