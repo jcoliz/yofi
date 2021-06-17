@@ -348,6 +348,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         static string GetTokenByIndex(string category, int index)
         {
+            if (category == null)
+                return null;
+
             var split = category.Split(':');
 
             if (index >= split.Count() || split[index] == string.Empty)

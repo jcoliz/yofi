@@ -1159,7 +1159,7 @@ namespace OfxWeb.Asp.Controllers
 
             var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer" };
             var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
-            var txsExpenses = txs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
+            var txsExpenses = txs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category?.StartsWith(y) ?? false));
             var splitsExpenses = splits.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
             var txscompleteExpenses = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
             var budgettxsExpenses = budgettxs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
