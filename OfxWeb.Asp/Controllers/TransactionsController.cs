@@ -1176,6 +1176,14 @@ namespace OfxWeb.Asp.Controllers
                 budgettxs.GroupBy(x => "Budget")
             };
 
+            var budgetpctcolumn = new ColumnLabel()
+            {
+                Name = "% Progress",
+                UniqueID = "Z",
+                DisplayAsPercent = true,
+                Custom = (cols) => cols["ID:Budget"] == 0 ? 0 : cols["ID:Actual"] / cols["ID:Budget"]
+            };
+
             if (id == "all")
             {
                 result.WithMonthColumns = true;
@@ -1234,6 +1242,7 @@ namespace OfxWeb.Asp.Controllers
             }
             else if (id == "expenses-v-budget")
             {
+                result.AddCustomColumn(budgetpctcolumn);
                 result.SeriesQuerySource = serieslistexpenses;
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
@@ -1242,6 +1251,7 @@ namespace OfxWeb.Asp.Controllers
             }
             else if (id == "all-v-budget")
             {
+                result.AddCustomColumn(budgetpctcolumn);
                 result.SeriesQuerySource = serieslistall;
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;

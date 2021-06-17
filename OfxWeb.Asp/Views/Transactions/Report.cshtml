@@ -128,8 +128,10 @@
 
                     var colformat = "report-col-amount" + (column.IsTotal ? " report-col-total" : string.Empty);
 
+                    var cellformat = column.DisplayAsPercent ? "P0" : "C2";
+
                     <td class="@colformat">
-                        @cell.ToString("C2")
+                        @cell.ToString(cellformat)
                     </td>
                 }
             </tr>
