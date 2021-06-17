@@ -141,8 +141,6 @@ namespace Ofx.Tests
         [TestMethod]
         public void TwoCategoriesColsCustomSimple()
         {
-            Func<Dictionary<string,decimal>, decimal> func = x => 100m;
-
             var custom = new ColumnLabel()
             {
                 Name = "Custom",
@@ -172,8 +170,8 @@ namespace Ofx.Tests
         {
             Func<Dictionary<string, decimal>, decimal> func = (cols) =>
             {
-                var feb = cols["02"];
-                var mar = cols["03"];
+                var feb = cols["ID:02"];
+                var mar = cols["ID:03"];
 
                 return feb + mar;
             };
@@ -529,6 +527,40 @@ namespace Ofx.Tests
 
             Assert.AreEqual(600m, report[report.TotalColumn, Name]);
             Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(700m, report[One, report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+            Assert.AreEqual(200m, report[One, Else]);
+            Assert.AreEqual(400m, report[Two, Else]);
+        }
+        [TestMethod]
+        public void TwoSeriesDeepCustomPct()
+        {
+            report.AddCustomColumn(
+                new ColumnLabel()
+                {
+                    Name = "Pct",
+                    UniqueID = "Z",
+                    DisplayAsPercent = true,
+                    Custom = (cols) => cols["ID:Two"] == 0 ? 0 : cols["ID:One"] / cols["ID:Two"]
+                }
+            );            
+            report.SeriesSource = TwoSeriesSource;
+            report.NumLevels = 2;
+            report.Build();
+            report.WriteToConsole();
+
+            var Name = GetRow(x => x.Name == "Name");
+            var Other = GetRow(x => x.Name == "Other");
+            var Else = GetRow(x => x.Name == "Else");
+            var One = GetColumn(x => x.Name == "One");
+            var Two = GetColumn(x => x.Name == "Two");
+            var Pct = GetColumn(x => x.Name == "Pct");
+
+            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(0.5m, report[Pct, Name]);
+            Assert.AreEqual(5m/9m, report[Pct, Other]);
             Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
             Assert.AreEqual(700m, report[One, report.TotalRow]);
             Assert.AreEqual(1300m, report[Two, report.TotalRow]);

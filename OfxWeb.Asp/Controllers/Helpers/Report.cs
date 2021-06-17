@@ -56,7 +56,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
         }
 
-        Dictionary<string,decimal> RowDetails(RowLabel rowLabel) => ColumnLabels.ToDictionary(x => x.UniqueID, x => base[x, rowLabel]);
+        Dictionary<string,decimal> RowDetails(RowLabel rowLabel) => ColumnLabels.ToDictionary(x => x.ToString(), x => base[x, rowLabel]);
 
         /// <summary>
         /// This will build a one-level report with no columns, just totals,
@@ -80,13 +80,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (SeriesSource != null)
             {
                 foreach (var series in SeriesSource)
-                    BuildInternal(series.AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.Key });
+                    BuildInternal(series.AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.Key, UniqueID = series.Key });
             }
 
             if (SeriesQuerySource != null)
             {
                 foreach (var series in SeriesQuerySource)
-                    BuildInternal(series.First().AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.First().Key });
+                    BuildInternal(series.First().AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.First().Key, UniqueID = series.First().Key });
             }
 
             CalculateTotalRow(NumLevels - 1);
@@ -192,7 +192,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 foreach (var col in ColumnLabelsFiltered)
                 {
                     var val = this[col, line];
-                    builder.Append($"| {val,10:C2} ");
+                    var format = col.DisplayAsPercent ? "P0" : "C2";
+                    builder.Append($"| {val.ToString(format),10} ");
                 }
 
                 Console.WriteLine(builder.ToString());
@@ -387,6 +388,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
     public class ColumnLabel : BaseLabel
     {
         public bool IsCalculated { get; set; } = false;
+
+        public bool DisplayAsPercent { get; set; } = false;
 
         public Func<Dictionary<string,decimal>, decimal> Custom { get; set; }
     }
