@@ -494,7 +494,7 @@ namespace Ofx.Tests
             var result = await controller.Download(false,mapped);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
-            var incoming = ExtractFromExcel<Split>(data);
+            var incoming = helper.ExtractFromExcel<Split>(data);
 
             Assert.AreEqual(2, incoming.Count);
             Assert.AreEqual(item.ID, incoming.First().TransactionID);
@@ -564,7 +564,7 @@ namespace Ofx.Tests
             var result = await controller.Download(false, true);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
-            var incoming = ExtractFromExcel<Transaction>(data);
+            var incoming = helper.ExtractFromExcel<Transaction>(data);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual("X:Y:A", incoming.Single().Category);
@@ -580,25 +580,10 @@ namespace Ofx.Tests
             var result = await controller.Download(false, true);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
-            var incoming = ExtractFromExcel<Transaction>(data);
+            var incoming = helper.ExtractFromExcel<Transaction>(data);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual(null, incoming.Single().Category);
-        }
-
-        private HashSet<T> ExtractFromExcel<T>(byte[] data) where T:new()
-        {
-            var incoming = new HashSet<T>();
-            using (var stream = new MemoryStream(data))
-            {
-                var excel = new ExcelPackage(stream);
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(T).Name}s";
-                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto<T>(incoming, includeids: true);
-            }
-
-            return incoming;
         }
 
         [TestMethod]
@@ -615,7 +600,7 @@ namespace Ofx.Tests
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 
-            var incoming = ExtractFromExcel<Transaction>(data);
+            var incoming = helper.ExtractFromExcel<Transaction>(data);
 
             Assert.AreEqual(2, incoming.Count);
 

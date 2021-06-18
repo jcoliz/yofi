@@ -101,6 +101,21 @@ namespace Common.AspNetCore.Test
             await context.SaveChangesAsync();
         }
 
+        public HashSet<T> ExtractFromExcel<T>(byte[] data) where T : new()
+        {
+            var incoming = new HashSet<T>();
+            using (var stream = new MemoryStream(data))
+            {
+                var excel = new ExcelPackage(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var sheetname = $"{typeof(T).Name}s";
+                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
+                worksheet.ExtractInto<T>(incoming, includeids: true);
+            }
+
+            return incoming;
+        }
+
         public void Empty()
         {
             Assert.IsNotNull(controller);
@@ -262,15 +277,7 @@ namespace Common.AspNetCore.Test
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 
-            var incoming = new HashSet<T>();
-            using (var stream = new MemoryStream(data))
-            {
-                var excel = new ExcelPackage(stream);
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(T).Name}s";
-                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto(incoming);
-            }
+            var incoming = ExtractFromExcel<T>(data);
 
             Assert.AreEqual(5, incoming.Count);
 
