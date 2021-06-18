@@ -281,6 +281,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
         }
 
+        /// <summary>
+        /// Serialize the report to JSON
+        /// </summary>
+        /// <returns>JSON-encoded string for this report</returns>
         public string ToJson()
         {
             string result = string.Empty;
@@ -323,7 +327,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     writer.Flush();
 
                     var bytes = stream.ToArray();
-                    result = System.Text.Encoding.UTF8.GetString(bytes);
+                    result = Encoding.UTF8.GetString(bytes);
                 }
             }
 
