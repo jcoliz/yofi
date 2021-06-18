@@ -301,13 +301,16 @@ namespace Ofx.Tests
             Assert.IsNull(actual.Transaction.SubCategory);
         }
 
+        List<Split> SplitItems = new List<Split>()
+        {
+            new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
+            new Split() { Amount = 75m, Category = "C", SubCategory = "D" }
+        };
+
         [TestMethod]
         public async Task CreateSecondSplit()
         {
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
-
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(1).ToList() };
 
             context.Transactions.Add(item);
             context.SaveChanges();
@@ -330,12 +333,7 @@ namespace Ofx.Tests
         public async Task SplitsShownInEdit()
         {
             // Copied from SplitTest.Includes()
-
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
-            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
-
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
 
             context.Transactions.Add(item);
             context.SaveChanges();
@@ -358,13 +356,7 @@ namespace Ofx.Tests
         public async Task SplitsShownInIndex()
         {
             // Copied from SplitTest.Includes()
-
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
-            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
-
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
-
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
             context.Transactions.Add(item);
             context.SaveChanges();
 
@@ -382,7 +374,7 @@ namespace Ofx.Tests
             splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
             splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
 
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
 
             context.Transactions.Add(item);
             context.SaveChanges();
@@ -402,24 +394,20 @@ namespace Ofx.Tests
         public async Task SplitsShownInReport(bool usesplits)
         {
             int year = DateTime.Now.Year;
-            var expected_ab = 25m;
-            var expected_cd = 75m;
+            var ex1 = SplitItems[0];
+            var ex2 = SplitItems[1];
 
             if (usesplits)
             {
-                var splits = new List<Split>();
-                splits.Add(new Split() { Amount = expected_ab, Category = "A", SubCategory = "B" });
-                splits.Add(new Split() { Amount = expected_cd, Category = "C", SubCategory = "D" });
-
-                var item = new Transaction() { Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m, Splits = splits };
+                var item = new Transaction() { Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
 
                 context.Transactions.Add(item);
             }
             else
             {
                 var items = new List<Transaction>();
-                items.Add(new Transaction() { Category = "A", SubCategory = "B", Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = expected_ab });
-                items.Add(new Transaction() { Category = "C", SubCategory = "D", Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = expected_cd });
+                items.Add(new Transaction() { Category = ex1.Category, SubCategory = ex1.SubCategory, Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = ex1.Amount });
+                items.Add(new Transaction() { Category = ex2.Category, SubCategory = ex2.SubCategory, Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = ex2.Amount });
                 context.Transactions.AddRange(items);
             }
 
@@ -433,18 +421,18 @@ namespace Ofx.Tests
             var col = model.ColumnLabels.First();
             var actual_AB = model[col, row_AB];
 
-            Assert.AreEqual(expected_ab, actual_AB);
+            Assert.AreEqual(ex1.Amount, actual_AB);
 
             var row_CD = model.RowLabels.Where(x => x.Key1 == "C" && x.Key2 == "D").Single();
             var actual_CD = model[col, row_CD];
 
-            Assert.AreEqual(expected_cd, actual_CD);
+            Assert.AreEqual(ex2.Amount, actual_CD);
 
             // Make sure the total is correct as well, no extra stuff in there.
             var row_total = model.RowLabels.Where(x => x.Value == "TOTAL").Single();
             var actual_total = model[col, row_total];
 
-            Assert.AreEqual(expected_ab + expected_cd, actual_total);
+            Assert.AreEqual(ex1.Amount + ex2.Amount, actual_total);
         }
 
         [TestMethod]
@@ -452,10 +440,7 @@ namespace Ofx.Tests
         {
             // Copied from SplitTest.Includes()
 
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
-
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(1).ToList() };
 
             context.Transactions.Add(item);
             context.SaveChanges();
@@ -478,12 +463,8 @@ namespace Ofx.Tests
             context.Transactions.Add(item);
             context.SaveChanges();
 
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
-            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
-
             // Make an HTML Form file containg an excel spreadsheet containing those splits
-            var file = ControllerTestHelper<Split, SplitsController>.PrepareUpload(splits);
+            var file = ControllerTestHelper<Split, SplitsController>.PrepareUpload(SplitItems.Take(2).ToList());
 
             // Upload that
             var result = await controller.UpSplits(new List<IFormFile>() { file }, item.ID);
