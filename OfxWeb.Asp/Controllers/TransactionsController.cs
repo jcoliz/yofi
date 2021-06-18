@@ -1301,10 +1301,11 @@ namespace OfxWeb.Asp.Controllers
             }
             else if (id == "export")
             {
-                result.NumLevels = 4;
-                result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
-                result.SortOrder = Helpers.Report.SortOrders.NameAscending;
+                result.SeriesQuerySource = serieslistall;
                 result.LeafRowsOnly = true;
+                result.WithTotalColumn = false;
+                result.NumLevels = 4;
+                result.SortOrder = Helpers.Report.SortOrders.NameAscending;
                 result.Name = "Transaction Export";
             }
 
