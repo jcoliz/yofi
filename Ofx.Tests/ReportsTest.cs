@@ -255,6 +255,28 @@ namespace Ofx.Tests
             Assert.AreEqual(500m, report[report.TotalColumn, Name]);
             Assert.AreEqual(800m, report[report.TotalColumn, Other]);
             Assert.AreEqual(1300m, report[report.TotalColumn, report.TotalRow]);
+
+        }
+        [TestMethod]
+        public void SimpleJson()
+        {
+            report.SingleSource = Items.Take(13).AsQueryable();
+            report.Build();
+
+            string json = report.ToJson();
+
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var Name = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Name").Single();
+            var Other = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Other").Single();
+            var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
+
+            Assert.AreEqual(3, root.GetArrayLength());
+            Assert.AreEqual(5, Name.EnumerateObject().Count());
+            Assert.AreEqual(500m, Name.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(800m, Other.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(1300m, Total.GetProperty("TOTAL").GetDecimal());
         }
         [TestMethod]
         public void SimpleSorted()
