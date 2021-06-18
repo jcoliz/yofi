@@ -667,5 +667,35 @@ namespace Ofx.Tests
                 Assert.AreEqual(expected.Amount, actual.Amount);
             }
         }
+
+        [TestMethod]
+        public async Task ReportV2()
+        {
+            int year = DateTime.Now.Year;
+
+            await AddFiveTransactions();
+            await context.SaveChangesAsync();
+
+            var actionresult = await controller.ReportV2("all");
+            var okresult = actionresult as ContentResult;
+            var report = okresult.Content;
+
+            Console.WriteLine(report);
+
+            var doc = JsonDocument.Parse(report);
+            var root = doc.RootElement;
+
+            var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA").Single();
+            var BB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "BB").Single();
+            var CC = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC").Single();
+            var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
+
+            Assert.AreEqual(8, root.GetArrayLength());
+            Assert.AreEqual(6, Total.EnumerateObject().Count());
+            Assert.AreEqual(200m, AAAA.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(1000m, BB.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(300m, CC.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(1500m, Total.GetProperty("TOTAL").GetDecimal());
+        }
     }
 }

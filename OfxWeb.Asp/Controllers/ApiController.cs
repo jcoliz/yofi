@@ -417,27 +417,32 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        private static void CheckApiAuth(IHeaderDictionary Headers)
+        {
+            if (!Headers.ContainsKey("Authorization"))
+                throw new UnauthorizedAccessException();
+
+            var authorization = Headers["Authorization"].Single();
+            if (!authorization.StartsWith("Basic "))
+                throw new UnauthorizedAccessException();
+
+            var base64 = authorization.Substring(6);
+            var credentialBytes = Convert.FromBase64String(base64);
+            var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
+            var username = credentials[0];
+            var password = credentials[1];
+
+            if ("j+dF48FhiU+Dz83ZQYsoXw==" != password)
+                throw new ApplicationException("Invalid password");
+        }
+
         // GET: api/tx/report/2020
         [HttpGet("Report/{topic}")]
         public async Task<ActionResult> Report(string topic, int year, string key, string constraint)
         {
             try
             {
-                if (!Request.Headers.ContainsKey("Authorization"))
-                    throw new UnauthorizedAccessException();
-
-                var authorization = Request.Headers["Authorization"].Single();
-                if (!authorization.StartsWith("Basic "))
-                    throw new UnauthorizedAccessException();
-
-                var base64 = authorization.Substring(6);
-                var credentialBytes = Convert.FromBase64String(base64);
-                var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
-                var username = credentials[0];
-                var password = credentials[1];
-
-                if ("j+dF48FhiU+Dz83ZQYsoXw==" != password)
-                    throw new ApplicationException("Invalid password");
+                CheckApiAuth(Request.Headers);
 
                 if (year < 2017 || year > 2050)
                     throw new ApplicationException("Invalid year");
@@ -490,6 +495,28 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // GET: api/tx/reportv2/all
+        [HttpGet("ReportV2/{id}")]
+        public async Task<ActionResult> ReportV2(string id, int? year = null, int? month = null, bool? showmonths = null, int? level = null)
+        {
+            try
+            {
+                CheckApiAuth(Request.Headers);
+
+                var result = new ReportBuilder(_context).BuildReport(id, year, month, showmonths, level);
+                var json = result.ToJson();
+
+                return Content(json);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
 
         private string BlobStoreName
         {
