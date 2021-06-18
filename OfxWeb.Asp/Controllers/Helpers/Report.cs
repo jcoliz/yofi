@@ -3,8 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Controllers.Helpers
@@ -277,6 +279,56 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                 Console.WriteLine(builder.ToString());
             }
+        }
+
+        public string ToJson()
+        {
+            string result = string.Empty;
+
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new Utf8JsonWriter(stream,options:new JsonWriterOptions() { Indented = true }))
+                {
+                    writer.WriteStartArray();
+
+                    foreach (var line in RowLabelsOrdered)
+                    {
+                        writer.WriteStartObject();
+
+                        writer.WritePropertyName("Name");
+                        writer.WriteStringValue(line.Name ?? "-");
+                        writer.WritePropertyName("ID");
+                        writer.WriteStringValue(line.UniqueID);
+                        writer.WritePropertyName("IsTotal");
+                        writer.WriteBooleanValue(line.IsTotal);
+                        writer.WritePropertyName("Level");
+                        writer.WriteNumberValue(line.Level);
+
+                        foreach (var col in ColumnLabelsFiltered)
+                        {
+                            var val = this[col, line];
+                            var name = col.ToString();
+                            if (col.DisplayAsPercent)
+                            {
+                                val /= 100;
+                                name += "%";
+                            }
+                            writer.WritePropertyName(name);
+                            writer.WriteNumberValue(val);
+                        }
+                        writer.WriteEndObject();
+                    }
+                    writer.WriteEndArray();
+
+                    writer.Flush();
+
+                    var bytes = stream.ToArray();
+                    result = System.Text.Encoding.UTF8.GetString(bytes);
+                }
+            }
+
+            return result;
+
         }
 
         #endregion

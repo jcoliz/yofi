@@ -108,6 +108,31 @@ namespace Ofx.Tests
             Assert.AreEqual(100, report[Jan, Name]);
         }
         [TestMethod]
+        public void OneItemColsJson()
+        {
+            report.WithMonthColumns = true;
+            report.SingleSource = Items.Take(1).AsQueryable();
+            report.Build();
+
+            string json = report.ToJson();
+
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var actual = root.EnumerateArray().First();
+            var Name = actual.GetProperty("Name").GetString();
+            var Jan = actual.GetProperty("ID:01").GetDecimal();
+
+            var total = root.EnumerateArray().Last();
+            var IsTotal = total.GetProperty("IsTotal").GetBoolean();
+            var TotalTotal = total.GetProperty("TOTAL").GetDecimal();
+
+            Assert.AreEqual("Name",Name);
+            Assert.AreEqual(100m, Jan);
+            Assert.AreEqual(true, IsTotal);
+            Assert.AreEqual(100m, TotalTotal);
+        }
+        [TestMethod]
         public void ThreeMonthsCols()
         {
             report.WithMonthColumns = true;
