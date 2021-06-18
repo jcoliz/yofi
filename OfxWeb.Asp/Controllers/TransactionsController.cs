@@ -1299,6 +1299,14 @@ namespace OfxWeb.Asp.Controllers
                 result.Build();
                 result.SeriesSource = serieslistsplitsyoy;
             }
+            else if (id == "export")
+            {
+                result.NumLevels = 4;
+                result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
+                result.SortOrder = Helpers.Report.SortOrders.NameAscending;
+                result.LeafRowsOnly = true;
+                result.Name = "Transaction Export";
+            }
 
             if (level.HasValue)
             {
