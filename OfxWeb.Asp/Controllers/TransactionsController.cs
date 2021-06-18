@@ -928,6 +928,8 @@ namespace OfxWeb.Asp.Controllers
                     if (splits?.Contains(item.ID) ?? false)
                     {
                         item.Splits = new List<Split>();
+                        item.Category = null;
+                        item.SubCategory = null;
                         foreach (var split in splits[item.ID])
                         {
                             split.ID = 0;

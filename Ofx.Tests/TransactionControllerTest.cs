@@ -555,7 +555,7 @@ namespace Ofx.Tests
             splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D", TransactionID = 1000 });
             splits.Add(new Split() { Amount = 175m, Category = "X", SubCategory = "Y", TransactionID = 12000 }); // Not going to be matched!
 
-            var item = new Transaction() { ID = 1000, Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+            var item = new Transaction() { ID = 1000, Payee = "3", Category = "RemoveMe", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
             transactions.Add(item);
 
             // Build a spreadsheet with the chosen number of items
@@ -582,6 +582,9 @@ namespace Ofx.Tests
             // Did the transaction and splits find each other?
             var actual = context.Transactions.Include(x=>x.Splits).Single();
             Assert.AreEqual(2,actual.Splits.Count);
+
+            // The transaction should NOT have a category anymore, even if it had one to begin with
+            Assert.IsNull(actual.Category);
         }
         [TestMethod]
         public async Task DownloadMapped()
