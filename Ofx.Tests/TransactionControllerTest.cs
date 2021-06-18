@@ -28,22 +28,46 @@ namespace Ofx.Tests
         List<Transaction> Items => helper.Items;
         DbSet<Transaction> dbset => helper.dbset;
 
+        List<Transaction> TransactionItems = new List<Transaction>()
+        {
+            new Transaction() { Category = "B", SubCategory = "A", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m },
+            new Transaction() { Category = "A", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m },
+            new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m },
+            new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m }
+        };
+
+        List<Split> SplitItems = new List<Split>()
+        {
+            new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
+            new Split() { Amount = 75m, Category = "C", SubCategory = "D" }
+        };
+
+        List<Payee> PayeeItems = new List<Payee>()
+        {
+            new Payee() { Category = "Y", SubCategory = "E", Name = "3" },
+            new Payee() { Category = "X", SubCategory = "E", Name = "2" },
+            new Payee() { Category = "Z", SubCategory = "E", Name = "5" },
+            new Payee() { Category = "X", SubCategory = "E", Name = "1" },
+            new Payee() { Category = "Y", SubCategory = "F", Name = "4" }
+        };
+
+        List<CategoryMap> CategoryMapItems = new List<CategoryMap>()
+        {
+            new CategoryMap() { Category = "A", Key1 = "X", Key2 = "Y" },
+            new CategoryMap() { Category = "C", Key1 = "Z", Key2 = "R" }
+        };
+
         [TestInitialize]
         public void SetUp()
         {
             helper = new ControllerTestHelper<Transaction, TransactionsController>();
             helper.SetUp();
             helper.controller = new TransactionsController(helper.context, null);
-
-            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
-            helper.Items.Add(new Transaction() { Category = "A", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
-            helper.Items.Add(new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
-            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
-            helper.Items.Add(new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
-
+            helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 
-            // Sample data items will use 'Name' as a unique sort idenfitier
+            // Sample data items will use Payee name as a unique sort idenfitier
             helper.KeyFor = (x => x.Payee);
         }
 
@@ -165,21 +189,11 @@ namespace Ofx.Tests
             Assert.AreEqual(initial, actual);
         }
 
-        async Task AddFivePayees()
-        {
-            context.Payees.Add(new Payee() { Category = "Y", SubCategory = "E", Name = "3" });
-            context.Payees.Add(new Payee() { Category = "X", SubCategory = "E", Name = "2" });
-            context.Payees.Add(new Payee() { Category = "Z", SubCategory = "E", Name = "5" });
-            context.Payees.Add(new Payee() { Category = "X", SubCategory = "E", Name = "1" });
-            context.Payees.Add(new Payee() { Category = "Y", SubCategory = "F", Name = "4" });
-
-            await context.SaveChangesAsync();
-        }
-
         [TestMethod]
         public async Task UploadMatchPayees()
         {
-            await AddFivePayees();
+            context.Payees.AddRange(PayeeItems.Take(5));
+            await context.SaveChangesAsync();
 
             // Strip off the categories, so they'll match on input
             var uploadme = Items.Select(x => { x.Category = null; x.SubCategory = null; return x; }).ToList();
@@ -301,12 +315,6 @@ namespace Ofx.Tests
             Assert.IsNull(actual.Transaction.SubCategory);
         }
 
-        List<Split> SplitItems = new List<Split>()
-        {
-            new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
-            new Split() { Amount = 75m, Category = "C", SubCategory = "D" }
-        };
-
         [TestMethod]
         public async Task CreateSecondSplit()
         {
@@ -370,12 +378,7 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task SplitsShownInIndexSearchCategory()
         {
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
-            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
-
             var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
-
             context.Transactions.Add(item);
             context.SaveChanges();
 
@@ -481,16 +484,9 @@ namespace Ofx.Tests
         public async Task SplitsShownDownload(bool mapped)
         {
             if (mapped)
-            {
-                context.CategoryMaps.Add(new CategoryMap() { Category = "A", Key1 = "X", Key2 = "Y" });
-                context.CategoryMaps.Add(new CategoryMap() { Category = "C", Key1 = "Z", Key2 = "R" });
-            }
+                context.CategoryMaps.AddRange(CategoryMapItems.Take(2)); 
 
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
-            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
-
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
 
             context.Transactions.Add(item);
             context.SaveChanges();
@@ -570,12 +566,8 @@ namespace Ofx.Tests
         [TestMethod]
         public async Task DownloadMapped()
         {
-            var map = new CategoryMap() { Category = "Food", Key1 = "A", Key2 = "B" };
-            context.CategoryMaps.Add(map);
-
-            var item = new Transaction() { Category = "Food", SubCategory = "Stuff", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-            context.Transactions.Add(item);
-
+            context.CategoryMaps.AddRange(CategoryMapItems.Take(1));
+            context.Transactions.AddRange(TransactionItems.Skip(1).Take(1));
             context.SaveChanges();
 
             var result = await controller.Download(false, true);
@@ -593,7 +585,7 @@ namespace Ofx.Tests
             }
 
             Assert.AreEqual(1, incoming.Count);
-            Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
+            Assert.AreEqual("X:Y:A", incoming.Single().Category);
         }
 
         [TestMethod]
