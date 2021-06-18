@@ -494,16 +494,7 @@ namespace Ofx.Tests
             var result = await controller.Download(false,mapped);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
-
-            var incoming = new HashSet<Split>();
-            using (var stream = new MemoryStream(data))
-            {
-                var excel = new ExcelPackage(stream);
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(Split).Name}s";
-                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto(incoming,includeids:true);
-            }
+            var incoming = ExtractFromExcel<Split>(data);
 
             Assert.AreEqual(2, incoming.Count);
             Assert.AreEqual(item.ID, incoming.First().TransactionID);
@@ -573,16 +564,7 @@ namespace Ofx.Tests
             var result = await controller.Download(false, true);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
-
-            var incoming = new HashSet<Transaction>();
-            using (var stream = new MemoryStream(data))
-            {
-                var excel = new ExcelPackage(stream);
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(Transaction).Name}s";
-                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto(incoming, includeids: true);
-            }
+            var incoming = ExtractFromExcel<Transaction>(data);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual("X:Y:A", incoming.Single().Category);
@@ -633,15 +615,7 @@ namespace Ofx.Tests
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 
-            var incoming = new HashSet<Transaction>();
-            using (var stream = new MemoryStream(data))
-            {
-                var excel = new ExcelPackage(stream);
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(Transaction).Name}s";
-                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto(incoming, includeids: true);
-            }
+            var incoming = ExtractFromExcel<Transaction>(data);
 
             Assert.AreEqual(2, incoming.Count);
 
