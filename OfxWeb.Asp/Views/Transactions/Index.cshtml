@@ -108,9 +108,6 @@
                 <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SubCategory)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Memo)
             </th>
             @if ((bool)(ViewData["ShowHidden"]))
@@ -159,23 +156,6 @@
                     else
                     {
                         @Html.DisplayFor(modelItem => item.Category)
-                    }
-                </td>
-                <td class="display-subcategory">
-                    @if (item.HasSplits)
-                    {
-                        @if (item.IsSplitsOK)
-                        {
-                            <p>OK</p>
-                        }
-                        else
-                        {
-                            <p>ERROR</p>
-                        }
-                    }
-                    else
-                    {
-                        @Html.DisplayFor(modelItem => item.SubCategory)
                     }
                 </td>
                 <td class="display-memo">

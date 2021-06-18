@@ -33,11 +33,6 @@
                 <span asp-validation-for="Category" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SubCategory" class="control-label"></label>
-                <input asp-for="SubCategory" class="form-control" />
-                <span asp-validation-for="SubCategory" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="Timestamp" class="control-label"></label>
                 <input asp-for="Timestamp" class="form-control" value="@DateTime.Now.ToString("s")" />
                 <span asp-validation-for="Timestamp" class="text-danger"></span>

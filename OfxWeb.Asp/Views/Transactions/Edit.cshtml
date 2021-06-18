@@ -24,11 +24,6 @@
                     <input asp-for="Category" class="form-control" />
                     <span asp-validation-for="Category" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="SubCategory" class="control-label"></label>
-                    <input asp-for="SubCategory" class="form-control" />
-                    <span asp-validation-for="SubCategory" class="text-danger"></span>
-                </div>
             }
             <div class="form-group">
                 <label asp-for="Memo" class="control-label"></label>
@@ -85,9 +80,6 @@
                             @Html.DisplayNameFor(x => x.Category)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(x => x.SubCategory)
-                        </th>
-                        <th>
                             @Html.DisplayNameFor(x => x.Amount)
                         </th>
                         <th>
@@ -105,9 +97,6 @@
                         <tr>
                             <td>
                                 @(split.Category ?? String.Empty)
-                            </td>
-                            <td>
-                                @(split.SubCategory ?? String.Empty)
                             </td>
                             <td>
                                 @split.Amount
