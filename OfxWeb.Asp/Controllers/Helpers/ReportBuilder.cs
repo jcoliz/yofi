@@ -19,6 +19,194 @@ namespace OfxWeb.Asp.Controllers.Helpers
             _context = context;
         }
 
+        public Report BuildReport(string id, int? year, int? month, bool? showmonths, int? level)
+        {
+            var result = new Report();
+
+            if (!month.HasValue)
+                month = 12;
+            if (!year.HasValue)
+                year = DateTime.Now.Year;
+
+            var period = new DateTime(year.Value, month.Value, 1);
+            result.Description = $"For {year.Value} through {period.ToString("MMMM")} ";
+
+            Func<Models.Transaction, bool> inscope_t = (x => x.Timestamp.Year == year && x.Hidden != true && x.Timestamp.Month <= month);
+            Func<Models.Split, bool> inscope_s = (x => x.Transaction.Timestamp.Year == year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= month);
+
+            var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any());
+            var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s);
+            var txscomplete = txs.AsQueryable<IReportable>().Concat(splits);
+            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == year);
+
+            var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
+            var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
+            var txsExpenses = txs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category?.StartsWith(y) ?? false));
+            var splitsExpenses = splits.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
+            var txscompleteExpenses = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
+            var budgettxsExpenses = budgettxs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
+
+            var serieslistexpenses = new List<IQueryable<IGrouping<string, IReportable>>>()
+            {
+                txscompleteExpenses.GroupBy(x => "Actual"),
+                budgettxsExpenses.GroupBy(x => "Budget")
+            };
+
+            var serieslistall = new List<IQueryable<IGrouping<string, IReportable>>>()
+            {
+                txscomplete.GroupBy(x => "Actual"),
+                budgettxs.GroupBy(x => "Budget")
+            };
+
+            var budgetpctcolumn = new ColumnLabel()
+            {
+                Name = "% Progress",
+                UniqueID = "Z",
+                DisplayAsPercent = true,
+                Custom = (cols) => cols["ID:Budget"] == 0 ? 0 : cols["ID:Actual"] / cols["ID:Budget"]
+            };
+
+            if (id == "all")
+            {
+                result.WithMonthColumns = true;
+                result.NumLevels = 2;
+                result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "All Transactions";
+            }
+            else if (id == "income")
+            {
+                var txsI = txs.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
+                var splitsI = splits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
+
+                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
+                result.FromLevel = 1;
+                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
+                result.Name = "Income";
+            }
+            else if (id == "taxes")
+            {
+                var txsI = txs.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
+                var splitsI = splits.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
+
+                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
+                result.FromLevel = 1;
+                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Taxes";
+            }
+            else if (id == "savings")
+            {
+                var txsI = txs.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
+                var splitsI = splits.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
+
+                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
+                result.FromLevel = 1;
+                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Savings";
+            }
+            else if (id == "expenses")
+            {
+                result.WithMonthColumns = true;
+                result.SingleSource = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
+                result.NumLevels = 2;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Expenses";
+            }
+            else if (id == "expenses-budget")
+            {
+                result.SingleSource = budgettxsExpenses.AsQueryable<IReportable>();
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Expenses Budget";
+            }
+            else if (id == "expenses-v-budget")
+            {
+                result.AddCustomColumn(budgetpctcolumn);
+                result.SeriesQuerySource = serieslistexpenses;
+                result.WithTotalColumn = false;
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Expenses vs. Budget";
+            }
+            else if (id == "all-v-budget")
+            {
+                result.AddCustomColumn(budgetpctcolumn);
+                result.SeriesQuerySource = serieslistall;
+                result.WithTotalColumn = false;
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "All vs. Budget";
+            }
+            else if (id == "budget")
+            {
+                result.NumLevels = 3;
+                result.SingleSource = budgettxs.AsQueryable<IReportable>();
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Description = $"For {year}";
+                result.Name = "Full Budget";
+            }
+            else if (id == "yoy")
+            {
+                // What we can't do is execute a GroupBy AFTER the Concat
+                //
+                // Looks like this won't be supported until 3.0.
+                // https://github.com/dotnet/efcore/issues/12289
+                // "However, groupby after set operation has been fixed in 3.0. However, currently we have a bug when result
+                // selector is used and grouping key is part of that result selector. #18267 Workaround is to use .Select
+                // rather than result selector"
+                //
+                // Instead, I am going to call Build TWICE with two different series lists (!!)
+
+
+                var txsyoy = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true).Where(x => !x.Splits.Any());
+                var splitsyoy = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true);
+                var txscompleteyoy = txsyoy.AsQueryable<IReportable>().Concat(splitsyoy);
+                var serieslistyoy = txscompleteyoy.GroupBy(x => x.Timestamp.Year.ToString());
+
+                var serieslisttxsyoy = txsyoy.GroupBy(x => x.Timestamp.Year.ToString());
+                var serieslistsplitsyoy = splitsyoy.GroupBy(x => x.Transaction.Timestamp.Year.ToString());
+
+                var years = serieslisttxsyoy.Select(x => x.Key);
+                result.Description = $"For {years.Min()} to {years.Max()}";
+                result.NumLevels = 3;
+                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.Name = "Year over Year";
+
+                result.SeriesSource = serieslisttxsyoy;
+                result.Build();
+                result.SeriesSource = serieslistsplitsyoy;
+            }
+            else if (id == "export")
+            {
+                result.SeriesQuerySource = serieslistall;
+                result.LeafRowsOnly = true;
+                result.WithTotalColumn = false;
+                result.NumLevels = 4;
+                result.SortOrder = Helpers.Report.SortOrders.NameAscending;
+                result.Name = "Transaction Export";
+            }
+
+            if (level.HasValue)
+            {
+                result.NumLevels = level.Value;
+                if (result.NumLevels == 1)
+                    result.DisplayLevelAdjustment = 1;
+            }
+
+            if (showmonths.HasValue)
+            {
+                result.WithMonthColumns = showmonths.Value;
+            }
+
+            result.Build();
+            result.WriteToConsole();
+
+            return result;
+        }
+
         public async Task<Table<Label, Label, decimal>> ThreeLevelReport(IEnumerable<IGrouping<int, ISubReportable>> outergroups, bool mapcategories = false)
         {
             var result = new Table<Label, Label, decimal>();
