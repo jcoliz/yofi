@@ -363,6 +363,33 @@ namespace Ofx.Tests
             Assert.AreEqual(1900m, report[report.TotalColumn, report.TotalRow]);
         }
         [TestMethod]
+        public void SubItemsAllDeepJson()
+        {
+            report.SingleSource = Items.Take(19).AsQueryable();
+            report.NumLevels = 2;
+            report.Build();
+            report.WriteToConsole();
+
+            string json = report.ToJson();
+
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var Name = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Name").Single();
+            var Other = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Other").Single();
+            var Something = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Something").Single();
+            var Else = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Else").Single();
+            var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
+
+            Assert.AreEqual(6, root.GetArrayLength());
+            Assert.AreEqual(5, Name.EnumerateObject().Count());
+            Assert.AreEqual(500m, Name.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(1400m, Other.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(400m, Something.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(600m, Else.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(1900m, Total.GetProperty("TOTAL").GetDecimal());
+        }
+        [TestMethod]
         public void SubItemsAllDeepSorted()
         {
             report.SingleSource = Items.Take(24).AsQueryable();
@@ -401,6 +428,36 @@ namespace Ofx.Tests
         }
         [TestMethod]
         public void SubItemsAllDeepCols()
+        {
+            report.WithMonthColumns = true;
+            report.NumLevels = 2;
+            report.SingleSource = Items.Take(20).AsQueryable();
+            report.Build();
+            report.WriteToConsole();
+
+            string json = report.ToJson();
+
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var Name = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Name").Single();
+            var Other = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Other").Single();
+            var Something = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Something").Single();
+            var Else = root.EnumerateArray().Where(x => x.GetProperty("Name").GetString() == "Else").Single();
+            var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
+
+            Assert.AreEqual(6, root.GetArrayLength());
+            Assert.AreEqual(13, Name.EnumerateObject().Count());
+            Assert.AreEqual(600m, Name.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(1400m, Other.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(400m, Something.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(600m, Else.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(2000m, Total.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(400m, Total.GetProperty("ID:06").GetDecimal());
+            Assert.AreEqual(200m, Else.GetProperty("ID:06").GetDecimal());
+        }
+        [TestMethod]
+        public void SubItemsAllDeepColsJson()
         {
             report.WithMonthColumns = true;
             report.NumLevels = 2;
