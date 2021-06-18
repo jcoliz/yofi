@@ -162,15 +162,7 @@ namespace Ofx.Tests
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 
-            var incoming = new HashSet<Transaction>();
-            using (var stream = new MemoryStream(data))
-            {
-                var excel = new ExcelPackage(stream);
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(Payee).Name}s";
-                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto(incoming, includeids: true);
-            }
+            var incoming = helper.ExtractFromExcel<Payee>(data);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
