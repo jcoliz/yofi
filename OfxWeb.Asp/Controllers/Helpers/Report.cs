@@ -124,6 +124,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
         }
         ColumnLabel _OrderingColumn;
 
+        /// <summary>
+        /// We are only interested in seeing a flat representation of only the leaf rows
+        /// </summary>
+        /// <remarks>
+        /// This is useful for reports where you only want the leaf items
+        /// </remarks>
+        public bool LeafRowsOnly { get; set; } = false;
+
         #endregion
 
         #region Informative Properties
@@ -209,6 +217,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
 
             CalculateTotalRow(NumLevels - 1);
+
+            if (LeafRowsOnly)
+                PruneToLeafRows();
         }
 
         /// <summary>
@@ -287,13 +298,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
         {
             var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
 
-            if (groups.Count() > 1 || groups.Single().Key != null) // Skip empty sub-levels
+            // Skip empty sub-levels unless we're specifically asking for them (LeafRowsOnly)
+            if (groups.Count() > 1 || groups.Single().Key != null || LeafRowsOnly) 
             {
                 foreach (var group in groups)
                 {
                     var token = group.Key;
                     var newpath = parent == null ? token : $"{parent.UniqueID}:{token}";
-                    var row = new RowLabel() { Name = token, Level = numlevels - 1, UniqueID = newpath, Parent = parent };
+
+                    // In case of LeafRowsOnly, we need a fully-qualified name, because headings will be removed.
+                    var row = new RowLabel() { Name = LeafRowsOnly?newpath:token, Level = numlevels - 1, UniqueID = newpath, Parent = parent };
 
                     // Bug 900: Rows out of order on multi-series deep lists
                     if (RowLabels.Contains(row))
@@ -337,6 +351,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
             foreach (var row in base.RowLabels.Where(x => x.Level == usinglevel))
                 foreach (var col in base.ColumnLabels)
                     base[col, TotalRow] += base[col, row];
+        }
+
+        void PruneToLeafRows()
+        {
+            // Remove parent rows
+            var parents = RowLabels.Where(x => x.Parent != null).Select(x => x.Parent as RowLabel);
+            base._RowLabels.RemoveWhere(x=>parents.Contains(x));
+
+            // Adjust remaining rows
+            foreach(var row in RowLabels)
+                row.Level = 0;
         }
 
         /// <summary>
