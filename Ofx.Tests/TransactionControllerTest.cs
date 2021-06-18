@@ -598,19 +598,25 @@ namespace Ofx.Tests
             var result = await controller.Download(false, true);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
+            var incoming = ExtractFromExcel<Transaction>(data);
 
-            var incoming = new HashSet<Transaction>();
+            Assert.AreEqual(1, incoming.Count);
+            Assert.AreEqual(null, incoming.Single().Category);
+        }
+
+        private HashSet<T> ExtractFromExcel<T>(byte[] data) where T:new()
+        {
+            var incoming = new HashSet<T>();
             using (var stream = new MemoryStream(data))
             {
                 var excel = new ExcelPackage(stream);
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(Transaction).Name}s";
+                var sheetname = $"{typeof(T).Name}s";
                 var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto(incoming, includeids: true);
+                worksheet.ExtractInto<T>(incoming, includeids: true);
             }
 
-            Assert.AreEqual(1, incoming.Count);
-            Assert.AreEqual(null, incoming.Single().Category);
+            return incoming;
         }
 
         [TestMethod]
