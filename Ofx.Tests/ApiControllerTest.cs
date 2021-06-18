@@ -93,6 +93,17 @@ namespace Ofx.Tests
             await context.SaveChangesAsync();
         }
 
+        async Task AddFiveBudgetTxs()
+        {
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 06, 01), Category = "BB:BB", Amount = 100m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 06, 01), Category = "BB:AA", Amount = 200m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 05, 01), Category = "CC:AA", Amount = 300m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 05, 01), Category = "AA:AA", Amount = 400m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 05, 01), Category = "AA:BB", Amount = 500m });
+
+            await context.SaveChangesAsync();
+        }
+
         [TestMethod]
         public void Empty()
         {
@@ -696,6 +707,39 @@ namespace Ofx.Tests
             Assert.AreEqual(1000m, BB.GetProperty("TOTAL").GetDecimal());
             Assert.AreEqual(300m, CC.GetProperty("TOTAL").GetDecimal());
             Assert.AreEqual(1500m, Total.GetProperty("TOTAL").GetDecimal());
+        }
+        [TestMethod]
+        public async Task ReportV2export()
+        {
+            int year = DateTime.Now.Year;
+
+            await AddFiveBudgetTxs();
+            await AddFiveTransactions();
+
+            var actionresult = await controller.ReportV2("export");
+            var okresult = actionresult as ContentResult;
+            var report = okresult.Content;
+
+            Console.WriteLine(report);
+
+            var doc = JsonDocument.Parse(report);
+            var root = doc.RootElement;
+
+            var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA:").Single();
+            var AABB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:BB:").Single();
+            var CCAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC:AA:").Single();
+            var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
+
+            Assert.AreEqual(6, root.GetArrayLength());
+            Assert.AreEqual(6, Total.EnumerateObject().Count());
+            Assert.AreEqual(200m, AAAA.GetProperty("ID:Actual").GetDecimal());
+            Assert.AreEqual(0m, AABB.GetProperty("ID:Actual").GetDecimal());
+            Assert.AreEqual(300m, CCAA.GetProperty("ID:Actual").GetDecimal());
+            Assert.AreEqual(1500m, Total.GetProperty("ID:Actual").GetDecimal());
+            Assert.AreEqual(400m, AAAA.GetProperty("ID:Budget").GetDecimal());
+            Assert.AreEqual(500m, AABB.GetProperty("ID:Budget").GetDecimal());
+            Assert.AreEqual(300m, CCAA.GetProperty("ID:Budget").GetDecimal());
+            Assert.AreEqual(1500m, Total.GetProperty("ID:Budget").GetDecimal());
         }
     }
 }
