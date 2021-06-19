@@ -209,8 +209,8 @@ namespace Common.AspNetCore.Test
             Assert.AreEqual(2, count);
 
             // Single() will fail if there's a problem.
-            var actual1 = dbset.Where(x => KeyFor(x) == KeyFor(Items[1])).Single();
-            var actual2 = dbset.Where(x => KeyFor(x) == KeyFor(Items[2])).Single();
+            var actual1 = dbset.AsEnumerable().Where(x => KeyFor(x) == KeyFor(Items[1])).Single();
+            var actual2 = dbset.AsEnumerable().Where(x => KeyFor(x) == KeyFor(Items[2])).Single();
         }
         public async Task EditObjectValues()
         {
