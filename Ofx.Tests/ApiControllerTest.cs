@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Controllers;
+using OfxWeb.Asp.Controllers.Helpers;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
@@ -687,7 +688,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             await context.SaveChangesAsync();
 
-            var actionresult = await controller.ReportV2("all");
+            var actionresult = await controller.ReportV2( new ReportBuilder.Parameters() { id = "all" } );
             var okresult = actionresult as ContentResult;
             var report = okresult.Content;
 
@@ -716,7 +717,7 @@ namespace Ofx.Tests
             await AddFiveBudgetTxs();
             await AddFiveTransactions();
 
-            var actionresult = await controller.ReportV2("export");
+            var actionresult = await controller.ReportV2(new ReportBuilder.Parameters() { id = "export" });
             var okresult = actionresult as ContentResult;
             var report = okresult.Content;
 

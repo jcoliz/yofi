@@ -497,13 +497,13 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/reportv2/all
         [HttpGet("ReportV2/{id}")]
-        public async Task<ActionResult> ReportV2(string id, int? year = null, int? month = null, bool? showmonths = null, int? level = null)
+        public async Task<ActionResult> ReportV2([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
         {
             try
             {
                 CheckApiAuth(Request.Headers);
 
-                var result = new ReportBuilder(_context).BuildReport(id, year, month, showmonths, level);
+                var result = new ReportBuilder(_context).BuildReport(parms.id, parms.year, parms.month, parms.showmonths, parms.level);
                 var json = result.ToJson();
 
                 return Content(json);

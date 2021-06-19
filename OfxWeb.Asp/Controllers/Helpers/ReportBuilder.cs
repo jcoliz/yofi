@@ -12,6 +12,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
 {
     public class ReportBuilder
     {
+        public class Parameters
+        {
+            public string id { get; set; } 
+            public int? year { get; set; } 
+            public int? month { get; set; } 
+            public bool? showmonths { get; set; } 
+            public int? level { get; set; }
+        }
         private readonly ApplicationDbContext _context;
 
         public ReportBuilder(ApplicationDbContext context)
