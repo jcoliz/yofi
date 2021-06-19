@@ -13,7 +13,6 @@ using Common.AspNetCore.Test;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using OfficeOpenXml;
-using Microsoft.AspNetCore.Http.Internal;
 
 namespace Ofx.Tests
 {
