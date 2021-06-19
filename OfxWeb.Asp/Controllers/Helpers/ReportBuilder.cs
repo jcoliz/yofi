@@ -12,6 +12,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
 {
     public class ReportBuilder
     {
+        /// <summary>
+        /// Parameters used to build a report
+        /// </summary>
+        /// <remarks>
+        /// Moved these into a class so I can make a single change in calling convention here
+        /// and have it propagate out to the controller endpoints automatically
+        /// </remarks>
         public class Parameters
         {
             public string id { get; set; } 
@@ -27,25 +34,25 @@ namespace OfxWeb.Asp.Controllers.Helpers
             _context = context;
         }
 
-        public Report BuildReport(string id, int? year, int? month, bool? showmonths, int? level)
+        public Report BuildReport(Parameters parms)
         {
             var result = new Report();
 
-            if (!month.HasValue)
-                month = 12;
-            if (!year.HasValue)
-                year = DateTime.Now.Year;
+            if (!parms.month.HasValue)
+                parms.month = 12;
+            if (!parms.year.HasValue)
+                parms.year = DateTime.Now.Year;
 
-            var period = new DateTime(year.Value, month.Value, 1);
-            result.Description = $"For {year.Value} through {period.ToString("MMMM")} ";
+            var period = new DateTime(parms.year.Value, parms.month.Value, 1);
+            result.Description = $"For {parms.year.Value} through {period.ToString("MMMM")} ";
 
-            Func<Models.Transaction, bool> inscope_t = (x => x.Timestamp.Year == year && x.Hidden != true && x.Timestamp.Month <= month);
-            Func<Models.Split, bool> inscope_s = (x => x.Transaction.Timestamp.Year == year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= month);
+            Func<Models.Transaction, bool> inscope_t = (x => x.Timestamp.Year == parms.year && x.Hidden != true && x.Timestamp.Month <= parms.month);
+            Func<Models.Split, bool> inscope_s = (x => x.Transaction.Timestamp.Year == parms.year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= parms.month);
 
             var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any());
             var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s);
             var txscomplete = txs.AsQueryable<IReportable>().Concat(splits);
-            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == year);
+            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == parms.year);
 
             var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
             var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
@@ -71,10 +78,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 Name = "% Progress",
                 UniqueID = "Z",
                 DisplayAsPercent = true,
-                Custom = (cols) => cols["ID:Budget"] == 0 ? 0 : cols["ID:Actual"] / cols["ID:Budget"]
+                Custom = (cols) =>
+                {
+                    if (cols.ContainsKey("ID:Budget") && cols.ContainsKey("ID:Actual"))
+                        return cols["ID:Budget"] == 0 ? 0 : cols["ID:Actual"] / cols["ID:Budget"];
+                    else
+                        return 0;
+                }
             };
 
-            if (id == "all")
+            if (parms.id == "all")
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 2;
@@ -82,7 +95,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "All Transactions";
             }
-            else if (id == "income")
+            else if (parms.id == "income")
             {
                 var txsI = txs.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
                 var splitsI = splits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
@@ -93,7 +106,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
                 result.Name = "Income";
             }
-            else if (id == "taxes")
+            else if (parms.id == "taxes")
             {
                 var txsI = txs.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
                 var splitsI = splits.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
@@ -104,7 +117,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Taxes";
             }
-            else if (id == "savings")
+            else if (parms.id == "savings")
             {
                 var txsI = txs.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
                 var splitsI = splits.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
@@ -115,7 +128,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Savings";
             }
-            else if (id == "expenses")
+            else if (parms.id == "expenses")
             {
                 result.WithMonthColumns = true;
                 result.SingleSource = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
@@ -123,14 +136,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
             }
-            else if (id == "expenses-budget")
+            else if (parms.id == "expenses-budget")
             {
                 result.SingleSource = budgettxsExpenses.AsQueryable<IReportable>();
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses Budget";
             }
-            else if (id == "expenses-v-budget")
+            else if (parms.id == "expenses-v-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
                 result.SeriesQuerySource = serieslistexpenses;
@@ -139,7 +152,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses vs. Budget";
             }
-            else if (id == "all-v-budget")
+            else if (parms.id == "all-v-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
                 result.SeriesQuerySource = serieslistall;
@@ -148,15 +161,15 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "All vs. Budget";
             }
-            else if (id == "budget")
+            else if (parms.id == "budget")
             {
                 result.NumLevels = 3;
                 result.SingleSource = budgettxs.AsQueryable<IReportable>();
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
-                result.Description = $"For {year}";
+                result.Description = $"For {parms.year}";
                 result.Name = "Full Budget";
             }
-            else if (id == "yoy")
+            else if (parms.id == "yoy")
             {
                 // What we can't do is execute a GroupBy AFTER the Concat
                 //
@@ -187,7 +200,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.Build();
                 result.SeriesSource = serieslistsplitsyoy;
             }
-            else if (id == "export")
+            else if (parms.id == "export")
             {
                 result.SeriesQuerySource = serieslistall;
                 result.LeafRowsOnly = true;
@@ -197,16 +210,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.Name = "Transaction Export";
             }
 
-            if (level.HasValue)
+            if (parms.level.HasValue)
             {
-                result.NumLevels = level.Value;
+                result.NumLevels = parms.level.Value;
                 if (result.NumLevels == 1)
                     result.DisplayLevelAdjustment = 1;
             }
 
-            if (showmonths.HasValue)
+            if (parms.showmonths.HasValue)
             {
-                result.WithMonthColumns = showmonths.Value;
+                result.WithMonthColumns = parms.showmonths.Value;
             }
 
             result.Build();

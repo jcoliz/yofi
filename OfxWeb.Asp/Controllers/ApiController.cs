@@ -503,7 +503,7 @@ namespace OfxWeb.Asp.Controllers
             {
                 CheckApiAuth(Request.Headers);
 
-                var result = new ReportBuilder(_context).BuildReport(parms.id, parms.year, parms.month, parms.showmonths, parms.level);
+                var result = new ReportBuilder(_context).BuildReport(parms);
                 var json = result.ToJson();
 
                 return Content(json);

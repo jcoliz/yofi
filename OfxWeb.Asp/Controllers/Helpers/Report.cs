@@ -201,21 +201,22 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (NumLevels < 1)
                 throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
-            if (SingleSource != null)
+            if (SingleSource != null && SingleSource.Any())
             {
                 BuildInternal(SingleSource, FromLevel, NumLevels, null);
             }
 
-            if (SeriesSource != null)
+            if (SeriesSource != null && SeriesSource.Any())
             {
                 foreach (var series in SeriesSource)
                     BuildInternal(series.AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.Key, UniqueID = series.Key });
             }
 
-            if (SeriesQuerySource != null)
+            if (SeriesQuerySource != null && SeriesQuerySource.Any() && SeriesQuerySource.First().Any())
             {
                 foreach (var series in SeriesQuerySource)
-                    BuildInternal(series.First().AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.First().Key, UniqueID = series.First().Key });
+                    if (series.Any())
+                        BuildInternal(series.First().AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.First().Key, UniqueID = series.First().Key });
             }
 
             CalculateTotalRow(NumLevels - 1);

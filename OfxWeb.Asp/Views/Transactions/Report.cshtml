@@ -16,7 +16,7 @@
             int currentyear = DateTime.Now.Year;
             for (int year = 2017; year <= currentyear; ++year)
             {
-                <a asp-action="Report" asp-route-id="@report" asp-route-setyear="@year" class="dropdown-item">@year</a>
+                <a asp-action="Report" asp-route-id="@report" asp-route-year="@year" class="dropdown-item">@year</a>
             }
         }
     </div>

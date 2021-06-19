@@ -1041,32 +1041,34 @@ namespace OfxWeb.Asp.Controllers
 
 
         // GET: Transactions/Report
-        public async Task<IActionResult> Report(string id, int? month, int? weekspct, int? setyear, bool? download, int? level, bool? showmonths)
+        public async Task<IActionResult> Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(parms.id))
             {
-                id = "all";
+                parms.id = "all";
             }
 
-            if (setyear.HasValue)
-                Year = setyear.Value;
+            if (parms.year.HasValue)
+                Year = parms.year.Value;
+            else
+                parms.year = Year;
 
-            if (!month.HasValue)
+            if (!parms.month.HasValue)
             {
                 bool iscurrentyear = (Year == DateTime.Now.Year);
 
                 // By default, month is the current month when looking at the current year.
                 // When looking at previous years, default is the whole year (december)
                 if (iscurrentyear)
-                    month = DateTime.Now.Month;
+                    parms.month = DateTime.Now.Month;
                 else
-                    month = 12;
+                    parms.month = 12;
             }
 
-            var result = new ReportBuilder(_context).BuildReport(id, Year, month, showmonths, level);
+            var result = new ReportBuilder(_context).BuildReport(parms);
 
-            ViewData["report"] = id;
-            ViewData["month"] = month;
+            ViewData["report"] = parms.id;
+            ViewData["month"] = parms.month;
             ViewData["level"] = result.NumLevels;
             ViewData["showmonths"] = result.WithMonthColumns;
 
