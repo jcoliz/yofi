@@ -1069,6 +1069,7 @@ namespace OfxWeb.Asp.Controllers
             ViewData["month"] = parms.month;
             ViewData["level"] = result.NumLevels;
             ViewData["showmonths"] = result.WithMonthColumns;
+            ViewData["Title"] = result.Name;
 
             return View(result);
         }
