@@ -461,15 +461,23 @@ namespace OfxWeb.Asp.Controllers
                     beforedate = new DateTime(now.Year, now.Month, beforeday);
                 }
 
-                Func<Models.Transaction, bool> inscope = (x => x.Timestamp.Year == year && x.Hidden != true);
+                Func<Models.Transaction, bool> inscope_t;
+                Func<Models.Split, bool> inscope_s;
                 if (beforedate.HasValue)
-                    inscope = (x => x.Timestamp < beforedate.Value && x.Timestamp.Year == year && x.Hidden != true);
+                {
+                    inscope_t = (x => x.Timestamp < beforedate.Value && x.Timestamp.Year == year && x.Hidden != true);
+                    inscope_s = (x => x.Transaction.Timestamp < beforedate.Value && x.Transaction.Timestamp.Year == year && x.Transaction.Hidden != true);
+                }
+                else
+                {
+                    inscope_t = (x => x.Timestamp.Year == year && x.Hidden != true);
+                    inscope_s = (x => x.Transaction.Timestamp.Year == year && x.Transaction.Hidden != true);
+                }
 
-                var txs = _context.Transactions.Include(x => x.Splits).Where(inscope).Where(x => !x.Splits.Any()).AsQueryable<ISubReportable>();
-                var splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).AsQueryable<ISubReportable>();
+                var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any()).AsQueryable<ISubReportable>();
+                var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s).AsQueryable<ISubReportable>();
                 var combined = txs.Concat(splits);
                 var groupings = combined.OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
-
                 var builder = new Helpers.ReportBuilder(_context);
                 var report = await builder.ThreeLevelReport(groupings, true);
                 var result = new ApiSummaryReportResult(report);
