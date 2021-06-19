@@ -25,9 +25,7 @@ namespace OfxWeb.Asp.Controllers
     [Authorize(Roles = "Verified")]
     public class TransactionsController : Controller, IController<Models.Transaction>
     {
-        private readonly ApplicationDbContext _context;
-
-        private const int pagesize = 100;
+        #region Constructor
 
         public TransactionsController(ApplicationDbContext context, IConfiguration configuration)
         {
@@ -38,7 +36,10 @@ namespace OfxWeb.Asp.Controllers
 
         }
 
-        // GET: Transactions
+        #endregion
+
+        #region Action Handlers
+
         public async Task<IActionResult> Index(string sortOrder, string search, string searchPayee, string searchCategory, int? page)
         {
             // Sort/Filter: https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/sort-filter-page?view=aspnetcore-2.1
@@ -299,7 +300,6 @@ namespace OfxWeb.Asp.Controllers
             return RedirectToAction("Edit", "Splits", new { id = split.ID });
         }
 
-        // GET: Transactions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -317,7 +317,6 @@ namespace OfxWeb.Asp.Controllers
             return View(transaction);
         }
 
-        // GET: Transactions/Import
         public async Task<IActionResult> Import(string command, string highlight = null)
         {
             var allimported = from s in _context.Transactions
@@ -357,7 +356,6 @@ namespace OfxWeb.Asp.Controllers
             return View(await allimported.AsNoTracking().ToListAsync());
         }
 
-        // POST: Transactions/BulkEdit
         [HttpPost]
         public async Task<IActionResult> BulkEdit(string Category, string SubCategory)
         {
@@ -392,7 +390,6 @@ namespace OfxWeb.Asp.Controllers
         }
 
 
-        // GET: Transactions/Create
         public IActionResult Create()
         {
             return View();
@@ -414,7 +411,6 @@ namespace OfxWeb.Asp.Controllers
             return View(transaction);
         }
 
-        // GET: Transactions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -451,7 +447,6 @@ namespace OfxWeb.Asp.Controllers
             return View(transaction);
         }
 
-        // GET: Transactions/EditModal/5
         public async Task<IActionResult> EditModal(int? id)
         {
             // TODO: Refactor to no duplicate between here and Edit
@@ -489,7 +484,6 @@ namespace OfxWeb.Asp.Controllers
             return PartialView();
         }
 
-        // GET: Transactions/ApplyPayee/5
         public async Task<IActionResult> ApplyPayee(int? id)
         {
             if (id == null)
@@ -671,18 +665,6 @@ namespace OfxWeb.Asp.Controllers
             return RedirectToAction(nameof(Edit), new { id });
         }
 
-
-        private string BlobStoreName
-        {
-            get
-            {
-                var receiptstore = Environment.GetEnvironmentVariable("RECEIPT_STORE");
-                if (string.IsNullOrEmpty(receiptstore))
-                    receiptstore = "myfire-undefined";
-
-                return receiptstore;
-            }
-        }
 
         [HttpPost]
         public async Task<IActionResult> UpSplits(List<IFormFile> files, int id)
@@ -1057,68 +1039,6 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        private IActionResult DownloadReport(Table<Label, Label, decimal> report, string title)
-        {
-            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            try
-            {
-                byte[] reportBytes;
-                using (var package = new ExcelPackage())
-                {
-                    package.Workbook.Properties.Title = title;
-                    package.Workbook.Properties.Author = "coliz.com";
-                    package.Workbook.Properties.Subject = title;
-                    package.Workbook.Properties.Keywords = title;
-
-                    var worksheet = package.Workbook.Worksheets.Add(title);
-                    int rows, cols;
-                    ExportRawReportTo(worksheet, report, out rows, out cols);
-
-                    var tablename = System.Text.RegularExpressions.Regex.Replace(title, @"\s+", "");
-                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), tablename);
-                    tbl.ShowHeader = true;
-                    tbl.TableStyle = TableStyles.Dark9;
-
-                    reportBytes = package.GetAsByteArray();
-                }
-
-                return File(reportBytes, XlsxContentType, $"{title}.xlsx");
-            }
-            catch (Exception)
-            {
-                return NotFound();
-            }
-        }
-        private int? _Year = null;
-        private int Year
-        {
-            get
-            {
-                if (!_Year.HasValue)
-                {
-                    var value = HttpContext?.Session.GetString(nameof(Year));
-                    if (string.IsNullOrEmpty(value))
-                    {
-                        Year = DateTime.Now.Year;
-                    }
-                    else
-                    {
-                        int y = DateTime.Now.Year;
-                        int.TryParse(value, out y);
-                        _Year = y;
-                    }
-                }
-
-                return _Year.Value;
-            }
-            set
-            {
-                _Year = value;
-
-                var serialisedDate = _Year.ToString();
-                HttpContext?.Session.SetString(nameof(Year), serialisedDate);
-            }
-        }
 
         // GET: Transactions/Report
         public async Task<IActionResult> Report(string id, int? month, int? weekspct, int? setyear, bool? download, int? level, bool? showmonths)
@@ -1153,6 +1073,108 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
+#endregion
+
+        #region Internals
+
+        private readonly ApplicationDbContext _context;
+
+        private const int pagesize = 100;
+
+        private int? _Year = null;
+        private int Year
+        {
+            get
+            {
+                if (!_Year.HasValue)
+                {
+                    var value = HttpContext?.Session.GetString(nameof(Year));
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        Year = DateTime.Now.Year;
+                    }
+                    else
+                    {
+                        int y = DateTime.Now.Year;
+                        int.TryParse(value, out y);
+                        _Year = y;
+                    }
+                }
+
+                return _Year.Value;
+            }
+            set
+            {
+                _Year = value;
+
+                var serialisedDate = _Year.ToString();
+                HttpContext?.Session.SetString(nameof(Year), serialisedDate);
+            }
+        }
+
+        private string BlobStoreName
+        {
+            get
+            {
+                var receiptstore = Environment.GetEnvironmentVariable("RECEIPT_STORE");
+                if (string.IsNullOrEmpty(receiptstore))
+                    receiptstore = "myfire-undefined";
+
+                return receiptstore;
+            }
+        }
+
+        private bool TransactionExists(int id)
+        {
+            return _context.Transactions.Any(e => e.ID == id);
+        }
+
+        #endregion
+
+        #region IController
+        Task<IActionResult> IController<Models.Transaction>.Index() => Index(string.Empty, string.Empty, string.Empty, string.Empty, null);
+
+        Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
+
+        Task<IActionResult> IController<Models.Transaction>.Upload(List<IFormFile> files) => Upload(files, string.Empty);
+
+        Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
+        #endregion
+
+        #region Old Reports (Delete me!!)
+
+        private IActionResult DownloadReport(Table<Label, Label, decimal> report, string title)
+        {
+            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            try
+            {
+                byte[] reportBytes;
+                using (var package = new ExcelPackage())
+                {
+                    package.Workbook.Properties.Title = title;
+                    package.Workbook.Properties.Author = "coliz.com";
+                    package.Workbook.Properties.Subject = title;
+                    package.Workbook.Properties.Keywords = title;
+
+                    var worksheet = package.Workbook.Worksheets.Add(title);
+                    int rows, cols;
+                    ExportRawReportTo(worksheet, report, out rows, out cols);
+
+                    var tablename = System.Text.RegularExpressions.Regex.Replace(title, @"\s+", "");
+                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), tablename);
+                    tbl.ShowHeader = true;
+                    tbl.TableStyle = TableStyles.Dark9;
+
+                    reportBytes = package.GetAsByteArray();
+                }
+
+                return File(reportBytes, XlsxContentType, $"{title}.xlsx");
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
         // GET: Transactions/Pivot
         public async Task<IActionResult> Pivot(string report, int? month, int? weekspct, int? setyear, bool? download)
         {
@@ -1213,7 +1235,7 @@ namespace OfxWeb.Asp.Controllers
                     splits = _context.Splits.Include(x => x.Transaction).Where(x => inscope(x.Transaction)).AsQueryable<ISubReportable>();
                     combined = txs.Concat(splits);
                     groupsL2 = combined.OrderBy(x => x.Timestamp).GroupBy(x => x.Timestamp.Month);
-                    result = await builder.ThreeLevelReport(groupsL2,true);
+                    result = await builder.ThreeLevelReport(groupsL2, true);
                     ViewData["Title"] = "Transaction Summary";
                     ViewData["Mapping"] = true;
                     break;
@@ -1294,7 +1316,7 @@ namespace OfxWeb.Asp.Controllers
             {
                 var labelrow = new Label() { Order = 0, Value = category };
 
-                if (monthlth.RowLabels.Where(x=>x == labelrow).Any())
+                if (monthlth.RowLabels.Where(x => x == labelrow).Any())
                 {
                     var budgetval = -budgettx[month, labelrow];
                     var spentval = -monthlth[month, labelrow];
@@ -1450,7 +1472,7 @@ namespace OfxWeb.Asp.Controllers
 
                 foreach (var column in Model.ColumnLabels)
                 {
-                    var cell = Model[column,rowlabel];
+                    var cell = Model[column, rowlabel];
                     worksheet.Cells[row, col].Value = cell;
                     worksheet.Cells[row, col].Style.Numberformat.Format = "$#,##0.00";
                     ++col;
@@ -1465,19 +1487,7 @@ namespace OfxWeb.Asp.Controllers
             rows = row - 1;
             cols = col - 1;
         }
+        #endregion
 
-
-        private bool TransactionExists(int id)
-        {
-            return _context.Transactions.Any(e => e.ID == id);
-        }
-
-        Task<IActionResult> IController<Models.Transaction>.Index() => Index(string.Empty, string.Empty, string.Empty, string.Empty, null);
-
-        Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
-
-        Task<IActionResult> IController<Models.Transaction>.Upload(List<IFormFile> files) => Upload(files, string.Empty);
-
-        Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
     }
 }
