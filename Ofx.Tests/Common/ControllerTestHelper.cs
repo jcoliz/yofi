@@ -12,9 +12,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNetCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace Common.AspNetCore.Test
 {
+
+
     /// <summary>
     /// This is a container for base test functionality that is common to most or all controllers
     /// </summary>
@@ -54,6 +58,14 @@ namespace Common.AspNetCore.Test
         /// Where in the context should we look for T items.
         /// </summary>
         public DbSet<T> dbset;
+
+        /*
+        ILoggerFactory log = LoggerFactory.Create(builder =>
+        {
+            builder.AddConsole(x => { });
+            builder.AddFilter((cat, level) => cat == DbLoggerCategory.Database.Command.Name && level == LogLevel.Information);  // "Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
+        });
+        */
 
         public void SetUp()
         {

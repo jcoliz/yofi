@@ -3,6 +3,7 @@ using Common.Test.Mock;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Controllers.Helpers;
@@ -27,10 +28,20 @@ namespace Ofx.Tests
 
         public TestAzureStorage storage = null;
 
+        public ILoggerFactory logfact = LoggerFactory.Create(builder => 
+        {
+        builder
+        .AddConsole((options) => { })
+        .AddFilter((category, level) => 
+                category == "Microsoft.EntityFrameworkCore.Query"
+                && level == LogLevel.Debug);
+        });
+
         [TestInitialize]
         public void SetUp()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseLoggerFactory(logfact)
                 .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
                 .Options;
 
@@ -753,6 +764,21 @@ namespace Ofx.Tests
                 }
             }
 
+        }
+        [TestMethod]
+        public async Task EFGroupByBugTransactionV3()
+        {
+            await AddFiveTransactions();
+
+            Func<IReportable, bool> inscope_t = x => true;
+
+            var groups = context.Transactions.GroupBy(x=>x.Category).Select(x=> new { key = x.Key, sum = x.Sum(y=>y.Amount) });
+
+            foreach (var group in groups)
+            {
+                Console.WriteLine(group.key);
+                Console.WriteLine(group.sum);
+            }
         }
 
         [TestMethod]
