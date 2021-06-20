@@ -709,6 +709,53 @@ namespace Ofx.Tests
             Assert.AreEqual(1500m, Total.GetProperty("TOTAL").GetDecimal());
         }
         [TestMethod]
+        public async Task EFGroupByBugBudgetTx()
+        {
+            await AddFiveBudgetTxs();
+
+            Func<IReportable, bool> inscope_t = x => true;
+
+            var budgettxs = context.BudgetTxs.Where(inscope_t);
+
+            var budgetgroups = budgettxs.GroupBy(x => x.Category);
+
+            foreach (var group in budgetgroups)
+            {
+                Console.WriteLine(group.Key);
+                Console.WriteLine(group.Count());
+
+                foreach(var item in group.AsEnumerable())
+                {
+                    Console.WriteLine(item.Category);
+                }
+            }
+
+        }
+        [TestMethod]
+        public async Task EFGroupByBugTransactionSplits()
+        {
+            await AddFiveTransactions();
+
+            Func<IReportable, bool> inscope_t = x => true;
+
+            var txs = context.Transactions.Where(inscope_t);
+
+            var groups = txs.GroupBy(x => x.Category);
+
+            foreach (var group in groups)
+            {
+                Console.WriteLine(group.Key);
+                Console.WriteLine(group.Count());
+
+                foreach (var item in group.AsEnumerable())
+                {
+                    Console.WriteLine(item.Category);
+                }
+            }
+
+        }
+
+        [TestMethod]
         public async Task ReportV2export()
         {
             int year = DateTime.Now.Year;

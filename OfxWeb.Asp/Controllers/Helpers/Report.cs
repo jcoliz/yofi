@@ -213,8 +213,25 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (SeriesQuerySource != null && SeriesQuerySource.Any() && SeriesQuerySource.First().Any())
             {
                 foreach (var series in SeriesQuerySource)
-                    if (series.Any())
-                        BuildInternal(series.First().AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.First().Key, UniqueID = series.First().Key });
+                {
+                    var selected = series.Select(x => x.Key).ToList();
+
+                    if (selected.Any())
+                    {
+                        var inmem = series.AsEnumerable();
+                        var list = inmem.ToList();
+
+                        var first = inmem.First();
+                        var source = first.AsQueryable();
+                        var key = first.Key;
+
+                        var tryme = source.ToList();
+
+                        BuildInternal(source, FromLevel, NumLevels, null, new ColumnLabel() { Name = key, UniqueID = key });
+
+                        Console.WriteLine($"OK {key}");
+                    }
+                }
             }
 
             CalculateTotalRow(NumLevels - 1);

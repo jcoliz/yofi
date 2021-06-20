@@ -47,10 +47,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
             Func<Models.Transaction, bool> inscope_t = (x => x.Timestamp.Year == parms.year && x.Hidden != true && x.Timestamp.Month <= parms.month);
             Func<Models.Split, bool> inscope_s = (x => x.Transaction.Timestamp.Year == parms.year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= parms.month);
 
+            // This works around absolutely inexplicable behavior where grouping absolutely does not work without it?!
+            Func<IReportable, bool> inscope_any = x => true;
+
             var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any());
             var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s);
             var txscomplete = txs.AsQueryable<IReportable>().Concat(splits);
-            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == parms.year);
+            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == parms.year).Where(inscope_any).AsQueryable<IReportable>();
 
             var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
             var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
