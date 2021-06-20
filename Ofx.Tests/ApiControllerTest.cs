@@ -770,14 +770,45 @@ namespace Ofx.Tests
         {
             await AddFiveTransactions();
 
-            Func<IReportable, bool> inscope_t = x => true;
-
-            var groups = context.Transactions.GroupBy(x=>x.Category).Select(x=> new { key = x.Key, sum = x.Sum(y=>y.Amount) });
+            var groups = context.Transactions.GroupBy(x => x.Category).Select(g => new { key = g.Key, sum = g.Sum(y => y.Amount) });
 
             foreach (var group in groups)
             {
                 Console.WriteLine(group.key);
                 Console.WriteLine(group.sum);
+            }
+
+        }
+        [TestMethod]
+        public async Task EFMultiGroupByBugTransactionV3()
+        {
+            // I think this will be the new lingua-franca of V3 reports.
+            // Server will group by category or category+month.
+            // Client will split into levels and filter as needed.
+
+            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
+            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
+            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 02, 03), Amount = 100m });
+            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 02, 04), Amount = 200m });
+            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
+            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
+            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 04, 05), Amount = 400m });
+            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 04, 03), Amount = 500m });
+
+            await context.SaveChangesAsync();
+
+            var source1 = context.Transactions.Where(x=>x.Category == "AA").AsQueryable<IReportable>();
+            var source2 = context.Transactions.Where(x => x.Category == "BB").AsQueryable<IReportable>();
+            var source = source1.Concat(source2);
+            var groups = source.GroupBy(x => new { cat = x.Category, month = x.Timestamp.Month }).Select(g => new { key = g.Key, sum = g.Sum(y => y.Amount) });
+
+            foreach (var group in groups)
+            {
+                Console.WriteLine($"{group.key.cat} {group.key.month} {group.sum,6:C0}");
             }
         }
 
