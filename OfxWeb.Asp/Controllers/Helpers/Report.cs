@@ -218,14 +218,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
                     if (selected.Any())
                     {
-                        var inmem = series.AsEnumerable();
-                        var list = inmem.ToList();
-
-                        var first = inmem.First();
+                        var first = series.First();
                         var source = first.AsQueryable();
                         var key = first.Key;
-
-                        var tryme = source.ToList();
 
                         BuildInternal(source, FromLevel, NumLevels, null, new ColumnLabel() { Name = key, UniqueID = key });
 
