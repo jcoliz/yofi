@@ -100,16 +100,16 @@ namespace Common.AspNetCore.Test
             await context.SaveChangesAsync();
         }
 
-        public HashSet<T> ExtractFromExcel<T>(byte[] data) where T : new()
+        public HashSet<TExtract> ExtractFromExcel<TExtract>(byte[] data) where TExtract : new()
         {
-            var incoming = new HashSet<T>();
+            var incoming = new HashSet<TExtract>();
             using (var stream = new MemoryStream(data))
             {
                 var excel = new ExcelPackage(stream);
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(T).Name}s";
+                var sheetname = $"{typeof(TExtract).Name}s";
                 var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto<T>(incoming, includeids: true);
+                worksheet.ExtractInto<TExtract>(incoming, includeids: true);
             }
 
             return incoming;
