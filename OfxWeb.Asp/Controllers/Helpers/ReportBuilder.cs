@@ -62,16 +62,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var txscompleteExpenses = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
             var budgettxsExpenses = budgettxs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
 
-            var serieslistexpenses = new List<IQueryable<IGrouping<string, IReportable>>>()
+            var serieslistexpenses = new Dictionary<string,IQueryable<IReportable>>()
             {
-                txscompleteExpenses.GroupBy(x => "Actual"),
-                budgettxsExpenses.GroupBy(x => "Budget")
+                { "Actual", txscompleteExpenses },
+                { "Budget", budgettxsExpenses },
             };
 
-            var serieslistall = new List<IQueryable<IGrouping<string, IReportable>>>()
+            var serieslistall = new Dictionary<string, IQueryable<IReportable>>()
             {
-                txscomplete.GroupBy(x => "Actual"),
-                budgettxs.GroupBy(x => "Budget")
+                { "Actual", txscomplete },
+                { "Budget", budgettxs },
             };
 
             var budgetpctcolumn = new ColumnLabel()
@@ -147,7 +147,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else if (parms.id == "expenses-v-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
-                result.SeriesQuerySource = serieslistexpenses;
+                result.MultipleSources = serieslistexpenses;
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
@@ -156,7 +156,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else if (parms.id == "all-v-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
-                result.SeriesQuerySource = serieslistall;
+                result.MultipleSources = serieslistall;
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
@@ -203,7 +203,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "export")
             {
-                result.SeriesQuerySource = serieslistall;
+                result.MultipleSources = serieslistall;
                 result.LeafRowsOnly = true;
                 result.WithTotalColumn = false;
                 result.NumLevels = 4;
