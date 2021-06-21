@@ -200,17 +200,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (NumLevels < 1)
                 throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
-            // V3 reports cover only a small slice of the report surface right now
-            bool V3 = (SingleSource != null);
-
+            bool V3 = false;
             if (SingleSource != null && SingleSource.Any())
             {
-                if (V3)
-                {
-                    BuildSingleV3();
-                }
-                else
-                    BuildInternal(SingleSource, SkipLevels, NumLevels, null);
+                V3 = true;
+                BuildSingleV3();
             }
 
             if (SeriesSource != null && SeriesSource.Any())
