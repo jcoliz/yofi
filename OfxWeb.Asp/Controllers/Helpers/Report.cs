@@ -42,7 +42,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         public IQueryable<IReportable> SingleSource { get; set; }
 
-        public Dictionary<string,IQueryable<IReportable>> MultipleSources { get; set; }
+        public IEnumerable<IQueryable<IReportable>> SingleSourceList { get; set; }
+
+        public IEnumerable<KeyValuePair<string,IQueryable<IReportable>>> MultipleSources { get; set; }
 
         /// <summary>
         /// Whether to include columns for individual months
@@ -191,6 +193,13 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 BuildInternal(SingleSource);
             }
+            if (SingleSourceList != null)
+            {
+                foreach(var source in SingleSourceList)
+                    if (source.Any())
+                        BuildInternal(source);
+            }
+
             if (MultipleSources != null)
             {
                 foreach (var kvp in MultipleSources)

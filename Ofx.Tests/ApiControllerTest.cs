@@ -74,11 +74,11 @@ namespace Ofx.Tests
 
         async Task AddFiveTransactions()
         {            
-            context.Transactions.Add(new Transaction() { Category = "BB", SubCategory = "AA", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
-            context.Transactions.Add(new Transaction() { Category = "AA", SubCategory = "AA", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
-            context.Transactions.Add(new Transaction() { Category = "CC", SubCategory = "AA", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { Category = "BB", SubCategory = "AA", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
-            context.Transactions.Add(new Transaction() { Category = "BB", SubCategory = "BB", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
+            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
+            context.Transactions.Add(new Transaction() { Category = "AA:AA", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
+            context.Transactions.Add(new Transaction() { Category = "CC:AA", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
+            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
             
             await context.SaveChangesAsync();
         }
@@ -702,6 +702,9 @@ namespace Ofx.Tests
             await context.SaveChangesAsync();
 
             var actionresult = await controller.ReportV2( new ReportBuilder.Parameters() { id = "all" } );
+            if (actionresult is ObjectResult or)
+                throw or.Value as Exception;
+
             var okresult = actionresult as ContentResult;
             var report = okresult.Content;
 
@@ -715,7 +718,7 @@ namespace Ofx.Tests
             var CC = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC").Single();
             var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
 
-            Assert.AreEqual(8, root.GetArrayLength());
+            Assert.AreEqual(7, root.GetArrayLength());
             Assert.AreEqual(6, Total.EnumerateObject().Count());
             Assert.AreEqual(200m, AAAA.GetProperty("TOTAL").GetDecimal());
             Assert.AreEqual(1000m, BB.GetProperty("TOTAL").GetDecimal());
@@ -824,6 +827,9 @@ namespace Ofx.Tests
             await AddFiveTransactions();
 
             var actionresult = await controller.ReportV2(new ReportBuilder.Parameters() { id = "export" });
+            if (actionresult is ObjectResult or)
+                throw or.Value as Exception;
+
             var okresult = actionresult as ContentResult;
             var report = okresult.Content;
 
