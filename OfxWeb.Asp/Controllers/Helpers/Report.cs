@@ -199,9 +199,15 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (NumLevels < 1)
                 throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
+            // V3 reports cover only a small slice of the report surface right now
+            bool V3 = (SingleSource != null && !WithMonthColumns && !LeafRowsOnly && FromLevel == 0);
+
             if (SingleSource != null && SingleSource.Any())
             {
-                BuildInternal(SingleSource, FromLevel, NumLevels, null);
+                if (V3)
+                    BuildSingleV3();
+                else
+                    BuildInternal(SingleSource, FromLevel, NumLevels, null);
             }
 
             if (SeriesSource != null && SeriesSource.Any())
@@ -229,10 +235,78 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 }
             }
 
-            CalculateTotalRow(NumLevels - 1);
-
+            // V3 reports calculate their own total row, thankyewverymuch
+            if (!V3)
+               CalculateTotalRow(NumLevels - 1);
+ 
             if (LeafRowsOnly)
                 PruneToLeafRows();
+        }
+
+        private void BuildSingleV3()
+        {
+            var groups = SingleSource.GroupBy(x => x.Category).Select(g => new { Name = g.Key, Total = g.Sum(y => y.Amount) });
+
+            foreach (var row in groups)
+            {
+                // Build each grouping into a row
+                var name = row.Name + ":"; // Should not add this colon if leaf rows only
+                var label = new RowLabel() { UniqueID = name };
+                base[TotalColumn, label] = row.Total;
+
+                // Propagate totals upward (should skip if leafrowsonly)
+                BuildPhase_Propagate(label,row.Total);
+            }
+
+            // Prune needless rows
+            BuildPhase_Prune();
+        }
+
+        private void BuildPhase_Propagate(RowLabel from,decimal amount)
+        {
+            var split = from.UniqueID.Split(':');
+            var parentsplit = split.SkipLast(1);
+            if (parentsplit.Any())
+            {
+                var parentid = string.Join(':', parentsplit);
+                var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
+                if (parentrow == null)
+                    parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
+                from.Parent = parentrow;
+
+                base[TotalColumn, parentrow] += amount;
+
+                BuildPhase_Propagate(parentrow, amount);
+
+                from.Level = parentrow.Level - 1;
+            }
+            else
+            {
+                base[TotalColumn, TotalRow] += amount;
+                from.Level = NumLevels - 1;
+            }
+        }
+
+        private void BuildPhase_Prune()
+        {
+            // This gets rid of the case where we might have A:B: sitting under A:B, with no other children.
+            // In that case, A:B: is duplicating A:B, and is ergo needless
+            // Note that this can only be done after ALL the series are in place
+
+            var removeme = new HashSet<RowLabel>();
+            foreach (var row in base.RowLabels)
+            {
+                if (string.IsNullOrEmpty(row.UniqueID.Split(':').Last()))
+                    if (row.Parent != null)
+                        if (base[TotalColumn, row] == base[TotalColumn, row.Parent as RowLabel])
+                            removeme.Add(row);
+
+                // Also prune rows that are below the numrows cutoff
+                if (row.Level < 0)
+                    removeme.Add(row);
+            }
+
+            base._RowLabels.RemoveWhere(x => removeme.Contains(x));
         }
 
         /// <summary>
@@ -250,7 +324,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             var builder = new StringBuilder();
             var name = string.Empty;
-            var padding = String.Concat(Enumerable.Repeat<char>(' ', maxlevel));
+            var padding = (maxlevel > 0) ? String.Concat(Enumerable.Repeat<char>(' ', maxlevel)) : string.Empty;
             builder.Append($"+ {name,15}{padding} ");
 
             foreach (var col in ColumnLabelsFiltered)
@@ -276,8 +350,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 if (name == null)
                     name = "-";
 
-                var padding_before = String.Concat( Enumerable.Repeat<char>('>', line.IsTotal ? 0 : maxlevel - line.Level));
-                var padding_after = String.Concat( Enumerable.Repeat<char>(' ', line.IsTotal ? maxlevel : line.Level));
+                var padding_before = string.Empty; // BROKEN String.Concat( Enumerable.Repeat<char>('>', line.IsTotal ? 0 : maxlevel - line.Level));
+                var padding_after = string.Empty; // BROKEN String.Concat( Enumerable.Repeat<char>(' ', line.IsTotal ? maxlevel : line.Level));
 
                 builder.Append($"{line.Level} {padding_before}{name,-15}{padding_after} ");
 
