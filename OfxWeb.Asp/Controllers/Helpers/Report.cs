@@ -207,14 +207,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 if (V3)
                 {
-                    if (WithMonthColumns)
-                    {
-                        BuildSingleV3Columns();
-                    }
-                    else
-                    {
-                        BuildSingleV3();
-                    }
+                    BuildSingleV3();
                 }
                 else
                     BuildInternal(SingleSource, SkipLevels, NumLevels, null);
@@ -255,17 +248,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         private void BuildSingleV3()
         {
-
-            var groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = 0 }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
-
-            BuildPhase_Place(groups);
-        }
-
-        private void BuildSingleV3Columns()
-        {
-            var groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
-
-            BuildPhase_Place(groups);
+            if (WithMonthColumns)
+            {
+                var groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
+                BuildPhase_Place(groups);
+            }
+            else
+            {
+                var groups = SingleSource.GroupBy(x => new { Name = x.Category }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
+                BuildPhase_Place(groups);
+            }
         }
 
         private void BuildPhase_Place(IQueryable<dynamic> groups)
@@ -287,7 +279,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     var name = string.Join(':', keys) + ":";
                     var row = new RowLabel() { UniqueID = name };
                     ColumnLabel column = null;
-                    if (cell.Key.Month > 0)
+                    if (cell.Key.GetType().GetProperty("Month") != null)
                     {
                         column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
                         base[column, row] += cell.Total;
