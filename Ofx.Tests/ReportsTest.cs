@@ -20,17 +20,6 @@ namespace Ofx.Tests
             public string Category { get; set; }
         }
 
-        public class ReportSeries : IGrouping<string, IReportable>
-        {
-            public string Key { get; set; }
-
-            public IEnumerable<IReportable> Items { get; set; }
-
-            public IEnumerator<IReportable> GetEnumerator() => Items.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => Items.GetEnumerator();
-        }
-
         List<Item> Items;
 
         Report report = null;
@@ -594,21 +583,6 @@ namespace Ofx.Tests
             }
         }
 
-        IEnumerable<IGrouping<string, IReportable>> TwoSeriesSource
-        {
-            get
-            {
-                // Divide the transactios into two imbalanced partitions, each partition will be a series
-                // ToList() needed to execute the index % 3 calculations NOW not later
-                int index = 0;
-                var seriesone = new ReportSeries() { Key = "One", Items = Items.Take(20).Where(x => index++ % 3 == 0).ToList() };
-                index = 0;
-                var seriestwo = new ReportSeries() { Key = "Two", Items = Items.Take(20).Where(x => index++ % 3 != 0).ToList() };
-
-                return new List<ReportSeries>() { seriesone, seriestwo };
-            }
-        }
-
         [TestMethod]
         public void TwoSeries()
         {
@@ -740,5 +714,53 @@ namespace Ofx.Tests
                 Assert.AreEqual(100m, report[Column, report.TotalRow]);
             }
         }
+
+#if false
+        [TestMethod]
+        public void Splits()
+        {
+            int year = DateTime.Now.Year;
+            var ex1 = SplitItems[0];
+            var ex2 = SplitItems[1];
+
+            if (usesplits)
+            {
+                var item = new Transaction() { Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
+
+                context.Transactions.Add(item);
+            }
+            else
+            {
+                var items = new List<Transaction>();
+                items.Add(new Transaction() { Category = ex1.Category, SubCategory = ex1.SubCategory, Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = ex1.Amount });
+                items.Add(new Transaction() { Category = ex2.Category, SubCategory = ex2.SubCategory, Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = ex2.Amount });
+                context.Transactions.AddRange(items);
+            }
+
+            context.SaveChanges();
+
+            var result = await controller.Pivot("all", null, null, year, null);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as Table<Label, Label, decimal>;
+
+            var row_AB = model.RowLabels.Where(x => x.Key1 == "A" && x.Key2 == "B").Single();
+            var col = model.ColumnLabels.First();
+            var actual_AB = model[col, row_AB];
+
+            Assert.AreEqual(ex1.Amount, actual_AB);
+
+            var row_CD = model.RowLabels.Where(x => x.Key1 == "C" && x.Key2 == "D").Single();
+            var actual_CD = model[col, row_CD];
+
+            Assert.AreEqual(ex2.Amount, actual_CD);
+
+            // Make sure the total is correct as well, no extra stuff in there.
+            var row_total = model.RowLabels.Where(x => x.Value == "TOTAL").Single();
+            var actual_total = model[col, row_total];
+
+            Assert.AreEqual(ex1.Amount + ex2.Amount, actual_total);
+        }
+#endif
+
     }
 }
