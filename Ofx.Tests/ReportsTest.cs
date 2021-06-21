@@ -582,6 +582,18 @@ namespace Ofx.Tests
         }
 
 
+        Dictionary<string,IQueryable<IReportable>> MultiSeriesSource
+        {
+            get
+            {
+                var result = new Dictionary<string, IQueryable<IReportable>>();
+                result["One"] = Items.Take(20).Where(x => Items.IndexOf(x) % 3 == 0).ToList().AsQueryable();
+                result["Two"] = Items.Take(20).Where(x => Items.IndexOf(x) % 3 != 0).ToList().AsQueryable();
+
+                return result;
+            }
+        }
+
         IEnumerable<IGrouping<string, IReportable>> TwoSeriesSource
         {
             get
@@ -637,7 +649,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void TwoSeriesDeep()
         {
-            report.SeriesSource = TwoSeriesSource;
+            report.MultipleSources = MultiSeriesSource;
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();

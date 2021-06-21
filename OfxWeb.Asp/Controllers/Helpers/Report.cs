@@ -41,6 +41,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// </remarks>
         public IQueryable<IReportable> SingleSource { get; set; }
 
+        public Dictionary<string,IQueryable<IReportable>> MultipleSources { get; set; }
+
         /// <summary>
         /// Multiple sources of items
         /// </summary>
@@ -204,7 +206,16 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (SingleSource != null && SingleSource.Any())
             {
                 V3 = true;
-                BuildSingleV3();
+                BuildSingleV3(SingleSource);
+            }
+            if (MultipleSources != null)
+            {
+                V3 = true;
+                foreach (var kvp in MultipleSources)
+                {
+                    var seriescolumn = new ColumnLabel() { Name = kvp.Key, UniqueID = kvp.Key };
+                    BuildSingleV3(kvp.Value,seriescolumn);
+                }
             }
 
             if (SeriesSource != null && SeriesSource.Any())
@@ -242,19 +253,19 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
         }
 
-        private void BuildSingleV3()
+        private void BuildSingleV3(IQueryable<IReportable> source, ColumnLabel seriescolumn = null)
         {
             IQueryable<IGrouping<object, IReportable>> groups;
             if (WithMonthColumns)
-                groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
+                groups = source.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
             else
-                groups = SingleSource.GroupBy(x => new { Name = x.Category });
+                groups = source.GroupBy(x => new { Name = x.Category });
 
             var selected = groups.Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
-            BuildPhase_Place(selected);
+            BuildPhase_Place(selected, seriescolumn);
         }
 
-        private void BuildPhase_Place(IQueryable<dynamic> selected)
+        private void BuildPhase_Place(IQueryable<dynamic> selected, ColumnLabel seriescolumn)
         {
             //
             // Phases:
@@ -279,11 +290,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
                         column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
                         base[column, row] += cell.Total;
                     }
+                    if (seriescolumn != null)
+                        base[seriescolumn, row] += cell.Total;
+
                     base[TotalColumn, row] += cell.Total;
 
                     // Propagate totals upward into parent rows which contain totals of all lower-level rows
                     if (!LeafRowsOnly)
-                        BuildPhase_Propagate(row: row, column: column, amount: cell.Total);
+                        BuildPhase_Propagate(row: row, column: column, seriescolumn:seriescolumn, amount: cell.Total);
                 }
             }
 
@@ -292,7 +306,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 BuildPhase_Prune();
         }
 
-        private void BuildPhase_Propagate(decimal amount,RowLabel row, ColumnLabel column = null)
+        private void BuildPhase_Propagate(decimal amount,RowLabel row, ColumnLabel column = null, ColumnLabel seriescolumn = null)
         {
             var split = row.UniqueID.Split(':');
             var parentsplit = split.SkipLast(1);
@@ -307,8 +321,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 base[TotalColumn, parentrow] += amount;
                 if (column != null)
                     base[column, parentrow] += amount;
+                if (seriescolumn != null)
+                    base[seriescolumn, parentrow] += amount;
 
-                BuildPhase_Propagate(amount:amount, row:parentrow, column:column);
+                BuildPhase_Propagate(amount:amount, row:parentrow, column:column, seriescolumn:seriescolumn);
 
                 row.Level = parentrow.Level - 1;
             }
@@ -318,6 +334,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 base[TotalColumn, TotalRow] += amount;
                 if (column != null)
                     base[column, TotalRow] += amount;
+                if (seriescolumn != null)
+                    base[seriescolumn, TotalRow] += amount;
             }
         }
 
