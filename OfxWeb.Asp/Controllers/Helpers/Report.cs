@@ -271,7 +271,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     base[TotalColumn, row] += cell.Total;
 
                     // Propagate totals upward
-                    BuildPhase_Propagate_Columns(row, column, cell.Total);
+                    BuildPhase_Propagate(row:row, column:column, amount:cell.Total);
                 }
             }
 
@@ -291,18 +291,18 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             var groups = SingleSource.GroupBy(x => x.Category).Select(g => new { Name = g.Key, Total = g.Sum(y => y.Amount) });
 
-            foreach (var row in groups)
+            foreach (var cell in groups)
             {
-                var keys = row.Name.Split(':').Skip(SkipLevels);
+                var keys = cell.Name.Split(':').Skip(SkipLevels);
                 if (keys.Any())
                 {
                     // Build each grouping into a row
                     var name = string.Join(':',keys) + ":";
-                    var label = new RowLabel() { UniqueID = name };
-                    base[TotalColumn, label] = row.Total;
+                    var row = new RowLabel() { UniqueID = name };
+                    base[TotalColumn, row] = cell.Total;
 
                     // Propagate totals upward
-                    BuildPhase_Propagate(label,row.Total);
+                    BuildPhase_Propagate(row:row,amount:cell.Total);
                 }
             }
 
@@ -310,9 +310,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
             BuildPhase_Prune();
         }
 
-        private void BuildPhase_Propagate(RowLabel from,decimal amount)
+        private void BuildPhase_Propagate(decimal amount,RowLabel row, ColumnLabel column = null)
         {
-            var split = from.UniqueID.Split(':');
+            var split = row.UniqueID.Split(':');
             var parentsplit = split.SkipLast(1);
             if (parentsplit.Any())
             {
@@ -320,43 +320,19 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
                 if (parentrow == null)
                     parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
-                from.Parent = parentrow;
-
-                base[TotalColumn, parentrow] += amount;
-
-                BuildPhase_Propagate(parentrow, amount);
-
-                from.Level = parentrow.Level - 1;
-            }
-            else
-            {
-                base[TotalColumn, TotalRow] += amount;
-                from.Level = NumLevels - 1;
-            }
-        }
-        private void BuildPhase_Propagate_Columns(RowLabel from, ColumnLabel column, decimal amount)
-        {
-            var split = from.UniqueID.Split(':');
-            var parentsplit = split.SkipLast(1);
-            if (parentsplit.Any())
-            {
-                var parentid = string.Join(':', parentsplit);
-                var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
-                if (parentrow == null)
-                    parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
-                from.Parent = parentrow;
+                row.Parent = parentrow;
 
                 base[TotalColumn, parentrow] += amount;
                 if (column != null)
                     base[column, parentrow] += amount;
 
-                BuildPhase_Propagate_Columns(parentrow, column, amount);
+                BuildPhase_Propagate(amount:amount, row:parentrow, column:column);
 
-                from.Level = parentrow.Level - 1;
+                row.Level = parentrow.Level - 1;
             }
             else
             {
-                from.Level = NumLevels - 1;
+                row.Level = NumLevels - 1;
                 base[TotalColumn, TotalRow] += amount;
                 if (column != null)
                     base[column, TotalRow] += amount;
