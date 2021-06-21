@@ -97,6 +97,7 @@ namespace Ofx.Tests
             report.WithMonthColumns = true;
             report.SingleSource = Items.Take(1).AsQueryable();
             report.Build();
+            report.WriteToConsole();
 
             var Name = GetRow(x => x.Name == "Name");
             var Jan = GetColumn(x => x.Name == "Jan");

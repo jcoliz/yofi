@@ -201,12 +201,21 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
             // V3 reports cover only a small slice of the report surface right now
-            bool V3 = (SingleSource != null && !WithMonthColumns && !LeafRowsOnly);
+            bool V3 = (SingleSource != null && !LeafRowsOnly);
 
             if (SingleSource != null && SingleSource.Any())
             {
                 if (V3)
-                    BuildSingleV3();
+                {
+                    if (WithMonthColumns)
+                    {
+                        BuildSingleV3Columns();
+                    }
+                    else
+                    {
+                        BuildSingleV3();
+                    }
+                }
                 else
                     BuildInternal(SingleSource, SkipLevels, NumLevels, null);
             }
@@ -242,6 +251,33 @@ namespace OfxWeb.Asp.Controllers.Helpers
  
             if (LeafRowsOnly)
                 PruneToLeafRows();
+        }
+
+        private void BuildSingleV3Columns()
+        {
+            var groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
+
+            foreach (var cell in groups)
+            {
+                var keys = cell.Key.Name.Split(':').Skip(SkipLevels);
+                if (keys.Any())
+                {
+                    // Build each grouping into a cell
+                    var name = string.Join(':', keys) + ":";
+                    var row = new RowLabel() { UniqueID = name };
+                    var column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
+
+                    base[column, row] += cell.Total;
+                    base[TotalColumn, row] += cell.Total;
+
+                    // Propagate totals upward
+                    BuildPhase_Propagate_Columns(row, column, cell.Total);
+                }
+            }
+
+            // Prune needless rows
+            BuildPhase_Prune();
+
         }
 
         private void BuildSingleV3()
@@ -296,6 +332,34 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 base[TotalColumn, TotalRow] += amount;
                 from.Level = NumLevels - 1;
+            }
+        }
+        private void BuildPhase_Propagate_Columns(RowLabel from, ColumnLabel column, decimal amount)
+        {
+            var split = from.UniqueID.Split(':');
+            var parentsplit = split.SkipLast(1);
+            if (parentsplit.Any())
+            {
+                var parentid = string.Join(':', parentsplit);
+                var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
+                if (parentrow == null)
+                    parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
+                from.Parent = parentrow;
+
+                base[TotalColumn, parentrow] += amount;
+                if (column != null)
+                    base[column, parentrow] += amount;
+
+                BuildPhase_Propagate_Columns(parentrow, column, amount);
+
+                from.Level = parentrow.Level - 1;
+            }
+            else
+            {
+                from.Level = NumLevels - 1;
+                base[TotalColumn, TotalRow] += amount;
+                if (column != null)
+                    base[column, TotalRow] += amount;
             }
         }
 
