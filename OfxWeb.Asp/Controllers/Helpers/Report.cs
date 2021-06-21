@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -365,7 +366,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     ColumnLabel column = null;
                     if (WithMonthColumns)
                     {
-                        column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
+                        column = new ColumnLabel() 
+                        { 
+                            UniqueID = cell.Key.Month.ToString("D2"), 
+                            Name = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(cell.Key.Month)
+                        };
                         base[column, row] += cell.Total;
                     }
                     if (subtotalcolumn != null)
