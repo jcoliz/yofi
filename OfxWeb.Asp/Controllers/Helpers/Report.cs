@@ -253,34 +253,22 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 PruneToLeafRows();
         }
 
+        private void BuildSingleV3()
+        {
+
+            var groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = 0 }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
+
+            BuildPhase_Place(groups);
+        }
+
         private void BuildSingleV3Columns()
         {
             var groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
 
-            foreach (var cell in groups)
-            {
-                var keys = cell.Key.Name.Split(':').Skip(SkipLevels);
-                if (keys.Any())
-                {
-                    // Build each grouping into a cell
-                    var name = string.Join(':', keys) + ":";
-                    var row = new RowLabel() { UniqueID = name };
-                    var column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
-
-                    base[column, row] += cell.Total;
-                    base[TotalColumn, row] += cell.Total;
-
-                    // Propagate totals upward
-                    BuildPhase_Propagate(row:row, column:column, amount:cell.Total);
-                }
-            }
-
-            // Prune needless rows
-            BuildPhase_Prune();
-
+            BuildPhase_Place(groups);
         }
 
-        private void BuildSingleV3()
+        private void BuildPhase_Place(IQueryable<dynamic> groups)
         {
             //
             // Phases:
@@ -289,20 +277,25 @@ namespace OfxWeb.Asp.Controllers.Helpers
             //  3. Prune
             //
 
-            var groups = SingleSource.GroupBy(x => x.Category).Select(g => new { Name = g.Key, Total = g.Sum(y => y.Amount) });
-
             foreach (var cell in groups)
             {
-                var keys = cell.Name.Split(':').Skip(SkipLevels);
+                string dynamicname = cell.Key.Name;
+                var keys = dynamicname.Split(':').Skip(SkipLevels);
                 if (keys.Any())
                 {
-                    // Build each grouping into a row
-                    var name = string.Join(':',keys) + ":";
+                    // Place each query cell into a report cell
+                    var name = string.Join(':', keys) + ":";
                     var row = new RowLabel() { UniqueID = name };
-                    base[TotalColumn, row] = cell.Total;
+                    ColumnLabel column = null;
+                    if (cell.Key.Month > 0)
+                    {
+                        column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
+                        base[column, row] += cell.Total;
+                    }
+                    base[TotalColumn, row] += cell.Total;
 
                     // Propagate totals upward
-                    BuildPhase_Propagate(row:row,amount:cell.Total);
+                    BuildPhase_Propagate(row: row, column: column, amount: cell.Total);
                 }
             }
 
