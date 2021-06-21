@@ -49,7 +49,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// <remarks>
         /// Must set at least one source of data
         /// </remarks>
-        public IEnumerable<IGrouping<string, IReportable>> SeriesSource { get; set; }
+        private IEnumerable<IGrouping<string, IReportable>> SeriesSource { get; set; }
 
         /// <summary>
         /// Multiple sources of items (IQueryable)
@@ -57,7 +57,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// <remarks>
         /// Must set at least one source of data
         /// </remarks>
-        public IEnumerable<IQueryable<IGrouping<string, IReportable>>> SeriesQuerySource { get; set; }
+        private IEnumerable<IQueryable<IGrouping<string, IReportable>>> SeriesQuerySource { get; set; }
 
         /// <summary>
         /// Whether to include columns for individual months

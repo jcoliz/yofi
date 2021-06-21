@@ -612,7 +612,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void TwoSeries()
         {
-            report.SeriesSource = TwoSeriesSource;
+            report.MultipleSources = MultiSeriesSource;
             report.Build();
             report.WriteToConsole();
 
@@ -627,25 +627,7 @@ namespace Ofx.Tests
             Assert.AreEqual(700m, report[One, report.TotalRow]);
             Assert.AreEqual(1300m, report[Two, report.TotalRow]);
         }
-        [TestMethod]
-        public void TwoSeriesQuerySource()
-        {
-            // Contort our data into the form it will take in production use
-            report.SeriesQuerySource = TwoSeriesSource.Select(x => x.GroupBy(y => x.Key).AsQueryable());
-            report.Build();
-            report.WriteToConsole();
 
-            var Name = GetRow(x => x.Name == "Name");
-            var Other = GetRow(x => x.Name == "Other");
-            var One = GetColumn(x => x.Name == "One");
-            var Two = GetColumn(x => x.Name == "Two");
-
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(700m, report[One, report.TotalRow]);
-            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
-        }
         [TestMethod]
         public void TwoSeriesDeep()
         {
@@ -679,8 +661,8 @@ namespace Ofx.Tests
                     DisplayAsPercent = true,
                     Custom = (cols) => cols["ID:Two"] == 0 ? 0 : cols["ID:One"] / cols["ID:Two"]
                 }
-            );            
-            report.SeriesSource = TwoSeriesSource;
+            );
+            report.MultipleSources = MultiSeriesSource;
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();
@@ -705,8 +687,11 @@ namespace Ofx.Tests
         [TestMethod]
         public void TwoSeriesDeepCols()
         {
+            // I'm not totally sure WHAT this report should like,
+            // So, for now it's going to total all the series into single month cols
+
             report.WithMonthColumns = true;
-            report.SeriesSource = TwoSeriesSource;
+            report.MultipleSources = MultiSeriesSource;
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();
@@ -716,7 +701,7 @@ namespace Ofx.Tests
             var Else = GetRow(x => x.Name == "Else");
             var One = GetColumn(x => x.Name == "One");
             var Two = GetColumn(x => x.Name == "Two");
-            var JunTwo = GetColumn(x => x.Name == "Jun Two");
+            var Jun = GetColumn(x => x.Name == "Jun");
 
             Assert.AreEqual(600m, report[report.TotalColumn, Name]);
             Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
@@ -724,14 +709,19 @@ namespace Ofx.Tests
             Assert.AreEqual(700m, report[One, report.TotalRow]);
             Assert.AreEqual(1300m, report[Two, report.TotalRow]);
             Assert.AreEqual(400m, report[Two, Else]);
-            Assert.AreEqual(200m, report[JunTwo, Else]);
+            Assert.AreEqual(200m, report[Jun, Else]);
+            Assert.AreEqual(400m, report[Jun, report.TotalRow]);
         }
         [TestMethod]
         public void ManySeriesDeep()
         {
             // This crazy test creates a series for every single transaction
 
-            report.SeriesSource = Enumerable.Range(0, 20).Select(i => new ReportSeries() { Key = i.ToString("D2"), Items = Items.Skip(i).Take(1) });
+            var sources = new Dictionary<string, IQueryable<IReportable>>();
+            for(int i = 0; i< 20; ++i)
+                sources[i.ToString("D2")] = Items.Skip(i).Take(1).AsQueryable();
+
+            report.MultipleSources = sources;
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();

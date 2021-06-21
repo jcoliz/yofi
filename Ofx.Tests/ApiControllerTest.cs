@@ -832,18 +832,14 @@ namespace Ofx.Tests
             var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA:").Single();
             var AABB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:BB:").Single();
             var CCAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC:AA:").Single();
-            var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
 
-            Assert.AreEqual(6, root.GetArrayLength());
-            Assert.AreEqual(6, Total.EnumerateObject().Count());
+            Assert.AreEqual(5, root.GetArrayLength());
             Assert.AreEqual(200m, AAAA.GetProperty("ID:Actual").GetDecimal());
             Assert.AreEqual(0m, AABB.GetProperty("ID:Actual").GetDecimal());
             Assert.AreEqual(300m, CCAA.GetProperty("ID:Actual").GetDecimal());
-            Assert.AreEqual(1500m, Total.GetProperty("ID:Actual").GetDecimal());
             Assert.AreEqual(400m, AAAA.GetProperty("ID:Budget").GetDecimal());
             Assert.AreEqual(500m, AABB.GetProperty("ID:Budget").GetDecimal());
             Assert.AreEqual(300m, CCAA.GetProperty("ID:Budget").GetDecimal());
-            Assert.AreEqual(1500m, Total.GetProperty("ID:Budget").GetDecimal());
         }
     }
 }
