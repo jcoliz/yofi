@@ -44,22 +44,6 @@ namespace OfxWeb.Asp.Controllers.Helpers
         public Dictionary<string,IQueryable<IReportable>> MultipleSources { get; set; }
 
         /// <summary>
-        /// Multiple sources of items
-        /// </summary>
-        /// <remarks>
-        /// Must set at least one source of data
-        /// </remarks>
-        private IEnumerable<IGrouping<string, IReportable>> SeriesSource { get; set; }
-
-        /// <summary>
-        /// Multiple sources of items (IQueryable)
-        /// </summary>
-        /// <remarks>
-        /// Must set at least one source of data
-        /// </remarks>
-        private IEnumerable<IQueryable<IGrouping<string, IReportable>>> SeriesQuerySource { get; set; }
-
-        /// <summary>
         /// Whether to include columns for individual months
         /// </summary>
         public bool WithMonthColumns { get; set; } = false;
@@ -202,164 +186,20 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (NumLevels < 1)
                 throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
-            bool V3 = false;
             if (SingleSource != null && SingleSource.Any())
             {
-                V3 = true;
-                BuildSingleV3(SingleSource);
+                BuildInternal(SingleSource);
             }
             if (MultipleSources != null)
             {
-                V3 = true;
                 foreach (var kvp in MultipleSources)
                 {
                     var seriescolumn = new ColumnLabel() { Name = kvp.Key, UniqueID = kvp.Key };
-                    BuildSingleV3(kvp.Value,seriescolumn);
+                    BuildInternal(kvp.Value,seriescolumn);
                 }
             }
-
-            if (SeriesSource != null && SeriesSource.Any())
-            {
-                foreach (var series in SeriesSource)
-                    BuildInternal(series.AsQueryable(), SkipLevels, NumLevels, null, new ColumnLabel() { Name = series.Key, UniqueID = series.Key });
-            }
-
-            if (SeriesQuerySource != null && SeriesQuerySource.Any() && SeriesQuerySource.First().Any())
-            {
-                foreach (var series in SeriesQuerySource)
-                {
-                    var selected = series.Select(x => x.Key).ToList();
-
-                    if (selected.Any())
-                    {
-                        var first = series.First();
-                        var source = first.AsQueryable();
-                        var key = first.Key;
-
-                        BuildInternal(source, SkipLevels, NumLevels, null, new ColumnLabel() { Name = key, UniqueID = key });
-
-                        Console.WriteLine($"OK {key}");
-                    }
-                }
-            }
-
-            // V3 reports calculate their own total row, thankyewverymuch
-            if (!V3)
-            {
-                CalculateTotalRow(NumLevels - 1);
-
-                if (LeafRowsOnly)
-                    PruneToLeafRows();
-            }
         }
 
-        private void BuildSingleV3(IQueryable<IReportable> source, ColumnLabel seriescolumn = null)
-        {
-            IQueryable<IGrouping<object, IReportable>> groups;
-            if (WithMonthColumns)
-                groups = source.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
-            else
-                groups = source.GroupBy(x => new { Name = x.Category });
-
-            var selected = groups.Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
-            BuildPhase_Place(selected, seriescolumn);
-        }
-
-        private void BuildPhase_Place(IQueryable<dynamic> selected, ColumnLabel seriescolumn)
-        {
-            //
-            // Phases:
-            //  1. Place
-            //  2. Propagate
-            //  3. Prune
-            //
-
-            foreach (var cell in selected)
-            {
-                string dynamicname = cell.Key.Name;
-                var keys = dynamicname.Split(':').Skip(SkipLevels);
-                if (keys.Any())
-                {
-                    // Place each query cell into a report cell
-                    var id = string.Join(':', keys) + ":";
-                    var name = LeafRowsOnly ? id : null;
-                    var row = new RowLabel() { Name = name, UniqueID = id };
-                    ColumnLabel column = null;
-                    if (WithMonthColumns)
-                    {
-                        column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
-                        base[column, row] += cell.Total;
-                    }
-                    if (seriescolumn != null)
-                        base[seriescolumn, row] += cell.Total;
-
-                    base[TotalColumn, row] += cell.Total;
-
-                    // Propagate totals upward into parent rows which contain totals of all lower-level rows
-                    if (!LeafRowsOnly)
-                        BuildPhase_Propagate(row: row, column: column, seriescolumn:seriescolumn, amount: cell.Total);
-                }
-            }
-
-            // Prune needless rows
-            if (!LeafRowsOnly)
-                BuildPhase_Prune();
-        }
-
-        private void BuildPhase_Propagate(decimal amount,RowLabel row, ColumnLabel column = null, ColumnLabel seriescolumn = null)
-        {
-            var split = row.UniqueID.Split(':');
-            var parentsplit = split.SkipLast(1);
-            if (parentsplit.Any())
-            {
-                var parentid = string.Join(':', parentsplit);
-                var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
-                if (parentrow == null)
-                    parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
-                row.Parent = parentrow;
-
-                base[TotalColumn, parentrow] += amount;
-                if (column != null)
-                    base[column, parentrow] += amount;
-                if (seriescolumn != null)
-                    base[seriescolumn, parentrow] += amount;
-
-                BuildPhase_Propagate(amount:amount, row:parentrow, column:column, seriescolumn:seriescolumn);
-
-                row.Level = parentrow.Level - 1;
-            }
-            else
-            {
-                row.Level = NumLevels - 1;
-                base[TotalColumn, TotalRow] += amount;
-                if (column != null)
-                    base[column, TotalRow] += amount;
-                if (seriescolumn != null)
-                    base[seriescolumn, TotalRow] += amount;
-            }
-        }
-
-        private void BuildPhase_Prune()
-        {
-            // This gets rid of the case where we might have A:B: sitting under A:B, with no other children.
-            // In that case, A:B: is duplicating A:B, and is ergo needless
-            // Note that this can only be done after ALL the series are in place
-
-            var removeme = new HashSet<RowLabel>();
-            foreach (var row in base.RowLabels)
-            {
-                if (string.IsNullOrEmpty(row.UniqueID.Split(':').Last()))
-                    if (row.Parent != null)
-                        if (base[TotalColumn, row] == base[TotalColumn, row.Parent as RowLabel])
-                            removeme.Add(row);
-
-                // Also prune rows that are below the numrows cutoff
-                if (row.Level < 0)
-                    removeme.Add(row);
-            }
-
-            base._RowLabels.RemoveWhere(x => removeme.Contains(x));
-        }
 
         /// <summary>
         /// Render the report to console
@@ -479,83 +319,126 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// <summary>
         /// Build the report.
         /// </summary>
-        /// <remarks>
-        /// This is the heart of this class.
-        /// </remarks>
-        /// <param name="items">Which items to build into the report</param>
-        /// <param name="fromlevel">How many levels deep into the source data do these items start at</param>
-        /// <param name="numlevels">How many further levels do render build into the report</param>
-        /// <param name="parent">The row which will be the parent of all the rows generated by this call</param>
-        /// <param name="seriescolumn">If we're coming from an individual series, where do we accumulate the series total</param>
-        void BuildInternal(IQueryable<IReportable> items, int fromlevel, int numlevels, RowLabel parent, ColumnLabel seriescolumn = null)
+        /// <param name="source">Source of reportables</param>
+        /// <param name="seriescolumn">Optional column to subtotal into</param>
+        private void BuildInternal(IQueryable<IReportable> source, ColumnLabel seriescolumn = null)
         {
-            var groups = items.GroupBy(x => GetTokenByIndex(x.Category, fromlevel));
+            IQueryable<IGrouping<object, IReportable>> groups;
+            if (WithMonthColumns)
+                groups = source.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
+            else
+                groups = source.GroupBy(x => new { Name = x.Category });
 
-            // Skip empty sub-levels unless we're specifically asking for them (LeafRowsOnly)
-            if (groups.Count() > 1 || groups.Single().Key != null || LeafRowsOnly) 
-            {
-                foreach (var group in groups)
-                {
-                    var token = group.Key;
-                    var newpath = parent == null ? token : $"{parent.UniqueID}:{token}";
-
-                    // In case of LeafRowsOnly, we need a fully-qualified name, because headings will be removed.
-                    var row = new RowLabel() { Name = LeafRowsOnly?newpath:token, Level = numlevels - 1, UniqueID = newpath, Parent = parent };
-
-                    // Bug 900: Rows out of order on multi-series deep lists
-                    if (RowLabels.Contains(row))
-                        row = RowLabels.Single(x => x.Equals(row));
-
-                    var sum = group.Sum(x => x.Amount);
-                    base[TotalColumn, row] += sum;
-                    if (seriescolumn != null)
-                        base[seriescolumn, row] += sum;
-
-                    if (WithMonthColumns)
-                        foreach (var monthgroup in group.GroupBy(x => x.Timestamp.Month))
-                        {
-                            var month = monthgroup.Key;
-                            var column = new ColumnLabel() { UniqueID = month.ToString("D2"), Name = new DateTime(2000, month, 1).ToString("MMM") };
-                            if (seriescolumn != null)
-                            {
-                                column.UniqueID += ":" + seriescolumn.Name;
-                                column.Name += " " + seriescolumn.Name;
-                            }
-                            base[column, row] = monthgroup.Sum(x => x.Amount);
-                        }
-
-                    // Build next level down
-                    if (numlevels > 1 && token != null)
-                        BuildInternal(group.AsQueryable(), fromlevel + 1, numlevels - 1, row, seriescolumn);
-                }
-            }
+            var selected = groups.Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
+            BuildPhase_Place(source:selected, subtotalcolumn:seriescolumn);
         }
 
         /// <summary>
-        /// Calculate the total row, from all the columns above
+        /// Place data into report, and call remaining phases
         /// </summary>
         /// <remarks>
-        /// We are only totally up the top-level rows, because all the lower-level rows
-        /// are accumlated into the top-level rows
+        /// The heart of V3 reports is to push the summing of items into the server side.
+        /// This method is the first place where data is actually brought into the client
+        /// and worked on.
         /// </remarks>
-        /// <param name="usinglevel">What level are the top-levels at</param>
-        void CalculateTotalRow(int usinglevel)
+        /// <param name="source">Report data</param>
+        /// <param name="subtotalcolumn">Optional column to subtotal into</param>
+        private void BuildPhase_Place(IQueryable<dynamic> source, ColumnLabel subtotalcolumn)
         {
-            foreach (var row in base.RowLabels.Where(x => x.Level == usinglevel))
-                foreach (var col in base.ColumnLabels)
-                    base[col, TotalRow] += base[col, row];
+            //
+            // Phases:
+            //  1. Place. Place each incoming data point into a report cell.
+            //  2. Propagate. Propagate those values upward into totalling rows.
+            //  3. Prune. Prune out rows that are not really needed.
+            //
+
+            foreach (var cell in source)
+            {
+                string dynamicname = cell.Key.Name;
+                var keys = dynamicname.Split(':').Skip(SkipLevels);
+                if (keys.Any())
+                {
+                    //  1. Place. Place each incoming data point into a report cell.
+                    var id = string.Join(':', keys) + ":";
+                    var name = LeafRowsOnly ? id : null;
+                    var row = new RowLabel() { Name = name, UniqueID = id };
+                    ColumnLabel column = null;
+                    if (WithMonthColumns)
+                    {
+                        column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
+                        base[column, row] += cell.Total;
+                    }
+                    if (subtotalcolumn != null)
+                        base[subtotalcolumn, row] += cell.Total;
+
+                    base[TotalColumn, row] += cell.Total;
+
+                    //  2. Propagate. Propagate those values upward into totalling rows.
+                    if (!LeafRowsOnly)
+                        BuildPhase_Propagate(row: row, column: column, seriescolumn: subtotalcolumn, amount: cell.Total);
+                }
+            }
+
+            //  3. Prune. Prune out rows that are not really needed.
+            if (!LeafRowsOnly)
+                BuildPhase_Prune();
         }
 
-        void PruneToLeafRows()
+        private void BuildPhase_Propagate(decimal amount, RowLabel row, ColumnLabel column = null, ColumnLabel seriescolumn = null)
         {
-            // Remove parent rows
-            var parents = RowLabels.Where(x => x.Parent != null).Select(x => x.Parent as RowLabel);
-            base._RowLabels.RemoveWhere(x=>parents.Contains(x));
+            var split = row.UniqueID.Split(':');
+            var parentsplit = split.SkipLast(1);
+            if (parentsplit.Any())
+            {
+                var parentid = string.Join(':', parentsplit);
+                var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
+                if (parentrow == null)
+                    parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
+                row.Parent = parentrow;
 
-            // Adjust remaining rows
-            foreach(var row in RowLabels)
-                row.Level = 0;
+                base[TotalColumn, parentrow] += amount;
+                if (column != null)
+                    base[column, parentrow] += amount;
+                if (seriescolumn != null)
+                    base[seriescolumn, parentrow] += amount;
+
+                BuildPhase_Propagate(amount: amount, row: parentrow, column: column, seriescolumn: seriescolumn);
+
+                row.Level = parentrow.Level - 1;
+            }
+            else
+            {
+                row.Level = NumLevels - 1;
+                base[TotalColumn, TotalRow] += amount;
+                if (column != null)
+                    base[column, TotalRow] += amount;
+                if (seriescolumn != null)
+                    base[seriescolumn, TotalRow] += amount;
+            }
         }
+
+        private void BuildPhase_Prune()
+        {
+            // This gets rid of the case where we might have A:B: sitting under A:B, with no other children.
+            // In that case, A:B: is duplicating A:B, and is ergo needless
+            // Note that this can only be done after ALL the series are in place
+
+            var pruned = new HashSet<RowLabel>();
+            foreach (var row in base.RowLabels)
+            {
+                if (string.IsNullOrEmpty(row.UniqueID.Split(':').Last()))
+                    if (row.Parent != null)
+                        if (base[TotalColumn, row] == base[TotalColumn, row.Parent as RowLabel])
+                            pruned.Add(row);
+
+                // Also prune rows that are below the numrows cutoff
+                if (row.Level < 0)
+                    pruned.Add(row);
+            }
+
+            base._RowLabels.RemoveWhere(x => pruned.Contains(x));
+        }
+
 
         /// <summary>
         /// Retrieve all the columns for a certain row in a focused way
