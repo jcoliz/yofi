@@ -568,7 +568,6 @@ namespace Ofx.Tests
         {
             report.SingleSource = Items.Take(20).AsQueryable();
             report.LeafRowsOnly = true;
-            report.NumLevels = 3;
             report.Build();
             report.WriteToConsole();
 
@@ -576,11 +575,10 @@ namespace Ofx.Tests
             var Other = GetRow(x => x.Name == "Other:" && x.Level == 0);
             var Else = GetRow(x => x.Name == "Other:Else:" && x.Level == 0);
 
-            Assert.AreEqual(8, report.RowLabels.Count());
+            Assert.AreEqual(7, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
             Assert.AreEqual(600m, report[report.TotalColumn, Name]);
             Assert.AreEqual(200m, report[report.TotalColumn, Else]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
         }
 
 

@@ -201,7 +201,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
             // V3 reports cover only a small slice of the report surface right now
-            bool V3 = (SingleSource != null && !LeafRowsOnly);
+            bool V3 = (SingleSource != null);
 
             if (SingleSource != null && SingleSource.Any())
             {
@@ -240,27 +240,27 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             // V3 reports calculate their own total row, thankyewverymuch
             if (!V3)
-               CalculateTotalRow(NumLevels - 1);
- 
-            if (LeafRowsOnly)
-                PruneToLeafRows();
+            {
+                CalculateTotalRow(NumLevels - 1);
+
+                if (LeafRowsOnly)
+                    PruneToLeafRows();
+            }
         }
 
         private void BuildSingleV3()
         {
+            IQueryable<IGrouping<object, IReportable>> groups;
             if (WithMonthColumns)
-            {
-                var groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
-                BuildPhase_Place(groups);
-            }
+                groups = SingleSource.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
             else
-            {
-                var groups = SingleSource.GroupBy(x => new { Name = x.Category }).Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
-                BuildPhase_Place(groups);
-            }
+                groups = SingleSource.GroupBy(x => new { Name = x.Category });
+
+            var selected = groups.Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
+            BuildPhase_Place(selected);
         }
 
-        private void BuildPhase_Place(IQueryable<dynamic> groups)
+        private void BuildPhase_Place(IQueryable<dynamic> selected)
         {
             //
             // Phases:
@@ -269,30 +269,33 @@ namespace OfxWeb.Asp.Controllers.Helpers
             //  3. Prune
             //
 
-            foreach (var cell in groups)
+            foreach (var cell in selected)
             {
                 string dynamicname = cell.Key.Name;
                 var keys = dynamicname.Split(':').Skip(SkipLevels);
                 if (keys.Any())
                 {
                     // Place each query cell into a report cell
-                    var name = string.Join(':', keys) + ":";
-                    var row = new RowLabel() { UniqueID = name };
+                    var id = string.Join(':', keys) + ":";
+                    var name = LeafRowsOnly ? id : null;
+                    var row = new RowLabel() { Name = name, UniqueID = id };
                     ColumnLabel column = null;
-                    if (cell.Key.GetType().GetProperty("Month") != null)
+                    if (WithMonthColumns)
                     {
                         column = new ColumnLabel() { UniqueID = cell.Key.Month.ToString("D2"), Name = new DateTime(2000, cell.Key.Month, 1).ToString("MMM") };
                         base[column, row] += cell.Total;
                     }
                     base[TotalColumn, row] += cell.Total;
 
-                    // Propagate totals upward
-                    BuildPhase_Propagate(row: row, column: column, amount: cell.Total);
+                    // Propagate totals upward into parent rows which contain totals of all lower-level rows
+                    if (!LeafRowsOnly)
+                        BuildPhase_Propagate(row: row, column: column, amount: cell.Total);
                 }
             }
 
             // Prune needless rows
-            BuildPhase_Prune();
+            if (!LeafRowsOnly)
+                BuildPhase_Prune();
         }
 
         private void BuildPhase_Propagate(decimal amount,RowLabel row, ColumnLabel column = null)
