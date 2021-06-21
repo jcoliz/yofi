@@ -102,7 +102,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var splitsI = splits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
 
                 result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
-                result.FromLevel = 1;
+                result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
                 result.Name = "Income";
@@ -113,7 +113,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var splitsI = splits.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
 
                 result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
-                result.FromLevel = 1;
+                result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Taxes";
@@ -124,7 +124,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 var splitsI = splits.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
 
                 result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
-                result.FromLevel = 1;
+                result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Savings";

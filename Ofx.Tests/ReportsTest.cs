@@ -483,8 +483,9 @@ namespace Ofx.Tests
         public void SubItemsFromL1()
         {
             report.SingleSource = Items.Skip(9).Take(10).AsQueryable();
-            report.FromLevel = 1;
+            report.SkipLevels = 1;
             report.Build();
+            report.WriteToConsole();
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
@@ -500,7 +501,7 @@ namespace Ofx.Tests
         {
             report.WithMonthColumns = true;
             report.SingleSource = Items.Skip(9).Take(10).AsQueryable();
-            report.FromLevel = 1;
+            report.SkipLevels = 1;
             report.NumLevels = 2;
             report.Build();
 

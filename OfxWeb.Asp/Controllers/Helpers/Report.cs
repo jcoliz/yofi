@@ -68,10 +68,11 @@ namespace OfxWeb.Asp.Controllers.Helpers
         public bool WithTotalColumn { get; set; } = true;
 
         /// <summary>
-        /// How deep into the tree to start showing, where 0 is the top level,
+        /// How many levels of depth to skip before showing the report
+        /// So 0 means start at the top level,
         /// 1 is the 2nd level down
         /// </summary>
-        public int FromLevel { get; set; }
+        public int SkipLevels { get; set; }
 
         /// <summary>
         /// How many levels deep to include
@@ -200,20 +201,20 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
             // V3 reports cover only a small slice of the report surface right now
-            bool V3 = (SingleSource != null && !WithMonthColumns && !LeafRowsOnly && FromLevel == 0);
+            bool V3 = (SingleSource != null && !WithMonthColumns && !LeafRowsOnly);
 
             if (SingleSource != null && SingleSource.Any())
             {
                 if (V3)
                     BuildSingleV3();
                 else
-                    BuildInternal(SingleSource, FromLevel, NumLevels, null);
+                    BuildInternal(SingleSource, SkipLevels, NumLevels, null);
             }
 
             if (SeriesSource != null && SeriesSource.Any())
             {
                 foreach (var series in SeriesSource)
-                    BuildInternal(series.AsQueryable(), FromLevel, NumLevels, null, new ColumnLabel() { Name = series.Key, UniqueID = series.Key });
+                    BuildInternal(series.AsQueryable(), SkipLevels, NumLevels, null, new ColumnLabel() { Name = series.Key, UniqueID = series.Key });
             }
 
             if (SeriesQuerySource != null && SeriesQuerySource.Any() && SeriesQuerySource.First().Any())
@@ -228,7 +229,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                         var source = first.AsQueryable();
                         var key = first.Key;
 
-                        BuildInternal(source, FromLevel, NumLevels, null, new ColumnLabel() { Name = key, UniqueID = key });
+                        BuildInternal(source, SkipLevels, NumLevels, null, new ColumnLabel() { Name = key, UniqueID = key });
 
                         Console.WriteLine($"OK {key}");
                     }
@@ -245,17 +246,28 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         private void BuildSingleV3()
         {
+            //
+            // Phases:
+            //  1. Place
+            //  2. Propagate
+            //  3. Prune
+            //
+
             var groups = SingleSource.GroupBy(x => x.Category).Select(g => new { Name = g.Key, Total = g.Sum(y => y.Amount) });
 
             foreach (var row in groups)
             {
-                // Build each grouping into a row
-                var name = row.Name + ":"; // Should not add this colon if leaf rows only
-                var label = new RowLabel() { UniqueID = name };
-                base[TotalColumn, label] = row.Total;
+                var keys = row.Name.Split(':').Skip(SkipLevels);
+                if (keys.Any())
+                {
+                    // Build each grouping into a row
+                    var name = string.Join(':',keys) + ":";
+                    var label = new RowLabel() { UniqueID = name };
+                    base[TotalColumn, label] = row.Total;
 
-                // Propagate totals upward (should skip if leafrowsonly)
-                BuildPhase_Propagate(label,row.Total);
+                    // Propagate totals upward
+                    BuildPhase_Propagate(label,row.Total);
+                }
             }
 
             // Prune needless rows
