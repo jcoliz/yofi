@@ -118,12 +118,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 UniqueID = "Z",
                 DisplayAsPercent = true,
                 Custom = (cols) =>
-                {
-                    if (cols.ContainsKey("ID:Budget") && cols.ContainsKey("ID:Actual"))
-                        return cols["ID:Budget"] == 0 ? 0 : cols["ID:Actual"] / cols["ID:Budget"];
-                    else
-                        return 0;
-                }
+                    cols.GetValueOrDefault("ID:Budget") == 0 ? 
+                        0 : 
+                        cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")
             };
 
             Func<string, IEnumerable<IQueryable<IReportable>>> txsplitsfor = e =>
