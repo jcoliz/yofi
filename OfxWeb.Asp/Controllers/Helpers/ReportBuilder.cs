@@ -44,34 +44,38 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var period = new DateTime(parms.year.Value, parms.month.Value, 1);
             result.Description = $"For {parms.year.Value} through {period.ToString("MMMM")} ";
 
-            Func<Models.Transaction, bool> inscope_t = (x => x.Timestamp.Year == parms.year && x.Hidden != true && x.Timestamp.Month <= parms.month);
-            Func<Models.Split, bool> inscope_s = (x => x.Transaction.Timestamp.Year == parms.year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= parms.month);
-
-            // This works around absolutely inexplicable behavior where grouping absolutely does not work without it?!
-            Func<IReportable, bool> inscope_any = x => true;
-
-            var txs = _context.Transactions.Include(x => x.Splits).Where(inscope_t).Where(x => !x.Splits.Any());
-            var splits = _context.Splits.Include(x => x.Transaction).Where(inscope_s);
-            var txscomplete = txs.AsQueryable<IReportable>().Concat(splits);
-            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == parms.year).Where(inscope_any).AsQueryable<IReportable>();
+            var txs = _context.Transactions.Include(x => x.Splits).Where(x => x.Timestamp.Year == parms.year && x.Hidden != true && x.Timestamp.Month <= parms.month).Where(x => !x.Splits.Any());
+            var splits = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Timestamp.Year == parms.year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= parms.month).ToList().AsQueryable<IReportable>();
+            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == parms.year).AsQueryable<IReportable>();
 
             var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
             var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
-            var txsExpenses = txs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category?.StartsWith(y) ?? false));
-            var splitsExpenses = splits.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
-            var txscompleteExpenses = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
-            var budgettxsExpenses = budgettxs.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)));
+            var txsExpenses = txs.Where(x => x.Category != null && !excludeExpenses.Contains(x.Category)).ToList().Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y))).AsQueryable<IReportable>(); 
+            var splitsExpenses = splits.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y))).ToList().AsQueryable<IReportable>();
+            var budgettxsExpenses = budgettxs.Where(x => x.Category != null && !excludeExpenses.Contains(x.Category)).ToList().Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y))).AsQueryable<IReportable>();
 
-            var serieslistexpenses = new Dictionary<string,IQueryable<IReportable>>()
+            var txscomplete = new List<IQueryable<IReportable>>()
             {
-                { "Actual", txscompleteExpenses },
-                { "Budget", budgettxsExpenses },
+                txs, splits
             };
 
-            var serieslistall = new Dictionary<string, IQueryable<IReportable>>()
+            var txscompleteExpenses = new List<IQueryable<IReportable>>()
             {
-                { "Actual", txscomplete },
-                { "Budget", budgettxs },
+                txsExpenses, splitsExpenses
+            };
+
+            var serieslistexpenses = new List<KeyValuePair<string, IQueryable<IReportable>>>()
+            {
+                new KeyValuePair<string, IQueryable<IReportable>>("Actual", txsExpenses),
+                new KeyValuePair<string, IQueryable<IReportable>>("Actual", splitsExpenses),
+                new KeyValuePair<string, IQueryable<IReportable>>("Budget", budgettxsExpenses),
+            };
+
+            var serieslistall = new List<KeyValuePair<string, IQueryable<IReportable>>>()
+            {
+                new KeyValuePair<string, IQueryable<IReportable>>("Actual", txs),
+                new KeyValuePair<string, IQueryable<IReportable>>("Actual", splits),
+                new KeyValuePair<string, IQueryable<IReportable>>("Budget", budgettxs),
             };
 
             var budgetpctcolumn = new ColumnLabel()
@@ -88,20 +92,27 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 }
             };
 
+            Func<string, IEnumerable<IQueryable<IReportable>>> txsplitsfor = e =>
+            {
+                string ecolon = $"{e}:";
+                return new List<IQueryable<IReportable>>()
+                {
+                    txs.Where(x => x.Category == e || x.Category.StartsWith(ecolon)),
+                    splits.Where(x => x.Category == e || x.Category.StartsWith(ecolon)).ToList().AsQueryable<IReportable>()
+                };
+            };
+
             if (parms.id == "all")
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 2;
-                result.SingleSource = txs.AsQueryable<IReportable>().Concat(splits);
+                result.SingleSourceList = txscomplete;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "All Transactions";
             }
             else if (parms.id == "income")
             {
-                var txsI = txs.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
-                var splitsI = splits.Where(x => x.Category == "Income" || x.Category.StartsWith("Income:"));
-
-                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
+                result.SingleSourceList = txsplitsfor("Income");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
@@ -109,10 +120,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "taxes")
             {
-                var txsI = txs.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
-                var splitsI = splits.Where(x => x.Category == "Taxes" || x.Category.StartsWith("Taxes:"));
-
-                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
+                result.SingleSourceList = txsplitsfor("Taxes");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
@@ -120,10 +128,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "savings")
             {
-                var txsI = txs.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
-                var splitsI = splits.Where(x => x.Category == "Savings" || x.Category.StartsWith("Savings:"));
-
-                result.SingleSource = txsI.AsQueryable<IReportable>().Concat(splitsI);
+                result.SingleSourceList = txsplitsfor("Savings");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
@@ -132,7 +137,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else if (parms.id == "expenses")
             {
                 result.WithMonthColumns = true;
-                result.SingleSource = txsExpenses.AsQueryable<IReportable>().Concat(splitsExpenses);
+                result.SingleSourceList = txscompleteExpenses;
                 result.NumLevels = 2;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
