@@ -8,6 +8,20 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Controllers.Helpers
 {
+    public class Query : List<KeyValuePair<string, IQueryable<IReportable>>>
+    {
+        public Query() { }
+        public Query(IQueryable<IReportable> single)
+        {
+            Add(new KeyValuePair<string, IQueryable<IReportable>>(string.Empty, single));
+        }
+        public Query(params Query[] many)
+        {
+            foreach(var q in many)
+                AddRange(q);
+        }
+
+    }
     public class ReportBuilder
     {
         /// <summary>
@@ -32,17 +46,44 @@ namespace OfxWeb.Asp.Controllers.Helpers
             _context = context;
         }
 
+        private int Year;
+        private int Month;
+
+        public Query QueryTransactions()
+        {
+            var txs = _context.Transactions
+                .Include(x => x.Splits)
+                .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
+                .Where(x => !x.Splits.Any());
+
+            return new Query(txs);
+        }
+
+        public Query QuerySplits()
+        {
+            var splits = _context.Splits
+                .Include(x => x.Transaction)
+                .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
+                .ToList()
+                .AsQueryable<IReportable>();
+
+            return new Query(splits);
+        }
+
+        public Query QueryTransactionsComplete()
+        {
+            return new Query(QueryTransactions(),QuerySplits());
+        }
+
         public Report BuildReport(Parameters parms)
         {
             var result = new Report();
 
-            if (!parms.month.HasValue)
-                parms.month = 12;
-            if (!parms.year.HasValue)
-                parms.year = DateTime.Now.Year;
+            Month = parms.month ?? 12;
+            Year = parms.year ?? DateTime.Now.Year;
 
-            var period = new DateTime(parms.year.Value, parms.month.Value, 1);
-            result.Description = $"For {parms.year.Value} through {period.ToString("MMMM")} ";
+            var period = new DateTime(Year, Month, 1);
+            result.Description = $"For {Year} through {period.ToString("MMMM")} ";
 
             // NOTE: These ToList()'s and AsEnumerable()'s have been added wherever Entity Framework couldn't build queries
             // in the report generator. AsEnumerable() is preferred, as it defers execution. However in some cases, THAT 
@@ -53,17 +94,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             var txs = _context.Transactions
                 .Include(x => x.Splits)
-                .Where(x => x.Timestamp.Year == parms.year && x.Hidden != true && x.Timestamp.Month <= parms.month)
+                .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
                 .Where(x => !x.Splits.Any());
 
             var splits = _context.Splits
                 .Include(x => x.Transaction)
-                .Where(x => x.Transaction.Timestamp.Year == parms.year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= parms.month)
+                .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
                 .ToList()
                 .AsQueryable<IReportable>();
             
             var budgettxs = _context.BudgetTxs
-                .Where(x => x.Timestamp.Year == parms.year);
+                .Where(x => x.Timestamp.Year == Year);
             
             var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
             
@@ -137,7 +178,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 2;
-                result.SingleSourceList = txscomplete;
+                result.MultipleSources = QueryTransactionsComplete();
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "All Transactions";
             }
@@ -203,7 +244,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.NumLevels = 3;
                 result.SingleSource = budgettxs.AsQueryable<IReportable>();
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
-                result.Description = $"For {parms.year}";
+                result.Description = $"For {Year}";
                 result.Name = "Full Budget";
             }
             else if (parms.id == "yoy")

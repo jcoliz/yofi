@@ -204,7 +204,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 foreach (var kvp in MultipleSources)
                 {
-                    var seriescolumn = new ColumnLabel() { Name = kvp.Key, UniqueID = kvp.Key };
+                    ColumnLabel seriescolumn = null;
+                    if (!string.IsNullOrEmpty(kvp.Key))
+                        seriescolumn = new ColumnLabel() { Name = kvp.Key, UniqueID = kvp.Key };
+
                     BuildInternal(kvp.Value,seriescolumn);
                 }
             }
