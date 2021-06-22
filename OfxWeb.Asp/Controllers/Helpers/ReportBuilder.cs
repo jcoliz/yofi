@@ -49,17 +49,23 @@ namespace OfxWeb.Asp.Controllers.Helpers
         private int Year;
         private int Month;
 
-        public Query QueryTransactions()
+        public Query QueryTransactions(string topcategory = null)
         {
             var txs = _context.Transactions
                 .Include(x => x.Splits)
                 .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
                 .Where(x => !x.Splits.Any());
 
+            if (topcategory != null)
+            {
+                string ecolon = $"{topcategory}:";
+                txs = txs.Where(x => x.Category == topcategory || x.Category.StartsWith(ecolon));
+            }
+
             return new Query(txs);
         }
 
-        public Query QuerySplits()
+        public Query QuerySplits(string topcategory = null)
         {
             var splits = _context.Splits
                 .Include(x => x.Transaction)
@@ -67,12 +73,18 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 .ToList()
                 .AsQueryable<IReportable>();
 
+            if (topcategory != null)
+            {
+                string ecolon = $"{topcategory}:";
+                splits = splits.Where(x => x.Category == topcategory || x.Category.StartsWith(ecolon));
+            }
+
             return new Query(splits);
         }
 
-        public Query QueryTransactionsComplete()
+        public Query QueryTransactionsComplete(string topcategory = null)
         {
-            return new Query(QueryTransactions(),QuerySplits());
+            return new Query(QueryTransactions(topcategory),QuerySplits(topcategory));
         }
 
         public Report BuildReport(Parameters parms)
@@ -184,7 +196,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "income")
             {
-                result.SingleSourceList = txsplitsfor("Income");
+                result.MultipleSources = QueryTransactionsComplete("Income");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
@@ -192,7 +204,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "taxes")
             {
-                result.SingleSourceList = txsplitsfor("Taxes");
+                result.MultipleSources = QueryTransactionsComplete("Taxes");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
@@ -200,7 +212,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "savings")
             {
-                result.SingleSourceList = txsplitsfor("Savings");
+                result.MultipleSources = QueryTransactionsComplete("Savings");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
