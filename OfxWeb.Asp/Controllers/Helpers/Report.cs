@@ -44,7 +44,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public IEnumerable<IQueryable<IReportable>> SingleSourceList { get; set; }
 
-        public IEnumerable<KeyValuePair<string,IQueryable<IReportable>>> MultipleSources { get; set; }
+        public IEnumerable<KeyValuePair<string,IQueryable<IReportable>>> Source { get; set; }
 
         /// <summary>
         /// Whether to include columns for individual months
@@ -200,9 +200,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
                         BuildInternal(source);
             }
 
-            if (MultipleSources != null)
+            if (Source != null)
             {
-                foreach (var kvp in MultipleSources)
+                foreach (var kvp in Source)
                 {
                     ColumnLabel seriescolumn = null;
                     if (!string.IsNullOrEmpty(kvp.Key))
