@@ -213,15 +213,20 @@ namespace OfxWeb.Asp.Controllers.Helpers
             {
                 var years = _context.Transactions.Select(x=>x.Timestamp.Year).Distinct().ToList();
 
-                var txsyoy = new Dictionary<string, IQueryable<IReportable>>();
-                var splitsyoy = new Dictionary<string, IQueryable<IReportable>>();
+                var yoy = new List<KeyValuePair<string, IQueryable<IReportable>>>();
                 foreach (var year in years)
                 {
                     var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
                     var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
 
-                    txsyoy[year.ToString()] = txsyear;
-                    splitsyoy[year.ToString()] = splitsyear;
+                    yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
+                        year.ToString(),
+                        txsyear
+                    ));
+                    yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
+                        year.ToString(),
+                        splitsyear
+                    ));
                 }
 
                 result.Description = $"For {years.Min()} to {years.Max()}";
@@ -229,9 +234,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Year over Year";
 
-                result.MultipleSources = txsyoy;
-                result.Build();
-                result.MultipleSources = splitsyoy;
+                result.MultipleSources = yoy;
             }
             else if (parms.id == "export")
             {
