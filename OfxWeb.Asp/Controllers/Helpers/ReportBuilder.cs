@@ -87,6 +87,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
             return new Query(QueryTransactions(topcategory),QuerySplits(topcategory));
         }
 
+        public Query QueryBudget()
+        {
+            var budgettxs = _context.BudgetTxs
+                .Where(x => x.Timestamp.Year == Year);
+
+            return new Query(budgettxs);
+        }
+
         public Report BuildReport(Parameters parms)
         {
             var result = new Report();
@@ -141,11 +149,6 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
 
-            var txscomplete = new List<IQueryable<IReportable>>()
-            {
-                txs, splits
-            };
-
             var txscompleteExpenses = new List<IQueryable<IReportable>>()
             {
                 txsExpenses, splitsExpenses
@@ -174,16 +177,6 @@ namespace OfxWeb.Asp.Controllers.Helpers
                     cols.GetValueOrDefault("ID:Budget") == 0 ? 
                         0 : 
                         cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")
-            };
-
-            Func<string, IEnumerable<IQueryable<IReportable>>> txsplitsfor = e =>
-            {
-                string ecolon = $"{e}:";
-                return new List<IQueryable<IReportable>>()
-                {
-                    txs.Where(x => x.Category == e || x.Category.StartsWith(ecolon)),
-                    splits.Where(x => x.Category == e || x.Category.StartsWith(ecolon))
-                };
             };
 
             if (parms.id == "all")
@@ -254,7 +247,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else if (parms.id == "budget")
             {
                 result.NumLevels = 3;
-                result.SingleSource = budgettxs.AsQueryable<IReportable>();
+                result.MultipleSources = QueryBudget();
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Description = $"For {Year}";
                 result.Name = "Full Budget";
