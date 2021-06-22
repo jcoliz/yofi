@@ -59,25 +59,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
         private int Year;
         private int Month;
 
+        // NOTE: These ToList()'s and AsEnumerable()'s have been added wherever Entity Framework couldn't build queries
+        // in the report generator. AsEnumerable() is preferred, as it defers execution. However in some cases, THAT 
+        // doesn't even work, so I needed ToList().
 
-        /*
-         *
-         var splitsExpenses = splits
-                .Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
-                .ToList()
-                .AsQueryable<IReportable>();
-            
-            var budgettxsExpenses = budgettxs
-                .Where(x => x.Category != null && !excludeExpenses.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
-                .AsQueryable<IReportable>();
-
-            var txscompleteExpenses = new List<IQueryable<IReportable>>()
-            {
-                txsExpenses, splitsExpenses
-            };
-        */
         public Query QueryTransactions(string top = null)
         {
             var txs = _context.Transactions
@@ -197,6 +182,29 @@ namespace OfxWeb.Asp.Controllers.Helpers
             );
         }
 
+        public Query QueryYearOverYear(out int[] years)
+        {
+            years = _context.Transactions.Select(x => x.Timestamp.Year).Distinct().ToArray();
+
+            var yoy = new Query();
+            foreach (var year in years)
+            {
+                var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
+                var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
+
+                yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
+                    year.ToString(),
+                    txsyear
+                ));
+                yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
+                    year.ToString(),
+                    splitsyear
+                ));
+            }
+
+            return yoy;
+        }
+
         public Report BuildReport(Parameters parms)
         {
             var result = new Report();
@@ -206,70 +214,9 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
             var period = new DateTime(Year, Month, 1);
             result.Description = $"For {Year} through {period.ToString("MMMM")} ";
-
-            // NOTE: These ToList()'s and AsEnumerable()'s have been added wherever Entity Framework couldn't build queries
-            // in the report generator. AsEnumerable() is preferred, as it defers execution. However in some cases, THAT 
-            // doesn't even work, so I needed ToList().
-            //
-            // TODO: Should avoid executing these ToList operations here, because it could needlessly take time. However,
-            // MOST queries require at least the splits ToList(), so it is more rare that it's not needed.
-
-            var txs = _context.Transactions
-                .Include(x => x.Splits)
-                .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
-                .Where(x => !x.Splits.Any());
-
-            var splits = _context.Splits
-                .Include(x => x.Transaction)
-                .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
-                .ToList()
-                .AsQueryable<IReportable>();
-            
-            var budgettxs = _context.BudgetTxs
-                .Where(x => x.Timestamp.Year == Year);
             
             var notexpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
             
-            var excludestartsExpenses = notexpenses
-                .Select(x => $"{x}:")
-                .ToList();
-            
-            var txsExpenses = txs
-                .Where(x => x.Category != null && !notexpenses.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
-                .AsQueryable<IReportable>(); 
-            
-            var splitsExpenses = splits
-                .Where(x => !notexpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
-                .ToList()
-                .AsQueryable<IReportable>();
-            
-            var budgettxsExpenses = budgettxs
-                .Where(x => x.Category != null && !notexpenses.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
-                .AsQueryable<IReportable>();
-
-            var txscompleteExpenses = new List<IQueryable<IReportable>>()
-            {
-                txsExpenses, splitsExpenses
-            };
-
-            var serieslistexpenses = new List<KeyValuePair<string, IQueryable<IReportable>>>()
-            {
-                new KeyValuePair<string, IQueryable<IReportable>>("Actual", txsExpenses),
-                new KeyValuePair<string, IQueryable<IReportable>>("Actual", splitsExpenses),
-                new KeyValuePair<string, IQueryable<IReportable>>("Budget", budgettxsExpenses),
-            };
-
-            var serieslistall = new List<KeyValuePair<string, IQueryable<IReportable>>>()
-            {
-                new KeyValuePair<string, IQueryable<IReportable>>("Actual", txs),
-                new KeyValuePair<string, IQueryable<IReportable>>("Actual", splits),
-                new KeyValuePair<string, IQueryable<IReportable>>("Budget", budgettxs),
-            };
-
             var budgetpctcolumn = new ColumnLabel()
             {
                 Name = "% Progress",
@@ -356,30 +303,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "yoy")
             {
-                var years = _context.Transactions.Select(x=>x.Timestamp.Year).Distinct().ToList();
-
-                var yoy = new List<KeyValuePair<string, IQueryable<IReportable>>>();
-                foreach (var year in years)
-                {
-                    var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
-                    var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
-
-                    yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
-                        year.ToString(),
-                        txsyear
-                    ));
-                    yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
-                        year.ToString(),
-                        splitsyear
-                    ));
-                }
-
+                var years = new int[] { };
+                result.MultipleSources = QueryYearOverYear(out years);
                 result.Description = $"For {years.Min()} to {years.Max()}";
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Year over Year";
-
-                result.MultipleSources = yoy;
             }
             else if (parms.id == "export")
             {
@@ -399,9 +328,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
 
             if (parms.showmonths.HasValue)
-            {
                 result.WithMonthColumns = parms.showmonths.Value;
-            }
 
             result.Build();
             result.WriteToConsole();
