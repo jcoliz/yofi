@@ -59,23 +59,57 @@ namespace OfxWeb.Asp.Controllers.Helpers
         private int Year;
         private int Month;
 
-        public Query QueryTransactions(string topcategory = null)
+
+        /*
+         *
+         var splitsExpenses = splits
+                .Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
+                .ToList()
+                .AsQueryable<IReportable>();
+            
+            var budgettxsExpenses = budgettxs
+                .Where(x => x.Category != null && !excludeExpenses.Contains(x.Category))
+                .AsEnumerable()
+                .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
+                .AsQueryable<IReportable>();
+
+            var txscompleteExpenses = new List<IQueryable<IReportable>>()
+            {
+                txsExpenses, splitsExpenses
+            };
+        */
+        public Query QueryTransactions(string top = null)
         {
             var txs = _context.Transactions
                 .Include(x => x.Splits)
                 .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
                 .Where(x => !x.Splits.Any());
 
-            if (topcategory != null)
+            if (top != null)
             {
-                string ecolon = $"{topcategory}:";
-                txs = txs.Where(x => x.Category == topcategory || x.Category.StartsWith(ecolon));
+                string ecolon = $"{top}:";
+                txs = txs.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
             }
 
             return new Query(txs);
         }
 
-        public Query QuerySplits(string topcategory = null)
+        public Query QueryTransactionsExcept(IEnumerable<string> excluetopcategories)
+        {
+            var excluetopcategoriesstartswith = excluetopcategories
+                .Select(x => $"{x}:")
+                .ToList();
+
+            var txsExcept = QueryTransactions().First().Value
+                .Where(x => x.Category != null && !excluetopcategories.Contains(x.Category))
+                .AsEnumerable()
+                .Where(x => !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                .AsQueryable<IReportable>();
+
+            return new Query(txsExcept);
+        }
+
+        public Query QuerySplits(string top = null)
         {
             var splits = _context.Splits
                 .Include(x => x.Transaction)
@@ -83,20 +117,42 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 .ToList()
                 .AsQueryable<IReportable>();
 
-            if (topcategory != null)
+            if (top != null)
             {
-                string ecolon = $"{topcategory}:";
-                splits = splits.Where(x => x.Category == topcategory || x.Category.StartsWith(ecolon));
+                string ecolon = $"{top}:";
+                splits = splits.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
             }
 
             return new Query(splits);
         }
 
-        public Query QueryTransactionsComplete(string topcategory = null)
+        public Query QuerySplitsExcept(IEnumerable<string> excluetopcategories)
+        {
+            var excluetopcategoriesstartswith = excluetopcategories
+                .Select(x => $"{x}:")
+                .ToList();
+
+            var splitsExcept = QuerySplits().First().Value
+                   .Where(x => !excluetopcategories.Contains(x.Category) && !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                   .ToList()
+                   .AsQueryable<IReportable>();
+
+            return new Query(splitsExcept);
+        }
+
+        public Query QueryTransactionsComplete(string top = null)
         {
             return new Query(
-                QueryTransactions(topcategory),
-                QuerySplits(topcategory)
+                QueryTransactions(top),
+                QuerySplits(top)
+            );
+        }
+
+        public Query QueryTransactionsCompleteExcept(IEnumerable<string> tops)
+        {
+            return new Query(
+                QueryTransactionsExcept(tops),
+                QuerySplitsExcept(tops)
             );
         }
 
@@ -108,12 +164,36 @@ namespace OfxWeb.Asp.Controllers.Helpers
             return new Query(budgettxs);
         }
 
+        public Query QueryBudgetExcept(IEnumerable<string> tops)
+        {
+            var topstarts = tops
+                .Select(x => $"{x}:")
+                .ToList();
+
+            var budgetExcept = QueryBudget().First().Value
+                .Where(x => x.Category != null && !tops.Contains(x.Category))
+                .AsEnumerable()
+                .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
+                .AsQueryable<IReportable>();
+
+            return new Query(budgetExcept);
+        }
+
         public Query QueryActualVsBudget()
         {
             return new Query
             (
                 QueryTransactionsComplete().Labeled("Actual"),
                 QueryBudget().Labeled("Budget")
+            );
+        }
+
+        public Query QueryActualVsBudgetExcept(IEnumerable<string> tops)
+        {
+            return new Query
+            (
+                QueryTransactionsCompleteExcept(tops).Labeled("Actual"),
+                QueryBudgetExcept(tops).Labeled("Budget")
             );
         }
 
@@ -148,25 +228,25 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var budgettxs = _context.BudgetTxs
                 .Where(x => x.Timestamp.Year == Year);
             
-            var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
+            var notexpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
             
-            var excludestartsExpenses = excludeExpenses
+            var excludestartsExpenses = notexpenses
                 .Select(x => $"{x}:")
                 .ToList();
             
             var txsExpenses = txs
-                .Where(x => x.Category != null && !excludeExpenses.Contains(x.Category))
+                .Where(x => x.Category != null && !notexpenses.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>(); 
             
             var splitsExpenses = splits
-                .Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
+                .Where(x => !notexpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
                 .ToList()
                 .AsQueryable<IReportable>();
             
             var budgettxsExpenses = budgettxs
-                .Where(x => x.Category != null && !excludeExpenses.Contains(x.Category))
+                .Where(x => x.Category != null && !notexpenses.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
@@ -211,7 +291,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "income")
             {
-                result.MultipleSources = QueryTransactionsComplete("Income");
+                result.MultipleSources = QueryTransactionsComplete(top: "Income");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
@@ -219,7 +299,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "taxes")
             {
-                result.MultipleSources = QueryTransactionsComplete("Taxes");
+                result.MultipleSources = QueryTransactionsComplete(top: "Taxes");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
@@ -227,7 +307,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "savings")
             {
-                result.MultipleSources = QueryTransactionsComplete("Savings");
+                result.MultipleSources = QueryTransactionsComplete(top: "Savings");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
@@ -236,14 +316,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else if (parms.id == "expenses")
             {
                 result.WithMonthColumns = true;
-                result.SingleSourceList = txscompleteExpenses;
+                result.MultipleSources = QueryTransactionsCompleteExcept(tops: notexpenses);
                 result.NumLevels = 2;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
             }
             else if (parms.id == "expenses-budget")
             {
-                result.SingleSource = budgettxsExpenses.AsQueryable<IReportable>();
+                result.MultipleSources = QueryBudgetExcept(tops: notexpenses);
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
                 result.Name = "Expenses Budget";
@@ -251,7 +331,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else if (parms.id == "expenses-v-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
-                result.MultipleSources = serieslistexpenses;
+                result.MultipleSources = QueryActualVsBudgetExcept(tops: notexpenses);
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
@@ -303,7 +383,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             }
             else if (parms.id == "export")
             {
-                result.MultipleSources = serieslistall;
+                result.MultipleSources = QueryActualVsBudget();
                 result.LeafRowsOnly = true;
                 result.WithTotalColumn = false;
                 result.NumLevels = 4;
