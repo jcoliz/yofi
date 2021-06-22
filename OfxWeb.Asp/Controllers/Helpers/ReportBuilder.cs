@@ -44,15 +44,49 @@ namespace OfxWeb.Asp.Controllers.Helpers
             var period = new DateTime(parms.year.Value, parms.month.Value, 1);
             result.Description = $"For {parms.year.Value} through {period.ToString("MMMM")} ";
 
-            var txs = _context.Transactions.Include(x => x.Splits).Where(x => x.Timestamp.Year == parms.year && x.Hidden != true && x.Timestamp.Month <= parms.month).Where(x => !x.Splits.Any());
-            var splits = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Timestamp.Year == parms.year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= parms.month).ToList().AsQueryable<IReportable>();
-            var budgettxs = _context.BudgetTxs.Where(x => x.Timestamp.Year == parms.year).AsQueryable<IReportable>();
+            // NOTE: These ToList()'s and AsEnumerable()'s have been added wherever Entity Framework couldn't build queries
+            // in the report generator. AsEnumerable() is preferred, as it defers execution. However in some cases, THAT 
+            // doesn't even work, so I needed ToList().
+            //
+            // TODO: Should avoid executing these ToList operations here, because it could needlessly take time. However,
+            // MOST queries require at least the splits ToList(), so it is more rare that it's not needed.
 
+            var txs = _context.Transactions
+                .Include(x => x.Splits)
+                .Where(x => x.Timestamp.Year == parms.year && x.Hidden != true && x.Timestamp.Month <= parms.month)
+                .Where(x => !x.Splits.Any());
+
+            var splits = _context.Splits
+                .Include(x => x.Transaction)
+                .Where(x => x.Transaction.Timestamp.Year == parms.year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= parms.month)
+                .ToList()
+                .AsQueryable<IReportable>();
+            
+            var budgettxs = _context.BudgetTxs
+                .Where(x => x.Timestamp.Year == parms.year);
+            
             var excludeExpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
-            var excludestartsExpenses = excludeExpenses.Select(x => $"{x}:").ToList();
-            var txsExpenses = txs.Where(x => x.Category != null && !excludeExpenses.Contains(x.Category)).ToList().Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y))).AsQueryable<IReportable>(); 
-            var splitsExpenses = splits.Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y))).ToList().AsQueryable<IReportable>();
-            var budgettxsExpenses = budgettxs.Where(x => x.Category != null && !excludeExpenses.Contains(x.Category)).ToList().Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y))).AsQueryable<IReportable>();
+            
+            var excludestartsExpenses = excludeExpenses
+                .Select(x => $"{x}:")
+                .ToList();
+            
+            var txsExpenses = txs
+                .Where(x => x.Category != null && !excludeExpenses.Contains(x.Category))
+                .AsEnumerable()
+                .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
+                .AsQueryable<IReportable>(); 
+            
+            var splitsExpenses = splits
+                .Where(x => !excludeExpenses.Contains(x.Category) && !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
+                .ToList()
+                .AsQueryable<IReportable>();
+            
+            var budgettxsExpenses = budgettxs
+                .Where(x => x.Category != null && !excludeExpenses.Contains(x.Category))
+                .AsEnumerable()
+                .Where(x => !excludestartsExpenses.Any(y => x.Category.StartsWith(y)))
+                .AsQueryable<IReportable>();
 
             var txscomplete = new List<IQueryable<IReportable>>()
             {
@@ -98,7 +132,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 return new List<IQueryable<IReportable>>()
                 {
                     txs.Where(x => x.Category == e || x.Category.StartsWith(ecolon)),
-                    splits.Where(x => x.Category == e || x.Category.StartsWith(ecolon)).ToList().AsQueryable<IReportable>()
+                    splits.Where(x => x.Category == e || x.Category.StartsWith(ecolon))
                 };
             };
 
