@@ -15,10 +15,20 @@ namespace OfxWeb.Asp.Controllers.Helpers
         {
             Add(new KeyValuePair<string, IQueryable<IReportable>>(string.Empty, single));
         }
+        public Query(IEnumerable<KeyValuePair<string, IQueryable<IReportable>>> items)
+        {
+            AddRange(items);
+        }
+
         public Query(params Query[] many)
         {
             foreach(var q in many)
                 AddRange(q);
+        }
+
+        public Query Labeled(string label)
+        {
+            return new Query(this.Select(x => new KeyValuePair<string, IQueryable<IReportable>>(label, x.Value)));
         }
 
     }
@@ -84,7 +94,10 @@ namespace OfxWeb.Asp.Controllers.Helpers
 
         public Query QueryTransactionsComplete(string topcategory = null)
         {
-            return new Query(QueryTransactions(topcategory),QuerySplits(topcategory));
+            return new Query(
+                QueryTransactions(topcategory),
+                QuerySplits(topcategory)
+            );
         }
 
         public Query QueryBudget()
@@ -93,6 +106,15 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 .Where(x => x.Timestamp.Year == Year);
 
             return new Query(budgettxs);
+        }
+
+        public Query QueryActualVsBudget()
+        {
+            return new Query
+            (
+                QueryTransactionsComplete().Labeled("Actual"),
+                QueryBudget().Labeled("Budget")
+            );
         }
 
         public Report BuildReport(Parameters parms)
@@ -238,7 +260,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
             else if (parms.id == "all-v-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
-                result.MultipleSources = serieslistall;
+                result.MultipleSources = QueryActualVsBudget();
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
