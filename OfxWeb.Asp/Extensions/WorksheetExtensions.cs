@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using System.Threading.Tasks;
 using OfficeOpenXml;
+using System.Text.Json.Serialization;
 
 namespace OfficeOpenXml
 {
@@ -99,7 +100,7 @@ namespace OfficeOpenXml
 
             // If we don't want a property to show up when it's being json serialized, we also don't want 
             // it to show up when we're exporting it.
-            var properties = typeof(T).GetProperties().Where(x => ! x.IsDefined(typeof(Newtonsoft.Json.JsonIgnoreAttribute)));
+            var properties = typeof(T).GetProperties().Where(x => ! x.IsDefined(typeof(JsonIgnoreAttribute)));
             int col = 1;
             foreach (var property in properties)
             {

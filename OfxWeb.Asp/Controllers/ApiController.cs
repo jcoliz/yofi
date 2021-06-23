@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using OfficeOpenXml;
 using OfxWeb.Asp.Controllers.Reports;
 using OfxWeb.Asp.Data;
@@ -11,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -471,6 +472,23 @@ namespace OfxWeb.Asp.Controllers
         }
     }
 
+    // https://github.com/dotnet/runtime/issues/43026
+    class ExceptionConverter : JsonConverter<Exception>
+    {
+        public override Exception Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Write(Utf8JsonWriter writer, Exception value, JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+            writer.WriteString("Message", value.Message);
+            writer.WriteString("Type", value.GetType().Name);
+            writer.WriteEndObject();
+        }
+    }
+
     public class ApiResult
     {
         public bool Ok { get; set; } = true;
@@ -485,7 +503,17 @@ namespace OfxWeb.Asp.Controllers
             Ok = false;
         }
 
-        public static implicit operator string(ApiResult r) => JsonConvert.SerializeObject(r);
+        public static implicit operator string(ApiResult r)
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = null,
+                WriteIndented = true
+            };
+            options.Converters.Add(new ExceptionConverter());
+
+            return JsonSerializer.Serialize(r, r.GetType(), options);
+        }
     }
 
     public class ApiTransactionResult : ApiResult
