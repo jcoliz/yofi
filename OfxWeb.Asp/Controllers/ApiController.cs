@@ -454,7 +454,7 @@ namespace OfxWeb.Asp.Controllers
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, ex);
+                return StatusCode(500, ex);
             }
         }
 
