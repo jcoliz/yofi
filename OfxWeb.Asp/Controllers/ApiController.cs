@@ -437,7 +437,7 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/reportv2/all
         [HttpGet("ReportV2/{id}")]
-        public async Task<ActionResult> ReportV2([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
+        public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
         {
             try
             {

@@ -701,7 +701,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             await context.SaveChangesAsync();
 
-            var actionresult = await controller.ReportV2( new ReportBuilder.Parameters() { id = "all" } );
+            var actionresult = controller.ReportV2( new ReportBuilder.Parameters() { id = "all" } );
             if (actionresult is ObjectResult or)
                 throw or.Value as Exception;
 
@@ -826,7 +826,7 @@ namespace Ofx.Tests
             await AddFiveBudgetTxs();
             await AddFiveTransactions();
 
-            var actionresult = await controller.ReportV2(new ReportBuilder.Parameters() { id = "export" });
+            var actionresult = controller.ReportV2(new ReportBuilder.Parameters() { id = "export" });
             if (actionresult is ObjectResult or)
                 throw or.Value as Exception;
 

@@ -1039,7 +1039,7 @@ namespace OfxWeb.Asp.Controllers
 
 
         // GET: Transactions/Report
-        public async Task<IActionResult> Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
+        public IActionResult Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
         {
             if (string.IsNullOrEmpty(parms.id))
             {

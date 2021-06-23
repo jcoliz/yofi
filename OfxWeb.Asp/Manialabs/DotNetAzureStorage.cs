@@ -27,7 +27,9 @@ namespace ManiaLabs.NET
 
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         async Task<string> IPlatformAzureStorage.PostTableEntry(string TableName, IReadOnlyDictionary<string, string> Fields)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
 #if true
             // Needs to be rewritten for SDK v12, but I don't use table entires here, so task for later.
