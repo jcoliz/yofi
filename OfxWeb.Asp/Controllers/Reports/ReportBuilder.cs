@@ -26,167 +26,23 @@ namespace OfxWeb.Asp.Controllers.Reports
             public int? level { get; set; }
         }
         private readonly ApplicationDbContext _context;
+        private readonly QueryBuilder _qbuilder;
 
         public ReportBuilder(ApplicationDbContext context)
         {
             _context = context;
+            _qbuilder = new QueryBuilder(context);
         }
 
         private int Year;
         private int Month;
 
-        // NOTE: These ToList()'s and AsEnumerable()'s have been added wherever Entity Framework couldn't build queries
-        // in the report generator. AsEnumerable() is preferred, as it defers execution. However in some cases, THAT 
-        // doesn't even work, so I needed ToList().
-
-        public Query QueryTransactions(string top = null)
-        {
-            var txs = _context.Transactions
-                .Include(x => x.Splits)
-                .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
-                .Where(x => !x.Splits.Any());
-
-            if (top != null)
-            {
-                string ecolon = $"{top}:";
-                txs = txs.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
-            }
-
-            return new Query(txs);
-        }
-
-        public Query QueryTransactionsExcept(IEnumerable<string> excluetopcategories)
-        {
-            var excluetopcategoriesstartswith = excluetopcategories
-                .Select(x => $"{x}:")
-                .ToList();
-
-            var txsExcept = QueryTransactions().First().Value
-                .Where(x => x.Category != null && !excluetopcategories.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
-                .AsQueryable<IReportable>();
-
-            return new Query(txsExcept);
-        }
-
-        public Query QuerySplits(string top = null)
-        {
-            var splits = _context.Splits
-                .Include(x => x.Transaction)
-                .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
-                .ToList()
-                .AsQueryable<IReportable>();
-
-            if (top != null)
-            {
-                string ecolon = $"{top}:";
-                splits = splits.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
-            }
-
-            return new Query(splits);
-        }
-
-        public Query QuerySplitsExcept(IEnumerable<string> excluetopcategories)
-        {
-            var excluetopcategoriesstartswith = excluetopcategories
-                .Select(x => $"{x}:")
-                .ToList();
-
-            var splitsExcept = QuerySplits().First().Value
-                   .Where(x => !excluetopcategories.Contains(x.Category) && !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
-                   .ToList()
-                   .AsQueryable<IReportable>();
-
-            return new Query(splitsExcept);
-        }
-
-        public Query QueryTransactionsComplete(string top = null)
-        {
-            return new Query(
-                QueryTransactions(top),
-                QuerySplits(top)
-            );
-        }
-
-        public Query QueryTransactionsCompleteExcept(IEnumerable<string> tops)
-        {
-            return new Query(
-                QueryTransactionsExcept(tops),
-                QuerySplitsExcept(tops)
-            );
-        }
-
-        public Query QueryBudget()
-        {
-            var budgettxs = _context.BudgetTxs
-                .Where(x => x.Timestamp.Year == Year);
-
-            return new Query(budgettxs);
-        }
-
-        public Query QueryBudgetExcept(IEnumerable<string> tops)
-        {
-            var topstarts = tops
-                .Select(x => $"{x}:")
-                .ToList();
-
-            var budgetExcept = QueryBudget().First().Value
-                .Where(x => x.Category != null && !tops.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
-                .AsQueryable<IReportable>();
-
-            return new Query(budgetExcept);
-        }
-
-        public Query QueryActualVsBudget()
-        {
-            return new Query
-            (
-                QueryTransactionsComplete().Labeled("Actual"),
-                QueryBudget().Labeled("Budget")
-            );
-        }
-
-        public Query QueryActualVsBudgetExcept(IEnumerable<string> tops)
-        {
-            return new Query
-            (
-                QueryTransactionsCompleteExcept(tops).Labeled("Actual"),
-                QueryBudgetExcept(tops).Labeled("Budget")
-            );
-        }
-
-        public Query QueryYearOverYear(out int[] years)
-        {
-            years = _context.Transactions.Select(x => x.Timestamp.Year).Distinct().ToArray();
-
-            var yoy = new Query();
-            foreach (var year in years)
-            {
-                var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
-                var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
-
-                yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
-                    year.ToString(),
-                    txsyear
-                ));
-                yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
-                    year.ToString(),
-                    splitsyear
-                ));
-            }
-
-            return yoy;
-        }
-
         public Report BuildReport(Parameters parms)
         {
             var result = new Report();
 
-            Month = parms.month ?? 12;
-            Year = parms.year ?? DateTime.Now.Year;
+            _qbuilder.Month = Month = parms.month ?? 12;
+            _qbuilder.Year = Year = parms.year ?? DateTime.Now.Year;
 
             var period = new DateTime(Year, Month, 1);
             result.Description = $"For {Year} through {period.ToString("MMMM")} ";
@@ -208,45 +64,45 @@ namespace OfxWeb.Asp.Controllers.Reports
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 2;
-                result.Source = QueryTransactionsComplete();
+                result.Source = _qbuilder.QueryTransactionsComplete();
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "All Transactions";
             }
             else if (parms.id == "income")
             {
-                result.Source = QueryTransactionsComplete(top: "Income");
+                result.Source = _qbuilder.QueryTransactionsComplete(top: "Income");
                 result.SkipLevels = 1;
-                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.DisplayLevelAdjustment = 1;
                 result.SortOrder = Report.SortOrders.TotalAscending;
                 result.Name = "Income";
             }
             else if (parms.id == "taxes")
             {
-                result.Source = QueryTransactionsComplete(top: "Taxes");
+                result.Source = _qbuilder.QueryTransactionsComplete(top: "Taxes");
                 result.SkipLevels = 1;
-                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.DisplayLevelAdjustment = 1;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Taxes";
             }
             else if (parms.id == "savings")
             {
-                result.Source = QueryTransactionsComplete(top: "Savings");
+                result.Source = _qbuilder.QueryTransactionsComplete(top: "Savings");
                 result.SkipLevels = 1;
-                result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
+                result.DisplayLevelAdjustment = 1;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Savings";
             }
             else if (parms.id == "expenses")
             {
                 result.WithMonthColumns = true;
-                result.Source = QueryTransactionsCompleteExcept(tops: notexpenses);
+                result.Source = _qbuilder.QueryTransactionsCompleteExcept(tops: notexpenses);
                 result.NumLevels = 2;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
             }
             else if (parms.id == "expenses-budget")
             {
-                result.Source = QueryBudgetExcept(tops: notexpenses);
+                result.Source = _qbuilder.QueryBudgetExcept(tops: notexpenses);
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses Budget";
@@ -254,7 +110,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             else if (parms.id == "expenses-v-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
-                result.Source = QueryActualVsBudgetExcept(tops: notexpenses);
+                result.Source = _qbuilder.QueryActualVsBudgetExcept(tops: notexpenses);
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
@@ -263,7 +119,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             else if (parms.id == "all-v-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
-                result.Source = QueryActualVsBudget();
+                result.Source = _qbuilder.QueryActualVsBudget();
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
@@ -272,7 +128,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             else if (parms.id == "budget")
             {
                 result.NumLevels = 3;
-                result.Source = QueryBudget();
+                result.Source = _qbuilder.QueryBudget();
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Description = $"For {Year}";
                 result.Name = "Full Budget";
@@ -280,7 +136,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             else if (parms.id == "yoy")
             {
                 var years = new int[] { };
-                result.Source = QueryYearOverYear(out years);
+                result.Source = _qbuilder.QueryYearOverYear(out years);
                 result.Description = $"For {years.Min()} to {years.Max()}";
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
@@ -288,7 +144,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "export")
             {
-                result.Source = QueryActualVsBudget();
+                result.Source = _qbuilder.QueryActualVsBudget();
                 result.LeafRowsOnly = true;
                 result.WithTotalColumn = false;
                 result.NumLevels = 4;
