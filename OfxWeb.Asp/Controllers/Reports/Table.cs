@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OfxWeb.Asp.Controllers.Helpers
+namespace OfxWeb.Asp.Controllers.Reports
 {
     /// <summary>
     /// This is a standardized way for reports to be formulated. It is simply a

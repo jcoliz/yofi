@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Controllers.Helpers
+namespace OfxWeb.Asp.Controllers.Reports
 {
     public class Query : List<KeyValuePair<string, IQueryable<IReportable>>>
     {
@@ -238,7 +238,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.WithMonthColumns = true;
                 result.NumLevels = 2;
                 result.Source = QueryTransactionsComplete();
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "All Transactions";
             }
             else if (parms.id == "income")
@@ -246,7 +246,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.Source = QueryTransactionsComplete(top: "Income");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
-                result.SortOrder = Helpers.Report.SortOrders.TotalAscending;
+                result.SortOrder = Report.SortOrders.TotalAscending;
                 result.Name = "Income";
             }
             else if (parms.id == "taxes")
@@ -254,7 +254,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.Source = QueryTransactionsComplete(top: "Taxes");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Taxes";
             }
             else if (parms.id == "savings")
@@ -262,7 +262,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.Source = QueryTransactionsComplete(top: "Savings");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1; // Push levels up one when displaying
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Savings";
             }
             else if (parms.id == "expenses")
@@ -270,14 +270,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.WithMonthColumns = true;
                 result.Source = QueryTransactionsCompleteExcept(tops: notexpenses);
                 result.NumLevels = 2;
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
             }
             else if (parms.id == "expenses-budget")
             {
                 result.Source = QueryBudgetExcept(tops: notexpenses);
                 result.NumLevels = 3;
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses Budget";
             }
             else if (parms.id == "expenses-v-budget")
@@ -286,7 +286,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.Source = QueryActualVsBudgetExcept(tops: notexpenses);
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses vs. Budget";
             }
             else if (parms.id == "all-v-budget")
@@ -295,14 +295,14 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.Source = QueryActualVsBudget();
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "All vs. Budget";
             }
             else if (parms.id == "budget")
             {
                 result.NumLevels = 3;
                 result.Source = QueryBudget();
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Description = $"For {Year}";
                 result.Name = "Full Budget";
             }
@@ -312,7 +312,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.Source = QueryYearOverYear(out years);
                 result.Description = $"For {years.Min()} to {years.Max()}";
                 result.NumLevels = 3;
-                result.SortOrder = Helpers.Report.SortOrders.TotalDescending;
+                result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Year over Year";
             }
             else if (parms.id == "export")
@@ -321,7 +321,7 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 result.LeafRowsOnly = true;
                 result.WithTotalColumn = false;
                 result.NumLevels = 4;
-                result.SortOrder = Helpers.Report.SortOrders.NameAscending;
+                result.SortOrder = Report.SortOrders.NameAscending;
                 result.Name = "Transaction Export";
             }
 

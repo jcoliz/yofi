@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 
-namespace OfxWeb.Asp.Controllers.Helpers
+namespace OfxWeb.Asp.Controllers.Reports
 {
     /// <summary>
     /// Table-based report: Arranges IReportable items into tables

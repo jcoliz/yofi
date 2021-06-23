@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Controllers;
-using OfxWeb.Asp.Controllers.Helpers;
+using OfxWeb.Asp.Controllers.Reports;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
