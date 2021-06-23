@@ -691,14 +691,16 @@ namespace Ofx.Tests
         {
             // This crazy test creates a series for every single transaction
 
-            report.Source = Enumerable
+            report.Source = new Query(
+                Enumerable
                 .Range(0, 20)
-                .Select(i => 
+                .Select(i =>
                     new KeyValuePair<string, IQueryable<IReportable>>(
-                        i.ToString("D2"), 
+                        i.ToString("D2"),
                         Items.Skip(i).Take(1).AsQueryable()
                         )
-                    );
+                    )
+            );
 
             report.NumLevels = 2;
             report.Build();
