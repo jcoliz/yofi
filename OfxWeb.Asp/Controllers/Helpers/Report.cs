@@ -35,15 +35,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
         public string Description { get; set; }
 
         /// <summary>
-        /// Single sources of items
+        /// Where to get items
         /// </summary>
-        /// <remarks>
-        /// Must set at least one source of data
-        /// </remarks>
-        public IQueryable<IReportable> SingleSource { get; set; }
-
-        public IEnumerable<IQueryable<IReportable>> SingleSourceList { get; set; }
-
         public IEnumerable<KeyValuePair<string,IQueryable<IReportable>>> Source { get; set; }
 
         /// <summary>
@@ -189,30 +182,12 @@ namespace OfxWeb.Asp.Controllers.Helpers
             if (NumLevels < 1)
                 throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
 
-            if (SingleSource != null && SingleSource.Any())
-            {
-                BuildInternal(SingleSource);
-            }
-            if (SingleSourceList != null)
-            {
-                foreach(var source in SingleSourceList)
-                    if (source.Any())
-                        BuildInternal(source);
-            }
+            if (Source == null)
+                throw new ArgumentOutOfRangeException(nameof(Source), "Must set a source");
 
-            if (Source != null)
-            {
-                foreach (var kvp in Source)
-                {
-                    ColumnLabel seriescolumn = null;
-                    if (!string.IsNullOrEmpty(kvp.Key))
-                        seriescolumn = new ColumnLabel() { Name = kvp.Key, UniqueID = kvp.Key };
-
-                    BuildInternal(kvp.Value,seriescolumn);
-                }
-            }
+            foreach (var kvp in Source)
+                BuildPhase_Group(kvp);
         }
-
 
         /// <summary>
         /// Render the report to console
@@ -255,8 +230,8 @@ namespace OfxWeb.Asp.Controllers.Helpers
                 if (name == null)
                     name = "-";
 
-                var padding_before = string.Empty; // BROKEN String.Concat( Enumerable.Repeat<char>('>', line.IsTotal ? 0 : maxlevel - line.Level));
-                var padding_after = string.Empty; // BROKEN String.Concat( Enumerable.Repeat<char>(' ', line.IsTotal ? maxlevel : line.Level));
+                var padding_before = string.Concat( Enumerable.Repeat<char>('>', line.IsTotal ? 0 : maxlevel - line.Level));
+                var padding_after = string.Concat( Enumerable.Repeat<char>(' ', line.IsTotal ? maxlevel : line.Level));
 
                 builder.Append($"{line.Level} {padding_before}{name,-15}{padding_after} ");
 
@@ -330,20 +305,31 @@ namespace OfxWeb.Asp.Controllers.Helpers
         #region Internal Methods
 
         /// <summary>
-        /// Build the report.
+        /// Group source transactions by name/month and calculate totals, and call remaining
+        /// phases.
         /// </summary>
-        /// <param name="source">Source of reportables</param>
-        /// <param name="seriescolumn">Optional column to subtotal into</param>
-        private void BuildInternal(IQueryable<IReportable> source, ColumnLabel seriescolumn = null)
+        /// <remarks>
+        /// Phases:
+        ///  1. Group. Group source transactions by name/month and calculate totals
+        ///  2. Place. Place each incoming data point into a report cell.
+        ///  3. Propagate. Propagate those values upward into totalling rows.
+        ///  4. Prune. Prune out rows that are not really needed.
+        /// </remarks>
+        /// <param name="kvp">Source of reportables, with optional series name key</param>
+
+        private void BuildPhase_Group(KeyValuePair<string, IQueryable<IReportable>> kvp)
         {
             IQueryable<IGrouping<object, IReportable>> groups;
             if (WithMonthColumns)
-                groups = source.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
+                groups = kvp.Value.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
             else
-                groups = source.GroupBy(x => new { Name = x.Category });
+                groups = kvp.Value.GroupBy(x => new { Name = x.Category });
 
+            //  1. Group. Group source transactions by name/month and calculate totals
             var selected = groups.Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
-            BuildPhase_Place(source:selected, subtotalcolumn:seriescolumn);
+
+            //  2. Place. Place each incoming data point into a report cell.
+            BuildPhase_Place(source: selected, seriesname: kvp.Key);
         }
 
         /// <summary>
@@ -355,23 +341,17 @@ namespace OfxWeb.Asp.Controllers.Helpers
         /// and worked on.
         /// </remarks>
         /// <param name="source">Report data</param>
-        /// <param name="subtotalcolumn">Optional column to subtotal into</param>
-        private void BuildPhase_Place(IQueryable<dynamic> source, ColumnLabel subtotalcolumn)
+        /// <param name="seriesname">Optional column to subtotal into</param>
+        private void BuildPhase_Place(IQueryable<dynamic> source, string seriesname)
         {
-            //
-            // Phases:
-            //  1. Place. Place each incoming data point into a report cell.
-            //  2. Propagate. Propagate those values upward into totalling rows.
-            //  3. Prune. Prune out rows that are not really needed.
-            //
-
+            var seriescolumn = string.IsNullOrEmpty(seriesname) ? null : new ColumnLabel() { Name = seriesname, UniqueID = seriesname };
             foreach (var cell in source)
             {
                 string dynamicname = cell.Key.Name;
                 var keys = dynamicname.Split(':').Skip(SkipLevels);
                 if (keys.Any())
                 {
-                    //  1. Place. Place each incoming data point into a report cell.
+                    //  2. Place. Place each incoming data point into a report cell.
                     var id = string.Join(':', keys) + ":";
                     var name = LeafRowsOnly ? id : null;
                     var row = new RowLabel() { Name = name, UniqueID = id };
@@ -385,18 +365,18 @@ namespace OfxWeb.Asp.Controllers.Helpers
                         };
                         base[column, row] += cell.Total;
                     }
-                    if (subtotalcolumn != null)
-                        base[subtotalcolumn, row] += cell.Total;
+                    if (seriescolumn != null)
+                        base[seriescolumn, row] += cell.Total;
 
                     base[TotalColumn, row] += cell.Total;
 
-                    //  2. Propagate. Propagate those values upward into totalling rows.
+                    //  3. Propagate. Propagate those values upward into totalling rows.
                     if (!LeafRowsOnly)
-                        BuildPhase_Propagate(row: row, column: column, seriescolumn: subtotalcolumn, amount: cell.Total);
+                        BuildPhase_Propagate(row: row, column: column, seriescolumn: seriescolumn, amount: cell.Total);
                 }
             }
 
-            //  3. Prune. Prune out rows that are not really needed.
+            //  4. Prune. Prune out rows that are not really needed.
             if (!LeafRowsOnly)
                 BuildPhase_Prune();
         }
