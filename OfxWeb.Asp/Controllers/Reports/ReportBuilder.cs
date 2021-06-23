@@ -8,35 +8,6 @@ using System.Threading.Tasks;
 
 namespace OfxWeb.Asp.Controllers.Reports
 {
-    public class Query : List<KeyValuePair<string, IQueryable<IReportable>>>
-    {
-        public Query() { }
-        public Query(IQueryable<IReportable> single)
-        {
-            Add(new KeyValuePair<string, IQueryable<IReportable>>(string.Empty, single));
-        }
-        public Query(IEnumerable<KeyValuePair<string, IQueryable<IReportable>>> items)
-        {
-            AddRange(items);
-        }
-
-        public Query(params Query[] many)
-        {
-            foreach(var q in many)
-                AddRange(q);
-        }
-
-        public Query Labeled(string label)
-        {
-            return new Query(this.Select(x => new KeyValuePair<string, IQueryable<IReportable>>(label, x.Value)));
-        }
-
-        public void Add(string key, IQueryable<IReportable> value)
-        {
-            Add(new KeyValuePair<string, IQueryable<IReportable>>(key, value));
-        }
-
-    }
     public class ReportBuilder
     {
         /// <summary>
