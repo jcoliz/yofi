@@ -695,11 +695,12 @@ namespace Ofx.Tests
                 Enumerable
                 .Range(0, 20)
                 .Select(i =>
-                    new KeyValuePair<string, IQueryable<IReportable>>(
-                        i.ToString("D2"),
-                        Items.Skip(i).Take(1).AsQueryable()
-                        )
-                    )
+                    new NamedQuery() 
+                    { 
+                        Key = i.ToString("D2"), 
+                        Value = Items.Skip(i).Take(1).AsQueryable() 
+                    }
+                )
             );
 
             report.NumLevels = 2;

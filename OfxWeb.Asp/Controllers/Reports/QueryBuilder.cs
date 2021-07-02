@@ -163,14 +163,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                 var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
                 var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
 
-                yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
-                    year.ToString(),
-                    txsyear
-                ));
-                yoy.Add(new KeyValuePair<string, IQueryable<IReportable>>(
-                    year.ToString(),
-                    splitsyear
-                ));
+                yoy.Add(new NamedQuery() { Key = year.ToString(), Value = txsyear });
+                yoy.Add(new NamedQuery() { Key = year.ToString(), Value = splitsyear });
             }
 
             return yoy;

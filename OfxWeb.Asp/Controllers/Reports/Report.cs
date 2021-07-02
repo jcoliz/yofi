@@ -317,7 +317,7 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// </remarks>
         /// <param name="kvp">Source of reportables, with optional series name key</param>
 
-        private void BuildPhase_Group(KeyValuePair<string, IQueryable<IReportable>> kvp)
+        private void BuildPhase_Group(NamedQuery kvp)
         {
             IQueryable<IGrouping<object, IReportable>> groups;
             if (WithMonthColumns)

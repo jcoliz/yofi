@@ -16,18 +16,18 @@ namespace OfxWeb.Asp.Controllers.Reports
     /// Multiple series can use the same name, in which case they are all aggregated
     /// into the subtotal column for that name.
     /// </remarks>
-    public class Query : List<KeyValuePair<string, IQueryable<IReportable>>>
+    public class Query : List<NamedQuery>
     {
         public Query() 
         { 
         }
-        
+
         public Query(IQueryable<IReportable> single)
         {
-            Add(new KeyValuePair<string, IQueryable<IReportable>>(string.Empty, single));
+            Add(new NamedQuery() { Value = single });
         }
         
-        public Query(IEnumerable<KeyValuePair<string, IQueryable<IReportable>>> items)
+        public Query(IEnumerable<NamedQuery> items)
         {
             AddRange(items);
         }
@@ -40,13 +40,12 @@ namespace OfxWeb.Asp.Controllers.Reports
 
         public Query Labeled(string label)
         {
-            return new Query(this.Select(x => new KeyValuePair<string, IQueryable<IReportable>>(label, x.Value)));
+            return new Query(this.Select(x => new NamedQuery() { Key = label, Value = x.Value }));
         }
 
         public void Add(string key, IQueryable<IReportable> value)
         {
-            Add(new KeyValuePair<string, IQueryable<IReportable>>(key, value));
+            Add(new NamedQuery() { Key = key, Value = value });
         }
-
     }
 }
