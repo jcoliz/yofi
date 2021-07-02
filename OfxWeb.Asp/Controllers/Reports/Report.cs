@@ -37,7 +37,7 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// <summary>
         /// Where to get items
         /// </summary>
-        public Query Source { get; set; }
+        public IEnumerable<NamedQuery> Source { get; set; }
 
         /// <summary>
         /// Whether to include columns for individual months
