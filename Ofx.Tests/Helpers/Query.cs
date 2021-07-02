@@ -1,10 +1,11 @@
-﻿using OfxWeb.Asp.Models;
+﻿using OfxWeb.Asp.Controllers.Reports;
+using OfxWeb.Asp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Controllers.Reports
+namespace OfxWeb.Tests.Helpers
 {
     /// <summary>
     /// Holds the data in a form that a Report can be built from it

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Controllers.Reports;
 using OfxWeb.Asp.Models;
+using OfxWeb.Tests.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
