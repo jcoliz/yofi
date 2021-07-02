@@ -13,5 +13,7 @@ namespace OfxWeb.Asp.Controllers.Reports
     {
         public string Name { get; set; }
         public IQueryable<IReportable> Query { get; set; }
+
+        public NamedQuery Labeled(string newname) => new NamedQuery() { Name = newname, Query = Query };
     }
 }

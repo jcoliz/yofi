@@ -96,31 +96,31 @@ namespace OfxWeb.Asp.Controllers.Reports
             return new NamedQuery() { Query = splitsExcept };
         }
 
-        public Query QueryTransactionsComplete(string top = null)
+        public IEnumerable<NamedQuery> QueryTransactionsComplete(string top = null)
         {
-            return new Query(
+            return new List<NamedQuery>() {
                 QueryTransactions(top),
                 QuerySplits(top)
-            );
+            };
         }
 
-        public Query QueryTransactionsCompleteExcept(IEnumerable<string> tops)
+        public IEnumerable<NamedQuery> QueryTransactionsCompleteExcept(IEnumerable<string> tops)
         {
-            return new Query(
+            return new List<NamedQuery>() {
                 QueryTransactionsExcept(tops),
                 QuerySplitsExcept(tops)
-            );
+            };
         }
 
-        public Query QueryBudget()
+        public IEnumerable<NamedQuery> QueryBudget()
         {
             var budgettxs = _context.BudgetTxs
                 .Where(x => x.Timestamp.Year == Year);
 
-            return new Query() { new NamedQuery() { Query = budgettxs } };
+            return new List<NamedQuery>() { new NamedQuery() { Query = budgettxs } };
         }
 
-        public Query QueryBudgetExcept(IEnumerable<string> tops)
+        public IEnumerable<NamedQuery> QueryBudgetExcept(IEnumerable<string> tops)
         {
             var topstarts = tops
                 .Select(x => $"{x}:")
@@ -132,42 +132,44 @@ namespace OfxWeb.Asp.Controllers.Reports
                 .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
 
-            return new Query(budgetExcept);
+            return new List<NamedQuery>() { new NamedQuery() { Query = budgetExcept } };
         }
 
-        public Query QueryActualVsBudget()
+        public IEnumerable<NamedQuery> QueryActualVsBudget()
         {
-            return new Query
-            (
-                QueryTransactionsComplete().Labeled("Actual"),
-                QueryBudget().Labeled("Budget")
-            );
+            var result = new List<NamedQuery>();
+
+            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual")));
+            result.AddRange(QueryBudget().Select(x => x.Labeled("Budget")));
+
+            return result;
         }
 
-        public Query QueryActualVsBudgetExcept(IEnumerable<string> tops)
+        public IEnumerable<NamedQuery> QueryActualVsBudgetExcept(IEnumerable<string> tops)
         {
-            return new Query
-            (
-                QueryTransactionsCompleteExcept(tops).Labeled("Actual"),
-                QueryBudgetExcept(tops).Labeled("Budget")
-            );
+            var result = new List<NamedQuery>();
+
+            result.AddRange(QueryTransactionsCompleteExcept(tops).Select(x => x.Labeled("Actual")));
+            result.AddRange(QueryBudgetExcept(tops).Select(x => x.Labeled("Budget")));
+
+            return result;
         }
 
-        public Query QueryYearOverYear(out int[] years)
+        public IEnumerable<NamedQuery> QueryYearOverYear(out int[] years)
         {
+            var result = new List<NamedQuery>();
+
             years = _context.Transactions.Select(x => x.Timestamp.Year).Distinct().ToArray();
-
-            var yoy = new Query();
             foreach (var year in years)
             {
                 var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
                 var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
 
-                yoy.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear });
-                yoy.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear });
+                result.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear });
+                result.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear });
             }
 
-            return yoy;
+            return result;
         }
 
     }
