@@ -34,7 +34,7 @@ namespace OfxWeb.Asp.Controllers.Reports
         // in the report generator. AsEnumerable() is preferred, as it defers execution. However in some cases, THAT 
         // doesn't even work, so I needed ToList().
 
-        public Query QueryTransactions(string top = null)
+        private NamedQuery QueryTransactions(string top = null)
         {
             var txs = _context.Transactions
                 .Include(x => x.Splits)
@@ -47,25 +47,25 @@ namespace OfxWeb.Asp.Controllers.Reports
                 txs = txs.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
             }
 
-            return new Query(txs);
+            return new NamedQuery() { Query = txs };
         }
 
-        public Query QueryTransactionsExcept(IEnumerable<string> excluetopcategories)
+        private NamedQuery QueryTransactionsExcept(IEnumerable<string> excluetopcategories)
         {
             var excluetopcategoriesstartswith = excluetopcategories
                 .Select(x => $"{x}:")
                 .ToList();
 
-            var txsExcept = QueryTransactions().First().Query
+            var txsExcept = QueryTransactions().Query
                 .Where(x => x.Category != null && !excluetopcategories.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
 
-            return new Query(txsExcept);
+            return new NamedQuery() { Query = txsExcept };
         }
 
-        public Query QuerySplits(string top = null)
+        private NamedQuery QuerySplits(string top = null)
         {
             var splits = _context.Splits
                 .Include(x => x.Transaction)
@@ -79,21 +79,21 @@ namespace OfxWeb.Asp.Controllers.Reports
                 splits = splits.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
             }
 
-            return new Query(splits);
+            return new NamedQuery() { Query = splits };
         }
 
-        public Query QuerySplitsExcept(IEnumerable<string> tops)
+        private NamedQuery QuerySplitsExcept(IEnumerable<string> tops)
         {
             var excluetopcategoriesstartswith = tops
                 .Select(x => $"{x}:")
                 .ToList();
 
-            var splitsExcept = QuerySplits().First().Query
+            var splitsExcept = QuerySplits().Query
                    .Where(x => !tops.Contains(x.Category) && !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
                    .ToList()
                    .AsQueryable<IReportable>();
 
-            return new Query(splitsExcept);
+            return new NamedQuery() { Query = splitsExcept };
         }
 
         public Query QueryTransactionsComplete(string top = null)
@@ -117,7 +117,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             var budgettxs = _context.BudgetTxs
                 .Where(x => x.Timestamp.Year == Year);
 
-            return new Query(budgettxs);
+            return new Query() { new NamedQuery() { Query = budgettxs } };
         }
 
         public Query QueryBudgetExcept(IEnumerable<string> tops)

@@ -37,6 +37,10 @@ namespace OfxWeb.Asp.Controllers.Reports
             foreach (var q in many)
                 AddRange(q);
         }
+        public Query(params NamedQuery[] many)
+        {
+            AddRange(many);
+        }
 
         public Query Labeled(string label)
         {
