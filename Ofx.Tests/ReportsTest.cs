@@ -85,7 +85,7 @@ namespace Ofx.Tests
         public void OneItemCols()
         {
             report.WithMonthColumns = true;
-            report.Source = new Query( Items.Take(1).AsQueryable() );
+            report.Source = new NamedQueryList( Items.Take(1).AsQueryable() );
             report.Build();
             report.WriteToConsole();
 
@@ -99,7 +99,7 @@ namespace Ofx.Tests
         public void OneItemColsJson()
         {
             report.WithMonthColumns = true;
-            report.Source = new Query( Items.Take(1).AsQueryable() );
+            report.Source = new NamedQueryList( Items.Take(1).AsQueryable() );
             report.Build();
 
             string json = report.ToJson();
@@ -124,7 +124,7 @@ namespace Ofx.Tests
         public void ThreeMonthsCols()
         {
             report.WithMonthColumns = true;
-            report.Source = new Query(Items.Take(5).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(5).AsQueryable());
             report.Build();
 
             var Name = GetRow(x => x.Name == "Name");
@@ -139,7 +139,7 @@ namespace Ofx.Tests
         public void TwoCategoriesCols()
         {
             report.WithMonthColumns = true;
-            report.Source = new Query(Items.Take(9).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(9).AsQueryable());
             report.Build();
 
             var Other = GetRow(x => x.Name == "Other");
@@ -163,7 +163,7 @@ namespace Ofx.Tests
 
             report.AddCustomColumn(custom);
             report.WithMonthColumns = true;
-            report.Source = new Query(Items.Take(9).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(9).AsQueryable());
             report.Build();
             report.WriteToConsole();
 
@@ -198,7 +198,7 @@ namespace Ofx.Tests
 
             report.AddCustomColumn(custom);
             report.WithMonthColumns = true;
-            report.Source = new Query(Items.Take(9).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(9).AsQueryable());
             report.Build();
             report.WriteToConsole();
 
@@ -217,7 +217,7 @@ namespace Ofx.Tests
         public void SubCategoriesCols()
         {
             report.WithMonthColumns = true;
-            report.Source = new Query(Items.Skip(5).Take(8).AsQueryable());
+            report.Source = new NamedQueryList(Items.Skip(5).Take(8).AsQueryable());
             report.Build();
 
             var Other = GetRow(x => x.Name == "Other");
@@ -232,7 +232,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void Simple()
         {
-            report.Source = new Query(Items.Take(13).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(13).AsQueryable());
             report.Build();
             report.WriteToConsole();
 
@@ -249,7 +249,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SimpleJson()
         {
-            report.Source = new Query(Items.Take(13).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(13).AsQueryable());
             report.Build();
 
             string json = report.ToJson();
@@ -270,7 +270,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SimpleSorted()
         {
-            report.Source = new Query(Items.Skip(3).Take(6).AsQueryable());
+            report.Source = new NamedQueryList(Items.Skip(3).Take(6).AsQueryable());
             report.SortOrder = Report.SortOrders.TotalAscending;
             report.Build();
             report.WriteToConsole(sorted:true);
@@ -283,7 +283,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItems()
         {
-            report.Source = new Query(Items.Skip(9).Take(10).AsQueryable());
+            report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());
             report.Build();
 
             var Other = GetRow(x => x.Name == "Other");
@@ -296,7 +296,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsDeep()
         {
-            report.Source = new Query(Items.Skip(9).Take(10).AsQueryable());
+            report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());
             report.NumLevels = 2;
             report.Build();
 
@@ -314,7 +314,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsDeepSorted()
         {
-            report.Source = new Query(Items.Skip(9).Take(6).AsQueryable());
+            report.Source = new NamedQueryList(Items.Skip(9).Take(6).AsQueryable());
             report.NumLevels = 2;
             report.SortOrder = Report.SortOrders.TotalAscending;
             report.Build();
@@ -333,7 +333,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsAllDeep()
         {
-            report.Source = new Query(Items.Take(19).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(19).AsQueryable());
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();
@@ -354,7 +354,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsAllDeepJson()
         {
-            report.Source = new Query(Items.Take(19).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(19).AsQueryable());
             report.NumLevels = 2;
             report.Build();
             report.WriteToConsole();
@@ -381,7 +381,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsAllDeepSorted()
         {
-            report.Source = new Query(Items.Take(24).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(24).AsQueryable());
             report.NumLevels = 2;
             report.SortOrder = Report.SortOrders.TotalAscending;
             report.Build();
@@ -399,7 +399,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsAllThreeDeepSorted()
         {
-            report.Source = new Query(Items.Take(25).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(25).AsQueryable());
             report.NumLevels = 3;
             report.SortOrder = Report.SortOrders.TotalAscending;
             report.Build();
@@ -420,7 +420,7 @@ namespace Ofx.Tests
         {
             report.WithMonthColumns = true;
             report.NumLevels = 2;
-            report.Source = new Query(Items.Take(20).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
             report.Build();
             report.WriteToConsole();
 
@@ -450,7 +450,7 @@ namespace Ofx.Tests
         {
             report.WithMonthColumns = true;
             report.NumLevels = 2;
-            report.Source = new Query(Items.Take(20).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
             report.Build();
             report.WriteToConsole();
 
@@ -473,7 +473,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void SubItemsFromL1()
         {
-            report.Source = new Query(Items.Skip(9).Take(10).AsQueryable());
+            report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());
             report.SkipLevels = 1;
             report.Build();
             report.WriteToConsole();
@@ -491,7 +491,7 @@ namespace Ofx.Tests
         public void SubItemsFromL1Cols()
         {
             report.WithMonthColumns = true;
-            report.Source = new Query(Items.Skip(9).Take(10).AsQueryable());
+            report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());
             report.SkipLevels = 1;
             report.NumLevels = 2;
             report.Build();
@@ -515,7 +515,7 @@ namespace Ofx.Tests
         public void ThreeLevelsDeepAllCols()
         {
             report.WithMonthColumns = true;
-            report.Source = new Query(Items.Take(20).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
             report.NumLevels = 3;
             report.Build();
             report.WriteToConsole();
@@ -544,7 +544,7 @@ namespace Ofx.Tests
         //[TestMethod]
         public void ThreeLevelsDeepSorted()
         {
-            report.Source = new Query(Items.Take(20).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
             report.NumLevels = 3;
             report.Build();
             report.WriteToConsole();
@@ -556,7 +556,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void ThreeLevelsDeepLeafs()
         {
-            report.Source = new Query(Items.Take(20).AsQueryable());
+            report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
             report.LeafRowsOnly = true;
             report.Build();
             report.WriteToConsole();
@@ -572,11 +572,11 @@ namespace Ofx.Tests
         }
 
 
-        Query MultiSeriesSource
+        NamedQueryList MultiSeriesSource
         {
             get
             {
-                var result = new Query();
+                var result = new NamedQueryList();
                 result.Add("One",Items.Take(20).Where(x => Items.IndexOf(x) % 3 == 0).ToList().AsQueryable());
                 result.Add("Two",Items.Take(20).Where(x => Items.IndexOf(x) % 3 != 0).ToList().AsQueryable());
 
@@ -692,7 +692,7 @@ namespace Ofx.Tests
         {
             // This crazy test creates a series for every single transaction
 
-            report.Source = new Query(
+            report.Source = new NamedQueryList(
                 Enumerable
                 .Range(0, 20)
                 .Select(i =>

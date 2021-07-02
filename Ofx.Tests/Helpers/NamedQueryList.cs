@@ -17,35 +17,35 @@ namespace OfxWeb.Tests.Helpers
     /// Multiple series can use the same name, in which case they are all aggregated
     /// into the subtotal column for that name.
     /// </remarks>
-    public class Query : List<NamedQuery>
+    public class NamedQueryList : List<NamedQuery>
     {
-        public Query() 
+        public NamedQueryList() 
         { 
         }
 
-        public Query(IQueryable<IReportable> single)
+        public NamedQueryList(IQueryable<IReportable> single)
         {
             Add(new NamedQuery() { Query = single });
         }
         
-        public Query(IEnumerable<NamedQuery> items)
+        public NamedQueryList(IEnumerable<NamedQuery> items)
         {
             AddRange(items);
         }
 
-        public Query(params Query[] many)
+        public NamedQueryList(params NamedQueryList[] many)
         {
             foreach (var q in many)
                 AddRange(q);
         }
-        public Query(params NamedQuery[] many)
+        public NamedQueryList(params NamedQuery[] many)
         {
             AddRange(many);
         }
 
-        public Query Labeled(string label)
+        public NamedQueryList Labeled(string label)
         {
-            return new Query(this.Select(x => new NamedQuery() { Name = label, Query = x.Query }));
+            return new NamedQueryList(this.Select(x => new NamedQuery() { Name = label, Query = x.Query }));
         }
 
         public void Add(string key, IQueryable<IReportable> value)
