@@ -697,8 +697,8 @@ namespace Ofx.Tests
                 .Select(i =>
                     new NamedQuery() 
                     { 
-                        Key = i.ToString("D2"), 
-                        Value = Items.Skip(i).Take(1).AsQueryable() 
+                        Name = i.ToString("D2"), 
+                        Query = Items.Skip(i).Take(1).AsQueryable() 
                     }
                 )
             );

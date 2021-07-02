@@ -24,7 +24,7 @@ namespace OfxWeb.Asp.Controllers.Reports
 
         public Query(IQueryable<IReportable> single)
         {
-            Add(new NamedQuery() { Value = single });
+            Add(new NamedQuery() { Query = single });
         }
         
         public Query(IEnumerable<NamedQuery> items)
@@ -40,12 +40,12 @@ namespace OfxWeb.Asp.Controllers.Reports
 
         public Query Labeled(string label)
         {
-            return new Query(this.Select(x => new NamedQuery() { Key = label, Value = x.Value }));
+            return new Query(this.Select(x => new NamedQuery() { Name = label, Query = x.Query }));
         }
 
         public void Add(string key, IQueryable<IReportable> value)
         {
-            Add(new NamedQuery() { Key = key, Value = value });
+            Add(new NamedQuery() { Name = key, Query = value });
         }
     }
 }

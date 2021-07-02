@@ -11,7 +11,7 @@ namespace OfxWeb.Asp.Controllers.Reports
     /// </summary>
     public class NamedQuery
     {
-        public string Key { get; set; }
-        public IQueryable<IReportable> Value { get; set; }
+        public string Name { get; set; }
+        public IQueryable<IReportable> Query { get; set; }
     }
 }

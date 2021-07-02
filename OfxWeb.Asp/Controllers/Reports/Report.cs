@@ -321,15 +321,15 @@ namespace OfxWeb.Asp.Controllers.Reports
         {
             IQueryable<IGrouping<object, IReportable>> groups;
             if (WithMonthColumns)
-                groups = kvp.Value.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
+                groups = kvp.Query.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
             else
-                groups = kvp.Value.GroupBy(x => new { Name = x.Category });
+                groups = kvp.Query.GroupBy(x => new { Name = x.Category });
 
             //  1. Group. Group source transactions by name/month and calculate totals
             var selected = groups.Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
 
             //  2. Place. Place each incoming data point into a report cell.
-            BuildPhase_Place(source: selected, seriesname: kvp.Key);
+            BuildPhase_Place(source: selected, seriesname: kvp.Name);
         }
 
         /// <summary>

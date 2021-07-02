@@ -56,7 +56,7 @@ namespace OfxWeb.Asp.Controllers.Reports
                 .Select(x => $"{x}:")
                 .ToList();
 
-            var txsExcept = QueryTransactions().First().Value
+            var txsExcept = QueryTransactions().First().Query
                 .Where(x => x.Category != null && !excluetopcategories.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
@@ -88,7 +88,7 @@ namespace OfxWeb.Asp.Controllers.Reports
                 .Select(x => $"{x}:")
                 .ToList();
 
-            var splitsExcept = QuerySplits().First().Value
+            var splitsExcept = QuerySplits().First().Query
                    .Where(x => !tops.Contains(x.Category) && !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
                    .ToList()
                    .AsQueryable<IReportable>();
@@ -126,7 +126,7 @@ namespace OfxWeb.Asp.Controllers.Reports
                 .Select(x => $"{x}:")
                 .ToList();
 
-            var budgetExcept = QueryBudget().First().Value
+            var budgetExcept = QueryBudget().First().Query
                 .Where(x => x.Category != null && !tops.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
@@ -163,8 +163,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                 var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
                 var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
 
-                yoy.Add(new NamedQuery() { Key = year.ToString(), Value = txsyear });
-                yoy.Add(new NamedQuery() { Key = year.ToString(), Value = splitsyear });
+                yoy.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear });
+                yoy.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear });
             }
 
             return yoy;
