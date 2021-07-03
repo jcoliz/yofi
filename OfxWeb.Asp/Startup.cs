@@ -46,8 +46,11 @@ namespace OfxWeb.Asp
             services.AddDistributedMemoryCache();
             services.AddSession();
 
+            // Build connection string out of component key parts
             var storagesection = Configuration.GetSection("AzureStorage");
-            services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storagesection["Connection"]));
+            var storageconnection = string.Join(';', storagesection.GetChildren().Select(x => $"{x.Key}={x.Value}"));
+
+            services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
