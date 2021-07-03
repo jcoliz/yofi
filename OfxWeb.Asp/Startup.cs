@@ -46,7 +46,8 @@ namespace OfxWeb.Asp
             services.AddDistributedMemoryCache();
             services.AddSession();
 
-            services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg=="));
+            var storagesection = Configuration.GetSection("AzureStorage");
+            services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storagesection["Connection"]));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
