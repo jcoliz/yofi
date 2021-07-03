@@ -60,6 +60,14 @@ namespace OfxWeb.Asp.Controllers.Reports
                         cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")
             };
 
+            var pctoftotalcolumn = new ColumnLabel()
+            {
+                Name = "% Total",
+                DisplayAsPercent = true,
+                Custom = (cols) =>
+                    result.GrandTotal == 0 ? 0 : cols.GetValueOrDefault("TOTAL") / result.GrandTotal
+            };
+
             if (parms.id == "all")
             {
                 result.WithMonthColumns = true;
@@ -70,6 +78,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "income")
             {
+                result.AddCustomColumn(pctoftotalcolumn);
                 result.Source = _qbuilder.QueryTransactionsComplete(top: "Income");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1;

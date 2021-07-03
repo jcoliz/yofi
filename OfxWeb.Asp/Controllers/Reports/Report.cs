@@ -156,6 +156,11 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// </summary>
         public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
 
+        /// <summary>
+        /// The total of the total column
+        /// </summary>
+        public decimal GrandTotal => base[TotalColumn, TotalRow];
+
         #endregion
 
         #region Public Methods

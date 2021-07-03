@@ -112,35 +112,38 @@ namespace OfxWeb.Asp.Controllers.Reports
             };
         }
 
-        public IEnumerable<NamedQuery> QueryBudget()
+        private NamedQuery QueryBudgetSingle()
         {
             var budgettxs = _context.BudgetTxs
                 .Where(x => x.Timestamp.Year == Year);
 
-            return new List<NamedQuery>() { new NamedQuery() { Query = budgettxs } };
+            return new NamedQuery() { Query = budgettxs };
         }
 
-        public IEnumerable<NamedQuery> QueryBudgetExcept(IEnumerable<string> tops)
+        public IEnumerable<NamedQuery> QueryBudget() => new List<NamedQuery>() { QueryBudgetSingle() };
+
+        private NamedQuery QueryBudgetSingleExcept(IEnumerable<string> tops)
         {
             var topstarts = tops
                 .Select(x => $"{x}:")
                 .ToList();
 
-            var budgetExcept = QueryBudget().First().Query
+            var budgetExcept = QueryBudgetSingle().Query
                 .Where(x => x.Category != null && !tops.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
 
-            return new List<NamedQuery>() { new NamedQuery() { Query = budgetExcept } };
+            return new NamedQuery() { Query = budgetExcept };
         }
+        public IEnumerable<NamedQuery> QueryBudgetExcept(IEnumerable<string> tops) => new List<NamedQuery>() { QueryBudgetSingleExcept(tops) };
 
         public IEnumerable<NamedQuery> QueryActualVsBudget()
         {
             var result = new List<NamedQuery>();
 
             result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual")));
-            result.AddRange(QueryBudget().Select(x => x.Labeled("Budget")));
+            result.Add(QueryBudgetSingle().Labeled("Budget"));
 
             return result;
         }
@@ -150,7 +153,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             var result = new List<NamedQuery>();
 
             result.AddRange(QueryTransactionsCompleteExcept(tops).Select(x => x.Labeled("Actual")));
-            result.AddRange(QueryBudgetExcept(tops).Select(x => x.Labeled("Budget")));
+            result.Add(QueryBudgetSingleExcept(tops).Labeled("Budget"));
 
             return result;
         }
@@ -171,6 +174,5 @@ namespace OfxWeb.Asp.Controllers.Reports
 
             return result;
         }
-
     }
 }
