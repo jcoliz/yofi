@@ -62,7 +62,7 @@ namespace Ofx.Tests
                 .AddInMemoryCollection(strings)
                 .Build();
 
-            controller = new ApiController(context,storage,configuration);
+            controller = new ApiController(context,configuration,storage);
 
             // Need to inject the Auth header into the context.
             // https://stackoverflow.com/questions/41400030/mock-httpcontext-for-unit-testing-a-net-core-mvc-controller
