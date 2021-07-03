@@ -81,7 +81,7 @@ namespace OfxWeb.Asp
             }
             else
             {
-                _logger.LogInformation($"*** CONFIGURE *** Running in Development");
+                _logger.LogInformation($"*** CONFIGURE *** Running in Production");
 
                 app.UseExceptionHandler("/Home/Error");
             }
