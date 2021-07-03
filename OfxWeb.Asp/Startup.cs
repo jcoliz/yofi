@@ -48,9 +48,17 @@ namespace OfxWeb.Asp
 
             // Build connection string out of component key parts
             var storagesection = Configuration.GetSection("AzureStorage");
-            var storageconnection = string.Join(';', storagesection.GetChildren().Select(x => $"{x.Key}={x.Value}"));
 
-            services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
+            if (null != storagesection)
+            {
+                var AccountKey = storagesection.GetValue<string>("AccountKey");
+                var AccountName = storagesection.GetValue<string>("AccountName");
+                if (null != AccountKey && null != AccountName)
+                {
+                    var storageconnection = string.Join(';', storagesection.GetChildren().Select(x => $"{x.Key}={x.Value}"));
+                    services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
+                }
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

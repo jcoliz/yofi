@@ -31,7 +31,7 @@ namespace OfxWeb.Asp.Controllers
         private IPlatformAzureStorage _storage;
         private readonly IConfiguration _configuration;
 
-        public ApiController(ApplicationDbContext context, IPlatformAzureStorage storage, IConfiguration configuration)
+        public ApiController(ApplicationDbContext context, IConfiguration configuration, IPlatformAzureStorage storage = null)
         {
             _context = context;
             _storage = storage;
@@ -287,6 +287,9 @@ namespace OfxWeb.Asp.Controllers
                 //
                 // Save the file to blob storage
                 //
+
+                if (null == _storage)
+                    throw new InvalidOperationException("Unable to upload receipt. Azure Blob Storage is not configured for this application.");
 
                 _storage.Initialize();
 
