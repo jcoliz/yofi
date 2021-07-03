@@ -3,6 +3,7 @@ using Common.Test.Mock;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Controllers;
@@ -49,7 +50,16 @@ namespace Ofx.Tests
 
             storage = new TestAzureStorage();
 
-            controller = new ApiController(context,storage);
+            // https://stackoverflow.com/questions/55497800/populate-iconfiguration-for-unit-tests
+            var strings = new Dictionary<string, string>
+            {
+                { "Something", "Else" }
+            };
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(strings)
+                .Build();
+
+            controller = new ApiController(context,storage,configuration);
 
             // Need to inject the Auth header into the context.
             // https://stackoverflow.com/questions/41400030/mock-httpcontext-for-unit-testing-a-net-core-mvc-controller

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 using OfxWeb.Asp.Controllers.Reports;
 using OfxWeb.Asp.Data;
@@ -27,13 +28,14 @@ namespace OfxWeb.Asp.Controllers
     public class ApiController : Controller
     {
         private readonly ApplicationDbContext _context;
-
         private IPlatformAzureStorage _storage;
+        private readonly IConfiguration _configuration;
 
-        public ApiController(ApplicationDbContext context, IPlatformAzureStorage storage)
+        public ApiController(ApplicationDbContext context, IPlatformAzureStorage storage, IConfiguration configuration)
         {
             _context = context;
             _storage = storage;
+            _configuration = configuration;
         }
 
         // GET: api/tx
