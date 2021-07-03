@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,7 +28,6 @@ namespace OfxWeb.Asp
                     var serviceProvider = services.GetRequiredService<IServiceProvider>();
                     var configuration = services.GetRequiredService<IConfiguration>();
                     Data.Seed.CreateRoles(serviceProvider, configuration).Wait();
-
                 }
                 catch (Exception exception)
                 {
@@ -40,6 +42,19 @@ namespace OfxWeb.Asp
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .ConfigureAppConfiguration((context, config) => 
+                {
+                    if (context.HostingEnvironment.EnvironmentName == "Production")
+                    {
+                        var builtConfig = config.Build();
+                        var secretClient = new SecretClient(
+                            new Uri($"https://{builtConfig["KeyVaultName"]}.vault.azure.net/"),
+                            new DefaultAzureCredential());
+                        config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+                    }
+                })
                 .Build();
+
+        // https://github.com/dotnet/AspNetCore.Docs/blob/main/aspnetcore/security/key-vault-configuration/samples/3.x/SampleApp/Program.cs
     }
 }

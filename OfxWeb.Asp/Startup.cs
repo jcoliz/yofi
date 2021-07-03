@@ -15,17 +15,20 @@ using OfxWeb.Asp.Services;
 using ManiaLabs.Portable.Base;
 using ManiaLabs.NET;
 using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
+using Microsoft.Extensions.Logging;
 
 namespace OfxWeb.Asp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILogger<Startup> _logger;
+        public IConfiguration Configuration { get; }
+
+        public Startup(ILogger<Startup> logger, IConfiguration configuration)
         {
+            _logger = logger;
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -46,6 +49,8 @@ namespace OfxWeb.Asp
             services.AddDistributedMemoryCache();
             services.AddSession();
 
+            _logger.LogInformation($"*** AZURESTORAGE *** Looking...");
+
             // Build connection string out of component key parts
             var storagesection = Configuration.GetSection("AzureStorage");
 
@@ -55,6 +60,8 @@ namespace OfxWeb.Asp
                 var AccountName = storagesection.GetValue<string>("AccountName");
                 if (null != AccountKey && null != AccountName)
                 {
+                    _logger.LogInformation($"*** AZURESTORAGE *** Found Account {AccountName}");
+
                     var storageconnection = string.Join(';', storagesection.GetChildren().Select(x => $"{x.Key}={x.Value}"));
                     services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
                 }
@@ -66,12 +73,16 @@ namespace OfxWeb.Asp
         {
             if (env.IsDevelopment())
             {
+                _logger.LogInformation($"*** CONFIGURE *** Running in Development");
+
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
             }
             else
             {
+                _logger.LogInformation($"*** CONFIGURE *** Running in Development");
+
                 app.UseExceptionHandler("/Home/Error");
             }
 
