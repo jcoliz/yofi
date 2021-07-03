@@ -419,7 +419,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        private static void CheckApiAuth(IHeaderDictionary Headers)
+        private void CheckApiAuth(IHeaderDictionary Headers)
         {
             if (!Headers.ContainsKey("Authorization"))
                 throw new UnauthorizedAccessException();
@@ -434,7 +434,9 @@ namespace OfxWeb.Asp.Controllers
             var username = credentials[0];
             var password = credentials[1];
 
-            if ("j+dF48FhiU+Dz83ZQYsoXw==" != password)
+            var expectedpassword = _configuration["Api:Key"];
+
+            if (expectedpassword != password)
                 throw new ApplicationException("Invalid password");
         }
 

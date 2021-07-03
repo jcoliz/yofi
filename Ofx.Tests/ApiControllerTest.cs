@@ -50,10 +50,13 @@ namespace Ofx.Tests
 
             storage = new TestAzureStorage();
 
+            // NOTE: This is a unit test password only, not a real credential!!
+            var password = "Password1234";
+
             // https://stackoverflow.com/questions/55497800/populate-iconfiguration-for-unit-tests
             var strings = new Dictionary<string, string>
             {
-                { "Something", "Else" }
+                { "Api:Key", password }
             };
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(strings)
@@ -64,7 +67,7 @@ namespace Ofx.Tests
             // Need to inject the Auth header into the context.
             // https://stackoverflow.com/questions/41400030/mock-httpcontext-for-unit-testing-a-net-core-mvc-controller
             var http = new DefaultHttpContext();
-            var userpass = "user:j+dF48FhiU+Dz83ZQYsoXw==";
+            var userpass = $"user:{password}";
             http.Request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(userpass)));
             controller.ControllerContext = new ControllerContext();
             controller.ControllerContext.HttpContext = http;
