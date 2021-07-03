@@ -283,10 +283,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                             var val = this[col, line];
                             var name = col.ToString();
                             if (col.DisplayAsPercent)
-                            {
-                                val /= 100;
                                 name += "%";
-                            }
+
                             writer.WritePropertyName(name);
                             writer.WriteNumberValue(val);
                         }
