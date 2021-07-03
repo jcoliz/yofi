@@ -594,6 +594,11 @@ namespace OfxWeb.Asp.Controllers.Reports
         public bool IsTotal { get; set; }
 
         /// <summary>
+        /// True if this column should sort AFTER the totals
+        /// </summary>
+        public bool IsSortingAfterTotal { get; set; }
+
+        /// <summary>
         /// In a multi-level report, whom are we under? or null for top-level
         /// </summary>
         public BaseLabel Parent { get; set; }
@@ -641,7 +646,9 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// <returns></returns>
         int IComparable<BaseLabel>.CompareTo(BaseLabel other)
         {
-            int result = IsTotal.CompareTo(other.IsTotal);
+            int result = IsSortingAfterTotal.CompareTo(other.IsSortingAfterTotal);
+            if (result == 0)
+                result = IsTotal.CompareTo(other.IsTotal);
             if (result == 0) // Empty orders sort at the END
                 result = string.IsNullOrEmpty(UniqueID).CompareTo(string.IsNullOrEmpty(other.UniqueID));
             if (result == 0)

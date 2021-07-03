@@ -63,6 +63,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             var pctoftotalcolumn = new ColumnLabel()
             {
                 Name = "% Total",
+                IsSortingAfterTotal = true,
                 DisplayAsPercent = true,
                 Custom = (cols) =>
                     result.GrandTotal == 0 ? 0 : cols.GetValueOrDefault("TOTAL") / result.GrandTotal
