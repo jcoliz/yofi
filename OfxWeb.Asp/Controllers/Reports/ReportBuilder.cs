@@ -88,6 +88,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "taxes")
             {
+                result.AddCustomColumn(pctoftotalcolumn);
                 result.Source = _qbuilder.QueryTransactionsComplete(top: "Taxes");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1;
@@ -96,6 +97,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "savings")
             {
+                result.AddCustomColumn(pctoftotalcolumn);
                 result.Source = _qbuilder.QueryTransactionsComplete(top: "Savings");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1;
@@ -104,6 +106,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "expenses")
             {
+                result.AddCustomColumn(pctoftotalcolumn);
                 result.WithMonthColumns = true;
                 result.Source = _qbuilder.QueryTransactionsCompleteExcept(tops: notexpenses);
                 result.NumLevels = 2;
