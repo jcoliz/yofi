@@ -44,6 +44,7 @@ namespace OfxWeb.Asp
                 .UseStartup<Startup>()
                 .ConfigureAppConfiguration((context, config) => 
                 {
+                    System.Diagnostics.Debug.WriteLine($"BuildWebHost in {context.HostingEnvironment.EnvironmentName}");
                     if (context.HostingEnvironment.EnvironmentName == "Production")
                     {
                         var builtConfig = config.Build();

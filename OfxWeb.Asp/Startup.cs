@@ -21,12 +21,10 @@ namespace OfxWeb.Asp
 {
     public class Startup
     {
-        private readonly ILogger<Startup> _logger;
         public IConfiguration Configuration { get; }
 
-        public Startup(ILogger<Startup> logger, IConfiguration configuration)
+        public Startup(IConfiguration configuration)
         {
-            _logger = logger;
             Configuration = configuration;
         }
 
@@ -49,7 +47,7 @@ namespace OfxWeb.Asp
             services.AddDistributedMemoryCache();
             services.AddSession();
 
-            _logger.LogInformation($"*** AZURESTORAGE *** Looking...");
+            System.Diagnostics.Debug.WriteLine($"*** AZURESTORAGE *** Looking...");
 
             // Build connection string out of component key parts
             var storagesection = Configuration.GetSection("AzureStorage");
@@ -60,7 +58,7 @@ namespace OfxWeb.Asp
                 var AccountName = storagesection.GetValue<string>("AccountName");
                 if (null != AccountKey && null != AccountName)
                 {
-                    _logger.LogInformation($"*** AZURESTORAGE *** Found Account {AccountName}");
+                    System.Diagnostics.Debug.WriteLine($"*** AZURESTORAGE *** Found Account {AccountName}");
 
                     var storageconnection = string.Join(';', storagesection.GetChildren().Select(x => $"{x.Key}={x.Value}"));
                     services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
@@ -73,7 +71,7 @@ namespace OfxWeb.Asp
         {
             if (env.IsDevelopment())
             {
-                _logger.LogInformation($"*** CONFIGURE *** Running in Development");
+                System.Diagnostics.Debug.WriteLine($"*** CONFIGURE *** Running in Development");
 
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
@@ -81,7 +79,7 @@ namespace OfxWeb.Asp
             }
             else
             {
-                _logger.LogInformation($"*** CONFIGURE *** Running in Production");
+                System.Diagnostics.Debug.WriteLine($"*** CONFIGURE *** Running in Production");
 
                 app.UseExceptionHandler("/Home/Error");
             }
