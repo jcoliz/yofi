@@ -47,7 +47,7 @@ namespace OfxWeb.Asp
                     try
                     {
                         System.Diagnostics.Debug.WriteLine($"*** BuildWebHost in {context.HostingEnvironment.EnvironmentName}");
-                        if (context.HostingEnvironment.EnvironmentName == "Production")
+                        if (context.HostingEnvironment.EnvironmentName == "Production" && ! context.HostingEnvironment.ContentRootPath.Contains("jcoliz"))
                         {
                             var builtConfig = config.Build();
                             var KeyVaultName = builtConfig["KeyVaultName"];
