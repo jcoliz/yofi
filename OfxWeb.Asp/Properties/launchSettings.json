@@ -17,7 +17,7 @@
       "launchBrowser": true,
       "launchUrl": "https://localhost:44323/",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production",
+        "ASPNETCORE_ENVIRONMENT": "Development",
         "RECEIPT_STORE": "myfire-iisexpress"
       }
     },

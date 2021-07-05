@@ -47,15 +47,18 @@ namespace OfxWeb.Asp
                     try
                     {
                         System.Diagnostics.Debug.WriteLine($"*** BuildWebHost in {context.HostingEnvironment.EnvironmentName}");
-                        if (context.HostingEnvironment.EnvironmentName == "Production" && ! context.HostingEnvironment.ContentRootPath.Contains("jcoliz"))
+                        if (context.HostingEnvironment.EnvironmentName == "Production")
                         {
                             var builtConfig = config.Build();
-                            var KeyVaultName = builtConfig["KeyVaultName"];
-                            System.Diagnostics.Debug.WriteLine($"*** Using KeyVault {KeyVaultName}");
-                            var secretClient = new SecretClient(
-                                new Uri($"https://{builtConfig["KeyVaultName"]}.vault.azure.net/"),
-                                new DefaultAzureCredential());
-                            config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+                            var KeyVaultUrl = builtConfig["KEY_VAULT_URL"];
+                            if (!string.IsNullOrEmpty(KeyVaultUrl))
+                            {
+                                System.Diagnostics.Debug.WriteLine($"*** Using KeyVault {KeyVaultUrl}");
+                                var secretClient = new SecretClient(
+                                    new Uri(KeyVaultUrl),
+                                    new DefaultAzureCredential());
+                                config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+                            }
                         }
                     }
                     catch (Exception ex)
