@@ -439,6 +439,9 @@ namespace OfxWeb.Asp.Controllers
 
             var expectedpassword = _configuration["Api:Key"];
 
+            if (string.IsNullOrEmpty(expectedpassword))
+                throw new ApplicationException("Application not configured for API password access.");
+
             if (expectedpassword != password)
                 throw new ApplicationException("Invalid password");
         }
