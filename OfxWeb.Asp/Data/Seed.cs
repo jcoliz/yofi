@@ -34,7 +34,7 @@ namespace OfxWeb.Asp.Data
             //creating a super user who could maintain the web app
             var adminusersection = Configuration.GetSection("AdminUser");
 
-            if (null != adminusersection)
+            if (null != adminusersection && adminusersection.Exists())
             {
                 var poweruser = new ApplicationUser
                 {

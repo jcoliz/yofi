@@ -27,6 +27,12 @@ namespace OfxWeb.Asp
                 var services = scope.ServiceProvider;
                 var logger = services.GetRequiredService<ILogger<Program>>();
 
+                logger.LogInformation("**************************************************************");
+                logger.LogInformation("**                                                          **");
+                logger.LogInformation("** APPLICATION STARTUP                                      **");
+                logger.LogInformation("**                                                          **");
+                logger.LogInformation("**************************************************************");
+
                 while (logme.Any())
                     logger.LogInformation(logme.Dequeue());
 
