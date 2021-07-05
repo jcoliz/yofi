@@ -21,6 +21,8 @@ namespace OfxWeb.Asp
 {
     public class Startup
     {
+        private Queue<string> logme = new Queue<string>();
+
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
@@ -47,7 +49,7 @@ namespace OfxWeb.Asp
             services.AddDistributedMemoryCache();
             services.AddSession();
 
-            System.Diagnostics.Debug.WriteLine($"*** AZURESTORAGE *** Looking...");
+            logme.Enqueue($"*** AZURESTORAGE *** Looking...");
 
             // Build connection string out of component key parts
             var storagesection = Configuration.GetSection("AzureStorage");
@@ -58,7 +60,7 @@ namespace OfxWeb.Asp
                 var AccountName = storagesection.GetValue<string>("AccountName");
                 if (null != AccountKey && null != AccountName)
                 {
-                    System.Diagnostics.Debug.WriteLine($"*** AZURESTORAGE *** Found Account {AccountName}");
+                    logme.Enqueue($"*** AZURESTORAGE *** Found Account {AccountName}");
 
                     var storageconnection = string.Join(';', storagesection.GetChildren().Select(x => $"{x.Key}={x.Value}"));
                     services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
@@ -67,11 +69,14 @@ namespace OfxWeb.Asp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
+            while (logme.Any())
+                logger.LogInformation(logme.Dequeue());
+
             if (env.IsDevelopment())
             {
-                System.Diagnostics.Debug.WriteLine($"*** CONFIGURE *** Running in Development");
+                logger.LogInformation($"*** CONFIGURE *** Running in Development");
 
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
@@ -79,7 +84,7 @@ namespace OfxWeb.Asp
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"*** CONFIGURE *** Running in Production");
+                logger.LogInformation($"*** CONFIGURE *** Running in Production");
 
                 app.UseExceptionHandler("/Home/Error");
             }

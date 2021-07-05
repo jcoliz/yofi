@@ -16,6 +16,8 @@ namespace OfxWeb.Asp
 {
     public class Program
     {
+        private static Queue<string> logme = new Queue<string>();
+
         public static void Main(string[] args)
         {
             var host = BuildWebHost(args);
@@ -23,6 +25,11 @@ namespace OfxWeb.Asp
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+                var logger = services.GetRequiredService<ILogger<Program>>();
+
+                while (logme.Any())
+                    logger.LogInformation(logme.Dequeue());
+
                 try
                 {
                     var serviceProvider = services.GetRequiredService<IServiceProvider>();
@@ -31,7 +38,6 @@ namespace OfxWeb.Asp
                 }
                 catch (Exception exception)
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
                     logger.LogError(exception, "An error occurred while creating roles");
                 }
             }
@@ -46,14 +52,14 @@ namespace OfxWeb.Asp
                 {
                     try
                     {
-                        System.Diagnostics.Debug.WriteLine($"*** BuildWebHost in {context.HostingEnvironment.EnvironmentName}");
+                        logme.Enqueue($"*** BuildWebHost in {context.HostingEnvironment.EnvironmentName}");
                         if (context.HostingEnvironment.EnvironmentName == "Production")
                         {
                             var builtConfig = config.Build();
                             var KeyVaultUrl = builtConfig["KEY_VAULT_URL"];
                             if (!string.IsNullOrEmpty(KeyVaultUrl))
                             {
-                                System.Diagnostics.Debug.WriteLine($"*** Using KeyVault {KeyVaultUrl}");
+                                logme.Enqueue($"*** Using KeyVault {KeyVaultUrl}");
                                 var secretClient = new SecretClient(
                                     new Uri(KeyVaultUrl),
                                     new DefaultAzureCredential());
@@ -63,7 +69,7 @@ namespace OfxWeb.Asp
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"*** ERROR with KeyVault: {ex.Message}");
+                        logme.Enqueue($"*** ERROR with KeyVault: {ex.Message}");
                     }
                 })
                 .Build();
