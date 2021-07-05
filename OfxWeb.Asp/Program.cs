@@ -44,14 +44,23 @@ namespace OfxWeb.Asp
                 .UseStartup<Startup>()
                 .ConfigureAppConfiguration((context, config) => 
                 {
-                    System.Diagnostics.Debug.WriteLine($"BuildWebHost in {context.HostingEnvironment.EnvironmentName}");
-                    if (context.HostingEnvironment.EnvironmentName == "Production")
+                    try
                     {
-                        var builtConfig = config.Build();
-                        var secretClient = new SecretClient(
-                            new Uri($"https://{builtConfig["KeyVaultName"]}.vault.azure.net/"),
-                            new DefaultAzureCredential());
-                        config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+                        System.Diagnostics.Debug.WriteLine($"*** BuildWebHost in {context.HostingEnvironment.EnvironmentName}");
+                        if (context.HostingEnvironment.EnvironmentName == "Production")
+                        {
+                            var builtConfig = config.Build();
+                            var KeyVaultName = builtConfig["KeyVaultName"];
+                            System.Diagnostics.Debug.WriteLine($"*** Using KeyVault {KeyVaultName}");
+                            var secretClient = new SecretClient(
+                                new Uri($"https://{builtConfig["KeyVaultName"]}.vault.azure.net/"),
+                                new DefaultAzureCredential());
+                            config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"*** ERROR with KeyVault: {ex.Message}");
                     }
                 })
                 .Build();
