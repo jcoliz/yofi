@@ -7,10 +7,10 @@
 }
 
 <div class="dropdown" style="float:right; margin: 4px">
-    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonYear" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Year
     </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonYear">
 
         @{
             int currentyear = DateTime.Now.Year;
@@ -23,10 +23,10 @@
 </div>
 
 <div class="dropdown" style="float:right; margin: 4px">
-    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonMonth" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Month
     </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonMonth">
 
         @{
             int i = 1;
@@ -55,10 +55,10 @@
 </div>
 
 <div class="dropdown" style="float:right; margin: 4px">
-    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonLevel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Depth
     </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLevel">
 
         @{
             for (i = 1; i <= 4; i++)
@@ -69,10 +69,10 @@
     </div>
 </div>
 <div class="dropdown" style="float:right; margin: 4px">
-    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonColumns" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Show Months
     </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
         <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="true" class="dropdown-item">Show</a>
         <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="false" class="dropdown-item">Hide</a>
     </div>

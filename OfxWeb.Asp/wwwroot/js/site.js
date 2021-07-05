@@ -1,10 +1,5 @@
 ﻿$(document).ready(function () {
 
-    // jQuery creates it's own event object, and it doesn't have a
-    // dataTransfer property yet. This adds dataTransfer to the event object.
-    // Thanks to l4rk for figuring this out!
-    jQuery.event.props.push('dataTransfer');
-
     $(".apply-link").on("click", function (event) {
         event.preventDefault();
         applyPayee($(this).parents('tr'));
