@@ -44,4 +44,8 @@
     </Content>
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="git describe --long --always --dirty --abbrev=8 &gt; &quot;$(ProjectDir)\version.txt&quot;" />
+  </Target>
+
 </Project>
