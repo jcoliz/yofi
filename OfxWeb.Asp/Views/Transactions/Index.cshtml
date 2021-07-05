@@ -26,33 +26,33 @@
        asp-route-sortOrder="@ViewData["CurrentSort"]"
        asp-route-page="@ViewData["PreviousPage"]"
        asp-route-search="@ViewData["CurrentFilter"]"
-       class="btn btn-default @prevDisabled">
+       class="btn @prevDisabled">
         Previous
     </a> |
     <a asp-action="Index"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
        asp-route-page="@ViewData["NextPage"]"
        asp-route-search="@ViewData["CurrentFilter"]"
-       class="btn btn-default @nextDisabled">
+       class="btn @nextDisabled">
         Next
     </a>
 </div>
 <div style="margin-bottom:15px; background-color: lightgray">
-    <a asp-action="Create" class="btn btn-default">Create New</a> |
-    <a asp-action="Index" class="btn btn-default"
+    <a asp-action="Create" class="btn">Create New</a> |
+    <a asp-action="Index" class="btn"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
        asp-route-page="@ViewData["PreviousPage"]"
        asp-route-search="@ViewData["CurrentFilterToggleHidden"]">
         Show Hidden
     </a> |
-    <a asp-action="Index" class="btn btn-default"
+    <a asp-action="Index" class="btn"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
        asp-route-page="@ViewData["PreviousPage"]"
        asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
         Bulk Edit
     </a> |
-    <!--<a asp-action="Download" class="btn btn-default">Export</a>-->
-    <a href="#" data-toggle="modal" data-target="#exportHowModal" class="btn btn-default">Export</a>
+    <!--<a asp-action="Download" class="btn btn-secondary">Export</a>-->
+    <a href="#" data-toggle="modal" data-target="#exportHowModal" class="btn">Export</a>
 </div>
 
 @if ((bool)(ViewData["ShowSelected"]))
