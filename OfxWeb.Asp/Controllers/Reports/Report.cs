@@ -384,30 +384,70 @@ namespace OfxWeb.Asp.Controllers.Reports
                 BuildPhase_Prune();
         }
 
+        /// <summary>
+        /// Propagate values upward to be collected byall generations of parents
+        /// </summary>
+        /// <param name="amount"></param>
+        /// <param name="row"></param>
+        /// <param name="column"></param>
+        /// <param name="seriescolumn"></param>
         private void BuildPhase_Propagate(decimal amount, RowLabel row, ColumnLabel column = null, ColumnLabel seriescolumn = null)
         {
+            // Who is our parent? Based on ID.
             var split = row.UniqueID.Split(':');
             var parentsplit = split.SkipLast(1);
+
+            // If we DO have a parent...
             if (parentsplit.Any())
             {
+                // Find the actual parent ROW, given that ID. Or create if not exists
                 var parentid = string.Join(':', parentsplit);
                 var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
                 if (parentrow == null)
                     parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
                 row.Parent = parentrow;
 
+                // Do the accumlation of values into the parent row
                 base[TotalColumn, parentrow] += amount;
                 if (column != null)
                     base[column, parentrow] += amount;
                 if (seriescolumn != null)
                     base[seriescolumn, parentrow] += amount;
 
+                // Then recursively accumulate upwards to the grandparent
                 BuildPhase_Propagate(amount: amount, row: parentrow, column: column, seriescolumn: seriescolumn);
 
+                // Now that the parent has been propagated, we finally know what level WE are, so we can set it here
                 row.Level = parentrow.Level - 1;
+
+                // User Story 819: Managed Budget Report
+                // There is also a case where a sibling wants to collect our values also. We will deal with that here.
+                // A valid peer-collection row will have an ID like A:B:^C, which collects all A:B children except
+                // A:B:C.
+                // The peer-collection row will be in place before we get here. So if the peer-collector is not
+                // found, we are not peer-collecting.
+                // Peer collection is (currently) only done for series values.
+                if (seriescolumn != null)
+                {
+                    var peeridstart = parentid + ":^";
+                    var rowfinder = RowLabels.Where(x => x.UniqueID.StartsWith(peeridstart) && ! x.UniqueID.EndsWith(':'));
+                    var peerrow = rowfinder.SingleOrDefault();
+                    if (peerrow != null)
+                    {
+                        // If the peer collector is specifically asking for NOT this row, we also won't collect in it
+                        var peeridnot = peeridstart + split.Last();
+                        if (peerrow.UniqueID != peeridnot && peerrow.UniqueID != row.UniqueID)
+                        {
+                            // Found a peer collector who wants us, let's do the collection.
+                            base[seriescolumn, peerrow] += amount;
+                        }
+                    }
+                }
             }
+            // Else we a top-level row
             else
             {
+                // In this case, we accumulate into the report total.
                 row.Level = NumLevels - 1;
                 base[TotalColumn, TotalRow] += amount;
                 if (column != null)

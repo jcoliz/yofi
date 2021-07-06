@@ -21,7 +21,7 @@ namespace Ofx.Tests
             public string Category { get; set; }
         }
 
-        List<Item> Items;
+        List<Item> Items, ActualItems, BudgetItems;
 
         Report report = null;
 
@@ -73,6 +73,17 @@ namespace Ofx.Tests
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else:X" });
             Items.Add(new Item() { Amount = 1000, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something:B" });
+
+            // User Story 819: Managed Budget Report
+            // ActualItems and Budget items are used for Managed Budget report
+            ActualItems = new List<Item>();
+            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B" });
+            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:C" });
+            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:X" });
+
+            BudgetItems = new List<Item>();
+            BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:^C" });
+
         }
 
         [TestMethod]
@@ -721,6 +732,25 @@ namespace Ofx.Tests
                 var Column = GetColumn(x => x.Name == key);
                 Assert.AreEqual(100m, report[Column, report.TotalRow]);
             }
+        }
+
+        [TestMethod]
+        public void BudgetPeerCollector()
+        {
+            var source = new NamedQueryList();
+            source.Add("Budget", BudgetItems.Take(1).AsQueryable());
+            source.Add("Actual", ActualItems.Take(3).AsQueryable());
+            report.Source = source;
+
+            report.NumLevels = 3;
+            report.Build();
+            report.WriteToConsole();
+            
+            var NotC = GetRow(x => x.Name == "^C");
+            var Actual = GetColumn(x => x.Name == "Actual");
+
+            // ^C collected A:B and A:B:X but not A:B:C
+            Assert.AreEqual(200m, report[Actual, NotC]);
         }
 
 #if false
