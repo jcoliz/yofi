@@ -740,6 +740,7 @@ namespace Ofx.Tests
             var source = new NamedQueryList();
             source.Add("Budget", BudgetItems.Take(1).AsQueryable());
             source.Add("Actual", ActualItems.Take(3).AsQueryable());
+            source.First().DoNotPropagate = true;
             report.Source = source;
 
             report.NumLevels = 3;
@@ -751,6 +752,16 @@ namespace Ofx.Tests
 
             // ^C collected A:B and A:B:X but not A:B:C
             Assert.AreEqual(200m, report[Actual, NotC]);
+        }
+
+        [TestMethod]
+        public void BudgetPruner()
+        {
+            report.ReduceToSeries = "Budget";
+            BudgetPeerCollector();
+
+            // There should JUST be A:B:^C
+            Assert.AreEqual(1, report.RowLabels.Count());
         }
 
 #if false

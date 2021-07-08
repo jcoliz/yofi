@@ -108,12 +108,18 @@ namespace OfxWeb.Asp.Controllers.Reports
         ColumnLabel _OrderingColumn;
 
         /// <summary>
-        /// We are only interested in seeing a flat representation of only the leaf rows
+        /// We are only interested in seeing a flat representation of only the leaf rows.
+        /// No total-collecting parent rows are created.
         /// </summary>
         /// <remarks>
         /// This is useful for reports where you only want the leaf items
         /// </remarks>
         public bool LeafRowsOnly { get; set; } = false;
+
+        /// <summary>
+        /// Reduce rows to only those rows which have non-zero values in a particular series
+        /// </summary>
+        public string ReduceToSeries { get; set; }
 
         #endregion
 
@@ -318,21 +324,21 @@ namespace OfxWeb.Asp.Controllers.Reports
         ///  3. Propagate. Propagate those values upward into totalling rows.
         ///  4. Prune. Prune out rows that are not really needed.
         /// </remarks>
-        /// <param name="kvp">Source of reportables, with optional series name key</param>
+        /// <param name="source">Source of reportables, with optional series name key</param>
 
-        private void BuildPhase_Group(NamedQuery kvp)
+        private void BuildPhase_Group(NamedQuery source)
         {
             IQueryable<IGrouping<object, IReportable>> groups;
             if (WithMonthColumns)
-                groups = kvp.Query.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
+                groups = source.Query.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
             else
-                groups = kvp.Query.GroupBy(x => new { Name = x.Category });
+                groups = source.Query.GroupBy(x => new { Name = x.Category });
 
             //  1. Group. Group source transactions by name/month and calculate totals
             var selected = groups.Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
 
             //  2. Place. Place each incoming data point into a report cell.
-            BuildPhase_Place(source: selected, seriesname: kvp.Name);
+            BuildPhase_Place(source: selected, oquery: source);
         }
 
         /// <summary>
@@ -344,10 +350,10 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// and worked on.
         /// </remarks>
         /// <param name="source">Report data</param>
-        /// <param name="seriesname">Optional column to subtotal into</param>
-        private void BuildPhase_Place(IQueryable<dynamic> source, string seriesname)
+        /// <param name="oquery">Original query</param>
+        private void BuildPhase_Place(IQueryable<dynamic> source, NamedQuery oquery)
         {
-            var seriescolumn = string.IsNullOrEmpty(seriesname) ? null : new ColumnLabel() { Name = seriesname, UniqueID = seriesname };
+            var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, DoNotPropagate = oquery.DoNotPropagate };
             foreach (var cell in source)
             {
                 string dynamicname = cell.Key.Name;
@@ -415,7 +421,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                     base[seriescolumn, parentrow] += amount;
 
                 // Then recursively accumulate upwards to the grandparent
-                BuildPhase_Propagate(amount: amount, row: parentrow, column: column, seriescolumn: seriescolumn);
+                if (seriescolumn?.DoNotPropagate != true)
+                    BuildPhase_Propagate(amount: amount, row: parentrow, column: column, seriescolumn: seriescolumn);
 
                 // Now that the parent has been propagated, we finally know what level WE are, so we can set it here
                 row.Level = parentrow.Level - 1;
@@ -463,6 +470,12 @@ namespace OfxWeb.Asp.Controllers.Reports
             // In that case, A:B: is duplicating A:B, and is ergo needless
             // Note that this can only be done after ALL the series are in place
 
+            // Also will get rid of rows which don't hold a value in a desired series,
+            // if so configured
+            ColumnLabel series = null;
+            if (!string.IsNullOrEmpty(ReduceToSeries))
+                series = ColumnLabelsFiltered.Where(x => x.Name == ReduceToSeries).Single();
+
             var pruned = new HashSet<RowLabel>();
             foreach (var row in base.RowLabels)
             {
@@ -473,6 +486,10 @@ namespace OfxWeb.Asp.Controllers.Reports
 
                 // Also prune rows that are below the numrows cutoff
                 if (row.Level < 0)
+                    pruned.Add(row);
+
+                // Also prune rows that aren't included in the desired series
+                if (null != series && base[series,row] == 0)
                     pruned.Add(row);
             }
 
@@ -733,6 +750,12 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// Otherwise it's a regular dollar figure
         /// </remarks>
         public bool DisplayAsPercent { get; set; } = false;
+
+        /// <summary>
+        /// True if this column should not be propagating values up to parent rows
+        /// </summary>
+
+        public bool DoNotPropagate { get; set; } = false;
 
         /// <summary>
         /// Custom function which will calculate values for this column based
