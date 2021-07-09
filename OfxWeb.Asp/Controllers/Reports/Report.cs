@@ -239,6 +239,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                     builder.Append($"| {val.ToString(format),10} ");
                 }
 
+                builder.Append($" {line}");
+
                 Console.WriteLine(builder.ToString());
             }
         }
@@ -349,8 +351,11 @@ namespace OfxWeb.Asp.Controllers.Reports
                 {
                     //  2. Place. Place each incoming data point into a report cell.
                     var id = string.Join(':', keys) + (!oquery.LeafRowsOnly ? ":" : string.Empty);
-                    var name = oquery.LeafRowsOnly ? id : null;
-                    var row = new RowLabel() { Name = name, UniqueID = id };
+                    var name = oquery.LeafRowsOnly ? id : null;                    
+                    var row = RowLabels.Where(x => x.UniqueID == id).SingleOrDefault();
+                    if (row == null)
+                        row = new RowLabel() { Name = name, UniqueID = id };
+
                     ColumnLabel column = null;
                     if (WithMonthColumns)
                     {
@@ -464,10 +469,11 @@ namespace OfxWeb.Asp.Controllers.Reports
             var pruned = new HashSet<RowLabel>();
             foreach (var row in base.RowLabels)
             {
-                if (string.IsNullOrEmpty(row.UniqueID.Split(':').Last()))
-                    if (row.Parent != null)
-                        if (base[TotalColumn, row] == base[TotalColumn, row.Parent as RowLabel])
-                            pruned.Add(row);
+                if (!leafnodecolumns.Any())
+                    if (string.IsNullOrEmpty(row.UniqueID.Split(':').Last()))
+                        if (row.Parent != null)
+                            if (base[TotalColumn, row] == base[TotalColumn, row.Parent as RowLabel])
+                                pruned.Add(row);
 
                 // Also prune rows that are below the numrows cutoff
                 if (row.Level < 0)

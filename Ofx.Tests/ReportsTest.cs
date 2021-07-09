@@ -737,59 +737,16 @@ namespace Ofx.Tests
             }
         }
 
-        [TestMethod]
-        public void BudgetPeerCollector()
-        {
-            report.Source = new NamedQueryList()
-            {
-                new NamedQuery() { Name = "Budget", Query = BudgetItems.Take(1).AsQueryable(), LeafRowsOnly = true },
-                new NamedQuery() { Name = "Actual", Query = ActualItems.Take(3).AsQueryable() }
-            };
-            report.NumLevels = 3;
-            report.Build();
-            report.WriteToConsole();
-            
-            var NotC = GetRow(x => x.Name == "A:B:^C");
-            var Actual = GetColumn(x => x.Name == "Actual");
-
-            // ^C collected A:B and A:B:X but not A:B:C
-            Assert.AreEqual(200m, report[Actual, NotC]);
-        }
-
-        [TestMethod]
-        public void BudgetPruner()
-        {
-            BudgetPeerCollector();
-
-            // There should JUST be A:B:^C
-            Assert.AreEqual(1, report.RowLabels.Count());
-        }
-
-        [TestMethod]
-        public void BudgetCase1()
-        {
-            report.Source = new NamedQueryList()
-            {
-                new NamedQuery() { Name = "Budget", Query = BudgetItems.Skip(1).Take(1).AsQueryable(), LeafRowsOnly = true },
-                new NamedQuery() { Name = "Actual", Query = ActualItems.Skip(3).Take(4).AsQueryable() }
-            };
-            report.NumLevels = 3;
-            report.Build();
-            report.WriteToConsole();
-
-            var Row = report.RowLabels.First();
-            var Actual = GetColumn(x => x.Name == "Actual");
-
-            // There should JUST be D:E
-            Assert.AreEqual(1, report.RowLabels.Count());
-
-            // D:E collected D:E, D:E:X, not D or D:X
-            Assert.AreEqual(200m, report[Actual, Row]);
-        }
-
+        [DataRow("D:E:", "D,D:E,D:E:F,D:E:F:G", 100)]
+        [DataRow("D:E:", "D:E", 100)]
+        [DataRow("A:B:^C", "A,A:X,A:B,A:B:C,A:B:D,A:B:C:X,A:B:D:X", 300)]
+        [DataRow("A:B:^C", "A:B,A:B:C,A:B:D", 200)]
+        [DataRow("A:B:^C", "A:B:C,A:B:D", 100)]
+        [DataRow("A:B:^C", "A:B:D", 100)]
+        [DataRow("D:E:F", "D,D:X,D:E:F,D:E:F:X,D:E:X", 200)]
         [DataRow("D:E", "D,D:X,D:E,D:E:X", 200)]
         [DataTestMethod]
-        public void BudgetCases(string budget, string actual, int expected )
+        public void MixedLeafRowsAndCollector(string budget, string actual, int expected )
         {
             report.Source = new NamedQueryList()
             {
