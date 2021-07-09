@@ -340,7 +340,6 @@ namespace OfxWeb.Asp.Controllers.Reports
         private void BuildPhase_Place(IQueryable<dynamic> source, NamedQuery oquery)
         {
             var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, LeafNodesOnly = oquery.LeafRowsOnly };
-            var leafonly = oquery.LeafRowsOnly;
 
             foreach (var cell in source)
             {
@@ -349,8 +348,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                 if (keys.Any())
                 {
                     //  2. Place. Place each incoming data point into a report cell.
-                    var id = string.Join(':', keys) + (!leafonly ? ":" : string.Empty);
-                    var name = leafonly ? id : null;
+                    var id = string.Join(':', keys) + (!oquery.LeafRowsOnly ? ":" : string.Empty);
+                    var name = oquery.LeafRowsOnly ? id : null;
                     var row = new RowLabel() { Name = name, UniqueID = id };
                     ColumnLabel column = null;
                     if (WithMonthColumns)
@@ -368,13 +367,13 @@ namespace OfxWeb.Asp.Controllers.Reports
                     base[TotalColumn, row] += cell.Total;
 
                     //  3. Propagate. Propagate those values upward into totalling rows.
-                    if (!leafonly)
+                    if (!oquery.LeafRowsOnly)
                         BuildPhase_Propagate(row: row, column: column, seriescolumn: seriescolumn, amount: cell.Total);
                 }
             }
 
             //  4. Prune. Prune out rows that are not really needed.
-            if (!leafonly)
+            if (!oquery.LeafRowsOnly)
                 BuildPhase_Prune();
         }
 
