@@ -138,12 +138,12 @@ namespace OfxWeb.Asp.Controllers.Reports
         }
         public IEnumerable<NamedQuery> QueryBudgetExcept(IEnumerable<string> tops) => new List<NamedQuery>() { QueryBudgetSingleExcept(tops) };
 
-        public IEnumerable<NamedQuery> QueryActualVsBudget()
+        public IEnumerable<NamedQuery> QueryActualVsBudget(bool leafrows = false)
         {
             var result = new List<NamedQuery>();
 
-            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual")));
-            result.Add(QueryBudgetSingle().Labeled("Budget"));
+            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
+            result.Add(QueryBudgetSingle().Labeled("Budget").AsLeafRowsOnly(leafrows));
 
             return result;
         }

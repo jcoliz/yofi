@@ -42,7 +42,7 @@ namespace Ofx.Tests
         public void SetUp()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseLoggerFactory(logfact)
+                //.UseLoggerFactory(logfact)
                 .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
                 .Options;
 
@@ -851,9 +851,9 @@ namespace Ofx.Tests
             var doc = JsonDocument.Parse(report);
             var root = doc.RootElement;
 
-            var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA:").Single();
-            var AABB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:BB:").Single();
-            var CCAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC:AA:").Single();
+            var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA").Single();
+            var AABB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:BB").Single();
+            var CCAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC:AA").Single();
 
             Assert.AreEqual(5, root.GetArrayLength());
             Assert.AreEqual(200m, AAAA.GetProperty("ID:Actual").GetDecimal());

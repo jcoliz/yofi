@@ -157,8 +157,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "export")
             {
-                result.Source = _qbuilder.QueryActualVsBudget();
-                result.LeafRowsOnly = true;
+                result.Source = _qbuilder.QueryActualVsBudget(leafrows:true);
                 result.WithTotalColumn = false;
                 result.NumLevels = 4;
                 result.SortOrder = Report.SortOrders.NameAscending;
