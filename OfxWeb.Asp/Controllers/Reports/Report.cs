@@ -486,7 +486,10 @@ namespace OfxWeb.Asp.Controllers.Reports
                     if (leafnodecolumns.Sum(x => base[x, row]) == 0)
                         pruned.Add(row);
                     else
+                    {
                         row.Level = 0;
+                        row.Parent = null;
+                    }
                 }
             }
 
