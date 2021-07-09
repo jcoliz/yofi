@@ -69,6 +69,13 @@ namespace OfxWeb.Asp.Controllers.Reports
                     result.GrandTotal == 0 ? 0 : cols.GetValueOrDefault("TOTAL") / result.GrandTotal
             };
 
+            var budgetavailablecolumn = new ColumnLabel()
+            {
+                Name = "Available",
+                Custom = (cols) =>
+                    cols.GetValueOrDefault("ID:Actual") - cols.GetValueOrDefault("ID:Budget")
+            };
+
             if (parms.id == "all")
             {
                 result.WithMonthColumns = true;
@@ -141,7 +148,9 @@ namespace OfxWeb.Asp.Controllers.Reports
             else if (parms.id == "managed-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
+                result.AddCustomColumn(budgetavailablecolumn);
                 result.Source = _qbuilder.QueryManagedBudget();
+                result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.NameAscending;
                 result.Name = "Managed Budget";
