@@ -107,15 +107,6 @@ namespace OfxWeb.Asp.Controllers.Reports
         }
         ColumnLabel _OrderingColumn;
 
-        /// <summary>
-        /// We are only interested in seeing a flat representation of only the leaf rows.
-        /// No total-collecting parent rows are created.
-        /// </summary>
-        /// <remarks>
-        /// This is useful for reports where you only want the leaf items
-        /// </remarks>
-        public bool LeafRowsOnly { get; set; } = false;
-
         #endregion
 
         #region Informative Properties
@@ -349,7 +340,7 @@ namespace OfxWeb.Asp.Controllers.Reports
         private void BuildPhase_Place(IQueryable<dynamic> source, NamedQuery oquery)
         {
             var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, LeafNodesOnly = oquery.LeafRowsOnly };
-            var leafonly = LeafRowsOnly || oquery.LeafRowsOnly;
+            var leafonly = oquery.LeafRowsOnly;
 
             foreach (var cell in source)
             {
