@@ -354,6 +354,8 @@ namespace OfxWeb.Asp.Controllers.Reports
         private void BuildPhase_Place(IQueryable<dynamic> source, NamedQuery oquery)
         {
             var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, DoNotPropagate = oquery.DoNotPropagate };
+            var leafonly = LeafRowsOnly || oquery.DoNotPropagate;
+
             foreach (var cell in source)
             {
                 string dynamicname = cell.Key.Name;
@@ -361,8 +363,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                 if (keys.Any())
                 {
                     //  2. Place. Place each incoming data point into a report cell.
-                    var id = string.Join(':', keys) + ":";
-                    var name = LeafRowsOnly ? id : null;
+                    var id = string.Join(':', keys) + (!leafonly ? ":" : string.Empty);
+                    var name = leafonly ? id : null;
                     var row = new RowLabel() { Name = name, UniqueID = id };
                     ColumnLabel column = null;
                     if (WithMonthColumns)
@@ -380,13 +382,13 @@ namespace OfxWeb.Asp.Controllers.Reports
                     base[TotalColumn, row] += cell.Total;
 
                     //  3. Propagate. Propagate those values upward into totalling rows.
-                    if (!LeafRowsOnly)
+                    if (!leafonly)
                         BuildPhase_Propagate(row: row, column: column, seriescolumn: seriescolumn, amount: cell.Total);
                 }
             }
 
             //  4. Prune. Prune out rows that are not really needed.
-            if (!LeafRowsOnly)
+            if (!leafonly)
                 BuildPhase_Prune();
         }
 
@@ -421,8 +423,7 @@ namespace OfxWeb.Asp.Controllers.Reports
                     base[seriescolumn, parentrow] += amount;
 
                 // Then recursively accumulate upwards to the grandparent
-                if (seriescolumn?.DoNotPropagate != true)
-                    BuildPhase_Propagate(amount: amount, row: parentrow, column: column, seriescolumn: seriescolumn);
+                BuildPhase_Propagate(amount: amount, row: parentrow, column: column, seriescolumn: seriescolumn);
 
                 // Now that the parent has been propagated, we finally know what level WE are, so we can set it here
                 row.Level = parentrow.Level - 1;

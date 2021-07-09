@@ -80,9 +80,14 @@ namespace Ofx.Tests
             ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B" });
             ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:C" });
             ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:X" });
+            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D" });
+            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:X" });
+            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:E" });
+            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:E:X" });
 
             BudgetItems = new List<Item>();
             BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:^C" });
+            BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:E" });
 
         }
 
@@ -572,9 +577,9 @@ namespace Ofx.Tests
             report.Build();
             report.WriteToConsole();
 
-            var Name = GetRow(x => x.Name == "Name:" && x.Level == 0);
-            var Other = GetRow(x => x.Name == "Other:" && x.Level == 0);
-            var Else = GetRow(x => x.Name == "Other:Else:" && x.Level == 0);
+            var Name = GetRow(x => x.Name == "Name" && x.Level == 0);
+            var Other = GetRow(x => x.Name == "Other" && x.Level == 0);
+            var Else = GetRow(x => x.Name == "Other:Else" && x.Level == 0);
 
             Assert.AreEqual(7, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
@@ -747,7 +752,7 @@ namespace Ofx.Tests
             report.Build();
             report.WriteToConsole();
             
-            var NotC = GetRow(x => x.Name == "^C");
+            var NotC = GetRow(x => x.Name == "A:B:^C");
             var Actual = GetColumn(x => x.Name == "Actual");
 
             // ^C collected A:B and A:B:X but not A:B:C
@@ -762,6 +767,30 @@ namespace Ofx.Tests
 
             // There should JUST be A:B:^C
             Assert.AreEqual(1, report.RowLabels.Count());
+        }
+
+        [TestMethod]
+        public void BudgetCase1()
+        {
+            var source = new NamedQueryList();
+            source.Add("Budget", BudgetItems.Skip(1).Take(1).AsQueryable());
+            source.Add("Actual", ActualItems.Skip(3).Take(4).AsQueryable());
+            source.First().DoNotPropagate = true;
+            report.ReduceToSeries = "Budget";
+            report.Source = source;
+
+            report.NumLevels = 3;
+            report.Build();
+            report.WriteToConsole();
+
+            var Row = report.RowLabels.First();
+            var Actual = GetColumn(x => x.Name == "Actual");
+
+            // There should JUST be D:E
+            Assert.AreEqual(1, report.RowLabels.Count());
+
+            // D:E collected D:E, D:E:X, not D or D:X
+            Assert.AreEqual(200m, report[Actual, Row]);
         }
 
 #if false
