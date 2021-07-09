@@ -351,6 +351,12 @@ namespace OfxWeb.Asp.Controllers.Reports
                 {
                     //  2. Place. Place each incoming data point into a report cell.
                     var id = string.Join(':', keys) + (!oquery.LeafRowsOnly ? ":" : string.Empty);
+
+                    // Items with a "^" are peer-collectors for leaf rows only reports.
+                    // They are not placed if the series is NOT "leaf rows only"
+                    if (id.Contains('^') && !oquery.LeafRowsOnly)
+                        continue;
+
                     var name = oquery.LeafRowsOnly ? id : null;                    
                     var row = RowLabels.Where(x => x.UniqueID == id).SingleOrDefault();
                     if (row == null)
