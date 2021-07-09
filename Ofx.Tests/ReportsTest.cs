@@ -88,7 +88,6 @@ namespace Ofx.Tests
             BudgetItems = new List<Item>();
             BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:^C" });
             BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:E" });
-
         }
 
         [TestMethod]
@@ -786,6 +785,38 @@ namespace Ofx.Tests
 
             // D:E collected D:E, D:E:X, not D or D:X
             Assert.AreEqual(200m, report[Actual, Row]);
+        }
+
+        [DataRow("D:E", "D,D:X,D:E,D:E:X", 200)]
+        [DataTestMethod]
+        public void BudgetCases(string budget, string actual, int expected )
+        {
+            report.Source = new NamedQueryList()
+            {
+                new NamedQuery() 
+                { 
+                    Name = "Budget", 
+                    Query = budget.Split(',').Select(x=>new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = x }).ToList().AsQueryable(), 
+                    LeafRowsOnly = true 
+                },
+                new NamedQuery() 
+                { 
+                    Name = "Actual",
+                    Query = actual.Split(',').Select(x=>new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = x }).ToList().AsQueryable(),
+                }
+            };
+
+            report.NumLevels = 3;
+            report.Build();
+            report.WriteToConsole();
+
+            var Row = report.RowLabels.First();
+            var Actual = GetColumn(x => x.Name == "Actual");
+
+            // There should JUST be the budget lines
+            Assert.AreEqual(budget.Split(',').Count(), report.RowLabels.Count());
+
+            Assert.AreEqual((decimal)expected, report[Actual, Row]);
         }
 
 #if false
