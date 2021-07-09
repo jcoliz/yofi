@@ -122,6 +122,8 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "expenses-budget")
             {
+                _qbuilder.Month = 12; // Budget reports are whole-year, generally
+                result.Description = $"For {Year}";
                 result.Source = _qbuilder.QueryBudgetExcept(tops: notexpenses);
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
@@ -129,6 +131,8 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "expenses-v-budget")
             {
+                _qbuilder.Month = 12; // Budget reports are whole-year, generally
+                result.Description = $"For {Year}";
                 result.AddCustomColumn(budgetpctcolumn);
                 result.Source = _qbuilder.QueryActualVsBudgetExcept(tops: notexpenses);
                 result.WithTotalColumn = false;
@@ -138,6 +142,8 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "all-v-budget")
             {
+                _qbuilder.Month = 12; // Budget reports are whole-year, generally
+                result.Description = $"For {Year}";
                 result.AddCustomColumn(budgetpctcolumn);
                 result.Source = _qbuilder.QueryActualVsBudget();
                 result.WithTotalColumn = false;
@@ -158,10 +164,11 @@ namespace OfxWeb.Asp.Controllers.Reports
             }
             else if (parms.id == "budget")
             {
+                _qbuilder.Month = 12; // Budget reports are whole-year, generally
+                result.Description = $"For {Year}";
                 result.NumLevels = 3;
                 result.Source = _qbuilder.QueryBudget();
                 result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Description = $"For {Year}";
                 result.Name = "Full Budget";
             }
             else if (parms.id == "yoy")
