@@ -13,7 +13,7 @@ namespace OfxWeb.Asp.Controllers.Reports
     {
         public string Name { get; set; }
         public IQueryable<IReportable> Query { get; set; }
-        public bool DoNotPropagate { get; set; } = false;
+        public bool LeafRowsOnly { get; set; } = false;
 
         public NamedQuery Labeled(string newname) => new NamedQuery() { Name = newname, Query = Query };
     }

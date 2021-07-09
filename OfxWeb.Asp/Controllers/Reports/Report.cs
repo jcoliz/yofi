@@ -353,8 +353,8 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// <param name="oquery">Original query</param>
         private void BuildPhase_Place(IQueryable<dynamic> source, NamedQuery oquery)
         {
-            var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, DoNotPropagate = oquery.DoNotPropagate };
-            var leafonly = LeafRowsOnly || oquery.DoNotPropagate;
+            var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, DoNotPropagate = oquery.LeafRowsOnly };
+            var leafonly = LeafRowsOnly || oquery.LeafRowsOnly;
 
             foreach (var cell in source)
             {

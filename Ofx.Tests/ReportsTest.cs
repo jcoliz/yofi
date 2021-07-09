@@ -572,7 +572,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void ThreeLevelsDeepLeafs()
         {
-            report.Source = new NamedQueryList(new NamedQuery() { Query = Items.Take(20).AsQueryable(), DoNotPropagate = true });
+            report.Source = new NamedQueryList(new NamedQuery() { Query = Items.Take(20).AsQueryable(), LeafRowsOnly = true });
             report.Build();
             report.WriteToConsole();
 
@@ -743,7 +743,7 @@ namespace Ofx.Tests
         {
             report.Source = new NamedQueryList()
             {
-                new NamedQuery() { Name = "Budget", Query = BudgetItems.Take(1).AsQueryable(), DoNotPropagate = true },
+                new NamedQuery() { Name = "Budget", Query = BudgetItems.Take(1).AsQueryable(), LeafRowsOnly = true },
                 new NamedQuery() { Name = "Actual", Query = ActualItems.Take(3).AsQueryable() }
             };
             report.NumLevels = 3;
@@ -773,7 +773,7 @@ namespace Ofx.Tests
             var source = new NamedQueryList();
             source.Add("Budget", BudgetItems.Skip(1).Take(1).AsQueryable());
             source.Add("Actual", ActualItems.Skip(3).Take(4).AsQueryable());
-            source.First().DoNotPropagate = true;
+            source.First().LeafRowsOnly = true;
             report.ReduceToSeries = "Budget";
             report.Source = source;
 
