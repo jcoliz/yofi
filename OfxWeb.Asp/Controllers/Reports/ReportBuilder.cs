@@ -138,6 +138,14 @@ namespace OfxWeb.Asp.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "All vs. Budget";
             }
+            else if (parms.id == "managed-budget")
+            {
+                result.AddCustomColumn(budgetpctcolumn);
+                result.Source = _qbuilder.QueryManagedBudget();
+                result.NumLevels = 3;
+                result.SortOrder = Report.SortOrders.NameAscending;
+                result.Name = "Managed Budget";
+            }
             else if (parms.id == "budget")
             {
                 result.NumLevels = 3;

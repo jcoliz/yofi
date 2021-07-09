@@ -15,7 +15,7 @@ namespace OfxWeb.Asp.Controllers.Reports
         public IQueryable<IReportable> Query { get; set; }
         public bool LeafRowsOnly { get; set; } = false;
 
-        public NamedQuery Labeled(string newname) => new NamedQuery() { Name = newname, Query = Query };
+        public NamedQuery Labeled(string newname) => new NamedQuery() { Name = newname, Query = Query, LeafRowsOnly = LeafRowsOnly };
         public NamedQuery AsLeafRowsOnly(bool leafrows) => new NamedQuery() { Name = Name, Query = Query, LeafRowsOnly = leafrows };
     }
 }

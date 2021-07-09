@@ -148,6 +148,35 @@ namespace OfxWeb.Asp.Controllers.Reports
             return result;
         }
 
+        private NamedQuery QueryManagedBudgetSingle()
+        {
+            // Start with the usual transactions
+            var budgettxs = QueryBudgetSingle().Query;
+
+            // "Managed" Categories are those with more than one budgettx in a year.
+            var categories = budgettxs.GroupBy(x => x.Category).Select(g => new { Key = g.Key, Count = g.Count() }).Where(x => x.Count > 1).Select(x => x.Key);
+
+            // This is SO not going to translate into a query :O
+            var managedtxs = budgettxs.Where(x => categories.Contains(x.Category));
+
+            // JUST FOR FUN!!
+            var runit = managedtxs.ToList();
+            foreach (var it in runit)
+                Console.WriteLine($"{it.Timestamp} {it.Category} {it.Amount}");
+
+            return new NamedQuery() { Query = managedtxs, LeafRowsOnly = true };
+        }
+
+        public IEnumerable<NamedQuery> QueryManagedBudget()
+        {
+            var result = new List<NamedQuery>();
+
+            result.Add(QueryManagedBudgetSingle().Labeled("Budget"));
+            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual")));
+
+            return result;
+        }
+
         public IEnumerable<NamedQuery> QueryActualVsBudgetExcept(IEnumerable<string> tops)
         {
             var result = new List<NamedQuery>();
