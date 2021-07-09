@@ -116,11 +116,6 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// </remarks>
         public bool LeafRowsOnly { get; set; } = false;
 
-        /// <summary>
-        /// Reduce rows to only those rows which have non-zero values in a particular series
-        /// </summary>
-        public string ReduceToSeries { get; set; }
-
         #endregion
 
         #region Informative Properties
@@ -353,7 +348,7 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// <param name="oquery">Original query</param>
         private void BuildPhase_Place(IQueryable<dynamic> source, NamedQuery oquery)
         {
-            var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, DoNotPropagate = oquery.LeafRowsOnly };
+            var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, LeafNodesOnly = oquery.LeafRowsOnly };
             var leafonly = LeafRowsOnly || oquery.LeafRowsOnly;
 
             foreach (var cell in source)
@@ -471,11 +466,10 @@ namespace OfxWeb.Asp.Controllers.Reports
             // In that case, A:B: is duplicating A:B, and is ergo needless
             // Note that this can only be done after ALL the series are in place
 
-            // Also will get rid of rows which don't hold a value in a desired series,
-            // if so configured
-            ColumnLabel series = null;
-            if (!string.IsNullOrEmpty(ReduceToSeries))
-                series = ColumnLabelsFiltered.Where(x => x.Name == ReduceToSeries).Single();
+            // Also will handle the case where one (or more) series in the report is "leaf nodes only"
+            // while the others were propagated. In this case, we will prune out rows which don't have
+            // a value in leaf-nodes-only series
+            var leafnodecolumns = ColumnLabelsFiltered.Where(x => x.LeafNodesOnly);
 
             var pruned = new HashSet<RowLabel>();
             foreach (var row in base.RowLabels)
@@ -490,7 +484,7 @@ namespace OfxWeb.Asp.Controllers.Reports
                     pruned.Add(row);
 
                 // Also prune rows that aren't included in the desired series
-                if (null != series && base[series,row] == 0)
+                if (leafnodecolumns.Any() && leafnodecolumns.Sum(x=>base[x,row]) == 0)
                     pruned.Add(row);
             }
 
@@ -756,7 +750,7 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// True if this column should not be propagating values up to parent rows
         /// </summary>
 
-        public bool DoNotPropagate { get; set; } = false;
+        public bool LeafNodesOnly { get; set; } = false;
 
         /// <summary>
         /// Custom function which will calculate values for this column based

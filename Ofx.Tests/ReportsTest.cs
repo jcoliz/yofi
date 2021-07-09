@@ -760,7 +760,6 @@ namespace Ofx.Tests
         [TestMethod]
         public void BudgetPruner()
         {
-            report.ReduceToSeries = "Budget";
             BudgetPeerCollector();
 
             // There should JUST be A:B:^C
@@ -770,13 +769,11 @@ namespace Ofx.Tests
         [TestMethod]
         public void BudgetCase1()
         {
-            var source = new NamedQueryList();
-            source.Add("Budget", BudgetItems.Skip(1).Take(1).AsQueryable());
-            source.Add("Actual", ActualItems.Skip(3).Take(4).AsQueryable());
-            source.First().LeafRowsOnly = true;
-            report.ReduceToSeries = "Budget";
-            report.Source = source;
-
+            report.Source = new NamedQueryList()
+            {
+                new NamedQuery() { Name = "Budget", Query = BudgetItems.Skip(1).Take(1).AsQueryable(), LeafRowsOnly = true },
+                new NamedQuery() { Name = "Actual", Query = ActualItems.Skip(3).Take(4).AsQueryable() }
+            };
             report.NumLevels = 3;
             report.Build();
             report.WriteToConsole();
