@@ -157,7 +157,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             var categories = budgettxs.GroupBy(x => x.Category).Select(g => new { Key = g.Key, Count = g.Count() }).Where(x => x.Count > 1).Select(x => x.Key);
 
             // This is SO not going to translate into a query :O
-            var managedtxs = budgettxs.Where(x => categories.Contains(x.Category));
+            var managedtxs = budgettxs.Where(x => x.Timestamp.Month <= Month && categories.Contains(x.Category));
 
             // JUST FOR FUN!!
             var runit = managedtxs.ToList();
