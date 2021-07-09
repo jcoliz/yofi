@@ -745,6 +745,7 @@ namespace Ofx.Tests
         [DataRow("A:B:^C", "A:B:D", 100)]
         [DataRow("D:E:F", "D,D:X,D:E:F,D:E:F:X,D:E:X", 200)]
         [DataRow("D:E", "D,D:X,D:E,D:E:X", 200)]
+        [DataRow("A:B:^C;D;E;F", "A:B:X,A:B:C,A:B:E,A:B:F", 100)]
         [DataTestMethod]
         public void MixedLeafRowsAndCollector(string budget, string actual, int expected )
         {

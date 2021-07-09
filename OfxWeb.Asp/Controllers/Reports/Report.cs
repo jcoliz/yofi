@@ -433,8 +433,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                     if (peerrow != null)
                     {
                         // If the peer collector is specifically asking for NOT this row, we also won't collect in it
-                        var peeridnot = peeridstart + split.Last();
-                        if (peerrow.UniqueID != peeridnot && peerrow.UniqueID != row.UniqueID)
+                        var dontcollect = peerrow.UniqueID.Substring(peeridstart.Length).Split(';');
+                        if (!dontcollect.Contains(split.Last()) && peerrow.UniqueID != row.UniqueID)
                         {
                             // Found a peer collector who wants us, let's do the collection.
                             base[seriescolumn, peerrow] += amount;
