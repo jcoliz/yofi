@@ -572,8 +572,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void ThreeLevelsDeepLeafs()
         {
-            report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
-            report.LeafRowsOnly = true;
+            report.Source = new NamedQueryList(new NamedQuery() { Query = Items.Take(20).AsQueryable(), DoNotPropagate = true });
             report.Build();
             report.WriteToConsole();
 
@@ -742,12 +741,11 @@ namespace Ofx.Tests
         [TestMethod]
         public void BudgetPeerCollector()
         {
-            var source = new NamedQueryList();
-            source.Add("Budget", BudgetItems.Take(1).AsQueryable());
-            source.Add("Actual", ActualItems.Take(3).AsQueryable());
-            source.First().DoNotPropagate = true;
-            report.Source = source;
-
+            report.Source = new NamedQueryList()
+            {
+                new NamedQuery() { Name = "Budget", Query = BudgetItems.Take(1).AsQueryable(), DoNotPropagate = true },
+                new NamedQuery() { Name = "Actual", Query = ActualItems.Take(3).AsQueryable() }
+            };
             report.NumLevels = 3;
             report.Build();
             report.WriteToConsole();
