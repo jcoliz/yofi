@@ -776,6 +776,18 @@ namespace Ofx.Tests
             Assert.AreEqual((decimal)expected, report[Actual, Row]);
         }
 
+        [TestMethod]
+        public void FlattenLevelSingleLeafRowsOnly()
+        {
+            // If ONE of the series is leafrows only, this report should be flattened (all level 0).
+
+            MixedLeafRowsAndCollector("D", "D:E:F,D,D:E,D:E:F:G", 400);
+
+            var Row = report.RowLabels.First();
+
+            Assert.AreEqual(0, Row.Level);
+        }
+
 #if false
         [TestMethod]
         public void Splits()

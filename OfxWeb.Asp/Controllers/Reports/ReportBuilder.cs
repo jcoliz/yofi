@@ -151,7 +151,8 @@ namespace OfxWeb.Asp.Controllers.Reports
                 result.AddCustomColumn(budgetavailablecolumn);
                 result.Source = _qbuilder.QueryManagedBudget();
                 result.WithTotalColumn = false;
-                result.NumLevels = 3;
+                result.NumLevels = 4;
+                result.DisplayLevelAdjustment = 1;
                 result.SortOrder = Report.SortOrders.NameAscending;
                 result.Name = "Managed Budget";
             }

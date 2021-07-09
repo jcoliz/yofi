@@ -479,9 +479,15 @@ namespace OfxWeb.Asp.Controllers.Reports
                 if (row.Level < 0)
                     pruned.Add(row);
 
-                // Also prune rows that aren't included in the desired series
-                if (leafnodecolumns.Any() && leafnodecolumns.Sum(x=>base[x,row]) == 0)
-                    pruned.Add(row);
+                // Also prune rows that aren't included a leaf-rows-only series, IF there is at least one
+                // such series. Also flatten series if there is a leaf-rows-only series.
+                if (leafnodecolumns.Any())
+                {
+                    if (leafnodecolumns.Sum(x => base[x, row]) == 0)
+                        pruned.Add(row);
+                    else
+                        row.Level = 0;
+                }
             }
 
             base._RowLabels.RemoveWhere(x => pruned.Contains(x));
