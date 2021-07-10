@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,6 +13,7 @@ namespace OfxWeb.Asp.Models
     {
         public int ID { get; set; }
         [DisplayFormat(DataFormatString = "{0:C2}")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Amount { get; set; }
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime Timestamp { get; set; }
