@@ -740,6 +740,7 @@ namespace Ofx.Tests
 
         [DataRow("D:E:", "D,D:E,D:E:F,D:E:F:G", 100)]
         [DataRow("D:E:", "D:E", 100)]
+        [DataRow("A:B:Z[^C]", "A:B:Z", 100)]
         [DataRow("A:B:Z[^C]", "A,A:X,A:B,A:B:C,A:B:D,A:B:C:X,A:B:D:X", 300)]
         [DataRow("A:B:Z[^C]", "A:B,A:B:C,A:B:D", 200)]
         [DataRow("A:B:Z[^C]", "A:B:C,A:B:D", 100)]

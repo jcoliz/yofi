@@ -478,7 +478,7 @@ namespace OfxWeb.Asp.Controllers.Reports
 
                         // When 'isnotlist' is false, the catgories array contains categories
                         // we DO match. When it's true, the opposite is true.
-                        if (categories.Contains(split.Last()) ^ isnotlist)
+                        if (categories.Contains(split.Last()) ^ isnotlist && collectorrow.UniqueID != row.UniqueID)
                         {
                             // Found a peer collector who wants us, let's do the collection.
                             base[seriescolumn, collectorrow] += amount;
