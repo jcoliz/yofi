@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace OfxWeb.Asp.Controllers.Reports
 {
@@ -341,27 +342,53 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// <param name="oquery">Original query</param>
         private void BuildPhase_Place(IQueryable<dynamic> source, NamedQuery oquery)
         {
-            var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? null : new ColumnLabel() { Name = oquery.Name, UniqueID = oquery.Name, LeafNodesOnly = oquery.LeafRowsOnly };
+            // If this query has a NAME, then we are also collecting the values in a
+            // series column.
+            var seriescolumn = string.IsNullOrEmpty(oquery?.Name) ? 
+                null : 
+                new ColumnLabel() 
+                { 
+                    Name = oquery.Name, 
+                    UniqueID = oquery.Name, 
+                    LeafNodesOnly = oquery.LeafRowsOnly 
+                };
 
+            // The pattern for collector rows
+            var collectorregex = new Regex("([^\\[]*)\\[([^\\]]*)\\]");
+
+            //  2. Place. Place each incoming data point into a report cell.
             foreach (var cell in source)
             {
                 string dynamicname = cell.Key.Name;
-                var keys = dynamicname.Split(':').Skip(SkipLevels);
+                var keys = dynamicname.Split(':').Skip(SkipLevels).ToList();
                 if (keys.Any())
                 {
-                    //  2. Place. Place each incoming data point into a report cell.
+                    // Is this a collector row?
+                    var match = collectorregex.Match(keys.Last());
+                    string collector = null;
+                    if (match.Success)
+                    {
+                        // Replace the last key with only the first part of the match
+                        keys[keys.Count()-1] = match.Groups[1].Value;
+
+                        // The second part IS the collector rule
+                        collector = match.Groups[2].Value;
+                    }
+
+                    // Reconstitute the category from parts
                     var id = string.Join(':', keys) + (!oquery.LeafRowsOnly ? ":" : string.Empty);
 
-                    // Items with a "^" are peer-collectors for leaf rows only reports.
-                    // They are not placed if the series is NOT "leaf rows only"
-                    if (id.Contains('^') && !oquery.LeafRowsOnly)
-                        continue;
+                    // Leaf-rows reports use the ID as a name.
+                    var name = oquery.LeafRowsOnly ? id : null;
 
-                    var name = oquery.LeafRowsOnly ? id : null;                    
+                    // Does this row already exist?
                     var row = RowLabels.Where(x => x.UniqueID == id).SingleOrDefault();
-                    if (row == null)
-                        row = new RowLabel() { Name = name, UniqueID = id };
 
+                    // If not, we'll go ahead and create one now
+                    if (row == null)
+                        row = new RowLabel() { Name = name, UniqueID = id, Collector = collector };
+
+                    // Place the value in the correct month column if applicable
                     ColumnLabel column = null;
                     if (WithMonthColumns)
                     {
@@ -372,9 +399,12 @@ namespace OfxWeb.Asp.Controllers.Reports
                         };
                         base[column, row] += cell.Total;
                     }
+
+                    // Place the value in the correct series column, if applicable
                     if (seriescolumn != null)
                         base[seriescolumn, row] += cell.Total;
 
+                    // Place the value in the total column
                     base[TotalColumn, row] += cell.Total;
 
                     //  3. Propagate. Propagate those values upward into totalling rows.
@@ -426,24 +456,32 @@ namespace OfxWeb.Asp.Controllers.Reports
 
                 // User Story 819: Managed Budget Report
                 // There is also a case where a sibling wants to collect our values also. We will deal with that here.
-                // A valid peer-collection row will have an ID like A:B:^C, which collects all A:B children except
-                // A:B:C.
+                // A valid peer-collection row will have an ID like A:B:X[^C], which collects all A:B children except
+                // A:B:C, into a row named A:B:X.
                 // The peer-collection row will be in place before we get here. So if the peer-collector is not
                 // found, we are not peer-collecting.
                 // Peer collection is (currently) only done for series values.
                 if (seriescolumn != null)
                 {
-                    var peeridstart = parentid + ":^";
-                    var rowfinder = RowLabels.Where(x => x.UniqueID.StartsWith(peeridstart) && ! x.UniqueID.EndsWith(':'));
-                    var peerrow = rowfinder.SingleOrDefault();
-                    if (peerrow != null)
+                    // Let's find any peer-collecting rows where we share a common category parent
+                    var peerstart = parentid;
+                    var foundrows = RowLabels.Where(x => x.Collector != null && x.UniqueID.StartsWith(parentid) && ( x.UniqueID.Count(y=>y==':') == 1 + parentid.Count(y=>y==':')));
+
+                    // Consider each peer-collector to see if it collects US
+                    foreach(var collectorrow in foundrows)
                     {
-                        // If the peer collector is specifically asking for NOT this row, we also won't collect in it
-                        var dontcollect = peerrow.UniqueID.Substring(peeridstart.Length).Split(';');
-                        if (!dontcollect.Contains(split.Last()) && peerrow.UniqueID != row.UniqueID)
+                        var rule = collectorrow.Collector;
+                        var isnotlist = rule.StartsWith('^');
+                        if (isnotlist)
+                            rule = rule.Substring(1);
+                        var categories = rule.Split(';');
+
+                        // When 'isnotlist' is false, the catgories array contains categories
+                        // we DO match. When it's true, the opposite is true.
+                        if (categories.Contains(split.Last()) ^ isnotlist)
                         {
                             // Found a peer collector who wants us, let's do the collection.
-                            base[seriescolumn, peerrow] += amount;
+                            base[seriescolumn, collectorrow] += amount;
                         }
                     }
                 }
@@ -734,6 +772,15 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// next heading up is level 2, etc.
         /// </remarks>
         public int Level { get; set; }
+
+        /// <summary>
+        /// If set, this row collects values from peer-level rows under
+        /// the same parent, according to the rule it specifies. This is
+        /// a semicolon-separated series of category values, optionally
+        /// with a '^' to start. The caret indicates we should collect
+        /// from all peers EXCEPT those in the list.
+        /// </summary>
+        public string Collector { get; set; } = null;
     }
 
     /// <summary>

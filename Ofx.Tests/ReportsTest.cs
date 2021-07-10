@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Ofx.Tests
 {
@@ -739,13 +740,13 @@ namespace Ofx.Tests
 
         [DataRow("D:E:", "D,D:E,D:E:F,D:E:F:G", 100)]
         [DataRow("D:E:", "D:E", 100)]
-        [DataRow("A:B:^C", "A,A:X,A:B,A:B:C,A:B:D,A:B:C:X,A:B:D:X", 300)]
-        [DataRow("A:B:^C", "A:B,A:B:C,A:B:D", 200)]
-        [DataRow("A:B:^C", "A:B:C,A:B:D", 100)]
-        [DataRow("A:B:^C", "A:B:D", 100)]
+        [DataRow("A:B:Z[^C]", "A,A:X,A:B,A:B:C,A:B:D,A:B:C:X,A:B:D:X", 300)]
+        [DataRow("A:B:Z[^C]", "A:B,A:B:C,A:B:D", 200)]
+        [DataRow("A:B:Z[^C]", "A:B:C,A:B:D", 100)]
+        [DataRow("A:B:Z[^C]", "A:B:D", 100)]
         [DataRow("D:E:F", "D,D:X,D:E:F,D:E:F:X,D:E:X", 200)]
         [DataRow("D:E", "D,D:X,D:E,D:E:X", 200)]
-        [DataRow("A:B:^C;D;E;F", "A:B:X,A:B:C,A:B:E,A:B:F", 100)]
+        [DataRow("A:B:Z[^C;D;E;F]", "A:B:X,A:B:C,A:B:E,A:B:F", 100)]
         [DataTestMethod]
         public void MixedLeafRowsAndCollector(string budget, string actual, int expected )
         {
@@ -787,6 +788,39 @@ namespace Ofx.Tests
             var Row = report.RowLabels.First();
 
             Assert.AreEqual(0, Row.Level);
+        }
+
+        [TestMethod]
+        public void CollectorMoniker()
+        {
+            // Task 921: Improve managed budget report NOT categories
+            //
+            // "A:B:^C;D;E;F" is super unwieldy and hard to read.
+            //
+            // Instead we're going to give this collector a MONIKER which is how it will LOOK.
+            // It will still act in the old way.
+            //
+            // "A:B:G[^C;D;E;F]" will be the new form. It will look like "A:B:G"
+            // And act like the above.
+
+            MixedLeafRowsAndCollector("A:B:G[^C;D;E;F]", "A:B:X,A:B:C,A:B:E,A:B:F", 100);
+
+            var Row = report.RowLabels.First();
+
+            Assert.AreEqual("A:B:G", Row.Name);
+        }
+
+        [TestMethod]
+        public void CollectorRegex()
+        {
+            var collectorregex = new Regex("([^\\[]*)\\[([^\\]]*)\\]");
+
+            var matchme = "A:B:G[^C;D;E;F]";
+
+            var result = collectorregex.Match(matchme);
+
+            Console.WriteLine(result.Captures.Count);
+
         }
 
 #if false
