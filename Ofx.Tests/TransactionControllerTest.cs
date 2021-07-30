@@ -632,13 +632,38 @@ namespace Ofx.Tests
         }
 
 
+        // TODO: Edit, duplicate = true
+
+        [TestMethod]
+        public async Task EditObjectValuesDuplicate()
+        {
+            var initial = Items[3];
+            context.Add(initial);
+            await context.SaveChangesAsync();
+            var id = initial.ID;
+
+            // Need to detach the entity we originally created, to set up the same state the controller would be
+            // in with not already haveing a tracked object.
+            context.Entry(initial).State = EntityState.Detached;
+
+            var updated = Items[1];
+            updated.ID = id;
+            var result = await controller.Edit(id, duplicate:true, transaction:updated);
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
+
+            // The net effect of the duplicate flag is that we now have TWO of these objects,
+            // so 2 total.
+            Assert.AreEqual(2, context.Transactions.Count());
+        }
+
         //
         // Long list of TODO tests!!
         //
         // TODO: Import (ok/cancel/deselect)
         // TODO: OFX Upload
         // TODO: Upload w/ date cutoff
-        // TODO: Edit, duplicate = true
         // TODO: Index sort order
         // TODO: Index payee search
         // TODO: Index cat/subcat search

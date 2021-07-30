@@ -2,13 +2,9 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
-    "iis": {
-      "applicationUrl": "http://localhost/OfxWeb.Asp",
-      "sslPort": 0
-    },
     "iisExpress": {
-      "applicationUrl": "http://localhost:50520/",
-      "sslPort": 44323
+      "applicationUrl": "http://localhost:50668/",
+      "sslPort": 44364
     }
   },
   "profiles": {
@@ -17,16 +13,16 @@
       "launchBrowser": true,
       "launchUrl": "https://localhost:44323/",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production",
-        "RECEIPT_STORE": "myfire-iisexpress"
+        "RECEIPT_STORE": "myfire-iisexpress",
+        "ASPNETCORE_ENVIRONMENT": "Production"
       }
     },
     "OfxWeb.Asp": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "RECEIPT_STORE": "myfire-ofxweb"
+        "RECEIPT_STORE": "myfire-ofxweb",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:50419/"
     }
