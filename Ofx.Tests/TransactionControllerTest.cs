@@ -34,7 +34,9 @@ namespace Ofx.Tests
             new Transaction() { Category = "A", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m },
             new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m },
-            new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m }
+            new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
+            new Transaction() { Category = "B", SubCategory = "B", Payee = "34", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
+            new Transaction() { Category = "B", SubCategory = "B", Payee = "1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
         };
 
         List<Split> SplitItems = new List<Split>()
@@ -727,17 +729,64 @@ namespace Ofx.Tests
             Assert.AreEqual(imported, dbset.Count());
         }
 
+        public async Task IndexSortOrder()
+        {
+            // Given: A set of items
+
+            // When: Calling Index with a defined sort order
+
+            // Then: The items are returned sorted in that order
+        }
+
+        [TestMethod]
+        public async Task IndexPayeeSearch()
+        {
+            // Given: A set of items with various payees
+            context.Transactions.AddRange(TransactionItems.Take(7));
+            context.SaveChanges();
+
+            // When: Calling Index with payee search term
+            var result = await controller.Index(null, null, "4", null, null);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            // Then: Only the items with a matching payee are returned
+            Assert.AreEqual(3, model.Count);
+        }
+
+        public async Task IndexCategorySearch()
+        {
+            // Given: A set of items with various categories
+
+            // When: Calling Index with category search term
+
+            // Then: Only the items with a matching category are returned
+        }
+
+        public async Task IndexPage1()
+        {
+            // Given: A very long set of items 
+
+            // When: Calling Index page 1
+
+            // Then: Only one page's worth of items are returned
+        }
+
+        public async Task IndexPage2()
+        {
+            // Given: A very long set of items 
+
+            // When: Calling Index page 2
+
+            // Then: Only items after one page's worth of items are returned
+        }
+
         //
         // Long list of TODO tests!!
         //
-        // TODO: Index sort order
-        // TODO: Index payee search
-        // TODO: Index cat/subcat search
-        // TODO: Index pagination
         // TODO: Bulk Edit
         // TODO: UpReceipt
         // TODO: DeleteReceipt
         // TODO: GetReceipt
-        // TODO: Reports (yikes!)
     }
 }
