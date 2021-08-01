@@ -656,27 +656,28 @@ namespace Ofx.Tests
             Assert.AreEqual(2, context.Transactions.Count());
         }
 
-        [TestMethod]
-        public async Task OfxUpload()
+        [DataRow("1/1/2017",1000)]
+        [DataRow("6/1/2018", 4)]
+        [DataTestMethod]
+        public async Task OfxUpload(string date, int expected)
         {
             var filename = "ExportedTransactions.ofx";
             var stream = SampleData.Open(filename);
             var length = stream.Length;
             IFormFile file = new FormFile(stream, 0, length, filename, filename);
-            var result = await controller.Upload(new List<IFormFile>() { file },"1/1/2017");
+            var result = await controller.Upload(new List<IFormFile>() { file },date);
 
             // Test the status
             var rdresult = result as RedirectToActionResult;
 
             Assert.AreEqual("Import", rdresult.ActionName);
-            Assert.AreEqual(1000, dbset.Count());
+            Assert.AreEqual(expected, dbset.Count());
         }
 
         //
         // Long list of TODO tests!!
         //
         // TODO: Import (ok/cancel/deselect)
-        // TODO: Upload w/ date cutoff
         // TODO: Index sort order
         // TODO: Index payee search
         // TODO: Index cat/subcat search
