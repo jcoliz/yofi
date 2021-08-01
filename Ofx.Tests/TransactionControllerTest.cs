@@ -791,11 +791,32 @@ namespace Ofx.Tests
             // And: No items remain selected
         }
 
-        //
-        // Long list of TODO tests!!
-        //
-        // TODO: UpReceipt
-        // TODO: DeleteReceipt
-        // TODO: GetReceipt
+        public async Task UpReceipt()
+        {
+            // Given: A transaction with no receipt
+
+            // When: Uploading a receipt
+
+            // Then: The transaction displays as having a receipt
+            // And: The receipt is contained in storage
+        }
+
+        public async Task DeleteReceipt()
+        {
+            // Given: A transaction with a receipt
+
+            // When: Deleting the receipt
+
+            // Then: The transaction displays as not having a receipt
+        }
+
+        public async Task GetReceipt()
+        {
+            // Given: A transaction with a receipt
+
+            // When: Getting the receipt
+
+            // Then: The receipt is returned
+        }
     }
 }
