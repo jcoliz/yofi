@@ -730,7 +730,6 @@ namespace Ofx.Tests
         //
         // Long list of TODO tests!!
         //
-        // TODO: Import (ok/cancel/deselect)
         // TODO: Index sort order
         // TODO: Index payee search
         // TODO: Index cat/subcat search
