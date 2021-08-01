@@ -781,10 +781,19 @@ namespace Ofx.Tests
             // Then: Only items after one page's worth of items are returned
         }
 
+        public async Task BulkEdit()
+        {
+            // Given: A list of items with varying categories, and varying selection states
+
+            // When: Calling Bulk Edit with a new category
+
+            // Then: All previously-selected items are now that new category
+            // And: No items remain selected
+        }
+
         //
         // Long list of TODO tests!!
         //
-        // TODO: Bulk Edit
         // TODO: UpReceipt
         // TODO: DeleteReceipt
         // TODO: GetReceipt
