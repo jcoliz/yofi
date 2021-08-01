@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 using OfficeOpenXml;
 using OfxWeb.Asp.Controllers.Reports;
+using Common.Test.Helper;
 
 namespace Ofx.Tests
 {
@@ -631,9 +632,6 @@ namespace Ofx.Tests
             }
         }
 
-
-        // TODO: Edit, duplicate = true
-
         [TestMethod]
         public async Task EditObjectValuesDuplicate()
         {
@@ -658,11 +656,26 @@ namespace Ofx.Tests
             Assert.AreEqual(2, context.Transactions.Count());
         }
 
+        [TestMethod]
+        public async Task OfxUpload()
+        {
+            var filename = "ExportedTransactions.ofx";
+            var stream = SampleData.Open(filename);
+            var length = stream.Length;
+            IFormFile file = new FormFile(stream, 0, length, filename, filename);
+            var result = await controller.Upload(new List<IFormFile>() { file },"1/1/2017");
+
+            // Test the status
+            var rdresult = result as RedirectToActionResult;
+
+            Assert.AreEqual("Import", rdresult.ActionName);
+            Assert.AreEqual(1000, dbset.Count());
+        }
+
         //
         // Long list of TODO tests!!
         //
         // TODO: Import (ok/cancel/deselect)
-        // TODO: OFX Upload
         // TODO: Upload w/ date cutoff
         // TODO: Index sort order
         // TODO: Index payee search
