@@ -37,6 +37,9 @@ namespace Ofx.Tests
             new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
             new Transaction() { Category = "B", SubCategory = "B", Payee = "34", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
             new Transaction() { Category = "B", SubCategory = "B", Payee = "1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
+            new Transaction() { Category = "C", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "ABC", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "DE:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
         };
 
         List<Split> SplitItems = new List<Split>()
@@ -754,13 +757,20 @@ namespace Ofx.Tests
             Assert.AreEqual(3, model.Count);
         }
 
+        [TestMethod]
         public async Task IndexCategorySearch()
         {
             // Given: A set of items with various categories
+            context.Transactions.AddRange(TransactionItems.Take(10));
+            context.SaveChanges();
 
             // When: Calling Index with category search term
+            var result = await controller.Index(null, null, null, "C", null);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
 
             // Then: Only the items with a matching category are returned
+            Assert.AreEqual(4, model.Count);
         }
 
         public async Task IndexPage1()
