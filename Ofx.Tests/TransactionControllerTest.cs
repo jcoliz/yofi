@@ -799,14 +799,29 @@ namespace Ofx.Tests
             // Then: Only items after one page's worth of items are returned
         }
 
+        [TestMethod]
         public async Task BulkEdit()
         {
             // Given: A list of items with varying categories, and varying selection states
+            var targetset = TransactionItems.Take(10).Where(x => x.Category == "B");
+            var expected = targetset.Count();
+            foreach (var t in targetset)
+                t.Selected = true;
+            context.Transactions.AddRange(targetset);
+            context.SaveChanges();
 
             // When: Calling Bulk Edit with a new category
+            var newcategory = "X:Y";
+            var result = await controller.BulkEdit(newcategory,null);
+            var rdresult = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", rdresult.ActionName);
 
             // Then: All previously-selected items are now that new category
+            Assert.AreEqual(expected, dbset.Where(x => x.Category == newcategory).Count());
+
             // And: No items remain selected
+            Assert.AreEqual(0, dbset.Where(x => x.Selected == true).Count());
         }
 
         public async Task UpReceipt()
