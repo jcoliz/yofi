@@ -732,13 +732,21 @@ namespace Ofx.Tests
             Assert.AreEqual(imported, dbset.Count());
         }
 
-        public async Task IndexSortOrder()
+        [TestMethod]
+        public async Task IndexSortOrderPayeeAsc()
         {
             // Given: A set of items
+            context.Transactions.AddRange(TransactionItems.Take(10));
+            context.SaveChanges();
 
             // When: Calling Index with a defined sort order
+            // 
+            var result = await controller.Index("payee_asc", null, null, null, null);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
 
             // Then: The items are returned sorted in that order
+            Assert.AreEqual("1", model.First().Payee);
         }
 
         [TestMethod]
