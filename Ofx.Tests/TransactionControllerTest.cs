@@ -690,6 +690,23 @@ namespace Ofx.Tests
             Assert.AreEqual(expected, dbset.Count());
         }
 
+        [TestMethod]
+        public async Task ImportOk()
+        {
+            // Given: As set of items, some with imported & selected flags, some with not
+            var notimported = 1; // How many should remain?
+            foreach (var item in Items.Skip(notimported))
+                item.Imported = item.Selected = true;
+            await helper.AddFiveItems();
+
+            // When: Calling import with "ok" command
+            var result = await controller.Import("ok");
+
+            // Then: All items remain, none have imported flag
+            Assert.AreEqual(5, dbset.Count());
+            Assert.AreEqual(0, dbset.Where(x => x.Imported == true).Count());
+        }
+
         //
         // Long list of TODO tests!!
         //
