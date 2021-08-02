@@ -786,13 +786,22 @@ namespace Ofx.Tests
             Assert.AreEqual(4, model.Count);
         }
 
+        [TestMethod]
         public async Task IndexPage1()
         {
             // Given: A very long set of items 
+            await OfxUpload("1/1/2017", 1000); // Fastest way to get a lot of items in
+            foreach (var tx in context.Transactions)
+                tx.Hidden = false;
+            context.SaveChanges();
 
             // When: Calling Index page 1
+            var result = await controller.Index(null, null, null, null, 1);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
 
             // Then: Only one page's worth of items are returned
+            Assert.AreEqual(100, model.Count);
         }
 
         public async Task IndexPage2()
