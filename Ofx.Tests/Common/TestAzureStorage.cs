@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Common.Test.Helper;
 
 namespace Common.Test.Mock
 {
@@ -19,10 +20,11 @@ namespace Common.Test.Mock
             throw new NotImplementedException();
         }
 
-        public Task DownloadBlob(string ContainerName, string FileName, Stream stream)
+#if false
+        public async Task<string> DownloadBlob(string ContainerName, string FileName, Stream stream)
         {
-            throw new NotImplementedException();
         }
+#endif
 
         public void Initialize()
         {
@@ -60,9 +62,21 @@ namespace Common.Test.Mock
             return Task.FromResult<Uri>(new Uri("http://www.nytimes.com/"));
         }
 
-        Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
+        async Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
         {
-            throw new NotImplementedException();
+            var blobitem = BlobItems.Where(x => x.FileName == FileName).SingleOrDefault();
+
+            if (null == blobitem)
+                throw new ApplicationException("Blob not found");
+
+            if (string.IsNullOrEmpty(blobitem.InternalFile))
+                throw new ApplicationException("No intenal file for this blob");
+
+            var filestream = SampleData.Open(blobitem.InternalFile);
+
+            filestream.CopyTo(stream);
+
+            return blobitem.ContentType;
         }
 
         public class Table: List<IReadOnlyDictionary<string, string>>
@@ -73,6 +87,7 @@ namespace Common.Test.Mock
             public string ContainerName;
             public string FileName;
             public string ContentType;
+            public string InternalFile;
         };
     }
 }

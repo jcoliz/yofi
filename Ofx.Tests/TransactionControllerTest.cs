@@ -873,13 +873,25 @@ namespace Ofx.Tests
             Assert.IsTrue(string.IsNullOrEmpty(tx.ReceiptUrl));
         }
 
+        [TestMethod]
         public async Task GetReceipt()
         {
             // Given: A transaction with a receipt
+            var tx = TransactionItems.First();
+            var contenttype = "application/ofx";
+            tx.ReceiptUrl = contenttype;
+            context.Transactions.Add(tx);
+            context.SaveChanges();
+
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = tx.ID.ToString(), InternalFile = "First10.ofx", ContentType = contenttype });
 
             // When: Getting the receipt
+            var result = await controller.GetReceipt(tx.ID);
+            var fsresult = result as FileStreamResult;
 
             // Then: The receipt is returned
+            Assert.AreEqual(tx.ID.ToString(), fsresult.FileDownloadName);
+            Assert.AreEqual(contenttype, fsresult.ContentType);
         }
     }
 }

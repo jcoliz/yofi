@@ -957,7 +957,7 @@ namespace OfxWeb.Asp.Controllers
                     contenttype = "application/pdf";
 
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
-                return File(stream, contenttype);
+                return File(stream, contenttype,id.ToString());
             }
             catch (Exception)
             {
