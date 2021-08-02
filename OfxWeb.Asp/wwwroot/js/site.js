@@ -134,12 +134,12 @@
     $('.txdrop').on('drop', function (event) {
 
         event.preventDefault();
-        if (event.dataTransfer.items) {
+        if (event.originalEvent.dataTransfer.items) {
             // Use DataTransferItemList interface to access the file(s)
-            for (var i = 0; i < event.dataTransfer.items.length; i++) {
+            for (var i = 0; i < event.originalEvent.dataTransfer.items.length; i++) {
                 // If dropped items aren't files, reject them
-                if (event.dataTransfer.items[i].kind === 'file') {
-                    var file = event.dataTransfer.items[i].getAsFile();
+                if (event.originalEvent.dataTransfer.items[i].kind === 'file') {
+                    var file = event.originalEvent.dataTransfer.items[i].getAsFile();
 
                     var tr = $(this);
                     var id = tr.data('id');
