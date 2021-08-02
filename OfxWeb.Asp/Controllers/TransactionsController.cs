@@ -948,10 +948,9 @@ namespace OfxWeb.Asp.Controllers
                 if (string.IsNullOrEmpty(transaction.ReceiptUrl))
                     throw new ApplicationException("Transaction has no receipt");
 
-                IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
-                storage.Initialize();
+                _storage.Initialize();
                 var stream = new System.IO.MemoryStream();
-                var contenttype = await storage.DownloadBlob(BlobStoreName, id.ToString(), stream);
+                var contenttype = await _storage.DownloadBlob(BlobStoreName, id.ToString(), stream);
 
                 // Work around previous versions which did NOT store content type in blob store.
                 if ("application/octet-stream" == contenttype)

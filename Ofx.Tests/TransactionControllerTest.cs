@@ -854,13 +854,23 @@ namespace Ofx.Tests
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
         }
 
+        [TestMethod]
         public async Task DeleteReceipt()
         {
             // Given: A transaction with a receipt
+            var tx = TransactionItems.First();
+            tx.ReceiptUrl = "application/ofx";
+            context.Transactions.Add(tx);
+            context.SaveChanges();
 
             // When: Deleting the receipt
+            var result = await controller.DeleteReceipt(tx.ID);
+            var rdresult = result as RedirectToActionResult;
+
+            Assert.AreEqual("Edit", rdresult.ActionName);
 
             // Then: The transaction displays as not having a receipt
+            Assert.IsTrue(string.IsNullOrEmpty(tx.ReceiptUrl));
         }
 
         public async Task GetReceipt()
