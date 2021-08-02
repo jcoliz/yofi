@@ -14,7 +14,7 @@
       "launchUrl": "https://localhost:44323/",
       "environmentVariables": {
         "RECEIPT_STORE": "myfire-iisexpress",
-        "ASPNETCORE_ENVIRONMENT": "Production"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "OfxWeb.Asp": {
