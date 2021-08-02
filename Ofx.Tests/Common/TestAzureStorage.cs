@@ -12,6 +12,8 @@ namespace Common.Test.Mock
     {
         public Dictionary<string, Table> TableStorage = new Dictionary<string, Table>();
 
+        public List<BlobItem> BlobItems = new List<BlobItem>();
+
         public Task<bool> DoesBlobExist(string ContainerName, string FileName)
         {
             throw new NotImplementedException();
@@ -53,6 +55,8 @@ namespace Common.Test.Mock
 
             // For this test, we are just going to full ignore it.
 
+            BlobItems.Add(new BlobItem() { ContainerName = ContainerName, FileName = FileName, ContentType = ContentType });
+
             return Task.FromResult<Uri>(new Uri("http://www.nytimes.com/"));
         }
 
@@ -64,5 +68,11 @@ namespace Common.Test.Mock
         public class Table: List<IReadOnlyDictionary<string, string>>
         {
         }
+        public class BlobItem
+        {
+            public string ContainerName;
+            public string FileName;
+            public string ContentType;
+        };
     }
 }

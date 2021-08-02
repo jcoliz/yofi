@@ -15,6 +15,8 @@ using System.IO;
 using OfficeOpenXml;
 using OfxWeb.Asp.Controllers.Reports;
 using Common.Test.Helper;
+using Common.Test.Mock;
+using ManiaLabs.Portable.Base;
 
 namespace Ofx.Tests
 {
@@ -27,6 +29,8 @@ namespace Ofx.Tests
         ApplicationDbContext context => helper.context;
         List<Transaction> Items => helper.Items;
         DbSet<Transaction> dbset => helper.dbset;
+
+        TestAzureStorage storage;
 
         List<Transaction> TransactionItems = new List<Transaction>()
         {
@@ -68,7 +72,8 @@ namespace Ofx.Tests
         {
             helper = new ControllerTestHelper<Transaction, TransactionsController>();
             helper.SetUp();
-            helper.controller = new TransactionsController(helper.context, null);
+            storage = new TestAzureStorage();
+            helper.controller = new TransactionsController(helper.context, null, storage);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 
@@ -824,14 +829,29 @@ namespace Ofx.Tests
             Assert.AreEqual(0, dbset.Where(x => x.Selected == true).Count());
         }
 
+        [TestMethod]
         public async Task UpReceipt()
         {
             // Given: A transaction with no receipt
+            var tx = TransactionItems.First();
+            context.Transactions.Add(tx);
+            context.SaveChanges();
 
             // When: Uploading a receipt
+            var filename = "First10.ofx";
+            var stream = SampleData.Open(filename);
+            var length = stream.Length;
+            var contenttype = "application/ofx";
+
+            var file = new FormFile(stream, 0, length, filename, filename) { Headers = new HeaderDictionary(), ContentType = contenttype };
+            var result = await controller.UpReceipt(new List<IFormFile>() { file },tx.ID);
+            Assert.IsTrue(result is RedirectResult);
 
             // Then: The transaction displays as having a receipt
+            Assert.IsFalse(string.IsNullOrEmpty(tx.ReceiptUrl));
+
             // And: The receipt is contained in storage
+            Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
         }
 
         public async Task DeleteReceipt()

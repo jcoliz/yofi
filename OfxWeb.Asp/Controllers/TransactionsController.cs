@@ -25,13 +25,13 @@ namespace OfxWeb.Asp.Controllers
     {
         #region Constructor
 
-        public TransactionsController(ApplicationDbContext context, IConfiguration configuration)
+        public TransactionsController(ApplicationDbContext context, IConfiguration configuration, IPlatformAzureStorage storage)
         {
             _context = context;
+            _storage = storage;
 
             var StorageAccount = configuration?["StorageAccount"];
             Console.WriteLine(StorageAccount);
-
         }
 
         #endregion
@@ -607,8 +607,7 @@ namespace OfxWeb.Asp.Controllers
                 // Save the file to blob storage
                 //
 
-                IPlatformAzureStorage storage = new DotNetAzureStorage("DefaultEndpointsProtocol=http;AccountName=jcolizstorage;AccountKey=kjfiUJrgAq/FP0ZL3uVR9c5LPq5dI3MCfCNNnwFRDtrYs63FU654j4mBa4tmkLm331I4Xd/fhZgORnhkEfb4Eg==");
-                storage.Initialize();
+                _storage.Initialize();
 
                 string contenttype = null;
 
@@ -617,7 +616,7 @@ namespace OfxWeb.Asp.Controllers
                     using (var stream = formFile.OpenReadStream())
                     {
                         // Upload the file
-                        await storage.UploadToBlob(BlobStoreName, id.ToString(), stream, formFile.ContentType);
+                        await _storage.UploadToBlob(BlobStoreName, id.ToString(), stream, formFile.ContentType);
 
                         // Remember the content type
                         // TODO: This can just be a true/false bool, cuz now we store content type in blob store.
@@ -1079,6 +1078,8 @@ namespace OfxWeb.Asp.Controllers
         #region Internals
 
         private readonly ApplicationDbContext _context;
+
+        private readonly IPlatformAzureStorage _storage;
 
         private const int pagesize = 100;
 
