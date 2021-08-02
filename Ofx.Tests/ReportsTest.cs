@@ -74,6 +74,7 @@ namespace Ofx.Tests
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
             Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else:X" });
             Items.Add(new Item() { Amount = 1000, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something:B" });
+            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01) });
 
             // User Story 819: Managed Budget Report
             // ActualItems and Budget items are used for Managed Budget report
@@ -261,6 +262,17 @@ namespace Ofx.Tests
             Assert.AreEqual(800m, report[report.TotalColumn, Other]);
             Assert.AreEqual(1300m, report[report.TotalColumn, report.TotalRow]);
 
+        }
+        [TestMethod]
+        public void NullCategory()
+        {
+            report.Source = new NamedQueryList(Items.Skip(25).Take(1).AsQueryable());
+            report.Build();
+            report.WriteToConsole();
+
+            // I'm not REALLY sure what I want to happen with empty categories, but for now...
+            var Empty = GetRow(x => x.Name == string.Empty && ! x.IsTotal);
+            Assert.AreEqual(100m, report[report.TotalColumn, Empty]);
         }
         [TestMethod]
         public void SimpleJson()

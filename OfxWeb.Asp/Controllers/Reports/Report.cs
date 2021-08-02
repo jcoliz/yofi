@@ -359,7 +359,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             //  2. Place. Place each incoming data point into a report cell.
             foreach (var cell in source)
             {
-                string dynamicname = cell.Key.Name;
+                string dynamicname = cell.Key.Name ?? string.Empty;
                 var keys = dynamicname.Split(':').Skip(SkipLevels).ToList();
                 if (keys.Any())
                 {
