@@ -14,7 +14,7 @@ using OfxWeb.Asp.Models;
 using OfxWeb.Asp.Models.AccountViewModels;
 using OfxWeb.Asp.Services;
 
-namespace OfxWeb.Asp.Controllers
+namespace OfxWeb.Asp.Controllers.Boilerplate
 {
     [Authorize]
     [Route("[controller]/[action]")]

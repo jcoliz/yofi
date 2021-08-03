@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 
+// This file isn't really used yet. This was for future expansion.
+#if false
+
 namespace OfxWeb.Asp.Controllers
 {
     public class TxAccountsController : Controller
@@ -151,3 +154,5 @@ namespace OfxWeb.Asp.Controllers
         }
     }
 }
+
+#endif

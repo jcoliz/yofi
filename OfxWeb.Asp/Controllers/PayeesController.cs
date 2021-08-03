@@ -12,7 +12,7 @@ using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using Common.AspNetCore;
 
-namespace OfxWeb.Asp
+namespace OfxWeb.Asp.Controllers
 {
     public class PayeesController : Controller, IController<Payee>
     {

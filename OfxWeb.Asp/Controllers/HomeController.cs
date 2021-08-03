@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using OfxWeb.Asp.Models;
 
-namespace OfxWeb.Asp.Controllers
+namespace OfxWeb.Asp.Controllers.Boilerplate
 {
     public class HomeController : Controller
     {
