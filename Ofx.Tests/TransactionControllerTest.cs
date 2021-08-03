@@ -17,6 +17,8 @@ using OfxWeb.Asp.Controllers.Reports;
 using Common.Test.Helper;
 using Common.Test.Mock;
 using ManiaLabs.Portable.Base;
+using OfxSharpLib;
+using Transaction = OfxWeb.Asp.Models.Transaction;
 
 namespace Ofx.Tests
 {
@@ -66,6 +68,23 @@ namespace Ofx.Tests
             new CategoryMap() { Category = "A", Key1 = "X", Key2 = "Y" },
             new CategoryMap() { Category = "C", Key1 = "Z", Key2 = "R" }
         };
+
+        IEnumerable<Transaction> TransactionItemsLong;
+
+        IEnumerable<Transaction> GetTransactionItemsLong()
+        {
+            if (null == TransactionItemsLong)
+            {
+                using (var stream = SampleData.Open("ExportedTransactions.ofx"))
+                {
+                    var parser = new OfxDocumentParser();
+                    var Document = parser.Import(stream);
+
+                    TransactionItemsLong = Document.Transactions.Select(tx=> new Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date });
+                }
+            }
+            return TransactionItemsLong;
+        }
 
         [TestInitialize]
         public void SetUp()
@@ -786,13 +805,13 @@ namespace Ofx.Tests
             Assert.AreEqual(4, model.Count);
         }
 
+        const int pagesize = 100;
+
         [TestMethod]
         public async Task IndexPage1()
         {
             // Given: A very long set of items 
-            await OfxUpload("1/1/2017", 1000); // Fastest way to get a lot of items in
-            foreach (var tx in context.Transactions)
-                tx.Hidden = false;
+            context.Transactions.AddRange(GetTransactionItemsLong());
             context.SaveChanges();
 
             // When: Calling Index page 1
@@ -801,16 +820,23 @@ namespace Ofx.Tests
             var model = actual.Model as List<Transaction>;
 
             // Then: Only one page's worth of items are returned
-            Assert.AreEqual(100, model.Count);
+            Assert.AreEqual(pagesize, model.Count);
         }
 
+        [TestMethod]
         public async Task IndexPage2()
         {
-            // Given: A very long set of items 
+            // Given: A long set of items, which is longer than one page, but not as long as two pages 
+            context.Transactions.AddRange(GetTransactionItemsLong().Take(pagesize + pagesize/2));
+            context.SaveChanges();
 
             // When: Calling Index page 2
+            var result = await controller.Index(null, null, null, null, 2);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
 
             // Then: Only items after one page's worth of items are returned
+            Assert.AreEqual(pagesize/2, model.Count);
         }
 
         [TestMethod]
