@@ -482,6 +482,8 @@ namespace OfxWeb.Asp.Controllers
             return PartialView();
         }
 
+// I believe this is never used. Instead, API Controller ApplyPayee is used.
+#if false
         public async Task<IActionResult> ApplyPayee(int? id)
         {
             if (id == null)
@@ -510,7 +512,7 @@ namespace OfxWeb.Asp.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
+#endif
         // POST: Transactions/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -1074,7 +1076,7 @@ namespace OfxWeb.Asp.Controllers
 
 #endregion
 
-        #region Internals
+#region Internals
 
         private readonly ApplicationDbContext _context;
 
@@ -1130,9 +1132,9 @@ namespace OfxWeb.Asp.Controllers
             return _context.Transactions.Any(e => e.ID == id);
         }
 
-        #endregion
+#endregion
 
-        #region IController
+#region IController
         Task<IActionResult> IController<Models.Transaction>.Index() => Index(string.Empty, string.Empty, string.Empty, string.Empty, null);
 
         Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
@@ -1140,6 +1142,6 @@ namespace OfxWeb.Asp.Controllers
         Task<IActionResult> IController<Models.Transaction>.Upload(List<IFormFile> files) => Upload(files, string.Empty);
 
         Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
-        #endregion
+#endregion
     }
 }
