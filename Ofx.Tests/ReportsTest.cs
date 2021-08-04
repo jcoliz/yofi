@@ -826,7 +826,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void CollectorRegex()
         {
-            var collectorregex = new Regex("([^\\[]*)\\[([^\\]]*)\\]");
+            var collectorregex = new Regex("(.*?)\\[(.*?)\\]");
 
             var matchme = "A:B:G[^C;D;E;F]";
 
