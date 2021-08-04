@@ -354,7 +354,7 @@ namespace OfxWeb.Asp.Controllers.Reports
                 };
 
             // The pattern for collector rows
-            var collectorregex = new Regex("([^\\[]*)\\[([^\\]]*)\\]");
+            var collectorregex = new Regex("(.*?)\\[(.*?)\\]");
 
             //  2. Place. Place each incoming data point into a report cell.
             foreach (var cell in source)
