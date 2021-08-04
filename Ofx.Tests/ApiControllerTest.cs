@@ -148,8 +148,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var json = await controller.Get(expected.ID);
-            var result = JsonSerializer.Deserialize<ApiTransactionResult>(json);
+            var result = await controller.Get(expected.ID) as ApiTransactionResult;
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(expected, result.Transaction);
@@ -160,8 +159,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x=>x.ID);
 
-            var json = await controller.Get(maxid + 1);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Get(maxid + 1) as ApiResult;
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
