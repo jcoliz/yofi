@@ -20,17 +20,10 @@ namespace Common.Test.Mock
             throw new NotImplementedException();
         }
 
-#if false
-        public async Task<string> DownloadBlob(string ContainerName, string FileName, Stream stream)
-        {
-        }
-#endif
-
         public void Initialize()
         {
         }
 
-        // It's only async beause the interface needs it that way
         public Task<string> PostTableEntry(string TableName, IReadOnlyDictionary<string, string> Fields)
         {
             if (!TableStorage.ContainsKey(TableName))
@@ -60,7 +53,7 @@ namespace Common.Test.Mock
             return Task.FromResult<Uri>(new Uri("http://www.nytimes.com/"));
         }
 
-        Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
+        public Task<string> DownloadBlob(string ContainerName, string FileName, Stream stream)
         {
             var blobitem = BlobItems.Where(x => x.FileName == FileName).SingleOrDefault();
 
