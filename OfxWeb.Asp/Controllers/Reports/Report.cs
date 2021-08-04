@@ -354,12 +354,12 @@ namespace OfxWeb.Asp.Controllers.Reports
                 };
 
             // The pattern for collector rows
-            var collectorregex = new Regex("(.*?)\\[(.*?)\\]");
+            var collectorregex = new Regex("(.+?)\\[(.+?)\\]");
 
             //  2. Place. Place each incoming data point into a report cell.
             foreach (var cell in source)
             {
-                string dynamicname = cell.Key.Name ?? string.Empty;
+                string dynamicname = cell.Key.Name ?? "[Blank]";
                 var keys = dynamicname.Split(':').Skip(SkipLevels).ToList();
                 if (keys.Any())
                 {

@@ -270,9 +270,8 @@ namespace Ofx.Tests
             report.Build();
             report.WriteToConsole();
 
-            // I'm not REALLY sure what I want to happen with empty categories, but for now...
-            var Empty = GetRow(x => x.Name == string.Empty && ! x.IsTotal);
-            Assert.AreEqual(100m, report[report.TotalColumn, Empty]);
+            var Blank = GetRow(x => x.Name == "[Blank]" && !x.IsTotal);
+            Assert.AreEqual(100m, report[report.TotalColumn, Blank]);
         }
         [TestMethod]
         public void SimpleJson()
@@ -378,6 +377,24 @@ namespace Ofx.Tests
             Assert.AreEqual(400m, report[report.TotalColumn, Something]);
             Assert.AreEqual(600m, report[report.TotalColumn, Else]);
             Assert.AreEqual(1900m, report[report.TotalColumn, report.TotalRow]);
+        }
+        [TestMethod]
+        public void SubItemsAllDeepWithBlank()
+        {
+            // Given: Report items with varying depth, and at least one item with no category
+            report.Source = new NamedQueryList(Items.Take(26).AsQueryable());
+
+            // When: Building a report with two levels of depth
+            report.NumLevels = 2;
+            report.Build();
+            report.WriteToConsole();
+
+            // Then: Empty row is a top-level row
+
+            var Blank = GetRow(x => x.Name == "[Blank]" && !x.IsTotal);
+
+            Assert.AreEqual(1, Blank.Level);
+            Assert.IsNull(Blank.Parent);
         }
         [TestMethod]
         public void SubItemsAllDeepJson()
