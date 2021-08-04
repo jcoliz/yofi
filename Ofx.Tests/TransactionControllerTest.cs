@@ -895,6 +895,41 @@ namespace Ofx.Tests
                 Assert.AreEqual(items.Count(), model.Count);
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataRow(null)]
+        [DataTestMethod]
+        public async Task IndexPayeesWithReceipt(bool? hasreceipt)
+        {
+            // Given: A set of items, some with receipts some not
+            var items = TransactionItems.Take(10);
+            foreach (var i in items.Take(3))
+                i.ReceiptUrl = "I have a receipt!";
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling Index with combined search term for payee AND with/without a receipt
+            string payee = "2";
+            string search = payee;
+            if (hasreceipt.HasValue)
+                search = hasreceipt.Value ? $"{payee}+R" : $"{payee}-R";
+            var result = await controller.Index(null, null, search, null, null);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            // Then: Only the items with a matching payee AND receipt state are returned
+            if (hasreceipt.HasValue)
+            {
+                if (hasreceipt.Value)
+                    Assert.AreEqual(items.Where(x => x.Payee.Contains(payee) && x.ReceiptUrl != null).Count(), model.Count);
+                else
+                    Assert.AreEqual(items.Where(x => x.Payee.Contains(payee) && x.ReceiptUrl == null).Count(), model.Count);
+            }
+            else
+                Assert.AreEqual(items.Where(x=>x.Payee.Contains(payee)).Count(), model.Count);
+        }
+
         [DataRow(2017,false)]
         [DataRow(2018,false)]
         [DataRow(2017,true)]

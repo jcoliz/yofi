@@ -69,14 +69,12 @@ namespace OfxWeb.Asp.Controllers
                     {
                         showHasReceipt = true;
                         didfilter = true;
+                        searchPayee = new string(searchPayee.SkipLast(2).ToArray());
                     }
                     else if (searchPayee.EndsWith("-R"))
                     {
                         showHasReceipt = false;
                         didfilter = true;
-                    }
-                    if (showHasReceipt.HasValue)
-                    {
                         searchPayee = new string(searchPayee.SkipLast(2).ToArray());
                     }
                 }
