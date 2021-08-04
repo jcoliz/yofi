@@ -54,9 +54,8 @@ namespace OfxWeb.Asp.Controllers
                 var transactions = _context.Transactions.Where(m => m.ID == id);
                 var any = await transactions.AnyAsync();
                 if (!any)
-                {
-                    throw new ApplicationException("Item not found");
-                }
+                    throw new KeyNotFoundException("Item not found");
+
                 var single = await transactions.SingleAsync();
                 return new ApiTransactionResult(single);
             }
@@ -68,11 +67,16 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/ApplyPayee/5
         [HttpGet("ApplyPayee/{id}")]
-        public async Task<string> ApplyPayee(int id)
+        public async Task<object> ApplyPayee(int id)
         {
             try
             {
-                var transaction = await _context.Transactions.SingleAsync(m => m.ID == id);
+                var transactions = _context.Transactions.Where(m => m.ID == id);
+                var any = await transactions.AnyAsync();
+                if (!any)
+                    throw new KeyNotFoundException("Item not found");
+
+                var transaction = await transactions.SingleAsync();
 
                 // Handle payee auto-assignment
 

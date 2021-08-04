@@ -332,10 +332,9 @@ namespace Ofx.Tests
             await AddFiveTransactions();
 
             // Pick an aribtrary transaction
-            var tx = await context.Transactions.LastAsync();           
+            var tx = await context.Transactions.LastAsync();
 
-            var json = await controller.ApplyPayee(tx.ID);
-            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
+            var result = await controller.ApplyPayee(tx.ID) as ApiPayeeResult;
 
             Assert.IsTrue(result.Ok);
 
@@ -353,8 +352,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var json = await controller.ApplyPayee(maxid + 1);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.ApplyPayee(maxid + 1) as ApiResult;
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -374,8 +372,7 @@ namespace Ofx.Tests
             context.Payees.Remove(payee);
             await context.SaveChangesAsync();
 
-            var json = await controller.ApplyPayee(tx.ID);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.ApplyPayee(tx.ID) as ApiResult;
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -398,8 +395,7 @@ namespace Ofx.Tests
 
             var tx = context.Transactions.First();
 
-            var json = await controller.ApplyPayee(tx.ID);
-            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
+            var result = await controller.ApplyPayee(tx.ID) as ApiPayeeResult;
 
             Assert.IsTrue(result.Ok);
 
