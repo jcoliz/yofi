@@ -45,19 +45,28 @@ namespace OfxWeb.Asp.Controllers
             return new ApiResult();
         }
 
+        private async Task<Transaction> LookupTransactionAsync(int id,bool splits = false)
+        {
+            IQueryable<Transaction> transactions;
+            transactions = _context.Transactions.Where(m => m.ID == id);
+            if (splits)
+                transactions = transactions.Include(x => x.Splits);
+
+            var any = await transactions.AnyAsync();
+            if (!any)
+                throw new KeyNotFoundException("Item not found");
+
+            var single = await transactions.SingleAsync();
+            return single;
+        }
+
         // GET: api/tx/5
         [HttpGet("{id}", Name = "Get")]
         public async Task<object> Get(int id)
         {
             try
             {
-                var transactions = _context.Transactions.Where(m => m.ID == id);
-                var any = await transactions.AnyAsync();
-                if (!any)
-                    throw new KeyNotFoundException("Item not found");
-
-                var single = await transactions.SingleAsync();
-                return new ApiTransactionResult(single);
+                return new ApiTransactionResult(await LookupTransactionAsync(id));
             }
             catch (Exception ex)
             {
@@ -71,12 +80,7 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
-                var transactions = _context.Transactions.Where(m => m.ID == id);
-                var any = await transactions.AnyAsync();
-                if (!any)
-                    throw new KeyNotFoundException("Item not found");
-
-                var transaction = await transactions.SingleAsync();
+                var transaction = await LookupTransactionAsync(id);
 
                 // Handle payee auto-assignment
 
@@ -118,12 +122,11 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/Hide/5
         [HttpGet("Hide/{id}")]
-        public async Task<string> Hide(int id)
+        public async Task<ApiResult> Hide(int id)
         {
             try
             {
-                var transaction = await _context.Transactions
-                    .SingleAsync(m => m.ID == id);
+                var transaction = await LookupTransactionAsync(id);
 
                 transaction.Hidden = true;
                 _context.Update(transaction);
@@ -139,12 +142,11 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/Show/5
         [HttpGet("Show/{id}")]
-        public async Task<string> Show(int id)
+        public async Task<ApiResult> Show(int id)
         {
             try
             {
-                var transaction = await _context.Transactions
-                    .SingleAsync(m => m.ID == id);
+                var transaction = await LookupTransactionAsync(id);
 
                 transaction.Hidden = false;
                 _context.Update(transaction);
@@ -164,8 +166,7 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
-                var transaction = await _context.Transactions
-                    .SingleAsync(m => m.ID == id);
+                var transaction = await LookupTransactionAsync(id);
 
                 transaction.Selected = true;
                 _context.Update(transaction);
@@ -185,8 +186,7 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
-                var transaction = await _context.Transactions
-                    .SingleAsync(m => m.ID == id);
+                var transaction = await LookupTransactionAsync(id);
 
                 transaction.Selected = false;
                 _context.Update(transaction);
@@ -284,10 +284,7 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
-                var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
-
-                if (null == transaction)
-                    throw new ApplicationException($"Unable to find transaction #{id}");
+                var transaction = await LookupTransactionAsync(id);
 
                 if (! string.IsNullOrEmpty(transaction.ReceiptUrl))
                     throw new ApplicationException($"This transaction already has a receipt. Delete the current receipt before uploading a new one.");
@@ -336,8 +333,7 @@ namespace OfxWeb.Asp.Controllers
 
             try
             {
-                var transaction = await _context.Transactions.Include(x=>x.Splits)
-                    .SingleAsync(m => m.ID == id);
+                var transaction = await LookupTransactionAsync(id,splits:true);
 
                 var incoming = new HashSet<Models.Split>();
                 // Extract submitted file into a list objects

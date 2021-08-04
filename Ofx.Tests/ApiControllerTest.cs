@@ -170,8 +170,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var json = await controller.Hide(expected.ID);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Hide(expected.ID);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Hidden);
@@ -182,8 +181,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var json = await controller.Hide(maxid + 1);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Hide(maxid + 1);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -196,8 +194,7 @@ namespace Ofx.Tests
             expected.Hidden = true;
             await context.SaveChangesAsync();
 
-            var json = await controller.Show(expected.ID);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Show(expected.ID);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Hidden);
@@ -208,8 +205,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var json = await controller.Show(maxid + 1);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Show(maxid + 1);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
