@@ -832,8 +832,10 @@ namespace Ofx.Tests
 
             var result = collectorregex.Match(matchme);
 
-            Console.WriteLine(result.Captures.Count);
-
+            Assert.AreEqual(1, result.Captures.Count);
+            Assert.AreEqual(3, result.Groups.Count);
+            Assert.IsTrue(result.Groups.Values.Select(x=>x.Value).Contains("A:B:G"));
+            Assert.IsTrue(result.Groups.Values.Select(x => x.Value).Contains("^C;D;E;F"));
         }
 
 #if false
