@@ -257,20 +257,23 @@ namespace Ofx.Tests
         {
             // Bug 880: Import applies substring matches before regex matches
 
+            // Given: Two payee matching rules, with differing payees, one with a regex one without (ergo it's a substring match)
+            // And: A transaction which could match either
             var regexpayee = new Payee() { Category = "Y", SubCategory = "E", Name = "/DOG.*123/" };
             var substrpayee = new Payee() { Category = "X", SubCategory = "E", Name = "BIGDOG" };
+            var tx = new Transaction() { Payee = "BIGDOG SAYS 1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
 
             context.Payees.Add(regexpayee);
             context.Payees.Add(substrpayee);
             await context.SaveChangesAsync();
 
-            // This transaction will match EITHER of the payees. Preference is to match the regex first
-            // because the regex is a more precise specification of what we want.
-            await helper.DoUpload(new List<Transaction>() { new Transaction() { Payee = "BIGDOG SAYS 1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m } });
+            // When: Uploading the transaction
+            await helper.DoUpload(new List<Transaction>() { tx });
 
-            var tx = context.Transactions.Single();
-
-            Assert.AreEqual(regexpayee.Category, tx.Category);
+            // Then: The transaction will be mapped to the payee which specifies a regex
+            // (Because the regex is a more precise specification of what we want.)
+            var actual = context.Transactions.Single();
+            Assert.AreEqual(regexpayee.Category, actual.Category);
         }
 
         [TestMethod]

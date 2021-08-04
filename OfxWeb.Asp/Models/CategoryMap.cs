@@ -110,7 +110,7 @@ namespace OfxWeb.Asp.Models
                     map = maptable[key];
                 else
                 {
-                    var re = new Regex("^([^\\.]*)\\.");
+                    var re = new Regex("^(.*?)\\.");
                     var match = re.Match(SubCategory);
                     if (match.Success && match.Groups.Count > 1)
                     {
