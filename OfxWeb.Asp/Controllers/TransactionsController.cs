@@ -350,33 +350,16 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> BulkEdit(string Category, string SubCategory)
+        public async Task<IActionResult> BulkEdit(string Category)
         {
-            var result = from s in _context.Transactions
-                         where s.Selected == true
-                         select s;
-
-            var list = await result.ToListAsync();
-
-            foreach (var item in list)
+            foreach (var item in _context.Transactions.Where(x=>x.Selected == true))
             {
+                item.Selected = false;
+
                 if (!string.IsNullOrEmpty(Category))
                     item.Category = Category;
-
-                if (!string.IsNullOrEmpty(SubCategory))
-                {
-                    if ("-" == SubCategory)
-                    {
-                        item.SubCategory = null;
-                    }
-                    else
-                    {
-                        item.SubCategory = SubCategory;
-                    }
-                }
-
-                item.Selected = false;
             }
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));

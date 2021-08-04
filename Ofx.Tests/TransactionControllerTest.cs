@@ -1021,7 +1021,7 @@ namespace Ofx.Tests
 
             // When: Calling Bulk Edit with a new category
             var newcategory = "X:Y";
-            var result = await controller.BulkEdit(newcategory,null);
+            var result = await controller.BulkEdit(newcategory);
             var rdresult = result as RedirectToActionResult;
 
             Assert.AreEqual("Index", rdresult.ActionName);
@@ -1030,6 +1030,27 @@ namespace Ofx.Tests
             Assert.AreEqual(expected, dbset.Where(x => x.Category == newcategory).Count());
 
             // And: No items remain selected
+            Assert.AreEqual(0, dbset.Where(x => x.Selected == true).Count());
+        }
+
+        [TestMethod]
+        public async Task BulkEditCancel()
+        {
+            // Given: A list of items with varying categories, and varying selection states
+            var targetset = TransactionItems.Take(10).Where(x => x.Category == "B");
+            var expected = targetset.Count();
+            foreach (var t in targetset)
+                t.Selected = true;
+            context.Transactions.AddRange(targetset);
+            context.SaveChanges();
+
+            // When: Calling Bulk Edit with blank category
+            var result = await controller.BulkEdit(null);
+            var rdresult = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", rdresult.ActionName);
+
+            // Then: No items remain selected
             Assert.AreEqual(0, dbset.Where(x => x.Selected == true).Count());
         }
 
