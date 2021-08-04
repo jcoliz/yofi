@@ -895,6 +895,44 @@ namespace Ofx.Tests
                 Assert.AreEqual(items.Count(), model.Count);
         }
 
+        [DataRow(2017)]
+        [DataRow(2018)]
+        [DataRow(null)]
+        [DataTestMethod]
+        public async Task IndexYear(int? year)
+        {
+            // Given: A set of items, with different years
+            var items = TransactionItems.Take(10);
+            var items2017 = items.Take(3);
+            var items2018 = items.Skip(3);
+            foreach (var i in items2017)
+                i.Timestamp = new DateTime(2017, 1, 1);
+            foreach (var i in items2018)
+                i.Timestamp = new DateTime(2018, 1, 1);
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling Index with indirect search term for items of a certain year
+            string searchterm = null;
+            if (year.HasValue)
+                searchterm = $"Y{year}";
+            var result = await controller.Index(null, searchterm, null, null, null);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            // Then: Only the items with a matching year are returned
+            if (year.HasValue)
+            {
+                if (year == 2017)
+                    Assert.AreEqual(items2017.Count(), model.Count);
+                else if (year == 2018)
+                    Assert.AreEqual(items2018.Count(), model.Count);
+            }
+            else
+                Assert.AreEqual(items.Count(), model.Count);
+        }
+
         const int pagesize = 100;
 
         [TestMethod]
