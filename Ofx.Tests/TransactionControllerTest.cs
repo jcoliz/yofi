@@ -860,6 +860,41 @@ namespace Ofx.Tests
             Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataRow(null)]
+        [DataTestMethod]
+        public async Task IndexShowHasReceipt(bool? hasreceipt)
+        {
+            // Given: A set of items, some with receipts some not
+            var items = TransactionItems.Take(10);
+            var receiptitems = items.Take(3);
+            foreach (var i in receiptitems)
+                i.ReceiptUrl = "I have a receipt!";
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling Index with indirect search term for items with/without a receipt
+            string searchterm = null;
+            if (hasreceipt.HasValue)
+                searchterm = hasreceipt.Value ? "R+" : "R-";
+            var result = await controller.Index(null, searchterm, null, null, null);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            // Then: Only the items with a matching receipt state are returned
+            if (hasreceipt.HasValue)
+            {
+                if (hasreceipt.Value)
+                    Assert.AreEqual(receiptitems.Count(), model.Count);
+                else
+                    Assert.AreEqual(items.Count() - receiptitems.Count(), model.Count);
+            }
+            else
+                Assert.AreEqual(items.Count(), model.Count);
+        }
+
         const int pagesize = 100;
 
         [TestMethod]
