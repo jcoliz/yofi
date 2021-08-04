@@ -895,11 +895,13 @@ namespace Ofx.Tests
                 Assert.AreEqual(items.Count(), model.Count);
         }
 
-        [DataRow(2017)]
-        [DataRow(2018)]
-        [DataRow(null)]
+        [DataRow(2017,false)]
+        [DataRow(2018,false)]
+        [DataRow(2017,true)]
+        [DataRow(2018,true)]
+        [DataRow(null,false)]
         [DataTestMethod]
-        public async Task IndexYear(int? year)
+        public async Task IndexYear(int? year, bool aspayee)
         {
             // Given: A set of items, with different years
             var items = TransactionItems.Take(10);
@@ -917,7 +919,11 @@ namespace Ofx.Tests
             string searchterm = null;
             if (year.HasValue)
                 searchterm = $"Y{year}";
-            var result = await controller.Index(null, searchterm, null, null, null);
+            IActionResult result;
+            if (aspayee)
+                result = await controller.Index(null, null, searchterm, null, null);
+            else
+                result = await controller.Index(null, searchterm, null, null, null);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
