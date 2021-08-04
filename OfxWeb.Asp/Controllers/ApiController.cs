@@ -47,14 +47,18 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/5
         [HttpGet("{id}", Name = "Get")]
-        public async Task<string> Get(int id)
+        public async Task<object> Get(int id)
         {
             try
             {
-                var transaction = await _context.Transactions
-                    .SingleAsync(m => m.ID == id);
-
-                return new ApiTransactionResult(transaction);
+                var transactions = _context.Transactions.Where(m => m.ID == id);
+                var any = await transactions.AnyAsync();
+                if (!any)
+                {
+                    throw new ApplicationException("Item not found");
+                }
+                var single = await transactions.SingleAsync();
+                return new ApiTransactionResult(single);
             }
             catch (Exception ex)
             {

@@ -52,7 +52,12 @@ namespace OfxWeb.Asp
             // Bug 916: Reports endpoint should return content type json, not text.
             // http://www.binaryintellect.net/articles/a1e0e49e-d4d0-4b7c-b758-84234f14047b.aspx
             services.AddControllers()
-                .AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = null; });
+                .AddJsonOptions(options => 
+                { 
+                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+                    options.JsonSerializerOptions.Converters.Add(new Controllers.ExceptionConverter());
+                }
+                );
 
             logme.Enqueue($"*** AZURESTORAGE *** Looking...");
 
