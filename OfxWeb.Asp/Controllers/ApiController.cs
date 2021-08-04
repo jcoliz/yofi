@@ -40,7 +40,7 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx
         [HttpGet]
-        public string Get()
+        public ApiResult Get()
         {
             return new ApiResult();
         }
