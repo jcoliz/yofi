@@ -92,7 +92,7 @@ namespace Ofx.Tests
             helper = new ControllerTestHelper<Transaction, TransactionsController>();
             helper.SetUp();
             storage = new TestAzureStorage();
-            helper.controller = new TransactionsController(helper.context, null, storage);
+            helper.controller = new TransactionsController(helper.context, storage);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 

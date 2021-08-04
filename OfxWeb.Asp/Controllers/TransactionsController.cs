@@ -25,13 +25,10 @@ namespace OfxWeb.Asp.Controllers
     {
         #region Constructor
 
-        public TransactionsController(ApplicationDbContext context, IConfiguration configuration, IPlatformAzureStorage storage)
+        public TransactionsController(ApplicationDbContext context, IPlatformAzureStorage storage)
         {
             _context = context;
             _storage = storage;
-
-            var StorageAccount = configuration?["StorageAccount"];
-            Console.WriteLine(StorageAccount);
         }
 
         #endregion
