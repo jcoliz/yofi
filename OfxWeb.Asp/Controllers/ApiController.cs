@@ -246,7 +246,7 @@ namespace OfxWeb.Asp.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("Edit/{id}")]
-        public async Task<string> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
+        public async Task<object> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
         {
             try
             {
@@ -280,7 +280,7 @@ namespace OfxWeb.Asp.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("UpReceipt/{id}")]
-        public async Task<string> UpReceipt(int id, IFormFile file)
+        public async Task<ApiResult> UpReceipt(int id, IFormFile file)
         {
             try
             {
@@ -328,9 +328,8 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        public async Task<String> UpSplits(int id, IFormFile file)
+        public async Task<object> UpSplits(int id, IFormFile file)
         {
-
             try
             {
                 var transaction = await LookupTransactionAsync(id,splits:true);
@@ -373,7 +372,7 @@ namespace OfxWeb.Asp.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("EditPayee/{id}")]
-        public async Task<string> EditPayee(int id, bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
+        public async Task<object> EditPayee(int id, bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
         {
             try
             {
@@ -409,7 +408,7 @@ namespace OfxWeb.Asp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         // TODO: Move to a payee api controller and rename to POST api/payee/Create
         [HttpPost("AddPayee")]
-        public async Task<string> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
+        public async Task<object> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
         {
             try
             {
@@ -515,18 +514,6 @@ namespace OfxWeb.Asp.Controllers
         {
             Exception = ex;
             Ok = false;
-        }
-
-        public static implicit operator string(ApiResult r)
-        {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = null,
-                WriteIndented = true
-            };
-            options.Converters.Add(new ExceptionConverter());
-
-            return JsonSerializer.Serialize(r, r.GetType(), options);
         }
     }
 

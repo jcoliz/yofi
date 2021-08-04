@@ -137,8 +137,7 @@ namespace Ofx.Tests
         [TestMethod]
         public void Get()
         {
-            var json = controller.Get();
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = controller.Get();
 
             Assert.IsTrue(result.Ok);
         }
@@ -306,9 +305,8 @@ namespace Ofx.Tests
         public async Task AddPayee()
         {
             var expected = new Payee() { Category = "B", SubCategory = "A", Name = "3" };
-            
-            var json = await controller.AddPayee(expected);
-            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
+
+            var result = await controller.AddPayee(expected) as ApiPayeeResult;
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(expected, result.Payee);
@@ -404,8 +402,7 @@ namespace Ofx.Tests
 
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
 
-            var json = await controller.Edit(original.ID, false, newtx);
-            var result = JsonSerializer.Deserialize<ApiTransactionResult>(json);
+            var result = await controller.Edit(original.ID, false, newtx) as ApiTransactionResult;
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newtx, result.Transaction);
@@ -426,8 +423,7 @@ namespace Ofx.Tests
 
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
 
-            var json = await controller.Edit(original.ID, true, newtx);
-            var result = JsonSerializer.Deserialize<ApiTransactionResult>(json);
+            var result = await controller.Edit(original.ID, true, newtx) as ApiTransactionResult;
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newtx, result.Transaction);
@@ -450,8 +446,7 @@ namespace Ofx.Tests
 
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
 
-            var json = await controller.EditPayee(original.ID, false, newitem);
-            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
+            var result = await controller.EditPayee(original.ID, false, newitem) as ApiPayeeResult;
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newitem, result.Payee);
@@ -472,8 +467,7 @@ namespace Ofx.Tests
 
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
 
-            var json = await controller.EditPayee(original.ID, true, newitem);
-            var result = JsonSerializer.Deserialize<ApiPayeeResult>(json);
+            var result = await controller.EditPayee(original.ID, true, newitem) as ApiPayeeResult;
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newitem, result.Payee);
@@ -497,8 +491,7 @@ namespace Ofx.Tests
             var stream = new MemoryStream(bytes);
             var file = new FormFile(stream, 0, 10, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
             
-            var json = await controller.UpReceipt(original.ID,file);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.UpReceipt(original.ID,file);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(contenttype, original.ReceiptUrl);
@@ -522,8 +515,7 @@ namespace Ofx.Tests
             var file = ControllerTestHelper<Split,SplitsController>.PrepareUpload(splits);
 
             // Upload that
-            var json = await controller.UpSplits(item.ID, file);
-            var result = JsonSerializer.Deserialize<ApiTransactionResult>(json);
+            var result = await controller.UpSplits(item.ID, file) as ApiTransactionResult;
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(item.HasSplits);
