@@ -818,6 +818,48 @@ namespace Ofx.Tests
             Assert.AreEqual(4, model.Count);
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexShowHidden(bool ishidden)
+        {
+            // Given: A set of items, some hidden some not
+            var items = TransactionItems.Take(10);
+            var hiddenitems = items.Take(3);
+            foreach (var i in hiddenitems)
+                i.Hidden = true;
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling Index with indirect search term for hidden items
+            var searchterm = ishidden ? "H+" : null;
+            var result = await controller.Index(null, searchterm, null, null, null);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            // Then: Only the items with a matching hidden state are returned
+            if (ishidden)
+                Assert.AreEqual(items.Count(), model.Count);
+            else
+                Assert.AreEqual(items.Count() - hiddenitems.Count(), model.Count);
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexShowSelected(bool isselected)
+        {
+            // When: Calling Index with indirect search term for selected items
+            var searchterm = isselected ? "Z+" : null;
+            var result = await controller.Index(null, searchterm, null, null, null);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            // Then: The "show selected" state is transmitted through to the view in the view data
+            Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
+        }
+
         const int pagesize = 100;
 
         [TestMethod]
