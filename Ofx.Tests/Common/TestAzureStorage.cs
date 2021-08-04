@@ -31,8 +31,7 @@ namespace Common.Test.Mock
         }
 
         // It's only async beause the interface needs it that way
-#pragma warning disable 1998
-        public async Task<string> PostTableEntry(string TableName, IReadOnlyDictionary<string, string> Fields)
+        public Task<string> PostTableEntry(string TableName, IReadOnlyDictionary<string, string> Fields)
         {
             if (!TableStorage.ContainsKey(TableName))
                 TableStorage[TableName] = new Table();
@@ -41,9 +40,8 @@ namespace Common.Test.Mock
 
             table.Add(Fields);
 
-            return (table.Count - 1).ToString();
+            return Task.FromResult<string>((table.Count - 1).ToString());
         }
-#pragma warning restore
 
         public Task UploadToBlob(string ContainerName, string FileName, Stream stream)
         {
@@ -62,7 +60,7 @@ namespace Common.Test.Mock
             return Task.FromResult<Uri>(new Uri("http://www.nytimes.com/"));
         }
 
-        async Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
+        Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
         {
             var blobitem = BlobItems.Where(x => x.FileName == FileName).SingleOrDefault();
 
@@ -76,7 +74,7 @@ namespace Common.Test.Mock
 
             filestream.CopyTo(stream);
 
-            return blobitem.ContentType;
+            return Task.FromResult<string>(blobitem.ContentType);
         }
 
         public class Table: List<IReadOnlyDictionary<string, string>>
