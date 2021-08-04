@@ -796,15 +796,21 @@ namespace Ofx.Tests
             Assert.AreEqual(3, model.Count);
         }
 
-        [TestMethod]
-        public async Task IndexCategorySearch()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexCategorySearch(bool direct)
         {
             // Given: A set of items with various categories
             context.Transactions.AddRange(TransactionItems.Take(10));
             context.SaveChanges();
 
             // When: Calling Index with category search term
-            var result = await controller.Index(null, null, null, "C", null);
+            IActionResult result;
+            if (direct)
+                result = await controller.Index(null, null, null, "C", null);
+            else
+                result = await controller.Index(null, "C-C", null, null, null);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
