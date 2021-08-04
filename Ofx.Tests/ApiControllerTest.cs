@@ -216,8 +216,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var json = await controller.Select(expected.ID);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Select(expected.ID);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Selected);
@@ -228,8 +227,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var json = await controller.Select(maxid + 1);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Select(maxid + 1);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -242,8 +240,7 @@ namespace Ofx.Tests
             expected.Selected = true;
             await context.SaveChangesAsync();
 
-            var json = await controller.Deselect(expected.ID);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Deselect(expected.ID);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Selected);
@@ -254,8 +251,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var json = await controller.Deselect(maxid + 1);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.Deselect(maxid + 1);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -266,8 +262,7 @@ namespace Ofx.Tests
             await AddFivePayees();
             var expected = await context.Payees.FirstAsync();
 
-            var json = await controller.SelectPayee(expected.ID);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.SelectPayee(expected.ID);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Selected);
@@ -278,8 +273,7 @@ namespace Ofx.Tests
             await AddFivePayees();
             var maxid = await context.Payees.MaxAsync(x => x.ID);
 
-            var json = await controller.SelectPayee(maxid + 1);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.SelectPayee(maxid + 1);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -292,8 +286,7 @@ namespace Ofx.Tests
             expected.Selected = true;
             await context.SaveChangesAsync();
 
-            var json = await controller.DeselectPayee(expected.ID);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.DeselectPayee(expected.ID);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Selected);
@@ -304,8 +297,7 @@ namespace Ofx.Tests
             await AddFivePayees();
             var maxid = await context.Payees.MaxAsync(x => x.ID);
 
-            var json = await controller.DeselectPayee(maxid + 1);
-            var result = JsonSerializer.Deserialize<ApiResult>(json);
+            var result = await controller.DeselectPayee(maxid + 1);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);

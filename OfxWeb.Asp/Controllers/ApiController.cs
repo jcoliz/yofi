@@ -162,7 +162,7 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/Select/5
         [HttpGet("Select/{id}")]
-        public async Task<string> Select(int id)
+        public async Task<ApiResult> Select(int id)
         {
             try
             {
@@ -182,7 +182,7 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/Deselect/5
         [HttpGet("Deselect/{id}")]
-        public async Task<string> Deselect(int id)
+        public async Task<ApiResult> Deselect(int id)
         {
             try
             {
@@ -202,7 +202,7 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/SelectPayee/5
         [HttpGet("SelectPayee/{id}")]
-        public async Task<string> SelectPayee(int id)
+        public async Task<ApiResult> SelectPayee(int id)
         {
             try
             {
@@ -223,7 +223,7 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/DeselectPayee/5
         [HttpGet("DeselectPayee/{id}")]
-        public async Task<string> DeselectPayee(int id)
+        public async Task<ApiResult> DeselectPayee(int id)
         {
             try
             {
