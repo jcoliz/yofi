@@ -773,15 +773,22 @@ namespace Ofx.Tests
             Assert.AreEqual("1", model.First().Payee);
         }
 
-        [TestMethod]
-        public async Task IndexPayeeSearch()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexPayeeSearch(bool direct)
         {
             // Given: A set of items with various payees
             context.Transactions.AddRange(TransactionItems.Take(7));
             context.SaveChanges();
 
             // When: Calling Index with payee search term
-            var result = await controller.Index(null, null, "4", null, null);
+            IActionResult result;
+            if (direct)
+                result = await controller.Index(null, null, "4", null, null);
+            else
+                result = await controller.Index(null, "P-4", null, null, null);
+
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
