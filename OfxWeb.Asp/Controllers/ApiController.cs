@@ -457,7 +457,7 @@ namespace OfxWeb.Asp.Controllers
                 var result = new ReportBuilder(_context).BuildReport(parms);
                 var json = result.ToJson();
 
-                return Content(json);
+                return Content(json,"application/json");
             }
             catch (UnauthorizedAccessException)
             {

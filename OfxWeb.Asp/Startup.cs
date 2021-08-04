@@ -49,6 +49,11 @@ namespace OfxWeb.Asp
             services.AddDistributedMemoryCache();
             services.AddSession();
 
+            // Bug 916: Reports endpoint should return content type json, not text.
+            // http://www.binaryintellect.net/articles/a1e0e49e-d4d0-4b7c-b758-84234f14047b.aspx
+            services.AddControllers()
+                .AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = null; });
+
             logme.Enqueue($"*** AZURESTORAGE *** Looking...");
 
             // Build connection string out of component key parts
