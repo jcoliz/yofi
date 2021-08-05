@@ -70,12 +70,33 @@ namespace Ofx.Tests
             Assert.AreEqual(13, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
-            // A, A-, AB, E, E-, EF, H, H-, HI, J, Blank, Total
-            Assert.AreEqual(12, report.RowLabels.Count());
+            Assert.AreEqual(21, report.RowLabels.Count());
+        }
+
+        [TestMethod]
+        public void Income()
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the 'Income' report for the correct year
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "income", year = 2020 });
+
+            // Then: Report has the correct total
+            var expected =
+                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains("Income")).Sum(x => x.Amount) +
+                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains("Income")).Sum(x => x.Amount);
+            Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
+
+            // And: Report has the correct # columns (Total & pct total)
+            Assert.AreEqual(2, report.ColumnLabels.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(3, report.RowLabels.Count());
         }
 
         // Only enable this if need to generate more sample data
-        //[TestMethod]
+        [TestMethod]
         public void GenerateData()
         {
             // Generates a huge dataset
@@ -83,7 +104,7 @@ namespace Ofx.Tests
 
             var random = new Random();
 
-            string[] categories = new string[] { "A", "A:B:C", "A:B:C:D", "E", "E:F", "E:F:G", "H", "H:I", "J", string.Empty };
+            string[] categories = new string[] { "A", "A:B:C", "A:B:C:D", "E", "E:F", "E:F:G", "H", "H:I", "J", "Income:K", "Income:L", "Taxes:M", "Taxes:N", "Savings:O", "Savings:P", string.Empty };
 
             var transactions = new List<Transaction>();
             int i = numtx;
