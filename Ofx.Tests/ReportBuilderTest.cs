@@ -64,14 +64,40 @@ namespace Ofx.Tests
             return Transactions1000;
         }
 
-        [TestMethod]
-        public void All()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void All(bool showmonths)
         {
             // Given: A large database of transactions
             // (Assembled on Initialize)
 
             // When: Building the 'All' report for the correct year
-            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "all", year = 2020 });
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "all", year = 2020, showmonths = showmonths });
+
+            // Then: Report has the correct total
+            var expected = Transactions1000.Sum(x => x.Amount);
+            Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
+
+            // And: Report has the correct # columns (One for each month plus total)
+            Assert.AreEqual(showmonths? 13 : 1, report.ColumnLabels.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(21, report.RowLabels.Count());
+        }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataTestMethod]
+        public void AllLevels(int level)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the 'All' report for the correct year, with level at '{level}'
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "all", year = 2020, level = level });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount);
@@ -81,7 +107,11 @@ namespace Ofx.Tests
             Assert.AreEqual(13, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(21, report.RowLabels.Count());
+            var rowset = new int[] { 9, 21, 24, 26 };
+            Assert.AreEqual(rowset[level-1], report.RowLabels.Count());
+
+            // Report has the right levels
+            Assert.AreEqual(level - 1, report.RowLabels.Max(x => x.Level));
         }
 
         decimal SumOfTopCategory(string category)
