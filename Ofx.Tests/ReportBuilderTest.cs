@@ -19,6 +19,7 @@ namespace Ofx.Tests
         public ReportBuilder builder = null;
 
         IEnumerable<Transaction> Transactions1000;
+        IEnumerable<BudgetTx> BudgetTxs;
 
         [TestInitialize]
         public void SetUp()
@@ -33,6 +34,8 @@ namespace Ofx.Tests
 
             var txs = LoadTransactions();
             context.Transactions.AddRange(txs);
+            var btxs = LoadBudgetTxs();
+            context.BudgetTxs.AddRange(btxs);
             context.SaveChanges();
         }
 
@@ -62,6 +65,22 @@ namespace Ofx.Tests
                 Transactions1000 = txs;
             }
             return Transactions1000;
+        }
+        public IEnumerable<BudgetTx> LoadBudgetTxs()
+        {
+            if (null == BudgetTxs)
+            {
+                string json;
+
+                using (var stream = SampleData.Open("BudgetTxs.json"))
+                using (var reader = new StreamReader(stream))
+                    json = reader.ReadToEnd();
+
+                var txs = System.Text.Json.JsonSerializer.Deserialize<List<BudgetTx>>(json);
+
+                BudgetTxs = txs;
+            }
+            return BudgetTxs;
         }
 
         [DataRow(true)]
@@ -121,6 +140,12 @@ namespace Ofx.Tests
                 Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
+        decimal SumOfBudgetTxsTopCategory(string category)
+        {
+            return
+                BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
         [DataRow("Income")]
         [DataRow("Taxes")]
         [DataRow("Savings")]
@@ -166,22 +191,47 @@ namespace Ofx.Tests
             Assert.AreEqual(12, report.RowLabels.Count());
         }
 
-        // Only enable this if need to generate more sample data
+        //expenses-budget
         [TestMethod]
+        public void ExpensesBudget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'expenses-budget' report for the correct year
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "expenses-budget", year = 2020 });
+
+            // Then: Report has the correct total
+            var expected = BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
+            Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
+
+            // And: Report has the correct # columns, just 1 the budget itself
+            Assert.AreEqual(1, report.ColumnLabels.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(7, report.RowLabels.Count());
+
+        }
+
+        // Only enable this if need to generate more sample data
+        //[TestMethod]
         public void GenerateData()
         {
-            // Generates a huge dataset
-            const int numtx = 1000;
+            // Generates a large dataset of transactions
 
+            const int numtx = 1000;
+            var year = 2020;
             var random = new Random();
+            Func<decimal,decimal> nextamount = x => ((decimal)random.Next(-(int)(x * 100m), 0)) / 100m;
 
             string[] categories = new string[] { "A", "A:B:C", "A:B:C:D", "E", "E:F", "E:F:G", "H", "H:I", "J", "Income:K", "Income:L", "Taxes:M", "Taxes:N", "Savings:O", "Savings:P", string.Empty };
+
+            
 
             var transactions = new List<Transaction>();
             int i = numtx;
             while(i-- > 0)
             {
-                var year = 2020;
                 var month = random.Next(1, 13);
                 var day = random.Next(1, 1+DateTime.DaysInMonth(year,month));
 
@@ -190,14 +240,14 @@ namespace Ofx.Tests
                 // Half the transactions will have splits
                 if (random.Next(0,2) == 1)
                 {
-                    tx.Amount = ((decimal)random.Next(-100000, 0)) / 100m;
+                    tx.Amount = nextamount(1000);
                     tx.Category = categories[random.Next(0, categories.Length)];
                 }
                 else
                 {
                     tx.Splits = Enumerable.Range(0, random.Next(2, 7)).Select(x => new Split()
                     {
-                        Amount = ((decimal)random.Next(-100000, 0)) / 100m,
+                        Amount = nextamount(1000),
                         Category = categories[random.Next(0, categories.Length)],
                         Memo = x.ToString()
                     })
@@ -216,6 +266,23 @@ namespace Ofx.Tests
                 using (var writer = new StreamWriter(stream))
                 {
                     var output = System.Text.Json.JsonSerializer.Serialize(transactions, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
+                    writer.Write(output);
+                }
+            }
+
+            // Generate annual budget txs
+
+            string[] budgetcategories = new string[] { "A:B", "E:F", "H:I", "Taxes", "Taxes:N", "Savings:O", "Savings:P" };
+
+            var budgettxs = budgetcategories.Select(x=>new BudgetTx() { Timestamp = new DateTime(year,1,1), Amount = nextamount(100000), Category = x});
+
+            // Serialize to JSON
+            using (var stream = System.IO.File.OpenWrite("BudgetTxs.json"))
+            {
+                Console.WriteLine($"Writing {stream.Name}...");
+                using (var writer = new StreamWriter(stream))
+                {
+                    var output = System.Text.Json.JsonSerializer.Serialize(budgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
                     writer.Write(output);
                 }
             }

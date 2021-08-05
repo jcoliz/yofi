@@ -1,0 +1,44 @@
+[
+  {
+    "ID": 0,
+    "Amount": -86202.08,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "A:B"
+  },
+  {
+    "ID": 0,
+    "Amount": -53654.68,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "E:F"
+  },
+  {
+    "ID": 0,
+    "Amount": -44841.16,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "H:I"
+  },
+  {
+    "ID": 0,
+    "Amount": -15026.35,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "Taxes"
+  },
+  {
+    "ID": 0,
+    "Amount": -44695.34,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "Taxes:N"
+  },
+  {
+    "ID": 0,
+    "Amount": -48449.09,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "Savings:O"
+  },
+  {
+    "ID": 0,
+    "Amount": -3313.21,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "Savings:P"
+  }
+]
