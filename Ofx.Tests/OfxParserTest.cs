@@ -1,9 +1,8 @@
+using Common.AspNetCore.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxSharpLib;
 using System;
 using System.Linq;
-using System.Reflection;
-using Common.AspNetCore.Test;
 
 namespace Ofx.Tests
 {

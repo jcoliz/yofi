@@ -1,21 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common.AspNetCore.Test;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfxWeb.Asp;
+using OfficeOpenXml;
+using OfxSharpLib;
 using OfxWeb.Asp.Controllers;
 using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Common.AspNetCore.Test;
-using Microsoft.AspNetCore.Http;
-using System.IO;
-using OfficeOpenXml;
-using OfxWeb.Asp.Controllers.Reports;
-using ManiaLabs.Portable.Base;
-using OfxSharpLib;
 using Transaction = OfxWeb.Asp.Models.Transaction;
 
 namespace Ofx.Tests
