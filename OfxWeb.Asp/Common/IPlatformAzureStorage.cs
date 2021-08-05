@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ManiaLabs.Portable.Base
+namespace Common.NET
 {
     /// <summary>
     /// Interface to the platform-specific way to interact with Azure Storage

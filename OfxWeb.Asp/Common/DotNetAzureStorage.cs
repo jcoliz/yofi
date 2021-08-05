@@ -1,5 +1,4 @@
-﻿using ManiaLabs.Portable.Base;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +6,7 @@ using System.IO;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
-namespace ManiaLabs.NET
+namespace Common.NET
 {
     public class DotNetAzureStorage : IPlatformAzureStorage
     {

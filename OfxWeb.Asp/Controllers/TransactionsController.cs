@@ -1,6 +1,5 @@
 ﻿using Common.AspNetCore;
-using ManiaLabs.NET;
-using ManiaLabs.Portable.Base;
+using Common.NET;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
