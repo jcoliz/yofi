@@ -9,12 +9,14 @@
   <ItemGroup>
     <None Remove="SampleData\ExportedTransactions.ofx" />
     <None Remove="SampleData\First10.ofx" />
+    <None Remove="SampleData\Transactions1000.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="SampleData\ExportedTransactions.ofx" />
     <EmbeddedResource Include="SampleData\First10.ofx" />
     <EmbeddedResource Include="SampleData\Second10.ofx" />
+    <EmbeddedResource Include="SampleData\Transactions1000.json" />
   </ItemGroup>
 
   <ItemGroup>
