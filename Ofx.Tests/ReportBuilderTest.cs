@@ -114,21 +114,23 @@ namespace Ofx.Tests
             Assert.AreEqual(3, report.RowLabels.Count());
         }
 
-        [TestMethod]
-        public void Expenses()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void Expenses(bool showmonths)
         {
             // Given: A large database of transactions
             // (Assembled on Initialize)
 
             // When: Building the '{Category}' report for the correct year
-            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "expenses", year = 2020 });
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "expenses", year = 2020, showmonths = showmonths});
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
             Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
 
             // And: Report has the correct # columns (12 months, plus Total & pct total)
-            Assert.AreEqual(14, report.ColumnLabels.Count());
+            Assert.AreEqual(showmonths? 14 : 2, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
             Assert.AreEqual(12, report.RowLabels.Count());
