@@ -67,14 +67,11 @@
             url: "/api/tx/Edit/5",
             type: "POST",
             data: $(this).serialize(),
-            success: function (jsonresult) {
-                var result = JSON.parse(jsonresult);
-
+            success: function (result) {
                 if (result.Ok) {
                     tr.find('.display-payee').text(result.Transaction.Payee);
                     tr.find('.display-memo').text(result.Transaction.Memo);
                     tr.find(".display-category").text(result.Transaction.Category);
-                    tr.find(".display-subcategory").text(result.Transaction.SubCategory);
                 }
                 else
                     alert(result.Exception.Message);
@@ -92,13 +89,10 @@
             url: "/api/tx/EditPayee/5",
             type: "POST",
             data: $(this).serialize(),
-            success: function (jsonresult) {
-                var result = JSON.parse(jsonresult);
-
+            success: function (result) {
                 if (result.Ok) {
                     tr.find('.display-payee').text(result.Payee.Name);
                     tr.find(".display-category").text(result.Payee.Category);
-                    tr.find(".display-subcategory").text(result.Payee.SubCategory);
                 }
                 else
                     alert(result.Exception.Message);
@@ -116,8 +110,7 @@
             url: "/api/tx/AddPayee/",
             type: "POST",
             data: $(this).serialize(),
-            success: function (jsonresult) {
-                var result = JSON.parse(jsonresult);
+            success: function (result) {
                 if (result.Ok)
                     applyPayee(tr);
                 else
@@ -157,9 +150,7 @@
                         error: function (result) {
                             alert(result.responseText);
                         },
-                        success: function (jsonresult) {
-                            var result = JSON.parse(jsonresult);
-
+                        success: function (result) {
                             if (result.Ok) {
                                 tr.find('.display-receipt').children().show();
                                 alert('Ok');
@@ -191,13 +182,9 @@ function applyPayee(tr)
 
     $.ajax({
         url: "/api/tx/ApplyPayee/" + id,
-        success: function (jsonresult) {
-            var result = JSON.parse(jsonresult);
-
-            if (result.Ok) {
+        success: function (result) {
+            if (result.Ok)
                 tr.find(".display-category").text(result.Payee.Category);
-                tr.find(".display-subcategory").text(result.Payee.SubCategory);
-            }
             else
                 alert(result.Exception.Message);
         }
