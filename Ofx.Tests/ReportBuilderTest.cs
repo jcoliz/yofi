@@ -84,6 +84,13 @@ namespace Ofx.Tests
             Assert.AreEqual(21, report.RowLabels.Count());
         }
 
+        decimal SumOfTopCategory(string category)
+        {
+            return
+                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
+                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
         [DataRow("Income")]
         [DataRow("Taxes")]
         [DataRow("Savings")]
@@ -97,9 +104,7 @@ namespace Ofx.Tests
             var report = builder.BuildReport(new ReportBuilder.Parameters() { id = category.ToLowerInvariant(), year = 2020 });
 
             // Then: Report has the correct total
-            var expected =
-                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
-                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+            var expected = SumOfTopCategory(category);
             Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
 
             // And: Report has the correct # columns (Total & pct total)
