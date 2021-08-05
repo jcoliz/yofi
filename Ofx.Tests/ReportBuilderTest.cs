@@ -36,6 +36,17 @@ namespace Ofx.Tests
             context.SaveChanges();
         }
 
+        [TestCleanup]
+        public void Cleanup()
+        {
+            // Didn't actually solve anything. Keep it around for possible future problem
+            //DetachAllEntities();
+
+            // https://stackoverflow.com/questions/33490696/how-can-i-reset-an-ef7-inmemory-provider-between-unit-tests
+            context?.Database.EnsureDeleted();
+            context = null;
+        }
+
         public IEnumerable<Transaction> LoadTransactions()
         {
             if (null == Transactions1000)
@@ -73,19 +84,22 @@ namespace Ofx.Tests
             Assert.AreEqual(21, report.RowLabels.Count());
         }
 
-        [TestMethod]
-        public void Income()
+        [DataRow("Income")]
+        [DataRow("Taxes")]
+        [DataRow("Savings")]
+        [DataTestMethod]
+        public void SingleTop(string category)
         {
             // Given: A large database of transactions
             // (Assembled on Initialize)
 
-            // When: Building the 'Income' report for the correct year
-            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "income", year = 2020 });
+            // When: Building the '{Category}' report for the correct year
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = category.ToLowerInvariant(), year = 2020 });
 
             // Then: Report has the correct total
             var expected =
-                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains("Income")).Sum(x => x.Amount) +
-                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains("Income")).Sum(x => x.Amount);
+                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
+                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
             Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
 
             // And: Report has the correct # columns (Total & pct total)
