@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Common.Test.Helper
+namespace Common.AspNetCore.Test
 {
     public static class SampleData
     {

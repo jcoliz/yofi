@@ -5,9 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using Common.Test.Helper;
 
-namespace Common.Test.Mock
+namespace Common.AspNetCore.Test
 {
     public class TestAzureStorage : IPlatformAzureStorage
     {

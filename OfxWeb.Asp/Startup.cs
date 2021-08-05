@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.AspNetCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace OfxWeb.Asp
                 .AddJsonOptions(options => 
                 { 
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
-                    options.JsonSerializerOptions.Converters.Add(new Controllers.ExceptionConverter());
+                    options.JsonSerializerOptions.Converters.Add(new ExceptionJsonConverter());
                 }
                 );
 

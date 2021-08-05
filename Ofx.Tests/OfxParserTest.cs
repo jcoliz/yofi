@@ -3,7 +3,7 @@ using OfxSharpLib;
 using System;
 using System.Linq;
 using System.Reflection;
-using Common.Test.Helper;
+using Common.AspNetCore.Test;
 
 namespace Ofx.Tests
 {

@@ -14,8 +14,6 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 using OfficeOpenXml;
 using OfxWeb.Asp.Controllers.Reports;
-using Common.Test.Helper;
-using Common.Test.Mock;
 using ManiaLabs.Portable.Base;
 using OfxSharpLib;
 using Transaction = OfxWeb.Asp.Models.Transaction;
