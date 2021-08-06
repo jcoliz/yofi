@@ -1,0 +1,146 @@
+[
+  {
+    "ID": 0,
+    "Amount": -7912.01,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -5691.76,
+    "Timestamp": "2020-02-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -7803.66,
+    "Timestamp": "2020-03-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -7607.09,
+    "Timestamp": "2020-04-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -3245.8,
+    "Timestamp": "2020-05-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -6503.34,
+    "Timestamp": "2020-06-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -9565.21,
+    "Timestamp": "2020-07-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -8932.56,
+    "Timestamp": "2020-08-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -2533.7,
+    "Timestamp": "2020-09-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -7251.56,
+    "Timestamp": "2020-10-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -5820.25,
+    "Timestamp": "2020-11-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -7445.44,
+    "Timestamp": "2020-12-01T00:00:00",
+    "Category": "J"
+  },
+  {
+    "ID": 0,
+    "Amount": -2145.99,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -4799.04,
+    "Timestamp": "2020-02-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -4043.73,
+    "Timestamp": "2020-03-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -9527.74,
+    "Timestamp": "2020-04-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -4100.9,
+    "Timestamp": "2020-05-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -7125.54,
+    "Timestamp": "2020-06-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -1742.36,
+    "Timestamp": "2020-07-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -4893.55,
+    "Timestamp": "2020-08-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -5591.57,
+    "Timestamp": "2020-09-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -1885.58,
+    "Timestamp": "2020-10-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -2922.56,
+    "Timestamp": "2020-11-01T00:00:00",
+    "Category": "Income"
+  },
+  {
+    "ID": 0,
+    "Amount": -5317.28,
+    "Timestamp": "2020-12-01T00:00:00",
+    "Category": "Income"
+  }
+]

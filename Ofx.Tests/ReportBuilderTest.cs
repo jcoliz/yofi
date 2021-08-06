@@ -20,6 +20,7 @@ namespace Ofx.Tests
 
         IEnumerable<Transaction> Transactions1000;
         IEnumerable<BudgetTx> BudgetTxs;
+        IEnumerable<BudgetTx> ManagedBudgetTxs;
 
         [TestInitialize]
         public void SetUp()
@@ -82,6 +83,22 @@ namespace Ofx.Tests
                 BudgetTxs = txs;
             }
             return BudgetTxs;
+        }
+        public IEnumerable<BudgetTx> LoadManagedBudgetTxs()
+        {
+            if (null == ManagedBudgetTxs)
+            {
+                string json;
+
+                using (var stream = SampleData.Open("BudgetTxsManaged.json"))
+                using (var reader = new StreamReader(stream))
+                    json = reader.ReadToEnd();
+
+                var txs = System.Text.Json.JsonSerializer.Deserialize<List<BudgetTx>>(json);
+
+                ManagedBudgetTxs = txs;
+            }
+            return ManagedBudgetTxs;
         }
 
         RowLabel GetRow(Report report, Func<RowLabel, bool> predicate)
@@ -162,6 +179,12 @@ namespace Ofx.Tests
         {
             return
                 BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        decimal SumOfManagedBudgetTxsTopCategory(string category)
+        {
+            return
+                ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
         [DataRow("Income")]
@@ -343,6 +366,35 @@ namespace Ofx.Tests
             Assert.AreEqual(level - 1, report.RowLabels.Max(x => x.Level));
         }
 
+        [TestMethod]
+        public void ManagedBudget()
+        {
+            // Given: A large database of transactions and budgettxs, including a mix of monthly and yearly budget txs
+            // Most are Assembled on Initialize, but we need to add managed txs
+            context.BudgetTxs.AddRange(LoadManagedBudgetTxs());
+            context.SaveChanges();
+
+            // When: Building the 'managed-budget' report for the correct year
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "managed-budget", year = 2020 });
+
+            // Then: Report has the correct values 
+            var BudgetCol = GetColumn(report, x => x.Name == "Budget");
+            var ActualCol = GetColumn(report, x => x.Name == "Actual");
+            var IncomeRow = GetRow(report, x => x.Name == "Income");
+            var JRow = GetRow(report, x => x.Name == "J");
+
+            Assert.AreEqual(SumOfManagedBudgetTxsTopCategory("Income"), report[BudgetCol, IncomeRow]);
+            Assert.AreEqual(SumOfManagedBudgetTxsTopCategory("J"), report[BudgetCol, JRow]);
+            Assert.AreEqual(SumOfTopCategory("Income"), report[ActualCol, IncomeRow]);
+            Assert.AreEqual(SumOfTopCategory("J"), report[ActualCol, JRow]);
+
+            // And: Report has the correct # displayed columns: budget, actual, progress, remaining
+            Assert.AreEqual(4, report.ColumnLabelsFiltered.Count());
+
+            // And: Report has the correct # rows: just the 2 managed budgets
+            Assert.AreEqual(2, report.RowLabels.Count());
+        }
+
         // Only enable this if need to generate more sample data
         //[TestMethod]
         public void GenerateData()
@@ -388,7 +440,7 @@ namespace Ofx.Tests
 
             // Serialize to JSON
 
-            using (var stream = System.IO.File.OpenWrite("Transactions1000.json"))
+            using (var stream = File.OpenWrite("Transactions1000.json"))
             {
                 Console.WriteLine($"Writing {stream.Name}...");
                 using (var writer = new StreamWriter(stream))
@@ -405,12 +457,35 @@ namespace Ofx.Tests
             var budgettxs = budgetcategories.Select(x=>new BudgetTx() { Timestamp = new DateTime(year,1,1), Amount = nextamount(100000), Category = x});
 
             // Serialize to JSON
-            using (var stream = System.IO.File.OpenWrite("BudgetTxs.json"))
+
+            using (var stream = File.OpenWrite("BudgetTxs.json"))
             {
                 Console.WriteLine($"Writing {stream.Name}...");
                 using (var writer = new StreamWriter(stream))
                 {
                     var output = System.Text.Json.JsonSerializer.Serialize(budgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
+                    writer.Write(output);
+                }
+            }
+
+            // Generate managed budget txs
+
+            string[] managedbudgetcategories = new string[] {"J", "Income" };
+
+            var managedbudgettxs = managedbudgetcategories.SelectMany(
+                c => Enumerable.Range(1,12).Select(
+                    mo => new BudgetTx() { Timestamp = new DateTime(year,mo,1), Amount = nextamount(10000), Category = c }
+                    )
+            );
+
+            // Serialize to JSON
+
+            using (var stream = File.OpenWrite("BudgetTxsManaged.json"))
+            {
+                Console.WriteLine($"Writing {stream.Name}...");
+                using (var writer = new StreamWriter(stream))
+                {
+                    var output = System.Text.Json.JsonSerializer.Serialize(managedbudgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
                     writer.Write(output);
                 }
             }

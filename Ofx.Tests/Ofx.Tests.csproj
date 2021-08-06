@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <None Remove="SampleData\BudgetTxs.json" />
+    <None Remove="SampleData\BudgetTxsManaged.json" />
     <None Remove="SampleData\ExportedTransactions.ofx" />
     <None Remove="SampleData\First10.ofx" />
     <None Remove="SampleData\Transactions1000.json" />
@@ -15,6 +16,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="SampleData\BudgetTxs.json" />
+    <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
     <EmbeddedResource Include="SampleData\ExportedTransactions.ofx" />
     <EmbeddedResource Include="SampleData\First10.ofx" />
     <EmbeddedResource Include="SampleData\Second10.ofx" />
