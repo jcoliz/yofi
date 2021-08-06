@@ -275,6 +275,32 @@ namespace Ofx.Tests
             Assert.AreEqual(16, report.RowLabels.Count());
         }
 
+        [TestMethod]
+        public void All_V_Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'all-v-budget' report for the correct year
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "all-v-budget", year = 2020 });
+
+            // Then: Report has the correct total budget
+            var BudgetCol = GetColumn(report, x => x.Name == "Budget");
+            var expected = BudgetTxs.Sum(x => x.Amount);
+            Assert.AreEqual(expected, report[BudgetCol, report.TotalRow]);
+
+            // And: Report has the correct actual total
+            var ActualCol = GetColumn(report, x => x.Name == "Actual");
+            expected = Transactions1000.Sum(x => x.Amount);
+            Assert.AreEqual(expected, report[ActualCol, report.TotalRow]);
+
+            // And: Report has the correct # visible columns, budget, actual, progress
+            Assert.AreEqual(3, report.ColumnLabelsFiltered.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(26, report.RowLabels.Count());
+        }
+
         // Only enable this if need to generate more sample data
         //[TestMethod]
         public void GenerateData()
