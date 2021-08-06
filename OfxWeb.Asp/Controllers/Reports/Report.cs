@@ -201,7 +201,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             // Columns
 
             var builder = new StringBuilder();
-            var name = string.Empty;
+            var name = Name ?? string.Empty;
             var padding = (maxlevel > 0) ? String.Concat(Enumerable.Repeat<char>(' ', maxlevel)) : string.Empty;
             builder.Append($"+ {name,15}{padding} ");
 
@@ -640,9 +640,12 @@ namespace OfxWeb.Asp.Controllers.Reports
                 result = ((IComparer<RowLabel>)this).Compare(x.Parent as RowLabel, y.Parent as RowLabel);
             }
 
+#if false
+            // This is a bit of defensive coding. I have never been able to give inputs which get
+            // the result to zero, so I don't think we really need this.
             if (result == 0)
                 Debug.WriteLineIf(debugout, $"??? Unable to resolve");
-
+#endif
         done:
 
             if (result < 0)
@@ -655,7 +658,7 @@ namespace OfxWeb.Asp.Controllers.Reports
             return result;
         }
 
-        #endregion
+#endregion
     }
 
     /// <summary>

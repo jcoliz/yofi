@@ -168,6 +168,32 @@ namespace Ofx.Tests
             Assert.AreEqual(level - 1, report.RowLabels.Max(x => x.Level));
         }
 
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(6)]
+        [DataRow(9)]
+        [DataRow(12)]
+        [DataTestMethod]
+        public void AllMonths(int month)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the 'All' report for the correct year, with level at '{level}'
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "all", year = 2020, month = month });
+
+            // Then: Report has the correct total
+            var expected = Transactions1000.Where(x=>x.Timestamp.Month <= month).Sum(x => x.Amount);
+            Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
+
+            // And: Report has the correct # columns (One for each month plus total)
+            Assert.AreEqual(month + 1, report.ColumnLabels.Count());
+
+            // And: Report has the correct # rows
+            var rowset = new int[] { 9, 21, 24, 26 };
+            Assert.AreEqual(21, report.RowLabels.Count());
+        }
+
         decimal SumOfTopCategory(string category)
         {
             return

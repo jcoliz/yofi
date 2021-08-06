@@ -309,6 +309,19 @@ namespace Ofx.Tests
             Assert.IsTrue(actual.Last().IsTotal);
         }
         [TestMethod]
+        public void SimpleSortedByName()
+        {
+            report.Source = new NamedQueryList(Items.Skip(3).Take(6).AsQueryable());
+            report.SortOrder = Report.SortOrders.NameAscending;
+            report.Build();
+            report.WriteToConsole(sorted: true);
+
+            var actual = report.RowLabelsOrdered;
+
+            Assert.AreEqual("Name", actual.First().Name);
+            Assert.IsTrue(actual.Last().IsTotal);
+        }
+        [TestMethod]
         public void SubItems()
         {
             report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());

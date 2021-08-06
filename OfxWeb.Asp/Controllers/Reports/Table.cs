@@ -56,12 +56,15 @@ namespace OfxWeb.Asp.Controllers.Reports
             {
                 return _ColumnLabels.OrderBy(x => x);
             }
+#if false
+            // It seems we do not actually SET these.
             set
             {
                 _ColumnLabels.Clear();
                 foreach (var label in value)
                     _ColumnLabels.Add(label);
             }
+#endif
         }
         protected HashSet<TColumn> _ColumnLabels = new HashSet<TColumn>();
 
@@ -71,12 +74,14 @@ namespace OfxWeb.Asp.Controllers.Reports
             {
                 return _RowLabels.OrderBy(x => x);
             }
-            set
+#if false
+            // It seems we do not actually SET these.
             {
                 _RowLabels.Clear();
                 foreach (var label in value)
                     _RowLabels.Add(label);
             }
+#endif
         }
         protected HashSet<TRow> _RowLabels = new HashSet<TRow>();
 
@@ -105,6 +110,9 @@ namespace OfxWeb.Asp.Controllers.Reports
            }
         }
 
+#if false
+        // It seems we do not actually use these
+
         public IEnumerable<TValue> RowValues(TRow row)
         {
             return _ColumnLabels.Select(x => this[x, row]);
@@ -114,6 +122,8 @@ namespace OfxWeb.Asp.Controllers.Reports
         {
             _ColumnLabels.RemoveWhere(predicate);
         }
+
+#endif
     }
 
 }
