@@ -208,7 +208,26 @@ namespace Ofx.Tests
             Assert.AreEqual(12, report.RowLabels.Count());
         }
 
-        //expenses-v-budget
+        [TestMethod]
+        public void Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'budget' report for the correct year
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "budget", year = 2020 });
+
+            // Then: Report has the correct total
+            var expected = BudgetTxs.Sum(x => x.Amount);
+            Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
+
+            // And: Report has the correct # columns, just 1 the budget itself
+            Assert.AreEqual(1, report.ColumnLabels.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(13, report.RowLabels.Count());
+        }
+
         [TestMethod]
         public void ExpensesBudget()
         {
