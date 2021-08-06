@@ -81,12 +81,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha256-fh8VA992XMpeCZiRuU4xii75UIG6KvHrbUF8yIS/2/4=" crossorigin="anonymous"></script>
 
     <environment exclude="Development">
+        <script src="~/js/dist/bootstrap-autocomplete.min.js" asp-append-version="true"></script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
     <environment include="Development">
+        <script src="~/js/dist/bootstrap-autocomplete.js" asp-append-version="true"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
     </environment>
-
 
     @RenderSection("Scripts", required: false)
 </body>

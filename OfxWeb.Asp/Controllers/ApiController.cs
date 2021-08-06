@@ -472,6 +472,15 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        // GET: api/tx/cat-ac
+        [HttpGet("cat-ac")]
+        public List<string> CategoryAutocomplete(string q)
+        {
+            var result = new List<string>() { "A:B:C:D", "E:F:G:H", "I:J:K:L", q };
+
+            return result;
+        }
+
         private string BlobStoreName
         {
             get

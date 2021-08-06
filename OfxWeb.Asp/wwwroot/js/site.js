@@ -174,6 +174,12 @@
         $('#editModal').modal('hide');
     });
 
+    $('.category-autocomplete').autoComplete({
+        resolverSettings: {
+            url: '/api/tx/cat-ac'
+        }
+    });
+
 });
 
 function applyPayee(tr)
