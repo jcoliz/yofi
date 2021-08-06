@@ -550,19 +550,6 @@ namespace OfxWeb.Asp.Controllers.Reports
         /// <returns>Dictionary of column identifier strings to the value in that column</returns>
         Dictionary<string, decimal> RowDetails(RowLabel rowLabel) => ColumnLabels.ToDictionary(x => x.ToString(), x => base[x, rowLabel]);
 
-        static string GetTokenByIndex(string category, int index)
-        {
-            if (category == null)
-                return null;
-
-            var split = category.Split(':');
-
-            if (index >= split.Count() || split[index] == string.Empty)
-                return null;
-            else
-                return split[index];
-        }
-
         /// <summary>
         /// Row comparer
         /// </summary>
