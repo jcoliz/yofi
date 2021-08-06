@@ -83,6 +83,23 @@ namespace Ofx.Tests
             return BudgetTxs;
         }
 
+        RowLabel GetRow(Report report, Func<RowLabel, bool> predicate)
+        {
+            var result = report.RowLabels.Where(predicate).SingleOrDefault();
+
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+        ColumnLabel GetColumn(Report report,Func<ColumnLabel, bool> predicate)
+        {
+            var result = report.ColumnLabels.Where(predicate).SingleOrDefault();
+
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+
         [DataRow(true)]
         [DataRow(false)]
         [DataTestMethod]
@@ -191,7 +208,7 @@ namespace Ofx.Tests
             Assert.AreEqual(12, report.RowLabels.Count());
         }
 
-        //expenses-budget
+        //expenses-v-budget
         [TestMethod]
         public void ExpensesBudget()
         {
@@ -211,6 +228,32 @@ namespace Ofx.Tests
             // And: Report has the correct # rows
             Assert.AreEqual(7, report.RowLabels.Count());
 
+        }
+
+        [TestMethod]
+        public void Expenses_V_Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'expenses-v-budget' report for the correct year
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "expenses-v-budget", year = 2020 });
+
+            // Then: Report has the correct total budget
+            var BudgetCol = GetColumn(report,x=>x.Name == "Budget");
+            var expected = BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
+            Assert.AreEqual(expected, report[BudgetCol, report.TotalRow]);
+
+            // And: Report has the correct actual total
+            var ActualCol = GetColumn(report, x => x.Name == "Actual");
+            expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
+            Assert.AreEqual(expected, report[ActualCol, report.TotalRow]);
+
+            // And: Report has the correct # visible columns, budget, actual, progress
+            Assert.AreEqual(3, report.ColumnLabelsFiltered.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(16, report.RowLabels.Count());
         }
 
         // Only enable this if need to generate more sample data
