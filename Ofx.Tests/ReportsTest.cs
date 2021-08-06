@@ -5,6 +5,7 @@ using OfxWeb.Tests.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -853,6 +854,44 @@ namespace Ofx.Tests
             Assert.AreEqual(3, result.Groups.Count);
             Assert.IsTrue(result.Groups.Values.Select(x=>x.Value).Contains("A:B:G"));
             Assert.IsTrue(result.Groups.Values.Select(x => x.Value).Contains("^C;D;E;F"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void CustomColumnNullFails()
+        {
+            report.AddCustomColumn(new ColumnLabel());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void NumLevels0Fails()
+        {
+            report.NumLevels = 0;
+            report.Build();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void SourceNullFails()
+        {
+            report.Build();
+        }
+
+        [TestMethod]
+        public void EmptyReportNoConsoleOut()
+        {
+            var sw = new StringWriter();
+            Console.SetOut(sw);
+            string result = sw.ToString();
+
+            report.WriteToConsole();
+
+            var standardOutput = new StreamWriter(Console.OpenStandardOutput());
+            standardOutput.AutoFlush = true;
+            Console.SetOut(standardOutput);
+
+            Assert.AreEqual(0, sw.ToString().Length);
         }
 
 #if false
