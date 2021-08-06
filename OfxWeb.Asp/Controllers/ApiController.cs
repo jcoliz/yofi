@@ -476,7 +476,7 @@ namespace OfxWeb.Asp.Controllers
         [HttpGet("cat-ac")]
         public List<string> CategoryAutocomplete(string q)
         {
-            var result = new List<string>() { "A:B:C:D", "E:F:G:H", "I:J:K:L", q };
+            var result = _context.Transactions.Where(x => x.Timestamp > DateTime.Now.AddMonths(-6) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, latest = g.Max(y => y.Timestamp) }).OrderByDescending(x => x.latest).Take(10).Select(x => x.key).ToList();
 
             return result;
         }
