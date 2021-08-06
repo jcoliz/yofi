@@ -66,6 +66,7 @@ namespace Ofx.Tests
             }
             return Transactions1000;
         }
+
         public IEnumerable<BudgetTx> LoadBudgetTxs()
         {
             if (null == BudgetTxs)
@@ -301,6 +302,39 @@ namespace Ofx.Tests
             Assert.AreEqual(26, report.RowLabels.Count());
         }
 
+        [TestMethod]
+        public void YoY()
+        {
+            // Given: A large database of transactions, over many years
+
+            // Clear out existing transactions
+            context.Transactions.RemoveRange(context.Transactions);
+            context.SaveChanges();
+
+            // Transform into a 10-year timespan
+            context.Transactions.AddRange(Transactions1000.Select(x=> 
+            {
+                var index = Convert.ToInt32(x.Payee);
+                var adjust = index % 10;
+                x.Timestamp = x.Timestamp.AddYears(-adjust); 
+                return x;
+            }));
+            context.SaveChanges();
+
+            // When: Building the 'yoy' report 
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "yoy" });
+
+            // Then: Report has the correct total
+            var expected = Transactions1000.Sum(x => x.Amount);
+            Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
+
+            // And: Report has the correct # columns: 10 years plus total
+            Assert.AreEqual(11, report.ColumnLabels.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(24, report.RowLabels.Count());
+        }
+
         // Only enable this if need to generate more sample data
         //[TestMethod]
         public void GenerateData()
@@ -313,9 +347,7 @@ namespace Ofx.Tests
             Func<decimal,decimal> nextamount = x => ((decimal)random.Next(-(int)(x * 100m), 0)) / 100m;
 
             string[] categories = new string[] { "A", "A:B:C", "A:B:C:D", "E", "E:F", "E:F:G", "H", "H:I", "J", "Income:K", "Income:L", "Taxes:M", "Taxes:N", "Savings:O", "Savings:P", string.Empty };
-
-            
-
+           
             var transactions = new List<Transaction>();
             int i = numtx;
             while(i-- > 0)
