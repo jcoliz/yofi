@@ -302,8 +302,12 @@ namespace Ofx.Tests
             Assert.AreEqual(26, report.RowLabels.Count());
         }
 
-        [TestMethod]
-        public void YoY()
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataTestMethod]
+        public void YoY(int level)
         {
             // Given: A large database of transactions, over many years
 
@@ -322,7 +326,7 @@ namespace Ofx.Tests
             context.SaveChanges();
 
             // When: Building the 'yoy' report 
-            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "yoy" });
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "yoy", level = level });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount);
@@ -332,7 +336,11 @@ namespace Ofx.Tests
             Assert.AreEqual(11, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(24, report.RowLabels.Count());
+            var rowset = new int[] { 9, 21, 24, 26 };
+            Assert.AreEqual(rowset[level - 1], report.RowLabels.Count());
+
+            // And: Report has the right levels
+            Assert.AreEqual(level - 1, report.RowLabels.Max(x => x.Level));
         }
 
         // Only enable this if need to generate more sample data
