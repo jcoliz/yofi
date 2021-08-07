@@ -479,10 +479,10 @@ namespace OfxWeb.Asp.Controllers
             const int numresults = 10;
 
             // Look for top N recent categories in transactions, first.
-            var txd = _context.Transactions.Where(x => x.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(numresults).ToDictionary(g => g.key, g => g.count);
+            var txd = _context.Transactions.Where(x => x.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
 
             // There are also some categories in splits. Get the top N there too.
-            var spd = _context.Splits.Include(x=>x.Transaction).Where(x => x.Transaction.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(numresults).ToDictionary(g => g.key, g => g.count);
+            var spd = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
 
             // Merge the results
 
