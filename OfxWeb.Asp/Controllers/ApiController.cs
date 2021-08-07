@@ -476,9 +476,24 @@ namespace OfxWeb.Asp.Controllers
         [HttpGet("cat-ac")]
         public List<string> CategoryAutocomplete(string q)
         {
-            var result = _context.Transactions.Where(x => x.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(10).Select(x => x.key).ToList();
+            const int numresults = 10;
 
-            return result;
+            // Look for top N recent categories in transactions, first.
+            var result = _context.Transactions.Where(x => x.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(numresults).ToDictionary(g => g.key, g => g.count);
+
+            // There are also some categories in splits. Get the top N there too.
+            var spd = _context.Splits.Include(x=>x.Transaction).Where(x => x.Transaction.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(numresults).ToDictionary(g => g.key, g => g.count);
+
+            // Merge the results
+            foreach(var kvp in spd)
+            {
+                if (result.ContainsKey(kvp.Key))
+                    result[kvp.Key] += kvp.Value;
+                else
+                    result[kvp.Key] = kvp.Value;
+            }
+
+            return result.OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key).ToList();
         }
 
         private string BlobStoreName
