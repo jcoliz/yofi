@@ -50,6 +50,12 @@
             url: endpoint + id,
             success: function (htmlresult) {
                 modal.find('.modal-body').html(htmlresult);
+
+                $('.category-autocomplete').autoComplete({
+                    resolverSettings: {
+                        url: '/api/tx/cat-ac'
+                    }
+                });
             },
             error: function (result) {
                 alert(result.responseText);
