@@ -488,6 +488,33 @@ namespace OfxWeb.Asp.Controllers
 
             // https://stackoverflow.com/questions/2812545/how-do-i-sum-values-from-two-dictionaries-in-c
             return txd.Concat(spd).GroupBy(x => x.Key).Select(x => new { Key = x.Key, Value = x.Sum(g => g.Value) }).OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key).ToList();
+
+            /* Just want to say how impressed I am with myself for getting this query to entirely run on server side :D
+             * 
+                  SELECT TOP(@__p_1) [t3].[Key]
+                  FROM (
+                      SELECT [t0].[Category] AS [Key], [t0].[c] AS [Value]
+                      FROM (
+                          SELECT TOP(@__p_1) [t].[Category], COUNT(*) AS [c]
+                          FROM [Transactions] AS [t]
+                          WHERE ([t].[Timestamp] > DATEADD(month, CAST(-12 AS int), GETDATE())) AND ((@__q_0 = N'') OR (CHARINDEX(@__q_0, [t].[Category]) > 0))
+                          GROUP BY [t].[Category]
+                          ORDER BY COUNT(*) DESC
+                      ) AS [t0]
+                      UNION ALL
+                      SELECT [t2].[Category] AS [Key], [t2].[c] AS [Value]
+                      FROM (
+                          SELECT TOP(@__p_1) [s].[Category], COUNT(*) AS [c]
+                          FROM [Split] AS [s]
+                          INNER JOIN [Transactions] AS [t1] ON [s].[TransactionID] = [t1].[ID]
+                          WHERE ([t1].[Timestamp] > DATEADD(month, CAST(-12 AS int), GETDATE())) AND ((@__q_0 = N'') OR (CHARINDEX(@__q_0, [s].[Category]) > 0))
+                          GROUP BY [s].[Category]
+                          ORDER BY COUNT(*) DESC
+                      ) AS [t2]
+                  ) AS [t3]
+                  GROUP BY [t3].[Key]
+                  ORDER BY SUM([t3].[Value]) DESC
+            */
         }
 
         private string BlobStoreName

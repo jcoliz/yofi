@@ -60,7 +60,7 @@
     <form asp-action="BulkEdit" method="post">
         <div class="form-actions">
             <p>
-                Category <input type="text" name="Category" />
+                Category <input type="text" name="Category" class="category-autocomplete" autocomplete="off"  />
                 <input type="submit" value="OK" class="btn btn-secondary" />
                 <a asp-action="Index" asp-route-search="@ViewData["CurrentFilterToggleSelected"]" class="btn btn-light">Cancel</a>
             </p>

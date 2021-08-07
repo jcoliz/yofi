@@ -19,7 +19,7 @@
     <form asp-action="BulkEdit" method="post">
         <div class="form-actions">
             <p>
-                Category <input type="text" name="Category" />
+                Category <input type="text" name="Category" class="category-autocomplete" autocomplete="off" />
                 SubCategory <input type="text" name="SubCategory" />
                 <input type="submit" value="OK" class="btn btn-secondary" />
                 <a asp-action="Index" class="btn btn-light">Cancel</a>
