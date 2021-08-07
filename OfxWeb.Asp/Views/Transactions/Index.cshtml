@@ -22,21 +22,32 @@
 }
 
 <div style="float:right; margin-bottom:15px">
-    <a asp-action="Index"
-       asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-page="@ViewData["PreviousPage"]"
-       asp-route-search="@ViewData["CurrentFilter"]"
-       class="btn @prevDisabled">
-        Previous
-    </a> |
-    <a asp-action="Index"
-       asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-page="@ViewData["NextPage"]"
-       asp-route-search="@ViewData["CurrentFilter"]"
-       class="btn @nextDisabled">
-        Next
-    </a>
+    @if (ViewData["PreviousPage"] != null)
+    {
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-page="@ViewData["PreviousPage"]"
+           asp-route-search="@ViewData["CurrentFilter"]"
+           class="btn @prevDisabled">
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+    }
+    @if (ViewData["PreviousPage"] != null && ViewData["NextPage"] != null)
+    {
+        <span>|</span>
+    }
+    @if(ViewData["NextPage"] != null)
+    {
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-page="@ViewData["NextPage"]"
+           asp-route-search="@ViewData["CurrentFilter"]"
+           class="btn @nextDisabled">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+    }
 </div>
+
 <div style="margin-bottom:15px; background-color: lightgray">
     <a asp-action="Create" class="btn">Create New</a> |
     <a asp-action="Index" class="btn"
@@ -95,7 +106,7 @@
                 </th>
             }
             <th>
-                <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["DateSortParm"]">@Html.DisplayNameFor(model => model.Timestamp)</a>
+                <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["DateSortParm"]">Date</a>
             </th>
             <th>
                 <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
