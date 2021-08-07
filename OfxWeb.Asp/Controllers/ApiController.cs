@@ -479,21 +479,15 @@ namespace OfxWeb.Asp.Controllers
             const int numresults = 10;
 
             // Look for top N recent categories in transactions, first.
-            var result = _context.Transactions.Where(x => x.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(numresults).ToDictionary(g => g.key, g => g.count);
+            var txd = _context.Transactions.Where(x => x.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(numresults).ToDictionary(g => g.key, g => g.count);
 
             // There are also some categories in splits. Get the top N there too.
             var spd = _context.Splits.Include(x=>x.Transaction).Where(x => x.Transaction.Timestamp > DateTime.Now.AddMonths(-12) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { key = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(numresults).ToDictionary(g => g.key, g => g.count);
 
             // Merge the results
-            foreach(var kvp in spd)
-            {
-                if (result.ContainsKey(kvp.Key))
-                    result[kvp.Key] += kvp.Value;
-                else
-                    result[kvp.Key] = kvp.Value;
-            }
 
-            return result.OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key).ToList();
+            // https://stackoverflow.com/questions/2812545/how-do-i-sum-values-from-two-dictionaries-in-c
+            return txd.Concat(spd).GroupBy(x => x.Key).Select(x => new { Key = x.Key, Value = x.Sum(g => g.Value) }).OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key).ToList();
         }
 
         private string BlobStoreName
