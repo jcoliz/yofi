@@ -1,10 +1,10 @@
 ﻿@model OfxWeb.Asp.Models.Transaction
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Transaction";
 }
 
-<h2>Edit</h2>
+<h2>@ViewData["Title"]</h2>
 <hr />
 <div class="row">
     <div class="col-md-6">
@@ -64,7 +64,7 @@
 {
     <div class="alert alert-danger" role="alert">
         <strong>Incomplete Splits Balance</strong> Please <a asp-action="CreateSplit" asp-route-id="@Model.ID" class="alert-link">add another split</a> to contain the remaining balance.
-</div>
+    </div>
 }
 
 <div class="row">
@@ -91,7 +91,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                     
+
                     @foreach (var split in splitorder)
                     {
                         <tr>

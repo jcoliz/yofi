@@ -21,6 +21,10 @@
     width: 100%;
 }
 
+.form-group {
+    margin-bottom: 20px;
+}
+
 /* QR code generator */
 #qrCode {
     margin: 15px;

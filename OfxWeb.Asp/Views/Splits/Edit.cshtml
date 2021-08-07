@@ -1,12 +1,10 @@
 ﻿@model OfxWeb.Asp.Models.Split
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Split";
 }
 
-<h2>Edit</h2>
-
-<h4>Split</h4>
+<h2>@ViewData["Title"]</h2>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -31,12 +29,8 @@
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
-                <a asp-controller="Transactions" asp-action="Edit" asp-route-id="@Model.TransactionID" class="btn btn-outline-secondary" >Cancel</a>
+                <a asp-controller="Transactions" asp-action="Edit" asp-route-id="@Model.TransactionID" class="btn btn-outline-secondary">Cancel</a>
             </div>
         </form>
     </div>
 </div>
-
-<div>
-</div>
-
