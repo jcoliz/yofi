@@ -72,7 +72,7 @@
     <div class="form-actions no-color">
         <p>
             Find by: Payee <input type="text" name="searchPayee" value="@ViewData["CurrentSearchPayee"]" />
-            Category <input type="text" name="searchCategory" value="@ViewData["CurrentSearchCategory"]" />
+            Category <input type="text" name="searchCategory" value="@ViewData["CurrentSearchCategory"]" class="category-autocomplete" autocomplete="off" />
             <input type="submit" value="Search" class="btn btn-secondary" />
             <a asp-action="Index" class="btn btn-light">Reset</a>
         </p>
