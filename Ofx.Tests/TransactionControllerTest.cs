@@ -1203,13 +1203,25 @@ namespace Ofx.Tests
             // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
             Assert.AreEqual(6, model.Count);
         }
+
+        [TestMethod]
         public async Task IndexQPayee()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = TransactionItems.Take(19);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
 
             // When: Calling index q='p={word}'
+            var word = "CAF";
+            var result = await controller.Index(q: $"P={word}");
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
 
             // Then: Only the transactions with '{word}' in their payee are returned
+            Assert.AreNotEqual(0, model.Count);
+            Assert.AreEqual(items.Where(x => x.Payee != null && x.Payee.Contains(word)).Count(), model.Count);
+            Assert.AreEqual(model.Where(x => x.Payee.Contains(word)).Count(), model.Count);
         }
         public async Task IndexQCategory()
         {
