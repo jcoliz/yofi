@@ -1291,6 +1291,25 @@ namespace Ofx.Tests
         }
 
         [TestMethod]
+        public async Task IndexQCategorySplits()
+        {
+            // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
+            var items = TransactionItems.Take(20);
+            items.First().Splits = SplitItems;
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index q='c={word}'
+            var word = "A";
+            var model = await WhenCallingIndexWithQ($"C={word}");
+
+            // Then: Only the transactions with '{word}' in their category are returned
+            Assert.AreEqual(5, model.Count);
+            Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || (tx.Splits?.Any(s=>s.Category?.Contains(word) == true) == true )));
+        }
+
+
+        [TestMethod]
         public async Task IndexQMemo()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without

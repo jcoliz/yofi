@@ -48,7 +48,7 @@ namespace OfxWeb.Asp.Controllers
             {
                 var split = q.Split(',');
 
-                foreach(var each in split)
+                foreach (var each in split)
                 {
 
                     if (each.ToLowerInvariant().StartsWith("p="))
@@ -62,7 +62,11 @@ namespace OfxWeb.Asp.Controllers
                         if (term.ToLowerInvariant() == "[blank]")
                             result = result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any());
                         else
-                            result = result.Where(x => x.Category.Contains(term));
+                            result = result.Where(x => 
+                                x.Category.Contains(term)
+                                ||
+                                x.Splits.Any(s=>s.Category.Contains(term))
+                            );
                     }
                     else if (each.ToLowerInvariant().StartsWith("m="))
                     {
