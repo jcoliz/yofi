@@ -44,7 +44,7 @@ namespace OfxWeb.Asp.Controllers
 
             if (!string.IsNullOrEmpty(q))
             {
-                result = result.Where(x => x.Category.Contains(q));
+                result = result.Where(x => x.Category.Contains(q) || x.Memo.Contains(q));
             }
 
             // Sort/Filter: https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/sort-filter-page?view=aspnetcore-2.1
