@@ -41,6 +41,7 @@ namespace Ofx.Tests
             new Transaction() { Category = "C", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "ABC", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "DE:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "GH:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
         };
 
         List<Split> SplitItems = new List<Split>()
@@ -1115,6 +1116,127 @@ namespace Ofx.Tests
             // Then: The receipt is returned
             Assert.AreEqual(tx.ID.ToString(), fsresult.FileDownloadName);
             Assert.AreEqual(contenttype, fsresult.ContentType);
+        }
+
+        [TestMethod]
+        public async Task IndexQCategoryAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category and some without
+            var items = TransactionItems.Take(11);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index q={word}
+            var word = "DEF";
+            var result = await controller.Index(q:word);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            // Then: Only the transactions with '{word}' in their category are returned
+            Assert.AreEqual(items.Where(x => x.Category.Contains(word)).Count(), model.Count);
+            Assert.AreEqual(model.Where(x => x.Category.Contains(word)).Count(), model.Count);
+        }
+
+        public async Task IndexQMemoAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their memo and some without
+
+            // When: Calling index q={word}
+
+            // Then: Only the transactions with '{word}' in their memo are returned
+        }
+
+        public async Task IndexQPayeeAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their payee and some without
+
+            // When: Calling index q={word}
+
+            // Then: Only the transactions with '{word}' in their payee are returned
+        }
+        public async Task IndexQAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+
+            // When: Calling index q={word}
+
+            // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
+        }
+        public async Task IndexQPayee()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+
+            // When: Calling index q='p={word}'
+
+            // Then: Only the transactions with '{word}' in their payee are returned
+        }
+        public async Task IndexQCategory()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+
+            // When: Calling index q='c={word}'
+
+            // Then: Only the transactions with '{word}' in their category are returned
+        }
+        public async Task IndexQMemo()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+
+            // When: Calling index q='m={word}'
+
+            // Then: Only the transactions with '{word}' in their memo are returned
+        }
+        public async Task IndexQReceipt()
+        {
+            // Given: A mix of transactions, some with receipts, some without
+
+            // When: Calling index q='r=1' (or r=0)
+
+            // Then: Only the transactions with (or without) receipts are returned
+        }
+        public async Task IndexQHidden()
+        {
+            // Given: A mix of transactions, some hidden, some not
+
+            // When: Calling index q='h=1'
+
+            // Then: All transactions are returned
+        }
+        public async Task IndexNoHidden()
+        {
+            // Given: A mix of transactions, some hidden, some not
+
+            // When: Calling index without qualifiers
+
+            // Then: Only non-hidden transactions are returned
+        }
+        public async Task IndexQYear()
+        {
+            // Given: A mix of transactions, in differing years
+
+            // When: Calling index q='y={year}'
+
+            // Then: Only the transactions in {year} are returned
+        }
+        public async Task IndexQPair()
+        {
+            // Given: A mix of transactions, in differing years
+            // And: some with '{word}' in their category, memo, or payee and some without
+            // And: some with receipts, some without
+
+            // When: Calling index q='{word},{key}={value}' in various combinations
+
+            // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are returned
+        }
+        public async Task IndexQMany()
+        {
+            // Given: A mix of transactions, in differing years
+            // And: some with '{word}' in their category, memo, or payee and some without
+            // And: some with receipts, some without
+
+            // When: Calling index q='{key}={value},{key}={value},{key}={value}' in various combinations
+
+            // Then: Only the transactions matching the supplied combination are returned
         }
     }
 }

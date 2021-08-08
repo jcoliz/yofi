@@ -34,8 +34,19 @@ namespace OfxWeb.Asp.Controllers
 
         #region Action Handlers
 
-        public async Task<IActionResult> Index(string sortOrder, string search, string searchPayee, string searchCategory, int? page)
+        public async Task<IActionResult> Index(string sortOrder = null, string search = null, string searchPayee = null, string searchCategory = null, int? page = null, string q = null)
         {
+            //
+            // Process QUERY (Q) parameters
+            //
+
+            var result = _context.Transactions.Include(x => x.Splits).AsQueryable<Models.Transaction>();
+
+            if (!string.IsNullOrEmpty(q))
+            {
+                result = result.Where(x => x.Category.Contains(q));
+            }
+
             // Sort/Filter: https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/sort-filter-page?view=aspnetcore-2.1
 
             if (string.IsNullOrEmpty(sortOrder))
@@ -159,8 +170,6 @@ namespace OfxWeb.Asp.Controllers
 
             if (!page.HasValue)
                 page = 1;
-
-            var result = _context.Transactions.Include(x => x.Splits).AsQueryable<Models.Transaction>();
 
             if (!String.IsNullOrEmpty(searchPayee))
             {
