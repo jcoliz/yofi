@@ -862,27 +862,6 @@ namespace Ofx.Tests
             Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
         }
 
-        void GivenItemsWithAndWithoutReceipt(out IEnumerable<Transaction> items, out IEnumerable<Transaction> receiptitems)
-        {
-            items = TransactionItems.Take(10);
-            receiptitems = items.Take(3);
-            foreach (var i in receiptitems)
-                i.ReceiptUrl = "I have a receipt!";
-
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-        }
-
-        void GivenItemsHiddenAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> hiddenitems)
-        {
-            items = TransactionItems.Take(10);
-            hiddenitems = items.Take(3);
-            foreach (var i in hiddenitems)
-                i.Hidden = true;
-
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-        }
 
         [DataRow(true)]
         [DataRow(false)]
@@ -1138,6 +1117,39 @@ namespace Ofx.Tests
             Assert.AreEqual(contenttype, fsresult.ContentType);
         }
 
+        void GivenItemsWithAndWithoutReceipt(out IEnumerable<Transaction> items, out IEnumerable<Transaction> receiptitems)
+        {
+            items = TransactionItems.Take(10);
+            receiptitems = items.Take(3);
+            foreach (var i in receiptitems)
+                i.ReceiptUrl = "I have a receipt!";
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+        }
+
+        void GivenItemsHiddenAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> hiddenitems)
+        {
+            items = TransactionItems.Take(10);
+            hiddenitems = items.Take(3);
+            foreach (var i in hiddenitems)
+                i.Hidden = true;
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+        }
+
+        void GivenItemsInYearAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> yearitems, int year)
+        {
+            items = TransactionItems.Take(10);
+            yearitems = items.Take(3);
+            foreach (var i in yearitems)
+                i.Timestamp = new DateTime(year, i.Timestamp.Month, i.Timestamp.Day);
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+        }
+
         async Task<List<Transaction>> WhenCallingIndexEmpty()
         {
             var result = await controller.Index();
@@ -1322,13 +1334,20 @@ namespace Ofx.Tests
             // Then: Only non-hidden transactions are returned
             Assert.AreEqual(items.Count() - hiddenitems.Count(), model.Count);
         }
+
+        [TestMethod]
         public async Task IndexQYear()
         {
             // Given: A mix of transactions, in differing years
+            int year = 2000;
+            IEnumerable<Transaction> items, yearitems;
+            GivenItemsInYearAndNot(out items, out yearitems, year);
 
             // When: Calling index q='y={year}'
+            var model = await WhenCallingIndexWithQ($"Y={year}");
 
             // Then: Only the transactions in {year} are returned
+            Assert.AreEqual(yearitems.Count(), model.Count);
         }
         public async Task IndexQPair()
         {

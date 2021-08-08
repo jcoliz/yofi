@@ -61,6 +61,13 @@ namespace OfxWeb.Asp.Controllers
                     var term = q.Substring(2);
                     result = result.Where(x => x.Memo.Contains(term));
                 }
+                else if (q.ToLowerInvariant().StartsWith("y="))
+                {
+                    var term = q.Substring(2);
+                    int year;
+                    if (Int32.TryParse(term, out year))
+                        result = result.Where(x => x.Timestamp.Year == year);
+                }
                 else if (q.ToLowerInvariant().StartsWith("r="))
                 {
                     var term = q.Substring(2);
