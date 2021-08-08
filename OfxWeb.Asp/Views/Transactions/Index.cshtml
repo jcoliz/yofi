@@ -3,6 +3,10 @@
 @{
     ViewData["Title"] = "Transactions";
 
+    int pagenum = 1;
+    if (ViewData["Page"] != null)
+        pagenum = Convert.ToInt32(ViewData["Page"]);
+
     var prevDisabled = ViewData["PreviousPage"] == null ? "disabled" : "";
     var nextDisabled = ViewData["NextPage"] == null ? "disabled" : "";
 
@@ -37,7 +41,7 @@
     </script>
 }
 
-<div style="float:right; margin-bottom:15px">
+<div style="display:none; margin-bottom:15px">
     @if (ViewData["PreviousPage"] != null)
     {
         <a asp-action="Index"
@@ -85,6 +89,36 @@
     <!--<a asp-action="Download" class="btn btn-secondary">Export</a>-->
     <a href="#" data-bs-toggle="modal" data-bs-target="#exportHowModal" class="btn">Export</a>
 </div>
+
+<nav aria-label="Pagination control" style="float:right">
+    <ul class="pagination pagination-sm">
+        @if (ViewData["PreviousPage"] != null)
+        {
+            <li class="page-item">
+                <a asp-action="Index"
+                   asp-route-o="@ViewData["Order"]"
+                   asp-route-p="@ViewData["PreviousPage"]"
+                   asp-route-q="@ViewData["Query"]"
+                   asp-route-v="@ViewData["ViewP"]"
+                   class="page-link">@ViewData["PreviousPage"]</a>
+            </li>
+        }
+        <li class="page-item active" aria-current="page">
+            <span class="page-link">@(ViewData["Page"] ?? 1)</span>
+        </li>
+        @if (ViewData["NextPage"] != null)
+        {
+            <li class="page-item">
+                <a asp-action="Index"
+                   asp-route-o="@ViewData["Order"]"
+                   asp-route-p="@ViewData["NextPage"]"
+                   asp-route-q="@ViewData["Query"]"
+                   asp-route-v="@ViewData["ViewP"]"
+                   class="page-link">@ViewData["NextPage"]</a>
+            </li>
+        }
+    </ul>
+</nav>
 
 @if ((bool)(ViewData["ShowSelected"]))
 {
