@@ -46,6 +46,10 @@ namespace Ofx.Tests
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "Something", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "Something", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "GH:RGB", SubCategory = "A", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
         };
 
         List<Split> SplitItems = new List<Split>()
@@ -1162,21 +1166,42 @@ namespace Ofx.Tests
             Assert.AreEqual(model.Where(x => x.Memo.Contains(word)).Count(), model.Count);
         }
 
+        [TestMethod]
         public async Task IndexQPayeeAny()
         {
             // Given: A mix of transactions, some with '{word}' in their payee and some without
+            var items = TransactionItems.Skip(15).Take(4);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
 
             // When: Calling index q={word}
+            var word = "CAF";
+            var result = await controller.Index(q: word);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
 
             // Then: Only the transactions with '{word}' in their payee are returned
+            Assert.AreNotEqual(0, model.Count);
+            Assert.AreEqual(items.Where(x => x.Payee != null && x.Payee.Contains(word)).Count(), model.Count);
+            Assert.AreEqual(model.Where(x => x.Payee.Contains(word)).Count(), model.Count);
         }
+
+        [TestMethod]
         public async Task IndexQAny()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = TransactionItems.Take(19);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
 
             // When: Calling index q={word}
+            var word = "CAF";
+            var result = await controller.Index(q: word);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
 
             // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
+            Assert.AreEqual(6, model.Count);
         }
         public async Task IndexQPayee()
         {
