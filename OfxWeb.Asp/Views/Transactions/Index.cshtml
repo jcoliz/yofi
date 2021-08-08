@@ -88,18 +88,18 @@
 
 @if ((bool)(ViewData["ShowSelected"]))
 {
-    <form asp-action="BulkEdit" method="post">
+    <form asp-action="BulkEdit" asp-route-o="@ViewData["CurrentSort"]" method="post">
         <div class="form-actions">
             <p>
                 Category <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
                 <input type="submit" value="OK" class="btn btn-primary" />
-                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondard">Cancel</a>
+                <a asp-action="Index" asp-route-o="@ViewData["CurrentSort"]" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondard">Cancel</a>
             </p>
         </div>
     </form>
 }
 
-<form asp-action="Index" asp-route-v="@ViewData["ViewP"]" method="post">
+<form asp-action="Index" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["CurrentSort"]" method="post">
     <div class="form-actions no-color">
         <p>
             <input type="text" name="q" value="@ViewData["Query"]" class="col-md-4 category-autocomplete" autocomplete="off" />

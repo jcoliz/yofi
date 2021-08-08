@@ -112,15 +112,18 @@ namespace OfxWeb.Asp.Controllers
             // Process ORDER (O) parameters
             //
 
+            const string default_order = "date_desc";
             if (string.IsNullOrEmpty(o))
-                o = "date_desc";
+                o = default_order;
 
-            ViewData["DateSortParm"] = o == "date_desc" ? "date_asc" : "date_desc";
+            ViewData["DateSortParm"] = o == "date_desc" ? "date_asc" : null; /* not "date_desc", which is default */;
             ViewData["PayeeSortParm"] = o == "payee_asc" ? "payee_desc" : "payee_asc";
             ViewData["CategorySortParm"] = o == "category_asc" ? "category_desc" : "category_asc";
             ViewData["AmountSortParm"] = o == "amount_asc" ? "amount_desc" : "amount_asc";
             ViewData["BankReferenceSortParm"] = o == "ref_asc" ? "ref_desc" : "ref_asc";
-            ViewData["CurrentSort"] = o;
+
+            // Don't set the future "o" parameter, if we're already just the default
+            ViewData["CurrentSort"] = (o == default_order) ? null : o;
 
             switch (o)
             {
@@ -165,8 +168,8 @@ namespace OfxWeb.Asp.Controllers
 
             if (!p.HasValue)
                 p = 1;
-
-            ViewData["Page"] = p;
+            else
+                ViewData["Page"] = p;
 
             if (count > pagesize)
             {
