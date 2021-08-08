@@ -867,6 +867,17 @@ namespace Ofx.Tests
             Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
         }
 
+        void GivenItemsWithAndWithoutReceipt(out IEnumerable<Transaction> items, out IEnumerable<Transaction> receiptitems)
+        {
+            items = TransactionItems.Take(10);
+            receiptitems = items.Take(3);
+            foreach (var i in receiptitems)
+                i.ReceiptUrl = "I have a receipt!";
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+        }
+
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)]
@@ -874,13 +885,8 @@ namespace Ofx.Tests
         public async Task IndexShowHasReceipt(bool? hasreceipt)
         {
             // Given: A set of items, some with receipts some not
-            var items = TransactionItems.Take(10);
-            var receiptitems = items.Take(3);
-            foreach (var i in receiptitems)
-                i.ReceiptUrl = "I have a receipt!";
-
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
+            IEnumerable<Transaction> items, receiptitems;
+            GivenItemsWithAndWithoutReceipt(out items, out receiptitems);
 
             // When: Calling Index with indirect search term for items with/without a receipt
             string searchterm = null;
@@ -1254,13 +1260,19 @@ namespace Ofx.Tests
             // Then: Only the transactions with '{word}' in their memo are returned
             ThenOnlyReturnedTxWith(items, model, x => x.Memo, word);
         }
+
+        [TestMethod]
         public async Task IndexQReceipt()
         {
             // Given: A mix of transactions, some with receipts, some without
+            IEnumerable<Transaction> items, receiptitems;
+            GivenItemsWithAndWithoutReceipt(out items, out receiptitems);
 
             // When: Calling index q='r=1' (or r=0)
+            var model = await WhenCallingIndexWithQ($"R=1");
 
             // Then: Only the transactions with (or without) receipts are returned
+            Assert.AreEqual(receiptitems.Count(),model.Count);
         }
         public async Task IndexQHidden()
         {
