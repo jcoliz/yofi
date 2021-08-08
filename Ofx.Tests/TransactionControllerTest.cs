@@ -37,7 +37,7 @@ namespace Ofx.Tests
             new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m },
             new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
             new Transaction() { Category = "B", SubCategory = "B", Payee = "34", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
-            new Transaction() { Category = "B", SubCategory = "B", Payee = "1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
+            new Transaction() { Category = "B", SubCategory = "B", Payee = "1234", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
             new Transaction() { Category = "C", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "ABC", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "DE:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
@@ -45,7 +45,7 @@ namespace Ofx.Tests
             new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "2", Memo = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "2", Memo = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
@@ -1351,6 +1351,9 @@ namespace Ofx.Tests
         }
 
         [DataRow("c=B,p=4",3)]
+        [DataRow("p=2,y=2000", 2)]
+        [DataRow("c=C,p=2,y=2000", 1)]
+        [DataRow("m=Wut,y=2000", 1)]
         [DataTestMethod]
         public async Task IndexQPair(string q, int expected)
         {
@@ -1358,6 +1361,10 @@ namespace Ofx.Tests
             // And: some with '{word}' in their category, memo, or payee and some without
             // And: some with receipts, some without
             var items = TransactionItems.Take(19);
+            var yearitems = items.Skip(3).Take(5);
+            int year = 2000;
+            foreach(var i in yearitems)
+                i.Timestamp = new DateTime(year, i.Timestamp.Month, i.Timestamp.Day);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
