@@ -1261,18 +1261,23 @@ namespace Ofx.Tests
             ThenOnlyReturnedTxWith(items, model, x => x.Memo, word);
         }
 
-        [TestMethod]
-        public async Task IndexQReceipt()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexQReceipt(bool with)
         {
             // Given: A mix of transactions, some with receipts, some without
             IEnumerable<Transaction> items, receiptitems;
             GivenItemsWithAndWithoutReceipt(out items, out receiptitems);
 
             // When: Calling index q='r=1' (or r=0)
-            var model = await WhenCallingIndexWithQ($"R=1");
+            var model = await WhenCallingIndexWithQ($"R={(with?'1':'0')}");
 
             // Then: Only the transactions with (or without) receipts are returned
-            Assert.AreEqual(receiptitems.Count(),model.Count);
+            if (with)
+                Assert.AreEqual(receiptitems.Count(),model.Count);
+            else
+                Assert.AreEqual(items.Count() - receiptitems.Count(), model.Count);
         }
         public async Task IndexQHidden()
         {
