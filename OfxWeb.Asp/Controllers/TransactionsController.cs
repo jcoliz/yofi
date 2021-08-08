@@ -42,6 +42,8 @@ namespace OfxWeb.Asp.Controllers
 
             var result = _context.Transactions.Include(x => x.Splits).AsQueryable<Models.Transaction>();
 
+            bool showHidden = false;
+
             if (!string.IsNullOrEmpty(q))
             {
                 if (q.ToLowerInvariant().StartsWith("p="))
@@ -67,6 +69,10 @@ namespace OfxWeb.Asp.Controllers
                     else if (term == "1")
                         result = result.Where(x => x.ReceiptUrl != null);
                 }
+                else if (q.ToLowerInvariant() == "h=1")
+                {
+                    showHidden = true;
+                }
                 else
                     result = result.Where(x => x.Category.Contains(q) || x.Memo.Contains(q) || x.Payee.Contains(q));
             }
@@ -82,7 +88,6 @@ namespace OfxWeb.Asp.Controllers
             ViewData["AmountSortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
             ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
 
-            bool showHidden = false;
             bool showSelected = false;
             bool? showHasReceipt = null;
             int? filteryear = null;

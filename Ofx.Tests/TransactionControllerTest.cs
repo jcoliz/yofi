@@ -831,13 +831,8 @@ namespace Ofx.Tests
         public async Task IndexShowHidden(bool ishidden)
         {
             // Given: A set of items, some hidden some not
-            var items = TransactionItems.Take(10);
-            var hiddenitems = items.Take(3);
-            foreach (var i in hiddenitems)
-                i.Hidden = true;
-
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
+            IEnumerable<Transaction> items, hiddenitems;
+            GivenItemsHiddenAndNot(out items, out hiddenitems);
 
             // When: Calling Index with indirect search term for hidden items
             var searchterm = ishidden ? "H+" : null;
@@ -873,6 +868,17 @@ namespace Ofx.Tests
             receiptitems = items.Take(3);
             foreach (var i in receiptitems)
                 i.ReceiptUrl = "I have a receipt!";
+
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+        }
+
+        void GivenItemsHiddenAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> hiddenitems)
+        {
+            items = TransactionItems.Take(10);
+            hiddenitems = items.Take(3);
+            foreach (var i in hiddenitems)
+                i.Hidden = true;
 
             context.Transactions.AddRange(items);
             context.SaveChanges();
@@ -1132,6 +1138,15 @@ namespace Ofx.Tests
             Assert.AreEqual(contenttype, fsresult.ContentType);
         }
 
+        async Task<List<Transaction>> WhenCallingIndexEmpty()
+        {
+            var result = await controller.Index();
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            return model;
+        }
+
         async Task<List<Transaction>> WhenCallingIndexWithQ(string q)
         {
             var result = await controller.Index(q: q);
@@ -1279,21 +1294,33 @@ namespace Ofx.Tests
             else
                 Assert.AreEqual(items.Count() - receiptitems.Count(), model.Count);
         }
+
+        [TestMethod]
         public async Task IndexQHidden()
         {
             // Given: A mix of transactions, some hidden, some not
+            IEnumerable<Transaction> items, hiddenitems;
+            GivenItemsHiddenAndNot(out items, out hiddenitems);
 
             // When: Calling index q='h=1'
+            var model = await WhenCallingIndexWithQ($"H=1");
 
             // Then: All transactions are returned
+            Assert.AreEqual(items.Count(), model.Count);
         }
+
+        [TestMethod]
         public async Task IndexNoHidden()
         {
             // Given: A mix of transactions, some hidden, some not
+            IEnumerable<Transaction> items, hiddenitems;
+            GivenItemsHiddenAndNot(out items, out hiddenitems);
 
             // When: Calling index without qualifiers
+            var model = await WhenCallingIndexEmpty();
 
             // Then: Only non-hidden transactions are returned
+            Assert.AreEqual(items.Count() - hiddenitems.Count(), model.Count);
         }
         public async Task IndexQYear()
         {
