@@ -41,7 +41,7 @@
     @if (ViewData["PreviousPage"] != null)
     {
         <a asp-action="Index"
-           asp-route-o="@ViewData["CurrentSort"]"
+           asp-route-o="@ViewData["Order"]"
            asp-route-p="@ViewData["PreviousPage"]"
            asp-route-q="@ViewData["Query"]"
            asp-route-v="@ViewData["ViewP"]"
@@ -56,7 +56,7 @@
     @if (ViewData["NextPage"] != null)
     {
         <a asp-action="Index"
-           asp-route-o="@ViewData["CurrentSort"]"
+           asp-route-o="@ViewData["Order"]"
            asp-route-p="@ViewData["NextPage"]"
            asp-route-q="@ViewData["Query"]"
            asp-route-v="@ViewData["ViewP"]"
@@ -69,14 +69,14 @@
 <div style="margin-bottom:15px; background-color: lightgray">
     <a asp-action="Create" class="btn">Create New</a> |
     <a asp-action="Index" class="btn"
-       asp-route-o="@ViewData["CurrentSort"]"
+       asp-route-o="@ViewData["Order"]"
        asp-route-p="@ViewData["Page"]"
        asp-route-q="@ViewData["Query"]"
        asp-route-v="@toggleHidden">
         Show Hidden
     </a> |
     <a asp-action="Index" class="btn"
-       asp-route-o="@ViewData["CurrentSort"]"
+       asp-route-o="@ViewData["Order"]"
        asp-route-p="@ViewData["Page"]"
        asp-route-q="@ViewData["Query"]"
        asp-route-v="@toggleSelected">
@@ -88,18 +88,18 @@
 
 @if ((bool)(ViewData["ShowSelected"]))
 {
-    <form asp-action="BulkEdit" asp-route-o="@ViewData["CurrentSort"]" method="post">
+    <form asp-action="BulkEdit" asp-route-o="@ViewData["Order"]" method="post">
         <div class="form-actions">
             <p>
                 Category <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
                 <input type="submit" value="OK" class="btn btn-primary" />
-                <a asp-action="Index" asp-route-o="@ViewData["CurrentSort"]" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondard">Cancel</a>
+                <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondard">Cancel</a>
             </p>
         </div>
     </form>
 }
 
-<form asp-action="Index" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["CurrentSort"]" method="post">
+<form asp-action="Index" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["Order"]" method="post">
     <div class="form-actions no-color">
         <p>
             <input type="text" name="q" value="@ViewData["Query"]" class="col-md-4 category-autocomplete" autocomplete="off" />
@@ -107,7 +107,7 @@
                 <i class="fas fa-search"></i>
             </button>
             <a a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary"><i class="fas fa-question"></i></a>
-            <a asp-action="Index" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary"><i class="fas fa-times"></i></a>
+            <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary"><i class="fas fa-times"></i></a>
         </p>
     </div>
 </form>
@@ -216,7 +216,7 @@
                 </td>
                 <td style="padding-left:0; padding-right:5px">
                     <a asp-action="Index"
-                       asp-route-o="@ViewData["CurrentSort"]"
+                       asp-route-o="@ViewData["Order"]"
                        asp-route-v="@ViewData["ViewP"]"
                        asp-route-q="p=@item.Payee?.Trim()">
                         <i class="fa fa-search"></i>
@@ -245,16 +245,6 @@
     </tbody>
 </table>
 
-<!--
-    TODO: "Payee" column
-    * If cat/subcat empty, and payee exists in payee table, show payee cat/subcat and "apply" button
-        This will require a left join to payee table on transaction.payee == payee.name, then include payee.cat & .subcat here
-    * If cat/subcat set, and payee not exists in payee table, show "add" button -> Payees/Add
--->
-<!-- Modal Edit -->
-<!-- https://getbootstrap.com/docs/4.0/components/modal/ -->
-<!-- Working on this: https://stackoverflow.com/questions/16011151/mvc-4-edit-modal-form-using-bootstrap -->
-
 <div class="actiondialog modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-endpoint="/Transactions/EditModal/">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -268,7 +258,6 @@
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
-            <!-- asp-route-id="@@item.ID"  -->
         </div>
     </div>
 </div>
@@ -285,7 +274,6 @@
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
-            <!-- asp-route-id="@@item.ID"  -->
         </div>
     </div>
 </div>
@@ -302,7 +290,6 @@
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
-            <!-- asp-route-id="@@item.ID"  -->
         </div>
     </div>
 </div>
@@ -328,7 +315,6 @@
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                 </div>
             </form>
-            <!-- asp-route-id="@@item.ID"  -->
         </div>
     </div>
 </div>

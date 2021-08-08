@@ -34,6 +34,14 @@ namespace OfxWeb.Asp.Controllers
 
         #region Action Handlers
 
+        /// <summary>
+        /// Fetch list of transactions for display
+        /// </summary>
+        /// <param name="o">Order of transactions</param>
+        /// <param name="p">Page number, where 1 is first page</param>
+        /// <param name="q">Query (or filter) specifying which transactions</param>
+        /// <param name="v">View modifiers, specifying how the view should look</param>
+        /// <returns></returns>
         public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
         {
             //
@@ -113,6 +121,8 @@ namespace OfxWeb.Asp.Controllers
             //
 
             const string default_order = "date_desc";
+            ViewData["Order"] = (o == default_order) ? null : o;
+
             if (string.IsNullOrEmpty(o))
                 o = default_order;
 
@@ -121,9 +131,6 @@ namespace OfxWeb.Asp.Controllers
             ViewData["CategorySortParm"] = o == "category_asc" ? "category_desc" : "category_asc";
             ViewData["AmountSortParm"] = o == "amount_asc" ? "amount_desc" : "amount_asc";
             ViewData["BankReferenceSortParm"] = o == "ref_asc" ? "ref_desc" : "ref_asc";
-
-            // Don't set the future "o" parameter, if we're already just the default
-            ViewData["CurrentSort"] = (o == default_order) ? null : o;
 
             switch (o)
             {
