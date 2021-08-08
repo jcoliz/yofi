@@ -34,7 +34,7 @@ namespace OfxWeb.Asp.Controllers
 
         #region Action Handlers
 
-        public async Task<IActionResult> Index(string sortOrder = null, int? p = null, string q = null, string v = null)
+        public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
         {
             //
             // Process QUERY (Q) parameters
@@ -112,17 +112,17 @@ namespace OfxWeb.Asp.Controllers
             // Process ORDER (O) parameters
             //
 
-            if (string.IsNullOrEmpty(sortOrder))
-                sortOrder = "date_desc";
+            if (string.IsNullOrEmpty(o))
+                o = "date_desc";
 
-            ViewData["DateSortParm"] = sortOrder == "date_desc" ? "date_asc" : "date_desc";
-            ViewData["PayeeSortParm"] = sortOrder == "payee_asc" ? "payee_desc" : "payee_asc";
-            ViewData["CategorySortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
-            ViewData["AmountSortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
-            ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
-            ViewData["CurrentSort"] = sortOrder;
+            ViewData["DateSortParm"] = o == "date_desc" ? "date_asc" : "date_desc";
+            ViewData["PayeeSortParm"] = o == "payee_asc" ? "payee_desc" : "payee_asc";
+            ViewData["CategorySortParm"] = o == "category_asc" ? "category_desc" : "category_asc";
+            ViewData["AmountSortParm"] = o == "amount_asc" ? "amount_desc" : "amount_asc";
+            ViewData["BankReferenceSortParm"] = o == "ref_asc" ? "ref_desc" : "ref_asc";
+            ViewData["CurrentSort"] = o;
 
-            switch (sortOrder)
+            switch (o)
             {
                 case "amount_asc":
                     result = result.OrderBy(s => s.Amount);

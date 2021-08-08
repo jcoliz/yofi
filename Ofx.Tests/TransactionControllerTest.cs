@@ -773,7 +773,7 @@ namespace Ofx.Tests
 
             // When: Calling Index with a defined sort order
             // 
-            var result = await controller.Index(sortOrder:"payee_asc");
+            var result = await controller.Index(o:"payee_asc");
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
