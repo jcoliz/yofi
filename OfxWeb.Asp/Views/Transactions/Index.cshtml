@@ -45,7 +45,7 @@
     <div class="container">
         <span class="navbar-brand mb-0 h1">Transactions</span>
         <form class="d-flex" asp-action="Index" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["Order"]" method="post">
-            <input class="form-control me-2 category-autocomplete" type="search" placeholder="Search" aria-label="Search" name="q" value="@ViewData["Query"]" autocomplete="off">
+            <input class="form-control me-2 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" value="@ViewData["Query"]" autocomplete="off">
             <button type="submit" class="btn btn-secondary me-1">
                 <i class="fas fa-search"></i>
             </button>
@@ -226,80 +226,82 @@
     </tbody>
 </table>
 
-<nav aria-label="Pagination control" style="float:right">
-    <ul class="pagination pagination-sm">
-        @if (ViewData["FirstPage"] != null)
-        {
-            <li class="page-item">
-                <a asp-action="Index"
-                   asp-route-o="@ViewData["Order"]"
-                   asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@ViewData["ViewP"]"
-                   aria-label="First Page"
-                   class="page-link">&laquo;</a>
+<div class="mt-2">
+    <nav aria-label="Pagination control">
+        <ul class="pagination pagination-sm justify-content-end">
+            @if (ViewData["FirstPage"] != null)
+            {
+                <li class="page-item">
+                    <a asp-action="Index"
+                       asp-route-o="@ViewData["Order"]"
+                       asp-route-q="@ViewData["Query"]"
+                       asp-route-v="@ViewData["ViewP"]"
+                       aria-label="First Page"
+                       class="page-link">&laquo;</a>
+                </li>
+            }
+            @if (ViewData["PreviousPreviousPage"] != null)
+            {
+                <li class="page-item">
+                    <a asp-action="Index"
+                       asp-route-o="@ViewData["Order"]"
+                       asp-route-p="@ViewData["PreviousPreviousPage"]"
+                       asp-route-q="@ViewData["Query"]"
+                       asp-route-v="@ViewData["ViewP"]"
+                       class="page-link">@ViewData["PreviousPreviousPage"]</a>
+                </li>
+            }
+            @if (ViewData["PreviousPage"] != null)
+            {
+                <li class="page-item">
+                    <a asp-action="Index"
+                       asp-route-o="@ViewData["Order"]"
+                       asp-route-p="@ViewData["PreviousPage"]"
+                       asp-route-q="@ViewData["Query"]"
+                       asp-route-v="@ViewData["ViewP"]"
+                       class="page-link">@ViewData["PreviousPage"]</a>
+                </li>
+            }
+            <li class="page-item active" aria-current="page">
+                <span class="page-link">@(ViewData["Page"] ?? 1)</span>
             </li>
-        }
-        @if (ViewData["PreviousPreviousPage"] != null)
-        {
-            <li class="page-item">
-                <a asp-action="Index"
-                   asp-route-o="@ViewData["Order"]"
-                   asp-route-p="@ViewData["PreviousPreviousPage"]"
-                   asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@ViewData["ViewP"]"
-                   class="page-link">@ViewData["PreviousPreviousPage"]</a>
-            </li>
-        }
-        @if (ViewData["PreviousPage"] != null)
-        {
-            <li class="page-item">
-                <a asp-action="Index"
-                   asp-route-o="@ViewData["Order"]"
-                   asp-route-p="@ViewData["PreviousPage"]"
-                   asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@ViewData["ViewP"]"
-                   class="page-link">@ViewData["PreviousPage"]</a>
-            </li>
-        }
-        <li class="page-item active" aria-current="page">
-            <span class="page-link">@(ViewData["Page"] ?? 1)</span>
-        </li>
-        @if (ViewData["NextPage"] != null)
-        {
-            <li class="page-item">
-                <a asp-action="Index"
-                   asp-route-o="@ViewData["Order"]"
-                   asp-route-p="@ViewData["NextPage"]"
-                   asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@ViewData["ViewP"]"
-                   class="page-link">@ViewData["NextPage"]</a>
-            </li>
-        }
-        @if (ViewData["NextNextPage"] != null)
-        {
-            <li class="page-item">
-                <a asp-action="Index"
-                   asp-route-o="@ViewData["Order"]"
-                   asp-route-p="@ViewData["NextNextPage"]"
-                   asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@ViewData["ViewP"]"
-                   class="page-link">@ViewData["NextNextPage"]</a>
-            </li>
-        }
-        @if (ViewData["LastPage"] != null)
-        {
-            <li class="page-item">
-                <a asp-action="Index"
-                   asp-route-o="@ViewData["Order"]"
-                   asp-route-p="@ViewData["LastPage"]"
-                   asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@ViewData["ViewP"]"
-                   aria-label="Last Page"
-                   class="page-link">&raquo;</a>
-            </li>
-        }
-    </ul>
-</nav>
+            @if (ViewData["NextPage"] != null)
+            {
+                <li class="page-item">
+                    <a asp-action="Index"
+                       asp-route-o="@ViewData["Order"]"
+                       asp-route-p="@ViewData["NextPage"]"
+                       asp-route-q="@ViewData["Query"]"
+                       asp-route-v="@ViewData["ViewP"]"
+                       class="page-link">@ViewData["NextPage"]</a>
+                </li>
+            }
+            @if (ViewData["NextNextPage"] != null)
+            {
+                <li class="page-item">
+                    <a asp-action="Index"
+                       asp-route-o="@ViewData["Order"]"
+                       asp-route-p="@ViewData["NextNextPage"]"
+                       asp-route-q="@ViewData["Query"]"
+                       asp-route-v="@ViewData["ViewP"]"
+                       class="page-link">@ViewData["NextNextPage"]</a>
+                </li>
+            }
+            @if (ViewData["LastPage"] != null)
+            {
+                <li class="page-item">
+                    <a asp-action="Index"
+                       asp-route-o="@ViewData["Order"]"
+                       asp-route-p="@ViewData["LastPage"]"
+                       asp-route-q="@ViewData["Query"]"
+                       asp-route-v="@ViewData["ViewP"]"
+                       aria-label="Last Page"
+                       class="page-link">&raquo;</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
 
 
 <div class="actiondialog modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-endpoint="/Transactions/EditModal/">
