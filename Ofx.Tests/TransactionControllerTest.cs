@@ -781,10 +781,8 @@ namespace Ofx.Tests
             Assert.AreEqual("1", model.First().Payee);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task IndexPayeeSearch(bool direct)
+        [TestMethod]
+        public async Task IndexPayeeSearch()
         {
             // Given: A set of items with various payees
             context.Transactions.AddRange(TransactionItems.Take(7));
@@ -792,10 +790,7 @@ namespace Ofx.Tests
 
             // When: Calling Index with payee search term
             IActionResult result;
-            if (direct)
-                result = await controller.Index(q:"p=4");
-            else
-                result = await controller.Index(search:"P-4");
+            result = await controller.Index(q:"p=4");
 
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
@@ -804,10 +799,8 @@ namespace Ofx.Tests
             Assert.AreEqual(3, model.Count);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task IndexCategorySearch(bool direct)
+        [TestMethod]
+        public async Task IndexCategorySearch()
         {
             // Given: A set of items with various categories
             context.Transactions.AddRange(TransactionItems.Take(10));
@@ -815,10 +808,7 @@ namespace Ofx.Tests
 
             // When: Calling Index with category search term
             IActionResult result;
-            if (direct)
-                result = await controller.Index(q:"C=C");
-            else
-                result = await controller.Index(search:"C-C");
+            result = await controller.Index(q:"C=C");
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -836,8 +826,8 @@ namespace Ofx.Tests
             GivenItemsHiddenAndNot(out items, out hiddenitems);
 
             // When: Calling Index with indirect search term for hidden items
-            var searchterm = ishidden ? "H+" : null;
-            var result = await controller.Index(search:searchterm);
+            var searchterm = ishidden ? "H" : null;
+            var result = await controller.Index(v:searchterm);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -854,15 +844,14 @@ namespace Ofx.Tests
         public async Task IndexShowSelected(bool isselected)
         {
             // When: Calling Index with indirect search term for selected items
-            var searchterm = isselected ? "Z+" : null;
-            var result = await controller.Index(search:searchterm);
+            var searchterm = isselected ? "S" : null;
+            var result = await controller.Index(v:searchterm);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
             // Then: The "show selected" state is transmitted through to the view in the view data
             Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
         }
-
 
         [DataRow(true)]
         [DataRow(false)]
@@ -877,8 +866,8 @@ namespace Ofx.Tests
             // When: Calling Index with indirect search term for items with/without a receipt
             string searchterm = null;
             if (hasreceipt.HasValue)
-                searchterm = hasreceipt.Value ? "R+" : "R-";
-            var result = await controller.Index(search:searchterm);
+                searchterm = hasreceipt.Value ? "R=1" : "R=0";
+            var result = await controller.Index(q:searchterm);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -927,54 +916,6 @@ namespace Ofx.Tests
             }
             else
                 Assert.AreEqual(items.Where(x=>x.Payee.Contains(payee)).Count(), model.Count);
-        }
-
-        [DataRow(2017,false)]
-        [DataRow(2018,false)]
-        [DataRow(2017,true)]
-        [DataRow(2018,true)]
-        [DataRow(null,false)]
-        [DataTestMethod]
-        public async Task IndexYear(int? year, bool aspayee)
-        {
-            // Given: A set of items, with different years
-            var items = TransactionItems.Take(10);
-            var items2017 = items.Take(3);
-            var items2018 = items.Skip(3);
-            foreach (var i in items2017)
-                i.Timestamp = new DateTime(2017, 1, 1);
-            foreach (var i in items2018)
-                i.Timestamp = new DateTime(2018, 1, 1);
-
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling Index with indirect search term for items of a certain year
-            string searchterm = null;
-            string qterm = null;
-            if (year.HasValue)
-            {
-                searchterm = $"Y{year}";
-                qterm = $"Y={year}";
-            }
-            IActionResult result;
-            if (aspayee)
-                result = await controller.Index(q:qterm);
-            else
-                result = await controller.Index(search:searchterm);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
-
-            // Then: Only the items with a matching year are returned
-            if (year.HasValue)
-            {
-                if (year == 2017)
-                    Assert.AreEqual(items2017.Count(), model.Count);
-                else if (year == 2018)
-                    Assert.AreEqual(items2018.Count(), model.Count);
-            }
-            else
-                Assert.AreEqual(items.Count(), model.Count);
         }
 
         const int pagesize = 100;
@@ -1173,6 +1114,15 @@ namespace Ofx.Tests
             return model;
         }
 
+        async Task<List<Transaction>> WhenCallingIndexWithV(string v)
+        {
+            var result = await controller.Index(v: v);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            return model;
+        }
+
         void ThenOnlyReturnedTxWith(IEnumerable<Transaction> items, IEnumerable<Transaction> model, Func<Transaction, string> predicate, string word)
         {
             Assert.AreNotEqual(0, model.Count());
@@ -1348,15 +1298,15 @@ namespace Ofx.Tests
                 Assert.AreEqual(items.Count() - moditems.Count(), model.Count);
         }
 
-        [TestMethod]
-        public async Task IndexQHidden()
+        [DataTestMethod]
+        public async Task IndexVHidden()
         {
             // Given: A mix of transactions, some hidden, some not
             IEnumerable<Transaction> items, moditems;
             GivenItemsHiddenAndNot(out items, out moditems);
 
-            // When: Calling index q='h=1'
-            var model = await WhenCallingIndexWithQ($"H=1");
+            // When: Calling index v='h'
+            var model = await WhenCallingIndexWithV("h");
 
             // Then: All transactions are returned
             Assert.AreEqual(items.Count(), model.Count);

@@ -5,6 +5,22 @@
 
     var prevDisabled = ViewData["PreviousPage"] == null ? "disabled" : "";
     var nextDisabled = ViewData["NextPage"] == null ? "disabled" : "";
+
+    var viewp = ViewData["ViewP"] as string;
+    var toggleHidden = "h";
+    var toggleSelected = "s";
+    if (!string.IsNullOrEmpty(viewp))
+    {
+        if (viewp.Contains('h'))
+            toggleHidden = viewp.Replace("h", string.Empty);
+        else
+            toggleHidden = viewp + "h";
+
+        if (viewp.Contains('s'))
+            toggleSelected = viewp.Replace("s", string.Empty);
+        else
+            toggleSelected = viewp + "s";
+    }
 }
 
 @section scripts {
@@ -27,7 +43,8 @@
         <a asp-action="Index"
            asp-route-sortOrder="@ViewData["CurrentSort"]"
            asp-route-page="@ViewData["PreviousPage"]"
-           asp-route-search="@ViewData["CurrentFilter"]"
+           asp-route-q="@ViewData["Query"]"
+           asp-route-v="@ViewData["ViewP"]"
            class="btn @prevDisabled">
             <i class="fas fa-angle-double-left"></i>
         </a>
@@ -41,7 +58,8 @@
         <a asp-action="Index"
            asp-route-sortOrder="@ViewData["CurrentSort"]"
            asp-route-page="@ViewData["NextPage"]"
-           asp-route-search="@ViewData["CurrentFilter"]"
+           asp-route-q="@ViewData["Query"]"
+           asp-route-v="@ViewData["ViewP"]"
            class="btn @nextDisabled">
             <i class="fas fa-angle-double-right"></i>
         </a>
@@ -52,14 +70,16 @@
     <a asp-action="Create" class="btn">Create New</a> |
     <a asp-action="Index" class="btn"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-page="@ViewData["PreviousPage"]"
-       asp-route-search="@ViewData["CurrentFilterToggleHidden"]">
+       asp-route-page="@ViewData["Page"]"
+       asp-route-q="@ViewData["Query"]"
+       asp-route-v="@toggleHidden">
         Show Hidden
     </a> |
     <a asp-action="Index" class="btn"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-page="@ViewData["PreviousPage"]"
-       asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
+       asp-route-page="@ViewData["Page"]"
+       asp-route-q="@ViewData["Query"]"
+       asp-route-v="@toggleSelected">
         Bulk Edit
     </a> |
     <!--<a asp-action="Download" class="btn btn-secondary">Export</a>-->
@@ -73,18 +93,18 @@
             <p>
                 Category <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off"  />
                 <input type="submit" value="OK" class="btn btn-primary" />
-                <a asp-action="Index" asp-route-search="@ViewData["CurrentFilterToggleSelected"]" class="btn btn-outline-secondard">Cancel</a>
+                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondard">Cancel</a>
             </p>
         </div>
     </form>
 }
 
-<form asp-action="Index" method="get">
+<form asp-action="Index" asp-route-v="@ViewData["ViewP"]" method="get">
     <div class="form-actions no-color">
         <p>
             <input type="text" name="q" value="@ViewData["Query"]" class="col-md-4 category-autocomplete" autocomplete="off" />
             <input type="submit" value="Search" class="btn btn-secondary" />
-            <a asp-action="Index" class="btn btn-light">Reset</a>
+            <a asp-action="Index" asp-route-v="@ViewData["ViewP"]" class="btn btn-light">Reset</a>
         </p>
     </div>
 </form>
@@ -105,16 +125,16 @@
                 </th>
             }
             <th>
-                <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["DateSortParm"]">Date</a>
+                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-sortOrder="@ViewData["DateSortParm"]">Date</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
+                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]"  asp-route-sortOrder="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
+                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]"  asp-route-sortOrder="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
+                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]"  asp-route-sortOrder="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Memo)
@@ -122,7 +142,7 @@
             @if ((bool)(ViewData["ShowHidden"]))
             {
                 <th>
-                    <a asp-action="Index" asp-route-search="@ViewData["CurrentFilter"]" asp-route-sortOrder="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
+                    <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]"  asp-route-sortOrder="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
                 </th>
             }
             <th colspan="5">
@@ -194,6 +214,7 @@
                 <td style="padding-left:0; padding-right:5px">
                     <a asp-action="Index"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-v="@ViewData["ViewP"]" 
                        asp-route-q="p=@item.Payee?.Trim()">
                         <i class="fa fa-search"></i>
                     </a>

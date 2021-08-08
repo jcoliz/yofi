@@ -34,7 +34,7 @@ namespace OfxWeb.Asp.Controllers
 
         #region Action Handlers
 
-        public async Task<IActionResult> Index(string sortOrder = null, string search = null, string searchPayee = null, string searchCategory = null, int? page = null, string q = null)
+        public async Task<IActionResult> Index(string sortOrder = null, int? page = null, string q = null, string v = null)
         {
             //
             // Process QUERY (Q) parameters
@@ -43,8 +43,6 @@ namespace OfxWeb.Asp.Controllers
             ViewData["Query"] = q;
 
             var result = _context.Transactions.Include(x => x.Splits).AsQueryable<Models.Transaction>();
-
-            bool showHidden = false;
 
             if (!string.IsNullOrEmpty(q))
             {
@@ -90,17 +88,29 @@ namespace OfxWeb.Asp.Controllers
                         else if (term == "1")
                             result = result.Where(x => x.ReceiptUrl != null);
                     }
-                    else if (each.ToLowerInvariant() == "h=1")
-                    {
-                        showHidden = true;
-                    }
                     else
                         result = result.Where(x => x.Category.Contains(each) || x.Memo.Contains(each) || x.Payee.Contains(each));
                 }
 
             }
 
-            // Sort/Filter: https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/sort-filter-page?view=aspnetcore-2.1
+            //
+            // Process VIEW (V) parameters
+            //
+
+            ViewData["ViewP"] = v;
+
+            bool showHidden = v?.ToLowerInvariant().Contains("h") == true;
+            bool showSelected = v?.ToLowerInvariant().Contains("s") == true;
+
+            ViewData["ShowHidden"] = showHidden;
+            ViewData["ShowSelected"] = showSelected;
+
+            if (!showHidden)
+                result = result.Where(x => x.Hidden != true);
+            //
+            // Process ORDER (O) parameters
+            //
 
             if (string.IsNullOrEmpty(sortOrder))
                 sortOrder = "date_desc";
@@ -110,161 +120,7 @@ namespace OfxWeb.Asp.Controllers
             ViewData["CategorySortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
             ViewData["AmountSortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
             ViewData["BankReferenceSortParm"] = sortOrder == "ref_asc" ? "ref_desc" : "ref_asc";
-
-            bool showSelected = false;
-            bool? showHasReceipt = null;
-            int? filteryear = null;
-
-            bool didfilter;
-
-            do
-            {
-                didfilter = false;
-
-                // Pull receipt filtering out of payee
-                if (!string.IsNullOrEmpty(searchPayee))
-                {
-                    if (searchPayee.EndsWith("+R"))
-                    {
-                        showHasReceipt = true;
-                        didfilter = true;
-                        searchPayee = new string(searchPayee.SkipLast(2).ToArray());
-                    }
-                    else if (searchPayee.EndsWith("-R"))
-                    {
-                        showHasReceipt = false;
-                        didfilter = true;
-                        searchPayee = new string(searchPayee.SkipLast(2).ToArray());
-                    }
-                }
-
-                // Pull year filtering out of payee
-                if (!string.IsNullOrEmpty(searchPayee))
-                {
-                    var re = new Regex("Y(\\d{4})");
-                    var match = re.Match(searchPayee);
-                    if (match.Success)
-                    {
-                        filteryear = int.Parse(match.Groups[1].Value);
-                        didfilter = true;
-                        searchPayee = searchPayee.Remove(match.Index, match.Length);
-                    }
-                }
-            }
-            while (didfilter);
-
-            // 'search' parameter combines all search types
-            if (!String.IsNullOrEmpty(search))
-            {
-                var terms = search.Split(',');
-                foreach (var term in terms)
-                {
-                    if (term[0] == 'P')
-                    {
-                        searchPayee = term.Substring(2);
-                    }
-                    else if (term[0] == 'C')
-                    {
-                        searchCategory = term.Substring(2);
-                    }
-                    else if (term[0] == 'H')
-                    {
-                        showHidden = (term[1] == '+');
-                    }
-                    else if (term[0] == 'Z')
-                    {
-                        showSelected = (term[1] == '+');
-                    }
-                    else if (term[0] == 'R')
-                    {
-                        showHasReceipt = (term[1] == '+');
-                    }
-                    else if (term[0] == 'Y')
-                    {
-                        var termyear = new string(term.Skip(1).ToArray());
-                        int yearval = 0;
-                        if (int.TryParse(termyear,out yearval))
-                        {
-                            filteryear = yearval;
-                        }
-                    }
-                }
-            }
-
-            ViewData["ShowHidden"] = showHidden;
-            ViewData["ShowSelected"] = showSelected;
-            ViewData["CurrentSearchPayee"] = searchPayee;
-            ViewData["CurrentSearchCategory"] = searchCategory;
-
-            var searchlist = new List<string>();
-            if (!String.IsNullOrEmpty(searchPayee))
-                searchlist.Add($"P-{searchPayee}");
-            if (!String.IsNullOrEmpty(searchCategory))
-                searchlist.Add($"C-{searchCategory}");
-            if (showHasReceipt.HasValue)
-                searchlist.Add($"R{(showHasReceipt.Value ? '+' : '-')}");
-            if (showHidden)
-                searchlist.Add("H+");
-            if (showSelected)
-                searchlist.Add("Z+");
-            if (filteryear.HasValue)
-                searchlist.Add($"Y{filteryear.Value}");
-
-            ViewData["CurrentFilter"] = string.Join(',', searchlist);
-
-            var togglehiddensearchlist = new List<string>(searchlist);
-            togglehiddensearchlist.Add($"H{(showHidden ? '-' : '+')}");
-            ViewData["CurrentFilterToggleHidden"] = string.Join(',', togglehiddensearchlist);
-
-            var toggleselectedsearchlist = new List<string>(searchlist);
-            toggleselectedsearchlist.Add($"Z{(showSelected ? '-' : '+')}");
-            ViewData["CurrentFilterToggleSelected"] = string.Join(',', toggleselectedsearchlist);
-
-            if (!page.HasValue)
-                page = 1;
-
-            if (!String.IsNullOrEmpty(searchPayee))
-            {
-                result = result.Where(x => x.Payee.Contains(searchPayee));
-            }
-
-            if (!String.IsNullOrEmpty(searchCategory))
-            {
-                if (searchCategory == "-")
-                    result = result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any());
-                else
-                    result = result.Where(x => 
-                        (x.Category != null && x.Category.Contains(searchCategory)) 
-                        || 
-                        (x.SubCategory != null && x.SubCategory.Contains(searchCategory))
-                        ||
-                        (
-                            x.Splits.Any(s=> 
-                                (s.Category != null && s.Category.Contains(searchCategory))
-                                ||
-                                (s.SubCategory != null && s.SubCategory.Contains(searchCategory))
-                            )
-                        )
-                    );
-            }
-
-            if (!showHidden)
-            {
-                result = result.Where(x => x.Hidden != true);
-            }
-
-            if (showHasReceipt.HasValue)
-            {
-                if (showHasReceipt.Value)
-                    result = result.Where(x => x.ReceiptUrl != null);
-                else
-                    result = result.Where(x => x.ReceiptUrl == null);
-            }
-
-            if (filteryear.HasValue)
-            {
-                result = result.Where(x => x.Timestamp.Year == filteryear.Value);
-            }
+            ViewData["CurrentSort"] = sortOrder;
 
             switch (sortOrder)
             {
@@ -303,6 +159,15 @@ namespace OfxWeb.Asp.Controllers
 
             var count = await result.CountAsync();
 
+            //
+            // Process PAGE (P) parameters
+            //
+
+            if (!page.HasValue)
+                page = 1;
+
+            ViewData["Page"] = page;
+
             if (count > pagesize)
             {
                 result = result.Skip((page.Value - 1) * pagesize).Take(pagesize);
@@ -311,8 +176,6 @@ namespace OfxWeb.Asp.Controllers
                     ViewData["PreviousPage"] = page.Value - 1;
                 if (page * pagesize < count)
                     ViewData["NextPage"] = page.Value + 1;
-
-                ViewData["CurrentSort"] = sortOrder;
             }
 
             return View(await result.AsNoTracking().ToListAsync());
