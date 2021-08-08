@@ -53,7 +53,7 @@
     {
         <span>|</span>
     }
-    @if(ViewData["NextPage"] != null)
+    @if (ViewData["NextPage"] != null)
     {
         <a asp-action="Index"
            asp-route-o="@ViewData["CurrentSort"]"
@@ -91,7 +91,7 @@
     <form asp-action="BulkEdit" method="post">
         <div class="form-actions">
             <p>
-                Category <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off"  />
+                Category <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
                 <input type="submit" value="OK" class="btn btn-primary" />
                 <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondard">Cancel</a>
             </p>
@@ -106,7 +106,7 @@
             <button type="submit" class="btn btn-secondary">
                 <i class="fas fa-search"></i>
             </button>
-            <a class="btn btn-outline-secondary"><i class="fas fa-question"></i></a>
+            <a a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary"><i class="fas fa-question"></i></a>
             <a asp-action="Index" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary"><i class="fas fa-times"></i></a>
         </p>
     </div>
@@ -131,13 +131,13 @@
                 <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["DateSortParm"]">Date</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]"  asp-route-o="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
+                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]"  asp-route-o="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
+                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]"  asp-route-o="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
+                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Memo)
@@ -145,7 +145,7 @@
             @if ((bool)(ViewData["ShowHidden"]))
             {
                 <th>
-                    <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]"  asp-route-o="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
+                    <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
                 </th>
             }
             <th colspan="5">
@@ -217,7 +217,7 @@
                 <td style="padding-left:0; padding-right:5px">
                     <a asp-action="Index"
                        asp-route-o="@ViewData["CurrentSort"]"
-                       asp-route-v="@ViewData["ViewP"]" 
+                       asp-route-v="@ViewData["ViewP"]"
                        asp-route-q="p=@item.Payee?.Trim()">
                         <i class="fa fa-search"></i>
                     </a>
@@ -299,10 +299,37 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Download</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
             <!-- asp-route-id="@@item.ID"  -->
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="searchHelpModal" tabindex="-1" role="dialog" aria-labelledby="searchHelpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form>
+                <div class="modal-body">
+                    <h2>How to search for transactions</h2>
+                    <ul>
+                        <li>Type any text to search in category, payee, or memo</li>
+                        <li>C={text} to search for {text} only in category</li>
+                        <li>C=[blank] to search for items with empty category</li>
+                        <li>P={text} to search for {text} only in payee</li>
+                        <li>M={text} to search for {text} only in memo</li>
+                        <li>R=1 or R=0 to include only items with (or without) a receipt</li>
+                        <li>Y={year} to include only items in {year}</li>
+                        <li>Separate multiple search terms with commas, e.g. "C=[blank],Y=2021"</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+            <!-- asp-route-id="@@item.ID"  -->
+        </div>
+    </div>
+</div>
+
