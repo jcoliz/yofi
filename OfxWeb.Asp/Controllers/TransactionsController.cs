@@ -193,6 +193,12 @@ namespace OfxWeb.Asp.Controllers
                 else
                     if (p > 2)
                         ViewData["PreviousPreviousPage"] = p.Value - 2;
+
+                if (p > 2)
+                    ViewData["FirstPage"] = 1;
+
+                if ((p + 1) * pagesize < count)
+                    ViewData["LastPage"] = 1 + (count-1) / pagesize;
             }
 
             return View(await result.AsNoTracking().ToListAsync());
