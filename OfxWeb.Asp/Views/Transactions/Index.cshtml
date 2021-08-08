@@ -103,8 +103,11 @@
     <div class="form-actions no-color">
         <p>
             <input type="text" name="q" value="@ViewData["Query"]" class="col-md-4 category-autocomplete" autocomplete="off" />
-            <input type="submit" value="Search" class="btn btn-secondary" />
-            <a asp-action="Index" asp-route-v="@ViewData["ViewP"]" class="btn btn-light">Reset</a>
+            <button type="submit" class="btn btn-secondary">
+                <i class="fas fa-search"></i>
+            </button>
+            <a class="btn btn-outline-secondary"><i class="fas fa-question"></i></a>
+            <a asp-action="Index" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary"><i class="fas fa-times"></i></a>
         </p>
     </div>
 </form>
