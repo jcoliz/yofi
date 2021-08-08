@@ -44,11 +44,11 @@ namespace Ofx.Tests
             new Transaction() { Category = "GH:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "2", Memo = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "Something", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "2", Memo = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "Something", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
         };
 
@@ -1117,33 +1117,33 @@ namespace Ofx.Tests
             Assert.AreEqual(contenttype, fsresult.ContentType);
         }
 
-        void GivenItemsWithAndWithoutReceipt(out IEnumerable<Transaction> items, out IEnumerable<Transaction> receiptitems)
+        void GivenItemsWithAndWithoutReceipt(out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
         {
             items = TransactionItems.Take(10);
-            receiptitems = items.Take(3);
-            foreach (var i in receiptitems)
+            moditems = items.Take(3);
+            foreach (var i in moditems)
                 i.ReceiptUrl = "I have a receipt!";
 
             context.Transactions.AddRange(items);
             context.SaveChanges();
         }
 
-        void GivenItemsHiddenAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> hiddenitems)
+        void GivenItemsHiddenAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
         {
             items = TransactionItems.Take(10);
-            hiddenitems = items.Take(3);
-            foreach (var i in hiddenitems)
+            moditems = items.Take(3);
+            foreach (var i in moditems)
                 i.Hidden = true;
 
             context.Transactions.AddRange(items);
             context.SaveChanges();
         }
 
-        void GivenItemsInYearAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> yearitems, int year)
+        void GivenItemsInYearAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems, int year)
         {
             items = TransactionItems.Take(10);
-            yearitems = items.Take(3);
-            foreach (var i in yearitems)
+            moditems = items.Take(3);
+            foreach (var i in moditems)
                 i.Timestamp = new DateTime(year, i.Timestamp.Month, i.Timestamp.Day);
 
             context.Transactions.AddRange(items);
@@ -1294,25 +1294,25 @@ namespace Ofx.Tests
         public async Task IndexQReceipt(bool with)
         {
             // Given: A mix of transactions, some with receipts, some without
-            IEnumerable<Transaction> items, receiptitems;
-            GivenItemsWithAndWithoutReceipt(out items, out receiptitems);
+            IEnumerable<Transaction> items, moditems;
+            GivenItemsWithAndWithoutReceipt(out items, out moditems);
 
             // When: Calling index q='r=1' (or r=0)
             var model = await WhenCallingIndexWithQ($"R={(with?'1':'0')}");
 
             // Then: Only the transactions with (or without) receipts are returned
             if (with)
-                Assert.AreEqual(receiptitems.Count(),model.Count);
+                Assert.AreEqual(moditems.Count(),model.Count);
             else
-                Assert.AreEqual(items.Count() - receiptitems.Count(), model.Count);
+                Assert.AreEqual(items.Count() - moditems.Count(), model.Count);
         }
 
         [TestMethod]
         public async Task IndexQHidden()
         {
             // Given: A mix of transactions, some hidden, some not
-            IEnumerable<Transaction> items, hiddenitems;
-            GivenItemsHiddenAndNot(out items, out hiddenitems);
+            IEnumerable<Transaction> items, moditems;
+            GivenItemsHiddenAndNot(out items, out moditems);
 
             // When: Calling index q='h=1'
             var model = await WhenCallingIndexWithQ($"H=1");
@@ -1325,14 +1325,14 @@ namespace Ofx.Tests
         public async Task IndexNoHidden()
         {
             // Given: A mix of transactions, some hidden, some not
-            IEnumerable<Transaction> items, hiddenitems;
-            GivenItemsHiddenAndNot(out items, out hiddenitems);
+            IEnumerable<Transaction> items, moditems;
+            GivenItemsHiddenAndNot(out items, out moditems);
 
             // When: Calling index without qualifiers
             var model = await WhenCallingIndexEmpty();
 
             // Then: Only non-hidden transactions are returned
-            Assert.AreEqual(items.Count() - hiddenitems.Count(), model.Count);
+            Assert.AreEqual(items.Count() - moditems.Count(), model.Count);
         }
 
         [TestMethod]
@@ -1340,25 +1340,34 @@ namespace Ofx.Tests
         {
             // Given: A mix of transactions, in differing years
             int year = 2000;
-            IEnumerable<Transaction> items, yearitems;
-            GivenItemsInYearAndNot(out items, out yearitems, year);
+            IEnumerable<Transaction> items, moditems;
+            GivenItemsInYearAndNot(out items, out moditems, year);
 
             // When: Calling index q='y={year}'
             var model = await WhenCallingIndexWithQ($"Y={year}");
 
             // Then: Only the transactions in {year} are returned
-            Assert.AreEqual(yearitems.Count(), model.Count);
+            Assert.AreEqual(moditems.Count(), model.Count);
         }
-        public async Task IndexQPair()
+
+        [DataRow("c=B,p=4",3)]
+        [DataTestMethod]
+        public async Task IndexQPair(string q, int expected)
         {
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
             // And: some with receipts, some without
+            var items = TransactionItems.Take(19);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
 
             // When: Calling index q='{word},{key}={value}' in various combinations
+            var model = await WhenCallingIndexWithQ(q);
 
             // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are returned
+            Assert.AreEqual(expected, model.Count);
         }
+
         public async Task IndexQMany()
         {
             // Given: A mix of transactions, in differing years

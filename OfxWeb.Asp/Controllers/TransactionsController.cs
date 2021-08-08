@@ -46,42 +46,49 @@ namespace OfxWeb.Asp.Controllers
 
             if (!string.IsNullOrEmpty(q))
             {
-                if (q.ToLowerInvariant().StartsWith("p="))
+                var split = q.Split(',');
+
+                foreach(var each in split)
                 {
-                    var term = q.Substring(2);
-                    result = result.Where(x => x.Payee.Contains(term));
+
+                    if (each.ToLowerInvariant().StartsWith("p="))
+                    {
+                        var term = each.Substring(2);
+                        result = result.Where(x => x.Payee.Contains(term));
+                    }
+                    else if (each.ToLowerInvariant().StartsWith("c="))
+                    {
+                        var term = each.Substring(2);
+                        result = result.Where(x => x.Category.Contains(term));
+                    }
+                    else if (each.ToLowerInvariant().StartsWith("m="))
+                    {
+                        var term = each.Substring(2);
+                        result = result.Where(x => x.Memo.Contains(term));
+                    }
+                    else if (each.ToLowerInvariant().StartsWith("y="))
+                    {
+                        var term = each.Substring(2);
+                        int year;
+                        if (Int32.TryParse(term, out year))
+                            result = result.Where(x => x.Timestamp.Year == year);
+                    }
+                    else if (each.ToLowerInvariant().StartsWith("r="))
+                    {
+                        var term = each.Substring(2);
+                        if (term == "0")
+                            result = result.Where(x => x.ReceiptUrl == null);
+                        else if (term == "1")
+                            result = result.Where(x => x.ReceiptUrl != null);
+                    }
+                    else if (each.ToLowerInvariant() == "h=1")
+                    {
+                        showHidden = true;
+                    }
+                    else
+                        result = result.Where(x => x.Category.Contains(each) || x.Memo.Contains(each) || x.Payee.Contains(each));
                 }
-                else if (q.ToLowerInvariant().StartsWith("c="))
-                {
-                    var term = q.Substring(2);
-                    result = result.Where(x => x.Category.Contains(term));
-                }
-                else if (q.ToLowerInvariant().StartsWith("m="))
-                {
-                    var term = q.Substring(2);
-                    result = result.Where(x => x.Memo.Contains(term));
-                }
-                else if (q.ToLowerInvariant().StartsWith("y="))
-                {
-                    var term = q.Substring(2);
-                    int year;
-                    if (Int32.TryParse(term, out year))
-                        result = result.Where(x => x.Timestamp.Year == year);
-                }
-                else if (q.ToLowerInvariant().StartsWith("r="))
-                {
-                    var term = q.Substring(2);
-                    if (term == "0")
-                        result = result.Where(x => x.ReceiptUrl == null);
-                    else if (term == "1")
-                        result = result.Where(x => x.ReceiptUrl != null);
-                }
-                else if (q.ToLowerInvariant() == "h=1")
-                {
-                    showHidden = true;
-                }
-                else
-                    result = result.Where(x => x.Category.Contains(q) || x.Memo.Contains(q) || x.Payee.Contains(q));
+
             }
 
             // Sort/Filter: https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/sort-filter-page?view=aspnetcore-2.1
