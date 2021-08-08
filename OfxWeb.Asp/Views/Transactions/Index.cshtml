@@ -52,7 +52,7 @@
             <a a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary me-1"><i class="fas fa-question"></i></a>
             <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary me-1"><i class="fas fa-times"></i></a>
         </form>
-        <div class="dropdown d-flex">
+        <div class="dropstart d-flex">
             <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Actions
             </button>
@@ -63,14 +63,14 @@
                    asp-route-p="@ViewData["Page"]"
                    asp-route-q="@ViewData["Query"]"
                    asp-route-v="@toggleHidden">
-                    Show Hidden
+                    @((bool)(ViewData["ShowHidden"])?"Hide Hidden":"Show Hidden")
                 </a>
                 <a asp-action="Index" class="btn"
                    asp-route-o="@ViewData["Order"]"
                    asp-route-p="@ViewData["Page"]"
                    asp-route-q="@ViewData["Query"]"
                    asp-route-v="@toggleSelected">
-                    Bulk Edit
+                    @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
                 </a>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#exportHowModal" class="btn">Export</a>
             </div>
@@ -81,15 +81,17 @@
 
 @if ((bool)(ViewData["ShowSelected"]))
 {
-    <form asp-action="BulkEdit" asp-route-o="@ViewData["Order"]" method="post">
-        <div class="form-actions">
-            <p>
-                Category <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
-                <input type="submit" value="OK" class="btn btn-primary" />
-                <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondard">Cancel</a>
-            </p>
-        </div>
-    </form>
+    <div class="mt-2">
+        <form asp-action="BulkEdit" asp-route-o="@ViewData["Order"]" method="post">
+            <div class="form-actions">
+                <p>
+                    Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
+                    <input type="submit" value="OK" class="btn btn-primary" />
+                    <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondary">Cancel</a>
+                </p>
+            </div>
+        </form>
+    </div>
 }
 
 <table class="table">
