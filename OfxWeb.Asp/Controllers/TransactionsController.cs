@@ -59,7 +59,10 @@ namespace OfxWeb.Asp.Controllers
                     else if (each.ToLowerInvariant().StartsWith("c="))
                     {
                         var term = each.Substring(2);
-                        result = result.Where(x => x.Category.Contains(term));
+                        if (term.ToLowerInvariant() == "[blank]")
+                            result = result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any());
+                        else
+                            result = result.Where(x => x.Category.Contains(term));
                     }
                     else if (each.ToLowerInvariant().StartsWith("m="))
                     {

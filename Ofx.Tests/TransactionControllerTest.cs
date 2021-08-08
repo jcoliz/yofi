@@ -50,6 +50,7 @@ namespace Ofx.Tests
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "GH:RGB", SubCategory = "A", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+            new Transaction() { Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
         };
 
         List<Split> SplitItems = new List<Split>()
@@ -1270,6 +1271,23 @@ namespace Ofx.Tests
 
             // Then: Only the transactions with '{word}' in their category are returned
             ThenOnlyReturnedTxWith(items, model, x => x.Category, word);
+        }
+
+        [TestMethod]
+        public async Task IndexQCategoryBlank()
+        {
+            // Given: A mix of transactions, some with null category
+            var items = TransactionItems.Take(20);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index q='c=[blank]'
+            var model = await WhenCallingIndexWithQ($"C=[blank]");
+
+            // Then: Only the transactions blank category are returned
+            Assert.AreNotEqual(0, model.Count());
+            Assert.AreEqual(items.Where(x => x.Category == null).Count(), model.Count());
+            Assert.AreEqual(model.Where(x => x.Category == null).Count(), model.Count());
         }
 
         [TestMethod]
