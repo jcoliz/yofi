@@ -1135,6 +1135,13 @@ namespace Ofx.Tests
             return model;
         }
 
+        void ThenOnlyReturnedTxWith(IEnumerable<Transaction> items, IEnumerable<Transaction> model, Func<Transaction, string> predicate, string word)
+        {
+            Assert.AreNotEqual(0, model.Count());
+            Assert.AreEqual(items.Where(x => predicate(x) != null && predicate(x).Contains(word)).Count(), model.Count());
+            Assert.AreEqual(model.Where(x => predicate(x).Contains(word)).Count(), model.Count());
+        }
+
         [TestMethod]
         public async Task IndexQCategoryAny()
         {
@@ -1148,9 +1155,7 @@ namespace Ofx.Tests
             var model = await WhenCallingIndexWithQ(word);
 
             // Then: Only the transactions with '{word}' in their category are returned
-            Assert.AreNotEqual(0, model.Count);
-            Assert.AreEqual(items.Where(x => x.Category.Contains(word)).Count(), model.Count);
-            Assert.AreEqual(model.Where(x => x.Category.Contains(word)).Count(), model.Count);
+            ThenOnlyReturnedTxWith(items, model, x => x.Category, word);
         }
 
         [TestMethod]
@@ -1166,9 +1171,7 @@ namespace Ofx.Tests
             var model = await WhenCallingIndexWithQ(word);
 
             // Then: Only the transactions with '{word}' in their memo are returned
-            Assert.AreNotEqual(0,model.Count);
-            Assert.AreEqual(items.Where(x => x.Memo != null && x.Memo.Contains(word)).Count(), model.Count);
-            Assert.AreEqual(model.Where(x => x.Memo.Contains(word)).Count(), model.Count);
+            ThenOnlyReturnedTxWith(items, model, x => x.Memo, word);
         }
 
         [TestMethod]
@@ -1184,9 +1187,7 @@ namespace Ofx.Tests
             var model = await WhenCallingIndexWithQ(word);
 
             // Then: Only the transactions with '{word}' in their payee are returned
-            Assert.AreNotEqual(0, model.Count);
-            Assert.AreEqual(items.Where(x => x.Payee != null && x.Payee.Contains(word)).Count(), model.Count);
-            Assert.AreEqual(model.Where(x => x.Payee.Contains(word)).Count(), model.Count);
+            ThenOnlyReturnedTxWith(items, model, x => x.Payee, word);
         }
 
         [TestMethod]
@@ -1219,18 +1220,23 @@ namespace Ofx.Tests
             var model = await WhenCallingIndexWithQ($"P={word}");
 
             // Then: Only the transactions with '{word}' in their payee are returned
-            Assert.AreNotEqual(0, model.Count);
-            Assert.AreEqual(items.Where(x => x.Payee != null && x.Payee.Contains(word)).Count(), model.Count);
-            Assert.AreEqual(model.Where(x => x.Payee.Contains(word)).Count(), model.Count);
+            ThenOnlyReturnedTxWith(items, model, x => x.Payee, word);
         }
 
+        [TestMethod]
         public async Task IndexQCategory()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = TransactionItems.Take(19);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
 
             // When: Calling index q='c={word}'
+            var word = "CAF";
+            var model = await WhenCallingIndexWithQ($"C={word}");
 
             // Then: Only the transactions with '{word}' in their category are returned
+            ThenOnlyReturnedTxWith(items, model, x => x.Category, word);
         }
         public async Task IndexQMemo()
         {

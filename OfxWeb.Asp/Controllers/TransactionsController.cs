@@ -46,8 +46,13 @@ namespace OfxWeb.Asp.Controllers
             {
                 if (q.ToLowerInvariant().StartsWith("p="))
                 {
-                    var payee = q.Substring(2);
-                    result = result.Where(x => x.Payee.Contains(payee));
+                    var term = q.Substring(2);
+                    result = result.Where(x => x.Payee.Contains(term));
+                }
+                else if (q.ToLowerInvariant().StartsWith("c="))
+                {
+                    var term = q.Substring(2);
+                    result = result.Where(x => x.Category.Contains(term));
                 }
                 else
                     result = result.Where(x => x.Category.Contains(q) || x.Memo.Contains(q) || x.Payee.Contains(q));
