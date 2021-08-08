@@ -182,10 +182,17 @@ namespace OfxWeb.Asp.Controllers
             {
                 result = result.Skip((p.Value - 1) * pagesize).Take(pagesize);
 
-                if (p.Value > 1)
+                if (p > 1)
                     ViewData["PreviousPage"] = p.Value - 1;
+                else
+                    if ((p + 1) * pagesize < count)
+                        ViewData["NextNextPage"] = p.Value + 2;
+
                 if (p * pagesize < count)
                     ViewData["NextPage"] = p.Value + 1;
+                else
+                    if (p > 2)
+                        ViewData["PreviousPreviousPage"] = p.Value - 2;
             }
 
             return View(await result.AsNoTracking().ToListAsync());

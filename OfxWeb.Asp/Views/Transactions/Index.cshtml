@@ -92,6 +92,17 @@
 
 <nav aria-label="Pagination control" style="float:right">
     <ul class="pagination pagination-sm">
+        @if (ViewData["PreviousPreviousPage"] != null)
+        {
+            <li class="page-item">
+                <a asp-action="Index"
+                   asp-route-o="@ViewData["Order"]"
+                   asp-route-p="@ViewData["PreviousPreviousPage"]"
+                   asp-route-q="@ViewData["Query"]"
+                   asp-route-v="@ViewData["ViewP"]"
+                   class="page-link">@ViewData["PreviousPreviousPage"]</a>
+            </li>
+        }
         @if (ViewData["PreviousPage"] != null)
         {
             <li class="page-item">
@@ -115,6 +126,17 @@
                    asp-route-q="@ViewData["Query"]"
                    asp-route-v="@ViewData["ViewP"]"
                    class="page-link">@ViewData["NextPage"]</a>
+            </li>
+        }
+        @if (ViewData["NextNextPage"] != null)
+        {
+            <li class="page-item">
+                <a asp-action="Index"
+                   asp-route-o="@ViewData["Order"]"
+                   asp-route-p="@ViewData["NextNextPage"]"
+                   asp-route-q="@ViewData["Query"]"
+                   asp-route-v="@ViewData["ViewP"]"
+                   class="page-link">@ViewData["NextNextPage"]</a>
             </li>
         }
     </ul>
