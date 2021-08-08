@@ -1126,6 +1126,15 @@ namespace Ofx.Tests
             Assert.AreEqual(contenttype, fsresult.ContentType);
         }
 
+        async Task<List<Transaction>> WhenCallingIndexWithQ(string q)
+        {
+            var result = await controller.Index(q: q);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Transaction>;
+
+            return model;
+        }
+
         [TestMethod]
         public async Task IndexQCategoryAny()
         {
@@ -1136,9 +1145,7 @@ namespace Ofx.Tests
 
             // When: Calling index q={word}
             var word = "CAF";
-            var result = await controller.Index(q:word);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var model = await WhenCallingIndexWithQ(word);
 
             // Then: Only the transactions with '{word}' in their category are returned
             Assert.AreNotEqual(0, model.Count);
@@ -1156,9 +1163,7 @@ namespace Ofx.Tests
 
             // When: Calling index q={word}
             var word = "CAF";
-            var result = await controller.Index(q: word);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var model = await WhenCallingIndexWithQ(word);
 
             // Then: Only the transactions with '{word}' in their memo are returned
             Assert.AreNotEqual(0,model.Count);
@@ -1176,9 +1181,7 @@ namespace Ofx.Tests
 
             // When: Calling index q={word}
             var word = "CAF";
-            var result = await controller.Index(q: word);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var model = await WhenCallingIndexWithQ(word);
 
             // Then: Only the transactions with '{word}' in their payee are returned
             Assert.AreNotEqual(0, model.Count);
@@ -1196,12 +1199,11 @@ namespace Ofx.Tests
 
             // When: Calling index q={word}
             var word = "CAF";
-            var result = await controller.Index(q: word);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var model = await WhenCallingIndexWithQ(word);
 
             // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
             Assert.AreEqual(6, model.Count);
+            Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
         }
 
         [TestMethod]
@@ -1214,15 +1216,14 @@ namespace Ofx.Tests
 
             // When: Calling index q='p={word}'
             var word = "CAF";
-            var result = await controller.Index(q: $"P={word}");
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var model = await WhenCallingIndexWithQ($"P={word}");
 
             // Then: Only the transactions with '{word}' in their payee are returned
             Assert.AreNotEqual(0, model.Count);
             Assert.AreEqual(items.Where(x => x.Payee != null && x.Payee.Contains(word)).Count(), model.Count);
             Assert.AreEqual(model.Where(x => x.Payee.Contains(word)).Count(), model.Count);
         }
+
         public async Task IndexQCategory()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
