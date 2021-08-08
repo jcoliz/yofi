@@ -40,6 +40,8 @@ namespace OfxWeb.Asp.Controllers
             // Process QUERY (Q) parameters
             //
 
+            ViewData["Query"] = q;
+
             var result = _context.Transactions.Include(x => x.Splits).AsQueryable<Models.Transaction>();
 
             bool showHidden = false;
