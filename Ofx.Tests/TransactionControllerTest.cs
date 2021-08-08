@@ -1238,13 +1238,21 @@ namespace Ofx.Tests
             // Then: Only the transactions with '{word}' in their category are returned
             ThenOnlyReturnedTxWith(items, model, x => x.Category, word);
         }
+
+        [TestMethod]
         public async Task IndexQMemo()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = TransactionItems.Take(19);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
 
             // When: Calling index q='m={word}'
+            var word = "CAF";
+            var model = await WhenCallingIndexWithQ($"M={word}");
 
             // Then: Only the transactions with '{word}' in their memo are returned
+            ThenOnlyReturnedTxWith(items, model, x => x.Memo, word);
         }
         public async Task IndexQReceipt()
         {
