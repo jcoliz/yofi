@@ -405,7 +405,7 @@ namespace Ofx.Tests
             context.Transactions.Add(item);
             context.SaveChanges();
 
-            var result = await controller.Index(null,null,null,null,null);
+            var result = await controller.Index();
             var viewresult = result as ViewResult;
             var model = viewresult.Model as List<Transaction>;
 
@@ -419,7 +419,7 @@ namespace Ofx.Tests
             context.Transactions.Add(item);
             context.SaveChanges();
 
-            var result = await controller.Index(null, null, null, "A", null);
+            var result = await controller.Index(q:"c=A");
             var viewresult = result as ViewResult;
             var model = viewresult.Model as List<Transaction>;
 
@@ -773,7 +773,7 @@ namespace Ofx.Tests
 
             // When: Calling Index with a defined sort order
             // 
-            var result = await controller.Index("payee_asc", null, null, null, null);
+            var result = await controller.Index(sortOrder:"payee_asc");
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -793,9 +793,9 @@ namespace Ofx.Tests
             // When: Calling Index with payee search term
             IActionResult result;
             if (direct)
-                result = await controller.Index(null, null, "4", null, null);
+                result = await controller.Index(q:"p=4");
             else
-                result = await controller.Index(null, "P-4", null, null, null);
+                result = await controller.Index(search:"P-4");
 
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
@@ -816,9 +816,9 @@ namespace Ofx.Tests
             // When: Calling Index with category search term
             IActionResult result;
             if (direct)
-                result = await controller.Index(null, null, null, "C", null);
+                result = await controller.Index(q:"C=C");
             else
-                result = await controller.Index(null, "C-C", null, null, null);
+                result = await controller.Index(search:"C-C");
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -837,7 +837,7 @@ namespace Ofx.Tests
 
             // When: Calling Index with indirect search term for hidden items
             var searchterm = ishidden ? "H+" : null;
-            var result = await controller.Index(null, searchterm, null, null, null);
+            var result = await controller.Index(search:searchterm);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -855,7 +855,7 @@ namespace Ofx.Tests
         {
             // When: Calling Index with indirect search term for selected items
             var searchterm = isselected ? "Z+" : null;
-            var result = await controller.Index(null, searchterm, null, null, null);
+            var result = await controller.Index(search:searchterm);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -878,7 +878,7 @@ namespace Ofx.Tests
             string searchterm = null;
             if (hasreceipt.HasValue)
                 searchterm = hasreceipt.Value ? "R+" : "R-";
-            var result = await controller.Index(null, searchterm, null, null, null);
+            var result = await controller.Index(search:searchterm);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -910,10 +910,10 @@ namespace Ofx.Tests
 
             // When: Calling Index with combined search term for payee AND with/without a receipt
             string payee = "2";
-            string search = payee;
+            string search = $"P={payee}";
             if (hasreceipt.HasValue)
-                search = hasreceipt.Value ? $"{payee}+R" : $"{payee}-R";
-            var result = await controller.Index(null, null, search, null, null);
+                search = hasreceipt.Value ? $"P={payee},R=1" : $"P={payee},R=0";
+            var result = await controller.Index(q:search);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -951,13 +951,17 @@ namespace Ofx.Tests
 
             // When: Calling Index with indirect search term for items of a certain year
             string searchterm = null;
+            string qterm = null;
             if (year.HasValue)
+            {
                 searchterm = $"Y{year}";
+                qterm = $"Y={year}";
+            }
             IActionResult result;
             if (aspayee)
-                result = await controller.Index(null, null, searchterm, null, null);
+                result = await controller.Index(q:qterm);
             else
-                result = await controller.Index(null, searchterm, null, null, null);
+                result = await controller.Index(search:searchterm);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -983,7 +987,7 @@ namespace Ofx.Tests
             context.SaveChanges();
 
             // When: Calling Index page 1
-            var result = await controller.Index(null, null, null, null, 1);
+            var result = await controller.Index(page:1);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -999,7 +1003,7 @@ namespace Ofx.Tests
             context.SaveChanges();
 
             // When: Calling Index page 2
-            var result = await controller.Index(null, null, null, null, 2);
+            var result = await controller.Index(page:2);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 

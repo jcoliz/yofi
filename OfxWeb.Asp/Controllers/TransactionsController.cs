@@ -1173,7 +1173,7 @@ namespace OfxWeb.Asp.Controllers
 #endregion
 
 #region IController
-        Task<IActionResult> IController<Models.Transaction>.Index() => Index(string.Empty, string.Empty, string.Empty, string.Empty, null);
+        Task<IActionResult> IController<Models.Transaction>.Index() => Index();
 
         Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
 
