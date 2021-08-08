@@ -42,7 +42,7 @@
     {
         <a asp-action="Index"
            asp-route-sortOrder="@ViewData["CurrentSort"]"
-           asp-route-page="@ViewData["PreviousPage"]"
+           asp-route-p="@ViewData["PreviousPage"]"
            asp-route-q="@ViewData["Query"]"
            asp-route-v="@ViewData["ViewP"]"
            class="btn @prevDisabled">
@@ -57,7 +57,7 @@
     {
         <a asp-action="Index"
            asp-route-sortOrder="@ViewData["CurrentSort"]"
-           asp-route-page="@ViewData["NextPage"]"
+           asp-route-p="@ViewData["NextPage"]"
            asp-route-q="@ViewData["Query"]"
            asp-route-v="@ViewData["ViewP"]"
            class="btn @nextDisabled">
@@ -70,14 +70,14 @@
     <a asp-action="Create" class="btn">Create New</a> |
     <a asp-action="Index" class="btn"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-page="@ViewData["Page"]"
+       asp-route-p="@ViewData["Page"]"
        asp-route-q="@ViewData["Query"]"
        asp-route-v="@toggleHidden">
         Show Hidden
     </a> |
     <a asp-action="Index" class="btn"
        asp-route-sortOrder="@ViewData["CurrentSort"]"
-       asp-route-page="@ViewData["Page"]"
+       asp-route-p="@ViewData["Page"]"
        asp-route-q="@ViewData["Query"]"
        asp-route-v="@toggleSelected">
         Bulk Edit

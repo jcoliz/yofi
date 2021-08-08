@@ -34,7 +34,7 @@ namespace OfxWeb.Asp.Controllers
 
         #region Action Handlers
 
-        public async Task<IActionResult> Index(string sortOrder = null, int? page = null, string q = null, string v = null)
+        public async Task<IActionResult> Index(string sortOrder = null, int? p = null, string q = null, string v = null)
         {
             //
             // Process QUERY (Q) parameters
@@ -163,19 +163,19 @@ namespace OfxWeb.Asp.Controllers
             // Process PAGE (P) parameters
             //
 
-            if (!page.HasValue)
-                page = 1;
+            if (!p.HasValue)
+                p = 1;
 
-            ViewData["Page"] = page;
+            ViewData["Page"] = p;
 
             if (count > pagesize)
             {
-                result = result.Skip((page.Value - 1) * pagesize).Take(pagesize);
+                result = result.Skip((p.Value - 1) * pagesize).Take(pagesize);
 
-                if (page.Value > 1)
-                    ViewData["PreviousPage"] = page.Value - 1;
-                if (page * pagesize < count)
-                    ViewData["NextPage"] = page.Value + 1;
+                if (p.Value > 1)
+                    ViewData["PreviousPage"] = p.Value - 1;
+                if (p * pagesize < count)
+                    ViewData["NextPage"] = p.Value + 1;
             }
 
             return View(await result.AsNoTracking().ToListAsync());

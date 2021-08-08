@@ -928,7 +928,7 @@ namespace Ofx.Tests
             context.SaveChanges();
 
             // When: Calling Index page 1
-            var result = await controller.Index(page:1);
+            var result = await controller.Index(p:1);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
@@ -944,7 +944,7 @@ namespace Ofx.Tests
             context.SaveChanges();
 
             // When: Calling Index page 2
-            var result = await controller.Index(page:2);
+            var result = await controller.Index(p:2);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
