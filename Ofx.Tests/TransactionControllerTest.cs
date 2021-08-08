@@ -36,7 +36,7 @@ namespace Ofx.Tests
             new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m },
             new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m },
             new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
-            new Transaction() { Category = "B", SubCategory = "B", Payee = "34", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
+            new Transaction() { Category = "B", SubCategory = "B", Payee = "34", Memo = "222", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
             new Transaction() { Category = "B", SubCategory = "B", Payee = "1234", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
             new Transaction() { Category = "C", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
             new Transaction() { Category = "ABC", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
@@ -1354,8 +1354,9 @@ namespace Ofx.Tests
         [DataRow("p=2,y=2000", 2)]
         [DataRow("c=C,p=2,y=2000", 1)]
         [DataRow("m=Wut,y=2000", 1)]
+        [DataRow("2,y=2000", 3)]
         [DataTestMethod]
-        public async Task IndexQPair(string q, int expected)
+        public async Task IndexQMany(string q, int expected)
         {
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
@@ -1373,17 +1374,6 @@ namespace Ofx.Tests
 
             // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are returned
             Assert.AreEqual(expected, model.Count);
-        }
-
-        public async Task IndexQMany()
-        {
-            // Given: A mix of transactions, in differing years
-            // And: some with '{word}' in their category, memo, or payee and some without
-            // And: some with receipts, some without
-
-            // When: Calling index q='{key}={value},{key}={value},{key}={value}' in various combinations
-
-            // Then: Only the transactions matching the supplied combination are returned
         }
     }
 }
