@@ -6,87 +6,105 @@
     int month = (int)ViewData["month"];
 }
 
-<div class="dropdown" style="float:right; margin: 4px">
-    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonYear" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Year
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonYear">
+<nav class="navbar navbar-expand-lg navbar-light mb-3" style="background-color: #b1e6fc;">
+    <div class="container">
 
-        @{
-            int currentyear = DateTime.Now.Year;
-            for (int year = 2017; year <= currentyear; ++year)
-            {
-                <a asp-action="Report" asp-route-id="@report" asp-route-year="@year" class="dropdown-item">@year</a>
-            }
-        }
+        <span class="navbar-brand mb-0 h1">Reports</span>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPage" aria-controls="navbarPage" aria-expanded="false" aria-label="Toggle page navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarPage">
+
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuReportId" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Choose a Report
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuReportId">
+                        <a asp-action="Report" asp-route-id="all" class="dropdown-item">All</a>
+                        <a asp-action="Report" asp-route-id="expenses" class="dropdown-item">Expenses</a>
+                        <a asp-action="Report" asp-route-id="income" class="dropdown-item">Income</a>
+                        <a asp-action="Report" asp-route-id="taxes" class="dropdown-item">Taxes</a>
+                        <a asp-action="Report" asp-route-id="savings" class="dropdown-item">Savings</a>
+                        <a asp-action="Report" asp-route-id="budget" class="dropdown-item">Full Budget</a>
+                        <a asp-action="Report" asp-route-id="expenses-budget" class="dropdown-item">Expenses Budget</a>
+                        <a asp-action="Report" asp-route-id="all-v-budget" class="dropdown-item">All v Budget</a>
+                        <a asp-action="Report" asp-route-id="expenses-v-budget" class="dropdown-item">Expenses v Budget</a>
+                        <a asp-action="Report" asp-route-id="managed-budget" class="dropdown-item">Managed Budget</a>
+                        <a asp-action="Report" asp-route-id="yoy" class="dropdown-item">Year over Year</a>
+                        <a asp-action="Report" asp-route-id="export" class="dropdown-item">Export</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonLevel" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Depth
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLevel">
+                        @{
+                            for (int i = 1; i <= 4; i++)
+                            {
+                                <a asp-action="Report" asp-route-id="@report" asp-route-level="@i" asp-route-showmonths="@ViewData["showmonths"]" class="dropdown-item">@i-Level</a>
+                            }
+                        }
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonColumns" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Show Months
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
+                        <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="true" class="dropdown-item">Show</a>
+                        <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="false" class="dropdown-item">Hide</a>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonMonth" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Month
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonMonth">
+                        @{
+                            int n = 1;
+                            foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
+                            {
+                                <a asp-action="Report" asp-route-id="@report" asp-route-month="@n" asp-route-level="@ViewData["level"]" class="dropdown-item">@n @monthname</a>
+                                n++;
+                            }
+                        }
+                    </div>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonYear" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Year
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonYear">
+                        @{
+                            int currentyear = DateTime.Now.Year;
+                            for (int year = 2017; year <= currentyear; ++year)
+                            {
+                                <a asp-action="Report" asp-route-id="@report" asp-route-year="@year" class="dropdown-item">@year</a>
+                            }
+                        }
+                    </div>
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
+</nav>
 
-<div class="dropdown" style="float:right; margin: 4px">
-    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonMonth" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Month
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonMonth">
-
-        @{
-            int i = 1;
-            foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
-            {
-                <a asp-action="Report" asp-route-id="@report" asp-route-month="@i" asp-route-level="@ViewData["level"]" class="dropdown-item">@i @monthname</a>
-                i++;
-            }
-        }
-    </div>
-</div>
-
-<div style="margin-bottom:15px; background-color: lightgray">
-    <a asp-action="Report" asp-route-id="all" class="btn">All</a> |
-    <a asp-action="Report" asp-route-id="expenses" class="btn">Expenses</a> |
-    <a asp-action="Report" asp-route-id="income" class="btn">Income</a> |
-    <a asp-action="Report" asp-route-id="taxes" class="btn">Taxes</a> |
-    <a asp-action="Report" asp-route-id="savings" class="btn">Savings</a> |
-    <a asp-action="Report" asp-route-id="budget" class="btn">Full Budget</a> |
-    <a asp-action="Report" asp-route-id="expenses-budget" class="btn">Expenses Budget</a> |
-    <a asp-action="Report" asp-route-id="all-v-budget" class="btn">All v Budget</a> |
-    <a asp-action="Report" asp-route-id="expenses-v-budget" class="btn">Expenses v Budget</a> |
-    <a asp-action="Report" asp-route-id="managed-budget" class="btn">Managed Budget</a> |
-    <a asp-action="Report" asp-route-id="yoy" class="btn">Year over Year</a> |
-    <a asp-action="Report" asp-route-id="export" class="btn">Export</a>
-</div>
-
-<div class="dropdown" style="float:right; margin: 4px">
-    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonLevel" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Depth
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLevel">
-
-        @{
-            for (i = 1; i <= 4; i++)
-            {
-                <a asp-action="Report" asp-route-id="@report" asp-route-level="@i" asp-route-showmonths="@ViewData["showmonths"]" class="dropdown-item">@i-Level</a>
-            }
-        }
-    </div>
-</div>
-<div class="dropdown" style="float:right; margin: 4px">
-    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonColumns" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Show Months
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
-        <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="true" class="dropdown-item">Show</a>
-        <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="false" class="dropdown-item">Hide</a>
-    </div>
-</div>
 <h2>
     @Model.Name
 </h2>
+
 @if (!string.IsNullOrEmpty(Model.Description))
 {
     <h3>
         @Model.Description
     </h3>
 }
-
 
 <table class="table report">
     <thead>
