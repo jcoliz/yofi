@@ -17,6 +17,16 @@
                 <input asp-for="Payee" class="form-control" />
                 <span asp-validation-for="Payee" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <label asp-for="Amount" class="control-label"></label>
+                <input asp-for="Amount" class="form-control" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Timestamp" class="control-label"></label>
+                <input asp-for="Timestamp" class="form-control" />
+                <span asp-validation-for="Timestamp" class="text-danger"></span>
+            </div>
             @if (!Model.HasSplits)
             {
                 <div class="form-group">
@@ -29,16 +39,6 @@
                 <label asp-for="Memo" class="control-label"></label>
                 <input asp-for="Memo" class="form-control" />
                 <span asp-validation-for="Memo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Amount" class="control-label"></label>
-                <input asp-for="Amount" class="form-control" />
-                <span asp-validation-for="Amount" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Timestamp" class="control-label"></label>
-                <input asp-for="Timestamp" class="form-control" />
-                <span asp-validation-for="Timestamp" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="BankReference" class="control-label"></label>

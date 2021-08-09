@@ -16,6 +16,7 @@ namespace OfxWeb.Asp.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal Amount { get; set; }
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
+        [Display(Name = "Date")]
         public DateTime Timestamp { get; set; }
         public string Memo { get; set; }
         public string Payee { get; set; }
