@@ -4,7 +4,12 @@
     ViewData["Title"] = "Uploaded Payees";
 }
 
-<h2>@ViewData["Title"]</h2>
+<nav class="navbar navbar-light mb-3" style="background-color: #b1e6fc;">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+        <a asp-action="Index" class="btn btn-secondary">Ok</a>
+    </div>
+</nav>
 
 <table class="table">
     <thead>
