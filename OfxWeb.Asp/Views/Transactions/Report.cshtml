@@ -45,7 +45,13 @@
                         @{
                             for (int i = 1; i <= 4; i++)
                             {
-                                <a asp-action="Report" asp-route-id="@report" asp-route-level="@i" asp-route-showmonths="@ViewData["showmonths"]" class="dropdown-item">@i-Level</a>
+                                <a 
+                                   asp-action="Report" 
+                                   asp-route-id="@ViewData["report"]" 
+                                   asp-route-month="@ViewData["month"]"
+                                   asp-route-showmonths="@ViewData["showmonths"]" 
+                                   asp-route-level="@i" 
+                                   class="dropdown-item">@i-Level</a>
                             }
                         }
                     </div>
@@ -55,8 +61,20 @@
                         Show Months
                     </a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
-                        <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="true" class="dropdown-item">Show</a>
-                        <a asp-action="Report" asp-route-id="@report" asp-route-level="@ViewData["level"]" asp-route-showmonths="false" class="dropdown-item">Hide</a>
+                        <a 
+                           asp-action="Report" 
+                           asp-route-id="@ViewData["report"]" 
+                           asp-route-level="@ViewData["level"]" 
+                           asp-route-month="@ViewData["month"]"
+                           asp-route-showmonths="true" 
+                           class="dropdown-item">Show</a>
+                        <a 
+                           asp-action="Report" 
+                           asp-route-id="@ViewData["report"]" 
+                           asp-route-level="@ViewData["level"]" 
+                           asp-route-month="@ViewData["month"]"
+                           asp-route-showmonths="false" 
+                           class="dropdown-item">Hide</a>
                     </div>
                 </li>
 
@@ -69,7 +87,13 @@
                             int n = 1;
                             foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
                             {
-                                <a asp-action="Report" asp-route-id="@report" asp-route-month="@n" asp-route-level="@ViewData["level"]" class="dropdown-item">@n @monthname</a>
+                                <a 
+                                   asp-action="Report" 
+                                   asp-route-id="@ViewData["report"]" 
+                                   asp-route-showmonths="@ViewData["showmonths"]" 
+                                   asp-route-level="@ViewData["level"]" 
+                                   asp-route-month="@n" 
+                                   class="dropdown-item">@n @monthname</a>
                                 n++;
                             }
                         }
@@ -83,9 +107,15 @@
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonYear">
                         @{
                             int currentyear = DateTime.Now.Year;
-                            for (int year = 2017; year <= currentyear; ++year)
+                            for (int y = 2017; y <= currentyear; ++y)
                             {
-                                <a asp-action="Report" asp-route-id="@report" asp-route-year="@year" class="dropdown-item">@year</a>
+                                <a 
+                                   asp-action="Report" 
+                                   asp-route-id="@ViewData["report"]" 
+                                   asp-route-level="@ViewData["level"]" 
+                                   asp-route-showmonths="@ViewData["showmonths"]"
+                                   asp-route-year="@y" 
+                                   class="dropdown-item">@y</a>
                             }
                         }
                     </div>
