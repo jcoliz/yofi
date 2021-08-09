@@ -86,7 +86,6 @@
                             @Html.DisplayNameFor(x => x.Memo)
                         </th>
                         <th>
-                            Actions
                         </th>
                     </tr>
                 </thead>
@@ -94,21 +93,21 @@
 
                     @foreach (var split in splitorder)
                     {
-                        <tr>
-                            <td>
-                                @(split.Category ?? String.Empty)
-                            </td>
-                            <td>
-                                @split.Amount
-                            </td>
-                            <td>
-                                @split.Memo
-                            </td>
-                            <td>
-                                <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID">Edit</a>
-                                <a asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID">Delete</a>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td>
+                            @(split.Category ?? String.Empty)
+                        </td>
+                        <td>
+                            @split.Amount
+                        </td>
+                        <td>
+                            @split.Memo
+                        </td>
+                        <td>
+                            <a class="btn btn-outline-secondary btn-sm" asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID"><i class="fa fa-edit"></i></a>
+                            <a class="btn btn-outline-secondary btn-sm"asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID"><i class="fa fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
                     }
                 </tbody>
             </table>
