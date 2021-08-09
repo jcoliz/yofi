@@ -43,7 +43,7 @@
 
 <nav class="navbar navbar-light mb-3" style="background-color: #b1e6fc;">
     <div class="container">
-        <span class="navbar-brand mb-0 h1">Transactions</span>
+        <span class="navbar-brand">Transactions</span>
         <form class="d-flex" asp-action="Index" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["Order"]" method="post">
             <input class="form-control me-2 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" value="@ViewData["Query"]" autocomplete="off">
             <button type="submit" class="btn btn-secondary me-1">
