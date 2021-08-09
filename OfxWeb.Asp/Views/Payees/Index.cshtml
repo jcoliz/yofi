@@ -4,15 +4,24 @@
     ViewData["Title"] = "Payees";
 }
 
-<h2>Payees</h2>
-
-<p>
-    <a asp-action="Create">Create New</a> |
-    <a asp-action="Index"
-       asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
-        Bulk Edit</a> |
-    <a asp-action="Download">Export</a>
-</p>
+<nav class="navbar navbar-light mb-3" style="background-color: #b1e6fc;">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">Payees</span>
+        <div class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </a>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
+                <a asp-action="Create" class="btn">Create New</a>
+                <a asp-action="Index" class="btn"
+                   asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
+                    @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
+                </a>
+                <a asp-action="Download" class="btn">Export</a>
+            </div>
+        </div>
+    </div>
+</nav>
 
 @if ((bool)(ViewData["ShowSelected"]))
 {
