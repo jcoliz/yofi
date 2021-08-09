@@ -249,7 +249,7 @@ namespace OfxWeb.Asp.Controllers.Boilerplate
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction(nameof(TransactionsController.Index), "Transactions");
         }
 
         [HttpPost]
@@ -337,7 +337,7 @@ namespace OfxWeb.Asp.Controllers.Boilerplate
         {
             if (userId == null || code == null)
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+                return RedirectToAction(nameof(TransactionsController.Index), "Transactions");
             }
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -457,7 +457,7 @@ namespace OfxWeb.Asp.Controllers.Boilerplate
             }
             else
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+                return RedirectToAction(nameof(TransactionsController.Index), "Transactions");
             }
         }
 

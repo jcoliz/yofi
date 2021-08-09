@@ -13,6 +13,7 @@ using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -33,6 +34,11 @@ namespace OfxWeb.Asp.Controllers
         #endregion
 
         #region Action Handlers
+
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
 
         /// <summary>
         /// Fetch list of transactions for display

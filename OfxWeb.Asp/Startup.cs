@@ -93,7 +93,7 @@ namespace OfxWeb.Asp
             {
                 logger.LogInformation($"*** CONFIGURE *** Running in Production");
 
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Transactions/Error");
             }
 
             app.UseStaticFiles();
