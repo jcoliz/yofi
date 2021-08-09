@@ -4,56 +4,53 @@
     ViewData["Title"] = "Import Transactions";
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="Upload">
-    <div class="form-group">
-        <div class="col-md-10">
-            <p>Upload one or more files using this form:</p>
-            <input type="file" name="files" multiple size="50" />
-        </div>
-        <div class="col-md-10">
-            <label for="date" class="control-label">Ignore transactions before:</label>
-            <input name="date" class="form-control" width="50" />
-        </div>
+<nav class="navbar navbar-light mb-3" style="background-color: #b1e6fc;">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
     </div>
-    <div class="form-group">
-        <div class="col-md-10">
-            <input type="submit" value="Upload" class="btn btn-primary" />
+</nav>
+
+@if (!Model.Any())
+{
+    <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="Upload">
+        <div class="input-group mb-3 mt-3">
+            <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03">Upload</button>
+            <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
         </div>
-    </div>
-</form>
-
-<h2>Transactions</h2>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Import?</th>
-            <th>
-                @Html.DisplayNameFor(model => model.Timestamp)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Amount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Memo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Payee)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BankReference)
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            var highlight = ((ViewData["Highlight"] as HashSet<int>)?.Contains(item.ID) ?? false) ? "alert alert-warning" : string.Empty;
+    </form>
+}
+else
+{
+    <a asp-action="Import" asp-route-command="ok" class="btn btn-primary">Import</a>
+    <a asp-action="Import" asp-route-command="cancel" class="btn btn-outline-secondary">Delete</a>
+    <table class="table mt-3">
+        <thead>
+            <tr>
+                <th>Import?</th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Timestamp)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Payee)
+                </th>
+                <th style="text-align:right">
+                    @Html.DisplayNameFor(model => model.Amount)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Category)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Memo)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.BankReference)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var highlight = ((ViewData["Highlight"] as HashSet<int>)?.Contains(item.ID) ?? false) ? "alert alert-warning" : string.Empty;
             <tr class="@highlight">
                 <td>
                     @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
@@ -63,24 +60,22 @@
                     @Html.DisplayFor(modelItem => item.Timestamp)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Amount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Memo)
-                </td>
-                <td>
                     @Html.DisplayFor(modelItem => item.Payee)
+                </td>
+                <td style="text-align:right">
+                    @Html.DisplayFor(modelItem => item.Amount)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Category)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.Memo)
+                </td>
+                <td>
                     @Html.DisplayFor(modelItem => item.BankReference)
                 </td>
             </tr>
-        }
-    </tbody>
-</table>
-
-<a asp-action="Import" asp-route-command="ok" class="btn btn-primary">Import</a>
-<a asp-action="Import" asp-route-command="cancel" class="btn btn-secondary-outline">Delete</a>
+            }
+        </tbody>
+    </table>
+}

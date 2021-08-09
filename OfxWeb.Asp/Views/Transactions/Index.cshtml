@@ -115,7 +115,7 @@
             <th>
                 <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
             </th>
-            <th>
+            <th style="text-align:right">
                 <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
             </th>
             <th>
