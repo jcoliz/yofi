@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inject IConfiguration _config
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -74,12 +75,12 @@
         <div class="container py-5">
             <div class="row">
                 <div class="col">
-                    <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" href="/" aria-label="MyFire">
-                        <span class="fs-5"><i class="fas fa-comment-dollar"></i> MyFire</span>
+                    <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" href="/" aria-label="@_config["Site:Brand"]">
+                        <span class="fs-5"><i class="@_config["Site:Icon"]"></i> @_config["Site:Brand"]</span>
                     </a>
                     <ul class="list-unstyled small text-muted">
-                        <li class="mb-2"><a href="https://todo/">Link to your hosting site</a></li>
-                        <li class="mb-2">James Coliz, Jr.</li>
+                        <li class="mb-2"><a href="@_config["Site:Link"]">@_config["Site:Link"]</a></li>
+                        <li class="mb-2">@_config["Site:Owner"]</li>
                     </ul>
                 </div>
                 <div class="col">
@@ -88,7 +89,7 @@
                     <ul class="list-unstyled small text-muted mb-0">
                         <li>Powered by:</li>
                     </ul>
-                    <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none"  target="_blank" href="https://github.com/jcoliz/yofi/issues" aria-label="YoFi">
+                    <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" target="_blank" href="https://github.com/jcoliz/yofi/issues" aria-label="YoFi">
                         <span class="fs-5">YoFi</span>
                     </a>
                     <ul class="list-unstyled small text-muted">
