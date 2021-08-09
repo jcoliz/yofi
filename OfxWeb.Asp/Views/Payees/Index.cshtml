@@ -74,7 +74,7 @@
                 </td>
                 <td>
                     <button class="btn btn-outline-secondary btn-sm" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editPayeeModal"><i class="fa fa-edit"></i></button>
-                    </td>
+                </td>
                 <td>
                     <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID"><i class="fa fa-trash-alt"></i></a>
                 </td>
@@ -83,19 +83,10 @@
     </tbody>
 </table>
 
-<h2>Upload</h2>
-
 <form method="post" enctype="multipart/form-data" asp-controller="Payees" asp-action="Upload">
-    <div class="form-group">
-        <div class="col-md-10">
-            <p>Upload one or more files using this form:</p>
-            <input type="file" name="files" multiple />
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-10">
-            <input type="submit" value="Upload" />
-        </div>
+    <div class="input-group mb-3 mt-3">
+        <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03">Upload</button>
+        <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple >
     </div>
 </form>
 
