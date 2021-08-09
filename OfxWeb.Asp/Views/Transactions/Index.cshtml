@@ -52,10 +52,10 @@
             <a a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary me-1"><i class="fas fa-question"></i></a>
             <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary me-1"><i class="fas fa-times"></i></a>
         </form>
-        <div class="dropstart d-flex">
-            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <div class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Actions
-            </button>
+            </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
                 <a asp-action="Create" class="btn">Create New</a>
                 <a asp-action="Index" class="btn"
