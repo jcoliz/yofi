@@ -24,7 +24,8 @@
     $(".checkbox-payee-selected").on("click", function (event) {
         var endpoint = $(this).is(":checked") ? "SelectPayee" : "DeselectPayee";
         $.ajax({
-            url: "/api/tx/" + endpoint + "/" + this.dataset.id
+            url: "/api/tx/" + endpoint + "/" + this.dataset.id,
+            type: "POST"
         });
     });
 

@@ -195,8 +195,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: api/tx/SelectPayee/5
-        [HttpGet("SelectPayee/{id}")]
+        [HttpPost("SelectPayee/{id}")]
         public async Task<ApiResult> SelectPayee(int id)
         {
             try
@@ -216,8 +215,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: api/tx/DeselectPayee/5
-        [HttpGet("DeselectPayee/{id}")]
+        [HttpPost("DeselectPayee/{id}")]
         public async Task<ApiResult> DeselectPayee(int id)
         {
             try
