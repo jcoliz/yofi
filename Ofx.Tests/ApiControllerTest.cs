@@ -836,5 +836,20 @@ namespace Ofx.Tests
             Assert.AreEqual(500m, AABB.GetProperty("ID:Budget").GetDecimal());
             Assert.AreEqual(300m, CCAA.GetProperty("ID:Budget").GetDecimal());
         }
+
+        [TestMethod]
+        public async Task CategoryAutocomplete()
+        {
+            // Given: A set of five transactions, some with {word} in their category, some not
+            await AddFiveTransactions();
+
+            // When: Calling CategoryAutocomplete with '{word}'
+            var word = "BB";
+            var result = controller.CategoryAutocomplete(word);
+
+            // Then: All of the categories from given items which contain '{word}' are returned
+            var expected = await context.Transactions.Select(x=>x.Category).Distinct().Where(c => c.Contains(word)).ToListAsync();
+            CollectionAssert.AreEqual(expected, result);
+        }
     }
 }
