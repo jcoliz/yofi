@@ -21,9 +21,12 @@
 }
 else
 {
-    <a asp-action="Import" asp-route-command="ok" class="btn btn-primary">Import</a>
-    <a asp-action="Import" asp-route-command="cancel" class="btn btn-outline-secondary">Delete</a>
-    <table class="table mt-3">
+    <form asp-action="ProcessImported">
+        <button type="submit" name="command" value="ok" class="btn btn-primary mb-3">Import</button>
+        <button type="submit" name="command" value="cancel" class="btn btn-outline-secondary mb-3">Delete</button>
+    </form>
+
+    <table class="table">
         <thead>
             <tr>
                 <th>Import?</th>
@@ -51,30 +54,30 @@ else
             @foreach (var item in Model)
             {
                 var highlight = ((ViewData["Highlight"] as HashSet<int>)?.Contains(item.ID) ?? false) ? "alert alert-warning" : string.Empty;
-            <tr class="@highlight">
-                <td>
-                    @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                    <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/tx/Select/@item.ID">
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Timestamp)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Payee)
-                </td>
-                <td style="text-align:right">
-                    @Html.DisplayFor(modelItem => item.Amount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Category)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Memo)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.BankReference)
-                </td>
-            </tr>
+                <tr class="@highlight">
+                    <td>
+                        @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/tx/Select/@item.ID">
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Timestamp)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Payee)
+                    </td>
+                    <td style="text-align:right">
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Category)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Memo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BankReference)
+                    </td>
+                </tr>
             }
         </tbody>
     </table>

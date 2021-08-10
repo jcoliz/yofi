@@ -283,12 +283,14 @@ namespace OfxWeb.Asp.Controllers
             return View(transaction);
         }
 
-        public async Task<IActionResult> Import(string command, string highlight = null)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProcessImported(string command)
         {
             var allimported = from s in _context.Transactions
-                         where s.Imported == true
-                         orderby s.Timestamp descending, s.BankReference ascending
-                         select s;
+                              where s.Imported == true
+                              orderby s.Timestamp descending, s.BankReference ascending
+                              select s;
 
             var selected = await allimported.Where(x => true == x.Selected).ToListAsync();
             var unselected = await allimported.Where(x => true != x.Selected).ToListAsync();
@@ -306,6 +308,15 @@ namespace OfxWeb.Asp.Controllers
                 _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
+            return RedirectToAction(nameof(Import));
+        }
+
+        public async Task<IActionResult> Import(string highlight = null)
+        {
+            var allimported = from s in _context.Transactions
+                         where s.Imported == true
+                         orderby s.Timestamp descending, s.BankReference ascending
+                         select s;
 
             try
             {

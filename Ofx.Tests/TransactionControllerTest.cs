@@ -289,7 +289,7 @@ namespace Ofx.Tests
             // Bug 839: Imported items are selected automatically :(
             await helper.DoUpload(Items);
 
-            await controller.Import("ok");
+            await controller.ProcessImported("ok");
 
             var numimported = await dbset.Where(x => x.Imported == true).CountAsync();
             var numselected = await dbset.Where(x => x.Selected == true).CountAsync();
@@ -722,8 +722,8 @@ namespace Ofx.Tests
                 item.Imported = true;
             await helper.AddFiveItems();
 
-            // When: Calling import with "cancel" command
-            var result = await controller.Import("cancel");
+            // When: Cancelling the import
+            var result = await controller.ProcessImported("cancel");
 
             // Then: Only items without imported flag remain
             Assert.AreEqual(expected, dbset.Count());
@@ -738,8 +738,8 @@ namespace Ofx.Tests
                 item.Imported = item.Selected = true;
             await helper.AddFiveItems();
 
-            // When: Calling import with "ok" command
-            var result = await controller.Import("ok");
+            // When: Approving the import
+            var result = await controller.ProcessImported("ok");
 
             // Then: All items remain, none have imported flag
             Assert.AreEqual(5, dbset.Count());
@@ -759,8 +759,8 @@ namespace Ofx.Tests
 
             await helper.AddFiveItems();
 
-            // When: Calling import with "ok" command
-            var result = await controller.Import("ok");
+            // When: Approving the import
+            var result = await controller.ProcessImported("ok");
 
             // Then: Only selected items remain
             Assert.AreEqual(imported, dbset.Count());
@@ -774,13 +774,13 @@ namespace Ofx.Tests
             context.SaveChanges();
 
             // When: Calling Index with a defined sort order
-            // 
-            var result = await controller.Index(o:"payee_asc");
+            var result = await controller.Index(o:"pa");
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
             // Then: The items are returned sorted in that order
-            Assert.AreEqual("1", model.First().Payee);
+            var expected = model.OrderBy(x => x.Payee).ToList();
+            Assert.IsTrue(Enumerable.Range(0, model.Count - 1).All(x => model[x] == expected[x]));
         }
 
         [TestMethod]
