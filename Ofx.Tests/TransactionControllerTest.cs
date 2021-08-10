@@ -782,7 +782,7 @@ namespace Ofx.Tests
 
         [DynamicData(nameof(IndexSortOrderTestData))]
         [DataTestMethod]
-        public async Task IndexSortOrder(KeyValuePair<string, Func<Transaction, string>> kvp)
+        public async Task IndexSortOrder(dynamic kvp)
         {
             // Given: A set of items
             context.Transactions.AddRange(TransactionItems.Take(10));
@@ -794,7 +794,8 @@ namespace Ofx.Tests
             var model = actual.Model as List<Transaction>;
 
             // Then: The items are returned sorted in that order
-            var expected = model.OrderBy(kvp.Value).ToList();
+            var predicate = kvp.Value as Func<Transaction, string>;
+            var expected = model.OrderBy(predicate).ToList();
             Assert.IsTrue(Enumerable.Range(0, model.Count - 1).All(x => model[x] == expected[x]));
         }
 
