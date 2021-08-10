@@ -64,13 +64,14 @@ namespace OfxWeb.Asp.Controllers
 
                 foreach (var each in split)
                 {
+                    var token = (each.Length > 2) ? each.ToLowerInvariant().Substring(0, 2) : string.Empty;
 
-                    if (each.ToLowerInvariant().StartsWith("p="))
+                    if (token == "p=")
                     {
                         var term = each.Substring(2);
                         result = result.Where(x => x.Payee.Contains(term));
                     }
-                    else if (each.ToLowerInvariant().StartsWith("c="))
+                    else if (token == "c=")
                     {
                         var term = each.Substring(2);
                         if (term.ToLowerInvariant() == "[blank]")
@@ -82,19 +83,19 @@ namespace OfxWeb.Asp.Controllers
                                 x.Splits.Any(s=>s.Category.Contains(term))
                             );
                     }
-                    else if (each.ToLowerInvariant().StartsWith("m="))
+                    else if (token == "m=")
                     {
                         var term = each.Substring(2);
                         result = result.Where(x => x.Memo.Contains(term));
                     }
-                    else if (each.ToLowerInvariant().StartsWith("y="))
+                    else if (token == "y=")
                     {
                         var term = each.Substring(2);
                         int year;
                         if (Int32.TryParse(term, out year))
                             result = result.Where(x => x.Timestamp.Year == year);
                     }
-                    else if (each.ToLowerInvariant().StartsWith("r="))
+                    else if (token == "r=")
                     {
                         var term = each.Substring(2);
                         if (term == "0")
