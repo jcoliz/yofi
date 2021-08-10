@@ -119,8 +119,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: api/tx/Hide/5
-        [HttpGet("Hide/{id}")]
+        [HttpPost("Hide/{id}")]
         public async Task<ApiResult> Hide(int id)
         {
             try
@@ -139,8 +138,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: api/tx/Show/5
-        [HttpGet("Show/{id}")]
+        [HttpPost("Show/{id}")]
         public async Task<ApiResult> Show(int id)
         {
             try
