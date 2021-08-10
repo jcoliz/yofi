@@ -160,7 +160,7 @@ namespace Ofx.Tests
             var result = await controller.Get(maxid + 1);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
         [TestMethod]
         public async Task HideId()
@@ -182,7 +182,7 @@ namespace Ofx.Tests
             var result = await controller.Hide(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
         [TestMethod]
         public async Task ShowId()
@@ -206,7 +206,7 @@ namespace Ofx.Tests
             var result = await controller.Hide(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
         [TestMethod]
         public async Task SelectId()
@@ -228,7 +228,7 @@ namespace Ofx.Tests
             var result = await controller.Select(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
         [TestMethod]
         public async Task DeselectId()
@@ -252,7 +252,7 @@ namespace Ofx.Tests
             var result = await controller.Select(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
         [TestMethod]
         public async Task SelectPayeeId()
@@ -274,7 +274,7 @@ namespace Ofx.Tests
             var result = await controller.SelectPayee(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
         [TestMethod]
         public async Task DeselectPayeeId()
@@ -298,7 +298,7 @@ namespace Ofx.Tests
             var result = await controller.SelectPayee(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
         [TestMethod]
         public async Task AddPayee()
@@ -340,7 +340,7 @@ namespace Ofx.Tests
             var result = await controller.ApplyPayee(maxid + 1);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
 
         [TestMethod]
@@ -360,7 +360,7 @@ namespace Ofx.Tests
             var result = await controller.ApplyPayee(tx.ID);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsTrue(result.Item is Exception);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
 
         [DataTestMethod]

@@ -52,7 +52,6 @@ namespace OfxWeb.Asp
                 .AddJsonOptions(options => 
                 { 
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
-                    options.JsonSerializerOptions.Converters.Add(new ExceptionJsonConverter());
                 }
                 );
 

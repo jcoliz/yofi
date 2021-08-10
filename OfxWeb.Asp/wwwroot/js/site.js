@@ -67,7 +67,7 @@
                     tr.find(".display-category").text(result.Item.Category);
                 }
                 else
-                    alert(result.Item.Message);
+                    alert(result.Error);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -89,7 +89,7 @@
                     tr.find(".display-category").text(result.Item.Category);
                 }
                 else
-                    alert(result.Item.Message);
+                    alert(result.Error);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -108,7 +108,7 @@
                 if (result.Ok)
                     applyPayee(tr);
                 else
-                    alert(result.Item.Message);
+                    alert(result.Error);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -150,7 +150,7 @@
                                 alert('Ok');
                             }
                             else
-                                alert(result.Item.Message);
+                                alert(result.Error);
                         }
                     });
 
@@ -187,7 +187,7 @@ function applyPayee(tr)
             if (result.Ok)
                 tr.find(".display-category").text(result.Item.Category);
             else
-                alert(result.Item.Message);
+                alert(result.Error);
         }
     });
 }

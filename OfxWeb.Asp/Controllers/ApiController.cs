@@ -472,12 +472,20 @@ namespace OfxWeb.Asp.Controllers
 
         public object Item { get; private set; } = null;
 
+        public string Error { get; private set; } = null;
+
         public ApiResult() { }
 
         public ApiResult(object o)
         {
-            Item = o;
-            Ok = !(o is Exception);
+            if (o is Exception)
+            {
+                var ex = o as Exception;
+                Error = $"{ex.GetType().Name}: {ex.Message}";
+                Ok = false;
+            }
+            else
+                Item = o;
         }
     }
 }
