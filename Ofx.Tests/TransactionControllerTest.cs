@@ -772,31 +772,35 @@ namespace Ofx.Tests
             {
                 return new[]
                 {
-                    new object[] { new { Key ="pa" , Ascending = true, Value = (Func<Transaction, string>)(x=>x.Payee) } },
-                    new object[] { new { Key ="ca" , Ascending = true, Value = (Func<Transaction, string>)(x=>x.Category) } },
-                    new object[] { new { Key ="da" , Ascending = true, Value = (Func<Transaction, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
-                    new object[] { new { Key ="aa" , Ascending = true, Value = (Func<Transaction, string>)(x=>x.Amount.ToString()) } },
+                    new object[] { new { Key = "pa" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Payee) } },
+                    new object[] { new { Key = "ca" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Category) } },
+                    new object[] { new { Key = "da" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
+                    new object[] { new { Key = "aa" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Amount.ToString()) } },
+                    new object[] { new { Key = "pd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Payee) } },
+                    new object[] { new { Key = "cd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Category) } },
+                    new object[] { new { Key = "dd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
+                    new object[] { new { Key = "ad" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Amount.ToString()) } },
                 };
             }
         }
 
         [DynamicData(nameof(IndexSortOrderTestData))]
         [DataTestMethod]
-        public async Task IndexSortOrder(dynamic kvp)
+        public async Task IndexSortOrder(dynamic item)
         {
             // Given: A set of items
             context.Transactions.AddRange(TransactionItems.Take(10));
             context.SaveChanges();
 
             // When: Calling Index with a defined sort order
-            var result = await controller.Index(o:kvp.Key);
+            var result = await controller.Index(o:item.Key);
             var actual = result as ViewResult;
             var model = actual.Model as List<Transaction>;
 
             // Then: The items are returned sorted in that order
-            var predicate = kvp.Value as Func<Transaction, string>;
+            var predicate = item.Predicate as Func<Transaction, string>;
             List<Transaction> expected = null;
-            if (kvp.Ascending)
+            if (item.Ascending)
                 expected = model.OrderBy(predicate).ToList();
             else
                 expected = model.OrderByDescending(predicate).ToList();
