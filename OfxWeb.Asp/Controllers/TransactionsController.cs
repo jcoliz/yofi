@@ -211,19 +211,19 @@ namespace OfxWeb.Asp.Controllers
                     ViewData["PreviousPage"] = p.Value - 1;
                 else
                     if ((p + 1) * pagesize < count)
-                        ViewData["NextNextPage"] = p.Value + 2;
+                    ViewData["NextNextPage"] = p.Value + 2;
 
                 if (p * pagesize < count)
                     ViewData["NextPage"] = p.Value + 1;
                 else
                     if (p > 2)
-                        ViewData["PreviousPreviousPage"] = p.Value - 2;
+                    ViewData["PreviousPreviousPage"] = p.Value - 2;
 
                 if (p > 2)
                     ViewData["FirstPage"] = 1;
 
                 if ((p + 1) * pagesize < count)
-                    ViewData["LastPage"] = 1 + (count-1) / pagesize;
+                    ViewData["LastPage"] = 1 + (count - 1) / pagesize;
             }
 
             return View(await result.AsNoTracking().ToListAsync());
@@ -314,9 +314,9 @@ namespace OfxWeb.Asp.Controllers
         public async Task<IActionResult> Import(string highlight = null)
         {
             var allimported = from s in _context.Transactions
-                         where s.Imported == true
-                         orderby s.Timestamp descending, s.BankReference ascending
-                         select s;
+                              where s.Imported == true
+                              orderby s.Timestamp descending, s.BankReference ascending
+                              select s;
 
             try
             {
@@ -336,7 +336,7 @@ namespace OfxWeb.Asp.Controllers
         [HttpPost]
         public async Task<IActionResult> BulkEdit(string Category)
         {
-            foreach (var item in _context.Transactions.Where(x=>x.Selected == true))
+            foreach (var item in _context.Transactions.Where(x => x.Selected == true))
             {
                 item.Selected = false;
 
@@ -403,7 +403,7 @@ namespace OfxWeb.Asp.Controllers
 
             var splitstotal = transaction.Splits.Select(x => x.Amount).Sum();
             ViewData["SplitsOK"] = (splitstotal == transaction.Amount);
-            
+
             return View(transaction);
         }
 
@@ -444,7 +444,7 @@ namespace OfxWeb.Asp.Controllers
             return PartialView();
         }
 
-// I believe this is never used. Instead, API Controller ApplyPayee is used.
+        // I believe this is never used. Instead, API Controller ApplyPayee is used.
 #if false
         public async Task<IActionResult> ApplyPayee(int? id)
         {
@@ -605,8 +605,19 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: Transactions/DeleteReceipt/5
-        public async Task<IActionResult> DeleteReceipt(int? id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReceiptAction(int id, string action)
+        {
+            if (action == "delete")
+                return await DeleteReceipt(id);
+            else if (action == "get")
+                return await GetReceipt(id);
+            else
+                return RedirectToAction(nameof(Edit), new { id });
+        }
+
+        private async Task<IActionResult> DeleteReceipt(int? id)
         {
             if (id == null)
             {
@@ -626,6 +637,31 @@ namespace OfxWeb.Asp.Controllers
             return RedirectToAction(nameof(Edit), new { id });
         }
 
+        private async Task<IActionResult> GetReceipt(int id)
+        {
+            try
+            {
+                var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+
+                if (string.IsNullOrEmpty(transaction.ReceiptUrl))
+                    throw new ApplicationException("Transaction has no receipt");
+
+                _storage.Initialize();
+                var stream = new System.IO.MemoryStream();
+                var contenttype = await _storage.DownloadBlob(BlobStoreName, id.ToString(), stream);
+
+                // Work around previous versions which did NOT store content type in blob store.
+                if ("application/octet-stream" == contenttype)
+                    contenttype = "application/pdf";
+
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+                return File(stream, contenttype, id.ToString());
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> UpSplits(List<IFormFile> files, int id)
@@ -899,34 +935,6 @@ namespace OfxWeb.Asp.Controllers
             // If user returns to Import page directly, these highlights will be lost. Really probably
             // should persist this to the database somehow. Or at least stick it in the session??
             return RedirectToAction(nameof(Import), new { highlight = string.Join(':',highlights.Select(x=>x.ID)) });
-        }
-
-        // GET: Transactions/GetReceipt/5
-        [ActionName("GetReceipt")]
-        public async Task<IActionResult> GetReceipt(int id)
-        {
-            try
-            {
-                var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
-
-                if (string.IsNullOrEmpty(transaction.ReceiptUrl))
-                    throw new ApplicationException("Transaction has no receipt");
-
-                _storage.Initialize();
-                var stream = new System.IO.MemoryStream();
-                var contenttype = await _storage.DownloadBlob(BlobStoreName, id.ToString(), stream);
-
-                // Work around previous versions which did NOT store content type in blob store.
-                if ("application/octet-stream" == contenttype)
-                    contenttype = "application/pdf";
-
-                stream.Seek(0, System.IO.SeekOrigin.Begin);
-                return File(stream, contenttype,id.ToString());
-            }
-            catch (Exception)
-            {
-                return NotFound();
-            }
         }
 
         // POST: Transactions/Download
