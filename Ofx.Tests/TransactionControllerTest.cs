@@ -772,7 +772,10 @@ namespace Ofx.Tests
             {
                 return new[]
                 {
-                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("pa",x=>x.Payee) }
+                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("pa",x=>x.Payee) },
+                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("ca",x=>x.Category) },
+                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("da",x=>x.Timestamp.ToOADate().ToString()) },
+                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("aa",x=>x.Amount.ToString()) },
                 };
             }
         }
