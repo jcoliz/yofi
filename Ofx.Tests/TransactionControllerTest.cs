@@ -1130,6 +1130,13 @@ namespace Ofx.Tests
             Assert.AreEqual(model.Where(x => predicate(x).Contains(word)).Count(), model.Count());
         }
 
+        void ThenTxWithWereReturned(IEnumerable<Transaction> items, IEnumerable<Transaction> model, Func<Transaction, string> predicate, string word)
+        {
+            Assert.AreNotEqual(0, model.Count());
+            Assert.AreEqual(items.Where(x => predicate(x) != null && predicate(x).Contains(word)).Count(), model.Count());
+            Assert.AreEqual(model.Where(x => predicate(x).Contains(word)).Count(), model.Count());
+        }
+
         [TestMethod]
         public async Task IndexQCategoryAny()
         {
@@ -1146,6 +1153,23 @@ namespace Ofx.Tests
             ThenOnlyReturnedTxWith(items, model, x => x.Category, word);
         }
 
+        [TestMethod]
+        public async Task IndexQCategorySplitsAny()
+        {
+            // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
+            var items = TransactionItems.Take(20);
+            items.First().Splits = SplitItems;
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index q='{word}'
+            var word = "A";
+            var model = await WhenCallingIndexWithQ(word);
+
+            // Then: All the transactions with '{word}' directly in their category OR in their splits category are returned
+            var expected = items.Where(tx => tx.Category?.Contains(word) == true || (tx.Splits?.Any(s => s.Category?.Contains(word) == true) == true));
+            Assert.IsTrue(expected.All(x => model.Contains(x)));
+        }
         [TestMethod]
         public async Task IndexQMemoAny()
         {

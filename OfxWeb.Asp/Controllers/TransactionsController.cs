@@ -103,7 +103,12 @@ namespace OfxWeb.Asp.Controllers
                             result = result.Where(x => x.ReceiptUrl != null);
                     }
                     else
-                        result = result.Where(x => x.Category.Contains(each) || x.Memo.Contains(each) || x.Payee.Contains(each));
+                        result = result.Where(x => 
+                            x.Category.Contains(each) || 
+                            x.Memo.Contains(each) || 
+                            x.Payee.Contains(each) || 
+                            x.Splits.Any(s=>s.Category.Contains(each))
+                        );
                 }
 
             }
