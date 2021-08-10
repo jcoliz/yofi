@@ -15,7 +15,7 @@ namespace OfxWeb.Asp.Models
         [DisplayFormat(DataFormatString = "{0:C2}")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Amount { get; set; }
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
         [Display(Name = "Date")]
         public DateTime Timestamp { get; set; }
         public string Memo { get; set; }
