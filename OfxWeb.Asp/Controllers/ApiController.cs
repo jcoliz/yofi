@@ -66,7 +66,7 @@ namespace OfxWeb.Asp.Controllers
         {
             try
             {
-                return new ApiTransactionResult(await LookupTransactionAsync(id));
+                return new ApiObjectResult<Transaction>(await LookupTransactionAsync(id));
             }
             catch (Exception ex)
             {
@@ -111,7 +111,7 @@ namespace OfxWeb.Asp.Controllers
                 _context.Update(transaction);
                 await _context.SaveChangesAsync();
 
-                return new ApiPayeeResult(payee);
+                return new ApiObjectResult<Payee>(payee);
             }
             catch (Exception ex)
             {
@@ -203,7 +203,7 @@ namespace OfxWeb.Asp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return new ApiTransactionResult(transaction);
+                return new ApiObjectResult<Transaction>(transaction);
             }
             catch (Exception ex)
             {
@@ -296,7 +296,7 @@ namespace OfxWeb.Asp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return new ApiTransactionResult(transaction);
+                return new ApiObjectResult<Transaction>(transaction);
             }
             catch (Exception ex)
             {
@@ -330,7 +330,7 @@ namespace OfxWeb.Asp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return new ApiPayeeResult(payee);
+                return new ApiObjectResult<Payee>(payee);
             }
             catch (Exception ex)
             {
@@ -353,7 +353,7 @@ namespace OfxWeb.Asp.Controllers
 
                 _context.Add(payee);
                 await _context.SaveChangesAsync();
-                return new ApiPayeeResult(payee);
+                return new ApiObjectResult<Payee>(payee);
             }
             catch (Exception ex)
             {
@@ -481,23 +481,13 @@ namespace OfxWeb.Asp.Controllers
         }
     }
 
-    public class ApiTransactionResult : ApiResult
+    public class ApiObjectResult<T> : ApiResult
     {
-        public Transaction Transaction { get; set; }
+        public T Item { get; set; }
 
-        public ApiTransactionResult(Transaction transaction)
+        public ApiObjectResult(T item)
         {
-            Transaction = transaction;
-        }
-    }
-
-    public class ApiPayeeResult : ApiResult
-    {
-        public Payee Payee { get; set; }
-
-        public ApiPayeeResult(Payee payee)
-        {
-            Payee = payee;
+            Item = item;
         }
     }
 }

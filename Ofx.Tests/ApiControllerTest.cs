@@ -146,10 +146,10 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var result = await controller.Get(expected.ID) as ApiTransactionResult;
+            var result = await controller.Get(expected.ID) as ApiObjectResult<Transaction>;
 
             Assert.IsTrue(result.Ok);
-            Assert.AreEqual(expected, result.Transaction);
+            Assert.AreEqual(expected, result.Item);
         }
         [TestMethod]
         public async Task GetIdFails()
@@ -305,10 +305,10 @@ namespace Ofx.Tests
         {
             var expected = new Payee() { Category = "B", SubCategory = "A", Name = "3" };
 
-            var result = await controller.AddPayee(expected) as ApiPayeeResult;
+            var result = await controller.AddPayee(expected) as ApiObjectResult<Payee>;
 
             Assert.IsTrue(result.Ok);
-            Assert.AreEqual(expected, result.Payee);
+            Assert.AreEqual(expected, result.Item);
         }
         [TestMethod]
         public async Task ApplyPayee()
@@ -319,13 +319,13 @@ namespace Ofx.Tests
             // Pick an aribtrary transaction
             var tx = await context.Transactions.LastAsync();
 
-            var result = await controller.ApplyPayee(tx.ID) as ApiPayeeResult;
+            var result = await controller.ApplyPayee(tx.ID) as ApiObjectResult<Payee>;
 
             Assert.IsTrue(result.Ok);
 
             var expected = await context.Payees.Where(x => x.Name == tx.Payee).SingleAsync();
 
-            Assert.AreEqual(expected, result.Payee);
+            Assert.AreEqual(expected, result.Item);
 
             Assert.AreEqual(expected.Category, tx.Category);
             Assert.AreEqual(expected.SubCategory, tx.SubCategory);
@@ -380,11 +380,11 @@ namespace Ofx.Tests
 
             var tx = context.Transactions.First();
 
-            var result = await controller.ApplyPayee(tx.ID) as ApiPayeeResult;
+            var result = await controller.ApplyPayee(tx.ID) as ApiObjectResult<Payee>;
 
             Assert.IsTrue(result.Ok);
 
-            Assert.AreEqual(expected, result.Payee);
+            Assert.AreEqual(expected, result.Item);
 
             Assert.AreEqual(expected.Category, tx.Category);
             Assert.AreEqual(expected.SubCategory, tx.SubCategory);
@@ -401,11 +401,11 @@ namespace Ofx.Tests
 
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
 
-            var result = await controller.Edit(original.ID, false, newtx) as ApiTransactionResult;
+            var result = await controller.Edit(original.ID, false, newtx) as ApiObjectResult<Transaction>;
 
             Assert.IsTrue(result.Ok);
-            Assert.AreEqual(newtx, result.Transaction);
-            Assert.AreNotEqual(original, result.Transaction);
+            Assert.AreEqual(newtx, result.Item);
+            Assert.AreNotEqual(original, result.Item);
 
             var actual = await context.Transactions.Where(x => x.ID == original.ID).SingleAsync();
             Assert.AreEqual(newtx, actual);
@@ -422,11 +422,11 @@ namespace Ofx.Tests
 
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
 
-            var result = await controller.Edit(original.ID, true, newtx) as ApiTransactionResult;
+            var result = await controller.Edit(original.ID, true, newtx) as ApiObjectResult<Transaction>;
 
             Assert.IsTrue(result.Ok);
-            Assert.AreEqual(newtx, result.Transaction);
-            Assert.AreNotEqual(original, result.Transaction);
+            Assert.AreEqual(newtx, result.Item);
+            Assert.AreNotEqual(original, result.Item);
 
             var unmodified = await context.Transactions.Where(x => x.ID == original.ID).SingleAsync();
             Assert.AreEqual(original, unmodified);
@@ -445,11 +445,11 @@ namespace Ofx.Tests
 
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
 
-            var result = await controller.EditPayee(original.ID, false, newitem) as ApiPayeeResult;
+            var result = await controller.EditPayee(original.ID, false, newitem) as ApiObjectResult<Payee>;
 
             Assert.IsTrue(result.Ok);
-            Assert.AreEqual(newitem, result.Payee);
-            Assert.AreNotEqual(original, result.Payee);
+            Assert.AreEqual(newitem, result.Item);
+            Assert.AreNotEqual(original, result.Item);
 
             var actual = await context.Payees.Where(x => x.ID == original.ID).SingleAsync();
             Assert.AreEqual(newitem, actual);
@@ -466,11 +466,11 @@ namespace Ofx.Tests
 
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
 
-            var result = await controller.EditPayee(original.ID, true, newitem) as ApiPayeeResult;
+            var result = await controller.EditPayee(original.ID, true, newitem) as ApiObjectResult<Payee>;
 
             Assert.IsTrue(result.Ok);
-            Assert.AreEqual(newitem, result.Payee);
-            Assert.AreNotEqual(original, result.Payee);
+            Assert.AreEqual(newitem, result.Item);
+            Assert.AreNotEqual(original, result.Item);
 
             var unmodified = await context.Payees.Where(x => x.ID == original.ID).SingleAsync();
             Assert.AreEqual(original, unmodified);
@@ -514,7 +514,7 @@ namespace Ofx.Tests
             var file = ControllerTestHelper<Split,SplitsController>.PrepareUpload(splits);
 
             // Upload that
-            var result = await controller.UpSplits(item.ID, file) as ApiTransactionResult;
+            var result = await controller.UpSplits(item.ID, file) as ApiObjectResult<Transaction>;
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(item.HasSplits);

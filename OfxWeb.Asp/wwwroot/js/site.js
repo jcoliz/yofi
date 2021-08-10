@@ -62,9 +62,9 @@
             data: $(this).serialize(),
             success: function (result) {
                 if (result.Ok) {
-                    tr.find('.display-payee').text(result.Transaction.Payee);
-                    tr.find('.display-memo').text(result.Transaction.Memo);
-                    tr.find(".display-category").text(result.Transaction.Category);
+                    tr.find('.display-payee').text(result.Item.Payee);
+                    tr.find('.display-memo').text(result.Item.Memo);
+                    tr.find(".display-category").text(result.Item.Category);
                 }
                 else
                     alert(result.Exception.Message);
@@ -84,8 +84,8 @@
             data: $(this).serialize(),
             success: function (result) {
                 if (result.Ok) {
-                    tr.find('.display-payee').text(result.Payee.Name);
-                    tr.find(".display-category").text(result.Payee.Category);
+                    tr.find('.display-payee').text(result.Item.Name);
+                    tr.find(".display-category").text(result.Item.Category);
                 }
                 else
                     alert(result.Exception.Message);
@@ -184,7 +184,7 @@ function applyPayee(tr)
         type: "POST",
         success: function (result) {
             if (result.Ok)
-                tr.find(".display-category").text(result.Payee.Category);
+                tr.find(".display-category").text(result.Item.Category);
             else
                 alert(result.Exception.Message);
         }
