@@ -145,48 +145,48 @@ namespace OfxWeb.Asp.Controllers
             // Process ORDER (O) parameters
             //
 
-            const string default_order = "date_desc";
+            const string default_order = "dd";
             ViewData["Order"] = (o == default_order) ? null : o;
 
             if (string.IsNullOrEmpty(o))
                 o = default_order;
 
-            ViewData["DateSortParm"] = o == "date_desc" ? "date_asc" : null; /* not "date_desc", which is default */;
-            ViewData["PayeeSortParm"] = o == "payee_asc" ? "payee_desc" : "payee_asc";
-            ViewData["CategorySortParm"] = o == "category_asc" ? "category_desc" : "category_asc";
-            ViewData["AmountSortParm"] = o == "amount_asc" ? "amount_desc" : "amount_asc";
-            ViewData["BankReferenceSortParm"] = o == "ref_asc" ? "ref_desc" : "ref_asc";
+            ViewData["DateSortParm"] = o == "dd" ? "da" : null; /* not "dd", which is default */;
+            ViewData["PayeeSortParm"] = o == "pa" ? "pd" : "pa";
+            ViewData["CategorySortParm"] = o == "ca" ? "cd" : "ca";
+            ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
+            ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
 
             switch (o)
             {
-                case "amount_asc":
+                case "aa": // "amount_asc":
                     result = result.OrderBy(s => s.Amount);
                     break;
-                case "amount_desc":
+                case "ad": // "amount_desc":
                     result = result.OrderByDescending(s => s.Amount);
                     break;
-                case "ref_asc":
+                case "ra": // "ref_asc":
                     result = result.OrderBy(s => s.BankReference);
                     break;
-                case "ref_desc":
+                case "rd": // "ref_desc":
                     result = result.OrderByDescending(s => s.BankReference);
                     break;
-                case "payee_asc":
+                case "pa": // "payee_asc":
                     result = result.OrderBy(s => s.Payee);
                     break;
-                case "payee_desc":
+                case "pd": // "payee_desc":
                     result = result.OrderByDescending(s => s.Payee);
                     break;
-                case "category_asc":
+                case "ca": // "category_asc":
                     result = result.OrderBy(s => s.Category);
                     break;
-                case "category_desc":
+                case "cd": // "category_desc":
                     result = result.OrderByDescending(s => s.Category);
                     break;
-                case "date_asc":
+                case "da": // "date_asc":
                     result = result.OrderBy(s => s.Timestamp).ThenBy(s => s.BankReference);
                     break;
-                case "date_desc":
+                case "dd": // "date_desc":
                 default:
                     result = result.OrderByDescending(s => s.Timestamp).ThenByDescending(s => s.BankReference);
                     break;
