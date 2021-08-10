@@ -63,7 +63,7 @@
                 {
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-payee-selected" @checkedornot data-id="@item.ID">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/tx/SelectPayee/@item.ID">
                     </td>
                 }
                 <td class="display-category">

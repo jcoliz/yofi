@@ -5,25 +5,9 @@
         applyPayee($(this).parents('tr'));
     });
 
-    $(".checkbox-hidden").on("click", function (event) {
+    $(".checkbox-post").on("click", function (event) {
         $.ajax({
-            url: "/api/tx/Hide/" + this.dataset.id,
-            data: { value: $(this).is(":checked") },
-            type: "POST"
-        });
-    });
-
-    $(".checkbox-selected").on("click", function (event) {
-        $.ajax({
-            url: "/api/tx/Select/" + this.dataset.id,
-            data: { value: $(this).is(":checked") },
-            type: "POST"
-        });
-    });
-
-    $(".checkbox-payee-selected").on("click", function (event) {
-        $.ajax({
-            url: "/api/tx/SelectPayee/" + this.dataset.id,
+            url: this.dataset.endpoint,
             data: { value: $(this).is(":checked") },
             type: "POST"
         });
