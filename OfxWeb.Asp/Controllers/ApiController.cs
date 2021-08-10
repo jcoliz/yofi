@@ -263,6 +263,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
+        [HttpPost("UpSplits/{id}")]
         public async Task<object> UpSplits(int id, IFormFile file)
         {
             try
