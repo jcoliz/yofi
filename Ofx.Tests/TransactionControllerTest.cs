@@ -1060,7 +1060,7 @@ namespace Ofx.Tests
             context.SaveChanges();
 
             // When: Deleting the receipt
-            var result = await controller.DeleteReceipt(tx.ID);
+            var result = await controller.ReceiptAction(tx.ID,"delete");
             var rdresult = result as RedirectToActionResult;
 
             Assert.AreEqual("Edit", rdresult.ActionName);
@@ -1082,7 +1082,7 @@ namespace Ofx.Tests
             storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = tx.ID.ToString(), InternalFile = "First10.ofx", ContentType = contenttype });
 
             // When: Getting the receipt
-            var result = await controller.GetReceipt(tx.ID);
+            var result = await controller.ReceiptAction(tx.ID,"get");
             var fsresult = result as FileStreamResult;
 
             // Then: The receipt is returned
