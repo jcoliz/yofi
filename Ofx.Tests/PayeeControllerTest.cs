@@ -168,6 +168,21 @@ namespace Ofx.Tests
             Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexShowSelected(bool isselected)
+        {
+            // When: Calling index with view set to 'selected'
+            var searchterm = isselected ? "S" : null;
+            var result = await controller.Index(v: searchterm);
+            var actual = result as ViewResult;
+
+            // Then: The "show selected" state is transmitted through to the view in the view data
+            Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
+        }
+
+
         // TODO: Upload duplicate where ONLY the NAME is the same
         // TODO: Upload payee name stripping
     }

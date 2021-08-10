@@ -10,21 +10,6 @@
     var prevDisabled = ViewData["PreviousPage"] == null ? "disabled" : "";
     var nextDisabled = ViewData["NextPage"] == null ? "disabled" : "";
 
-    var viewp = ViewData["ViewP"] as string;
-    var toggleHidden = "h";
-    var toggleSelected = "s";
-    if (!string.IsNullOrEmpty(viewp))
-    {
-        if (viewp.Contains('h'))
-            toggleHidden = viewp.Replace("h", string.Empty);
-        else
-            toggleHidden = viewp + "h";
-
-        if (viewp.Contains('s'))
-            toggleSelected = viewp.Replace("s", string.Empty);
-        else
-            toggleSelected = viewp + "s";
-    }
 }
 
 @section scripts {
@@ -62,14 +47,14 @@
                    asp-route-o="@ViewData["Order"]"
                    asp-route-p="@ViewData["Page"]"
                    asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@toggleHidden">
+                   asp-route-v="@ViewData["ToggleHidden"]">
                     @((bool)(ViewData["ShowHidden"])?"Hide Hidden":"Show Hidden")
                 </a>
                 <a asp-action="Index" class="btn"
                    asp-route-o="@ViewData["Order"]"
                    asp-route-p="@ViewData["Page"]"
                    asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@toggleSelected">
+                   asp-route-v="@ViewData["ToggleSelected"]">
                     @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
                 </a>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#exportHowModal" class="btn">Export</a>
@@ -87,7 +72,7 @@
                 <p>
                     Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
                     <input type="submit" value="OK" class="btn btn-primary" />
-                    <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-q="@ViewData["Query"]" asp-route-v="@toggleSelected" class="btn btn-outline-secondary">Cancel</a>
+                    <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ToggleSelected"]" class="btn btn-outline-secondary">Cancel</a>
                 </p>
             </div>
         </form>

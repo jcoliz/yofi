@@ -138,9 +138,12 @@ namespace OfxWeb.Asp.Controllers
 
             ViewData["ShowHidden"] = showHidden;
             ViewData["ShowSelected"] = showSelected;
+            ViewData["ToggleHidden"] = (showHidden ? string.Empty : "h") + (showSelected ? "s" : string.Empty);
+            ViewData["ToggleSelected"] = (showHidden ? "h": string.Empty) + (showSelected ? string.Empty : "s"); ;
 
             if (!showHidden)
                 result = result.Where(x => x.Hidden != true);
+
             //
             // Process ORDER (O) parameters
             //

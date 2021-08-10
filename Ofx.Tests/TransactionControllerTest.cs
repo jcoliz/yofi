@@ -870,7 +870,7 @@ namespace Ofx.Tests
         [DataTestMethod]
         public async Task IndexShowSelected(bool isselected)
         {
-            // When: Calling Index with indirect search term for selected items
+            // When: Calling index with view set to 'selected'
             var searchterm = isselected ? "S" : null;
             var result = await controller.Index(v:searchterm);
             var actual = result as ViewResult;

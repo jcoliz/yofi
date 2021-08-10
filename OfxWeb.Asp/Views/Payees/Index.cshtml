@@ -14,7 +14,7 @@
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
                 <a asp-action="Create" class="btn">Create New</a>
                 <a asp-action="Index" class="btn"
-                   asp-route-search="@ViewData["CurrentFilterToggleSelected"]">
+                   asp-route-v="@ViewData["ToggleSelected"]">
                     @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
                 </a>
                 <a asp-action="Download" class="btn">Export</a>

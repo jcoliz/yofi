@@ -24,24 +24,17 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Payees
-        public async Task<IActionResult> Index(string search)
+        public async Task<IActionResult> Index(string v)
         {
-            bool showSelected = false;
 
-            if (!String.IsNullOrEmpty(search))
-            {
-                var terms = search.Split(',');
-                foreach (var term in terms)
-                {
-                    if (term[0] == 'Z')
-                    {
-                        showSelected = (term[1] == '+');
-                    }
-                }
-            }
+            //
+            // Process VIEW (V) parameters
+            //
 
+            ViewData["ViewP"] = v;
+            bool showSelected = v?.ToLowerInvariant().Contains("s") == true;
             ViewData["ShowSelected"] = showSelected;
-            ViewData["CurrentFilterToggleSelected"] = $"Z{(showSelected ? '-' : '+')}";
+            ViewData["ToggleSelected"] = showSelected ? null : "s";
 
             return View(await _context.Payees.OrderBy(x=>x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync());
         }
