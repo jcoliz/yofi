@@ -260,7 +260,7 @@ namespace Ofx.Tests
             await AddFivePayees();
             var expected = await context.Payees.FirstAsync();
 
-            var result = await controller.SelectPayee(expected.ID);
+            var result = await controller.SelectPayee(expected.ID,true);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Selected);
@@ -271,7 +271,7 @@ namespace Ofx.Tests
             await AddFivePayees();
             var maxid = await context.Payees.MaxAsync(x => x.ID);
 
-            var result = await controller.SelectPayee(maxid + 1);
+            var result = await controller.SelectPayee(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -284,7 +284,7 @@ namespace Ofx.Tests
             expected.Selected = true;
             await context.SaveChangesAsync();
 
-            var result = await controller.DeselectPayee(expected.ID);
+            var result = await controller.SelectPayee(expected.ID,false);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Selected);
@@ -295,7 +295,7 @@ namespace Ofx.Tests
             await AddFivePayees();
             var maxid = await context.Payees.MaxAsync(x => x.ID);
 
-            var result = await controller.DeselectPayee(maxid + 1);
+            var result = await controller.SelectPayee(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);

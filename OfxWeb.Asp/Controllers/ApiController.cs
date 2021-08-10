@@ -158,34 +158,14 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost("SelectPayee/{id}")]
-        public async Task<ApiResult> SelectPayee(int id)
+        public async Task<ApiResult> SelectPayee(int id, bool value)
         {
             try
             {
                 var payee = await _context.Payees
                     .SingleAsync(m => m.ID == id);
 
-                payee.Selected = true;
-                _context.Update(payee);
-                await _context.SaveChangesAsync();
-
-                return new ApiResult();
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
-        [HttpPost("DeselectPayee/{id}")]
-        public async Task<ApiResult> DeselectPayee(int id)
-        {
-            try
-            {
-                var payee = await _context.Payees
-                    .SingleAsync(m => m.ID == id);
-
-                payee.Selected = false;
+                payee.Selected = value;
                 _context.Update(payee);
                 await _context.SaveChangesAsync();
 
