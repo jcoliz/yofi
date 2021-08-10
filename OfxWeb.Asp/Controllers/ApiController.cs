@@ -74,8 +74,7 @@ namespace OfxWeb.Asp.Controllers
             }
         }
 
-        // GET: api/tx/ApplyPayee/5
-        [HttpGet("ApplyPayee/{id}")]
+        [HttpPost("ApplyPayee/{id}")]
         public async Task<object> ApplyPayee(int id)
         {
             try

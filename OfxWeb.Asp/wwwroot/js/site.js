@@ -194,6 +194,7 @@ function applyPayee(tr)
 
     $.ajax({
         url: "/api/tx/ApplyPayee/" + id,
+        type: "POST",
         success: function (result) {
             if (result.Ok)
                 tr.find(".display-category").text(result.Payee.Category);
