@@ -6,9 +6,9 @@
     });
 
     $(".checkbox-hidden").on("click", function (event) {
-        var endpoint = $(this).is(":checked") ? "Hide" : "Show";
         $.ajax({
-            url: "/api/tx/" + endpoint + "/" + this.dataset.id,
+            url: "/api/tx/Hide/" + this.dataset.id,
+            data: { value: $(this).is(":checked") },
             type: "POST"
         });
     });

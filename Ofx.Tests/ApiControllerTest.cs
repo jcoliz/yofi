@@ -168,7 +168,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var result = await controller.Hide(expected.ID);
+            var result = await controller.Hide(expected.ID,true);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Hidden);
@@ -179,7 +179,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.Hide(maxid + 1);
+            var result = await controller.Hide(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -192,7 +192,7 @@ namespace Ofx.Tests
             expected.Hidden = true;
             await context.SaveChangesAsync();
 
-            var result = await controller.Show(expected.ID);
+            var result = await controller.Hide(expected.ID,false);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Hidden);
@@ -203,7 +203,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.Show(maxid + 1);
+            var result = await controller.Hide(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);

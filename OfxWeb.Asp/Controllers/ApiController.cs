@@ -120,32 +120,13 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost("Hide/{id}")]
-        public async Task<ApiResult> Hide(int id)
+        public async Task<ApiResult> Hide(int id, bool value)
         {
             try
             {
                 var transaction = await LookupTransactionAsync(id);
 
-                transaction.Hidden = true;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-
-                return new ApiResult();
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
-        [HttpPost("Show/{id}")]
-        public async Task<ApiResult> Show(int id)
-        {
-            try
-            {
-                var transaction = await LookupTransactionAsync(id);
-
-                transaction.Hidden = false;
+                transaction.Hidden = value;
                 _context.Update(transaction);
                 await _context.SaveChangesAsync();
 
