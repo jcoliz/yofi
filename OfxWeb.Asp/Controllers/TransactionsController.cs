@@ -60,61 +60,71 @@ namespace OfxWeb.Asp.Controllers
 
             if (!string.IsNullOrEmpty(q))
             {
-                var split = q.Split(',');
+                var terms = q.Split(',');
 
-                foreach (var each in split)
+                foreach (var term in terms)
                 {
-                    var token = (each.Length > 2) ? each.ToLowerInvariant().Substring(0, 2) : string.Empty;
+                    // Look for "{key}={value}" terms
+                    if (term.Length > 2 && term[1] == '=')
+                    {
+                        var key = term.ToLowerInvariant().First();
+                        var value = term.Substring(2);
 
-                    if (token == "p=")
-                    {
-                        var term = each.Substring(2);
-                        result = result.Where(x => x.Payee.Contains(term));
-                    }
-                    else if (token == "c=")
-                    {
-                        var term = each.Substring(2);
-                        if (term.ToLowerInvariant() == "[blank]")
-                            result = result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any());
-                        else
-                            result = result.Where(x => 
-                                x.Category.Contains(term)
-                                ||
-                                x.Splits.Any(s=>s.Category.Contains(term))
-                            );
-                    }
-                    else if (token == "m=")
-                    {
-                        var term = each.Substring(2);
-                        result = result.Where(x => x.Memo.Contains(term));
-                    }
-                    else if (token == "y=")
-                    {
-                        var term = each.Substring(2);
-                        int year;
-                        if (Int32.TryParse(term, out year))
-                            result = result.Where(x => x.Timestamp.Year == year);
-                    }
-                    else if (token == "r=")
-                    {
-                        var term = each.Substring(2);
-                        if (term == "0")
-                            result = result.Where(x => x.ReceiptUrl == null);
-                        else if (term == "1")
-                            result = result.Where(x => x.ReceiptUrl != null);
+                        switch (key)
+                        {
+                            // Payee
+                            case 'p':
+                                result = result.Where(x => x.Payee.Contains(value));
+                                break;
+
+                            // Category
+                            case 'c':
+                                if (value.ToLowerInvariant() == "[blank]")
+                                    result = result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any());
+                                else
+                                    result = result.Where(x =>
+                                        x.Category.Contains(value)
+                                        ||
+                                        x.Splits.Any(s => s.Category.Contains(value))
+                                    );
+                                break;
+
+                            // Year
+                            case 'y':
+                                int year;
+                                if (Int32.TryParse(value, out year))
+                                    result = result.Where(x => x.Timestamp.Year == year);
+                                break;
+
+                            // Memo
+                            case 'm':
+                                result = result.Where(x => x.Memo.Contains(value));
+                                break;
+
+                            // Has Receipt
+                            case 'r':
+                                if (value == "0")
+                                    result = result.Where(x => x.ReceiptUrl == null);
+                                else if (value == "1")
+                                    result = result.Where(x => x.ReceiptUrl != null);
+                                break;
+                        }
                     }
                     else
-                        result = result.Where(x => 
-                            x.Category.Contains(each) || 
-                            x.Memo.Contains(each) || 
-                            x.Payee.Contains(each) || 
-                            x.Splits.Any(s=>
-                                s.Category.Contains(each) ||
-                                s.Memo.Contains(each)
+                    {
+                        // Look for term anywhere
+                        result = result.Where(x =>
+                            x.Category.Contains(term) ||
+                            x.Memo.Contains(term) ||
+                            x.Payee.Contains(term) ||
+                            x.Splits.Any(s =>
+                                s.Category.Contains(term) ||
+                                s.Memo.Contains(term)
                             )
                         );
-                }
 
+                    }
+                }
             }
 
             //
