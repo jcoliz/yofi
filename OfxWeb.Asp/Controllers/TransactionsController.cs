@@ -107,7 +107,10 @@ namespace OfxWeb.Asp.Controllers
                             x.Category.Contains(each) || 
                             x.Memo.Contains(each) || 
                             x.Payee.Contains(each) || 
-                            x.Splits.Any(s=>s.Category.Contains(each))
+                            x.Splits.Any(s=>
+                                s.Category.Contains(each) ||
+                                s.Memo.Contains(each)
+                            )
                         );
                 }
 

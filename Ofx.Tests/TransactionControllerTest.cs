@@ -56,7 +56,9 @@ namespace Ofx.Tests
         List<Split> SplitItems = new List<Split>()
         {
             new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
-            new Split() { Amount = 75m, Category = "C", SubCategory = "D" }
+            new Split() { Amount = 75m, Category = "C", SubCategory = "D" },
+            new Split() { Amount = 75m, Category = "C", SubCategory = "D", Memo = "CAFES" },
+            new Split() { Amount = 75m, Category = "C", SubCategory = "D", Memo = "WHOCAFD" }
         };
 
         List<Payee> PayeeItems = new List<Payee>()
@@ -1158,7 +1160,7 @@ namespace Ofx.Tests
         {
             // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
             var items = TransactionItems.Take(20);
-            items.First().Splits = SplitItems;
+            items.First().Splits = SplitItems.Take(2).ToList();
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -1184,6 +1186,24 @@ namespace Ofx.Tests
 
             // Then: Only the transactions with '{word}' in their memo are returned
             ThenOnlyReturnedTxWith(items, model, x => x.Memo, word);
+        }
+        [TestMethod]
+        public async Task IndexQMemoSplitsAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their memo and some without
+            // And: Some with '{word}' in their splits' memo and some without
+            var items = TransactionItems.Take(20);
+            items.First().Splits = SplitItems.Take(4).ToList();
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index q={word}
+            var word = "CAF";
+            var model = await WhenCallingIndexWithQ(word);
+
+            // Then: All the transactions with '{word}' directly in their memo OR in their splits memo are returned
+            var expected = items.Where(tx => tx.Memo?.Contains(word) == true || (tx.Splits?.Any(s => s.Memo?.Contains(word) == true) == true));
+            Assert.IsTrue(expected.All(x => model.Contains(x)));
         }
 
         [TestMethod]
@@ -1273,7 +1293,7 @@ namespace Ofx.Tests
         {
             // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
             var items = TransactionItems.Take(20);
-            items.First().Splits = SplitItems;
+            items.First().Splits = SplitItems.Take(2).ToList();
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
