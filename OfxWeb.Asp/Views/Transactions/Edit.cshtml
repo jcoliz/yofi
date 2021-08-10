@@ -48,8 +48,8 @@
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-                <input type="submit" value="Duplicate" class="btn btn-light" asp-route-duplicate="true" />
-                <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-light" style="float:right">Delete</a>
+                <input type="submit" value="Duplicate" class="btn btn-outline-secondary" asp-route-duplicate="true" />
+                <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-outline-secondary" style="float:right">Delete</a>
             </div>
         </form>
 
@@ -59,6 +59,16 @@
 
 <h2>Splits</h2>
 <hr />
+@if (!Model.HasSplits)
+{
+    <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpSplits">
+        <div class="input-group mb-3">
+            <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03">Upload</button>
+            <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files">
+            <input type="hidden" asp-for="ID" />
+        </div>
+    </form>
+    }
 
 @if (!Model.IsSplitsOK)
 {
@@ -70,7 +80,7 @@
 <div class="row">
     <div class="col-md-12">
 
-        @if (Model.Splits != null)
+        @if (Model.HasSplits)
         {
             var splitorder = (Model.Amount < 0) ? Model.Splits.OrderBy(x => x.Amount) : Model.Splits.OrderByDescending(x => x.Amount);
             <table class="table">
@@ -93,76 +103,50 @@
 
                     @foreach (var split in splitorder)
                     {
-                    <tr>
-                        <td>
-                            @(split.Category ?? String.Empty)
-                        </td>
-                        <td>
-                            @split.Amount
-                        </td>
-                        <td>
-                            @split.Memo
-                        </td>
-                        <td>
-                            <a class="btn btn-outline-secondary btn-sm" asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID"><i class="fa fa-edit"></i></a>
-                            <a class="btn btn-outline-secondary btn-sm"asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID"><i class="fa fa-trash-alt"></i></a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                @(split.Category ?? String.Empty)
+                            </td>
+                            <td>
+                                @split.Amount
+                            </td>
+                            <td>
+                                @split.Memo
+                            </td>
+                            <td>
+                                <a class="btn btn-outline-secondary btn-sm" asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID"><i class="fa fa-edit"></i></a>
+                                <a class="btn btn-outline-secondary btn-sm" asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID"><i class="fa fa-trash-alt"></i></a>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
         }
     </div>
 </div>
-<div class="row">
-    <div class="col-md-6">
-        <a asp-action="CreateSplit" asp-route-id="@Model.ID" class="btn btn-primary">Add</a>
-    </div>
-    <div class="col-md-6">
-        <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpSplits">
-            <div class="row">
-                <div class="form-group col-md-2">
-                    <input type="submit" value="Upload" class="btn btn-secondary" />
-                </div>
-                <div class="form-group col-md-10">
-                    <input type="file" name="files" size="50" />
-                    <input type="hidden" asp-for="ID" />
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+
+<a asp-action="CreateSplit" asp-route-id="@Model.ID" class="btn btn-primary mb-3">Add</a>
 
 <br />
 
 <h2>Receipt</h2>
 <hr />
 
-<div class="row">
-    <div class="col-md-6">
-        @if (null == Model.ReceiptUrl)
-        {
-            <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
-                <div class="form-group">
-                    <p>Upload a receipt</p>
-                    <input type="file" name="files" size="50" />
-                    <input type="hidden" asp-for="ID" />
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Upload" class="btn btn-primary" />
-                </div>
-            </form>
-        }
-        else
-        {
-            <p>
-                <a href="/Transactions/GetReceipt/@Model.ID">Get Receipt</a> |
-                <a href="/Transactions/DeleteReceipt/@Model.ID">Delete Receipt</a>
-            </p>
-        }
-
-    </div>
-</div>
+@if (null == Model.ReceiptUrl)
+{
+    <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
+        <div class="input-group mb-3">
+            <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03">Upload</button>
+            <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files">
+            <input type="hidden" asp-for="ID" />
+        </div>
+    </form>
+}
+else
+{
+    <a asp-action="GetReceipt" asp-route-id="@Model.ID" class="btn btn-primary">Download</a>
+    <a asp-action="DeleteReceipt" asp-route-id="@Model.ID" class="btn btn-outline-secondary">Delete</a>
+}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
