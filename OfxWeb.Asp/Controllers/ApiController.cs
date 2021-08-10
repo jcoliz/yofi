@@ -62,11 +62,11 @@ namespace OfxWeb.Asp.Controllers
 
         // GET: api/tx/5
         [HttpGet("{id}", Name = "Get")]
-        public async Task<object> Get(int id)
+        public async Task<ApiResult> Get(int id)
         {
             try
             {
-                return new ApiObjectResult<Transaction>(await LookupTransactionAsync(id));
+                return new ApiResult(await LookupTransactionAsync(id));
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost("ApplyPayee/{id}")]
-        public async Task<object> ApplyPayee(int id)
+        public async Task<ApiResult> ApplyPayee(int id)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace OfxWeb.Asp.Controllers
                 _context.Update(transaction);
                 await _context.SaveChangesAsync();
 
-                return new ApiObjectResult<Payee>(payee);
+                return new ApiResult(payee);
             }
             catch (Exception ex)
             {
@@ -181,7 +181,7 @@ namespace OfxWeb.Asp.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("Edit/{id}")]
-        public async Task<object> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
+        public async Task<ApiResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
         {
             try
             {
@@ -203,7 +203,7 @@ namespace OfxWeb.Asp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return new ApiObjectResult<Transaction>(transaction);
+                return new ApiResult(transaction);
             }
             catch (Exception ex)
             {
@@ -264,7 +264,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost("UpSplits/{id}")]
-        public async Task<object> UpSplits(int id, IFormFile file)
+        public async Task<ApiResult> UpSplits(int id, IFormFile file)
         {
             try
             {
@@ -296,7 +296,7 @@ namespace OfxWeb.Asp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return new ApiObjectResult<Transaction>(transaction);
+                return new ApiResult(transaction);
             }
             catch (Exception ex)
             {
@@ -308,7 +308,7 @@ namespace OfxWeb.Asp.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("EditPayee/{id}")]
-        public async Task<object> EditPayee(int id, bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
+        public async Task<ApiResult> EditPayee(int id, bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
         {
             try
             {
@@ -330,7 +330,7 @@ namespace OfxWeb.Asp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return new ApiObjectResult<Payee>(payee);
+                return new ApiResult(payee);
             }
             catch (Exception ex)
             {
@@ -344,7 +344,7 @@ namespace OfxWeb.Asp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         // TODO: Move to a payee api controller and rename to POST api/payee/Create
         [HttpPost("AddPayee")]
-        public async Task<object> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
+        public async Task<ApiResult> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
         {
             try
             {
@@ -353,7 +353,7 @@ namespace OfxWeb.Asp.Controllers
 
                 _context.Add(payee);
                 await _context.SaveChangesAsync();
-                return new ApiObjectResult<Payee>(payee);
+                return new ApiResult(payee);
             }
             catch (Exception ex)
             {
@@ -470,24 +470,14 @@ namespace OfxWeb.Asp.Controllers
     {
         public bool Ok { get; set; } = true;
 
-        public Exception Exception { get; set; } = null;
+        public object Item { get; private set; } = null;
 
         public ApiResult() { }
 
-        public ApiResult(Exception ex)
+        public ApiResult(object o)
         {
-            Exception = ex;
-            Ok = false;
-        }
-    }
-
-    public class ApiObjectResult<T> : ApiResult
-    {
-        public T Item { get; set; }
-
-        public ApiObjectResult(T item)
-        {
-            Item = item;
+            Item = o;
+            Ok = !(o is Exception);
         }
     }
 }

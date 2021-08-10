@@ -146,7 +146,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var result = await controller.Get(expected.ID) as ApiObjectResult<Transaction>;
+            var result = await controller.Get(expected.ID);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(expected, result.Item);
@@ -157,10 +157,10 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x=>x.ID);
 
-            var result = await controller.Get(maxid + 1) as ApiResult;
+            var result = await controller.Get(maxid + 1);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
         [TestMethod]
         public async Task HideId()
@@ -182,7 +182,7 @@ namespace Ofx.Tests
             var result = await controller.Hide(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
         [TestMethod]
         public async Task ShowId()
@@ -206,7 +206,7 @@ namespace Ofx.Tests
             var result = await controller.Hide(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
         [TestMethod]
         public async Task SelectId()
@@ -228,7 +228,7 @@ namespace Ofx.Tests
             var result = await controller.Select(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
         [TestMethod]
         public async Task DeselectId()
@@ -252,7 +252,7 @@ namespace Ofx.Tests
             var result = await controller.Select(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
         [TestMethod]
         public async Task SelectPayeeId()
@@ -274,7 +274,7 @@ namespace Ofx.Tests
             var result = await controller.SelectPayee(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
         [TestMethod]
         public async Task DeselectPayeeId()
@@ -298,14 +298,14 @@ namespace Ofx.Tests
             var result = await controller.SelectPayee(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
         [TestMethod]
         public async Task AddPayee()
         {
             var expected = new Payee() { Category = "B", SubCategory = "A", Name = "3" };
 
-            var result = await controller.AddPayee(expected) as ApiObjectResult<Payee>;
+            var result = await controller.AddPayee(expected);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(expected, result.Item);
@@ -319,7 +319,7 @@ namespace Ofx.Tests
             // Pick an aribtrary transaction
             var tx = await context.Transactions.LastAsync();
 
-            var result = await controller.ApplyPayee(tx.ID) as ApiObjectResult<Payee>;
+            var result = await controller.ApplyPayee(tx.ID);
 
             Assert.IsTrue(result.Ok);
 
@@ -337,10 +337,10 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.ApplyPayee(maxid + 1) as ApiResult;
+            var result = await controller.ApplyPayee(maxid + 1);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
 
         [TestMethod]
@@ -357,10 +357,10 @@ namespace Ofx.Tests
             context.Payees.Remove(payee);
             await context.SaveChangesAsync();
 
-            var result = await controller.ApplyPayee(tx.ID) as ApiResult;
+            var result = await controller.ApplyPayee(tx.ID);
 
             Assert.IsFalse(result.Ok);
-            Assert.IsNotNull(result.Exception);
+            Assert.IsTrue(result.Item is Exception);
         }
 
         [DataTestMethod]
@@ -380,7 +380,7 @@ namespace Ofx.Tests
 
             var tx = context.Transactions.First();
 
-            var result = await controller.ApplyPayee(tx.ID) as ApiObjectResult<Payee>;
+            var result = await controller.ApplyPayee(tx.ID);
 
             Assert.IsTrue(result.Ok);
 
@@ -401,7 +401,7 @@ namespace Ofx.Tests
 
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
 
-            var result = await controller.Edit(original.ID, false, newtx) as ApiObjectResult<Transaction>;
+            var result = await controller.Edit(original.ID, false, newtx);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newtx, result.Item);
@@ -422,7 +422,7 @@ namespace Ofx.Tests
 
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
 
-            var result = await controller.Edit(original.ID, true, newtx) as ApiObjectResult<Transaction>;
+            var result = await controller.Edit(original.ID, true, newtx);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newtx, result.Item);
@@ -445,7 +445,7 @@ namespace Ofx.Tests
 
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
 
-            var result = await controller.EditPayee(original.ID, false, newitem) as ApiObjectResult<Payee>;
+            var result = await controller.EditPayee(original.ID, false, newitem);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newitem, result.Item);
@@ -466,7 +466,7 @@ namespace Ofx.Tests
 
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
 
-            var result = await controller.EditPayee(original.ID, true, newitem) as ApiObjectResult<Payee>;
+            var result = await controller.EditPayee(original.ID, true, newitem);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newitem, result.Item);
@@ -514,7 +514,7 @@ namespace Ofx.Tests
             var file = ControllerTestHelper<Split,SplitsController>.PrepareUpload(splits);
 
             // Upload that
-            var result = await controller.UpSplits(item.ID, file) as ApiObjectResult<Transaction>;
+            var result = await controller.UpSplits(item.ID, file);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(item.HasSplits);

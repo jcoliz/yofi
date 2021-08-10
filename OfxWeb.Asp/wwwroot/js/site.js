@@ -67,7 +67,7 @@
                     tr.find(".display-category").text(result.Item.Category);
                 }
                 else
-                    alert(result.Exception.Message);
+                    alert(result.Item.Message);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -83,12 +83,13 @@
             type: "POST",
             data: $(this).serialize(),
             success: function (result) {
+                alert(JSON.stringify(result));
                 if (result.Ok) {
                     tr.find('.display-payee').text(result.Item.Name);
                     tr.find(".display-category").text(result.Item.Category);
                 }
                 else
-                    alert(result.Exception.Message);
+                    alert(result.Item.Message);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -107,7 +108,7 @@
                 if (result.Ok)
                     applyPayee(tr);
                 else
-                    alert(result.Exception.Message);
+                    alert(result.Item.Message);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -149,7 +150,7 @@
                                 alert('Ok');
                             }
                             else
-                                alert(result.Exception.Message);
+                                alert(result.Item.Message);
                         }
                     });
 
@@ -186,7 +187,7 @@ function applyPayee(tr)
             if (result.Ok)
                 tr.find(".display-category").text(result.Item.Category);
             else
-                alert(result.Exception.Message);
+                alert(result.Item.Message);
         }
     });
 }
