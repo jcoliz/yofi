@@ -772,10 +772,10 @@ namespace Ofx.Tests
             {
                 return new[]
                 {
-                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("pa",x=>x.Payee) },
-                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("ca",x=>x.Category) },
-                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("da",x=>x.Timestamp.ToOADate().ToString()) },
-                    new object[] { new KeyValuePair<string, Func<Transaction, string>>("aa",x=>x.Amount.ToString()) },
+                    new object[] { new { Key ="pa" , Ascending = true, Value = (Func<Transaction, string>)(x=>x.Payee) } },
+                    new object[] { new { Key ="ca" , Ascending = true, Value = (Func<Transaction, string>)(x=>x.Category) } },
+                    new object[] { new { Key ="da" , Ascending = true, Value = (Func<Transaction, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
+                    new object[] { new { Key ="aa" , Ascending = true, Value = (Func<Transaction, string>)(x=>x.Amount.ToString()) } },
                 };
             }
         }
@@ -795,7 +795,12 @@ namespace Ofx.Tests
 
             // Then: The items are returned sorted in that order
             var predicate = kvp.Value as Func<Transaction, string>;
-            var expected = model.OrderBy(predicate).ToList();
+            List<Transaction> expected = null;
+            if (kvp.Ascending)
+                expected = model.OrderBy(predicate).ToList();
+            else
+                expected = model.OrderByDescending(predicate).ToList();
+
             Assert.IsTrue(Enumerable.Range(0, model.Count - 1).All(x => model[x] == expected[x]));
         }
 
