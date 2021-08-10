@@ -229,6 +229,8 @@ namespace OfxWeb.Asp.Controllers
             return View(await result.AsNoTracking().ToListAsync());
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateSplit(int id)
         {
             /*

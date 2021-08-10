@@ -72,9 +72,12 @@
 
 @if (!Model.IsSplitsOK)
 {
+<form asp-action="CreateSplit" asp-route-id="@Model.ID">
     <div class="alert alert-danger" role="alert">
-        <strong>Incomplete Splits Balance</strong> Please <a asp-action="CreateSplit" asp-route-id="@Model.ID" class="alert-link">add another split</a> to contain the remaining balance.
+        <strong>Incomplete Splits Balance</strong> Please add another split to contain the remaining balance.
+        <button type="submit" class="btn btn-danger ms-2">Add</button>
     </div>
+</form>
 }
 
 <div class="row">
@@ -125,7 +128,9 @@
     </div>
 </div>
 
-<a asp-action="CreateSplit" asp-route-id="@Model.ID" class="btn btn-primary mb-3">Add</a>
+<form asp-action="CreateSplit" asp-route-id="@Model.ID">
+    <button type="submit" class="btn btn-primary mb-3">Add</button>
+</form>
 
 <br />
 
