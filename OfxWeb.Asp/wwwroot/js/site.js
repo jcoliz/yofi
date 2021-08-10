@@ -14,9 +14,9 @@
     });
 
     $(".checkbox-selected").on("click", function (event) {
-        var endpoint = $(this).is(":checked") ? "Select" : "Deselect";
         $.ajax({
-            url: "/api/tx/" + endpoint + "/" + this.dataset.id,
+            url: "/api/tx/Select/" + this.dataset.id,
+            data: { value: $(this).is(":checked") },
             type: "POST"
         });
     });

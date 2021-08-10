@@ -214,7 +214,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var result = await controller.Select(expected.ID);
+            var result = await controller.Select(expected.ID,true);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Selected);
@@ -225,7 +225,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.Select(maxid + 1);
+            var result = await controller.Select(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);
@@ -238,7 +238,7 @@ namespace Ofx.Tests
             expected.Selected = true;
             await context.SaveChangesAsync();
 
-            var result = await controller.Deselect(expected.ID);
+            var result = await controller.Select(expected.ID,false);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Selected);
@@ -249,7 +249,7 @@ namespace Ofx.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.Deselect(maxid + 1);
+            var result = await controller.Select(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
             Assert.IsNotNull(result.Exception);

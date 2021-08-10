@@ -158,32 +158,13 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost("Select/{id}")]
-        public async Task<ApiResult> Select(int id)
+        public async Task<ApiResult> Select(int id, bool value)
         {
             try
             {
                 var transaction = await LookupTransactionAsync(id);
 
-                transaction.Selected = true;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-
-                return new ApiResult();
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
-        [HttpPost("Deselect/{id}")]
-        public async Task<ApiResult> Deselect(int id)
-        {
-            try
-            {
-                var transaction = await LookupTransactionAsync(id);
-
-                transaction.Selected = false;
+                transaction.Selected = value;
                 _context.Update(transaction);
                 await _context.SaveChangesAsync();
 
