@@ -1,8 +1,12 @@
 ﻿using Common.AspNetCore.Test;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Controllers;
+using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +17,24 @@ namespace Ofx.Tests
     public class BudgetTxControllerTest
     {
         private ControllerTestHelper<BudgetTx, BudgetTxsController> helper = null;
+
+        BudgetTxsController controller => helper.controller;
+        ApplicationDbContext context => helper.context;
+        List<BudgetTx> Items => helper.Items;
+        DbSet<BudgetTx> dbset => helper.dbset;
+
+        IEnumerable<BudgetTx> ItemsLong;
+
+        IEnumerable<BudgetTx> GetItemsLong()
+        {
+            if (null == ItemsLong)
+            {
+                int count = 200;
+                DateTime origin = new DateTime(2020, 1, 1).AddMonths(-count);
+                ItemsLong = Enumerable.Range(1, 200).Select(x => new BudgetTx() { Timestamp = origin.AddMonths(x), Category = x.ToString(), Amount = x * 100 }).ToList();
+            }
+            return ItemsLong;
+        }
 
         [TestInitialize]
         public void SetUp()
@@ -141,6 +163,51 @@ namespace Ofx.Tests
 
             // Upload it. It should be rejected.
             var actual = await helper.Upload(1, 0);
+        }
+
+
+        [TestMethod]
+        public async Task IndexPage1()
+        {
+            // Given: A very long set of items 
+            var items = GetItemsLong();
+            dbset.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling Index page 1
+            var result = await controller.Index(p: 1);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as List<BudgetTx>;
+
+            // Then: Only one page's worth of items are returned
+            Assert.AreEqual(PayeesController.PageSize, model.Count);
+
+            // And: Page Item values are as expected
+            Assert.AreEqual(1, viewresult.ViewData["PageFirstItem"]);
+            Assert.AreEqual(PayeesController.PageSize, viewresult.ViewData["PageLastItem"]);
+            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
+        }
+
+        [TestMethod]
+        public async Task IndexPage2()
+        {
+            // Given: A long set of items, which is longer than one page, but not as long as two pages 
+            var itemcount = BudgetTxsController.PageSize + PayeesController.PageSize / 2;
+            dbset.AddRange(GetItemsLong().Take(itemcount));
+            context.SaveChanges();
+
+            // When: Calling Index page 2
+            var result = await controller.Index(p: 2);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as List<BudgetTx>;
+
+            // Then: Only items after one page's worth of items are returned
+            Assert.AreEqual(BudgetTxsController.PageSize / 2, model.Count);
+
+            // And: Page Item values are as expected
+            Assert.AreEqual(1 + BudgetTxsController.PageSize, viewresult.ViewData["PageFirstItem"]);
+            Assert.AreEqual(itemcount, viewresult.ViewData["PageLastItem"]);
+            Assert.AreEqual(itemcount, viewresult.ViewData["PageTotalItems"]);
         }
 
         // TODO: Generate next month's TXs

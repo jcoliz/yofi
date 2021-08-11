@@ -15,6 +15,8 @@ namespace OfxWeb.Asp.Controllers
 {
     public class BudgetTxsController : Controller, IController<BudgetTx>
     {
+        public static int PageSize { get; } = 25;
+
         private readonly ApplicationDbContext _context;
 
         public BudgetTxsController(ApplicationDbContext context)
@@ -23,10 +25,10 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: BudgetTxs
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? p = null)
         {
             // Assemble the results
-            var result = await _context.BudgetTxs.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).ToListAsync();
+            var result = _context.BudgetTxs.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).AsQueryable();
 
             if (result.FirstOrDefault() != null)
             {
@@ -34,8 +36,47 @@ namespace OfxWeb.Asp.Controllers
                 ViewData["LastMonth"] = $"Generate {nextmonth:MMMM} Budget";
             }
 
+            //
+            // Process PAGE (P) parameters
+            //
+
+            if (!p.HasValue)
+                p = 1;
+            else
+                ViewData["Page"] = p;
+
+            var count = await result.CountAsync();
+
+            int offset = (p.Value - 1) * PageSize;
+            ViewData["PageFirstItem"] = offset + 1;
+            ViewData["PageLastItem"] = Math.Min(count, offset + PageSize);
+            ViewData["PageTotalItems"] = count;
+
+            if (count > PageSize)
+            {
+                result = result.Skip(offset).Take(PageSize);
+
+                if (p > 1)
+                    ViewData["PreviousPage"] = p.Value - 1;
+                else
+                    if ((p + 1) * PageSize < count)
+                    ViewData["NextNextPage"] = p.Value + 2;
+
+                if (p * PageSize < count)
+                    ViewData["NextPage"] = p.Value + 1;
+                else
+                    if (p > 2)
+                    ViewData["PreviousPreviousPage"] = p.Value - 2;
+
+                if (p > 2)
+                    ViewData["FirstPage"] = 1;
+
+                if ((p + 1) * PageSize < count)
+                    ViewData["LastPage"] = 1 + (count - 1) / PageSize;
+            }
+
             // Show the index
-            return View(result);
+            return View(await result.ToListAsync());
         }
 
         // GET: BudgetTxs/Details/5
@@ -252,6 +293,8 @@ namespace OfxWeb.Asp.Controllers
         {
             return _context.BudgetTxs.Any(e => e.ID == id);
         }
+
+        Task<IActionResult> IController<BudgetTx>.Index() => Index();
     }
 
     class BudgetTxComparer: IEqualityComparer<Models.BudgetTx>
