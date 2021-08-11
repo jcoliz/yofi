@@ -7,6 +7,13 @@
 <nav class="navbar navbar-light mb-3" style="background-color: #b1e6fc;">
     <div class="container">
         <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+        <form class="d-flex" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["Order"]" method="post">
+            <input class="form-control me-2 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" value="@ViewData["Query"]" autocomplete="off">
+            <button type="submit" class="btn btn-secondary me-1">
+                <i class="fas fa-search"></i>
+            </button>
+            <a asp-route-o="@ViewData["Order"]" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary me-1"><i class="fas fa-times"></i></a>
+        </form>
         <div class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Actions
@@ -14,6 +21,7 @@
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
                 <a asp-action="Create" class="btn">Create New</a>
                 <a asp-action="Index" class="btn"
+                   asp-route-q="@ViewData["Query"]" 
                    asp-route-v="@ViewData["ToggleSelected"]">
                     @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
                 </a>
@@ -28,7 +36,7 @@
     <form asp-action="BulkEdit" method="post">
         <div class="form-actions">
             <p>
-                Category <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
+                Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
                 <input type="submit" value="OK" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
             </p>

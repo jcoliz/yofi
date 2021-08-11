@@ -34,6 +34,8 @@ namespace OfxWeb.Asp.Controllers
 
             var result = _context.Payees.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Name).AsQueryable();
 
+            ViewData["Query"] = q;
+
             if (!string.IsNullOrEmpty(q))
             {
                 // Look for term anywhere
