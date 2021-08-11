@@ -26,9 +26,22 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Payees
-        public async Task<IActionResult> Index(string v = null, int? p = null)
+        public async Task<IActionResult> Index(string q = null, string v = null, int? p = null)
         {
+            //
+            // Process QUERY (Q) parameters
+            //
+
             var result = _context.Payees.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Name).AsQueryable();
+
+            if (!string.IsNullOrEmpty(q))
+            {
+                // Look for term anywhere
+                result = result.Where(x =>
+                    x.Category.Contains(q) ||
+                    x.Name.Contains(q)
+                );
+            }
 
             //
             // Process VIEW (V) parameters

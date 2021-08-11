@@ -24,6 +24,21 @@ namespace Ofx.Tests
         List<Payee> Items => helper.Items;
         DbSet<Payee> dbset => helper.dbset;
 
+        List<Payee> PayeeItems = new List<Payee>()
+        {
+            new Payee() { Category = "B", SubCategory = "A", Name = "3" },
+            new Payee() { Category = "A", SubCategory = "A", Name = "2" },
+            new Payee() { Category = "C", SubCategory = "A", Name = "5" },
+            new Payee() { Category = "A", SubCategory = "A", Name = "1" },
+            new Payee() { Category = "B", SubCategory = "B", Name = "4" },
+
+            new Payee() { Category = "ABCD", Name = "3" },
+            new Payee() { Category = "X", Name = "2" },
+            new Payee() { Category = "ZABCZZ", Name = "5" },
+            new Payee() { Category = "X", Name = "1ABC" },
+            new Payee() { Category = "Y", Name = "4" }
+        };
+
         IEnumerable<Payee> ItemsLong;
 
         IEnumerable<Payee> GetItemsLong()
@@ -39,16 +54,8 @@ namespace Ofx.Tests
             helper = new ControllerTestHelper<Payee, PayeesController>();
             helper.SetUp();
             helper.controller = new PayeesController(helper.context);
-
-            helper.Items.Add(new Payee() { Category = "B", SubCategory = "A", Name = "3" });
-            helper.Items.Add(new Payee() { Category = "A", SubCategory = "A", Name = "2" });
-            helper.Items.Add(new Payee() { Category = "C", SubCategory = "A", Name = "5" });
-            helper.Items.Add(new Payee() { Category = "A", SubCategory = "A", Name = "1" });
-            helper.Items.Add(new Payee() { Category = "B", SubCategory = "B", Name = "4" });
-
+            helper.Items.AddRange(PayeeItems.Take(5));
             helper.dbset = helper.context.Payees;
-
-            // Sample data items will use 'Name' as a unique sort idenfitier
             helper.KeyFor = (x => x.Name);
         }
 
@@ -196,7 +203,7 @@ namespace Ofx.Tests
         {
             // Given: A very long set of items 
             var items = GetItemsLong();
-            context.Payees.AddRange(items);
+            dbset.AddRange(items);
             context.SaveChanges();
 
             // When: Calling Index page 1
@@ -218,7 +225,7 @@ namespace Ofx.Tests
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             var itemcount = PayeesController.PageSize + PayeesController.PageSize / 2;
-            context.Payees.AddRange(GetItemsLong().Take(itemcount));
+            dbset.AddRange(GetItemsLong().Take(itemcount));
             context.SaveChanges();
 
             // When: Calling Index page 2
@@ -233,6 +240,25 @@ namespace Ofx.Tests
             Assert.AreEqual(1 + TransactionsController.PageSize, viewresult.ViewData["PageFirstItem"]);
             Assert.AreEqual(itemcount, viewresult.ViewData["PageLastItem"]);
             Assert.AreEqual(itemcount, viewresult.ViewData["PageTotalItems"]);
+        }
+
+        [TestMethod]
+        public async Task IndexQAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = PayeeItems.Take(10);
+            dbset.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index q={word}
+            var word = "ABC";
+            var result = await controller.Index(q: word);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<Payee>;
+
+            // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
+            var expected = items.Where(x => x.Name.Contains(word) || x.Category.Contains(word)).ToList();
+            CollectionAssert.AreEquivalent(expected, model);
         }
 
         // TODO: Upload duplicate where ONLY the NAME is the same
