@@ -256,7 +256,7 @@ namespace Ofx.Tests
             var actual = result as ViewResult;
             var model = actual.Model as List<Payee>;
 
-            // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
+            // Then: Only the items with '{word}' in their category or payee are returned
             var expected = items.Where(x => x.Name.Contains(word) || x.Category.Contains(word)).ToList();
             CollectionAssert.AreEquivalent(expected, model);
         }

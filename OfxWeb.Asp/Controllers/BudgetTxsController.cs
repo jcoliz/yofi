@@ -25,15 +25,28 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: BudgetTxs
-        public async Task<IActionResult> Index(int? p = null)
+        public async Task<IActionResult> Index(string q = null, int? p = null)
         {
-            // Assemble the results
             var result = _context.BudgetTxs.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).AsQueryable();
 
             if (result.FirstOrDefault() != null)
             {
                 var nextmonth = result.First().Timestamp.AddMonths(1);
                 ViewData["LastMonth"] = $"Generate {nextmonth:MMMM} Budget";
+            }
+
+            //
+            // Process QUERY (Q) parameters
+            //
+
+            ViewData["Query"] = q;
+
+            if (!string.IsNullOrEmpty(q))
+            {
+                // Look for term anywhere
+                result = result.Where(x =>
+                    x.Category.Contains(q)
+                );
             }
 
             //

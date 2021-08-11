@@ -23,6 +23,15 @@ namespace Ofx.Tests
         List<BudgetTx> Items => helper.Items;
         DbSet<BudgetTx> dbset => helper.dbset;
 
+        List<BudgetTx> BudgetTxItems = new List<BudgetTx>()
+        {
+            new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01),  Category = "A", Amount = 100m },
+            new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01),  Category = "B", Amount = 200m },
+            new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "A", Amount = 300m },
+            new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "B", Amount = 400m },
+            new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "C", Amount = 500m },
+        };
+
         IEnumerable<BudgetTx> ItemsLong;
 
         IEnumerable<BudgetTx> GetItemsLong()
@@ -42,12 +51,7 @@ namespace Ofx.Tests
             helper = new ControllerTestHelper<BudgetTx, BudgetTxsController>();
             helper.SetUp();
             helper.controller = new BudgetTxsController(helper.context);
-
-            helper.Items.Add(new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01),  Category = "A", Amount = 100m });
-            helper.Items.Add(new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01),  Category = "B", Amount = 200m });
-            helper.Items.Add(new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "A", Amount = 300m });
-            helper.Items.Add(new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "B", Amount = 400m });
-            helper.Items.Add(new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "C", Amount = 500m });
+            helper.Items.AddRange(BudgetTxItems.Take(5));
 
             helper.dbset = helper.context.BudgetTxs;
 
@@ -209,6 +213,26 @@ namespace Ofx.Tests
             Assert.AreEqual(itemcount, viewresult.ViewData["PageLastItem"]);
             Assert.AreEqual(itemcount, viewresult.ViewData["PageTotalItems"]);
         }
+
+        [TestMethod]
+        public async Task IndexQAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = BudgetTxItems.Take(5);
+            dbset.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index q={word}
+            var word = "A";
+            var result = await controller.Index(q: word);
+            var actual = result as ViewResult;
+            var model = actual.Model as List<BudgetTx>;
+
+            // Then: Only the items with '{word}' in their category are returned
+            var expected = items.Where(x=>x.Category.Contains(word)).ToList();
+            CollectionAssert.AreEquivalent(expected, model);
+        }
+
 
         // TODO: Generate next month's TXs
     }
