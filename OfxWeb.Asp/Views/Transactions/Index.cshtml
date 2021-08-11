@@ -220,7 +220,7 @@
             @if (ViewData["FirstPage"] != null)
             {
                 <li class="page-item">
-                    <a asp-action="Index"
+                    <a 
                        asp-route-o="@ViewData["Order"]"
                        asp-route-q="@ViewData["Query"]"
                        asp-route-v="@ViewData["ViewP"]"
@@ -231,7 +231,7 @@
             @if (ViewData["PreviousPreviousPage"] != null)
             {
                 <li class="page-item">
-                    <a asp-action="Index"
+                    <a 
                        asp-route-o="@ViewData["Order"]"
                        asp-route-p="@ViewData["PreviousPreviousPage"]"
                        asp-route-q="@ViewData["Query"]"
@@ -242,7 +242,7 @@
             @if (ViewData["PreviousPage"] != null)
             {
                 <li class="page-item">
-                    <a asp-action="Index"
+                    <a 
                        asp-route-o="@ViewData["Order"]"
                        asp-route-p="@ViewData["PreviousPage"]"
                        asp-route-q="@ViewData["Query"]"
@@ -256,7 +256,7 @@
             @if (ViewData["NextPage"] != null)
             {
                 <li class="page-item">
-                    <a asp-action="Index"
+                    <a 
                        asp-route-o="@ViewData["Order"]"
                        asp-route-p="@ViewData["NextPage"]"
                        asp-route-q="@ViewData["Query"]"
@@ -267,7 +267,7 @@
             @if (ViewData["NextNextPage"] != null)
             {
                 <li class="page-item">
-                    <a asp-action="Index"
+                    <a 
                        asp-route-o="@ViewData["Order"]"
                        asp-route-p="@ViewData["NextNextPage"]"
                        asp-route-q="@ViewData["Query"]"
@@ -278,7 +278,7 @@
             @if (ViewData["LastPage"] != null)
             {
                 <li class="page-item">
-                    <a asp-action="Index"
+                    <a 
                        asp-route-o="@ViewData["Order"]"
                        asp-route-p="@ViewData["LastPage"]"
                        asp-route-q="@ViewData["Query"]"
