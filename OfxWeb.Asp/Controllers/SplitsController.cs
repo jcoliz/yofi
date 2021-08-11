@@ -53,8 +53,6 @@ namespace OfxWeb.Asp.Controllers
             {
                 try
                 {
-
-
                     _context.Update(split);
                     await _context.SaveChangesAsync();
                 }

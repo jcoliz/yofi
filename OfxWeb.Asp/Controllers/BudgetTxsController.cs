@@ -110,7 +110,9 @@ namespace OfxWeb.Asp.Controllers
             return View(budgetTx);
         }
 
-        // GET: BudgetTxs/Generate
+        // Note that this is not currently implemented in the UI
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Generate()
         {
             // Grab the whole first group
@@ -230,6 +232,7 @@ namespace OfxWeb.Asp.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var incoming = new HashSet<Models.BudgetTx>(new BudgetTxComparer());
@@ -265,7 +268,6 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Transactions/Download
-        [ActionName("Download")]
         public async Task<IActionResult> Download()
         {
             const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -300,7 +302,6 @@ namespace OfxWeb.Asp.Controllers
                 return NotFound();
             }
         }
-
 
         private bool BudgetTxExists(int id)
         {

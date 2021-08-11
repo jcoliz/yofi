@@ -236,6 +236,7 @@ namespace OfxWeb.Asp.Controllers
 
         // POST: Payees/BulkEdit
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> BulkEdit(string Category, string SubCategory)
         {
             var result = from s in _context.Payees
@@ -298,6 +299,7 @@ namespace OfxWeb.Asp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var incoming = new HashSet<Models.Payee>(new PayeeNameComparer());
