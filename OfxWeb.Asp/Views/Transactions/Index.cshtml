@@ -134,7 +134,7 @@
                 {
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot  data-endpoint="/api/tx/Select/@item.ID">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/tx/Select/@item.ID">
                     </td>
                 }
                 <td>
@@ -211,86 +211,7 @@
     </tbody>
 </table>
 
-<div class="mt-2 row">
-    <div class="col-sm-7">
-        <p class="fs-6">Displaying @ViewData["PageFirstItem"] through @ViewData["PageLastItem"] of @ViewData["PageTotalItems"].</p>
-    </div>
-    <nav class="col-sm-5" aria-label="Pagination control">
-        <ul class="pagination pagination-sm justify-content-end">
-            @if (ViewData["FirstPage"] != null)
-            {
-                <li class="page-item">
-                    <a 
-                       asp-route-o="@ViewData["Order"]"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
-                       aria-label="First Page"
-                       class="page-link">&laquo;</a>
-                </li>
-            }
-            @if (ViewData["PreviousPreviousPage"] != null)
-            {
-                <li class="page-item">
-                    <a 
-                       asp-route-o="@ViewData["Order"]"
-                       asp-route-p="@ViewData["PreviousPreviousPage"]"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
-                       class="page-link">@ViewData["PreviousPreviousPage"]</a>
-                </li>
-            }
-            @if (ViewData["PreviousPage"] != null)
-            {
-                <li class="page-item">
-                    <a 
-                       asp-route-o="@ViewData["Order"]"
-                       asp-route-p="@ViewData["PreviousPage"]"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
-                       class="page-link">@ViewData["PreviousPage"]</a>
-                </li>
-            }
-            <li class="page-item active" aria-current="page">
-                <span class="page-link">@(ViewData["Page"] ?? 1)</span>
-            </li>
-            @if (ViewData["NextPage"] != null)
-            {
-                <li class="page-item">
-                    <a 
-                       asp-route-o="@ViewData["Order"]"
-                       asp-route-p="@ViewData["NextPage"]"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
-                       class="page-link">@ViewData["NextPage"]</a>
-                </li>
-            }
-            @if (ViewData["NextNextPage"] != null)
-            {
-                <li class="page-item">
-                    <a 
-                       asp-route-o="@ViewData["Order"]"
-                       asp-route-p="@ViewData["NextNextPage"]"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
-                       class="page-link">@ViewData["NextNextPage"]</a>
-                </li>
-            }
-            @if (ViewData["LastPage"] != null)
-            {
-                <li class="page-item">
-                    <a 
-                       asp-route-o="@ViewData["Order"]"
-                       asp-route-p="@ViewData["LastPage"]"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
-                       aria-label="Last Page"
-                       class="page-link">&raquo;</a>
-                </li>
-            }
-        </ul>
-    </nav>
-</div>
-
+@await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml")
 
 <div class="actiondialog modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-endpoint="/Transactions/EditModal/">
     <div class="modal-dialog modal-dialog-centered" role="document">
