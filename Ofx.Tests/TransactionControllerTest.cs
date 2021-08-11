@@ -945,38 +945,48 @@ namespace Ofx.Tests
                 Assert.AreEqual(items.Where(x=>x.Payee.Contains(payee)).Count(), model.Count);
         }
 
-        const int pagesize = 100;
-
         [TestMethod]
         public async Task IndexPage1()
         {
             // Given: A very long set of items 
-            context.Transactions.AddRange(GetTransactionItemsLong());
+            var items = GetTransactionItemsLong();
+            context.Transactions.AddRange(items);
             context.SaveChanges();
 
             // When: Calling Index page 1
             var result = await controller.Index(p:1);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as List<Transaction>;
 
             // Then: Only one page's worth of items are returned
-            Assert.AreEqual(pagesize, model.Count);
+            Assert.AreEqual(TransactionsController.PageSize, model.Count);
+
+            // And: Page Item values are as expected
+            Assert.AreEqual(1,viewresult.ViewData["PageFirstItem"]);
+            Assert.AreEqual(TransactionsController.PageSize, viewresult.ViewData["PageLastItem"]);
+            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
         }
 
         [TestMethod]
         public async Task IndexPage2()
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
-            context.Transactions.AddRange(GetTransactionItemsLong().Take(pagesize + pagesize/2));
+            var itemcount = TransactionsController.PageSize + TransactionsController.PageSize / 2;
+            context.Transactions.AddRange(GetTransactionItemsLong().Take(itemcount));
             context.SaveChanges();
 
             // When: Calling Index page 2
             var result = await controller.Index(p:2);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as List<Transaction>;
 
             // Then: Only items after one page's worth of items are returned
-            Assert.AreEqual(pagesize/2, model.Count);
+            Assert.AreEqual(TransactionsController.PageSize / 2, model.Count);
+
+            // And: Page Item values are as expected
+            Assert.AreEqual(1 + TransactionsController.PageSize, viewresult.ViewData["PageFirstItem"]);
+            Assert.AreEqual(itemcount, viewresult.ViewData["PageLastItem"]);
+            Assert.AreEqual(itemcount, viewresult.ViewData["PageTotalItems"]);
         }
 
         [TestMethod]

@@ -23,6 +23,11 @@ namespace OfxWeb.Asp.Controllers
     [Authorize(Roles = "Verified")]
     public class TransactionsController : Controller, IController<Models.Transaction>
     {
+        #region Public Properties
+        public static int PageSize { get; } = 25;
+
+        #endregion
+
         #region Constructor
 
         public TransactionsController(ApplicationDbContext context, IPlatformAzureStorage storage)
@@ -139,7 +144,7 @@ namespace OfxWeb.Asp.Controllers
             ViewData["ShowHidden"] = showHidden;
             ViewData["ShowSelected"] = showSelected;
             ViewData["ToggleHidden"] = (showHidden ? string.Empty : "h") + (showSelected ? "s" : string.Empty);
-            ViewData["ToggleSelected"] = (showHidden ? "h": string.Empty) + (showSelected ? string.Empty : "s"); ;
+            ViewData["ToggleSelected"] = (showHidden ? "h" : string.Empty) + (showSelected ? string.Empty : "s"); ;
 
             if (!showHidden)
                 result = result.Where(x => x.Hidden != true);
@@ -195,8 +200,6 @@ namespace OfxWeb.Asp.Controllers
                     break;
             }
 
-            var count = await result.CountAsync();
-
             //
             // Process PAGE (P) parameters
             //
@@ -206,17 +209,24 @@ namespace OfxWeb.Asp.Controllers
             else
                 ViewData["Page"] = p;
 
-            if (count > pagesize)
+            var count = await result.CountAsync();
+
+            int offset = (p.Value - 1) * PageSize;
+            ViewData["PageFirstItem"] = offset + 1;
+            ViewData["PageLastItem"] = Math.Min(count, offset + PageSize);
+            ViewData["PageTotalItems"] = count;
+
+            if (count > PageSize)
             {
-                result = result.Skip((p.Value - 1) * pagesize).Take(pagesize);
+                result = result.Skip(offset).Take(PageSize);
 
                 if (p > 1)
                     ViewData["PreviousPage"] = p.Value - 1;
                 else
-                    if ((p + 1) * pagesize < count)
+                    if ((p + 1) * PageSize < count)
                     ViewData["NextNextPage"] = p.Value + 2;
 
-                if (p * pagesize < count)
+                if (p * PageSize < count)
                     ViewData["NextPage"] = p.Value + 1;
                 else
                     if (p > 2)
@@ -225,8 +235,8 @@ namespace OfxWeb.Asp.Controllers
                 if (p > 2)
                     ViewData["FirstPage"] = 1;
 
-                if ((p + 1) * pagesize < count)
-                    ViewData["LastPage"] = 1 + (count - 1) / pagesize;
+                if ((p + 1) * PageSize < count)
+                    ViewData["LastPage"] = 1 + (count - 1) / PageSize;
             }
 
             return View(await result.AsNoTracking().ToListAsync());
@@ -677,7 +687,7 @@ namespace OfxWeb.Asp.Controllers
                 var incoming = new HashSet<Models.Split>();
                 // Extract submitted file into a list objects
 
-                foreach(var file in files)
+                foreach (var file in files)
                 {
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
@@ -768,7 +778,7 @@ namespace OfxWeb.Asp.Controllers
                             if (null != worksheet)
                             {
                                 var flatsplits = new List<Models.Split>();
-                                worksheet.ExtractInto(flatsplits,includeids:true);
+                                worksheet.ExtractInto(flatsplits, includeids: true);
 
                                 // Transform the flat data into something easier to use.
                                 splits = flatsplits.ToLookup(x => x.TransactionID);
@@ -855,7 +865,7 @@ namespace OfxWeb.Asp.Controllers
                             // most likely case is it's a legit duplicate but the user made slight changes to the payee or
                             // date.
 
-                            if ( ! conflicts[tx.BankReference].Any(x => x.Equals(tx)) )
+                            if (!conflicts[tx.BankReference].Any(x => x.Equals(tx)))
                             {
                                 Console.WriteLine($"Conflict may be a false positive, flagging for user.");
                                 highlights.Add(tx);
@@ -937,7 +947,7 @@ namespace OfxWeb.Asp.Controllers
             // This is kind of a crappy way to communicate the potential false negative conflicts.
             // If user returns to Import page directly, these highlights will be lost. Really probably
             // should persist this to the database somehow. Or at least stick it in the session??
-            return RedirectToAction(nameof(Import), new { highlight = string.Join(':',highlights.Select(x=>x.ID)) });
+            return RedirectToAction(nameof(Import), new { highlight = string.Join(':', highlights.Select(x => x.ID)) });
         }
 
         // POST: Transactions/Download
@@ -951,7 +961,7 @@ namespace OfxWeb.Asp.Controllers
                 var objecttype = "Transactions";
                 var transactionsquery = _context.Transactions.Where(x => x.Hidden != true);
                 if (!allyears)
-                    transactionsquery = transactionsquery.Where(x=> x.Timestamp.Year == Year);
+                    transactionsquery = transactionsquery.Where(x => x.Timestamp.Year == Year);
                 transactionsquery = transactionsquery.OrderByDescending(x => x.Timestamp);
                 var transactions = await transactionsquery.ToListAsync();
 
@@ -1047,15 +1057,13 @@ namespace OfxWeb.Asp.Controllers
             return View(result);
         }
 
-#endregion
+        #endregion
 
-#region Internals
+        #region Internals
 
         private readonly ApplicationDbContext _context;
 
         private readonly IPlatformAzureStorage _storage;
-
-        private const int pagesize = 100;
 
         private int? _Year = null;
         private int Year
