@@ -16,6 +16,8 @@ namespace OfxWeb.Asp.Controllers
 {
     public class PayeesController : Controller, IController<Payee>
     {
+        public static int PageSize { get; } = 25;
+
         private readonly ApplicationDbContext _context;
 
         public PayeesController(ApplicationDbContext context)
@@ -24,8 +26,9 @@ namespace OfxWeb.Asp.Controllers
         }
 
         // GET: Payees
-        public async Task<IActionResult> Index(string v)
+        public async Task<IActionResult> Index(string v = null, int? p = null)
         {
+            var result = _context.Payees.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Name).AsQueryable();
 
             //
             // Process VIEW (V) parameters
@@ -36,8 +39,48 @@ namespace OfxWeb.Asp.Controllers
             ViewData["ShowSelected"] = showSelected;
             ViewData["ToggleSelected"] = showSelected ? null : "s";
 
-            return View(await _context.Payees.OrderBy(x=>x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync());
+            //
+            // Process PAGE (P) parameters
+            //
+
+            if (!p.HasValue)
+                p = 1;
+            else
+                ViewData["Page"] = p;
+
+            var count = await result.CountAsync();
+
+            int offset = (p.Value - 1) * PageSize;
+            ViewData["PageFirstItem"] = offset + 1;
+            ViewData["PageLastItem"] = Math.Min(count, offset + PageSize);
+            ViewData["PageTotalItems"] = count;
+
+            if (count > PageSize)
+            {
+                result = result.Skip(offset).Take(PageSize);
+
+                if (p > 1)
+                    ViewData["PreviousPage"] = p.Value - 1;
+                else
+                    if ((p + 1) * PageSize < count)
+                    ViewData["NextNextPage"] = p.Value + 2;
+
+                if (p * PageSize < count)
+                    ViewData["NextPage"] = p.Value + 1;
+                else
+                    if (p > 2)
+                    ViewData["PreviousPreviousPage"] = p.Value - 2;
+
+                if (p > 2)
+                    ViewData["FirstPage"] = 1;
+
+                if ((p + 1) * PageSize < count)
+                    ViewData["LastPage"] = 1 + (count - 1) / PageSize;
+            }
+
+            return View(await result.ToListAsync());
         }
+
         Task<IActionResult> IController<Payee>.Index() => Index(string.Empty);
 
         // GET: Payees/Details/5

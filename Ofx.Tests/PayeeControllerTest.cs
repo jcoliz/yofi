@@ -24,6 +24,15 @@ namespace Ofx.Tests
         List<Payee> Items => helper.Items;
         DbSet<Payee> dbset => helper.dbset;
 
+        IEnumerable<Payee> ItemsLong;
+
+        IEnumerable<Payee> GetItemsLong()
+        {
+            if (null == ItemsLong)
+                ItemsLong = Enumerable.Range(1,200).Select(x => new Payee() { Category = x.ToString(), Name = x.ToString() }).ToList();
+            return ItemsLong;
+        }
+
         [TestInitialize]
         public void SetUp()
         {
@@ -182,6 +191,49 @@ namespace Ofx.Tests
             Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
         }
 
+        [TestMethod]
+        public async Task IndexPage1()
+        {
+            // Given: A very long set of items 
+            var items = GetItemsLong();
+            context.Payees.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling Index page 1
+            var result = await controller.Index(p: 1);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as List<Payee>;
+
+            // Then: Only one page's worth of items are returned
+            Assert.AreEqual(PayeesController.PageSize, model.Count);
+
+            // And: Page Item values are as expected
+            Assert.AreEqual(1, viewresult.ViewData["PageFirstItem"]);
+            Assert.AreEqual(PayeesController.PageSize, viewresult.ViewData["PageLastItem"]);
+            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
+        }
+
+        [TestMethod]
+        public async Task IndexPage2()
+        {
+            // Given: A long set of items, which is longer than one page, but not as long as two pages 
+            var itemcount = PayeesController.PageSize + PayeesController.PageSize / 2;
+            context.Payees.AddRange(GetItemsLong().Take(itemcount));
+            context.SaveChanges();
+
+            // When: Calling Index page 2
+            var result = await controller.Index(p: 2);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as List<Payee>;
+
+            // Then: Only items after one page's worth of items are returned
+            Assert.AreEqual(TransactionsController.PageSize / 2, model.Count);
+
+            // And: Page Item values are as expected
+            Assert.AreEqual(1 + TransactionsController.PageSize, viewresult.ViewData["PageFirstItem"]);
+            Assert.AreEqual(itemcount, viewresult.ViewData["PageLastItem"]);
+            Assert.AreEqual(itemcount, viewresult.ViewData["PageTotalItems"]);
+        }
 
         // TODO: Upload duplicate where ONLY the NAME is the same
         // TODO: Upload payee name stripping

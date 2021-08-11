@@ -83,10 +83,12 @@
     </tbody>
 </table>
 
+@await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml")
+
 <form method="post" enctype="multipart/form-data" asp-controller="Payees" asp-action="Upload">
     <div class="input-group mb-3 mt-3">
         <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03">Upload</button>
-        <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple >
+        <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
     </div>
 </form>
 
