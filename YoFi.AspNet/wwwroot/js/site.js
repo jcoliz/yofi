@@ -9,13 +9,7 @@
         $.ajax({
             url: this.dataset.endpoint,
             data: { value: $(this).is(":checked") },
-            beforeSend: function (xhr) {
-                element = document.getElementById('xsrf');
-                if (element) {
-                    token = element.value;
-                    xhr.setRequestHeader("RequestVerificationToken", token);
-                }
-            },
+            beforeSend: xsrf,
             type: "POST"
         });
     });
@@ -66,6 +60,7 @@
         $.ajax({
             url: "/api/tx/Edit/5",
             type: "POST",
+            beforeSend: xsrf,
             data: $(this).serialize(),
             success: function (result) {
                 if (result.Ok) {
@@ -88,9 +83,9 @@
         $.ajax({
             url: "/api/tx/EditPayee/5",
             type: "POST",
+            beforeSend: xsrf,
             data: $(this).serialize(),
             success: function (result) {
-                alert(JSON.stringify(result));
                 if (result.Ok) {
                     tr.find('.display-payee').text(result.Item.Name);
                     tr.find(".display-category").text(result.Item.Category);
@@ -110,6 +105,7 @@
         $.ajax({
             url: "/api/tx/AddPayee/",
             type: "POST",
+            beforeSend: xsrf,
             data: $(this).serialize(),
             success: function (result) {
                 if (result.Ok)
@@ -197,4 +193,12 @@ function applyPayee(tr)
                 alert(result.Error);
         }
     });
+}
+
+function xsrf(xhr) {
+    element = document.getElementById('xsrf');
+    if (element) {
+        token = element.value;
+        xhr.setRequestHeader("RequestVerificationToken", token);
+    }
 }

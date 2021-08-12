@@ -140,6 +140,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost("Select/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<ApiResult> Select(int id, bool value)
         {
             try
@@ -159,6 +160,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost("SelectPayee/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<ApiResult> SelectPayee(int id, bool value)
         {
             try
@@ -182,6 +184,7 @@ namespace YoFi.AspNet.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<ApiResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
         {
             try
@@ -309,6 +312,7 @@ namespace YoFi.AspNet.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("EditPayee/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<ApiResult> EditPayee(int id, bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
         {
             try
@@ -345,6 +349,7 @@ namespace YoFi.AspNet.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         // TODO: Move to a payee api controller and rename to POST api/payee/Create
         [HttpPost("AddPayee")]
+        [ValidateAntiForgeryToken]
         public async Task<ApiResult> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
         {
             try

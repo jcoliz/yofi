@@ -4,6 +4,17 @@
     ViewData["Title"] = "Payees";
 }
 
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+<input type="hidden" id="xsrf"
+       name="xsrf" value="@GetAntiXsrfRequestToken()">
+
 <nav class="navbar navbar-light navbar-page mb-3">
     <div class="container">
         <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
@@ -21,7 +32,7 @@
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
                 <a asp-action="Create" class="btn">Create New</a>
                 <a asp-action="Index" class="btn"
-                   asp-route-q="@ViewData["Query"]" 
+                   asp-route-q="@ViewData["Query"]"
                    asp-route-v="@ViewData["ToggleSelected"]">
                     @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
                 </a>
