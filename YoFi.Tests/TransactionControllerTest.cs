@@ -15,6 +15,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Transaction = YoFi.AspNet.Models.Transaction;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace YoFi.Tests
 {
@@ -662,12 +664,14 @@ namespace YoFi.Tests
 
             using (var stream = new MemoryStream(data))
             {
-                var excel = new ExcelPackage(stream);
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-                // Only 1 worksheet, no "splits" worksheet
-                Assert.AreEqual(1, excel.Workbook.Worksheets.Count);
-                Assert.IsFalse(excel.Workbook.Worksheets.Where(x => x.Name == "Splits").Any());
+                // Open a SpreadsheetDocument for read-only access based on a filepath.
+                using (SpreadsheetDocument spreadsheetDocument = SpreadsheetDocument.Open(stream, isEditable: false))
+                {
+                    // Only 1 worksheet, no "splits" worksheet
+                    Assert.AreEqual(1, spreadsheetDocument.WorkbookPart.WorksheetParts.Count());
+                    Assert.AreEqual("Transactions",(spreadsheetDocument.WorkbookPart.Workbook.Sheets.FirstChild as Sheet).Name.Value);
+                    Assert.IsFalse(spreadsheetDocument.WorkbookPart.Workbook.Sheets.Where(x => (x as Sheet).Name.Value == "Splits").Any());
+                }
             }
         }
 
