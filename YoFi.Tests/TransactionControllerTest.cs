@@ -669,7 +669,7 @@ namespace YoFi.Tests
                 {
                     // Only 1 worksheet, no "splits" worksheet
                     Assert.AreEqual(1, spreadsheetDocument.WorkbookPart.WorksheetParts.Count());
-                    Assert.AreEqual("Transactions",(spreadsheetDocument.WorkbookPart.Workbook.Sheets.FirstChild as Sheet).Name.Value);
+                    Assert.AreEqual("Transactions",spreadsheetDocument.WorkbookPart.Workbook.Sheets.GetFirstChild<Sheet>().Name.Value);
                     Assert.IsFalse(spreadsheetDocument.WorkbookPart.Workbook.Sheets.Where(x => (x as Sheet).Name.Value == "Splits").Any());
                 }
             }
