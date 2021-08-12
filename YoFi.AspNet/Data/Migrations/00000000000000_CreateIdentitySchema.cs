@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace OfxWeb.Asp.Data.Migrations
+namespace YoFi.AspNet.Data.Migrations
 {
     public partial class CreateIdentitySchema : Migration
     {

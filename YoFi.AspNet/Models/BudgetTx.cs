@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Models
+namespace YoFi.AspNet.Models
 {
     public class BudgetTx: IReportable, IID
     {

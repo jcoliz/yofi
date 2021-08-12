@@ -1,10 +1,10 @@
-﻿using OfxWeb.Asp.Models;
+﻿using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Controllers.Reports
+namespace YoFi.AspNet.Controllers.Reports
 {
     /// <summary>
     /// A query of reportable items, with an optional name

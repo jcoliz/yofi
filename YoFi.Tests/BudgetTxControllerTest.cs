@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfxWeb.Asp.Controllers;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Controllers;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

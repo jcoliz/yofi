@@ -1,5 +1,4 @@
-﻿using Common.AspNetCore;
-using Common.NET;
+﻿using Common.NET;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -8,13 +7,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
-using OfxWeb.Asp.Services;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
+using YoFi.AspNet.Services;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OfxWeb.Asp
+namespace YoFi.AspNet
 {
     public class Startup
     {

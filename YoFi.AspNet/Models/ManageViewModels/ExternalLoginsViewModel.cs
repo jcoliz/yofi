@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 
-namespace OfxWeb.Asp.Models.ManageViewModels
+namespace YoFi.AspNet.Models.ManageViewModels
 {
     public class ExternalLoginsViewModel
     {

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Models;
 
-namespace OfxWeb.Asp.Data
+namespace YoFi.AspNet.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {

@@ -1,7 +1,7 @@
 ﻿using Common.AspNet.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfxWeb.Asp.Controllers;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Controllers;
+using YoFi.AspNet.Models;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests

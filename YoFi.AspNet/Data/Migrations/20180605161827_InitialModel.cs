@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
-namespace OfxWeb.Asp.Data.Migrations
+namespace YoFi.AspNet.Data.Migrations
 {
     public partial class InitialModel : Migration
     {

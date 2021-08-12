@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OfxWeb.Asp.Models;
-using OfxWeb.Asp.Models.ManageViewModels;
-using OfxWeb.Asp.Services;
+using YoFi.AspNet.Models;
+using YoFi.AspNet.Models.ManageViewModels;
+using YoFi.AspNet.Services;
 
-namespace OfxWeb.Asp.Controllers.Boilerplate
+namespace YoFi.AspNet.Controllers.Boilerplate
 {
     [Authorize]
     [Route("[controller]/[action]")]
@@ -495,7 +495,7 @@ namespace OfxWeb.Asp.Controllers.Boilerplate
         {
             return string.Format(
                 AuthenicatorUriFormat,
-                _urlEncoder.Encode("OfxWeb.Asp"),
+                _urlEncoder.Encode("YoFi.AspNet"),
                 _urlEncoder.Encode(email),
                 unformattedKey);
         }

@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OfxWeb.Asp.Models;
-using OfxWeb.Asp.Models.AccountViewModels;
-using OfxWeb.Asp.Services;
+using YoFi.AspNet.Models;
+using YoFi.AspNet.Models.AccountViewModels;
+using YoFi.AspNet.Services;
 
-namespace OfxWeb.Asp.Controllers.Boilerplate
+namespace YoFi.AspNet.Controllers.Boilerplate
 {
     [Authorize]
     [Route("[controller]/[action]")]

@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Common.AspNetCore
+namespace Common.NET
 {
     // https://github.com/dotnet/runtime/issues/43026
     public class ExceptionJsonConverter: JsonConverter<Exception>

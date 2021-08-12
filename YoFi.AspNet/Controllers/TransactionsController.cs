@@ -1,4 +1,4 @@
-﻿using Common.AspNetCore;
+﻿using Common.AspNet;
 using Common.NET;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -8,9 +8,9 @@ using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
 using OfxSharpLib;
-using OfxWeb.Asp.Controllers.Reports;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Controllers.Reports;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,7 +18,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Controllers
+namespace YoFi.AspNet.Controllers
 {
     [Authorize(Roles = "Verified")]
     public class TransactionsController : Controller, IController<Models.Transaction>

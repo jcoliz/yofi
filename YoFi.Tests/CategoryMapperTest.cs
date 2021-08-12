@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Models;
 using System.Collections.Generic;
 using System.Linq;
 

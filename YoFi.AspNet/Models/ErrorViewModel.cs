@@ -1,6 +1,6 @@
 using System;
 
-namespace OfxWeb.Asp.Models
+namespace YoFi.AspNet.Models
 {
     public class ErrorViewModel
     {

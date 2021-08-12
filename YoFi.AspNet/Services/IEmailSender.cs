@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Services
+namespace YoFi.AspNet.Services
 {
     public interface IEmailSender
     {

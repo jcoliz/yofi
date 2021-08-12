@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
-using OfxWeb.Asp.Controllers.Reports;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Controllers.Reports;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Controllers
+namespace YoFi.AspNet.Controllers
 {
     // Note that these methods largely do their own Json serialization. This
     // is currently needed because the front end expectes everything in PascalCase,

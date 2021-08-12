@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Models
+namespace YoFi.AspNet.Models
 {
     public class Payee: IID, ICatSubcat
     {

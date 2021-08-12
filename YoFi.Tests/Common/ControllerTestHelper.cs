@@ -1,11 +1,10 @@
-﻿using Common.AspNetCore;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,8 +13,6 @@ using System.Threading.Tasks;
 
 namespace Common.AspNet.Test
 {
-
-
     /// <summary>
     /// This is a container for base test functionality that is common to most or all controllers
     /// </summary>

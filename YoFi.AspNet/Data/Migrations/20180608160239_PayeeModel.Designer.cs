@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
-using OfxWeb.Asp.Data;
+using YoFi.AspNet.Data;
 using System;
 
-namespace OfxWeb.Asp.Data.Migrations
+namespace YoFi.AspNet.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20180608160239_PayeeModel")]
@@ -129,7 +129,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Account", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Account", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
@@ -141,7 +141,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("Accounts");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.ApplicationUser", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -192,7 +192,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Payee", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Payee", b =>
                 {
                     b.Property<string>("Name")
                         .ValueGeneratedOnAdd();
@@ -206,7 +206,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("Payees");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Transaction", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Transaction", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
@@ -244,7 +244,7 @@ namespace OfxWeb.Asp.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.ApplicationUser")
+                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -252,7 +252,7 @@ namespace OfxWeb.Asp.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.ApplicationUser")
+                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -265,7 +265,7 @@ namespace OfxWeb.Asp.Data.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("OfxWeb.Asp.Models.ApplicationUser")
+                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -273,15 +273,15 @@ namespace OfxWeb.Asp.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.ApplicationUser")
+                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Transaction", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Transaction", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.Account")
+                    b.HasOne("YoFi.AspNet.Models.Account")
                         .WithMany("Transactions")
                         .HasForeignKey("AccountID");
                 });

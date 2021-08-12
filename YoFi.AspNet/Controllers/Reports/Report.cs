@@ -1,4 +1,4 @@
-﻿using OfxWeb.Asp.Models;
+﻿using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace OfxWeb.Asp.Controllers.Reports
+namespace YoFi.AspNet.Controllers.Reports
 {
     /// <summary>
     /// Table-based report: Arranges IReportable items into tables

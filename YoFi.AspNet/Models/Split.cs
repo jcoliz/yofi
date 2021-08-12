@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Models
+namespace YoFi.AspNet.Models
 {
     public class Split: IID, ISubReportable, ICatSubcat
     {

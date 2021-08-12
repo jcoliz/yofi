@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Models
+namespace YoFi.AspNet.Models
 {
     public class Transaction : ICatSubcat, ISubReportable, IID
     {

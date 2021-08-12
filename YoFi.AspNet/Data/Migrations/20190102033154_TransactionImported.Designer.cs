@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using OfxWeb.Asp.Data;
+using YoFi.AspNet.Data;
 
-namespace OfxWeb.Asp.Data.Migrations
+namespace YoFi.AspNet.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20190102033154_TransactionImported")]
@@ -131,7 +131,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Account", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Account", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -144,7 +144,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("Accounts");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.ApplicationUser", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -195,7 +195,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.BudgetTx", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.BudgetTx", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -212,7 +212,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("BudgetTxs");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Payee", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Payee", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -229,7 +229,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("Payees");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Split", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Split", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -252,7 +252,7 @@ namespace OfxWeb.Asp.Data.Migrations
                     b.ToTable("Split");
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Transaction", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Transaction", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -295,7 +295,7 @@ namespace OfxWeb.Asp.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.ApplicationUser")
+                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -303,7 +303,7 @@ namespace OfxWeb.Asp.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.ApplicationUser")
+                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -316,7 +316,7 @@ namespace OfxWeb.Asp.Data.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("OfxWeb.Asp.Models.ApplicationUser")
+                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -324,23 +324,23 @@ namespace OfxWeb.Asp.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.ApplicationUser")
+                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Split", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Split", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.Transaction")
+                    b.HasOne("YoFi.AspNet.Models.Transaction")
                         .WithMany("Splits")
                         .HasForeignKey("TransactionID")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("OfxWeb.Asp.Models.Transaction", b =>
+            modelBuilder.Entity("YoFi.AspNet.Models.Transaction", b =>
                 {
-                    b.HasOne("OfxWeb.Asp.Models.Account")
+                    b.HasOne("YoFi.AspNet.Models.Account")
                         .WithMany("Transactions")
                         .HasForeignKey("AccountID");
                 });

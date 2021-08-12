@@ -1,18 +1,16 @@
-﻿using System;
+﻿using Common.AspNet;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml;
-using OfxWeb.Asp.Controllers;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
-using Common.AspNetCore;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 
-namespace OfxWeb.Asp.Controllers
+namespace YoFi.AspNet.Controllers
 {
     public class PayeesController : Controller, IController<Payee>
     {

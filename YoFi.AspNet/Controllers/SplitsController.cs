@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Common.AspNetCore;
+using Common.AspNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 
-namespace OfxWeb.Asp.Controllers
+namespace YoFi.AspNet.Controllers
 {
     public class SplitsController : Controller, IController<Split>
     {

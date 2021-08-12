@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Common.AspNetCore
+namespace Common.AspNet
 {
     /// <summary>
     /// Standard ASP.NET controller functionality

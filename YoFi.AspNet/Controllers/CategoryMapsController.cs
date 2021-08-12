@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
-using Common.AspNetCore;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
+using Common.AspNet;
 
-namespace OfxWeb.Asp.Controllers
+namespace YoFi.AspNet.Controllers
 {
     public class CategoryMapsController : Controller, IController<CategoryMap>
     {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using OfxWeb.Asp.Services;
+using YoFi.AspNet.Services;
 
-namespace OfxWeb.Asp.Services
+namespace YoFi.AspNet.Services
 {
     public static class EmailSenderExtensions
     {

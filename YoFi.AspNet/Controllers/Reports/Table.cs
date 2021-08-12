@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OfxWeb.Asp.Controllers.Reports
+namespace YoFi.AspNet.Controllers.Reports
 {
     /// <summary>
     /// This is a standardized way for reports to be formulated. It is simply a

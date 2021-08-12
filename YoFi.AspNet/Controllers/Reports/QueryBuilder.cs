@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OfxWeb.Asp.Data;
-using OfxWeb.Asp.Models;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OfxWeb.Asp.Controllers.Reports
+namespace YoFi.AspNet.Controllers.Reports
 {
     /// <summary>
     /// This class has the unenviable task of building EF queries for
