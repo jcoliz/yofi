@@ -1,4 +1,5 @@
-﻿using Common.AspNetCore.Test;
+﻿using Common.AspNet.Test;
+using Common.NET.Test;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
     [TestClass]
     public class ApiControllerTest

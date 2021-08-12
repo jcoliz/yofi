@@ -1,11 +1,9 @@
 ﻿using OfxWeb.Asp.Controllers.Reports;
 using OfxWeb.Asp.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
-namespace OfxWeb.Tests.Helpers
+namespace YoFi.Tests.Helpers
 {
     /// <summary>
     /// Holds the data in a form that a Report can be built from it

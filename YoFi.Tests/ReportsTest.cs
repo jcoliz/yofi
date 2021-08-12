@@ -1,15 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Controllers.Reports;
 using OfxWeb.Asp.Models;
-using OfxWeb.Tests.Helpers;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using YoFi.Tests.Helpers;
 
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
     [TestClass]
     public class ReportsTest

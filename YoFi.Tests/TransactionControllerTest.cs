@@ -1,4 +1,5 @@
-﻿using Common.AspNetCore.Test;
+﻿using Common.AspNet.Test;
+using Common.NET.Test;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Transaction = OfxWeb.Asp.Models.Transaction;
 
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
     [TestClass]
     public class TransactionControllerTest

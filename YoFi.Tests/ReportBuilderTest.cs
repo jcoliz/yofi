@@ -1,4 +1,4 @@
-﻿using Common.AspNetCore.Test;
+﻿using Common.NET.Test;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Controllers.Reports;
@@ -8,9 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
     [TestClass]
     public class ReportBuilderTest

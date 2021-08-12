@@ -1,18 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common.AspNet.Test;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfxWeb.Asp;
 using OfxWeb.Asp.Controllers;
+using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Common.AspNetCore.Test;
-using OfxWeb.Asp.Data;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using OfficeOpenXml;
 
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
     [TestClass]
     public class PayeeControllerTest

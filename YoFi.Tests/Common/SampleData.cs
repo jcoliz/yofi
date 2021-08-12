@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
-namespace Common.AspNetCore.Test
+namespace Common.NET.Test
 {
     public static class SampleData
     {

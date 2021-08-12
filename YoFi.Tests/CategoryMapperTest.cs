@@ -1,11 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxWeb.Asp.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
     [TestClass]
     public class CategoryMapperTest

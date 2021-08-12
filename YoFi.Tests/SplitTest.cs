@@ -5,10 +5,9 @@ using OfxWeb.Asp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
     [TestClass]
     public class SplitTest

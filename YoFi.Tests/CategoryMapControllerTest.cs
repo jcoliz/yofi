@@ -1,26 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Common.AspNet.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfficeOpenXml;
 using OfxWeb.Asp.Controllers;
-using OfxWeb.Asp.Data;
 using OfxWeb.Asp.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using Common.AspNetCore.Test;
 
-//
-// This is my first controller unit test. I am going to start with an easy controller, the category map controller.
-//
-
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
-
-
     [TestClass]
     public class CategoryMapControllerTest
     {

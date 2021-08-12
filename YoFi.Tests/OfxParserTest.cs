@@ -1,10 +1,10 @@
-using Common.AspNetCore.Test;
+using Common.NET.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxSharpLib;
 using System;
 using System.Linq;
 
-namespace Ofx.Tests
+namespace YoFi.Tests
 {
     [TestClass]
     public class OfxParserTest
