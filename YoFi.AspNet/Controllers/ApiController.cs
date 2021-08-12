@@ -4,17 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
-using YoFi.AspNet.Controllers.Reports;
-using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using YoFi.AspNet.Controllers.Reports;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 
 namespace YoFi.AspNet.Controllers
 {
