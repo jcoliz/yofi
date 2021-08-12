@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OfxWeb.Asp\OfxWeb.Asp.csproj" />
+    <ProjectReference Include="..\YoFi.AspNet\YoFi.AspNet.csproj" />
   </ItemGroup>
 
 </Project>

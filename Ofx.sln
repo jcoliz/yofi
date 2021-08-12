@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31229.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoFi.Tests", "YoFi.Tests\YoFi.Tests.csproj", "{5E334C32-FE96-4F4F-954E-34681222DB9A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OfxWeb.Asp", "OfxWeb.Asp\OfxWeb.Asp.csproj", "{813D7788-D271-4932-A9BD-36DD24E2345D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoFi.AspNet", "YoFi.AspNet\YoFi.AspNet.csproj", "{813D7788-D271-4932-A9BD-36DD24E2345D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
