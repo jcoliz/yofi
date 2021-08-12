@@ -94,19 +94,19 @@
                     Edit
                 </th>
             }
-            <th>
+            <th class="col-1">
                 <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["DateSortParm"]">Date</a>
             </th>
-            <th>
+            <th class="col-3">
                 <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
             </th>
-            <th style="text-align:right">
+            <th class="col-1" style="text-align:right">
                 <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
             </th>
-            <th>
+            <th class="col-3">
                 <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
             </th>
-            <th>
+            <th class="col-3">
                 @Html.DisplayNameFor(model => model.Memo)
             </th>
             @if ((bool)(ViewData["ShowHidden"]))
@@ -115,7 +115,7 @@
                     <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
                 </th>
             }
-            <th colspan="5">
+            <th colspan="5" class="col-1">
             </th>
         </tr>
     </thead>
