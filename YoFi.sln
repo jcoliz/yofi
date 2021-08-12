@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoFi.Tests", "YoFi.Tests\Yo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoFi.AspNet", "YoFi.AspNet\YoFi.AspNet.csproj", "{813D7788-D271-4932-A9BD-36DD24E2345D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OfxSharp", "submodules\OFXSharp\source\OfxSharp\OfxSharp.csproj", "{3CE6F19D-DAC2-4594-B60D-5FF33C186D27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{813D7788-D271-4932-A9BD-36DD24E2345D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{813D7788-D271-4932-A9BD-36DD24E2345D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{813D7788-D271-4932-A9BD-36DD24E2345D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CE6F19D-DAC2-4594-B60D-5FF33C186D27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CE6F19D-DAC2-4594-B60D-5FF33C186D27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CE6F19D-DAC2-4594-B60D-5FF33C186D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CE6F19D-DAC2-4594-B60D-5FF33C186D27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,8 +1,9 @@
 using Common.NET.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfxSharpLib;
+using OfxSharp;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace YoFi.Tests
 {
@@ -12,14 +13,14 @@ namespace YoFi.Tests
         public OfxDocument Document = null;
 
         [TestInitialize]
-        public void SetUp()
+        public async Task SetUp()
         {
             if (null == Document)
             {
                 var filename = "ExportedTransactions.ofx";
                 var stream = SampleData.Open(filename);
-                var parser = new OfxDocumentParser();
-                Document = parser.Import(stream);
+
+                Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
             }
         }
 
@@ -32,18 +33,18 @@ namespace YoFi.Tests
         [TestMethod]
         public void TransactionsCount()
         {
-            Assert.AreEqual(1000, Document.Transactions.Count);
+            Assert.AreEqual(1000, Document.Statements.SelectMany(x=>x.Transactions).Count());
         }
 
         [TestMethod]
         public void TransactionSample()
         {
-            var actual = Document.Transactions.First();
+            var actual = Document.Statements.First().Transactions.First();
 
             Assert.AreEqual(-49.68M, actual.Amount);
             Assert.AreEqual("Ext Credit Card Debit SAFEWAY FUEL 0490       WINNEMUCCA     NV USA", actual.Memo.Trim());
             Assert.AreEqual("476365570", actual.ReferenceNumber.Trim());
-            Assert.AreEqual(new DateTime(2018, 6, 2), actual.Date);
+            Assert.AreEqual(new DateTime(2018, 6, 2), actual.Date.Value.DateTime);
         }
     }
 }

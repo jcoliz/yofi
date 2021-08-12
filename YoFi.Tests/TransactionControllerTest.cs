@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
-using OfxSharpLib;
+using OfxSharp;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
@@ -79,16 +79,15 @@ namespace YoFi.Tests
 
         IEnumerable<Transaction> TransactionItemsLong;
 
-        IEnumerable<Transaction> GetTransactionItemsLong()
+        async Task<IEnumerable<Transaction>> GetTransactionItemsLong()
         {
             if (null == TransactionItemsLong)
             {
                 using (var stream = SampleData.Open("ExportedTransactions.ofx"))
                 {
-                    var parser = new OfxDocumentParser();
-                    var Document = parser.Import(stream);
+                    OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
 
-                    TransactionItemsLong = Document.Transactions.Select(tx=> new Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date });
+                    TransactionItemsLong = Document.Statements.SelectMany(x=>x.Transactions).Select(tx=> new Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date.Value.DateTime });
                 }
             }
             return TransactionItemsLong;
@@ -715,6 +714,26 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public async Task OfxUploadNoBankRef()
+        {
+            // Given: An OFX file containing transactions with no bank reference
+            var filename = "NoRefnums.ofx";
+            var expected = 2;
+
+            // When: Uploading that file
+            var stream = SampleData.Open(filename);
+            var length = stream.Length;
+            IFormFile file = new FormFile(stream, 0, length, filename, filename);
+            var result = await controller.Upload(new List<IFormFile>() { file }, null);
+
+            // Then: All transactions are imported successfully
+            var rdresult = result as RedirectToActionResult;
+
+            Assert.AreEqual("Import", rdresult.ActionName);
+            Assert.AreEqual(expected, dbset.Count());
+        }
+
+        [TestMethod]
         public async Task ImportCancel()
         {
             // Given: As set of items, some with imported flag, some with not
@@ -950,7 +969,7 @@ namespace YoFi.Tests
         public async Task IndexPage1()
         {
             // Given: A very long set of items 
-            var items = GetTransactionItemsLong();
+            var items = await GetTransactionItemsLong();
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -973,7 +992,7 @@ namespace YoFi.Tests
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             var itemcount = TransactionsController.PageSize + TransactionsController.PageSize / 2;
-            context.Transactions.AddRange(GetTransactionItemsLong().Take(itemcount));
+            context.Transactions.AddRange((await GetTransactionItemsLong()).Take(itemcount));
             context.SaveChanges();
 
             // When: Calling Index page 2

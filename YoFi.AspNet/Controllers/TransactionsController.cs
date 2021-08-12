@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
-using OfxSharpLib;
+using OfxSharp;
 using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
@@ -749,14 +749,13 @@ namespace YoFi.AspNet.Controllers
                     {
                         using (var stream = formFile.OpenReadStream())
                         {
-                            var parser = new OfxDocumentParser();
-                            var Document = parser.Import(stream);
-
+                             OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
+                            
                             await Task.Run(() =>
                             {
-                                foreach (var tx in Document.Transactions)
+                                foreach (var tx in Document.Statements.SelectMany(x=>x.Transactions))
                                 {
-                                    var txmodel = new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date, Selected = true };
+                                    var txmodel = new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo?.Trim(), BankReference = tx.ReferenceNumber?.Trim(), Timestamp = tx.Date.Value.DateTime, Selected = true };
                                     if (string.IsNullOrEmpty(txmodel.BankReference))
                                         txmodel.GenerateBankReference();
 
