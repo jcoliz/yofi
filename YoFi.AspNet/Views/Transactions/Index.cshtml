@@ -139,14 +139,14 @@
                 {
                     <td>
                         @{ var checkedornot = (item.Hidden == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/tx/Hide/@item.ID">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Hide/@item.ID">
                     </td>
                 }
                 @if ((bool)(ViewData["ShowSelected"]))
                 {
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/tx/Select/@item.ID">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Select/@item.ID">
                     </td>
                 }
                 <td>

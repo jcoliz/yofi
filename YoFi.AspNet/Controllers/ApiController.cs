@@ -17,7 +17,7 @@ using YoFi.AspNet.Models;
 namespace YoFi.AspNet.Controllers
 {
     [Produces("application/json")]
-    [Route("api/tx")]
+    [Route("api")]
     public class ApiController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,7 +31,6 @@ namespace YoFi.AspNet.Controllers
             _configuration = configuration;
         }
 
-        // GET: api/tx
         [HttpGet]
         public ApiResult Get()
         {
@@ -53,7 +52,6 @@ namespace YoFi.AspNet.Controllers
             return single;
         }
 
-        // GET: api/tx/5
         [HttpGet("{id}", Name = "Get")]
         public async Task<ApiResult> Get(int id)
         {
@@ -173,9 +171,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // POST: api/tx/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<ApiResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
@@ -208,9 +203,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // POST: api/tx/UpReceipt/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("UpReceipt/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<ApiResult> UpReceipt(int id, IFormFile file)
@@ -307,9 +299,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // POST: api/tx/EditPayee/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("EditPayee/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<ApiResult> EditPayee(int id, bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
@@ -343,10 +332,6 @@ namespace YoFi.AspNet.Controllers
         }
 
 
-        // POST: api/tx/AddPayee
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        // TODO: Move to a payee api controller and rename to POST api/payee/Create
         [HttpPost("AddPayee")]
         [ValidateAntiForgeryToken]
         public async Task<ApiResult> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
@@ -390,7 +375,6 @@ namespace YoFi.AspNet.Controllers
                 throw new ApplicationException("Invalid password");
         }
 
-        // GET: api/tx/reportv2/all
         [HttpGet("ReportV2/{id}")]
         public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
         {
@@ -413,7 +397,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // GET: api/tx/cat-ac
         [HttpGet("cat-ac")]
         public List<string> CategoryAutocomplete(string q)
         {

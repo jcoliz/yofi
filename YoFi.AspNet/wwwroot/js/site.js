@@ -41,7 +41,7 @@
 
                 $('.category-autocomplete').autoComplete({
                     resolverSettings: {
-                        url: '/api/tx/cat-ac'
+                        url: '/api/cat-ac'
                     }
                 });
             },
@@ -58,7 +58,7 @@
         var tr = $(this).data('tr');
 
         $.ajax({
-            url: "/api/tx/Edit/5",
+            url: "/api/Edit/5",
             type: "POST",
             beforeSend: xsrf,
             data: $(this).serialize(),
@@ -81,7 +81,7 @@
         var tr = $(this).data('tr');
 
         $.ajax({
-            url: "/api/tx/EditPayee/5",
+            url: "/api/EditPayee/5",
             type: "POST",
             beforeSend: xsrf,
             data: $(this).serialize(),
@@ -103,7 +103,7 @@
         var tr = $(this).data('tr');
 
         $.ajax({
-            url: "/api/tx/AddPayee/",
+            url: "/api/AddPayee/",
             type: "POST",
             beforeSend: xsrf,
             data: $(this).serialize(),
@@ -139,7 +139,7 @@
                     formData.append('id', id)
 
                     $.ajax({
-                        url: "/api/tx/UpReceipt/5",
+                        url: "/api/UpReceipt/5",
                         type: "POST",
                         beforeSend: xsrf,
                         data: formData,
@@ -174,7 +174,7 @@
 
     $('.category-autocomplete').autoComplete({
         resolverSettings: {
-            url: '/api/tx/cat-ac'
+            url: '/api/cat-ac'
         }
     });
 
@@ -185,7 +185,7 @@ function applyPayee(tr)
     var id = tr.data('id');
 
     $.ajax({
-        url: "/api/tx/ApplyPayee/" + id,
+        url: "/api/ApplyPayee/" + id,
         type: "POST",
         success: function (result) {
             if (result.Ok)
