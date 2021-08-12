@@ -12,6 +12,7 @@
 
 }
 
+
 @section scripts {
     <script type="text/javascript">
         function dropHandler(ev) {
@@ -25,6 +26,17 @@
         }
     </script>
 }
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+<input type="hidden" id="xsrf"
+       name="xsrf" value="@GetAntiXsrfRequestToken()">
 
 <nav class="navbar navbar-light navbar-page mb-3">
     <div class="container">

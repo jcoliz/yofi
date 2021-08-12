@@ -120,6 +120,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost("Hide/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<ApiResult> Hide(int id, bool value)
         {
             try

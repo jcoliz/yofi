@@ -9,6 +9,13 @@
         $.ajax({
             url: this.dataset.endpoint,
             data: { value: $(this).is(":checked") },
+            beforeSend: function (xhr) {
+                element = document.getElementById('xsrf');
+                if (element) {
+                    token = element.value;
+                    xhr.setRequestHeader("RequestVerificationToken", token);
+                }
+            },
             type: "POST"
         });
     });
