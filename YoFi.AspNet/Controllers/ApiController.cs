@@ -219,6 +219,7 @@ namespace YoFi.AspNet.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("UpReceipt/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<ApiResult> UpReceipt(int id, IFormFile file)
         {
             try
@@ -267,7 +268,12 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
+        // TODO: I don't think this is actually used anywhere. Perhaps the original
+        // idea was that I could drag/drop an XLS file onto a transaction, and
+        // it would UpSplits that??
+
         [HttpPost("UpSplits/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<ApiResult> UpSplits(int id, IFormFile file)
         {
             try

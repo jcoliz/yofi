@@ -141,6 +141,7 @@
                     $.ajax({
                         url: "/api/tx/UpReceipt/5",
                         type: "POST",
+                        beforeSend: xsrf,
                         data: formData,
                         processData: false,
                         contentType: false,

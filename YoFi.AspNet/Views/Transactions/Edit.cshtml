@@ -4,6 +4,17 @@
     ViewData["Title"] = "Edit Transaction";
 }
 
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+<input type="hidden" id="xsrf"
+       name="xsrf" value="@GetAntiXsrfRequestToken()">
+
 <h2>@ViewData["Title"]</h2>
 <hr />
 <div class="row mb-3">

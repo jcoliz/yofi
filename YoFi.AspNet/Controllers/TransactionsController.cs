@@ -650,7 +650,8 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Edit), new { id });
         }
 
-        private async Task<IActionResult> GetReceipt(int id)
+        [HttpGet]
+        public async Task<IActionResult> GetReceipt(int id)
         {
             try
             {
