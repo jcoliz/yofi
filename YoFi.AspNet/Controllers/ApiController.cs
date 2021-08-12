@@ -16,11 +16,6 @@ using YoFi.AspNet.Models;
 
 namespace YoFi.AspNet.Controllers
 {
-    // Note that these methods largely do their own Json serialization. This
-    // is currently needed because the front end expectes everything in PascalCase,
-    // but the default formatter returns everything in camelCase. In later versions
-    // of .NET core this is configurable. But for now, we have to do it ourselves.
-
     [Produces("application/json")]
     [Route("api/tx")]
     public class ApiController : Controller
