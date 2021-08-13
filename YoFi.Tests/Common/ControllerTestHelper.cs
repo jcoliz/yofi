@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Tests.Helpers;
 
 namespace Common.AspNet.Test
 {
@@ -298,7 +299,8 @@ namespace Common.AspNet.Test
             return incoming;
         }
 
-        static public IFormFile PrepareUpload<X>(ICollection<X> what) where X: class
+#if true
+        static public IFormFile PrepareUpload<X>(ICollection<X> what) where X : class
         {
             // Build a spreadsheet with the chosen number of items
             byte[] reportBytes;
@@ -317,6 +319,29 @@ namespace Common.AspNet.Test
 
             return file;
         }
+#else
+        static public IFormFile PrepareUpload<X>(ICollection<X> what) where X: class
+        {
+            // Build a spreadsheet with the chosen number of items
+            var stream = new MemoryStream();
+            var sheetname = $"{typeof(T).Name}s";
+            SpreadsheetHelpers.InsertItems(stream, what, sheetname);
+
+            stream.Seek(0, SeekOrigin.Begin);
+            using (var outstream = File.OpenWrite($"{sheetname}.xlsx"))
+            {
+                Console.WriteLine($"Writing {sheetname}...");
+                stream.CopyTo(outstream);
+            }
+
+            // Create a formfile with it
+            // Note that we are not disposing the stream. User of the file will do so later.
+            stream.Seek(0,SeekOrigin.Begin);
+            IFormFile file = new FormFile(stream, 0, stream.Length, sheetname, $"{sheetname}.xlsx");
+
+            return file;
+        }
+#endif
 
         public async Task<IActionResult> DoUpload(ICollection<T> what)
         {
