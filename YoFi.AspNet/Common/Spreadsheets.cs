@@ -258,35 +258,36 @@ namespace YoFi.AspNet.Common
 
         private static void PopulateFrom<T>(ExcelWorksheet worksheet, IEnumerable<T> source, out int rows, out int cols) where T : class
         {
-            // First add the headers
+            var data = new List<IEnumerable<object>>();
 
-            // If we don't want a property to show up when it's being json serialized, we also don't want 
-            // it to show up when we're exporting it.
-            var properties = typeof(T).GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
+            // Ignore properties which also should be ignored on JSON serialize
+            var properties = source.First().GetType().GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
+
+            // Add a single line for headers
+            data.Add(properties.Select(x => x.Name).ToList());
+
+            // Add a line each for each item in source
+            data.AddRange(source.Select(item => properties.Select(x => x.GetValue(item)).ToList()));
+
             int col = 1;
-            foreach (var property in properties)
-            {
-                worksheet.Cells[1, col].Value = property.Name;
-                ++col;
-            }
-
-            // Add values
-
-            int row = 2;
-            foreach (var item in source)
+            int row = 1;
+            foreach (var line in data)
             {
                 col = 1;
-                foreach (var property in properties)
+                foreach (var field in line)
                 {
-                    worksheet.Cells[row, col].Value = property.GetValue(item);
+                    if (null != field)
+                    {
+                        worksheet.Cells[row, col].Value = field;
 
-                    if (property.PropertyType == typeof(DateTime))
-                    {
-                        worksheet.Cells[row, col].Style.Numberformat.Format = "m/d/yyyy";
-                    }
-                    else if (property.PropertyType == typeof(decimal))
-                    {
-                        worksheet.Cells[row, col].Style.Numberformat.Format = "$#,##0.00";
+                        if (field.GetType() == typeof(DateTime))
+                        {
+                            worksheet.Cells[row, col].Style.Numberformat.Format = "m/d/yyyy";
+                        }
+                        else if (field.GetType() == typeof(decimal))
+                        {
+                            worksheet.Cells[row, col].Style.Numberformat.Format = "$#,##0.00";
+                        }
                     }
                     ++col;
                 }
