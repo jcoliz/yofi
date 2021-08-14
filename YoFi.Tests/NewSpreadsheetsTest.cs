@@ -65,24 +65,14 @@ namespace YoFi.Tests
         [TestMethod]
         public void SimpleWriteString()
         {
-            // Given: A very simple item
-            var Items = new SimpleItem<string>[] { new SimpleItem<string>() { Key = "Hello, world!" } };
+
+            // Given: A ton of transactions
+            var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
 
             // When: Writing it to a spreadsheet using the new methods
-            var name = "SimpleWriteString";
-            using(var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                List<SimpleItem<string>> actual = new List<SimpleItem<string>>();
-                List<string> sheets = new List<string>();
-                WhenReadAsOldSpreadsheet(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("SimpleWriteString", Items);
         }
 
         [TestMethod]
@@ -279,20 +269,30 @@ namespace YoFi.Tests
             var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
 
             // When: Writing it to a spreadsheet using the new methods
-            var name = "TransactionItems20";
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("TransactionItems20", Items);
+        }
+
+        public void WriteNewReadOld<T>(string name, List<T> items) where T : class, new()
+        {
+            // Given: Some items
+
+            // When: Writing it to a spreadsheet using the new methods
             using (var stream = new MemoryStream())
             {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
+                WhenWritingToNewSpreadsheet(stream, items, name);
 
-                var actual = new List<Transaction>();
+                // And: Reading it back to a spreadsheet using the old methods
+                var actual = new List<T>();
                 var sheets = new List<string>();
-                WhenReadAsOldSpreadsheet<Transaction>(stream, name, actual, sheets);
+                WhenReadAsOldSpreadsheet<T>(stream, name, actual, sheets);
 
                 // Then: The spreadsheet is valid, and contains the expected item
                 Assert.AreEqual(1, sheets.Count());
                 Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
+                CollectionAssert.AreEqual(items, actual);
             }
-        }
+       }
     }
 }
