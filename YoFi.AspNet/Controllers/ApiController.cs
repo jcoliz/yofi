@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using YoFi.AspNet.Common;
 using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
@@ -271,10 +272,11 @@ namespace YoFi.AspNet.Controllers
                 if (file.FileName.ToLower().EndsWith(".xlsx"))
                 {
                     using (var stream = file.OpenReadStream())
+                    using (var ssr = new SpreadsheetReader())
                     {
-                        var excel = new ExcelPackage(stream);
-                        var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Splits").Single();
-                        worksheet.ExtractInto(incoming);
+                        ssr.Open(stream);
+                        var items = ssr.Read<Split>();
+                        incoming.UnionWith(items);
                     }
                 }
 
