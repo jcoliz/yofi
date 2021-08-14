@@ -62,218 +62,6 @@ namespace YoFi.Tests
             }
         }
 
-        [TestMethod]
-        public void SimpleWriteString()
-        {
-
-            // Given: A ton of transactions
-            var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
-
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
-            // Then: The spreadsheet is valid, and contains the expected item
-            WriteNewReadOld("SimpleWriteString", Items);
-        }
-
-        [TestMethod]
-        public void SimpleWriteStringNull()
-        {
-            // Given: A very simple item
-            var Items = new SimpleItem<string>[] { new SimpleItem<string>(), new SimpleItem<string>() { Key = "Second" } };
-
-            // When: Writing it to a spreadsheet using the new methods
-            var name = "SimpleWriteStringNull";
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                List<SimpleItem<string>> actual = new List<SimpleItem<string>>();
-                List<string> sheets = new List<string>();
-                WhenReadAsOldSpreadsheet(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
-        }
-
-        [TestMethod]
-        public void SimpleWriteDateTime()
-        {
-            // Given: A very simple item
-            var Items = new SimpleItem<DateTime>[] { new SimpleItem<DateTime>() { Key = new DateTime(2021,06,08) } };
-
-            // When: Writing it to a spreadsheet using the new methods
-            var name = "SimpleWriteDateTime";
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                List<SimpleItem<DateTime>> actual = new List<SimpleItem<DateTime>>();
-                List<string> sheets = new List<string>();
-                WhenReadAsOldSpreadsheet(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
-        }
-
-        [TestMethod]
-        public void SimpleWriteInt32()
-        {
-            // Given: A very simple item
-            var Items = new SimpleItem<Int32>[] { new SimpleItem<Int32>() { Key = 12345 } };
-
-            // When: Writing it to a spreadsheet using the new methods
-            var name = "SimpleWriteInt32";
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                List<SimpleItem<Int32>> actual = new List<SimpleItem<Int32>>();
-                List<string> sheets = new List<string>();
-                WhenReadAsOldSpreadsheet(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
-        }
-
-        [TestMethod]
-        public void SimpleWriteDecimal()
-        {
-            // Given: A very simple item
-            var Items = new SimpleItem<decimal>[] { new SimpleItem<decimal>() { Key = 123.45m } };
-
-            // When: Writing it to a spreadsheet using the new methods
-            var name = "SimpleWriteDecimal";
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                List<SimpleItem<decimal>> actual = new List<SimpleItem<decimal>>();
-                List<string> sheets = new List<string>();
-                WhenReadAsOldSpreadsheet(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
-        }
-        [TestMethod]
-        public void SimpleWriteBoolean()
-        {
-            // Given: A very simple item
-            var Items = new SimpleItem<Boolean>[] { new SimpleItem<Boolean>() { Key = true } };
-
-            // When: Writing it to a spreadsheet using the new methods
-            var name = "SimpleWriteBoolean";
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                var actual = new List<SimpleItem<Boolean>>();
-                var sheets = new List<string>();
-                WhenReadAsOldSpreadsheet(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
-        }
-
-        [TestMethod]
-        public void OnePayee()
-        {
-            // Given: A single empty transaction
-            // Note that an empty timestamp does not serialize well
-            var Items = new List<Payee>() { new Payee() { ID = 1, Category = "A", SubCategory = "B", Name = "C", Selected = true } };
-
-            // When: Writing it to a spreadsheet using the new methods
-            var name = "OnePayee";
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                var actual = new List<Payee>();
-                var sheets = new List<string>();
-                WhenReadAsOldSpreadsheet<Payee>(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
-        }
-
-
-        [TestMethod]
-        public void OneTransactionEmpty()
-        {
-            // NOTE: This fails to load in excel, whereas the previous ones DO work.
-
-            // Given: A single empty transaction
-            // Note that an empty timestamp does not serialize well
-            var Items = new List<Transaction>() { new Transaction() { Timestamp = new DateTime(2021, 01, 03) } };
-
-            // When: Writing it to a spreadsheet using the new methods
-            var name = "OneTransactionEmpty";
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                var actual = new List<Transaction>();
-                var sheets = new List<string>();
-                WhenReadAsOldSpreadsheet<Transaction>(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
-        }
-
-        [TestMethod]
-        public async Task TransactionItemsFew()
-        {
-            // Given: A ton of transactions
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(2).ToList();
-
-            // When: Writing it to a spreadsheet using the new methods
-            var name = "TransactionItemsFew";
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, Items, name);
-
-                var actual = new List<Transaction>();
-                var sheets = new List<string>();
-                WhenReadAsOldSpreadsheet<Transaction>(stream, name, actual, sheets);
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(Items, actual);
-            }
-        }
-        [TestMethod]
-        public async Task TransactionItems20()
-        {
-            // Given: A ton of transactions
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
-
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
-            // Then: The spreadsheet is valid, and contains the expected item
-            WriteNewReadOld("TransactionItems20", Items);
-        }
-
         public void WriteNewReadOld<T>(string name, List<T> items) where T : class, new()
         {
             // Given: Some items
@@ -293,6 +81,129 @@ namespace YoFi.Tests
                 Assert.AreEqual(name, sheets.Single());
                 CollectionAssert.AreEqual(items, actual);
             }
-       }
+        }
+
+
+        [TestMethod]
+        public void SimpleWriteString()
+        {
+            // Given: A very simple string item
+            var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("SimpleWriteString", Items);
+        }
+
+        [TestMethod]
+        public void SimpleWriteStringNull()
+        {
+            // Given: A small list of simple string items, one with null key
+            var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("SimpleWriteStringNull", Items);
+        }
+
+        [TestMethod]
+        public void SimpleWriteDateTime()
+        {
+            // Given: A very simple item w/ DateTime member
+            var Items = new List<SimpleItem<DateTime>>() { new SimpleItem<DateTime>() { Key = new DateTime(2021,06,08) } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("SimpleWriteDateTime", Items);
+        }
+
+        [TestMethod]
+        public void SimpleWriteInt32()
+        {
+            // Given: A very simple item w/ Int32 member
+            var Items = new List<SimpleItem<Int32>>() { new SimpleItem<Int32>() { Key = 12345 } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("SimpleWriteInt32", Items);
+        }
+
+        [TestMethod]
+        public void SimpleWriteDecimal()
+        {
+            // Given: A very simple item w/ decimal member
+            var Items = new List<SimpleItem<decimal>>() { new SimpleItem<decimal>() { Key = 123.45m } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("SimpleWriteDecimal", Items);
+        }
+        [TestMethod]
+        public void SimpleWriteBoolean()
+        {
+            // Given: A very simple item w/ boolean member
+            var Items = new List<SimpleItem<Boolean>>() { new SimpleItem<Boolean>() { Key = true } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("SimpleWriteBoolean", Items);
+        }
+
+        [TestMethod]
+        public void OnePayee()
+        {
+            // Given: A single empty transaction
+            // Note that an empty timestamp does not serialize well
+            var Items = new List<Payee>() { new Payee() { ID = 1, Category = "A", SubCategory = "B", Name = "C", Selected = true } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("OnePayee", Items);
+        }
+
+        [TestMethod]
+        public void OneTransactionEmpty()
+        {
+            // Given: A single empty transaction
+            // Note that an empty timestamp does not serialize well
+            var Items = new List<Transaction>() { new Transaction() { Timestamp = new DateTime(2021, 01, 03) } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("OneTransactionEmpty", Items);
+        }
+
+        [TestMethod]
+        public async Task TransactionItemsFew()
+        {
+            // Given: A small number of transactions
+            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(2).ToList();
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("TransactionItemsFew", Items);
+        }
+        
+        [TestMethod]
+        public async Task TransactionItems20()
+        {
+            // Given: A ton of transactions
+            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("TransactionItems20", Items);
+        }
+
     }
 }
