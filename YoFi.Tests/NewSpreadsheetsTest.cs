@@ -28,13 +28,13 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
-        public void SimpleWrite()
+        public void SimpleWriteString()
         {
             // Given: A very simple item
             var Items = new SimpleItem<string>[] { new SimpleItem<string>() { Key = "Hello, world!" } };
 
             // When: Writing it to a spreadsheet using the new methods
-            var name = "SimpleWrite";
+            var name = "SimpleWriteString";
             using(var stream = new MemoryStream())
             {
                 using(var writer = new NewSpreadsheetWriter())
@@ -44,7 +44,7 @@ namespace YoFi.Tests
                 }
 
                 stream.Seek(0, SeekOrigin.Begin);
-                using (var outstream = File.OpenWrite($"Test-SimpleWrite.xlsx"))
+                using (var outstream = File.OpenWrite($"Test-{name}.xlsx"))
                 {
                     Console.WriteLine($"Writing {outstream.Name}...");
                     stream.CopyTo(outstream);
