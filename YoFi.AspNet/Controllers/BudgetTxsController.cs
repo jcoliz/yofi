@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Common;
@@ -269,38 +269,27 @@ namespace YoFi.AspNet.Controllers
         }
 
         // GET: Transactions/Download
-        public async Task<IActionResult> Download()
+        public Task<IActionResult> Download()
         {
-            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             try
             {
-                var objecttype = "BudgetTxs";
-                var transactions = await _context.BudgetTxs.OrderBy(x => x.Timestamp).ThenBy(x=>x.Category).ToListAsync();
+                var transactions = _context.BudgetTxs.OrderBy(x => x.Timestamp).ThenBy(x=>x.Category);
 
-                byte[] reportBytes;
-                using (var package = new ExcelPackage())
+                var stream = new MemoryStream();
+                using (var ssw = new SpreadsheetWriter())
                 {
-                    package.Workbook.Properties.Title = objecttype;
-                    package.Workbook.Properties.Author = "coliz.com";
-                    package.Workbook.Properties.Subject = objecttype;
-                    package.Workbook.Properties.Keywords = objecttype;
-
-                    var worksheet = package.Workbook.Worksheets.Add(objecttype);
-                    int rows, cols;
-                    worksheet.PopulateFrom(transactions, out rows, out cols);
-
-                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), objecttype);
-                    tbl.ShowHeader = true;
-                    tbl.TableStyle = OfficeOpenXml.Table.TableStyles.Dark9;
-
-                    reportBytes = package.GetAsByteArray();
+                    ssw.Open(stream);
+                    ssw.Write(transactions);
                 }
 
-                return File(reportBytes, XlsxContentType, $"{objecttype}.xlsx");
+                stream.Seek(0, SeekOrigin.Begin);
+
+                // Need to return a task to meet the IControllerBase interface
+                return Task.FromResult(File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "BudgetTxs.xlsx") as IActionResult);
             }
             catch (Exception)
             {
-                return NotFound();
+                return Task.FromResult(NotFound() as IActionResult);
             }
         }
 
