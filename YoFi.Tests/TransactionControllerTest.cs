@@ -539,7 +539,7 @@ namespace YoFi.Tests
             var result = await controller.Download(false,mapped);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
-            var incoming = helper.ExtractFromExcel<Split>(data);
+            var incoming = helper.ExtractFromSpreadsheet<Split>(data);
 
             Assert.AreEqual(2, incoming.Count);
             Assert.AreEqual(item.ID, incoming.First().TransactionID);
@@ -607,7 +607,7 @@ namespace YoFi.Tests
             var result = await controller.Download(false, true);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
-            var incoming = helper.ExtractFromExcel<Transaction>(data);
+            var incoming = helper.ExtractFromSpreadsheet<Transaction>(data);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual("X:Y:A", incoming.Single().Category);
@@ -623,7 +623,7 @@ namespace YoFi.Tests
             var result = await controller.Download(false, true);
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
-            var incoming = helper.ExtractFromExcel<Transaction>(data);
+            var incoming = helper.ExtractFromSpreadsheet<Transaction>(data);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual(null, incoming.Single().Category);
@@ -643,7 +643,7 @@ namespace YoFi.Tests
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 
-            var incoming = helper.ExtractFromExcel<Transaction>(data);
+            var incoming = helper.ExtractFromSpreadsheet<Transaction>(data);
 
             Assert.AreEqual(2, incoming.Count);
 

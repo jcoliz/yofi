@@ -2,9 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfficeOpenXml;
-using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,6 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Tests.Helpers;
 using YoFi.AspNet.Common;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 
 namespace Common.AspNet.Test
 {
@@ -108,16 +107,17 @@ namespace Common.AspNet.Test
             await context.SaveChangesAsync();
         }
 
-        public HashSet<TExtract> ExtractFromExcel<TExtract>(byte[] data) where TExtract : new()
+        public HashSet<TExtract> ExtractFromSpreadsheet<TExtract>(byte[] data) where TExtract : class, new()
         {
             var incoming = new HashSet<TExtract>();
             using (var stream = new MemoryStream(data))
             {
-                var excel = new ExcelPackage(stream);
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var sheetname = $"{typeof(TExtract).Name}s";
-                var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == sheetname).Single();
-                worksheet.ExtractInto<TExtract>(incoming, includeids: true);
+                using (var ssr = new SpreadsheetReader())
+                {
+                    ssr.Open(stream);
+                    var items = ssr.Read<TExtract>(includeids:true);
+                    incoming.UnionWith(items);
+                }
             }
 
             return incoming;
@@ -284,7 +284,7 @@ namespace Common.AspNet.Test
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 
-            var incoming = ExtractFromExcel<T>(data);
+            var incoming = ExtractFromSpreadsheet<T>(data);
 
             Assert.AreEqual(5, incoming.Count);
 

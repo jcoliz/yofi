@@ -38,7 +38,7 @@ namespace YoFi.AspNet.Common
         /// </remarks>
         /// <param name="sheetname"></param>
         /// <returns>Enumerable of T items, OR null if @sheetname is not found</returns>
-        IEnumerable<T> Read<T>(string sheetname);
+        IEnumerable<T> Read<T>(string sheetname = null, bool? includeids = false) where T : class, new();
     }
 
     public interface ISpreadsheetWriter : IDisposable
@@ -63,13 +63,29 @@ namespace YoFi.AspNet.Common
     {
         public void Open(Stream stream)
         {
-            throw new NotImplementedException();
+            _package = new ExcelPackage(stream);
         }
 
-        public IEnumerable<T> Read<T>(string sheetname)
+        public IEnumerable<T> Read<T>(string sheetname = null, bool? includeids = false) where T : class, new()
         {
-            throw new NotImplementedException();
+            List<T> result = null;
+
+            var name = sheetname;
+            if (string.IsNullOrEmpty(name))
+                name = typeof(T).Name + "s";
+
+            var found = _package.Workbook.Worksheets.Where(x => x.Name == name);
+            if (found.Any())
+            {
+                result = new List<T>();
+                var worksheet = found.First();
+                worksheet.ExtractInto(result,includeids);
+            }
+
+            return result;
         }
+
+        ExcelPackage _package;
 
         #region IDispose
         private bool disposedValue;

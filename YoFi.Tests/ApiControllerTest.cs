@@ -6,10 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using YoFi.AspNet.Controllers;
-using YoFi.AspNet.Controllers.Reports;
-using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,6 +13,10 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using YoFi.AspNet.Controllers;
+using YoFi.AspNet.Controllers.Reports;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 
 namespace YoFi.Tests
 {

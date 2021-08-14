@@ -175,7 +175,7 @@ namespace YoFi.Tests
             var fcresult = result as FileContentResult;
             var data = fcresult.FileContents;
 
-            var incoming = helper.ExtractFromExcel<Payee>(data);
+            var incoming = helper.ExtractFromSpreadsheet<Payee>(data);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
