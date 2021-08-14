@@ -17,6 +17,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using YoFi.AspNet.Common;
+using Transaction = YoFi.AspNet.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -693,10 +695,11 @@ namespace YoFi.AspNet.Controllers
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using (var stream = file.OpenReadStream())
+                        using (var ssr = new SpreadsheetReader())
                         {
-                            var excel = new ExcelPackage(stream);
-                            var worksheet = excel.Workbook.Worksheets.First();
-                            worksheet.ExtractInto(incoming);
+                            ssr.Open(stream);
+                            var items = ssr.Read<Split>();
+                            incoming.UnionWith(items);
                         }
                     }
                 }
@@ -768,18 +771,16 @@ namespace YoFi.AspNet.Controllers
                     if (formFile.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using (var stream = formFile.OpenReadStream())
+                        using (var ssr = new SpreadsheetReader())
                         {
-                            var excel = new ExcelPackage(stream);
-                            var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Transactions").Single();
-                            worksheet.ExtractInto(incoming, includeids: true);
+                            ssr.Open(stream);
+                            var items = ssr.Read<Transaction>(includeids: true);
+                            incoming.AddRange(items);
 
                             // If there are also splits included here, let's grab those
-                            worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "Splits").SingleOrDefault();
-                            if (null != worksheet)
+                            var flatsplits = ssr.Read<Split>(includeids: true);
+                            if (null != flatsplits)
                             {
-                                var flatsplits = new List<Models.Split>();
-                                worksheet.ExtractInto(flatsplits, includeids: true);
-
                                 // Transform the flat data into something easier to use.
                                 splits = flatsplits.ToLookup(x => x.TransactionID);
                             }

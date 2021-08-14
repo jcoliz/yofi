@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.AspNet.Common;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
 
@@ -238,15 +239,16 @@ namespace YoFi.AspNet.Controllers
             IEnumerable<BudgetTx> result = Enumerable.Empty<BudgetTx>();
             try
             {
-                foreach (var formFile in files)
+                foreach (var file in files)
                 {
-                    if (formFile.FileName.ToLower().EndsWith(".xlsx"))
+                    if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
-                        using (var stream = formFile.OpenReadStream())
+                        using (var stream = file.OpenReadStream())
+                        using (var ssr = new SpreadsheetReader())
                         {
-                            var excel = new ExcelPackage(stream);
-                            var worksheet = excel.Workbook.Worksheets.Where(x => x.Name == "BudgetTxs").Single();
-                            worksheet.ExtractInto(incoming);
+                            ssr.Open(stream);
+                            var items = ssr.Read<BudgetTx>();
+                            incoming.UnionWith(items);
                         }
                     }
                 }
