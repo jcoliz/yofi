@@ -172,10 +172,9 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             var result = await controller.Download(mapped:true);
-            var fcresult = result as FileContentResult;
-            var data = fcresult.FileContents;
-
-            var incoming = helper.ExtractFromSpreadsheet<Payee>(data);
+            var fcresult = result as FileStreamResult;
+            var stream = fcresult.FileStream;
+            var incoming = helper.ExtractFromSpreadsheet<Payee>(stream);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual("A:B:Stuff", incoming.Single().Category);

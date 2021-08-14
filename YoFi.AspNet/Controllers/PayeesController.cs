@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Common;
@@ -344,10 +345,8 @@ namespace YoFi.AspNet.Controllers
         [ActionName("Download")]
         public async Task<IActionResult> Download(bool? mapped = false)
         {
-            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             try
             {
-                var objecttype = "Payees";
                 var lines = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync();
 
                 if (mapped ?? false)
@@ -357,26 +356,15 @@ namespace YoFi.AspNet.Controllers
                         maptable.MapObject(item);
                 }
 
-                byte[] reportBytes;
-                using (var package = new ExcelPackage())
+                var stream = new MemoryStream();
+                using (var ssw = new SpreadsheetWriter())
                 {
-                    package.Workbook.Properties.Title = objecttype;
-                    package.Workbook.Properties.Author = "coliz.com";
-                    package.Workbook.Properties.Subject = objecttype;
-                    package.Workbook.Properties.Keywords = objecttype;
-
-                    var worksheet = package.Workbook.Worksheets.Add(objecttype);
-                    int rows, cols;
-                    worksheet.PopulateFrom(lines, out rows, out cols);
-
-                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), objecttype);
-                    tbl.ShowHeader = true;
-                    tbl.TableStyle = OfficeOpenXml.Table.TableStyles.Dark9;
-
-                    reportBytes = package.GetAsByteArray();
+                    ssw.Open(stream);
+                    ssw.Write(lines);
                 }
 
-                return File(reportBytes, XlsxContentType, $"{objecttype}.xlsx");
+                stream.Seek(0, SeekOrigin.Begin);
+                return File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "Payees.xlsx");
             }
             catch (Exception)
             {
