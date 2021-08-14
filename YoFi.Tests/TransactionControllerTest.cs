@@ -670,7 +670,7 @@ namespace YoFi.Tests
             }
 
             Assert.AreEqual(1, sheetnames.Count());
-            Assert.AreEqual("Transactions", sheetnames.Single());
+            Assert.AreEqual("Transaction", sheetnames.Single());
             Assert.IsTrue(txitems.Any());
             Assert.IsNull(splititems);
         }

@@ -86,10 +86,8 @@ namespace YoFi.AspNet.Common
         {
             List<T> result = null;
 
-            var name = sheetname;
-            if (string.IsNullOrEmpty(name))
-                name = typeof(T).Name + "s";
-
+            var name = string.IsNullOrEmpty(sheetname) ? typeof(T).Name : sheetname;
+            
             var found = _package.Workbook.Worksheets.Where(x => x.Name == name);
             if (found.Any())
             {
@@ -233,10 +231,7 @@ namespace YoFi.AspNet.Common
 
         public void Write<T>(IEnumerable<T> items, string sheetname = null) where T : class
         {
-            var name = sheetname;
-            if (string.IsNullOrEmpty(name))
-                name = typeof(T).Name + "s";
-
+            var name = string.IsNullOrEmpty(sheetname) ? typeof(T).Name : sheetname;
             var worksheet = _package.Workbook.Worksheets.Add(name);
 
             int rows, cols;
