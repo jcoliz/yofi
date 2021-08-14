@@ -43,6 +43,11 @@ namespace YoFi.AspNet.Common
         /// <param name="sheetname"></param>
         /// <returns>Enumerable of T items, OR null if @sheetname is not found</returns>
         IEnumerable<T> Read<T>(string sheetname = null, bool? includeids = false) where T : class, new();
+
+        /// <summary>
+        /// The names of all the individuals sheets
+        /// </summary>
+        IEnumerable<string> SheetNames { get; }
     }
 
     public interface ISpreadsheetWriter : IDisposable
@@ -61,6 +66,11 @@ namespace YoFi.AspNet.Common
         /// </remarks>
         /// <param name="sheetname">Name of sheet. Will be inferred from name of T if not supplied</param>
         void Write<T>(IEnumerable<T> items, string sheetname = null) where T : class;
+
+        /// <summary>
+        /// The names of all the individuals sheets
+        /// </summary>
+        IEnumerable<string> SheetNames { get; }
     }
 
     public class SpreadsheetReader : ISpreadsheetReader
@@ -88,6 +98,8 @@ namespace YoFi.AspNet.Common
 
             return result;
         }
+
+        public IEnumerable<string> SheetNames => _package.Workbook.Worksheets.Select(x => x.Name);
 
         ExcelPackage _package;
 
@@ -149,6 +161,7 @@ namespace YoFi.AspNet.Common
             tbl.ShowHeader = true;
             tbl.TableStyle = TableStyles.Dark9;
         }
+        public IEnumerable<string> SheetNames => _package.Workbook.Worksheets.Select(x => x.Name);
 
         private void Flush()
         {

@@ -659,13 +659,18 @@ namespace YoFi.Tests
 
             IEnumerable<Transaction> txitems;
             IEnumerable<Split> splititems;
+            IEnumerable<string> sheetnames;
+            string singlesheet = string.Empty;
             using (var ssr = new SpreadsheetReader())
             {
                 ssr.Open(stream);
                 txitems = ssr.Read<Transaction>();
                 splititems = ssr.Read<Split>();
+                sheetnames = ssr.SheetNames.ToList();
             }
 
+            Assert.AreEqual(1, sheetnames.Count());
+            Assert.AreEqual("Transactions", sheetnames.Single());
             Assert.IsTrue(txitems.Any());
             Assert.IsNull(splititems);
         }

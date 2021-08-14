@@ -273,19 +273,21 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var transactions = _context.BudgetTxs.OrderBy(x => x.Timestamp).ThenBy(x=>x.Category);
+                FileStreamResult result = null;
+
+                var items = _context.BudgetTxs.OrderBy(x => x.Timestamp).ThenBy(x=>x.Category);
 
                 var stream = new MemoryStream();
                 using (var ssw = new SpreadsheetWriter())
                 {
                     ssw.Open(stream);
-                    ssw.Write(transactions);
+                    ssw.Write(items);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{ssw.SheetNames.First()}.xlsx");
                 }
 
-                stream.Seek(0, SeekOrigin.Begin);
-
                 // Need to return a task to meet the IControllerBase interface
-                return Task.FromResult(File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "BudgetTxs.xlsx") as IActionResult);
+                return Task.FromResult(result as IActionResult);
             }
             catch (Exception)
             {
