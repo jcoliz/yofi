@@ -777,12 +777,8 @@ namespace YoFi.AspNet.Controllers
                             incoming.AddRange(items);
 
                             // If there are also splits included here, let's grab those
-                            var flatsplits = ssr.Read<Split>(includeids: true);
-                            if (null != flatsplits)
-                            {
-                                // Transform the flat data into something easier to use.
-                                splits = flatsplits.ToLookup(x => x.TransactionID);
-                            }
+                            // And transform the flat data into something easier to use.
+                            splits = ssr.Read<Split>(includeids: true)?.ToLookup(x => x.TransactionID);
                         }
 
                         // Need to select all of these, so they import by default
@@ -957,11 +953,15 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
+                // Which transactions?
+
                 var transactionsquery = _context.Transactions.Where(x => x.Hidden != true);
                 if (!allyears)
                     transactionsquery = transactionsquery.Where(x => x.Timestamp.Year == Year);
                 transactionsquery = transactionsquery.OrderByDescending(x => x.Timestamp);
                 var transactions = await transactionsquery.ToListAsync();
+
+                // Which splits?
 
                 // Product Backlog Item 870: Export & import transactions with splits
                 var splitsquery = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true);
@@ -970,11 +970,11 @@ namespace YoFi.AspNet.Controllers
                 splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
                 var splits = await splitsquery.ToListAsync();
 
-                // Map categories, if user is asking for that
-                CategoryMapper maptable = null;
+                // Map categories, if requested
+
                 if (mapcheck)
                 {
-                    maptable = new CategoryMapper(_context.CategoryMaps);
+                    var maptable = new CategoryMapper(_context.CategoryMaps);
                     foreach (var tx in transactions)
                         maptable.MapObject(tx);
 
@@ -982,6 +982,8 @@ namespace YoFi.AspNet.Controllers
                         foreach (var split in splits)
                             maptable.MapObject(split);
                 }
+
+                // Create the spreadsheet result
 
                 var stream = new MemoryStream();
                 using (var ssw = new SpreadsheetWriter())
@@ -992,6 +994,8 @@ namespace YoFi.AspNet.Controllers
                     if (splits.Any())
                         ssw.Write(splits);
                 }
+
+                // Return it to caller
 
                 stream.Seek(0, SeekOrigin.Begin);
                 return File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName:"Transactions.xlsx");
