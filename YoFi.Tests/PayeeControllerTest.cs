@@ -21,20 +21,26 @@ namespace YoFi.Tests
         List<Payee> Items => helper.Items;
         DbSet<Payee> dbset => helper.dbset;
 
-        List<Payee> PayeeItems = new List<Payee>()
+        public static List<Payee> PayeeItems
         {
-            new Payee() { Category = "B", SubCategory = "A", Name = "3" },
-            new Payee() { Category = "A", SubCategory = "A", Name = "2" },
-            new Payee() { Category = "C", SubCategory = "A", Name = "5" },
-            new Payee() { Category = "A", SubCategory = "A", Name = "1" },
-            new Payee() { Category = "B", SubCategory = "B", Name = "4" },
+            get
+            {
+                return  new List<Payee>()
+                {
+                    new Payee() { Category = "B", SubCategory = "A", Name = "3" },
+                    new Payee() { Category = "A", SubCategory = "A", Name = "2" },
+                    new Payee() { Category = "C", SubCategory = "A", Name = "5" },
+                    new Payee() { Category = "A", SubCategory = "A", Name = "1" },
+                    new Payee() { Category = "B", SubCategory = "B", Name = "4" },
 
-            new Payee() { Category = "ABCD", Name = "3" },
-            new Payee() { Category = "X", Name = "2" },
-            new Payee() { Category = "ZABCZZ", Name = "5" },
-            new Payee() { Category = "X", Name = "1ABC" },
-            new Payee() { Category = "Y", Name = "4" }
-        };
+                    new Payee() { Category = "ABCD", Name = "3" },
+                    new Payee() { Category = "X", Name = "2" },
+                    new Payee() { Category = "ZABCZZ", Name = "5" },
+                    new Payee() { Category = "X", Name = "1ABC" },
+                    new Payee() { Category = "Y", Name = "4" }
+                };
+            }
+        }
 
         IEnumerable<Payee> ItemsLong;
 
