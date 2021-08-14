@@ -11,19 +11,19 @@ namespace YoFi.Tests
     [TestClass]
     public class NewSpreadsheetsTest
     {
-        public class SimpleItem
+        public class SimpleItem<T>
         {
-            public string Value { get; set; }
+            public T Key { get; set; }
 
             public override bool Equals(object obj)
             {
-                return obj is SimpleItem item &&
-                       Value == item.Value;
+                return obj is SimpleItem<T> item &&
+                       Key.Equals(item.Key);
             }
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(Value);
+                return HashCode.Combine(Key);
             }
         }
 
@@ -31,15 +31,16 @@ namespace YoFi.Tests
         public void SimpleWrite()
         {
             // Given: A very simple item
-            var Items = new SimpleItem[] { new SimpleItem() { Value = "Hello, world!" } };
+            var Items = new SimpleItem<string>[] { new SimpleItem<string>() { Key = "Hello, world!" } };
 
-            // When: Writing it to a spreadsheet
+            // When: Writing it to a spreadsheet using the new methods
+            var name = "SimpleWrite";
             using(var stream = new MemoryStream())
             {
                 using(var writer = new NewSpreadsheetWriter())
                 {
                     writer.Open(stream);
-                    writer.Write(Items);
+                    writer.Write(Items,name);
                 }
 
                 stream.Seek(0, SeekOrigin.Begin);
@@ -49,19 +50,20 @@ namespace YoFi.Tests
                     stream.CopyTo(outstream);
                 }
 
-                // Then: The spreadsheet is valid, and contains the expected item
+                // And: Loading it back in using the old methods
                 stream.Seek(0, SeekOrigin.Begin);
-                IEnumerable<SimpleItem> actual = null;
+                IEnumerable<SimpleItem<string>> actual = null;
                 IEnumerable<string> sheets = null;
                 using ( var reader = new SpreadsheetReader())
                 {
                     reader.Open(stream);
-                    actual = reader.Read<SimpleItem>();
+                    actual = reader.Read<SimpleItem<string>>(name);
                     sheets = reader.SheetNames.ToList();
                 }
 
+                // Then: The spreadsheet is valid, and contains the expected item
                 Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual("SimpleItem", sheets.Single());
+                Assert.AreEqual(name, sheets.Single());
                 Assert.AreEqual(Items.First(), actual.First());
             }
         }
