@@ -27,6 +27,34 @@ namespace YoFi.Tests
             }
         }
 
+        void WhenWritingToNewSpreadsheet<T>(Stream stream,IEnumerable<T> items, string name) where T: class
+        {
+            using (var writer = new NewSpreadsheetWriter())
+            {
+                writer.Open(stream);
+                writer.Write(items, name);
+            }
+
+            stream.Seek(0, SeekOrigin.Begin);
+            using (var outstream = File.OpenWrite($"Test-{name}.xlsx"))
+            {
+                Console.WriteLine($"Writing {outstream.Name}...");
+                stream.CopyTo(outstream);
+            }
+        }
+
+        private void WhenReadAsOldSpreadsheet(MemoryStream stream, string name, List<SimpleItem<string>> actual, List<string> sheets)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            using (var reader = new SpreadsheetReader())
+            {
+                reader.Open(stream);
+                actual.AddRange(reader.Read<SimpleItem<string>>(name));
+                sheets.AddRange(reader.SheetNames.ToList());
+            }
+        }
+
+
         [TestMethod]
         public void SimpleWriteString()
         {
@@ -37,35 +65,18 @@ namespace YoFi.Tests
             var name = "SimpleWriteString";
             using(var stream = new MemoryStream())
             {
-                using(var writer = new NewSpreadsheetWriter())
-                {
-                    writer.Open(stream);
-                    writer.Write(Items,name);
-                }
+                WhenWritingToNewSpreadsheet(stream, Items, name);
 
-                stream.Seek(0, SeekOrigin.Begin);
-                using (var outstream = File.OpenWrite($"Test-{name}.xlsx"))
-                {
-                    Console.WriteLine($"Writing {outstream.Name}...");
-                    stream.CopyTo(outstream);
-                }
-
-                // And: Loading it back in using the old methods
-                stream.Seek(0, SeekOrigin.Begin);
-                IEnumerable<SimpleItem<string>> actual = null;
-                IEnumerable<string> sheets = null;
-                using ( var reader = new SpreadsheetReader())
-                {
-                    reader.Open(stream);
-                    actual = reader.Read<SimpleItem<string>>(name);
-                    sheets = reader.SheetNames.ToList();
-                }
+                List<SimpleItem<string>> actual = new List<SimpleItem<string>>();
+                List<string> sheets = new List<string>();
+                WhenReadAsOldSpreadsheet(stream, name, actual, sheets);
 
                 // Then: The spreadsheet is valid, and contains the expected item
                 Assert.AreEqual(1, sheets.Count());
                 Assert.AreEqual(name, sheets.Single());
-                Assert.AreEqual(Items.First(), actual.First());
+                CollectionAssert.AreEqual(Items, actual);
             }
         }
+
     }
 }
