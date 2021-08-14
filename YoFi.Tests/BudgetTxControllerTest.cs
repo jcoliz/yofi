@@ -23,15 +23,21 @@ namespace YoFi.Tests
         List<BudgetTx> Items => helper.Items;
         DbSet<BudgetTx> dbset => helper.dbset;
 
-        List<BudgetTx> BudgetTxItems = new List<BudgetTx>()
+        public static List<BudgetTx> BudgetTxItems
         {
-            new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01),  Category = "A", Amount = 100m },
-            new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01),  Category = "B", Amount = 200m },
-            new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "A", Amount = 300m },
-            new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "B", Amount = 400m },
-            new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "C", Amount = 500m },
-        };
-
+            get
+            {
+                return new List<BudgetTx>()
+                {
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01),  Category = "A", Amount = 100m },
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01),  Category = "B", Amount = 200m },
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "A", Amount = 300m },
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "B", Amount = 400m },
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 05, 01),  Category = "C", Amount = 500m },
+                };
+            }
+        }
+            
         IEnumerable<BudgetTx> ItemsLong;
 
         IEnumerable<BudgetTx> GetItemsLong()

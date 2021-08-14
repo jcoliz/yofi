@@ -195,6 +195,19 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public void AllBudgetTxs()
+        {
+            // Given: A single empty transaction
+            // Note that an empty timestamp does not serialize well
+            var Items = BudgetTxControllerTest.BudgetTxItems;
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("AllBudgetTxs", Items);
+        }
+
+        [TestMethod]
         public void OneTransactionEmpty()
         {
             // Given: A single empty transaction
