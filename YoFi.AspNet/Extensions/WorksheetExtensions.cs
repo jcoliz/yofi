@@ -94,7 +94,7 @@ namespace OfficeOpenXml
             }
         }
 
-        public static void PopulateFrom<T>(this ExcelWorksheet worksheet, ICollection<T> source, out int rows, out int cols) where T : class
+        public static void PopulateFrom<T>(this ExcelWorksheet worksheet, IEnumerable<T> source, out int rows, out int cols) where T : class
         {
             // First add the headers
 

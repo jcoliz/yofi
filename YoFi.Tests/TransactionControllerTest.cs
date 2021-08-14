@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using Transaction = YoFi.AspNet.Models.Transaction;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using YoFi.AspNet.Common;
 
 namespace YoFi.Tests
 {
@@ -571,21 +572,19 @@ namespace YoFi.Tests
             transactions.Add(item);
 
             // Build a spreadsheet with the chosen number of items
-            byte[] reportBytes;
-            var sheetname = "Transactions";
-            using (var package = new ExcelPackage())
+            // Note that we are not disposing the stream. User of the file will do so later.
+            var stream = new MemoryStream();
+            using (var ssr = new SpreadsheetWriter())
             {
-                var worksheet = package.Workbook.Worksheets.Add(sheetname);
-                worksheet.PopulateFrom(transactions, out _, out _);
-                worksheet = package.Workbook.Worksheets.Add("Splits");
-                worksheet.PopulateFrom(splits, out _, out _);
-                reportBytes = package.GetAsByteArray();
+                ssr.Open(stream);
+                ssr.Write(transactions);
+                ssr.Write(splits);
             }
 
             // Create a formfile with it
-            // Note that we are not disposing the stream. User of the file will do so later.
-            var stream = new MemoryStream(reportBytes);
-            IFormFile file = new FormFile(stream, 0, reportBytes.Length, sheetname, $"{sheetname}.xlsx");
+            var filename = "Transactions";
+            stream.Seek(0, SeekOrigin.Begin);
+            IFormFile file = new FormFile(stream, 0, stream.Length, filename, $"{filename}.xlsx");
 
             // Upload it!
             var result = await controller.Upload(new List<IFormFile>() { file },null);
