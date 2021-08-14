@@ -273,10 +273,9 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                FileStreamResult result = null;
-
                 var items = _context.BudgetTxs.OrderBy(x => x.Timestamp).ThenBy(x=>x.Category);
 
+                FileStreamResult result = null;
                 var stream = new MemoryStream();
                 using (var ssw = new SpreadsheetWriter())
                 {

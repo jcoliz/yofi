@@ -346,24 +346,27 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var lines = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync();
+                var items = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync();
 
                 if (mapped ?? false)
                 {
                     var maptable = new CategoryMapper(_context.CategoryMaps);
-                    foreach (var item in lines)
+                    foreach (var item in items)
                         maptable.MapObject(item);
                 }
 
+                FileStreamResult result = null;
                 var stream = new MemoryStream();
                 using (var ssw = new SpreadsheetWriter())
                 {
                     ssw.Open(stream);
-                    ssw.Write(lines);
+                    ssw.Write(items);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{ssw.SheetNames.First()}.xlsx");
                 }
 
-                stream.Seek(0, SeekOrigin.Begin);
-                return File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "Payees.xlsx");
+                // Need to return a task to meet the IControllerBase interface
+                return result;
             }
             catch (Exception)
             {
