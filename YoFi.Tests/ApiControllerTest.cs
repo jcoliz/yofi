@@ -511,7 +511,7 @@ namespace YoFi.Tests
             splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
             splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
 
-            // Make an HTML Form file containg an excel spreadsheet containing those splits
+            // Make an HTML Form file containg a spreadsheet containing those splits
             var file = ControllerTestHelper<Split,SplitsController>.PrepareUpload(splits);
 
             // Upload that

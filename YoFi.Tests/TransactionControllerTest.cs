@@ -511,7 +511,7 @@ namespace YoFi.Tests
             context.Transactions.Add(item);
             context.SaveChanges();
 
-            // Make an HTML Form file containg an excel spreadsheet containing those splits
+            // Make an HTML Form file containg a spreadsheet containing those splits
             var file = ControllerTestHelper<Split, SplitsController>.PrepareUpload(SplitItems.Take(2).ToList());
 
             // Upload that

@@ -345,7 +345,7 @@ namespace Common.AspNet.Test
 
         public async Task<IActionResult> DoUpload(ICollection<T> what)
         {
-            // Make an HTML Form file containg an excel spreadsheet.
+            // Make an HTML Form file containg a spreadsheet.
             var file = PrepareUpload(what);
 
             // Upload that
