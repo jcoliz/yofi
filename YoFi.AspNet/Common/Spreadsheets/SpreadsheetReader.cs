@@ -109,8 +109,11 @@ namespace YoFi.AspNet.Common
                             }
                             else if (property.PropertyType == typeof(bool))
                             {
-                                var value = Convert.ToBoolean(worksheet.Cells[row, col].Value);
-                                property.SetValue(item, value);
+                                if (property.SetMethod != null)
+                                {
+                                    var value = Convert.ToBoolean(worksheet.Cells[row, col].Value);
+                                    property.SetValue(item, value);
+                                }
                             }
                             else if (property.PropertyType == typeof(string))
                             {
