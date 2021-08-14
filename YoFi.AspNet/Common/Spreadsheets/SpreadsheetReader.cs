@@ -107,6 +107,11 @@ namespace YoFi.AspNet.Common
                                 var value = Convert.ToDecimal((double)worksheet.Cells[row, col].Value);
                                 property.SetValue(item, value);
                             }
+                            else if (property.PropertyType == typeof(bool))
+                            {
+                                var value = Convert.ToBoolean(worksheet.Cells[row, col].Value);
+                                property.SetValue(item, value);
+                            }
                             else if (property.PropertyType == typeof(string))
                             {
                                 var value = worksheet.Cells[row, col].Text?.Trim();
