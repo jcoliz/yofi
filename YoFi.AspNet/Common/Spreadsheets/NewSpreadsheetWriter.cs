@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -166,8 +167,10 @@ namespace YoFi.AspNet.Common
                                 // Insert cell into the new worksheet.
                                 Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
 
-                                cell.CellValue = new CellValue((DateTime)cel);
-                                cell.DataType = new EnumValue<CellValues>(CellValues.Date);
+                                // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
+                                double oaValue = ((DateTime)cel).ToOADate();
+                                cell.CellValue = new CellValue(oaValue.ToString(CultureInfo.InvariantCulture));
+                                cell.DataType = new EnumValue<CellValues>(CellValues.Number);
                             }
                             else if (t == typeof(Boolean))
                             {
@@ -274,7 +277,7 @@ namespace YoFi.AspNet.Common
             }
             else
             {
-                row = new Row() { RowIndex = rowIndex };
+                row = new Row() { RowIndex = rowIndex, Spans = new ListValue<StringValue>() };
                 sheetData.Append(row);
             }
 
