@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Tests.Helpers;
+using YoFi.AspNet.Common;
 
 namespace Common.AspNet.Test
 {
@@ -303,19 +304,18 @@ namespace Common.AspNet.Test
         static public IFormFile PrepareUpload<X>(ICollection<X> what) where X : class
         {
             // Build a spreadsheet with the chosen number of items
-            byte[] reportBytes;
-            var sheetname = $"{typeof(T).Name}s";
-            using (var package = new ExcelPackage())
+            // Note that we are not disposing the stream. User of the file will do so later.
+            var stream = new MemoryStream();
+            using (var ssr = new SpreadsheetWriter())
             {
-                var worksheet = package.Workbook.Worksheets.Add(sheetname);
-                worksheet.PopulateFrom(what, out _, out _);
-                reportBytes = package.GetAsByteArray();
+                ssr.Open(stream);
+                ssr.Write(what);
             }
 
             // Create a formfile with it
-            // Note that we are not disposing the stream. User of the file will do so later.
-            var stream = new MemoryStream(reportBytes);
-            IFormFile file = new FormFile(stream, 0, reportBytes.Length, sheetname, $"{sheetname}.xlsx");
+            var filename = $"{typeof(T).Name}s";
+            stream.Seek(0, SeekOrigin.Begin);
+            IFormFile file = new FormFile(stream, 0, stream.Length, filename, $"{filename}.xlsx");
 
             return file;
         }
