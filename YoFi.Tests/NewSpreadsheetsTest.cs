@@ -180,7 +180,20 @@ namespace YoFi.Tests
             // Then: The spreadsheet is valid, and contains the expected item
             WriteNewReadOld("AllPayees", Items);
         }
-        //PayeeItems
+
+        [TestMethod]
+        public void AllSplits()
+        {
+            // Given: A single empty transaction
+            // Note that an empty timestamp does not serialize well
+            var Items = SplitControllerTest.SplitItems;
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadOld("AllSplits", Items);
+        }
+
         [TestMethod]
         public void OneTransactionEmpty()
         {

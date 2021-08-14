@@ -22,6 +22,21 @@ namespace YoFi.Tests
         List<Split> Items => helper.Items;
         DbSet<Split> dbset => helper.dbset;
 
+        public static List<Split> SplitItems
+        {
+            get
+            {
+                return new List<Split>()
+                {
+                    new Split() { Category = "B", SubCategory = "A", Memo = "3", Amount = 300m },
+                    new Split() { Category = "A", SubCategory = "A", Memo = "2", Amount = 200m },
+                    new Split() { Category = "C", SubCategory = "A", Memo = "5", Amount = 500m },
+                    new Split() { Category = "A", SubCategory = "A", Memo = "1", Amount = 100m },
+                    new Split() { Category = "B", SubCategory = "B", Memo = "4", Amount = 400m }
+                };
+            }
+        }
+
         [TestInitialize]
         public void SetUp()
         {
@@ -29,11 +44,7 @@ namespace YoFi.Tests
             helper.SetUp();
             helper.controller = new SplitsController(helper.context);
 
-            helper.Items.Add(new Split() { Category = "B", SubCategory = "A", Memo = "3", Amount = 300m });
-            helper.Items.Add(new Split() { Category = "A", SubCategory = "A", Memo = "2", Amount = 200m });
-            helper.Items.Add(new Split() { Category = "C", SubCategory = "A", Memo = "5", Amount = 500m });
-            helper.Items.Add(new Split() { Category = "A", SubCategory = "A", Memo = "1", Amount = 100m });
-            helper.Items.Add(new Split() { Category = "B", SubCategory = "B", Memo = "4", Amount = 400m });
+            helper.Items.AddRange(SplitItems);
 
             helper.dbset = helper.context.Splits;
 

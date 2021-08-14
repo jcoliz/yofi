@@ -34,6 +34,15 @@ namespace YoFi.AspNet.Models
             }
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is Split split &&
+                   Amount == split.Amount &&
+                   Category == split.Category &&
+                   SubCategory == split.SubCategory &&
+                   Memo == split.Memo;
+        }
+
         /// <summary>
         /// If category has >2 colon-divided parts, move items 3+ into subcategory
         /// </summary>
@@ -56,6 +65,11 @@ namespace YoFi.AspNet.Models
                 if (parts.Count() > 2)
                     SubCategory = string.Join(':', parts.Skip(2));
             }
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Amount, Category, SubCategory, Memo);
         }
     }
 }
