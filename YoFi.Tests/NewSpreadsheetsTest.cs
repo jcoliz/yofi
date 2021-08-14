@@ -272,5 +272,27 @@ namespace YoFi.Tests
                 CollectionAssert.AreEqual(Items, actual);
             }
         }
+        [TestMethod]
+        public async Task TransactionItems20()
+        {
+            // Given: A ton of transactions
+            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
+
+            // When: Writing it to a spreadsheet using the new methods
+            var name = "TransactionItems20";
+            using (var stream = new MemoryStream())
+            {
+                WhenWritingToNewSpreadsheet(stream, Items, name);
+
+                var actual = new List<Transaction>();
+                var sheets = new List<string>();
+                WhenReadAsOldSpreadsheet<Transaction>(stream, name, actual, sheets);
+
+                // Then: The spreadsheet is valid, and contains the expected item
+                Assert.AreEqual(1, sheets.Count());
+                Assert.AreEqual(name, sheets.Single());
+                CollectionAssert.AreEqual(Items, actual);
+            }
+        }
     }
 }
