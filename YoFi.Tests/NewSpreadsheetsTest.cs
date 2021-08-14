@@ -18,7 +18,11 @@ namespace YoFi.Tests
             public override bool Equals(object obj)
             {
                 return obj is SimpleItem<T> item &&
-                       Key.Equals(item.Key);
+                    (
+                        (Key == null && item.Key == null)
+                        ||
+                        (Key?.Equals(item.Key) ?? false)
+                     );
             }
 
             public override int GetHashCode()
@@ -65,6 +69,29 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             var name = "SimpleWriteString";
             using(var stream = new MemoryStream())
+            {
+                WhenWritingToNewSpreadsheet(stream, Items, name);
+
+                List<SimpleItem<string>> actual = new List<SimpleItem<string>>();
+                List<string> sheets = new List<string>();
+                WhenReadAsOldSpreadsheet(stream, name, actual, sheets);
+
+                // Then: The spreadsheet is valid, and contains the expected item
+                Assert.AreEqual(1, sheets.Count());
+                Assert.AreEqual(name, sheets.Single());
+                CollectionAssert.AreEqual(Items, actual);
+            }
+        }
+
+        [TestMethod]
+        public void SimpleWriteStringNull()
+        {
+            // Given: A very simple item
+            var Items = new SimpleItem<string>[] { new SimpleItem<string>(), new SimpleItem<string>() { Key = "Second" } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            var name = "SimpleWriteStringNull";
+            using (var stream = new MemoryStream())
             {
                 WhenWritingToNewSpreadsheet(stream, Items, name);
 

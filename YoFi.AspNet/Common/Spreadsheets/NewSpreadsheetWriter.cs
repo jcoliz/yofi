@@ -94,14 +94,14 @@ namespace YoFi.AspNet.Common
         // "data" is an enumerable of rows, where rows are an enumerable of columns
         // supported types are string, DateTime, decimal, and int
 
-        public static void InsertItems(SpreadsheetDocument spreadSheet, IEnumerable<object> items, string sheetName)
+        public static void InsertItems<T>(SpreadsheetDocument spreadSheet, IEnumerable<T> items, string sheetName)
         {
             var data = new List<IEnumerable<object>>();
 
             // First add the headers
             // If we don't want a property to show up when it's being json serialized, we also don't want 
             // it to show up when we're exporting it.
-            var properties = items.First().GetType().GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
+            var properties = typeof(T).GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
 
             data.Add(properties.Select(x => x.Name).ToList());
 
