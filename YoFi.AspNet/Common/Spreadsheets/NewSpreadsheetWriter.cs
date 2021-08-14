@@ -151,7 +151,7 @@ namespace YoFi.AspNet.Common
                                 // Insert cell into the new worksheet.
                                 Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
 
-                                cell.CellValue = new CellValue((decimal)cel);
+                                cell.CellValue = new CellValue(cel.ToString());
                                 cell.DataType = new EnumValue<CellValues>(CellValues.Number);
                             }
                             else if (t == typeof(Int32))
@@ -159,7 +159,7 @@ namespace YoFi.AspNet.Common
                                 // Insert cell into the new worksheet.
                                 Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
 
-                                cell.CellValue = new CellValue((Int32)cel);
+                                cell.CellValue = new CellValue(cel.ToString());
                                 cell.DataType = new EnumValue<CellValues>(CellValues.Number);
                             }
                             else if (t == typeof(DateTime))
@@ -177,7 +177,7 @@ namespace YoFi.AspNet.Common
                                 // Insert cell into the new worksheet.
                                 Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
 
-                                cell.CellValue = new CellValue((Boolean)cel);
+                                cell.CellValue = new CellValue(((Boolean)cel)?"1":"0");
                                 cell.DataType = new EnumValue<CellValues>(CellValues.Boolean);
                             }
                             // else leave it alone?

@@ -79,9 +79,10 @@ namespace YoFi.Tests
             new CategoryMap() { Category = "C", Key1 = "Z", Key2 = "R" }
         };
 
-        IEnumerable<Transaction> TransactionItemsLong;
+        static IEnumerable<Transaction> TransactionItemsLong;
 
-        async Task<IEnumerable<Transaction>> GetTransactionItemsLong()
+        // This is public in case someone ELSE wants a big boatload of transactions
+        public static async Task<IEnumerable<Transaction>> GetTransactionItemsLong()
         {
             if (null == TransactionItemsLong)
             {
