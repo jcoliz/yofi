@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfficeOpenXml;
 using OfxSharp;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
@@ -537,9 +536,9 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             var result = await controller.Download(false,mapped);
-            var fcresult = result as FileContentResult;
-            var data = fcresult.FileContents;
-            var incoming = helper.ExtractFromSpreadsheet<Split>(data);
+            var fcresult = result as FileStreamResult;
+            var stream = fcresult.FileStream;
+            var incoming = helper.ExtractFromSpreadsheet<Split>(stream);
 
             Assert.AreEqual(2, incoming.Count);
             Assert.AreEqual(item.ID, incoming.First().TransactionID);
@@ -550,9 +549,7 @@ namespace YoFi.Tests
                 Assert.AreEqual("X:Y:B", incoming.First().Category);
                 Assert.AreEqual("Z:R:D", incoming.Last().Category);
             }
-
         }
-
 
         [TestMethod]
         public async Task UploadSplitsWithTransactions()
@@ -605,9 +602,9 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             var result = await controller.Download(false, true);
-            var fcresult = result as FileContentResult;
-            var data = fcresult.FileContents;
-            var incoming = helper.ExtractFromSpreadsheet<Transaction>(data);
+            var fcresult = result as FileStreamResult;
+            var stream = fcresult.FileStream;
+            var incoming = helper.ExtractFromSpreadsheet<Transaction>(stream);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual("X:Y:A", incoming.Single().Category);
@@ -621,16 +618,16 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             var result = await controller.Download(false, true);
-            var fcresult = result as FileContentResult;
-            var data = fcresult.FileContents;
-            var incoming = helper.ExtractFromSpreadsheet<Transaction>(data);
+            var fcresult = result as FileStreamResult;
+            var stream = fcresult.FileStream;
+            var incoming = helper.ExtractFromSpreadsheet<Transaction>(stream);
 
             Assert.AreEqual(1, incoming.Count);
             Assert.AreEqual(null, incoming.Single().Category);
         }
 
         [TestMethod]
-        public async Task<FileContentResult> DownloadAllYears()
+        public async Task<FileStreamResult> DownloadAllYears()
         {
             var item_new = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
             var item_old = new Transaction() { Payee = "4", Timestamp = new DateTime(DateTime.Now.Year - 5, 01, 03), Amount = 200m };
@@ -640,10 +637,9 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             var result = await controller.Download(true, false);
-            var fcresult = result as FileContentResult;
-            var data = fcresult.FileContents;
-
-            var incoming = helper.ExtractFromSpreadsheet<Transaction>(data);
+            var fcresult = result as FileStreamResult;
+            var stream = fcresult.FileStream;
+            var incoming = helper.ExtractFromSpreadsheet<Transaction>(stream);
 
             Assert.AreEqual(2, incoming.Count);
 
@@ -659,19 +655,19 @@ namespace YoFi.Tests
             // For convenience we'll use a different test and just grab those results.
 
             var fcresult = await DownloadAllYears();
-            var data = fcresult.FileContents;
+            var stream = fcresult.FileStream;
 
-            using (var stream = new MemoryStream(data))
+            IEnumerable<Transaction> txitems;
+            IEnumerable<Split> splititems;
+            using (var ssr = new SpreadsheetReader())
             {
-                // Open a SpreadsheetDocument for read-only access based on a filepath.
-                using (SpreadsheetDocument spreadsheetDocument = SpreadsheetDocument.Open(stream, isEditable: false))
-                {
-                    // Only 1 worksheet, no "splits" worksheet
-                    Assert.AreEqual(1, spreadsheetDocument.WorkbookPart.WorksheetParts.Count());
-                    Assert.AreEqual("Transactions",spreadsheetDocument.WorkbookPart.Workbook.Sheets.GetFirstChild<Sheet>().Name.Value);
-                    Assert.IsFalse(spreadsheetDocument.WorkbookPart.Workbook.Sheets.Where(x => (x as Sheet).Name.Value == "Splits").Any());
-                }
+                ssr.Open(stream);
+                txitems = ssr.Read<Transaction>();
+                splititems = ssr.Read<Split>();
             }
+
+            Assert.IsTrue(txitems.Any());
+            Assert.IsNull(splititems);
         }
 
         [TestMethod]

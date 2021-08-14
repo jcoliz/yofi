@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using OfficeOpenXml;
-using OfficeOpenXml.Table;
 using OfxSharp;
 using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Data;
@@ -19,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.AspNet.Common;
 using Transaction = YoFi.AspNet.Models.Transaction;
+using System.IO;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -956,71 +955,52 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         public async Task<IActionResult> Download(bool allyears, bool mapcheck)
         {
-            const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             try
             {
-                var objecttype = "Transactions";
                 var transactionsquery = _context.Transactions.Where(x => x.Hidden != true);
                 if (!allyears)
                     transactionsquery = transactionsquery.Where(x => x.Timestamp.Year == Year);
                 transactionsquery = transactionsquery.OrderByDescending(x => x.Timestamp);
                 var transactions = await transactionsquery.ToListAsync();
 
+                // Product Backlog Item 870: Export & import transactions with splits
+                var splitsquery = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true);
+                if (!allyears)
+                    splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
+                splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
+                var splits = await splitsquery.ToListAsync();
+
+                // Map categories, if user is asking for that
                 CategoryMapper maptable = null;
                 if (mapcheck)
                 {
                     maptable = new CategoryMapper(_context.CategoryMaps);
                     foreach (var tx in transactions)
                         maptable.MapObject(tx);
-                }
-
-                byte[] reportBytes;
-                using (var package = new ExcelPackage())
-                {
-                    package.Workbook.Properties.Title = objecttype;
-                    package.Workbook.Properties.Author = "coliz.com";
-                    package.Workbook.Properties.Subject = objecttype;
-                    package.Workbook.Properties.Keywords = objecttype;
-
-                    var worksheet = package.Workbook.Worksheets.Add(objecttype);
-                    int rows, cols;
-                    worksheet.PopulateFrom(transactions, out rows, out cols);
-
-                    var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), objecttype);
-                    tbl.ShowHeader = true;
-                    tbl.TableStyle = TableStyles.Dark9;
-
-                    // Product Backlog Item 870: Export & import transactions with splits
-                    var splitsquery = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true);
-                    if (!allyears)
-                        splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
-                    splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
-                    var splits = await splitsquery.ToListAsync();
 
                     if (splits.Any())
-                    {
-                        if (mapcheck)
-                            foreach (var split in splits)
-                                maptable.MapObject(split);
-
-                        worksheet = package.Workbook.Worksheets.Add("Splits");
-                        worksheet.PopulateFrom(splits, out rows, out cols);
-                        tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), "Splits");
-                        tbl.ShowHeader = true;
-                        tbl.TableStyle = TableStyles.Dark9;
-                    }
-
-                    reportBytes = package.GetAsByteArray();
+                        foreach (var split in splits)
+                            maptable.MapObject(split);
                 }
 
-                return File(reportBytes, XlsxContentType, $"{objecttype}.xlsx");
+                var stream = new MemoryStream();
+                using (var ssw = new SpreadsheetWriter())
+                {
+                    ssw.Open(stream);
+                    ssw.Write(transactions);
+
+                    if (splits.Any())
+                        ssw.Write(splits);
+                }
+
+                stream.Seek(0, SeekOrigin.Begin);
+                return File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName:"Transactions.xlsx");
             }
             catch (Exception)
             {
                 return NotFound();
             }
         }
-
 
         // GET: Transactions/Report
         public IActionResult Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)

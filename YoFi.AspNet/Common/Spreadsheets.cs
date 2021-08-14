@@ -1,4 +1,5 @@
 ﻿using OfficeOpenXml;
+using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -140,7 +141,13 @@ namespace YoFi.AspNet.Common
                 name = typeof(T).Name + "s";
 
             var worksheet = _package.Workbook.Worksheets.Add(name);
-            worksheet.PopulateFrom(items, out _, out _);
+
+            int rows, cols;
+            worksheet.PopulateFrom(items, out rows, out cols);
+
+            var tbl = worksheet.Tables.Add(new ExcelAddressBase(fromRow: 1, fromCol: 1, toRow: rows, toColumn: cols), name);
+            tbl.ShowHeader = true;
+            tbl.TableStyle = TableStyles.Dark9;
         }
 
         private void Flush()

@@ -123,6 +123,19 @@ namespace Common.AspNet.Test
             return incoming;
         }
 
+        public HashSet<TExtract> ExtractFromSpreadsheet<TExtract>(Stream stream) where TExtract : class, new()
+        {
+            var incoming = new HashSet<TExtract>();
+            using (var ssr = new SpreadsheetReader())
+            {
+                ssr.Open(stream);
+                var items = ssr.Read<TExtract>(includeids: true);
+                incoming.UnionWith(items);
+            }
+
+            return incoming;
+        }
+
         public void Empty()
         {
             Assert.IsNotNull(controller);
@@ -281,10 +294,22 @@ namespace Common.AspNet.Test
         {
             await AddFiveItems();
             var result = await controller.Download();
-            var fcresult = result as FileContentResult;
-            var data = fcresult.FileContents;
 
-            var incoming = ExtractFromSpreadsheet<T>(data);
+            HashSet<T> incoming = null;
+            if (result is FileStreamResult)
+            {
+                var fcresult = result as FileStreamResult;
+                var stream = fcresult.FileStream;
+
+                incoming = ExtractFromSpreadsheet<T>(stream);
+            }
+            else if (result is FileContentResult)
+            {
+                var fcresult = result as FileContentResult;
+                var data = fcresult.FileContents;
+
+                incoming = ExtractFromSpreadsheet<T>(data);
+            }
 
             Assert.AreEqual(5, incoming.Count);
 
