@@ -6,11 +6,81 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
-namespace YoFi.Tests.Helpers
+namespace YoFi.AspNet.Common
 {
+    /// <summary>
+    /// Provides ISpreadsheetWriter using Microsoft-supported libraries
+    /// </summary>
+    public class NewSpreadsheetWriter : ISpreadsheetWriter
+    {
+        #region ISpreadsheetWriter (Public Interface)
+
+        public IEnumerable<string> SheetNames => throw new NotImplementedException();
+
+        public void Open(Stream stream)
+        {
+            spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
+
+            // Add a WorkbookPart to the document.
+            WorkbookPart workbookpart = spreadSheet.AddWorkbookPart();
+            workbookpart.Workbook = new Workbook();
+        }
+
+        public void Write<T>(IEnumerable<T> items, string sheetname = null) where T : class
+        {
+            var name = string.IsNullOrEmpty(sheetname) ? typeof(T).Name : sheetname;
+
+            SpreadsheetHelpers.InsertItems(spreadSheet, items, name);
+        }
+
+        #endregion
+
+        #region Fields
+        SpreadsheetDocument spreadSheet;
+        #endregion
+        
+        #region IDispose
+        private bool disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                    if (null != spreadSheet)
+                    {
+                        spreadSheet.Dispose();
+                        spreadSheet = null;
+                    }
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~NewSpreadsheetWriter()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
+    }
+
     public class SpreadsheetHelpers
     {
         #region Sample Code
@@ -23,7 +93,7 @@ namespace YoFi.Tests.Helpers
         // "data" is an enumerable of rows, where rows are an enumerable of columns
         // supported types are string, DateTime, decimal, and int
 
-        public static void InsertItems(Stream stream, IEnumerable<object> items, string sheetName)
+        public static void InsertItems(SpreadsheetDocument spreadSheet, IEnumerable<object> items, string sheetName)
         {
             var data = new List<IEnumerable<object>>();
 
@@ -38,13 +108,7 @@ namespace YoFi.Tests.Helpers
 
             data.AddRange(items.Select(item => properties.Select(x => x.GetValue(item)).ToList()));
 
-            // Open the document for editing.
-            using (SpreadsheetDocument spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
             {
-                // Add a WorkbookPart to the document.
-                WorkbookPart workbookpart = spreadSheet.AddWorkbookPart();
-                workbookpart.Workbook = new Workbook();
-
                 // Get the SharedStringTablePart. If it does not exist, create a new one.
                 SharedStringTablePart shareStringPart;
                 if (spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Count() > 0)
