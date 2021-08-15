@@ -53,7 +53,7 @@ namespace YoFi.AspNet.Common
         public void Write<T>(IEnumerable<T> items, string sheetname = null) where T : class
         {
             var name = string.IsNullOrEmpty(sheetname) ? typeof(T).Name : sheetname;
-            InsertItems(spreadSheet, items, name);
+            InsertItems(items, name);
         }
 
         #endregion
@@ -69,8 +69,10 @@ namespace YoFi.AspNet.Common
 
         // Then I modified it to work more generically, and refactored it for simplicity
 
-        public static void InsertItems<T>(SpreadsheetDocument spreadSheet, IEnumerable<T> items, string sheetName)
+        public void InsertItems<T>(IEnumerable<T> items, string sheetName)
         {
+            WorksheetPart worksheetPart = InsertWorksheet(sheetName);
+
             var rows = new List<IEnumerable<object>>();
 
             // Add the properties as a header row
@@ -82,10 +84,6 @@ namespace YoFi.AspNet.Common
 
             // Add the items as remaining rows
             rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item))));
-
-            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
-
-            WorksheetPart worksheetPart = InsertWorksheet(spreadSheet.WorkbookPart, sheetName);
 
             uint rowid = 1;
             foreach (var row in rows)
@@ -101,7 +99,7 @@ namespace YoFi.AspNet.Common
 
                         if (t == typeof(string))
                         {
-                            value = InsertSharedStringItem(cel as string, shareStringPart).ToString();
+                            value = InsertSharedStringItem(cel as string).ToString();
                             datatype = CellValues.SharedString;
                         }
                         else if (t == typeof(decimal))
@@ -151,8 +149,9 @@ namespace YoFi.AspNet.Common
 
         // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text 
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
-        private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart)
+        private int InsertSharedStringItem(string text)
         {
+            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
             var table = shareStringPart.SharedStringTable;
             var elements = table.Elements<SharedStringItem>();
             var prior = elements.TakeWhile(x => x.InnerText != text);
@@ -169,8 +168,10 @@ namespace YoFi.AspNet.Common
         }
 
         // Given a WorkbookPart, inserts a new worksheet.
-        private static WorksheetPart InsertWorksheet(WorkbookPart workbookPart, string sheetName)
+        private WorksheetPart InsertWorksheet(string sheetName)
         {
+            var workbookPart = spreadSheet.WorkbookPart;
+
             // Add a new worksheet part to the workbook.
             WorksheetPart newWorksheetPart = workbookPart.AddNewPart<WorksheetPart>();
             newWorksheetPart.Worksheet = new Worksheet(new SheetData());
