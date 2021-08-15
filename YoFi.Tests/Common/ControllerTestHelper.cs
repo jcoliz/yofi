@@ -296,20 +296,12 @@ namespace Common.AspNet.Test
             var result = await controller.Download();
 
             HashSet<T> incoming = null;
-            if (result is FileStreamResult)
-            {
-                var fcresult = result as FileStreamResult;
-                var stream = fcresult.FileStream;
+            Assert.IsTrue(result is FileStreamResult);
 
-                incoming = ExtractFromSpreadsheet<T>(stream);
-            }
-            else if (result is FileContentResult)
-            {
-                var fcresult = result as FileContentResult;
-                var data = fcresult.FileContents;
+            var fcresult = result as FileStreamResult;
+            var stream = fcresult.FileStream;
 
-                incoming = ExtractFromSpreadsheet<T>(data);
-            }
+            incoming = ExtractFromSpreadsheet<T>(stream);
 
             Assert.AreEqual(5, incoming.Count);
 
