@@ -98,8 +98,10 @@ namespace YoFi.Tests
             }
         }
 
-        [TestMethod]
-        public void SimpleWriteString()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void SimpleWriteString(bool newreader)
         {
             // Given: A very simple string item
             var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
@@ -107,7 +109,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteString", Items);
+            WriteThenReadBack("SimpleWriteString", Items, newreader);
         }
 
         [TestMethod]
@@ -311,16 +313,6 @@ namespace YoFi.Tests
             }
 
         }
-        [TestMethod]
-        public void SimpleWriteStringNew()
-        {
-            // Given: A very simple string item
-            var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
-            // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteString", Items, newreader:true);
-        }
     }
 }
