@@ -166,8 +166,10 @@ namespace YoFi.Tests
             WriteThenReadBack("SimpleWriteDecimal", Items, newreader);
         }
 
-        [TestMethod]
-        public void SimpleWriteBoolean()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void SimpleWriteBoolean(bool newreader)
         {
             // Given: A very simple item w/ boolean member
             var Items = new List<SimpleItem<Boolean>>() { new SimpleItem<Boolean>() { Key = true } };
@@ -175,7 +177,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteBoolean", Items);
+            WriteThenReadBack("SimpleWriteBoolean", Items, newreader);
         }
 
         [TestMethod]

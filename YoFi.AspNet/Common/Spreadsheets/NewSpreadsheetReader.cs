@@ -159,9 +159,19 @@ namespace YoFi.AspNet.Common
                     }
                     else if (property.PropertyType == typeof(bool))
                     {
-                        bool value;
-                        if (bool.TryParse(kvp.Value, out value))
-                            property.SetValue(item, value);
+                        // Bool is represented as 0/1.
+                        // But maybe somettimes it will come in as true/false
+                        // So I'll deal with each
+
+                        int intvalue;
+                        if (int.TryParse(kvp.Value, out intvalue))
+                            property.SetValue(item, intvalue != 0);
+                        else
+                        {
+                            bool value;
+                            if (bool.TryParse(kvp.Value, out value))
+                                property.SetValue(item, value);
+                        }
                     }
                     else if (property.PropertyType == typeof(string))
                     {
