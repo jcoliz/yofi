@@ -244,5 +244,57 @@ namespace YoFi.Tests
             WriteNewReadOld("TransactionItems20", Items);
         }
 
+        [TestMethod]
+        public async Task MultipleDataSeries()
+        {
+            // Given: Two different item series
+            var TxItems = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
+            var SplitItems = SplitControllerTest.SplitItems;
+
+            // When: Writing both to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: All spreadsheets are valid, and contain the expected items
+
+            // When: Writing it to a spreadsheet using the new methods
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new NewSpreadsheetWriter())
+                {
+                    writer.Open(stream);
+                    writer.Write(TxItems);
+                    writer.Write(SplitItems);
+                }
+
+                stream.Seek(0, SeekOrigin.Begin);
+                var filename = $"Test-MultipleDataSeries.xlsx";
+                File.Delete(filename);
+                using (var outstream = File.OpenWrite(filename))
+                {
+                    Console.WriteLine($"Writing {outstream.Name}...");
+                    stream.CopyTo(outstream);
+                }
+
+                // And: Reading it back to a spreadsheet using the old methods
+                var actual_t = new List<Transaction>();
+                var actual_s = new List<Split>();
+                var sheets = new List<string>();
+
+                stream.Seek(0, SeekOrigin.Begin);
+                using (var reader = new SpreadsheetReader())
+                {
+                    reader.Open(stream);
+                    actual_t.AddRange(reader.Read<Transaction>(includeids: true));
+                    actual_s.AddRange(reader.Read<Split>(includeids: true));
+                    sheets.AddRange(reader.SheetNames.ToList());
+                }
+
+                // Then: The spreadsheet is valid, and contains the expected item
+                Assert.AreEqual(2, sheets.Count());
+                Assert.IsTrue(sheets.Contains("Transaction"));
+                Assert.IsTrue(sheets.Contains("Split"));
+                CollectionAssert.AreEqual(TxItems, actual_t);
+                CollectionAssert.AreEqual(SplitItems, actual_s);
+            }
+        }
     }
 }

@@ -238,9 +238,11 @@ namespace YoFi.AspNet.Common
             WorksheetPart newWorksheetPart = workbookPart.AddNewPart<WorksheetPart>();
             newWorksheetPart.Worksheet = new Worksheet(new SheetData());
 
-            // Add Sheets to the Workbook.
-            Sheets sheets = workbookPart.Workbook.
-                AppendChild<Sheets>(new Sheets());
+            // Are there already sheets?
+            Sheets sheets = workbookPart.Workbook.GetFirstChild<Sheets>();
+            if (null == sheets)
+                // Add Sheets to the Workbook.
+                sheets = workbookPart.Workbook.AppendChild<Sheets>(new Sheets());
 
             newWorksheetPart.Worksheet.Save();
 
