@@ -660,7 +660,7 @@ namespace YoFi.Tests
             IEnumerable<Split> splititems;
             IEnumerable<string> sheetnames;
             string singlesheet = string.Empty;
-            using (var ssr = new SpreadsheetReader())
+            using (var ssr = new NewSpreadsheetReader())
             {
                 ssr.Open(stream);
                 txitems = ssr.Read<Transaction>();

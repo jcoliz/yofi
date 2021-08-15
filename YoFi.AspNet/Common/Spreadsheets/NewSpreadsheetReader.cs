@@ -94,16 +94,16 @@ namespace YoFi.AspNet.Common
                 string value = string.Empty;
                 if (null != cell)
                 {
-                    if (cell.DataType == CellValues.SharedString)
+                    if (cell.DataType != null && cell.DataType == CellValues.SharedString)
                     {
                         if (null == shareStringPart)
                             throw new ApplicationException("Shared string cell found, but no shared string table!");
 
                         value = FindSharedStringItem(cell.CellValue?.Text, shareStringPart);
                     }
-                    else
+                    else if (!string.IsNullOrEmpty(cell.CellValue?.Text))
                     {
-                        value = cell.CellValue?.Text;
+                        value = cell.CellValue.Text;
                     }
                 }
                 line[col] = value;
