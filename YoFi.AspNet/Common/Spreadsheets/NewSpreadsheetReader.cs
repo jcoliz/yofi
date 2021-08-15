@@ -60,66 +60,18 @@ namespace YoFi.AspNet.Common
             if (maxrow < 2U)
                 return null;
 
-            //
-            // Read the headers
-            //
+            // Read row 1 into the headers
+            var headers = ReadRow(cells, 1, maxcol);
 
-            List<string> headers = new List<string>();
-            uint row = 1;
-            for (uint col = 0; col <= maxcol; col++)
-            {
-                var celref = ColNameFor(col) + row;
-                var cell = cells.Where(x => x.CellReference.Value == celref).SingleOrDefault();
-                if (null != cell)
-                {
-                    string text = string.Empty;
-                    if (cell.DataType == CellValues.SharedString)
-                    {
-                        if (null == shareStringPart)
-                            throw new ApplicationException("Shared string cell found, but no shared string table!");
-
-                        text = FindSharedStringItem(cell.CellValue?.Text, shareStringPart);
-                    }
-                    else
-                    {
-                        text = cell.CellValue?.Text;
-                    }
-
-                    headers.Add(text);
-                }
-            }
-
-            //
-            // Now read in the lines
-            //
-
+            // Read rows 2+ into the result items
             var result = new List<T>();
-            for (row = 2; row <= maxrow; row++)
+            for (uint row = 2; row <= maxrow; row++)
             {
-                var line = new Dictionary<string, string>();
-                for (uint col = 0; col <= maxcol; col++)
-                {
-                    var celref = ColNameFor(col) + row;
-                    var cell = cells.Where(x => x.CellReference.Value == celref).SingleOrDefault();
-                    if (null != cell)
-                    {
-                        var property = headers[(int)col];
-                        string value = string.Empty;
-                        if (cell.DataType == CellValues.SharedString)
-                        {
-                            if (null == shareStringPart)
-                                throw new ApplicationException("Shared string cell found, but no shared string table!");
+                // Get raw row data
+                var rowdata = ReadRow(cells, row, maxcol);
 
-                            value = FindSharedStringItem(cell.CellValue?.Text, shareStringPart);
-                        }
-                        else
-                        {
-                            value = cell.CellValue?.Text;
-                        }
-
-                        line[property] = value;
-                    }
-                }
+                // Transform keys based on headers
+                var line = rowdata.ToDictionary(x => headers[x.Key], x => x.Value);
 
                 // Transform into result object
                 var item = CreateFromDictionary<T>(line);
@@ -128,6 +80,36 @@ namespace YoFi.AspNet.Common
             }
 
             return result;
+        }
+
+        private Dictionary<uint, string> ReadRow(IEnumerable<Cell> cells, uint row, uint maxcol)
+        {
+            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().SingleOrDefault();
+
+            var line = new Dictionary<uint, string>();
+            for (uint col = 0; col <= maxcol; col++)
+            {
+                var celref = ColNameFor(col) + row;
+                var cell = cells.Where(x => x.CellReference.Value == celref).SingleOrDefault();
+                string value = string.Empty;
+                if (null != cell)
+                {
+                    if (cell.DataType == CellValues.SharedString)
+                    {
+                        if (null == shareStringPart)
+                            throw new ApplicationException("Shared string cell found, but no shared string table!");
+
+                        value = FindSharedStringItem(cell.CellValue?.Text, shareStringPart);
+                    }
+                    else
+                    {
+                        value = cell.CellValue?.Text;
+                    }
+                }
+                line[col] = value;
+            }
+
+            return line;
         }
 
         private static T CreateFromDictionary<T>(Dictionary<string, string> source, bool includeints = false) where T : class, new()
