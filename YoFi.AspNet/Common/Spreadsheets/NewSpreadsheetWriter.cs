@@ -63,80 +63,67 @@ namespace YoFi.AspNet.Common
 
             rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item)).ToList()));
 
+            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
+
+            WorksheetPart worksheetPart = InsertWorksheet(spreadSheet.WorkbookPart, sheetName);
+
+            uint rowid = 1;
+            foreach (var row in rows)
             {
-                // Get the SharedStringTablePart. If it does not exist, create a new one.
-                var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
-
-                // Insert a new worksheet.
-                WorksheetPart worksheetPart = InsertWorksheet(spreadSheet.WorkbookPart, sheetName);
-
-                uint rowid = 1;
-                foreach (var row in rows)
+                int colid = 0;
+                foreach (var cel in row)
                 {
-                    int colid = 0;
-                    foreach (var cel in row)
+                    if (cel != null)
                     {
-                        if (cel != null)
+                        var t = cel.GetType();
+
+                        if (t == typeof(string))
                         {
-                            var t = cel.GetType();
+                            int index = InsertSharedStringItem(cel as string, shareStringPart);
+                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
 
-                            if (t == typeof(string))
-                            {
-                                // Insert the text into the SharedStringTablePart.
-                                int index = InsertSharedStringItem(cel as string, shareStringPart);
-
-                                // Insert cell into the new worksheet.
-                                Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                                // Set the value of cell
-                                cell.CellValue = new CellValue(index.ToString());
-                                cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                            }
-                            else if (t == typeof(decimal))
-                            {
-                                // Insert cell into the new worksheet.
-                                Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                                cell.CellValue = new CellValue(cel.ToString());
-                                cell.DataType = new EnumValue<CellValues>(CellValues.Number);
-                            }
-                            else if (t == typeof(Int32))
-                            {
-                                // Insert cell into the new worksheet.
-                                Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                                cell.CellValue = new CellValue(cel.ToString());
-                                cell.DataType = new EnumValue<CellValues>(CellValues.Number);
-                            }
-                            else if (t == typeof(DateTime))
-                            {
-                                // Insert cell into the new worksheet.
-                                Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                                // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
-                                double oaValue = ((DateTime)cel).ToOADate();
-                                cell.CellValue = new CellValue(oaValue.ToString(CultureInfo.InvariantCulture));
-                                cell.DataType = new EnumValue<CellValues>(CellValues.Number);
-                            }
-                            else if (t == typeof(Boolean))
-                            {
-                                // Insert cell into the new worksheet.
-                                Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                                cell.CellValue = new CellValue(((Boolean)cel)?"1":"0");
-                                cell.DataType = new EnumValue<CellValues>(CellValues.Boolean);
-                            }
-                            // else leave it alone?
+                            cell.CellValue = new CellValue(index.ToString());
+                            cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
                         }
+                        else if (t == typeof(decimal))
+                        {
+                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
 
-                        ++colid;
+                            cell.CellValue = new CellValue(cel.ToString());
+                            cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                        }
+                        else if (t == typeof(Int32))
+                        {
+                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
+
+                            cell.CellValue = new CellValue(cel.ToString());
+                            cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                        }
+                        else if (t == typeof(DateTime))
+                        {
+                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
+
+                            // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
+                            double oaValue = ((DateTime)cel).ToOADate();
+                            cell.CellValue = new CellValue(oaValue.ToString(CultureInfo.InvariantCulture));
+                            cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                        }
+                        else if (t == typeof(Boolean))
+                        {
+                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
+
+                            cell.CellValue = new CellValue(((Boolean)cel)?"1":"0");
+                            cell.DataType = new EnumValue<CellValues>(CellValues.Boolean);
+                        }
+                        // else leave it alone?
                     }
-                    ++rowid;
-                }
 
-                // Save the new worksheet.
-                worksheetPart.Worksheet.Save();
+                    ++colid;
+                }
+                ++rowid;
             }
+
+            worksheetPart.Worksheet.Save();
         }
 
         private static string ColNameFor(int colnumber)
