@@ -13,14 +13,26 @@ using System.Threading.Tasks;
 namespace YoFi.AspNet.Common
 {
     /// <summary>
-    /// Provides ISpreadsheetWriter using Microsoft-supported libraries
+    /// Write spreadsheets from memory, using Office OpenXML
     /// </summary>
+    /// <remarks>
+    /// https://github.com/OfficeDev/Open-XML-SDK
+    /// 
+    /// Originally, I used EPPlus. However, that library is commercial use and closed source.
+    /// </remarks>
     public class NewSpreadsheetWriter : ISpreadsheetWriter
     {
         #region ISpreadsheetWriter (Public Interface)
 
+        /// <summary>
+        /// The names of all the individual sheets
+        /// </summary>
         public IEnumerable<string> SheetNames => throw new NotImplementedException();
 
+        /// <summary>
+        /// Open the reader for writing to <paramref name="stream"/>
+        /// </summary>
+        /// <param name="stream">Stream where to write</param>
         public void Open(Stream stream)
         {
             spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
@@ -30,6 +42,14 @@ namespace YoFi.AspNet.Common
             shareStringPart.SharedStringTable = new SharedStringTable();
         }
 
+        /// <summary>
+        /// Write <paramref name="items"/> to a new sheet named <paramref name="sheetname"/>
+        /// </summary>
+        /// <remarks>
+        /// This can be called multiple times on the same open reader
+        /// </remarks>
+        /// <param name="items">Which items to write</param>
+        /// <param name="sheetname">Name of sheet. Will be inferred from name of T if not supplied</param>
         public void Write<T>(IEnumerable<T> items, string sheetname = null) where T : class
         {
             var name = string.IsNullOrEmpty(sheetname) ? typeof(T).Name : sheetname;

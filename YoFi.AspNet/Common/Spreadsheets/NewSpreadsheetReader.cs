@@ -10,12 +10,27 @@ using System.Threading.Tasks;
 
 namespace YoFi.AspNet.Common
 {
+    /// <summary>
+    /// Read spreadsheets into memory, using Office OpenXML
+    /// </summary>
+    /// <remarks>
+    /// https://github.com/OfficeDev/Open-XML-SDK
+    /// 
+    /// Originally, I used EPPlus. However, that library is commercial use and closed source.
+    /// </remarks>
     public class NewSpreadsheetReader : ISpreadsheetReader
     {
         #region ISpreadsheetReader (Public Interface)
 
+        /// <summary>
+        /// The names of all the individual sheets
+        /// </summary>
         public IEnumerable<string> SheetNames { get; private set; }
 
+        /// <summary>
+        /// Open the reader for reading from <paramref name="stream"/>
+        /// </summary>
+        /// <param name="stream">Where to read from</param>
         public void Open(Stream stream)
         {
             spreadSheet = SpreadsheetDocument.Open(stream, isEditable: false);
@@ -23,6 +38,16 @@ namespace YoFi.AspNet.Common
             SheetNames = workbookpart.Workbook.Descendants<Sheet>().Select(x => x.Name.Value).ToList();
         }
 
+        /// <summary>
+        /// Read the sheet named <paramref name="sheetname"/> into items
+        /// </summary>
+        /// <remarks>
+        /// This can be called multiple times on the same open reader
+        /// </remarks>
+        /// <typeparam name="T">Type of the items to return</typeparam>
+        /// <param name="sheetname">Name of sheet. Will be inferred from name of <typeparamref name="T"/> if not supplied</param>
+        /// <param name="exceptproperties">Properties to exclude from the import</param>
+        /// <returns>Enumerable of <typeparamref name="T"/> items, OR null if  <paramref name="sheetname"/> is not found</returns>
         public IEnumerable<T> Read<T>(string sheetname = null, IEnumerable<string> exceptproperties = null) where T : class, new()
         {
             // Fill in default name if not specified
@@ -89,6 +114,13 @@ namespace YoFi.AspNet.Common
 
         #region Internals
 
+        /// <summary>
+        /// Read a single row out of a sheet
+        /// </summary>
+        /// <param name="cells">All cells in sheet</param>
+        /// <param name="row">Which row, from 1</param>
+        /// <param name="maxcol">Largest valid column number, from 0</param>
+        /// <returns>Cell values mapped to column number where found, from 0</returns>
         private Dictionary<uint, string> ReadRow(IEnumerable<Cell> cells, uint row, uint maxcol)
         {
             var result = new Dictionary<uint, string>();
@@ -112,6 +144,14 @@ namespace YoFi.AspNet.Common
             return result;
         }
 
+        /// <summary>
+        /// Look up a string from the shared string table part
+        /// </summary>
+        /// <param name="id">ID for the string, 0-based integer in string form</param>
+        /// <exception cref="ApplicationException">
+        /// Throws if there is no string table, or if the string can't be found.
+        /// </exception>
+        /// <returns>The string found</returns>
         private string FindSharedStringItem(string id)
         {
             var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().SingleOrDefault();
@@ -133,6 +173,12 @@ namespace YoFi.AspNet.Common
 
         #region Static Internals
 
+        /// <summary>
+        /// Create a type from a dictionary of values
+        /// </summary>
+        /// <typeparam name="T">Which type to create</typeparam>
+        /// <param name="source">Dictionary of strings to values, where each key is a property name</param>
+        /// <returns>The created T item</returns>
         private static T CreateFromDictionary<T>(Dictionary<string, string> source) where T : class, new()
         {
             var item = new T();
@@ -206,6 +252,11 @@ namespace YoFi.AspNet.Common
             return item;
         }
 
+        /// <summary>
+        /// Convert string column name to integer index
+        /// </summary>
+        /// <param name="colname">Base 26-style column name, e.g. "AF"</param>
+        /// <returns>0-based integer column number, e.g. "A" = 0</returns>
         private static uint ColNumberFor(IEnumerable<char> colname)
         {
             if (colname == null || !colname.Any())
@@ -217,6 +268,11 @@ namespace YoFi.AspNet.Common
             return last + 26U * others;
         }
 
+        /// <summary>
+        /// Convert column number to spreadsheet name
+        /// </summary>
+        /// <param name="colnumber">0-based integer column number, e.g. "A" = 0</param>
+        /// <returns>Base 26-style column name, e.g. "AF"</returns>
         private static string ColNameFor(uint colnumber)
         {
             if (colnumber < 26)
