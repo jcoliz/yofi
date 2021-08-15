@@ -107,22 +107,6 @@ namespace Common.AspNet.Test
             await context.SaveChangesAsync();
         }
 
-        public HashSet<TExtract> ExtractFromSpreadsheet<TExtract>(byte[] data) where TExtract : class, new()
-        {
-            var incoming = new HashSet<TExtract>();
-            using (var stream = new MemoryStream(data))
-            {
-                using (var ssr = new SpreadsheetReader())
-                {
-                    ssr.Open(stream);
-                    var items = ssr.Read<TExtract>();
-                    incoming.UnionWith(items);
-                }
-            }
-
-            return incoming;
-        }
-
         public HashSet<TExtract> ExtractFromSpreadsheet<TExtract>(Stream stream) where TExtract : class, new()
         {
             var incoming = new HashSet<TExtract>();
