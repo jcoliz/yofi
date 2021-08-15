@@ -572,7 +572,7 @@ namespace YoFi.Tests
             // Build a spreadsheet with the chosen number of items
             // Note that we are not disposing the stream. User of the file will do so later.
             var stream = new MemoryStream();
-            using (var ssr = new SpreadsheetWriter())
+            using (var ssr = new NewSpreadsheetWriter())
             {
                 ssr.Open(stream);
                 ssr.Write(transactions);
