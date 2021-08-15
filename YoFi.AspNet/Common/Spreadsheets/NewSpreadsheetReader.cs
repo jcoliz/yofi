@@ -67,14 +67,14 @@ namespace YoFi.AspNet.Common
             var result = new List<T>();
             for (uint row = 2; row <= maxrow; row++)
             {
-                // Get raw row data
+                // Extract raw row data
                 var rowdata = ReadRow(cells, row, maxcol);
 
                 // Transform keys based on headers
                 var line = rowdata.ToDictionary(x => headers[x.Key], x => x.Value);
 
                 // Transform into result object
-                var item = CreateFromDictionary<T>(line);
+                var item = CreateFromDictionary<T>(source: line, includeints: includeids ?? false);
 
                 result.Add(item);
             }
