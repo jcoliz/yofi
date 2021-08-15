@@ -167,7 +167,7 @@ namespace YoFi.AspNet.Common
             // Are there already sheets?
             Sheets sheets = workbookPart.Workbook.GetFirstChild<Sheets>();
             if (null == sheets)
-                // Add Sheets to the Workbook.
+                // If not, sdd Sheets to the Workbook.
                 sheets = workbookPart.Workbook.AppendChild<Sheets>(new Sheets());
 
             newWorksheetPart.Worksheet.Save();
@@ -175,11 +175,7 @@ namespace YoFi.AspNet.Common
             string relationshipId = workbookPart.GetIdOfPart(newWorksheetPart);
 
             // Get a unique ID for the new sheet.
-            uint sheetId = 1;
-            if (sheets.Elements<Sheet>().Count() > 0)
-            {
-                sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
-            }
+            var sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).DefaultIfEmpty().Max() + 1;
 
             // Append the new worksheet and associate it with the workbook.
             Sheet sheet = new Sheet() { Id = relationshipId, SheetId = sheetId, Name = sheetName };
@@ -193,46 +189,39 @@ namespace YoFi.AspNet.Common
         // If the cell already exists, returns it. 
         private static Cell InsertCellInWorksheet(string columnName, uint rowIndex, WorksheetPart worksheetPart)
         {
+            Cell result = null;
+
             Worksheet worksheet = worksheetPart.Worksheet;
             SheetData sheetData = worksheet.GetFirstChild<SheetData>();
             string cellReference = columnName + rowIndex;
 
-            // If the worksheet does not contain a row with the specified row index, insert one.
-            Row row;
-            if (sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).Count() != 0)
-            {
-                row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).First();
-            }
-            else
+            // Find the existing row
+            Row row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).SingleOrDefault();
+
+            // Or create one if that doesn't exist.
+            if (null == row)
             {
                 row = new Row() { RowIndex = rowIndex, Spans = new ListValue<StringValue>() };
                 sheetData.Append(row);
             }
 
-            // If there is not a cell with the specified column name, insert one.  
-            if (row.Elements<Cell>().Where(c => c.CellReference.Value == columnName + rowIndex).Count() > 0)
-            {
-                return row.Elements<Cell>().Where(c => c.CellReference.Value == cellReference).First();
-            }
-            else
-            {
-                // Cells must be in sequential order according to CellReference. Determine where to insert the new cell.
-                Cell refCell = null;
-                foreach (Cell cell in row.Elements<Cell>())
-                {
-                    if (string.Compare(cell.CellReference.Value, cellReference, true) > 0)
-                    {
-                        refCell = cell;
-                        break;
-                    }
-                }
+            // Find the existing cell
+            result = row.Elements<Cell>().Where(c => c.CellReference.Value == cellReference).SingleOrDefault();
 
-                Cell newCell = new Cell() { CellReference = cellReference };
-                row.InsertBefore(newCell, refCell);
+            // If not...
+            if (null == result)
+            {
+                // Create a new one!
+                result = new Cell() { CellReference = cellReference };
+
+                // Insert in the correct place. Must be in sequential order according to CellReference.
+                var refCell = row.Elements<Cell>().FirstOrDefault(x=> string.Compare(x.CellReference.Value, cellReference, true) > 0);
+                row.InsertBefore(result, refCell);
 
                 worksheet.Save();
-                return newCell;
             }
+
+            return result;
         }
         #endregion
 
