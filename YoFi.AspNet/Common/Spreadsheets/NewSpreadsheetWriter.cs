@@ -52,16 +52,15 @@ namespace YoFi.AspNet.Common
         {
             var rows = new List<IEnumerable<object>>();
 
-            // First add the headers
+            // Add the properties as a header row
+
             // If we don't want a property to show up when it's being json serialized, we also don't want 
             // it to show up when we're exporting it.
             var properties = typeof(T).GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
+            rows.Add(properties.Select(x => x.Name));
 
-            rows.Add(properties.Select(x => x.Name).ToList());
-
-            // Second, add the items
-
-            rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item)).ToList()));
+            // Add the items as remaining rows
+            rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item))));
 
             var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
 
@@ -76,46 +75,40 @@ namespace YoFi.AspNet.Common
                     if (cel != null)
                     {
                         var t = cel.GetType();
+                        string value = null;
+                        CellValues datatype = CellValues.Number;
 
                         if (t == typeof(string))
                         {
-                            int index = InsertSharedStringItem(cel as string, shareStringPart);
-                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                            cell.CellValue = new CellValue(index.ToString());
-                            cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                            value = InsertSharedStringItem(cel as string, shareStringPart).ToString();
+                            datatype = CellValues.SharedString;
                         }
                         else if (t == typeof(decimal))
                         {
-                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                            cell.CellValue = new CellValue(cel.ToString());
-                            cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                            value = cel.ToString();
                         }
                         else if (t == typeof(Int32))
                         {
-                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                            cell.CellValue = new CellValue(cel.ToString());
-                            cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                            value = cel.ToString();
                         }
                         else if (t == typeof(DateTime))
                         {
-                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
                             // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
                             double oaValue = ((DateTime)cel).ToOADate();
-                            cell.CellValue = new CellValue(oaValue.ToString(CultureInfo.InvariantCulture));
-                            cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                            value = oaValue.ToString(CultureInfo.InvariantCulture);
                         }
                         else if (t == typeof(Boolean))
                         {
-                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-
-                            cell.CellValue = new CellValue(((Boolean)cel)?"1":"0");
-                            cell.DataType = new EnumValue<CellValues>(CellValues.Boolean);
+                            value = ((Boolean)cel)?"1":"0";
+                            datatype = CellValues.Boolean;
                         }
-                        // else leave it alone?
+
+                        if (null != value)
+                        {
+                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
+                            cell.CellValue = new CellValue(value);
+                            cell.DataType = new EnumValue<CellValues>(datatype);
+                        }
                     }
 
                     ++colid;
