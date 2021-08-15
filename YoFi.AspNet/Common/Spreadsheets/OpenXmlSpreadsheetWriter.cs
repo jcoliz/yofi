@@ -20,7 +20,7 @@ namespace YoFi.AspNet.Common
     /// 
     /// Originally, I used EPPlus. However, that library is commercial use and closed source.
     /// </remarks>
-    public class NewSpreadsheetWriter : ISpreadsheetWriter
+    public class OpenXmlSpreadsheetWriter : ISpreadsheetWriter
     {
         #region ISpreadsheetWriter (Public Interface)
 

@@ -110,7 +110,7 @@ namespace Common.AspNet.Test
         public HashSet<TExtract> ExtractFromSpreadsheet<TExtract>(Stream stream) where TExtract : class, new()
         {
             var incoming = new HashSet<TExtract>();
-            using (var ssr = new NewSpreadsheetReader())
+            using (var ssr = new OpenXmlSpreadsheetReader())
             {
                 ssr.Open(stream);
                 var items = ssr.Read<TExtract>();
@@ -307,7 +307,7 @@ namespace Common.AspNet.Test
             // Build a spreadsheet with the chosen number of items
             // Note that we are not disposing the stream. User of the file will do so later.
             var stream = new MemoryStream();
-            using (var ssr = new NewSpreadsheetWriter())
+            using (var ssr = new OpenXmlSpreadsheetWriter())
             {
                 ssr.Open(stream);
                 ssr.Write(what);

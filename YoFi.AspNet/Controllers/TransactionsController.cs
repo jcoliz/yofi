@@ -694,7 +694,7 @@ namespace YoFi.AspNet.Controllers
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using (var stream = file.OpenReadStream())
-                        using (var ssr = new NewSpreadsheetReader())
+                        using (var ssr = new OpenXmlSpreadsheetReader())
                         {
                             ssr.Open(stream);
                             var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
@@ -770,7 +770,7 @@ namespace YoFi.AspNet.Controllers
                     if (formFile.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using (var stream = formFile.OpenReadStream())
-                        using (var ssr = new NewSpreadsheetReader())
+                        using (var ssr = new OpenXmlSpreadsheetReader())
                         {
                             ssr.Open(stream);
                             var items = ssr.Read<Transaction>();
@@ -986,7 +986,7 @@ namespace YoFi.AspNet.Controllers
                 // Create the spreadsheet result
 
                 var stream = new MemoryStream();
-                using (var ssw = new NewSpreadsheetWriter())
+                using (var ssw = new OpenXmlSpreadsheetWriter())
                 {
                     ssw.Open(stream);
                     ssw.Write(transactions);

@@ -162,7 +162,7 @@ namespace YoFi.AspNet.Controllers
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using (var stream = file.OpenReadStream())
-                        using (var ssr = new NewSpreadsheetReader())
+                        using (var ssr = new OpenXmlSpreadsheetReader())
                         {
                             ssr.Open(stream);
                             var items = ssr.Read<CategoryMap>(exceptproperties: new string[] { "ID" });
@@ -196,7 +196,7 @@ namespace YoFi.AspNet.Controllers
 
                 FileStreamResult result = null;
                 var stream = new MemoryStream();
-                using (var ssw = new NewSpreadsheetWriter())
+                using (var ssw = new OpenXmlSpreadsheetWriter())
                 {
                     ssw.Open(stream);
                     ssw.Write(items);

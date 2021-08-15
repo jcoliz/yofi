@@ -36,7 +36,7 @@ namespace YoFi.Tests
 
         void WhenWritingToNewSpreadsheet<T>(Stream stream,IEnumerable<T> items, string name) where T: class
         {
-            using (var writer = new NewSpreadsheetWriter())
+            using (var writer = new OpenXmlSpreadsheetWriter())
             {
                 writer.Open(stream);
                 writer.Write(items, name);
@@ -66,7 +66,7 @@ namespace YoFi.Tests
         private void WhenReadAsNewSpreadsheet<T>(MemoryStream stream, string name, List<T> actual, List<string> sheets) where T : class, new()
         {
             stream.Seek(0, SeekOrigin.Begin);
-            using (var reader = new NewSpreadsheetReader())
+            using (var reader = new OpenXmlSpreadsheetReader())
             {
                 reader.Open(stream);
                 actual.AddRange(reader.Read<T>(name));
@@ -302,7 +302,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             using (var stream = new MemoryStream())
             {
-                using (var writer = new NewSpreadsheetWriter())
+                using (var writer = new OpenXmlSpreadsheetWriter())
                 {
                     writer.Open(stream);
                     writer.Write(TxItems);
@@ -326,7 +326,7 @@ namespace YoFi.Tests
                 stream.Seek(0, SeekOrigin.Begin);
                 ISpreadsheetReader reader;
                 if (newreader)
-                    reader = new NewSpreadsheetReader();
+                    reader = new OpenXmlSpreadsheetReader();
                 else
                     reader = new SpreadsheetReader();
                 using (reader)
@@ -354,7 +354,7 @@ namespace YoFi.Tests
 
             // When: Loading this file
             IEnumerable<Split> actual;
-            using(var reader = new NewSpreadsheetReader())
+            using(var reader = new OpenXmlSpreadsheetReader())
             {
                 reader.Open(instream);
                 actual = reader.Read<Split>();

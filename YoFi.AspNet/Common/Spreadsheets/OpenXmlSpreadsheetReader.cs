@@ -18,7 +18,7 @@ namespace YoFi.AspNet.Common
     /// 
     /// Originally, I used EPPlus. However, that library is commercial use and closed source.
     /// </remarks>
-    public class NewSpreadsheetReader : ISpreadsheetReader
+    public class OpenXmlSpreadsheetReader : ISpreadsheetReader
     {
         #region ISpreadsheetReader (Public Interface)
 
