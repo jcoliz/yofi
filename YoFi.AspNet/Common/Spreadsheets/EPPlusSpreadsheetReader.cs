@@ -12,6 +12,8 @@ namespace YoFi.AspNet.Common
 
         public void Open(Stream stream)
         {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            
             _package = new ExcelPackage(stream);
         }
 
