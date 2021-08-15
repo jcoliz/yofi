@@ -986,7 +986,7 @@ namespace YoFi.AspNet.Controllers
                 // Create the spreadsheet result
 
                 var stream = new MemoryStream();
-                using (var ssw = new SpreadsheetWriter())
+                using (var ssw = new NewSpreadsheetWriter())
                 {
                     ssw.Open(stream);
                     ssw.Write(transactions);

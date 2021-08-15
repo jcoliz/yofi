@@ -196,13 +196,13 @@ namespace YoFi.AspNet.Controllers
 
                 FileStreamResult result = null;
                 var stream = new MemoryStream();
-                using (var ssw = new SpreadsheetWriter())
+                using (var ssw = new NewSpreadsheetWriter())
                 {
                     ssw.Open(stream);
                     ssw.Write(items);
-                    stream.Seek(0, SeekOrigin.Begin);
-                    result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{ssw.SheetNames.First()}.xlsx");
                 }
+                stream.Seek(0, SeekOrigin.Begin);
+                result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"CategoryMap.xlsx");
 
                 // Need to return a task to meet the IControllerBase interface
                 return Task.FromResult(result as IActionResult);
