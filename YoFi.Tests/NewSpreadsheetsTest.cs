@@ -62,6 +62,17 @@ namespace YoFi.Tests
             }
         }
 
+        private void WhenReadAsNewSpreadsheet<T>(MemoryStream stream, string name, List<T> actual, List<string> sheets) where T : class, new()
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            using (var reader = new NewSpreadsheetReader())
+            {
+                reader.Open(stream);
+                actual.AddRange(reader.Read<T>(name, includeids: true));
+                sheets.AddRange(reader.SheetNames.ToList());
+            }
+        }
+
         public void WriteNewReadOld<T>(string name, List<T> items) where T : class, new()
         {
             // Given: Some items
@@ -83,6 +94,26 @@ namespace YoFi.Tests
             }
         }
 
+        public void WriteNewReadNew<T>(string name, List<T> items) where T : class, new()
+        {
+            // Given: Some items
+
+            // When: Writing it to a spreadsheet using the new methods
+            using (var stream = new MemoryStream())
+            {
+                WhenWritingToNewSpreadsheet(stream, items, name);
+
+                // And: Reading it back to a spreadsheet using the old methods
+                var actual = new List<T>();
+                var sheets = new List<string>();
+                WhenReadAsNewSpreadsheet<T>(stream, name, actual, sheets);
+
+                // Then: The spreadsheet is valid, and contains the expected item
+                Assert.AreEqual(1, sheets.Count());
+                Assert.AreEqual(name, sheets.Single());
+                CollectionAssert.AreEqual(items, actual);
+            }
+        }
 
         [TestMethod]
         public void SimpleWriteString()
@@ -295,6 +326,18 @@ namespace YoFi.Tests
                 CollectionAssert.AreEqual(TxItems, actual_t);
                 CollectionAssert.AreEqual(SplitItems, actual_s);
             }
+
+        }
+        [TestMethod]
+        public void SimpleWriteStringNew()
+        {
+            // Given: A very simple string item
+            var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteNewReadNew("SimpleWriteString", Items);
         }
     }
 }
