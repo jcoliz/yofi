@@ -26,6 +26,7 @@ namespace YoFi.AspNet.Common
             spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
             WorkbookPart workbookpart = spreadSheet.AddWorkbookPart();
             workbookpart.Workbook = new Workbook();
+            workbookpart.AddNewPart<SharedStringTablePart>();
         }
 
         public void Write<T>(IEnumerable<T> items, string sheetname = null) where T : class
@@ -64,15 +65,7 @@ namespace YoFi.AspNet.Common
 
             {
                 // Get the SharedStringTablePart. If it does not exist, create a new one.
-                SharedStringTablePart shareStringPart;
-                if (spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Count() > 0)
-                {
-                    shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().First();
-                }
-                else
-                {
-                    shareStringPart = spreadSheet.WorkbookPart.AddNewPart<SharedStringTablePart>();
-                }
+                var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
 
                 // Insert a new worksheet.
                 WorksheetPart worksheetPart = InsertWorksheet(spreadSheet.WorkbookPart, sheetName);
