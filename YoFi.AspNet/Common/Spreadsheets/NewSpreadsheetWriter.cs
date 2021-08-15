@@ -104,6 +104,7 @@ namespace YoFi.AspNet.Common
                             datatype = CellValues.Boolean;
                         }
 
+                        // If we actually handled it, then do add it, else ignore
                         if (null != value)
                         {
                             Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
