@@ -14,8 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Transaction = YoFi.AspNet.Models.Transaction;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
 using YoFi.AspNet.Common;
 
 namespace YoFi.Tests
