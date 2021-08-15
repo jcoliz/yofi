@@ -24,8 +24,6 @@ namespace YoFi.AspNet.Common
         public void Open(Stream stream)
         {
             spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
-
-            // Add a WorkbookPart to the document.
             WorkbookPart workbookpart = spreadSheet.AddWorkbookPart();
             workbookpart.Workbook = new Workbook();
         }
@@ -33,8 +31,7 @@ namespace YoFi.AspNet.Common
         public void Write<T>(IEnumerable<T> items, string sheetname = null) where T : class
         {
             var name = string.IsNullOrEmpty(sheetname) ? typeof(T).Name : sheetname;
-
-            SpreadsheetHelpers.InsertItems(spreadSheet, items, name);
+            InsertItems(spreadSheet, items, name);
         }
 
         #endregion
@@ -43,71 +40,27 @@ namespace YoFi.AspNet.Common
         SpreadsheetDocument spreadSheet;
         #endregion
         
-        #region IDispose
-        private bool disposedValue;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                    if (null != spreadSheet)
-                    {
-                        spreadSheet.Dispose();
-                        spreadSheet = null;
-                    }
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                disposedValue = true;
-            }
-        }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~NewSpreadsheetWriter()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-        #endregion
-    }
-
-    public class SpreadsheetHelpers
-    {
         #region Sample Code
 
+        // All this code came from:
         // https://docs.microsoft.com/en-us/office/open-xml/how-to-insert-text-into-a-cell-in-a-spreadsheet
 
-        // Given a document name and text, 
-        // inserts a new work sheet and writes the text to cell "A1" of the new worksheet.
-
-        // "data" is an enumerable of rows, where rows are an enumerable of columns
-        // supported types are string, DateTime, decimal, and int
+        // Then I modified it every so slightly to work more generically
 
         public static void InsertItems<T>(SpreadsheetDocument spreadSheet, IEnumerable<T> items, string sheetName)
         {
-            var data = new List<IEnumerable<object>>();
+            var rows = new List<IEnumerable<object>>();
 
             // First add the headers
             // If we don't want a property to show up when it's being json serialized, we also don't want 
             // it to show up when we're exporting it.
             var properties = typeof(T).GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
 
-            data.Add(properties.Select(x => x.Name).ToList());
+            rows.Add(properties.Select(x => x.Name).ToList());
 
             // Second, add the items
 
-            data.AddRange(items.Select(item => properties.Select(x => x.GetValue(item)).ToList()));
+            rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item)).ToList()));
 
             {
                 // Get the SharedStringTablePart. If it does not exist, create a new one.
@@ -125,7 +78,7 @@ namespace YoFi.AspNet.Common
                 WorksheetPart worksheetPart = InsertWorksheet(spreadSheet.WorkbookPart, sheetName);
 
                 uint rowid = 1;
-                foreach (var row in data)
+                foreach (var row in rows)
                 {
                     int colid = 0;
                     foreach (var cel in row)
@@ -307,6 +260,44 @@ namespace YoFi.AspNet.Common
                 worksheet.Save();
                 return newCell;
             }
+        }
+        #endregion
+
+        #region IDispose
+        private bool disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                    if (null != spreadSheet)
+                    {
+                        spreadSheet.Dispose();
+                        spreadSheet = null;
+                    }
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~NewSpreadsheetWriter()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
 
