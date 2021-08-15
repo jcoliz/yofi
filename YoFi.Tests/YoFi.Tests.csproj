@@ -12,6 +12,7 @@
     <None Remove="SampleData\ExportedTransactions.ofx" />
     <None Remove="SampleData\First10.ofx" />
     <None Remove="SampleData\NoRefnums.ofx" />
+    <None Remove="SampleData\Splits-Test.xlsx" />
     <None Remove="SampleData\Transactions1000.json" />
   </ItemGroup>
 
@@ -22,6 +23,7 @@
     <EmbeddedResource Include="SampleData\NoRefnums.ofx" />
     <EmbeddedResource Include="SampleData\First10.ofx" />
     <EmbeddedResource Include="SampleData\Second10.ofx" />
+    <EmbeddedResource Include="SampleData\Splits-Test.xlsx" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
   </ItemGroup>
 

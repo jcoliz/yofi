@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Common.NET.Test;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -343,6 +344,28 @@ namespace YoFi.Tests
                 CollectionAssert.AreEqual(TxItems, actual_t);
                 CollectionAssert.AreEqual(SplitItems, actual_s);
             }
+        }
+
+        [TestMethod]
+        public void LoadFromFile()
+        {
+            // Given: An existing file with splits
+            var instream = SampleData.Open("Splits-Test.xlsx");
+
+            // When: Loading this file
+            IEnumerable<Split> actual;
+            using(var reader = new NewSpreadsheetReader())
+            {
+                reader.Open(instream);
+                actual = reader.Read<Split>();
+            }
+
+            // Then: Contents are as expected
+            Assert.AreEqual(7, actual.Count());
+            Assert.AreEqual(1, actual.Count(x => x.Memo == "Memo 4"));
+            Assert.AreEqual(3, actual.Count(x => x.Category.Contains("A")));
+            // Last item is a total row
+            Assert.AreEqual(actual.TakeLast(1).Single().Amount, actual.SkipLast(1).Sum(x => x.Amount));
         }
     }
 }
