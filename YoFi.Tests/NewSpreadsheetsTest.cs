@@ -285,8 +285,10 @@ namespace YoFi.Tests
             WriteThenReadBack("TransactionItems20", Items, newreader);
         }
 
-        [TestMethod]
-        public async Task MultipleDataSeries()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task MultipleDataSeries(bool newreader)
         {
             // Given: Two different item series
             var TxItems = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
@@ -321,7 +323,12 @@ namespace YoFi.Tests
                 var sheets = new List<string>();
 
                 stream.Seek(0, SeekOrigin.Begin);
-                using (var reader = new SpreadsheetReader())
+                ISpreadsheetReader reader;
+                if (newreader)
+                    reader = new NewSpreadsheetReader();
+                else
+                    reader = new SpreadsheetReader();
+                using (reader)
                 {
                     reader.Open(stream);
                     actual_t.AddRange(reader.Read<Transaction>(includeids: true));
@@ -336,8 +343,6 @@ namespace YoFi.Tests
                 CollectionAssert.AreEqual(TxItems, actual_t);
                 CollectionAssert.AreEqual(SplitItems, actual_s);
             }
-
         }
-
     }
 }
