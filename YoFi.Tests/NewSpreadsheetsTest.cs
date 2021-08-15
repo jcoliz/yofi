@@ -112,16 +112,18 @@ namespace YoFi.Tests
             WriteThenReadBack("SimpleWriteString", Items, newreader);
         }
 
-        [TestMethod]
-        public void SimpleWriteStringNull()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void SimpleWriteStringNull(bool newreader)
         {
             // Given: A small list of simple string items, one with null key
-            var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
+            var Items = new List<SimpleItem<string>>() { new SimpleItem<string>(), new SimpleItem<string>() { Key = "Hello, world!" } };
 
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteStringNull", Items);
+            WriteThenReadBack("SimpleWriteStringNull", Items, newreader);
         }
 
         [DataRow(true)]
@@ -180,8 +182,10 @@ namespace YoFi.Tests
             WriteThenReadBack("SimpleWriteBoolean", Items, newreader);
         }
 
-        [TestMethod]
-        public void OnePayee()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void OnePayee(bool newreader)
         {
             // Given: A single empty transaction
             // Note that an empty timestamp does not serialize well
@@ -190,11 +194,13 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("OnePayee", Items);
+            WriteThenReadBack("OnePayee", Items, newreader);
         }
 
-        [TestMethod]
-        public void AllPayees()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void AllPayees(bool newreader)
         {
             // Given: A single empty transaction
             // Note that an empty timestamp does not serialize well
@@ -203,11 +209,13 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("AllPayees", Items);
+            WriteThenReadBack("AllPayees", Items, newreader);
         }
 
-        [TestMethod]
-        public void AllSplits()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void AllSplits(bool newreader)
         {
             // Given: A single empty transaction
             // Note that an empty timestamp does not serialize well
@@ -216,11 +224,13 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("AllSplits", Items);
+            WriteThenReadBack("AllSplits", Items, newreader);
         }
 
-        [TestMethod]
-        public void AllBudgetTxs()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void AllBudgetTxs(bool newreader)
         {
             // Given: A single empty transaction
             // Note that an empty timestamp does not serialize well
@@ -229,11 +239,13 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("AllBudgetTxs", Items);
+            WriteThenReadBack("AllBudgetTxs", Items, newreader);
         }
 
-        [TestMethod]
-        public void OneTransactionEmpty()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void OneTransactionEmpty(bool newreader)
         {
             // Given: A single empty transaction
             // Note that an empty timestamp does not serialize well
@@ -242,11 +254,13 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("OneTransactionEmpty", Items);
+            WriteThenReadBack("OneTransactionEmpty", Items, newreader);
         }
 
-        [TestMethod]
-        public async Task TransactionItemsFew()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task TransactionItemsFew(bool newreader)
         {
             // Given: A small number of transactions
             var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(2).ToList();
@@ -254,11 +268,13 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("TransactionItemsFew", Items);
+            WriteThenReadBack("TransactionItemsFew", Items, newreader);
         }
-        
-        [TestMethod]
-        public async Task TransactionItems20()
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task TransactionItems20(bool newreader)
         {
             // Given: A ton of transactions
             var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
@@ -266,7 +282,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("TransactionItems20", Items);
+            WriteThenReadBack("TransactionItems20", Items, newreader);
         }
 
         [TestMethod]
