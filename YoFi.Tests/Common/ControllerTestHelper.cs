@@ -126,7 +126,7 @@ namespace Common.AspNet.Test
         public HashSet<TExtract> ExtractFromSpreadsheet<TExtract>(Stream stream) where TExtract : class, new()
         {
             var incoming = new HashSet<TExtract>();
-            using (var ssr = new SpreadsheetReader())
+            using (var ssr = new NewSpreadsheetReader())
             {
                 ssr.Open(stream);
                 var items = ssr.Read<TExtract>(includeids: true);
