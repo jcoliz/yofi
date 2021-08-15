@@ -24,9 +24,10 @@ namespace YoFi.AspNet.Common
         public void Open(Stream stream)
         {
             spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
-            WorkbookPart workbookpart = spreadSheet.AddWorkbookPart();
+            var workbookpart = spreadSheet.AddWorkbookPart();
             workbookpart.Workbook = new Workbook();
-            workbookpart.AddNewPart<SharedStringTablePart>();
+            var shareStringPart = workbookpart.AddNewPart<SharedStringTablePart>();
+            shareStringPart.SharedStringTable = new SharedStringTable();
         }
 
         public void Write<T>(IEnumerable<T> items, string sheetname = null) where T : class
@@ -46,7 +47,7 @@ namespace YoFi.AspNet.Common
         // All this code came from:
         // https://docs.microsoft.com/en-us/office/open-xml/how-to-insert-text-into-a-cell-in-a-spreadsheet
 
-        // Then I modified it every so slightly to work more generically
+        // Then I modified it to work more generically, and refactored it for simplicity
 
         public static void InsertItems<T>(SpreadsheetDocument spreadSheet, IEnumerable<T> items, string sheetName)
         {
@@ -131,30 +132,19 @@ namespace YoFi.AspNet.Common
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
         private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart)
         {
-            // If the part does not contain a SharedStringTable, create one.
-            if (shareStringPart.SharedStringTable == null)
+            var table = shareStringPart.SharedStringTable;
+            var elements = table.Elements<SharedStringItem>();
+            var prior = elements.TakeWhile(x => x.InnerText != text);
+            var id = prior.Count();
+
+            if (id == elements.Count())
             {
-                shareStringPart.SharedStringTable = new SharedStringTable();
+                // The text does not exist in the part. Create the SharedStringItem.
+                table.AppendChild(new SharedStringItem(new Text(text)));
+                table.Save();
             }
 
-            int i = 0;
-
-            // Iterate through all the items in the SharedStringTable. If the text already exists, return its index.
-            foreach (SharedStringItem item in shareStringPart.SharedStringTable.Elements<SharedStringItem>())
-            {
-                if (item.InnerText == text)
-                {
-                    return i;
-                }
-
-                i++;
-            }
-
-            // The text does not exist in the part. Create the SharedStringItem and return its index.
-            shareStringPart.SharedStringTable.AppendChild(new SharedStringItem(new DocumentFormat.OpenXml.Spreadsheet.Text(text)));
-            shareStringPart.SharedStringTable.Save();
-
-            return i;
+            return id;
         }
 
         // Given a WorkbookPart, inserts a new worksheet.
@@ -178,8 +168,7 @@ namespace YoFi.AspNet.Common
             var sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).DefaultIfEmpty().Max() + 1;
 
             // Append the new worksheet and associate it with the workbook.
-            Sheet sheet = new Sheet() { Id = relationshipId, SheetId = sheetId, Name = sheetName };
-            sheets.Append(sheet);
+            sheets.Append(new Sheet() { Id = relationshipId, SheetId = sheetId, Name = sheetName });
             workbookPart.Workbook.Save();
 
             return newWorksheetPart;
