@@ -18,7 +18,6 @@ namespace YoFi.AspNet.Common
 
         public void Open(Stream stream)
         {
-            // Open the document for not editing.
             spreadSheet = SpreadsheetDocument.Open(stream, isEditable: false);
             var workbookpart = spreadSheet.WorkbookPart;
             SheetNames = workbookpart.Workbook.Descendants<Sheet>().Select(x => x.Name.Value).ToList();
@@ -26,10 +25,14 @@ namespace YoFi.AspNet.Common
 
         public IEnumerable<T> Read<T>(string sheetname = null, bool? includeids = false) where T : class, new()
         {
+            // Fill in default name if not specified
             var name = string.IsNullOrEmpty(sheetname) ? typeof(T).Name : sheetname;
+
+            // Find the worksheet
 
             var workbookpart = spreadSheet.WorkbookPart;
             var matching = workbookpart.Workbook.Descendants<Sheet>().Where(x => x.Name == name);
+
             if (!matching.Any())
                 return null;
 
@@ -37,14 +40,9 @@ namespace YoFi.AspNet.Common
                 throw new ApplicationException($"Ambiguous sheet name. Shreadsheet has multiple sheets matching {name}.");
 
             var sheet = matching.Single();
-
-            // Retrieve a reference to the worksheet part.
             WorksheetPart worksheetPart = (WorksheetPart)(workbookpart.GetPartById(sheet.Id));
 
-            // Also let's get the string table if exists
-            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().SingleOrDefault();
-
-            // We need to figure out the extents of the cells in this worksheet.
+            // Determine the extents of the cells contained within in this sheet.
 
             // First, all the cell references in one place
             var cells = worksheetPart.Worksheet.Descendants<Cell>();
@@ -82,35 +80,53 @@ namespace YoFi.AspNet.Common
             return result;
         }
 
+        #endregion
+
+        #region Internals
+
         private Dictionary<uint, string> ReadRow(IEnumerable<Cell> cells, uint row, uint maxcol)
         {
-            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().SingleOrDefault();
+            var result = new Dictionary<uint, string>();
 
-            var line = new Dictionary<uint, string>();
             for (uint col = 0; col <= maxcol; col++)
             {
+                var value = string.Empty;
                 var celref = ColNameFor(col) + row;
                 var cell = cells.Where(x => x.CellReference.Value == celref).SingleOrDefault();
-                string value = string.Empty;
                 if (null != cell)
                 {
                     if (cell.DataType != null && cell.DataType == CellValues.SharedString)
-                    {
-                        if (null == shareStringPart)
-                            throw new ApplicationException("Shared string cell found, but no shared string table!");
+                        value = FindSharedStringItem(cell.CellValue?.Text);
 
-                        value = FindSharedStringItem(cell.CellValue?.Text, shareStringPart);
-                    }
                     else if (!string.IsNullOrEmpty(cell.CellValue?.Text))
-                    {
                         value = cell.CellValue.Text;
-                    }
                 }
-                line[col] = value;
+                result[col] = value;
             }
 
-            return line;
+            return result;
         }
+
+        private string FindSharedStringItem(string id)
+        {
+            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().SingleOrDefault();
+
+            if (null == shareStringPart)
+                throw new ApplicationException("Shared string cell found, but no shared string table!");
+
+            var table = shareStringPart.SharedStringTable;
+            var found = table.Skip(Convert.ToInt32(id));
+            var result = found.FirstOrDefault()?.InnerText;
+
+            if (null == result)
+                throw new ApplicationException($"Unable to find shared string reference for id {id}!");
+
+            return result;
+        }
+
+        #endregion
+
+        #region Static Internals
 
         private static T CreateFromDictionary<T>(Dictionary<string, string> source, bool includeints = false) where T : class, new()
         {
@@ -185,18 +201,6 @@ namespace YoFi.AspNet.Common
             return item;
         }
 
-        private static string FindSharedStringItem(string id, SharedStringTablePart shareStringPart)
-        {
-            var table = shareStringPart.SharedStringTable;
-            var found = table.Skip(Convert.ToInt32(id));
-            var result = found.FirstOrDefault()?.InnerText;
-
-            if (null == result)
-                throw new ApplicationException($"Unable to find shared string reference for id {id}!");
-
-            return result;
-        }
-
         private static uint ColNumberFor(IEnumerable<char> colname)
         {
             if (colname == null || !colname.Any())
@@ -215,7 +219,6 @@ namespace YoFi.AspNet.Common
             else
                 return ColNameFor(colnumber / 26) + ColNameFor(colnumber % 26);
         }
-
 
         #endregion
 
