@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace YoFi.AspNet.Common
 {
-    public class SpreadsheetReader : ISpreadsheetReader
+    public class EPPlusSpreadsheetReader : ISpreadsheetReader
     {
         #region ISpreadsheetReader (Public Interface)
 

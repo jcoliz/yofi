@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace YoFi.AspNet.Common
 {
-    public class SpreadsheetWriter : ISpreadsheetWriter
+    public class EPPlusSpreadsheetWriter : ISpreadsheetWriter
     {
         #region ISpreadsheetWriter (Public Interface)
 

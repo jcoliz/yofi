@@ -55,7 +55,7 @@ namespace YoFi.Tests
         private void WhenReadAsOldSpreadsheet<T>(MemoryStream stream, string name, List<T> actual, List<string> sheets) where T: class, new()
         {
             stream.Seek(0, SeekOrigin.Begin);
-            using (var reader = new SpreadsheetReader())
+            using (var reader = new EPPlusSpreadsheetReader())
             {
                 reader.Open(stream);
                 actual.AddRange(reader.Read<T>(name));
@@ -328,7 +328,7 @@ namespace YoFi.Tests
                 if (newreader)
                     reader = new OpenXmlSpreadsheetReader();
                 else
-                    reader = new SpreadsheetReader();
+                    reader = new EPPlusSpreadsheetReader();
                 using (reader)
                 {
                     reader.Open(stream);
