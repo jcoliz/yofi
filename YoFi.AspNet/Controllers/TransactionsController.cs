@@ -694,7 +694,7 @@ namespace YoFi.AspNet.Controllers
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using (var stream = file.OpenReadStream())
-                        using (var ssr = new SpreadsheetReader())
+                        using (var ssr = new NewSpreadsheetReader())
                         {
                             ssr.Open(stream);
                             var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
@@ -770,7 +770,7 @@ namespace YoFi.AspNet.Controllers
                     if (formFile.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using (var stream = formFile.OpenReadStream())
-                        using (var ssr = new SpreadsheetReader())
+                        using (var ssr = new NewSpreadsheetReader())
                         {
                             ssr.Open(stream);
                             var items = ssr.Read<Transaction>();
