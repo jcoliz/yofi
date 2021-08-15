@@ -124,8 +124,10 @@ namespace YoFi.Tests
             WriteThenReadBack("SimpleWriteStringNull", Items);
         }
 
-        [TestMethod]
-        public void SimpleWriteDateTime()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void SimpleWriteDateTime(bool newreader)
         {
             // Given: A very simple item w/ DateTime member
             var Items = new List<SimpleItem<DateTime>>() { new SimpleItem<DateTime>() { Key = new DateTime(2021,06,08) } };
@@ -133,11 +135,13 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteDateTime", Items);
+            WriteThenReadBack("SimpleWriteDateTime", Items, newreader);
         }
 
-        [TestMethod]
-        public void SimpleWriteInt32()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void SimpleWriteInt32(bool newreader)
         {
             // Given: A very simple item w/ Int32 member
             var Items = new List<SimpleItem<Int32>>() { new SimpleItem<Int32>() { Key = 12345 } };
@@ -145,11 +149,13 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteInt32", Items);
+            WriteThenReadBack("SimpleWriteInt32", Items, newreader);
         }
 
-        [TestMethod]
-        public void SimpleWriteDecimal()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void SimpleWriteDecimal(bool newreader)
         {
             // Given: A very simple item w/ decimal member
             var Items = new List<SimpleItem<decimal>>() { new SimpleItem<decimal>() { Key = 123.45m } };
@@ -157,8 +163,9 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteDecimal", Items);
+            WriteThenReadBack("SimpleWriteDecimal", Items, newreader);
         }
+
         [TestMethod]
         public void SimpleWriteBoolean()
         {
