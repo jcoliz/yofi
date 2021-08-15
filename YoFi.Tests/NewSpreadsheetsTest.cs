@@ -63,7 +63,7 @@ namespace YoFi.Tests
                 sheets.AddRange(reader.SheetNames.ToList());
             }
 #else
-            throw new ApplicationException("Old spreadsheets not included. Define EPPLUS to include them.")
+            throw new ApplicationException("Old spreadsheets not included. Define EPPLUS to include them.");
 #endif
         }
 
@@ -335,6 +335,7 @@ namespace YoFi.Tests
                 ISpreadsheetReader reader;
                 if (newreader)
                     reader = new OpenXmlSpreadsheetReader();
+#if EPPLUS
                 else
                     reader = new EPPlusSpreadsheetReader();
                 using (reader)
@@ -351,6 +352,7 @@ namespace YoFi.Tests
                 Assert.IsTrue(sheets.Contains("Split"));
                 CollectionAssert.AreEqual(TxItems, actual_t);
                 CollectionAssert.AreEqual(SplitItems, actual_s);
+#endif
             }
         }
 
