@@ -6,6 +6,10 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;EPPLUS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="SampleData\BudgetTxs.json" />
     <None Remove="SampleData\BudgetTxsManaged.json" />

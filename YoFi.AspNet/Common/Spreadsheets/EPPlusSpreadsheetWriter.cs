@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿#if EPPLUS
+using OfficeOpenXml;
 using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,19 @@ using System.Text.Json.Serialization;
 
 namespace YoFi.AspNet.Common
 {
+    /// <summary>
+    /// Spreadsheet reader using EPPlus
+    /// </summary>
+    /// <remarks>
+    /// This was the spreadsheet handling code I started with. It's much easier to use
+    /// than Office OpenXML SDK. However, EPPlus has changed their licensing to a
+    /// commercial license. https://www.epplussoftware.com/Home/LgplToPolyform.
+    /// 
+    /// I am leaving it in the code for now in case I find an issue with the new stuff.
+    /// 
+    /// Set conditional compilation symbol "EPPLUS" to include it.
+    /// </remarks>
+
     public class EPPlusSpreadsheetWriter : ISpreadsheetWriter
     {
         #region ISpreadsheetWriter (Public Interface)
@@ -138,3 +152,4 @@ namespace YoFi.AspNet.Common
         #endregion
     }
 }
+#endif

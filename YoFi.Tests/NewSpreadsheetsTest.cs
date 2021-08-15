@@ -54,6 +54,7 @@ namespace YoFi.Tests
 
         private void WhenReadAsOldSpreadsheet<T>(MemoryStream stream, string name, List<T> actual, List<string> sheets) where T: class, new()
         {
+#if EPPLUS
             stream.Seek(0, SeekOrigin.Begin);
             using (var reader = new EPPlusSpreadsheetReader())
             {
@@ -61,6 +62,9 @@ namespace YoFi.Tests
                 actual.AddRange(reader.Read<T>(name));
                 sheets.AddRange(reader.SheetNames.ToList());
             }
+#else
+            throw new ApplicationException("Old spreadsheets not included. Define EPPLUS to include them.")
+#endif
         }
 
         private void WhenReadAsNewSpreadsheet<T>(MemoryStream stream, string name, List<T> actual, List<string> sheets) where T : class, new()
@@ -89,9 +93,13 @@ namespace YoFi.Tests
 
                 if (newreader)
                     WhenReadAsNewSpreadsheet<T>(stream, name, actual, sheets);
+#if EPPLUS
                 else
                     WhenReadAsOldSpreadsheet<T>(stream, name, actual, sheets);
-
+#else
+                else
+                    return;
+#endif
                 // Then: The spreadsheet is valid, and contains the expected item
                 Assert.AreEqual(1, sheets.Count());
                 Assert.AreEqual(name, sheets.Single());

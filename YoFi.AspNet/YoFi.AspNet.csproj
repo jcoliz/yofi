@@ -5,6 +5,10 @@
     <UserSecretsId>aspnet-OfxWeb.Asp-BDDDDEB0-488C-4CEF-A390-529A80D08E0A</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;EPPLUS</DefineConstants>
+  </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.1" />
