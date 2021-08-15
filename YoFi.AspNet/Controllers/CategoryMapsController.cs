@@ -165,7 +165,7 @@ namespace YoFi.AspNet.Controllers
                         using (var ssr = new SpreadsheetReader())
                         {
                             ssr.Open(stream);
-                            var items = ssr.Read<CategoryMap>();
+                            var items = ssr.Read<CategoryMap>(exceptproperties: new string[] { "ID" });
                             incoming.UnionWith(items);
                         }
                     }

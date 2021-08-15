@@ -697,7 +697,7 @@ namespace YoFi.AspNet.Controllers
                         using (var ssr = new SpreadsheetReader())
                         {
                             ssr.Open(stream);
-                            var items = ssr.Read<Split>();
+                            var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
                             incoming.UnionWith(items);
                         }
                     }
@@ -773,12 +773,12 @@ namespace YoFi.AspNet.Controllers
                         using (var ssr = new SpreadsheetReader())
                         {
                             ssr.Open(stream);
-                            var items = ssr.Read<Transaction>(includeids: true);
+                            var items = ssr.Read<Transaction>();
                             incoming.AddRange(items);
 
                             // If there are also splits included here, let's grab those
                             // And transform the flat data into something easier to use.
-                            splits = ssr.Read<Split>(includeids: true)?.ToLookup(x => x.TransactionID);
+                            splits = ssr.Read<Split>()?.ToLookup(x => x.TransactionID);
                         }
 
                         // Need to select all of these, so they import by default

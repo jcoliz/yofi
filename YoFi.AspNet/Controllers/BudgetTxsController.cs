@@ -247,7 +247,7 @@ namespace YoFi.AspNet.Controllers
                         using (var ssr = new SpreadsheetReader())
                         {
                             ssr.Open(stream);
-                            var items = ssr.Read<BudgetTx>();
+                            var items = ssr.Read<BudgetTx>(exceptproperties: new string[] { "ID" });
                             incoming.UnionWith(items);
                         }
                     }

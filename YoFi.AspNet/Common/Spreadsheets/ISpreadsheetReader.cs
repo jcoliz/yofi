@@ -20,7 +20,7 @@ namespace YoFi.AspNet.Common
         /// </remarks>
         /// <param name="sheetname"></param>
         /// <returns>Enumerable of T items, OR null if @sheetname is not found</returns>
-        IEnumerable<T> Read<T>(string sheetname = null, bool? includeids = false) where T : class, new();
+        IEnumerable<T> Read<T>(string sheetname = null, IEnumerable<string> exceptproperties = null) where T : class, new();
 
         /// <summary>
         /// The names of all the individuals sheets

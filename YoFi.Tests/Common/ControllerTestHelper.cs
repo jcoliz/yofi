@@ -115,7 +115,7 @@ namespace Common.AspNet.Test
                 using (var ssr = new SpreadsheetReader())
                 {
                     ssr.Open(stream);
-                    var items = ssr.Read<TExtract>(includeids:true);
+                    var items = ssr.Read<TExtract>();
                     incoming.UnionWith(items);
                 }
             }
@@ -129,7 +129,7 @@ namespace Common.AspNet.Test
             using (var ssr = new NewSpreadsheetReader())
             {
                 ssr.Open(stream);
-                var items = ssr.Read<TExtract>(includeids: true);
+                var items = ssr.Read<TExtract>();
                 incoming.UnionWith(items);
             }
 

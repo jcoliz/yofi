@@ -23,7 +23,7 @@ namespace YoFi.AspNet.Common
             SheetNames = workbookpart.Workbook.Descendants<Sheet>().Select(x => x.Name.Value).ToList();
         }
 
-        public IEnumerable<T> Read<T>(string sheetname = null, bool? includeids = false) where T : class, new()
+        public IEnumerable<T> Read<T>(string sheetname = null, IEnumerable<string> exceptproperties = null) where T : class, new()
         {
             // Fill in default name if not specified
             var name = string.IsNullOrEmpty(sheetname) ? typeof(T).Name : sheetname;
@@ -69,10 +69,15 @@ namespace YoFi.AspNet.Common
                 var rowdata = ReadRow(cells, row, maxcol);
 
                 // Transform keys based on headers
-                var line = rowdata.ToDictionary(x => headers[x.Key], x => x.Value);
+                // Removing properties we don't want
+                var line = rowdata
+                    .Where(
+                        x => exceptproperties?.Any(p=>p == headers[x.Key]) != true
+                    )
+                    .ToDictionary(x => headers[x.Key], x => x.Value);
 
                 // Transform into result object
-                var item = CreateFromDictionary<T>(source: line, includeints: includeids ?? false);
+                var item = CreateFromDictionary<T>(source: line);
 
                 result.Add(item);
             }
@@ -128,7 +133,7 @@ namespace YoFi.AspNet.Common
 
         #region Static Internals
 
-        private static T CreateFromDictionary<T>(Dictionary<string, string> source, bool includeints = false) where T : class, new()
+        private static T CreateFromDictionary<T>(Dictionary<string, string> source) where T : class, new()
         {
             var item = new T();
 
@@ -161,7 +166,7 @@ namespace YoFi.AspNet.Common
                             property.SetValue(item, value);
                         }
                     }
-                    else if (property.PropertyType == typeof(int) && includeints)
+                    else if (property.PropertyType == typeof(int))
                     {
                         int value;
                         if (int.TryParse(kvp.Value, out value))

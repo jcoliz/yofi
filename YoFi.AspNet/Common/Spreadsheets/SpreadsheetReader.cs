@@ -15,7 +15,7 @@ namespace YoFi.AspNet.Common
             _package = new ExcelPackage(stream);
         }
 
-        public IEnumerable<T> Read<T>(string sheetname = null, bool? includeids = false) where T : class, new()
+        public IEnumerable<T> Read<T>(string sheetname = null, IEnumerable<string> exceptproperties = null) where T : class, new()
         {
             List<T> result = null;
 
@@ -26,7 +26,7 @@ namespace YoFi.AspNet.Common
             {
                 result = new List<T>();
                 var worksheet = found.First();
-                ExtractInto(worksheet, result, includeids);
+                ExtractInto(worksheet, result, exceptproperties);
             }
 
             return result;
@@ -44,7 +44,7 @@ namespace YoFi.AspNet.Common
 
         #region Internals
 
-        private static void ExtractInto<T>(ExcelWorksheet worksheet, ICollection<T> result, bool? includeids = false) where T : new()
+        private static void ExtractInto<T>(ExcelWorksheet worksheet, ICollection<T> result, IEnumerable<string> exceptproperties) where T : new()
         {
             var cols = new List<String>();
 
@@ -70,7 +70,7 @@ namespace YoFi.AspNet.Common
                 {
                     foreach (var property in typeof(T).GetProperties())
                     {
-                        if (cols.Contains(property.Name))
+                        if (cols.Contains(property.Name) && ! (exceptproperties?.Any(p=>p==property.Name) ?? false))
                         {
                             var col = columns[property.Name];
 
@@ -97,7 +97,7 @@ namespace YoFi.AspNet.Common
                                     value = new DateTime(1900, 1, 1) + TimeSpan.FromDays((Double)xlsvalue - 2.0);
                                 property.SetValue(item, value);
                             }
-                            else if (property.PropertyType == typeof(Int32) && (includeids ?? false))
+                            else if (property.PropertyType == typeof(Int32))
                             {
                                 var value = Convert.ToInt32((double)worksheet.Cells[row, col].Value);
                                 property.SetValue(item, value);

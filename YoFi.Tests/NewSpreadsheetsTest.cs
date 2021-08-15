@@ -58,7 +58,7 @@ namespace YoFi.Tests
             using (var reader = new SpreadsheetReader())
             {
                 reader.Open(stream);
-                actual.AddRange(reader.Read<T>(name,includeids:true));
+                actual.AddRange(reader.Read<T>(name));
                 sheets.AddRange(reader.SheetNames.ToList());
             }
         }
@@ -69,7 +69,7 @@ namespace YoFi.Tests
             using (var reader = new NewSpreadsheetReader())
             {
                 reader.Open(stream);
-                actual.AddRange(reader.Read<T>(name, includeids: true));
+                actual.AddRange(reader.Read<T>(name));
                 sheets.AddRange(reader.SheetNames.ToList());
             }
         }
@@ -332,8 +332,8 @@ namespace YoFi.Tests
                 using (reader)
                 {
                     reader.Open(stream);
-                    actual_t.AddRange(reader.Read<Transaction>(includeids: true));
-                    actual_s.AddRange(reader.Read<Split>(includeids: true));
+                    actual_t.AddRange(reader.Read<Transaction>());
+                    actual_s.AddRange(reader.Read<Split>());
                     sheets.AddRange(reader.SheetNames.ToList());
                 }
 
