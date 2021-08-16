@@ -55,6 +55,8 @@
     </form>
 }
 
+@if ((int)@ViewData["PageTotalItems"] > 0)
+{
 <table class="table">
     <thead>
         <tr>
@@ -103,7 +105,7 @@
 </table>
 
 @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml")
-
+                            }
 <form method="post" enctype="multipart/form-data" asp-controller="Payees" asp-action="Upload">
     <div class="input-group mb-3 mt-3">
         <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03">Upload</button>
