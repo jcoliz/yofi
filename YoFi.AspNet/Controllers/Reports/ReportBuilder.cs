@@ -55,7 +55,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 UniqueID = "Z",
                 DisplayAsPercent = true,
                 Custom = (cols) =>
-                    cols.GetValueOrDefault("ID:Budget") == 0 ? 
+                    cols.GetValueOrDefault("ID:Budget") == 0 || (Math.Abs(cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")) > 10m ) ? 
                         0 : 
                         cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")
             };
