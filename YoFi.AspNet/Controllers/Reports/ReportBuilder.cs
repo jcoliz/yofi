@@ -132,9 +132,17 @@ namespace YoFi.AspNet.Controllers.Reports
             else if (parms.id == "expenses-v-budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
-                result.Description = $"For {Year}";
+                var source = _qbuilder.QueryActualVsBudgetExcept(tops: notexpenses);
+                result.Source = source;
+
+                // What is the highest transaction in the "Actuals"?
+                var latesttime = source.Where(x => x.Name == "Actual").Select(q => q.Query.Max(a => a.Timestamp)).Max();
+
+                // What % of the way is it through that year?
+                var yearprogress = (double)latesttime.DayOfYear / 365.0;
+
+                result.Description = $"For {Year} ({yearprogress:P0})";
                 result.AddCustomColumn(budgetpctcolumn);
-                result.Source = _qbuilder.QueryActualVsBudgetExcept(tops: notexpenses);
                 result.WithTotalColumn = false;
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
