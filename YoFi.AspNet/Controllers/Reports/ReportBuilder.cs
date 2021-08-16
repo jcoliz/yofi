@@ -136,7 +136,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.Source = source;
 
                 // What is the highest transaction in the "Actuals"?
-                var latesttime = source.Where(x => x.Name == "Actual").Select(q => q.Query.Max(a => a.Timestamp)).Max();
+                var latesttime = source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a==null)?DateTime.MinValue:a.Timestamp )).Max();
 
                 // What % of the way is it through that year?
                 var yearprogress = (double)latesttime.DayOfYear / 365.0;
