@@ -104,6 +104,32 @@ namespace YoFi.AspNet
             app.UseAuthorization();
 
             app.UseEndpoints(x => x.MapControllerRoute(name: "default", pattern: "{controller=Transactions}/{action=Index}/{id?}"));
+
+            SetupBlobContainerName(env.IsDevelopment());
+        }
+
+        private void SetupBlobContainerName(bool isdevelopment)
+        {
+            // If blob container name is already set, we're good
+            var key = "Storage:BlobContainerName";
+            var value = Configuration[key];
+            if (string.IsNullOrEmpty(value))
+            {
+                // It's not set, so we'll need to derive it and set it ourselves
+
+                value = Configuration["Doesnt:Exist"];
+                if (string.IsNullOrEmpty(value))
+                    value = Configuration["Brand:Name"];
+                if (string.IsNullOrEmpty(value))
+                    value = Configuration["Codebase:Name"];
+                if (string.IsNullOrEmpty(value))
+                    value = "aspnet";
+
+                if (isdevelopment)
+                    value += "-development";
+
+                Configuration[key] = value.ToLowerInvariant();
+            }
         }
     }
 }
