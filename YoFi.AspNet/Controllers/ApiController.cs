@@ -442,17 +442,7 @@ namespace YoFi.AspNet.Controllers
             */
         }
 
-        private string BlobStoreName
-        {
-            get
-            {
-                var receiptstore = Environment.GetEnvironmentVariable("RECEIPT_STORE");
-                if (string.IsNullOrEmpty(receiptstore))
-                    receiptstore = "myfire-undefined";
-
-                return receiptstore;
-            }
-        }
+        private string BlobStoreName => _configuration["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
     }
 
     public class ApiResult

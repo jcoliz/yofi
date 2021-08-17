@@ -56,7 +56,8 @@ namespace YoFi.Tests
             // https://stackoverflow.com/questions/55497800/populate-iconfiguration-for-unit-tests
             var strings = new Dictionary<string, string>
             {
-                { "Api:Key", password }
+                { "Api:Key", password },
+                { "Storage:BlobContainerName", "Testing" }
             };
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(strings)

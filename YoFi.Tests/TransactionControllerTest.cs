@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Transaction = YoFi.AspNet.Models.Transaction;
 using YoFi.AspNet.Common;
+using Microsoft.Extensions.Configuration;
 
 namespace YoFi.Tests
 {
@@ -100,7 +101,17 @@ namespace YoFi.Tests
             helper = new ControllerTestHelper<Transaction, TransactionsController>();
             helper.SetUp();
             storage = new TestAzureStorage();
-            helper.controller = new TransactionsController(helper.context, storage);
+
+            // https://stackoverflow.com/questions/55497800/populate-iconfiguration-for-unit-tests
+            var strings = new Dictionary<string, string>
+            {
+                { "Storage:BlobContainerName", "Testing" }
+            };
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(strings)
+                .Build();
+
+            helper.controller = new TransactionsController(helper.context, storage, configuration);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 

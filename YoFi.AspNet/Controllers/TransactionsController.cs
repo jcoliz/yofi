@@ -31,10 +31,11 @@ namespace YoFi.AspNet.Controllers
 
         #region Constructor
 
-        public TransactionsController(ApplicationDbContext context, IPlatformAzureStorage storage)
+        public TransactionsController(ApplicationDbContext context, IPlatformAzureStorage storage, IConfiguration config)
         {
             _context = context;
             _storage = storage;
+            _config = config;
         }
 
         #endregion
@@ -672,9 +673,9 @@ namespace YoFi.AspNet.Controllers
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
                 return File(stream, contenttype, id.ToString());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(detail:ex.Message,type:ex.GetType().Name);
             }
         }
 
@@ -1050,6 +1051,8 @@ namespace YoFi.AspNet.Controllers
 
         private readonly IPlatformAzureStorage _storage;
 
+        private readonly IConfiguration _config;
+
         private int? _Year = null;
         private int Year
         {
@@ -1081,26 +1084,15 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        private string BlobStoreName
-        {
-            get
-            {
-                var receiptstore = Environment.GetEnvironmentVariable("RECEIPT_STORE");
-                if (string.IsNullOrEmpty(receiptstore))
-                    receiptstore = "myfire-undefined";
-
-                return receiptstore;
-            }
-        }
+        private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 
         private bool TransactionExists(int id)
         {
             return _context.Transactions.Any(e => e.ID == id);
         }
+        #endregion
 
-#endregion
-
-#region IController
+        #region IController
         Task<IActionResult> IController<Models.Transaction>.Index() => Index();
 
         Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
