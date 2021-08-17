@@ -11,28 +11,109 @@ namespace YoFi.AspNet.Models
 {
     public class Transaction : ICatSubcat, ISubReportable, IID
     {
+        /// <summary>
+        /// Object identity in Entity Framework
+        /// </summary>
         public int ID { get; set; }
-        [DisplayFormat(DataFormatString = "{0:C2}")]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal Amount { get; set; }
+
+        /// <summary>
+        /// Time transaction was created originally
+        /// </summary>
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
         [Display(Name = "Date")]
         public DateTime Timestamp { get; set; }
-        public string Memo { get; set; }
+
+        /// <summary>
+        /// Who got this money, or gave it to use?
+        /// </summary>
         public string Payee { get; set; }
+
+        /// <summary>
+        /// How much money are we talking here, anyway?
+        /// </summary>
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Amount { get; set; }
+
+        /// <summary>
+        /// Cagtegorization of this transaction
+        /// </summary>
+        /// <remarks>
+        /// Separate successive levels of depth with a colon, e.g. "Housing:Mortgage"
+        /// </remarks>
         public string Category { get; set; }
+
+        /// <summary>
+        /// Second-level category
+        /// </summary>
+        /// <remarks>
+        /// This property is obsolete. Category can now take multiple
+        /// levels of information separated with colons.
+        /// </remarks>
         public string SubCategory { get; set; }
+
+        /// <summary>
+        /// Optional commentary about this transaction
+        /// </summary>
+        public string Memo { get; set; }
+
+        /// <summary>
+        /// Bank-assigned unique ID
+        /// </summary>
+        /// <remarks>
+        /// If a unique ID is not assigned by the bank, we'll add one on
+        /// import.
+        /// </remarks>
         public string BankReference { get; set; }
+
+        /// <summary>
+        /// Whether to hide this transaction from all views and calculations
+        /// </summary>
         public bool? Hidden { get; set; }
+
+        /// <summary>
+        /// Whether this transaction was recently imported
+        /// </summary>
+        /// <remarks>
+        /// And so thus should show up on the "Imported" page
+        /// </remarks>
         public bool? Imported { get; set; }
+
+        /// <summary>
+        /// Whether this transaction will be included in the next bulk operation
+        /// </summary>
         public bool? Selected { get; set; }
+
+        /// <summary>
+        /// The URL to a receipt image
+        /// </summary>
+        /// <remarks>
+        /// This is no longer stored as a URL. It should be reformed to "bool HasReceipt"
+        /// </remarks>
         public string ReceiptUrl { get; set; }
 
+        /// <summary>
+        /// For transactions with multiple categories, the detail on how much $$ goes in
+        /// each category
+        /// </summary>
         public ICollection<Split> Splits { get; set; }
 
+        /// <summary>
+        /// Does this transaction have any splits?
+        /// </summary>
         public bool HasSplits => Splits?.Any() == true;
+
+        /// <summary>
+        /// Are all the splits fully balanced?
+        /// </summary>
         public bool IsSplitsOK => !HasSplits || ( Splits.Select(x=>x.Amount).Sum() == Amount );
 
+        /// <summary>
+        /// Collapse subcategory into category for sake of reports
+        /// </summary>
+        /// <remarks>
+        /// REally should get rid of this
+        /// </remarks>
         string IReportable.Category
         {
             get
@@ -62,6 +143,13 @@ namespace YoFi.AspNet.Models
         //
 
         // Store the hashcode in the bank reference. This makes it easier to find the hashcodes in the database.
+        
+        /// <summary>
+        /// Generate our own quasi-unique ID for this transaction
+        /// </summary>
+        /// <remarks>
+        /// Used if it doesn't already have one.
+        /// </remarks>
         public void GenerateBankReference()
         {
             var signature = $"/{Payee ?? "Null"}/{Amount:C2}/{Timestamp.Date.ToShortDateString()}";
