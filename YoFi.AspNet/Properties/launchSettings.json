@@ -13,6 +13,7 @@
       "launchBrowser": true,
       "launchUrl": "https://localhost:44323/",
       "environmentVariables": {
+        "STORAGE__BLOBCONTAINERNAME": "myfire-issexpress",
         "RECEIPT_STORE": "myfire-iisexpress",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -21,7 +22,7 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "RECEIPT_STORE": "myfire-ofxweb",
+        "STORAGE__BLOBCONTAINERNAME": "myfire-ofxweb",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:50419/"

@@ -117,9 +117,7 @@ namespace YoFi.AspNet
             {
                 // It's not set, so we'll need to derive it and set it ourselves
 
-                value = Configuration["Doesnt:Exist"];
-                if (string.IsNullOrEmpty(value))
-                    value = Configuration["Brand:Name"];
+                value = Configuration["Brand:Name"];
                 if (string.IsNullOrEmpty(value))
                     value = Configuration["Codebase:Name"];
                 if (string.IsNullOrEmpty(value))
