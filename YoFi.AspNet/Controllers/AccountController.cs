@@ -48,6 +48,7 @@ namespace YoFi.AspNet.Controllers.Boilerplate
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ViewData["ReturnUrl"] = returnUrl;
+            ViewData["Login"] = true;
             return View();
         }
 
