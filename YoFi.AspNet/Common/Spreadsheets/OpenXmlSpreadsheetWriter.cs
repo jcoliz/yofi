@@ -136,6 +136,9 @@ namespace YoFi.AspNet.Common
                 ++rowid;
             }
 
+            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
+            shareStringPart.SharedStringTable.Save();
+
             worksheetPart.Worksheet.Save();
         }
 
@@ -161,7 +164,6 @@ namespace YoFi.AspNet.Common
             {
                 // The text does not exist in the part. Create the SharedStringItem.
                 table.AppendChild(new SharedStringItem(new Text(text)));
-                table.Save();
             }
 
             return id;
@@ -228,8 +230,6 @@ namespace YoFi.AspNet.Common
                 // Insert in the correct place. Must be in sequential order according to CellReference.
                 var refCell = row.Elements<Cell>().FirstOrDefault(x=> string.Compare(x.CellReference.Value, cellReference, true) > 0);
                 row.InsertBefore(result, refCell);
-
-                worksheet.Save();
             }
 
             return result;

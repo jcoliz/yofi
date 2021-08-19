@@ -294,6 +294,19 @@ namespace YoFi.Tests
             WriteThenReadBack("TransactionItems20", Items, newreader);
         }
 
+
+        [TestMethod]
+        public async Task TransactionItems1000()
+        {
+            // Given: A ton of transactions
+            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).ToList();
+
+            // When: Writing it to a spreadsheet using the new methods
+            // And: Reading it back to a spreadsheet using the old methods
+            // Then: The spreadsheet is valid, and contains the expected item
+            WriteThenReadBack("TransactionItems200", Items, newreader:true);
+        }
+
         [DataRow(true)]
         [DataRow(false)]
         [DataTestMethod]
