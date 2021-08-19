@@ -78,7 +78,7 @@ namespace YoFi.Tests
             }
         }
 
-        public void WriteThenReadBack<T>(string name, List<T> items, bool newreader = false) where T : class, new()
+        public void WriteThenReadBack<T>(string name, IEnumerable<T> items, bool newreader = false) where T : class, new()
         {
             // Given: Some items
 
@@ -103,7 +103,7 @@ namespace YoFi.Tests
                 // Then: The spreadsheet is valid, and contains the expected item
                 Assert.AreEqual(1, sheets.Count());
                 Assert.AreEqual(name, sheets.Single());
-                CollectionAssert.AreEqual(items, actual);
+                Assert.IsTrue(actual.SequenceEqual(items));
             }
         }
 
@@ -272,7 +272,7 @@ namespace YoFi.Tests
         public async Task TransactionItemsFew(bool newreader)
         {
             // Given: A small number of transactions
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(2).ToList();
+            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(2) /*.ToList()*/;
 
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
@@ -286,7 +286,7 @@ namespace YoFi.Tests
         public async Task TransactionItems20(bool newreader)
         {
             // Given: A ton of transactions
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
+            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20) /*.ToList()*/;
 
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
@@ -299,12 +299,12 @@ namespace YoFi.Tests
         public async Task TransactionItems1000()
         {
             // Given: A ton of transactions
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).ToList();
+            var Items = (await TransactionControllerTest.GetTransactionItemsLong()) /*.ToList()*/;
 
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("TransactionItems200", Items, newreader:true);
+            WriteThenReadBack<Transaction>("TransactionItems200", Items, newreader:true);
         }
 
         [DataRow(true)]
