@@ -124,20 +124,23 @@ namespace YoFi.AspNet.Common
             SheetData sheetData = worksheet.GetFirstChild<SheetData>();
 
             uint rowindex = 1;
-            foreach (var rowseed in seeds)
-            {
-                var children = rowseed.Select(x =>
-                    new Cell()
-                    {
-                        CellReference = ColNameFor(x.colindex) + rowindex,
-                        CellValue = new CellValue(x.IsSharedString ? InsertSharedStringItem(x.Value) : x.Value),
-                        DataType = new EnumValue<CellValues>(x.DataType)
-                    }
-                );
-                var row = new Row(children) { RowIndex = rowindex, Spans = new ListValue<StringValue>() };
-                sheetData.Append(row);
-                ++rowindex;
-            }
+            var rows = seeds.Select(row => new Row
+                (
+                    row.Select(cell =>
+                        new Cell()
+                        {
+                            CellReference = ColNameFor(cell.colindex) + rowindex,
+                            CellValue = new CellValue(cell.IsSharedString ? InsertSharedStringItem(cell.Value) : cell.Value),
+                            DataType = new EnumValue<CellValues>(cell.DataType)
+                        }
+                    )
+                ) 
+                { 
+                    RowIndex = rowindex++, 
+                    Spans = new ListValue<StringValue>() 
+                }
+            );
+            sheetData.Append(rows);
         }
 
         private static string ColNameFor(int colnumber)
@@ -224,9 +227,9 @@ namespace YoFi.AspNet.Common
             }
         };
 
-        #endregion
+#endregion
 
-        #region IDispose
+#region IDispose
         private bool disposedValue;
 
         protected virtual void Dispose(bool disposing)
@@ -264,7 +267,7 @@ namespace YoFi.AspNet.Common
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-        #endregion
+#endregion
 
     }
 }
