@@ -66,15 +66,8 @@ namespace YoFi.AspNet.Common
         
         #region Sample Code
 
-        // All this code came from:
-        // https://docs.microsoft.com/en-us/office/open-xml/how-to-insert-text-into-a-cell-in-a-spreadsheet
-
-        // Then I modified it to work more generically, and refactored it for simplicity
-
         public void InsertItems<T>(IEnumerable<T> items, string sheetName)
         {
-            WorksheetPart worksheetPart = InsertWorksheet(sheetName);
-
             var rows = new List<IEnumerable<object>>();
 
             // Add the properties as a header row
@@ -87,57 +80,12 @@ namespace YoFi.AspNet.Common
             // Add the items as remaining rows
             rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item))));
 
-            uint rowid = 1;
-            foreach (var row in rows)
-            {
-                int colid = 0;
-                foreach (var cel in row)
-                {
-                    if (cel != null)
-                    {
-                        var t = cel.GetType();
-                        string value = null;
-                        CellValues datatype = CellValues.Number;
+            // Transform the rows into cell seeds
+            var seeds = rows.Select(r => { int col = 0; return r.Select(x => new CellSeed(x) { colindex = col++ }); });
 
-                        if (t == typeof(string))
-                        {
-                            value = InsertSharedStringItem(cel as string);
-                            datatype = CellValues.SharedString;
-                        }
-                        else if (t == typeof(decimal))
-                        {
-                            value = cel.ToString();
-                        }
-                        else if (t == typeof(Int32))
-                        {
-                            value = cel.ToString();
-                        }
-                        else if (t == typeof(DateTime))
-                        {
-                            // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
-                            double oaValue = ((DateTime)cel).ToOADate();
-                            value = oaValue.ToString(CultureInfo.InvariantCulture);
-                        }
-                        else if (t == typeof(Boolean))
-                        {
-                            value = ((Boolean)cel)?"1":"0";
-                            datatype = CellValues.Boolean;
-                        }
-
-                        // If we actually handled it, then do add it, else ignore
-                        if (null != value)
-                        {
-                            Cell cell = InsertCellInWorksheet(ColNameFor(colid), rowid, worksheetPart);
-                            cell.CellValue = new CellValue(value);
-                            cell.DataType = new EnumValue<CellValues>(datatype);
-                        }
-                    }
-
-                    ++colid;
-                }
-                ++rowid;
-            }
-
+            // Write the seeds as cells into the worksheet
+            WorksheetPart worksheetPart = InsertWorksheet(sheetName);
+            InsertIntoSheet(worksheetPart, seeds);
             worksheetPart.Worksheet.Save();
         }
 
@@ -234,12 +182,97 @@ namespace YoFi.AspNet.Common
                 result = new Cell() { CellReference = cellReference };
 
                 // Insert in the correct place. Must be in sequential order according to CellReference.
-                var refCell = row.Elements<Cell>().FirstOrDefault(x=> string.Compare(x.CellReference.Value, cellReference, true) > 0);
+                var refCell = row.Elements<Cell>().FirstOrDefault(x => string.Compare(x.CellReference.Value, cellReference, true) > 0);
                 row.InsertBefore(result, refCell);
             }
 
             return result;
         }
+        private Row MakeRowFrom(IEnumerable<CellSeed> seeds, uint rowindex)
+        {
+            var children = seeds.Select(x => 
+                new Cell() 
+                { 
+                    CellReference = ColNameFor(x.colindex) + rowindex, 
+                    CellValue = new CellValue(x.IsSharedString? InsertSharedStringItem(x.Value) : x.Value), 
+                    DataType = new EnumValue<CellValues>(x.DataType) 
+                }
+            );
+            var row = new Row(children) { RowIndex = rowindex, Spans = new ListValue<StringValue>() };
+
+            return row;
+        }
+
+        private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<IEnumerable<CellSeed>> seeds)
+        {
+            Worksheet worksheet = worksheetPart.Worksheet;
+            SheetData sheetData = worksheet.GetFirstChild<SheetData>();
+
+            uint rowindex = 1;
+            foreach (var rowseed in seeds)
+            {
+                var children = rowseed.Select(x =>
+                    new Cell()
+                    {
+                        CellReference = ColNameFor(x.colindex) + rowindex,
+                        CellValue = new CellValue(x.IsSharedString ? InsertSharedStringItem(x.Value) : x.Value),
+                        DataType = new EnumValue<CellValues>(x.DataType)
+                    }
+                );
+                var row = new Row(children) { RowIndex = rowindex, Spans = new ListValue<StringValue>() };
+                sheetData.Append(row);
+                ++rowindex;
+            }
+        }
+
+        class CellSeed
+        {
+            public int colindex { get; set; } = 0; // 0-based
+
+            public bool IsSharedString => DataType == CellValues.SharedString;
+
+            public string Value { get; set; } = null;
+
+            public CellValues DataType { get; set; } = CellValues.Number;
+
+            public bool IsValid => Value != null;
+
+            public CellSeed() { }
+
+            public CellSeed(object cel)
+            {
+                if (cel != null)
+                {
+                    var t = cel.GetType();
+
+                    if (t == typeof(string))
+                    {
+                        Value = cel as string;//InsertSharedStringItem(cel as string);
+                        DataType = CellValues.SharedString;
+                    }
+                    else if (t == typeof(decimal))
+                    {
+                        Value = cel.ToString();
+                    }
+                    else if (t == typeof(Int32))
+                    {
+                        Value = cel.ToString();
+                    }
+                    else if (t == typeof(DateTime))
+                    {
+                        // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
+                        double oaValue = ((DateTime)cel).ToOADate();
+                        Value = oaValue.ToString(CultureInfo.InvariantCulture);
+                    }
+                    else if (t == typeof(Boolean))
+                    {
+                        Value = ((Boolean)cel) ? "1" : "0";
+                        DataType = CellValues.Boolean;
+                    }
+                }
+            }
+        };
+
         #endregion
 
         #region IDispose

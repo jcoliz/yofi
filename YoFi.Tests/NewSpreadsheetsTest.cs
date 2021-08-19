@@ -299,7 +299,8 @@ namespace YoFi.Tests
         }
 
 
-        [TestMethod]
+        // This is really slow, so not running by default
+        //[TestMethod]
         public async Task TransactionItems1000()
         {
             // Given: A ton of transactions
