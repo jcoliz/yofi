@@ -38,8 +38,6 @@ namespace YoFi.AspNet.Common
             spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
             var workbookpart = spreadSheet.AddWorkbookPart();
             workbookpart.Workbook = new Workbook();
-            var shareStringPart = workbookpart.AddNewPart<SharedStringTablePart>();
-            shareStringPart.SharedStringTable = new SharedStringTable();
         }
 
         /// <summary>
@@ -60,6 +58,10 @@ namespace YoFi.AspNet.Common
 
         #region Fields
         SpreadsheetDocument spreadSheet;
+
+        Dictionary<string, string> stringTableIDs = new Dictionary<string, string>();
+        List<string> stringTable = new List<string>();
+        int stringTableNextID = 0;
         #endregion
         
         #region Sample Code
@@ -99,7 +101,7 @@ namespace YoFi.AspNet.Common
 
                         if (t == typeof(string))
                         {
-                            value = InsertSharedStringItem(cel as string).ToString();
+                            value = InsertSharedStringItem(cel as string);
                             datatype = CellValues.SharedString;
                         }
                         else if (t == typeof(decimal))
@@ -136,9 +138,6 @@ namespace YoFi.AspNet.Common
                 ++rowid;
             }
 
-            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
-            shareStringPart.SharedStringTable.Save();
-
             worksheetPart.Worksheet.Save();
         }
 
@@ -152,21 +151,28 @@ namespace YoFi.AspNet.Common
 
         // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text 
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
-        private int InsertSharedStringItem(string text)
+        private string InsertSharedStringItem(string text)
         {
-            var shareStringPart = spreadSheet.WorkbookPart.GetPartsOfType<SharedStringTablePart>().Single();
-            var table = shareStringPart.SharedStringTable;
-            var elements = table.Elements<SharedStringItem>();
-            var prior = elements.TakeWhile(x => x.InnerText != text);
-            var id = prior.Count();
-
-            if (id == elements.Count())
+            string result = null;
+            if (!stringTableIDs.TryGetValue(text,out result))
             {
-                // The text does not exist in the part. Create the SharedStringItem.
-                table.AppendChild(new SharedStringItem(new Text(text)));
-            }
+                result = stringTableNextID.ToString();
+                ++stringTableNextID;
 
-            return id;
+                stringTableIDs[text] = result;
+                stringTable.Add(text);
+            }
+            return result;
+        }
+
+        private void Flush()
+        {
+            // Generally each part is written as it's created, but the string table can
+            // be shared, so has to be written at the end.
+
+            var shareStringPart = spreadSheet.WorkbookPart.AddNewPart<SharedStringTablePart>();
+            var items = stringTable.Select(x => new SharedStringItem(new Text(x)));
+            shareStringPart.SharedStringTable = new SharedStringTable(items);
         }
 
         // Given a WorkbookPart, inserts a new worksheet.
@@ -245,6 +251,8 @@ namespace YoFi.AspNet.Common
             {
                 if (disposing)
                 {
+                    Flush();
+                    
                     // TODO: dispose managed state (managed objects)
                     if (null != spreadSheet)
                     {
