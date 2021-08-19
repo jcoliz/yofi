@@ -64,7 +64,7 @@ namespace YoFi.AspNet.Common
         int stringTableNextID = 0;
         #endregion
         
-        #region Sample Code
+        #region Internals
 
         public void InsertItems<T>(IEnumerable<T> items, string sheetName)
         {
@@ -81,12 +81,63 @@ namespace YoFi.AspNet.Common
             rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item))));
 
             // Transform the rows into cell seeds
-            var seeds = rows.Select(r => { int col = 0; return r.Select(x => new CellSeed(x) { colindex = col++ }); });
+            var seeds = rows.Select(r => { int col = 0; return r.Select(x => new CellSeed(x) { colindex = col++ }).Where(x=>x.IsValid); });
 
             // Write the seeds as cells into the worksheet
             WorksheetPart worksheetPart = InsertWorksheet(sheetName);
             InsertIntoSheet(worksheetPart, seeds);
             worksheetPart.Worksheet.Save();
+        }
+
+        // Given a WorkbookPart, inserts a new worksheet.
+        private WorksheetPart InsertWorksheet(string sheetName)
+        {
+            var workbookPart = spreadSheet.WorkbookPart;
+
+            // Add a new worksheet part to the workbook.
+            WorksheetPart newWorksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+            newWorksheetPart.Worksheet = new Worksheet(new SheetData());
+
+            // Are there already sheets?
+            Sheets sheets = workbookPart.Workbook.GetFirstChild<Sheets>();
+            if (null == sheets)
+                // If not, sdd Sheets to the Workbook.
+                sheets = workbookPart.Workbook.AppendChild<Sheets>(new Sheets());
+
+            newWorksheetPart.Worksheet.Save();
+
+            string relationshipId = workbookPart.GetIdOfPart(newWorksheetPart);
+
+            // Get a unique ID for the new sheet.
+            var sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).DefaultIfEmpty().Max() + 1;
+
+            // Append the new worksheet and associate it with the workbook.
+            sheets.Append(new Sheet() { Id = relationshipId, SheetId = sheetId, Name = sheetName });
+            workbookPart.Workbook.Save();
+
+            return newWorksheetPart;
+        }
+
+        private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<IEnumerable<CellSeed>> seeds)
+        {
+            Worksheet worksheet = worksheetPart.Worksheet;
+            SheetData sheetData = worksheet.GetFirstChild<SheetData>();
+
+            uint rowindex = 1;
+            foreach (var rowseed in seeds)
+            {
+                var children = rowseed.Select(x =>
+                    new Cell()
+                    {
+                        CellReference = ColNameFor(x.colindex) + rowindex,
+                        CellValue = new CellValue(x.IsSharedString ? InsertSharedStringItem(x.Value) : x.Value),
+                        DataType = new EnumValue<CellValues>(x.DataType)
+                    }
+                );
+                var row = new Row(children) { RowIndex = rowindex, Spans = new ListValue<StringValue>() };
+                sheetData.Append(row);
+                ++rowindex;
+            }
         }
 
         private static string ColNameFor(int colnumber)
@@ -123,107 +174,7 @@ namespace YoFi.AspNet.Common
             shareStringPart.SharedStringTable = new SharedStringTable(items);
         }
 
-        // Given a WorkbookPart, inserts a new worksheet.
-        private WorksheetPart InsertWorksheet(string sheetName)
-        {
-            var workbookPart = spreadSheet.WorkbookPart;
 
-            // Add a new worksheet part to the workbook.
-            WorksheetPart newWorksheetPart = workbookPart.AddNewPart<WorksheetPart>();
-            newWorksheetPart.Worksheet = new Worksheet(new SheetData());
-
-            // Are there already sheets?
-            Sheets sheets = workbookPart.Workbook.GetFirstChild<Sheets>();
-            if (null == sheets)
-                // If not, sdd Sheets to the Workbook.
-                sheets = workbookPart.Workbook.AppendChild<Sheets>(new Sheets());
-
-            newWorksheetPart.Worksheet.Save();
-
-            string relationshipId = workbookPart.GetIdOfPart(newWorksheetPart);
-
-            // Get a unique ID for the new sheet.
-            var sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).DefaultIfEmpty().Max() + 1;
-
-            // Append the new worksheet and associate it with the workbook.
-            sheets.Append(new Sheet() { Id = relationshipId, SheetId = sheetId, Name = sheetName });
-            workbookPart.Workbook.Save();
-
-            return newWorksheetPart;
-        }
-
-        // Given a column name, a row index, and a WorksheetPart, inserts a cell into the worksheet. 
-        // If the cell already exists, returns it. 
-        private static Cell InsertCellInWorksheet(string columnName, uint rowIndex, WorksheetPart worksheetPart)
-        {
-            Cell result = null;
-
-            Worksheet worksheet = worksheetPart.Worksheet;
-            SheetData sheetData = worksheet.GetFirstChild<SheetData>();
-            string cellReference = columnName + rowIndex;
-
-            // Find the existing row
-            Row row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).SingleOrDefault();
-
-            // Or create one if that doesn't exist.
-            if (null == row)
-            {
-                row = new Row() { RowIndex = rowIndex, Spans = new ListValue<StringValue>() };
-                sheetData.Append(row);
-            }
-
-            // Find the existing cell
-            result = row.Elements<Cell>().Where(c => c.CellReference.Value == cellReference).SingleOrDefault();
-
-            // If not...
-            if (null == result)
-            {
-                // Create a new one!
-                result = new Cell() { CellReference = cellReference };
-
-                // Insert in the correct place. Must be in sequential order according to CellReference.
-                var refCell = row.Elements<Cell>().FirstOrDefault(x => string.Compare(x.CellReference.Value, cellReference, true) > 0);
-                row.InsertBefore(result, refCell);
-            }
-
-            return result;
-        }
-        private Row MakeRowFrom(IEnumerable<CellSeed> seeds, uint rowindex)
-        {
-            var children = seeds.Select(x => 
-                new Cell() 
-                { 
-                    CellReference = ColNameFor(x.colindex) + rowindex, 
-                    CellValue = new CellValue(x.IsSharedString? InsertSharedStringItem(x.Value) : x.Value), 
-                    DataType = new EnumValue<CellValues>(x.DataType) 
-                }
-            );
-            var row = new Row(children) { RowIndex = rowindex, Spans = new ListValue<StringValue>() };
-
-            return row;
-        }
-
-        private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<IEnumerable<CellSeed>> seeds)
-        {
-            Worksheet worksheet = worksheetPart.Worksheet;
-            SheetData sheetData = worksheet.GetFirstChild<SheetData>();
-
-            uint rowindex = 1;
-            foreach (var rowseed in seeds)
-            {
-                var children = rowseed.Select(x =>
-                    new Cell()
-                    {
-                        CellReference = ColNameFor(x.colindex) + rowindex,
-                        CellValue = new CellValue(x.IsSharedString ? InsertSharedStringItem(x.Value) : x.Value),
-                        DataType = new EnumValue<CellValues>(x.DataType)
-                    }
-                );
-                var row = new Row(children) { RowIndex = rowindex, Spans = new ListValue<StringValue>() };
-                sheetData.Append(row);
-                ++rowindex;
-            }
-        }
 
         class CellSeed
         {
