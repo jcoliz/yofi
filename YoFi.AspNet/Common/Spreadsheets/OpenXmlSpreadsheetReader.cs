@@ -68,14 +68,14 @@ namespace YoFi.AspNet.Common
             WorksheetPart worksheetPart = (WorksheetPart)(workbookpart.GetPartById(sheet.Id));
 
             // Determine the extents of the cells contained within in this sheet.
+            // Transform cells into a usable dictionary
+            var celldict = worksheetPart.Worksheet.Descendants<Cell>().ToDictionary(x => x.CellReference.Value, x => x);
 
-            // First, all the cell references in one place
-            var cells = worksheetPart.Worksheet.Descendants<Cell>();
-            var cellrefs = cells.Select(x => x.CellReference);
+            // Determine extent of cells
 
             // Note that rows are 1-based, and columns are 0-based, to make them easier to convert to/from letters
             var regex = new Regex(@"([A-Za-z]+)(\d+)");
-            var matches = cellrefs.Select(x => regex.Match(x.Value).Groups);
+            var matches = celldict.Keys.Select(x => regex.Match(x).Groups);
             var maxrow = matches.Max(x => Convert.ToInt32(x[2].Value));
             var maxcol = matches.Max(x => ColNumberFor(x[1].Value));
 
@@ -84,14 +84,14 @@ namespace YoFi.AspNet.Common
                 return null;
 
             // Read row 1 into the headers
-            var headers = ReadRow(cells, 1, maxcol);
+            var headers = ReadRow(celldict, 1, maxcol);
 
             // Read rows 2+ into the result items
             var result = new List<T>();
             for (uint row = 2; row <= maxrow; row++)
             {
                 // Extract raw row data
-                var rowdata = ReadRow(cells, row, maxcol);
+                var rowdata = ReadRow(celldict, row, maxcol);
 
                 // Transform keys based on headers
                 // Removing properties we don't want
@@ -121,7 +121,7 @@ namespace YoFi.AspNet.Common
         /// <param name="row">Which row, from 1</param>
         /// <param name="maxcol">Largest valid column number, from 0</param>
         /// <returns>Cell values mapped to column number where found, from 0</returns>
-        private Dictionary<uint, string> ReadRow(IEnumerable<Cell> cells, uint row, uint maxcol)
+        private Dictionary<uint, string> ReadRow(Dictionary<string, Cell> cells, uint row, uint maxcol)
         {
             var result = new Dictionary<uint, string>();
 
@@ -129,7 +129,7 @@ namespace YoFi.AspNet.Common
             {
                 var value = string.Empty;
                 var celref = ColNameFor(col) + row;
-                var cell = cells.Where(x => x.CellReference.Value == celref).SingleOrDefault();
+                var cell = cells.GetValueOrDefault(celref);
                 if (null != cell)
                 {
                     if (cell.DataType != null && cell.DataType == CellValues.SharedString)
@@ -142,6 +142,11 @@ namespace YoFi.AspNet.Common
             }
 
             return result;
+        }
+
+        private Dictionary<string,Cell> CellDictionary(IEnumerable<Cell> cells)
+        {
+            return cells.ToDictionary(x => x.CellReference.Value, x=>x);
         }
 
         /// <summary>
