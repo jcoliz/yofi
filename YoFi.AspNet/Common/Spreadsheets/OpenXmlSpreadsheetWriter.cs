@@ -79,7 +79,7 @@ namespace YoFi.AspNet.Common
 
             // Add the properties names as a header row
 
-            var properties = typeof(T).GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
+            var properties = typeof(T).GetProperties();
             InsertIntoSheet(worksheetPart, properties.Select(p => p.Name).ToList(), ref rowindex);
 
             // Add the property values for each item as a row
