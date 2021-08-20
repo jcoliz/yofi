@@ -302,6 +302,12 @@ namespace YoFi.AspNet.Controllers.Reports
     /// Implements the minimum needed to present the IReportable
     /// interface, which is the most we should ever be fetching from
     /// DB for reports
+    /// 
+    /// In the future, when all queries are passed all the way
+    /// through and only executed once, this may not be needed.
+    /// That's because the final query selects only what it needs.
+    /// However, currently there are intermediate AsEnumerable()
+    /// calls which we want to protect from over-fetching.
     /// </remarks>
     public class ReportableDto : IReportable
     {
