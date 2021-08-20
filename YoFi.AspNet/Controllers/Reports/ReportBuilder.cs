@@ -1,13 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
-using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using YoFi.AspNet.Data;
 
 namespace YoFi.AspNet.Controllers.Reports
 {
+    /// <summary>
+    /// Build application-specific reports
+    /// </summary>
+    /// <remarks>
+    /// This is where the app logic lives to arrange the data we have in our
+    /// database into reports that will be interesting for the user.
+    /// 
+    /// It would be possible to make this more data driven so that fully
+    /// custom reports could be created.
+    /// </remarks>
     public class ReportBuilder
     {
         /// <summary>
@@ -25,8 +32,6 @@ namespace YoFi.AspNet.Controllers.Reports
             public bool? showmonths { get; set; } 
             public int? level { get; set; }
         }
-        private readonly ApplicationDbContext _context;
-        private readonly QueryBuilder _qbuilder;
 
         public ReportBuilder(ApplicationDbContext context)
         {
@@ -36,6 +41,8 @@ namespace YoFi.AspNet.Controllers.Reports
 
         private int Year;
         private int Month;
+        private readonly ApplicationDbContext _context;
+        private readonly QueryBuilder _qbuilder;
 
         public Report BuildReport(Parameters parms)
         {

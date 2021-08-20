@@ -5,15 +5,11 @@ using System.Linq;
 namespace YoFi.AspNet.Controllers.Reports
 {
     /// <summary>
-    /// This is a standardized way for reports to be formulated. It is simply a
-    /// 2D dictionary of C,R to V.
+    /// Dictionary of (<typeparamref name="TColumn"/>,<typeparamref name="TRow"/>)
+    /// to <typeparamref name="TValue"/>.
     /// </summary>
-    /// <remarks>
-    /// The idea is that the "pivot" view can render many different kinds of reports
-    /// without knowing the details, because the details are all in here.
-    /// </remarks>
     /// <typeparam name="TColumn">Class to represent each column</typeparam>
-    /// <typeparam name="TRow">Class to represent each roww</typeparam>
+    /// <typeparam name="TRow">Class to represent each row</typeparam>
     /// <typeparam name="TValue">Class to represent each cell value</typeparam>
     public class Table<TColumn, TRow, TValue>
     {
@@ -50,55 +46,39 @@ namespace YoFi.AspNet.Controllers.Reports
         /// </remarks>
         Dictionary<Key,TValue> DataSet = new Dictionary<Key,TValue>();
 
-        public IEnumerable<TColumn> ColumnLabels
-        {
-            get
-            {
-                return _ColumnLabels.OrderBy(x => x);
-            }
-#if false
-            // It seems we do not actually SET these.
-            set
-            {
-                _ColumnLabels.Clear();
-                foreach (var label in value)
-                    _ColumnLabels.Add(label);
-            }
-#endif
-        }
+        /// <summary>
+        /// Column labels
+        /// </summary>
+        /// <remarks>
+        /// In sorted order
+        /// </remarks>
+        public IEnumerable<TColumn> ColumnLabels => _ColumnLabels.OrderBy(x => x);
+
         protected HashSet<TColumn> _ColumnLabels = new HashSet<TColumn>();
 
-        public IEnumerable<TRow> RowLabels
-        {
-            get
-            {
-                return _RowLabels.OrderBy(x => x);
-            }
-#if false
-            // It seems we do not actually SET these.
-            {
-                _RowLabels.Clear();
-                foreach (var label in value)
-                    _RowLabels.Add(label);
-            }
-#endif
-        }
+        /// <summary>
+        /// Row labels
+        /// </summary>
+        /// <remarks>
+        /// In sorted order
+        /// </remarks>
+        public IEnumerable<TRow> RowLabels => _RowLabels.OrderBy(x => x);
+
         protected HashSet<TRow> _RowLabels = new HashSet<TRow>();
 
+        /// <summary>
+        /// Value at this (C,R) position, or default
+        /// </summary>
+        /// <param name="collabel">Column label</param>
+        /// <param name="rowlabel">Row label</param>
+        /// <returns>Value at this (C,R) position, or default</returns>
         public TValue this[TColumn collabel, TRow rowlabel]
         {
             get
             {
                 var key = new Key(_col: collabel, _row: rowlabel);
 
-                if (DataSet.ContainsKey(key))
-                {
-                    return DataSet[key];
-                }
-                else
-                {
-                    return default(TValue);
-                }
+                return DataSet.GetValueOrDefault(key);
             }
             set
             {
@@ -109,21 +89,5 @@ namespace YoFi.AspNet.Controllers.Reports
                 _RowLabels.Add(rowlabel);
            }
         }
-
-#if false
-        // It seems we do not actually use these
-
-        public IEnumerable<TValue> RowValues(TRow row)
-        {
-            return _ColumnLabels.Select(x => this[x, row]);
-        }
-
-        protected void RemoveColumnsWhere(Predicate<TColumn> predicate)
-        {
-            _ColumnLabels.RemoveWhere(predicate);
-        }
-
-#endif
     }
-
 }

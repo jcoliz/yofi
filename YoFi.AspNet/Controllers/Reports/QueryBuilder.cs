@@ -9,11 +9,13 @@ using System.Threading.Tasks;
 namespace YoFi.AspNet.Controllers.Reports
 {
     /// <summary>
+    /// Build EF Core queries for app-specific scenarios.
+    /// </summary>
+    /// <remarks>
     /// This class has the unenviable task of building EF queries for
     /// the various scenarios we might want to report about, specific
     /// to this application's data.
-    /// </summary>
-    /// <remarks>
+    /// 
     /// The challenge is building queries that EF can translate later on
     /// when month/category groupings are built. Sometimes it can't be done
     /// in which case we'll turn it into a client-side query here.
@@ -309,7 +311,7 @@ namespace YoFi.AspNet.Controllers.Reports
     /// However, currently there are intermediate AsEnumerable()
     /// calls which we want to protect from over-fetching.
     /// </remarks>
-    public class ReportableDto : IReportable
+    class ReportableDto : IReportable
     {
         public decimal Amount { get; set; }
 

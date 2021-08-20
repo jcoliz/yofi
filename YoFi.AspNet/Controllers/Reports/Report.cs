@@ -20,6 +20,9 @@ namespace YoFi.AspNet.Controllers.Reports
     /// 2. Set any needed configuration properties
     /// 3. Build the report
     /// 4. Iterate over rows/columns to display the report
+    /// 
+    /// Note that there is no app-specific logic of any form in this
+    /// class.
     /// </remarks>
     public class Report : Table<ColumnLabel, RowLabel, decimal>, IComparer<RowLabel>
     {
