@@ -129,10 +129,10 @@ namespace YoFi.AspNet.Controllers.Reports
                 .ToList();
 
             var splitsExcept = QuerySplits().Query
-                   .ToList()
-                   .Where(x => !tops.Contains(x.Category) && !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
-                   .ToList()
-                   .AsQueryable<IReportable>();
+                .Where(x => !tops.Contains(x.Category))
+                .AsEnumerable()
+                .Where(x => !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                .AsQueryable<IReportable>();
 
             return new NamedQuery() { Query = splitsExcept };
         }
