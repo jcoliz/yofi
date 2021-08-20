@@ -49,22 +49,12 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Column labels
         /// </summary>
-        /// <remarks>
-        /// In sorted order
-        /// </remarks>
-        public IEnumerable<TColumn> ColumnLabels => _ColumnLabels.OrderBy(x => x);
-
-        protected HashSet<TColumn> _ColumnLabels = new HashSet<TColumn>();
+        public HashSet<TColumn> ColumnLabels { get; private set; } = new HashSet<TColumn>();
 
         /// <summary>
         /// Row labels
         /// </summary>
-        /// <remarks>
-        /// In sorted order
-        /// </remarks>
-        public IEnumerable<TRow> RowLabels => _RowLabels.OrderBy(x => x);
-
-        protected HashSet<TRow> _RowLabels = new HashSet<TRow>();
+        public HashSet<TRow> RowLabels { get; set; } = new HashSet<TRow>();
 
         /// <summary>
         /// Value at this (C,R) position, or default
@@ -85,8 +75,8 @@ namespace YoFi.AspNet.Controllers.Reports
                 var key = new Key(_col: collabel, _row: rowlabel);
 
                 DataSet[key] = value;
-                _ColumnLabels.Add(collabel);
-                _RowLabels.Add(rowlabel);
+                ColumnLabels.Add(collabel);
+                RowLabels.Add(rowlabel);
            }
         }
     }

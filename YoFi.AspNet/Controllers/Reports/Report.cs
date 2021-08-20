@@ -24,7 +24,7 @@ namespace YoFi.AspNet.Controllers.Reports
     /// Note that there is no app-specific logic of any form in this
     /// class.
     /// </remarks>
-    public class Report : Table<ColumnLabel, RowLabel, decimal>, IComparer<RowLabel>
+    public class Report : IComparer<RowLabel>
     {
         #region Configuration Properties
 
@@ -121,26 +121,36 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <param name="collabel">Which column</param>
         /// <param name="rowlabel">Which row</param>
         /// <returns>Value at that column,row position </returns>
-        public new decimal this[ColumnLabel collabel, RowLabel rowlabel]
+        public decimal this[ColumnLabel collabel, RowLabel rowlabel]
         {
             get
             {
                 if (collabel.IsCalculated)
                     return collabel.Custom(RowDetails(rowlabel));
                 else
-                    return base[collabel, rowlabel];
+                    return Table[collabel, rowlabel];
             }
         }
 
         /// <summary>
         /// All the row labels, in the correct order as specified by SortOrder
         /// </summary>
-        public IEnumerable<RowLabel> RowLabelsOrdered => base.RowLabels.OrderBy(x => x, this);
+        public IEnumerable<RowLabel> RowLabelsOrdered => Table.RowLabels.OrderBy(x => x, this);
+
+        /// <summary>
+        /// All the row labels, in internal order
+        /// </summary>
+        public IEnumerable<RowLabel> RowLabels => Table.RowLabels.OrderBy(x => x);
 
         /// <summary>
         /// All the column labels which should be shown, as modified by configuration properties
         /// </summary>
-        public IEnumerable<ColumnLabel> ColumnLabelsFiltered => base.ColumnLabels.Where(x => WithTotalColumn || !x.IsTotal);
+        public IEnumerable<ColumnLabel> ColumnLabelsFiltered => ColumnLabels.Where(x => WithTotalColumn || !x.IsTotal);
+
+        /// <summary>
+        /// All the column labels, in internal order
+        /// </summary>
+        public IEnumerable<ColumnLabel> ColumnLabels => Table.ColumnLabels.OrderBy(x => x);
 
         /// <summary>
         /// The row which contains the total for columns
@@ -155,7 +165,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// The total of the total column
         /// </summary>
-        public decimal GrandTotal => base[TotalColumn, TotalRow];
+        public decimal GrandTotal => this[TotalColumn, TotalRow];
 
         #endregion
 
@@ -172,7 +182,7 @@ namespace YoFi.AspNet.Controllers.Reports
 
             column.IsCalculated = true;
             column.IsTotal = false;
-            base._ColumnLabels.Add(column);
+            Table.ColumnLabels.Add(column);
         }
 
         /// <summary>
@@ -303,6 +313,10 @@ namespace YoFi.AspNet.Controllers.Reports
 
         #endregion
 
+        #region Fields
+        Table<ColumnLabel, RowLabel, decimal> Table = new Table<ColumnLabel, RowLabel, decimal>();
+        #endregion
+
         #region Internal Methods
 
         /// <summary>
@@ -402,15 +416,15 @@ namespace YoFi.AspNet.Controllers.Reports
                             UniqueID = cell.Key.Month.ToString("D2"), 
                             Name = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(cell.Key.Month)
                         };
-                        base[column, row] += cell.Total;
+                        Table[column, row] += cell.Total;
                     }
 
                     // Place the value in the correct series column, if applicable
                     if (seriescolumn != null)
-                        base[seriescolumn, row] += cell.Total;
+                        Table[seriescolumn, row] += cell.Total;
 
                     // Place the value in the total column
-                    base[TotalColumn, row] += cell.Total;
+                    Table[TotalColumn, row] += cell.Total;
 
                     //  3. Propagate. Propagate those values upward into totalling rows.
                     if (!oquery.LeafRowsOnly)
@@ -447,11 +461,11 @@ namespace YoFi.AspNet.Controllers.Reports
                 row.Parent = parentrow;
 
                 // Do the accumlation of values into the parent row
-                base[TotalColumn, parentrow] += amount;
+                Table[TotalColumn, parentrow] += amount;
                 if (column != null)
-                    base[column, parentrow] += amount;
+                    Table[column, parentrow] += amount;
                 if (seriescolumn != null)
-                    base[seriescolumn, parentrow] += amount;
+                    Table[seriescolumn, parentrow] += amount;
 
                 // Then recursively accumulate upwards to the grandparent
                 BuildPhase_Propagate(amount: amount, row: parentrow, column: column, seriescolumn: seriescolumn);
@@ -486,7 +500,7 @@ namespace YoFi.AspNet.Controllers.Reports
                         if (categories.Contains(split.Last()) ^ isnotlist && collectorrow.UniqueID != row.UniqueID)
                         {
                             // Found a peer collector who wants us, let's do the collection.
-                            base[seriescolumn, collectorrow] += amount;
+                            Table[seriescolumn, collectorrow] += amount;
                         }
                     }
                 }
@@ -496,11 +510,11 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 // In this case, we accumulate into the report total.
                 row.Level = NumLevels - 1;
-                base[TotalColumn, TotalRow] += amount;
+                Table[TotalColumn, TotalRow] += amount;
                 if (column != null)
-                    base[column, TotalRow] += amount;
+                    Table[column, TotalRow] += amount;
                 if (seriescolumn != null)
-                    base[seriescolumn, TotalRow] += amount;
+                    Table[seriescolumn, TotalRow] += amount;
             }
         }
 
@@ -516,12 +530,12 @@ namespace YoFi.AspNet.Controllers.Reports
             var leafnodecolumns = ColumnLabelsFiltered.Where(x => x.LeafNodesOnly);
 
             var pruned = new HashSet<RowLabel>();
-            foreach (var row in base.RowLabels)
+            foreach (var row in RowLabels)
             {
                 if (!leafnodecolumns.Any())
                     if (string.IsNullOrEmpty(row.UniqueID.Split(':').Last()))
                         if (row.Parent != null)
-                            if (base[TotalColumn, row] == base[TotalColumn, row.Parent as RowLabel])
+                            if (Table[TotalColumn, row] == Table[TotalColumn, row.Parent as RowLabel])
                                 pruned.Add(row);
 
                 // Also prune rows that are below the numrows cutoff
@@ -532,7 +546,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 // such series. Also flatten series if there is a leaf-rows-only series.
                 if (leafnodecolumns.Any())
                 {
-                    if (leafnodecolumns.Sum(x => base[x, row]) == 0)
+                    if (leafnodecolumns.Sum(x => Table[x, row]) == 0)
                         pruned.Add(row);
                     else
                     {
@@ -542,16 +556,15 @@ namespace YoFi.AspNet.Controllers.Reports
                 }
             }
 
-            base._RowLabels.RemoveWhere(x => pruned.Contains(x));
+            Table.RowLabels.RemoveWhere(x => pruned.Contains(x));
         }
-
 
         /// <summary>
         /// Retrieve all the columns for a certain row in a focused way
         /// </summary>
         /// <param name="rowLabel">Which row</param>
         /// <returns>Dictionary of column identifier strings to the value in that column</returns>
-        Dictionary<string, decimal> RowDetails(RowLabel rowLabel) => ColumnLabels.ToDictionary(x => x.ToString(), x => base[x, rowLabel]);
+        Dictionary<string, decimal> RowDetails(RowLabel rowLabel) => ColumnLabels.ToDictionary(x => x.ToString(), x => Table[x, rowLabel]);
 
         /// <summary>
         /// Row comparer
@@ -589,8 +602,8 @@ namespace YoFi.AspNet.Controllers.Reports
             // (2) If these two share a common parent, we can compare based on SortOrder
             if (x.Parent == y.Parent)
             {
-                var yval = base[OrderingColumn, y as RowLabel];
-                var xval = base[OrderingColumn, x as RowLabel];
+                var yval = Table[OrderingColumn, y as RowLabel];
+                var xval = Table[OrderingColumn, x as RowLabel];
                 switch (SortOrder)
                 {
                     case SortOrders.TotalAscending:
