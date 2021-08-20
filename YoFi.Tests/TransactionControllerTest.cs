@@ -617,7 +617,11 @@ namespace YoFi.Tests
             var incoming = helper.ExtractFromSpreadsheet<Transaction>(stream);
 
             Assert.AreEqual(1, incoming.Count);
-            Assert.AreEqual("X:Y:A", incoming.Single().Category);
+
+            // Note that we now expect X:Y not X:Y:A because the transaction mapper
+            // now ignores subcategory.
+
+            Assert.AreEqual("X:Y", incoming.Single().Category);
         }
 
         [TestMethod]

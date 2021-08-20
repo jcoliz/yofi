@@ -947,6 +947,21 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Import), new { highlight = string.Join(':', highlights.Select(x => x.ID)) });
         }
 
+        /*
+         * 
+        class TransactionExportDto
+        {
+            public int ID { get; set; }
+            public DateTime Timestamp { get; set; }
+            public string Payee { get; set; }
+            public decimal Amount { get; set; }
+            public string Category { get; set; }
+            public string Memo { get; set; }
+            public string BankReference { get; set; }
+        };
+
+         */
+
         // POST: Transactions/Download
         //[ActionName("Download")]
         [HttpPost]
@@ -959,8 +974,24 @@ namespace YoFi.AspNet.Controllers
                 var transactionsquery = _context.Transactions.Where(x => x.Hidden != true);
                 if (!allyears)
                     transactionsquery = transactionsquery.Where(x => x.Timestamp.Year == Year);
-                transactionsquery = transactionsquery.OrderByDescending(x => x.Timestamp);
-                var transactions = await transactionsquery.ToListAsync();
+                transactionsquery = transactionsquery
+                    .OrderByDescending(x => x.Timestamp);
+
+                // Select to data transfer object
+                var transactionsdtoquery = transactionsquery
+                    .Select(x=> new TransactionExportDto()
+                    {
+                        ID = x.ID,
+                        Amount = x.Amount,
+                        Timestamp = x.Timestamp,
+                        Category = x.Category,
+                        Payee = x.Payee,
+                        Memo = x.Memo,
+                        BankReference = x.BankReference
+                    }
+                    );
+
+                var transactions = await transactionsdtoquery.ToListAsync();
 
                 // Which splits?
 
@@ -990,7 +1021,7 @@ namespace YoFi.AspNet.Controllers
                 using (var ssw = new OpenXmlSpreadsheetWriter())
                 {
                     ssw.Open(stream);
-                    ssw.Write(transactions);
+                    ssw.Write(transactions,sheetname:"Transaction");
 
                     if (splits.Any())
                         ssw.Write(splits);
@@ -1100,6 +1131,24 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Models.Transaction>.Upload(List<IFormFile> files) => Upload(files, string.Empty);
 
         Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
-#endregion
+        #endregion
+
+        #region Data Transfer Objects
+
+        /// <summary>
+        /// The transaction data for export
+        /// </summary>
+        class TransactionExportDto: ICatSubcat
+        {
+            public int ID { get; set; }
+            public DateTime Timestamp { get; set; }
+            public string Payee { get; set; }
+            public decimal Amount { get; set; }
+            public string Category { get; set; }
+            public string Memo { get; set; }
+            public string BankReference { get; set; }
+            string ICatSubcat.SubCategory { get => null; set { } }
+        }
+        #endregion
     }
 }
