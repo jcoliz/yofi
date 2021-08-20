@@ -1021,7 +1021,7 @@ namespace YoFi.AspNet.Controllers
                 using (var ssw = new OpenXmlSpreadsheetWriter())
                 {
                     ssw.Open(stream);
-                    ssw.Write(transactions,sheetname:"Transaction");
+                    ssw.Write(transactions,sheetname:nameof(Transaction));
 
                     if (splits.Any())
                         ssw.Write(splits);
