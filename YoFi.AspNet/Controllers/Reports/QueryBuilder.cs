@@ -139,11 +139,37 @@ namespace YoFi.AspNet.Controllers.Reports
 
         public IEnumerable<NamedQuery> QueryTransactionsComplete(string top = null)
         {
+            var txs = QueryTransactions(top).Query;
+            var splits = QuerySplits(top).Query;
+            var q = txs.Concat(splits);
+
             return new List<NamedQuery>() {
-                QueryTransactions(top),
-                QuerySplits(top)
+                new NamedQuery() { Query = q }
             };
         }
+
+        /*
+         * OK, I managed to concatenate the transactions and splits queries now, and hold it in EF Core all
+         * the way to the end, which generates the following.
+         * 
+            SELECT [t1].[Category] AS [Name], DATEPART(month, [t1].[Timestamp]) AS [Month], SUM([t1].[Amount]) AS [Total]
+            FROM (
+                SELECT [t].[Amount], [t].[Timestamp], [t].[Category]
+                FROM [Transactions] AS [t]
+                WHERE (((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)) AND NOT (EXISTS (
+                    SELECT 1
+                    FROM [Split] AS [s]
+                    WHERE [t].[ID] = [s].[TransactionID]))
+                UNION ALL
+                SELECT [s0].[Amount], [t0].[Timestamp], [s0].[Category]
+                FROM [Split] AS [s0]
+                INNER JOIN [Transactions] AS [t0] ON [s0].[TransactionID] = [t0].[ID]
+                WHERE ((DATEPART(year, [t0].[Timestamp]) = @__Year_0) AND (([t0].[Hidden] <> CAST(1 AS bit)) OR [t0].[Hidden] IS NULL)) AND (DATEPART(month, [t0].[Timestamp]) <= @__Month_1)
+            ) AS [t1]
+            GROUP BY [t1].[Category], DATEPART(month, [t1].[Timestamp])
+         *
+         * I will still need to figure out how to do the same on the "except" queries.
+         */
 
         public IEnumerable<NamedQuery> QueryTransactionsCompleteExcept(IEnumerable<string> tops)
         {
