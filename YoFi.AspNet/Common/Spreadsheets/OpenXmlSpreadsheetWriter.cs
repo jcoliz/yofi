@@ -74,36 +74,18 @@ namespace YoFi.AspNet.Common
         /// <param name="name">Name of spreadsheet where to insert them</param>
         private void InsertItems<T>(IEnumerable<T> items, string name)
         {
-            //
-            // My strategy is to break this problem into a three stage pipeline.
-            //
-            // 1. Transform the supplied items into a generic type-less matrix
-            // 2. Transform those into "cell seeds" which the bare minimum of data
-            // we will later need to create cells.
-            // 3. Transform those into actual spreadsheet rows/cells.
-            //
-            // It may be possible to refactor by combinining these stages.
-            // However, it's not obvious that doing so would add anything.
-
-            // Stage 1: Transform items into generic matrix
-            var rows = new List<IEnumerable<object>>();
+            WorksheetPart worksheetPart = InsertWorksheet(name);
+            uint rowindex = 1;
 
             // Add the properties names as a header row
 
-            // If we don't want a property to show up when it's being json serialized, we also don't want 
-            // it to show up when we're exporting it.
             var properties = typeof(T).GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
-            rows.Add(properties.Select(x => x.Name));
+            InsertIntoSheet(worksheetPart, MakeRowsFrom(properties.Select(x => x.Name).ToList(), ref rowindex));
 
             // Add the property values for each item as a row
-            rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item))));
 
-            // Stage 2: Transform the rows into cell seeds
-            var seeds = rows.Select(row => { int colnum = 0; return row.Select(obj => new CellSeed(obj) { colindex = colnum++ }).Where(seed=>seed.IsValid); });
+            InsertIntoSheet(worksheetPart, MakeRowsFrom(items.Select(item => properties.Select(x => x.GetValue(item)).ToList()), ref rowindex));
 
-            // Stage 3: Write the seeds as cells into the worksheet
-            WorksheetPart worksheetPart = InsertWorksheet(name);
-            InsertIntoSheet(worksheetPart, seeds);
             worksheetPart.Worksheet.Save();
         }
 
@@ -139,6 +121,87 @@ namespace YoFi.AspNet.Common
             workbookPart.Workbook.Save();
 
             return newWorksheetPart;
+        }
+
+        private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<Row> rows)
+        {
+            Worksheet worksheet = worksheetPart.Worksheet;
+            SheetData sheetData = worksheet.GetFirstChild<SheetData>();
+            sheetData.Append(rows);
+        }
+
+        private IEnumerable<Row> MakeRowsFrom(IEnumerable<object> objectrow, ref uint rowindex)
+        {
+            return MakeRowsFrom(new List<IEnumerable<object>>() { objectrow }, ref rowindex);
+        }
+
+        private IEnumerable<Row> MakeRowsFrom(IEnumerable<IEnumerable<object>> objectrows, ref uint rowindex)
+        {
+            var rows = new List<Row>();
+
+            foreach(var or in objectrows)
+            {
+                uint rowlocal = rowindex;
+                int colindex = 0;
+                var row =
+                    new Row
+                    (
+                        or.Select(o => MakeCellFrom(o, ColNameFor(colindex++) + rowlocal)).Where(c => c.DataType.Value != CellValues.Error)
+                    )
+                    {
+                        RowIndex = rowindex++,
+                        Spans = new ListValue<StringValue>()
+                    };
+                rows.Add(row);
+            }
+
+            return rows;
+        }
+
+        private Cell MakeCellFrom(object @object, string cellref)
+        {
+            string Value = null;
+            CellValues DataType = CellValues.Error;
+
+            if (@object != null)
+            {
+                var t = @object.GetType();
+
+                if (t == typeof(string))
+                {
+                    Value = @object as string;
+                    DataType = CellValues.SharedString;
+                }
+                else if (t == typeof(decimal))
+                {
+                    Value = @object.ToString();
+                    DataType = CellValues.Number;
+                }
+                else if (t == typeof(Int32))
+                {
+                    Value = @object.ToString();
+                    DataType = CellValues.Number;
+                }
+                else if (t == typeof(DateTime))
+                {
+                    // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
+                    double oaValue = ((DateTime)@object).ToOADate();
+                    Value = oaValue.ToString(CultureInfo.InvariantCulture);
+                    DataType = CellValues.Number;
+                }
+                else if (t == typeof(Boolean))
+                {
+                    Value = ((Boolean)@object) ? "1" : "0";
+                    DataType = CellValues.Boolean;
+                }
+            }
+
+            return new Cell()
+            {
+                CellReference = cellref,
+                CellValue = new CellValue(DataType == CellValues.SharedString ? InsertSharedStringItem(Value) : Value),
+                DataType = new EnumValue<CellValues>(DataType)
+            };
         }
 
         /// <summary>
