@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace YoFi.Tests
 {
@@ -21,10 +22,20 @@ namespace YoFi.Tests
         IEnumerable<BudgetTx> BudgetTxs;
         IEnumerable<BudgetTx> ManagedBudgetTxs;
 
+        public ILoggerFactory logfact = LoggerFactory.Create(builder =>
+        {
+            builder
+            .AddConsole((options) => { })
+            .AddFilter((category, level) =>
+                    category == "Microsoft.EntityFrameworkCore.Query"
+                    && level == LogLevel.Debug);
+        });
+
         [TestInitialize]
         public void SetUp()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                //.UseLoggerFactory(logfact)
                 .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
                 .Options;
 

@@ -37,7 +37,6 @@ namespace YoFi.AspNet.Controllers.Reports
         private NamedQuery QueryTransactions(string top = null)
         {
             IQueryable<IReportable> txs = _context.Transactions
-                .Include(x => x.Splits)
                 .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
                 .Where(x => !x.Splits.Any());
 
@@ -52,6 +51,19 @@ namespace YoFi.AspNet.Controllers.Reports
 
             return new NamedQuery() { Query = txs };
         }
+
+        /*
+         * EF Core does a great job of the above. This is the final single query that it creates later
+         * when doing GroupBy.
+         *
+            SELECT [t].[Category] AS [Name], DATEPART(month, [t].[Timestamp]) AS [Month], SUM([t].[Amount]) AS [Total]
+            FROM [Transactions] AS [t]
+            WHERE (((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)) AND NOT (EXISTS (
+                SELECT 1
+                FROM [Split] AS [s]
+                WHERE [t].[ID] = [s].[TransactionID]))
+            GROUP BY [t].[Category], DATEPART(month, [t].[Timestamp])
+         */
 
         private NamedQuery QueryTransactionsExcept(IEnumerable<string> excluetopcategories)
         {
@@ -68,22 +80,12 @@ namespace YoFi.AspNet.Controllers.Reports
             return new NamedQuery() { Query = txsExcept };
         }
 
-        public class ReportableDto : IReportable
-        {
-            public decimal Amount { get; set; }
-
-            public DateTime Timestamp { get; set; }
-
-            public string Category { get; set; }
-        }
-
         private NamedQuery QuerySplits(string top = null)
         {
             var splits = _context.Splits
                 .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
                 .Include(x => x.Transaction)
                 .Select(x=> new ReportableDto() { Amount = x.Amount, Timestamp = x.Transaction.Timestamp, Category = x.Category })
-                .ToList()
                 .AsQueryable<IReportable>();
 
             if (top != null)
@@ -95,6 +97,31 @@ namespace YoFi.AspNet.Controllers.Reports
             return new NamedQuery() { Query = splits };
         }
 
+        /*
+         * EF Core does a decent job of the above as well. It's straightforward because we have the ToList() here
+         * which is needed for an of the Except* reports.
+         * 
+            SELECT [s].[Amount], [t].[Timestamp], [s].[Category]
+            FROM [Split] AS [s]
+            INNER JOIN [Transactions] AS [t] ON [s].[TransactionID] = [t].[ID]
+            WHERE ((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)
+         *
+         * Leaving the ToList() out above works fine on All report, and generates the following
+         * when doing GroupBy, which is perfect.
+         * 
+            SELECT [s].[Category] AS [Name], DATEPART(month, [t].[Timestamp]) AS [Month], SUM([s].[Amount]) AS [Total]
+            FROM [Split] AS [s]
+            INNER JOIN [Transactions] AS [t] ON [s].[TransactionID] = [t].[ID]
+            WHERE ((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)
+            GROUP BY [s].[Category], DATEPART(month, [t].[Timestamp])
+         
+         * Unfortunately, taking out the ToList() leads "QuerySplitsExcept" below to fail with a
+         * "could not be translated" error.
+         * 
+         * OK so what I did was move the ToList() down to QuerySplitsExcept(), which is the only
+         * place it was really needed.
+         */
+
         private NamedQuery QuerySplitsExcept(IEnumerable<string> tops)
         {
             var excluetopcategoriesstartswith = tops
@@ -102,6 +129,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 .ToList();
 
             var splitsExcept = QuerySplits().Query
+                   .ToList()
                    .Where(x => !tops.Contains(x.Category) && !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
                    .ToList()
                    .AsQueryable<IReportable>();
@@ -219,4 +247,22 @@ namespace YoFi.AspNet.Controllers.Reports
             return result;
         }
     }
+
+    /// <summary>
+    /// Data transfer object for report data
+    /// </summary>
+    /// <remarks>
+    /// Implements the minimum needed to present the IReportable
+    /// interface, which is the most we should ever be fetching from
+    /// DB for reports
+    /// </remarks>
+    public class ReportableDto : IReportable
+    {
+        public decimal Amount { get; set; }
+
+        public DateTime Timestamp { get; set; }
+
+        public string Category { get; set; }
+    }
+
 }
