@@ -173,9 +173,12 @@ namespace YoFi.AspNet.Controllers.Reports
 
         public IEnumerable<NamedQuery> QueryTransactionsCompleteExcept(IEnumerable<string> tops)
         {
+            var txs = QueryTransactionsExcept(tops).Query;
+            var splits = QuerySplitsExcept(tops).Query;
+            var q = txs.Concat(splits);
+
             return new List<NamedQuery>() {
-                QueryTransactionsExcept(tops),
-                QuerySplitsExcept(tops)
+                new NamedQuery() { Query = q }
             };
         }
 
