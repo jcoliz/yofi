@@ -124,8 +124,10 @@ namespace YoFi.AspNet.Controllers.Reports
 
         private NamedQuery QueryBudgetSingle()
         {
+            // Maybe don't need a DTO for BudgetTx, because they don't have any extra fields?
             var budgettxs = _context.BudgetTxs
-                .Where(x => x.Timestamp.Year == Year);
+                .Where(x => x.Timestamp.Year == Year)
+                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
 
             return new NamedQuery() { Query = budgettxs };
         }
