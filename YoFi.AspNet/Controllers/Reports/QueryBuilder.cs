@@ -65,11 +65,21 @@ namespace YoFi.AspNet.Controllers.Reports
             return new NamedQuery() { Query = txsExcept };
         }
 
+        public class ReportableDto : IReportable
+        {
+            public decimal Amount { get; set; }
+
+            public DateTime Timestamp { get; set; }
+
+            public string Category { get; set; }
+        }
+
         private NamedQuery QuerySplits(string top = null)
         {
             var splits = _context.Splits
-                .Include(x => x.Transaction)
                 .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
+                .Include(x => x.Transaction)
+                .Select(x=> new ReportableDto() { Amount = x.Amount, Timestamp = x.Transaction.Timestamp, Category = x.Category })
                 .ToList()
                 .AsQueryable<IReportable>();
 
