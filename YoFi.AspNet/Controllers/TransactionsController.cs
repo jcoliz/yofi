@@ -996,7 +996,7 @@ namespace YoFi.AspNet.Controllers
                 // Which splits?
 
                 // Product Backlog Item 870: Export & import transactions with splits
-                var splitsquery = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true);
+                var splitsquery = _context.Splits.Where(x => x.Transaction.Hidden != true);
                 if (!allyears)
                     splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
                 splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
