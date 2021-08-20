@@ -80,11 +80,11 @@ namespace YoFi.AspNet.Common
             // Add the properties names as a header row
 
             var properties = typeof(T).GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
-            InsertIntoSheet(worksheetPart, MakeRowsFrom(properties.Select(x => x.Name).ToList(), ref rowindex));
+            InsertIntoSheet(worksheetPart, properties.Select(p => p.Name).ToList(), ref rowindex);
 
             // Add the property values for each item as a row
 
-            InsertIntoSheet(worksheetPart, MakeRowsFrom(items.Select(item => properties.Select(x => x.GetValue(item)).ToList()), ref rowindex));
+            InsertIntoSheet(worksheetPart, items.Select(item => properties.Select(p => p.GetValue(item))).ToList(), ref rowindex);
 
             worksheetPart.Worksheet.Save();
         }
@@ -123,23 +123,26 @@ namespace YoFi.AspNet.Common
             return newWorksheetPart;
         }
 
-        private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<Row> rows)
+        /// <summary>
+        /// Insert a set of <paramref name="objectrows"/> into the <paramref name="worksheetPart"/>, starting at
+        /// row <paramref name="rowindex"/>
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="objectrows"/> are an enumerable of rows, where each row is an enumerable of
+        /// arbitrary objects to be inserted.
+        /// </remarks>
+        /// <see cref="MakeCellFrom(object, string)"/>
+        /// <param name="worksheetPart">Insert into this</param>
+        /// <param name="objectrows">Insert these object row</param>
+        /// <param name="rowindex">Starting at what row</param>
+        private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<IEnumerable<object>> objectrows, ref uint rowindex)
         {
             Worksheet worksheet = worksheetPart.Worksheet;
             SheetData sheetData = worksheet.GetFirstChild<SheetData>();
-            sheetData.Append(rows);
-        }
 
-        private IEnumerable<Row> MakeRowsFrom(IEnumerable<object> objectrow, ref uint rowindex)
-        {
-            return MakeRowsFrom(new List<IEnumerable<object>>() { objectrow }, ref rowindex);
-        }
-
-        private IEnumerable<Row> MakeRowsFrom(IEnumerable<IEnumerable<object>> objectrows, ref uint rowindex)
-        {
             var rows = new List<Row>();
 
-            foreach(var or in objectrows)
+            foreach (var or in objectrows)
             {
                 uint rowlocal = rowindex;
                 int colindex = 0;
@@ -155,9 +158,28 @@ namespace YoFi.AspNet.Common
                 rows.Add(row);
             }
 
-            return rows;
+            sheetData.Append(rows);
         }
 
+        /// <summary>
+        /// Insert just a single <paramref name="objectrow"/> into <paramref name="worksheetPart"/>.
+        /// </summary>
+        /// <see cref="InsertIntoSheet(WorksheetPart, IEnumerable{IEnumerable{object}}, ref uint)"/>
+        /// <param name="worksheetPart"></param>
+        /// <param name="objectrow"></param>
+        /// <param name="rowindex"></param>
+        private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<object> objectrow, ref uint rowindex)
+        {
+            InsertIntoSheet(worksheetPart, new List<IEnumerable<object>>() { objectrow }, ref rowindex);
+        }
+
+        /// <summary>
+        /// Make a spreadsheet cell from the given <paramref name="object"/>, at the
+        /// given <paramref name="cellref"/>.
+        /// </summary>
+        /// <param name="object">Source object</param>
+        /// <param name="cellref">Position in the resulting spreadsheet</param>
+        /// <returns></returns>
         private Cell MakeCellFrom(object @object, string cellref)
         {
             string Value = null;
@@ -203,39 +225,7 @@ namespace YoFi.AspNet.Common
                 DataType = new EnumValue<CellValues>(DataType)
             };
         }
-
-        /// <summary>
-        /// Insert a matrix of <paramref name="seeds"/> into the given <paramref name="worksheetPart"/>
-        /// </summary>
-        /// <param name="worksheetPart">Where to insert the cells</param>
-        /// <param name="seeds">Sparse matrix of cell seeds, outer enumerable is rows, inner is columns</param>
-        private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<IEnumerable<CellSeed>> seeds)
-        {
-            Worksheet worksheet = worksheetPart.Worksheet;
-            SheetData sheetData = worksheet.GetFirstChild<SheetData>();
-
-            uint rowindex = 1;
-            var rows = seeds.Select
-            (
-                row => new Row
-                (
-                    row.Select(cell =>
-                        new Cell()
-                        {
-                            CellReference = ColNameFor(cell.colindex) + rowindex,
-                            CellValue = new CellValue(cell.IsSharedString ? InsertSharedStringItem(cell.Value) : cell.Value),
-                            DataType = new EnumValue<CellValues>(cell.DataType)
-                        }
-                    )
-                ) 
-                { 
-                    RowIndex = rowindex++, 
-                    Spans = new ListValue<StringValue>() 
-                }
-            );
-            sheetData.Append(rows);
-        }
-
+     
         /// <summary>
         /// Convert column <paramref name="number"/> to spreadsheet name
         /// </summary>
@@ -280,80 +270,6 @@ namespace YoFi.AspNet.Common
             var items = stringTable.Select(x => new SharedStringItem(new Text(x)));
             shareStringPart.SharedStringTable = new SharedStringTable(items);
         }
-
-        /// <summary>
-        /// All the information needed to create a Cell object
-        /// </summary>
-        class CellSeed
-        {
-            /// <summary>
-            /// Zero-based index describing the cell's column position
-            /// </summary>
-            public int colindex { get; set; } = 0;
-
-            /// <summary>
-            /// Whether this is a "shared string", so should be placed into string table
-            /// before committed to output stream
-            /// </summary>
-            public bool IsSharedString => DataType == CellValues.SharedString;
-
-            /// <summary>
-            /// Whether this cell has had a value assigned to it
-            /// </summary>
-            public bool IsValid => Value != null;
-
-            /// <summary>
-            /// The cell value, or null if cell is empty
-            /// </summary>
-            public string Value { get; set; } = null;
-
-            /// <summary>
-            /// The type of cell value
-            /// </summary>
-            public CellValues DataType { get; set; } = CellValues.Number;
-
-            /// <summary>
-            /// Empty constructor
-            /// </summary>
-            public CellSeed() { }
-
-            /// <summary>
-            /// Construct a cell seed from the given <paramref name="object"/>
-            /// </summary>
-            /// <param name="object">Object to create from</param>
-            public CellSeed(object @object)
-            {
-                if (@object != null)
-                {
-                    var t = @object.GetType();
-
-                    if (t == typeof(string))
-                    {
-                        Value = @object as string;
-                        DataType = CellValues.SharedString;
-                    }
-                    else if (t == typeof(decimal))
-                    {
-                        Value = @object.ToString();
-                    }
-                    else if (t == typeof(Int32))
-                    {
-                        Value = @object.ToString();
-                    }
-                    else if (t == typeof(DateTime))
-                    {
-                        // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
-                        double oaValue = ((DateTime)@object).ToOADate();
-                        Value = oaValue.ToString(CultureInfo.InvariantCulture);
-                    }
-                    else if (t == typeof(Boolean))
-                    {
-                        Value = ((Boolean)@object) ? "1" : "0";
-                        DataType = CellValues.Boolean;
-                    }
-                }
-            }
-        };
 
 #endregion
 
