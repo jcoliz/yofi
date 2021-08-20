@@ -141,10 +141,12 @@ namespace YoFi.AspNet.Controllers.Reports
         {
             var txs = QueryTransactions(top).Query;
             var splits = QuerySplits(top).Query;
-            var q = txs.Concat(splits);
 
             return new List<NamedQuery>() {
-                new NamedQuery() { Query = q }
+                new NamedQuery()
+                {
+                    Query = txs.Concat(splits)
+                }
             };
         }
 
@@ -175,10 +177,12 @@ namespace YoFi.AspNet.Controllers.Reports
         {
             var txs = QueryTransactionsExcept(tops).Query;
             var splits = QuerySplitsExcept(tops).Query;
-            var q = txs.Concat(splits);
 
             return new List<NamedQuery>() {
-                new NamedQuery() { Query = q }
+                new NamedQuery() 
+                { 
+                    Query = txs.Concat(splits)
+                }
             };
         }
 
