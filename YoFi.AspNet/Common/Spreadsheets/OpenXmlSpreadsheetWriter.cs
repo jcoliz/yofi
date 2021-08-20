@@ -66,31 +66,54 @@ namespace YoFi.AspNet.Common
         
         #region Internals
 
-        public void InsertItems<T>(IEnumerable<T> items, string sheetName)
+        /// <summary>
+        /// Insert <paramref name="items"/>items into a new worksheet with the given <paramref name="name"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of items to insert</typeparam>
+        /// <param name="items">Which items to insert</param>
+        /// <param name="name">Name of spreadsheet where to insert them</param>
+        private void InsertItems<T>(IEnumerable<T> items, string name)
         {
+            //
+            // My strategy is to break this problem into a three stage pipeline.
+            //
+            // 1. Transform the supplied items into a generic type-less matrix
+            // 2. Transform those into "cell seeds" which the bare minimum of data
+            // we will later need to create cells.
+            // 3. Transform those into actual spreadsheet rows/cells.
+            //
+            // It may be possible to refactor by combinining these stages.
+            // However, it's not obvious that doing so would add anything.
+
+            // Stage 1: Transform items into generic matrix
             var rows = new List<IEnumerable<object>>();
 
-            // Add the properties as a header row
+            // Add the properties names as a header row
 
             // If we don't want a property to show up when it's being json serialized, we also don't want 
             // it to show up when we're exporting it.
             var properties = typeof(T).GetProperties().Where(x => !x.IsDefined(typeof(JsonIgnoreAttribute)));
             rows.Add(properties.Select(x => x.Name));
 
-            // Add the items as remaining rows
+            // Add the property values for each item as a row
             rows.AddRange(items.Select(item => properties.Select(x => x.GetValue(item))));
 
-            // Transform the rows into cell seeds
-            var seeds = rows.Select(r => { int col = 0; return r.Select(x => new CellSeed(x) { colindex = col++ }).Where(x=>x.IsValid); });
+            // Stage 2: Transform the rows into cell seeds
+            var seeds = rows.Select(row => { int colnum = 0; return row.Select(obj => new CellSeed(obj) { colindex = colnum++ }).Where(seed=>seed.IsValid); });
 
-            // Write the seeds as cells into the worksheet
-            WorksheetPart worksheetPart = InsertWorksheet(sheetName);
+            // Stage 3: Write the seeds as cells into the worksheet
+            WorksheetPart worksheetPart = InsertWorksheet(name);
             InsertIntoSheet(worksheetPart, seeds);
             worksheetPart.Worksheet.Save();
         }
 
-        // Given a WorkbookPart, inserts a new worksheet.
-        private WorksheetPart InsertWorksheet(string sheetName)
+        /// <summary>
+        /// Insert a new worksheet with the given <paramref name="name"/> into the current
+        /// workbook
+        /// </summary>
+        /// <param name="name">The name of the worksheet</param>
+        /// <returns>The worksheetpart for the new worksheet</returns>
+        private WorksheetPart InsertWorksheet(string name)
         {
             var workbookPart = spreadSheet.WorkbookPart;
 
@@ -112,19 +135,26 @@ namespace YoFi.AspNet.Common
             var sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).DefaultIfEmpty().Max() + 1;
 
             // Append the new worksheet and associate it with the workbook.
-            sheets.Append(new Sheet() { Id = relationshipId, SheetId = sheetId, Name = sheetName });
+            sheets.Append(new Sheet() { Id = relationshipId, SheetId = sheetId, Name = name });
             workbookPart.Workbook.Save();
 
             return newWorksheetPart;
         }
 
+        /// <summary>
+        /// Insert a matrix of <paramref name="seeds"/> into the given <paramref name="worksheetPart"/>
+        /// </summary>
+        /// <param name="worksheetPart">Where to insert the cells</param>
+        /// <param name="seeds">Sparse matrix of cell seeds, outer enumerable is rows, inner is columns</param>
         private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<IEnumerable<CellSeed>> seeds)
         {
             Worksheet worksheet = worksheetPart.Worksheet;
             SheetData sheetData = worksheet.GetFirstChild<SheetData>();
 
             uint rowindex = 1;
-            var rows = seeds.Select(row => new Row
+            var rows = seeds.Select
+            (
+                row => new Row
                 (
                     row.Select(cell =>
                         new Cell()
@@ -143,16 +173,24 @@ namespace YoFi.AspNet.Common
             sheetData.Append(rows);
         }
 
-        private static string ColNameFor(int colnumber)
+        /// <summary>
+        /// Convert column <paramref name="number"/> to spreadsheet name
+        /// </summary>
+        /// <param name="number">0-based integer column number, e.g. "A" = 0</param>
+        /// <returns>Base 26-style column name, e.g. "AF"</returns>
+        private static string ColNameFor(int number)
         {
-            if (colnumber < 26)
-                return new string(new char[] { (char)((int)'A' + colnumber) });
+            if (number < 26)
+                return new string(new char[] { (char)((int)'A' + number) });
             else
-                return ColNameFor(colnumber / 26) + ColNameFor(colnumber % 26);
+                return ColNameFor(number / 26) + ColNameFor(number % 26);
         }
 
-        // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text 
-        // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
+        /// <summary>
+        /// Insert <paramref name="text"/> into the current shared string table
+        /// </summary>
+        /// <param name="text">String to insert</param>
+        /// <returns>Lookup key for where the string can be found in the table</returns>
         private string InsertSharedStringItem(string text)
         {
             string result = null;
@@ -167,6 +205,9 @@ namespace YoFi.AspNet.Common
             return result;
         }
 
+        /// <summary>
+        /// Perform any pending writing of data to output stream
+        /// </summary>
         private void Flush()
         {
             // Generally each part is written as it's created, but the string table can
@@ -177,50 +218,74 @@ namespace YoFi.AspNet.Common
             shareStringPart.SharedStringTable = new SharedStringTable(items);
         }
 
-
-
+        /// <summary>
+        /// All the information needed to create a Cell object
+        /// </summary>
         class CellSeed
         {
-            public int colindex { get; set; } = 0; // 0-based
+            /// <summary>
+            /// Zero-based index describing the cell's column position
+            /// </summary>
+            public int colindex { get; set; } = 0;
 
+            /// <summary>
+            /// Whether this is a "shared string", so should be placed into string table
+            /// before committed to output stream
+            /// </summary>
             public bool IsSharedString => DataType == CellValues.SharedString;
 
-            public string Value { get; set; } = null;
-
-            public CellValues DataType { get; set; } = CellValues.Number;
-
+            /// <summary>
+            /// Whether this cell has had a value assigned to it
+            /// </summary>
             public bool IsValid => Value != null;
 
+            /// <summary>
+            /// The cell value, or null if cell is empty
+            /// </summary>
+            public string Value { get; set; } = null;
+
+            /// <summary>
+            /// The type of cell value
+            /// </summary>
+            public CellValues DataType { get; set; } = CellValues.Number;
+
+            /// <summary>
+            /// Empty constructor
+            /// </summary>
             public CellSeed() { }
 
-            public CellSeed(object cel)
+            /// <summary>
+            /// Construct a cell seed from the given <paramref name="object"/>
+            /// </summary>
+            /// <param name="object">Object to create from</param>
+            public CellSeed(object @object)
             {
-                if (cel != null)
+                if (@object != null)
                 {
-                    var t = cel.GetType();
+                    var t = @object.GetType();
 
                     if (t == typeof(string))
                     {
-                        Value = cel as string;//InsertSharedStringItem(cel as string);
+                        Value = @object as string;
                         DataType = CellValues.SharedString;
                     }
                     else if (t == typeof(decimal))
                     {
-                        Value = cel.ToString();
+                        Value = @object.ToString();
                     }
                     else if (t == typeof(Int32))
                     {
-                        Value = cel.ToString();
+                        Value = @object.ToString();
                     }
                     else if (t == typeof(DateTime))
                     {
                         // https://stackoverflow.com/questions/39627749/adding-a-date-in-an-excel-cell-using-openxml
-                        double oaValue = ((DateTime)cel).ToOADate();
+                        double oaValue = ((DateTime)@object).ToOADate();
                         Value = oaValue.ToString(CultureInfo.InvariantCulture);
                     }
                     else if (t == typeof(Boolean))
                     {
-                        Value = ((Boolean)cel) ? "1" : "0";
+                        Value = ((Boolean)@object) ? "1" : "0";
                         DataType = CellValues.Boolean;
                     }
                 }

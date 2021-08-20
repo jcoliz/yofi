@@ -102,7 +102,7 @@ namespace YoFi.AspNet.Common
                     .ToDictionary(x => headers[x.Key], x => x.Value);
 
                 // Transform into result object
-                var item = CreateFromDictionary<T>(source: line);
+                var item = CreateFromDictionary<T>(dictionary: line);
 
                 result.Add(item);
             }
@@ -179,16 +179,16 @@ namespace YoFi.AspNet.Common
         #region Static Internals
 
         /// <summary>
-        /// Create a type from a dictionary of values
+        /// Create an object from a <paramref name="dictionary"/> of property values
         /// </summary>
-        /// <typeparam name="T">Which type to create</typeparam>
-        /// <param name="source">Dictionary of strings to values, where each key is a property name</param>
-        /// <returns>The created T item</returns>
-        private static T CreateFromDictionary<T>(Dictionary<string, string> source) where T : class, new()
+        /// <typeparam name="T">What type of object to create</typeparam>
+        /// <param name="dictionary">Dictionary of strings to values, where each key is a property name</param>
+        /// <returns>The created object of type <typeparamref name="T"/></returns>
+        private static T CreateFromDictionary<T>(Dictionary<string, string> dictionary) where T : class, new()
         {
             var item = new T();
 
-            foreach (var kvp in source)
+            foreach (var kvp in dictionary)
             {
                 var property = typeof(T).GetProperties().Where(x => x.Name == kvp.Key).SingleOrDefault();
                 if (null != property?.SetMethod)
