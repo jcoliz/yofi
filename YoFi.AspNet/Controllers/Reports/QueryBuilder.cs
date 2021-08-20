@@ -36,7 +36,7 @@ namespace YoFi.AspNet.Controllers.Reports
 
         private NamedQuery QueryTransactions(string top = null)
         {
-            var txs = _context.Transactions
+            IQueryable<IReportable> txs = _context.Transactions
                 .Include(x => x.Splits)
                 .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
                 .Where(x => !x.Splits.Any());
@@ -46,6 +46,9 @@ namespace YoFi.AspNet.Controllers.Reports
                 string ecolon = $"{top}:";
                 txs = txs.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
             }
+
+            txs = txs
+                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
 
             return new NamedQuery() { Query = txs };
         }
