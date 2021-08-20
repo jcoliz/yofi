@@ -9,6 +9,12 @@ using System.Threading.Tasks;
 
 namespace YoFi.AspNet.Models
 {
+    /// <summary>
+    /// A single financial transaction
+    /// </summary>
+    /// <remarks>
+    /// The basic building blocks!
+    /// </remarks>
     public class Transaction : ICatSubcat, ISubReportable, IID
     {
         /// <summary>
@@ -80,7 +86,7 @@ namespace YoFi.AspNet.Models
         public bool? Imported { get; set; }
 
         /// <summary>
-        /// Whether this transaction will be included in the next bulk operation
+        /// Whether this object will be included in the next bulk operation
         /// </summary>
         public bool? Selected { get; set; }
 

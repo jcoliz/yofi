@@ -326,7 +326,7 @@ namespace YoFi.AspNet.Controllers
 
                 // Fix up the remaining names
                 foreach (var item in result)
-                    item.FixupName();
+                    item.RemoveWhitespaceFromName();
 
                 // Add remaining transactions
                 await _context.AddRangeAsync(result);
