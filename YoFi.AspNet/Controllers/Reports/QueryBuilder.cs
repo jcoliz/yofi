@@ -30,10 +30,6 @@ namespace YoFi.AspNet.Controllers.Reports
         public int Year { get; set; }
         public int Month { get; set; }
 
-        // NOTE: These ToList()'s and AsEnumerable()'s have been added wherever Entity Framework couldn't build queries
-        // in the report generator. AsEnumerable() is preferred, as it defers execution. However in some cases, THAT 
-        // doesn't even work, so I needed ToList().
-
         private NamedQuery QueryTransactions(string top = null)
         {
             IQueryable<IReportable> txs = _context.Transactions
@@ -64,6 +60,10 @@ namespace YoFi.AspNet.Controllers.Reports
                 WHERE [t].[ID] = [s].[TransactionID]))
             GROUP BY [t].[Category], DATEPART(month, [t].[Timestamp])
          */
+
+        // TODO: Need to figure out how to get rid of the AsEnumerable() calls in the
+        // "Except" pipelines. If I remove them, EF Core can't generate queries. So I will
+        // have to study more on this.
 
         private NamedQuery QueryTransactionsExcept(IEnumerable<string> excludetopcategories)
         {
@@ -115,10 +115,10 @@ namespace YoFi.AspNet.Controllers.Reports
             WHERE ((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)
             GROUP BY [s].[Category], DATEPART(month, [t].[Timestamp])
          
-         * Unfortunately, taking out the ToList() leads "QuerySplitsExcept" below to fail with a
+         * Unfortunately, taking out the AsEnumerable() leads "QuerySplitsExcept" below to fail with a
          * "could not be translated" error.
          * 
-         * OK so what I did was move the ToList() down to QuerySplitsExcept(), which is the only
+         * OK so what I did was move the AsEnumerable() down to QuerySplitsExcept(), which is the only
          * place it was really needed.
          */
 
@@ -224,17 +224,31 @@ namespace YoFi.AspNet.Controllers.Reports
 
             // "Managed" Categories are those with more than one budgettx in a year.
             var categories = budgettxs.GroupBy(x => x.Category).Select(g => new { Key = g.Key, Count = g.Count() }).Where(x => x.Count > 1).Select(x => x.Key);
-
-            // This is SO not going to translate into a query :O
             var managedtxs = budgettxs.Where(x => x.Timestamp.Month <= Month && categories.Contains(x.Category));
 
-            // JUST FOR FUN!!
-            var runit = managedtxs.ToList();
-            foreach (var it in runit)
+#if false
+            foreach (var it in managedtxs.ToList())
                 Console.WriteLine($"{it.Timestamp} {it.Category} {it.Amount}");
+#endif
 
             return new NamedQuery() { Query = managedtxs, LeafRowsOnly = true };
         }
+
+        /*
+         * Here's the query for above:
+         * 
+            SELECT [b].[Category] AS [Name], SUM([b].[Amount]) AS [Total]
+            FROM [BudgetTxs] AS [b]
+            WHERE (DATEPART(year, [b].[Timestamp]) = @__Year_0) AND ((DATEPART(month, [b].[Timestamp]) <= @__Month_1) AND [b].[Category] IN (
+                SELECT [b0].[Category]
+                FROM [BudgetTxs] AS [b0]
+                WHERE DATEPART(year, [b0].[Timestamp]) = @__Year_0
+                GROUP BY [b0].[Category]
+                HAVING COUNT(*) > 1
+            )
+            )
+            GROUP BY [b].[Category]
+         */
 
         public IEnumerable<NamedQuery> QueryManagedBudget()
         {
