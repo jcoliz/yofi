@@ -65,16 +65,16 @@ namespace YoFi.AspNet.Controllers.Reports
             GROUP BY [t].[Category], DATEPART(month, [t].[Timestamp])
          */
 
-        private NamedQuery QueryTransactionsExcept(IEnumerable<string> excluetopcategories)
+        private NamedQuery QueryTransactionsExcept(IEnumerable<string> excludetopcategories)
         {
-            var excluetopcategoriesstartswith = excluetopcategories
+            var excludetopcategoriesstartswith = excludetopcategories
                 .Select(x => $"{x}:")
                 .ToList();
 
             var txsExcept = QueryTransactions().Query
-                .Where(x => x.Category != null && !excluetopcategories.Contains(x.Category))
+                .Where(x => x.Category != null && !excludetopcategories.Contains(x.Category))
                 .AsEnumerable()
-                .Where(x => !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
 
             return new NamedQuery() { Query = txsExcept };
@@ -124,14 +124,14 @@ namespace YoFi.AspNet.Controllers.Reports
 
         private NamedQuery QuerySplitsExcept(IEnumerable<string> tops)
         {
-            var excluetopcategoriesstartswith = tops
+            var excludetopcategoriesstartswith = tops
                 .Select(x => $"{x}:")
                 .ToList();
 
             var splitsExcept = QuerySplits().Query
                 .Where(x => !tops.Contains(x.Category))
                 .AsEnumerable()
-                .Where(x => !excluetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
 
             return new NamedQuery() { Query = splitsExcept };
