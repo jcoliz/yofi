@@ -40,10 +40,6 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Primary representation of data.
         /// </summary>
-        /// <remarks>
-        /// This is essentially a 2D dictionary, and could perhaps be improved to simply be a
-        /// SparseDictionary of (Row,Col) Tuple to Values.
-        /// </remarks>
         Dictionary<Key,TValue> DataSet = new Dictionary<Key,TValue>();
 
         /// <summary>
