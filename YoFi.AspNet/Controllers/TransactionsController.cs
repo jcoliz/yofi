@@ -736,9 +736,17 @@ namespace YoFi.AspNet.Controllers
                 if (string.IsNullOrEmpty(transaction.ReceiptUrl))
                     throw new ApplicationException("Transaction has no receipt");
 
+                var blobname = id.ToString();
+
+                // See Bug #991: Production bug: Receipts before 5/20/2021 don't download
+                // If the ReceiptUrl contains an int value, use THAT for the blobname instead.
+
+                if (Int32.TryParse(transaction.ReceiptUrl,out _))
+                    blobname = transaction.ReceiptUrl;
+
                 _storage.Initialize();
                 var stream = new System.IO.MemoryStream();
-                var contenttype = await _storage.DownloadBlob(BlobStoreName, id.ToString(), stream);
+                var contenttype = await _storage.DownloadBlob(BlobStoreName, blobname, stream);
 
                 // Work around previous versions which did NOT store content type in blob store.
                 if ("application/octet-stream" == contenttype)

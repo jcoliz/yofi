@@ -495,7 +495,7 @@ namespace YoFi.Tests
             var result = await controller.UpReceipt(original.ID,file);
 
             Assert.IsTrue(result.Ok);
-            Assert.AreEqual(contenttype, original.ReceiptUrl);
+            Assert.AreEqual(original.ID.ToString(), original.ReceiptUrl);
 
         }
 
