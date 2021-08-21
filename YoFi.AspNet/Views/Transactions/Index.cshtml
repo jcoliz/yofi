@@ -1,4 +1,4 @@
-﻿@model IEnumerable<YoFi.AspNet.Models.Transaction>
+﻿@model IEnumerable<YoFi.AspNet.Controllers.TransactionsController.TransactionIndexDto>
 
 @{
     ViewData["Title"] = "Transactions";
@@ -209,7 +209,7 @@
                     <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush"></i></a>
                 </td>
                 <td style="padding-left:0; padding-right:0" class="display-receipt">
-                    @if (null != item.ReceiptUrl)
+                    @if (item.HasReceipt)
                     {
                         <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="far fa-file-pdf"></i></a>
                     }

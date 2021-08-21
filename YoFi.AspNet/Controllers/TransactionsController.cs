@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using YoFi.AspNet.Common;
 using Transaction = YoFi.AspNet.Models.Transaction;
 using System.IO;
+using System.ComponentModel.DataAnnotations;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -241,7 +242,82 @@ namespace YoFi.AspNet.Controllers
                     ViewData["LastPage"] = 1 + (count - 1) / PageSize;
             }
 
-            return View(await result.AsNoTracking().ToListAsync());
+            // Use the Transaction object itself as a DTO, filtering out what we don't need to return
+
+            IEnumerable<TransactionIndexDto> r;
+            if (showHidden || showSelected)
+            {
+                // Get the long form
+                r = await result.Select(t => new TransactionIndexDto()
+                {
+                    ID = t.ID,
+                    Timestamp = t.Timestamp,
+                    Payee = t.Payee,
+                    Amount = t.Amount,
+                    Category = t.Category,
+                    Memo = t.Memo,
+                    HasReceipt = t.ReceiptUrl != null,
+                    HasSplits = t.Splits.Any(),
+                    BankReference = t.BankReference,
+                    Hidden = t.Hidden ?? false,
+                    Selected = t.Selected ?? false
+                }).ToListAsync();
+            }
+            else
+            {
+                // Get the shorter form
+                r = await result.Select(t => new TransactionIndexDto()
+                {
+                    ID = t.ID,
+                    Timestamp = t.Timestamp,
+                    Payee = t.Payee,
+                    Amount = t.Amount,
+                    Category = t.Category,
+                    Memo = t.Memo,
+                    HasReceipt = t.ReceiptUrl != null,
+                    HasSplits = t.Splits.Any(),
+                }).ToListAsync();
+            }
+
+            return View(r);
+        }
+
+        /// <summary>
+        /// The transaction data for Index page
+        /// </summary>
+        public class TransactionIndexDto
+        {
+            public int ID { get; set; }
+            [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
+            [Display(Name = "Date")]
+            public DateTime Timestamp { get; set; }
+            public string Payee { get; set; }
+            [DisplayFormat(DataFormatString = "{0:C2}")]
+            public decimal Amount { get; set; }
+            public string Category { get; set; }
+            public string Memo { get; set; }
+            public bool HasReceipt { get; set; }
+            public bool HasSplits { get; set; }
+
+            // Only needed in some cases
+
+            public string BankReference { get; set; }
+            public bool Hidden { get; set; }
+            public bool Selected { get; set; }
+
+            // This is just for test cases, so it's a limited transaltion, just what we need for
+            // certain cases.
+            public static explicit operator Transaction (TransactionIndexDto o) => new Transaction()
+            {
+                Category = o.Category,
+                Memo = o.Memo,
+                Payee = o.Payee
+            };
+
+            public bool Equals(Transaction other)
+            {
+                return string.Equals(Payee, other.Payee) && Amount == other.Amount && Timestamp.Date == other.Timestamp.Date;
+            }
         }
 
         [HttpPost]
@@ -946,21 +1022,6 @@ namespace YoFi.AspNet.Controllers
             // should persist this to the database somehow. Or at least stick it in the session??
             return RedirectToAction(nameof(Import), new { highlight = string.Join(':', highlights.Select(x => x.ID)) });
         }
-
-        /*
-         * 
-        class TransactionExportDto
-        {
-            public int ID { get; set; }
-            public DateTime Timestamp { get; set; }
-            public string Payee { get; set; }
-            public decimal Amount { get; set; }
-            public string Category { get; set; }
-            public string Memo { get; set; }
-            public string BankReference { get; set; }
-        };
-
-         */
 
         // POST: Transactions/Download
         //[ActionName("Download")]

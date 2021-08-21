@@ -125,13 +125,15 @@ namespace Common.AspNet.Test
             Assert.IsNotNull(controller);
         }
 
-        public async Task IndexEmpty()
+        public async Task IndexEmpty() => await IndexEmpty<T>();
+
+        public async Task IndexEmpty<TSpecific>()
         {
             var result = await controller.Index();
             var actual = result as ViewResult;
-            var model = actual.Model as List<T>;
+            var model = actual.Model as IEnumerable<TSpecific>;
 
-            Assert.AreEqual(0, model.Count);
+            Assert.AreEqual(0, model.Count());
         }
 
         public async Task IndexSingle()
@@ -143,10 +145,10 @@ namespace Common.AspNet.Test
 
             var result = await controller.Index();
             var actual = result as ViewResult;
-            var model = actual.Model as List<T>;
+            var model = actual.Model as IEnumerable<T>;
 
-            Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(expected, model.Single());
+            Assert.AreEqual(1, model.Count());
+            Assert.IsTrue(model.Single().Equals(expected));
         }
 
         public async Task IndexMany(bool additems = true)
@@ -157,14 +159,11 @@ namespace Common.AspNet.Test
             var actual = result as ViewResult;
             var model = actual.Model as List<T>;
 
-            Assert.AreEqual(5, model.Count);
-
             // Sort the original items by Key
             Items.Sort((x, y) => KeyFor(x).CompareTo(KeyFor(y)));
 
             // Test that the resulting items are in the same order
-            for (int i = 0; i < 5; ++i)
-                Assert.AreEqual(Items[i], model[i]);
+            Assert.IsTrue(model.SequenceEqual(Items));
         }
 
         public async Task DetailsFound()

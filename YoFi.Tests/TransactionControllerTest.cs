@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Transaction = YoFi.AspNet.Models.Transaction;
 using YoFi.AspNet.Common;
 using Microsoft.Extensions.Configuration;
+using Dto = YoFi.AspNet.Controllers.TransactionsController.TransactionIndexDto;
 
 namespace YoFi.Tests
 {
@@ -124,11 +125,22 @@ namespace YoFi.Tests
         [TestMethod]
         public void Empty() => helper.Empty();
         [TestMethod]
-        public async Task IndexEmpty() => await helper.IndexEmpty();
+        public async Task IndexEmpty() => await helper.IndexEmpty<Dto>();
         [TestMethod]
-        public async Task IndexSingle() => await helper.IndexSingle();
-        [TestMethod]
-        public async Task IndexMany() => await helper.IndexMany();
+        public async Task IndexSingle()
+        {
+            var expected = Items[0];
+
+            context.Add(expected);
+            await context.SaveChangesAsync();
+
+            var result = await controller.Index();
+            var actual = result as ViewResult;
+            var model = actual.Model as IEnumerable<Dto>;
+
+            Assert.AreEqual(1, model.Count());
+            Assert.IsTrue(model.Single().Equals(expected));
+        }
         [TestMethod]
         public async Task DetailsFound() => await helper.DetailsFound();
         [TestMethod]
@@ -421,10 +433,11 @@ namespace YoFi.Tests
 
             var result = await controller.Index();
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as List<Transaction>;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
-            Assert.IsTrue(model.Single().HasSplits);
-            Assert.IsTrue(model.Single().IsSplitsOK);
+            Assert.AreEqual(1, model.Count());
+            var actual = model.Single();
+            Assert.IsTrue(actual.HasSplits);
         }
         [TestMethod]
         public async Task SplitsShownInIndexSearchCategory()
@@ -435,11 +448,11 @@ namespace YoFi.Tests
 
             var result = await controller.Index(q:"c=A");
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as List<Transaction>;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
-            Assert.AreEqual(1, model.Count);
-            Assert.IsTrue(model.Single().HasSplits);
-            Assert.IsTrue(model.Single().IsSplitsOK);
+            Assert.AreEqual(1, model.Count());
+            var actual = model.Single();
+            Assert.IsTrue(actual.HasSplits);
         }
 
 #if false
@@ -810,14 +823,14 @@ namespace YoFi.Tests
             {
                 return new[]
                 {
-                    new object[] { new { Key = "pa" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Payee) } },
-                    new object[] { new { Key = "ca" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Category) } },
-                    new object[] { new { Key = "da" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
-                    new object[] { new { Key = "aa" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Amount.ToString()) } },
-                    new object[] { new { Key = "pd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Payee) } },
-                    new object[] { new { Key = "cd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Category) } },
-                    new object[] { new { Key = "dd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
-                    new object[] { new { Key = "ad" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Amount.ToString()) } },
+                    new object[] { new { Key = "pa" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.Payee) } },
+                    new object[] { new { Key = "ca" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.Category) } },
+                    new object[] { new { Key = "da" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
+                    new object[] { new { Key = "aa" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.Amount.ToString()) } },
+                    new object[] { new { Key = "pd" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.Payee) } },
+                    new object[] { new { Key = "cd" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.Category) } },
+                    new object[] { new { Key = "dd" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
+                    new object[] { new { Key = "ad" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.Amount.ToString()) } },
                 };
             }
         }
@@ -832,18 +845,18 @@ namespace YoFi.Tests
 
             // When: Calling Index with a defined sort order
             var result = await controller.Index(o:item.Key);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             // Then: The items are returned sorted in that order
-            var predicate = item.Predicate as Func<Transaction, string>;
-            List<Transaction> expected = null;
+            var predicate = item.Predicate as Func<Dto, string>;
+            List<Dto> expected = null;
             if (item.Ascending)
                 expected = model.OrderBy(predicate).ToList();
             else
                 expected = model.OrderByDescending(predicate).ToList();
 
-            Assert.IsTrue(Enumerable.Range(0, model.Count - 1).All(x => model[x] == expected[x]));
+            Assert.IsTrue(expected.SequenceEqual(model));
         }
 
         [TestMethod]
@@ -856,12 +869,11 @@ namespace YoFi.Tests
             // When: Calling Index with payee search term
             IActionResult result;
             result = await controller.Index(q:"p=4");
-
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             // Then: Only the items with a matching payee are returned
-            Assert.AreEqual(3, model.Count);
+            Assert.AreEqual(3, model.Count());
         }
 
         [TestMethod]
@@ -874,11 +886,11 @@ namespace YoFi.Tests
             // When: Calling Index with category search term
             IActionResult result;
             result = await controller.Index(q:"C=C");
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<TransactionsController.TransactionIndexDto>;
 
             // Then: Only the items with a matching category are returned
-            Assert.AreEqual(4, model.Count);
+            Assert.AreEqual(4, model.Count());
         }
 
         [DataRow(true)]
@@ -893,14 +905,14 @@ namespace YoFi.Tests
             // When: Calling Index with indirect search term for hidden items
             var searchterm = ishidden ? "H" : null;
             var result = await controller.Index(v:searchterm);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             // Then: Only the items with a matching hidden state are returned
             if (ishidden)
-                Assert.AreEqual(items.Count(), model.Count);
+                Assert.AreEqual(items.Count(), model.Count());
             else
-                Assert.AreEqual(items.Count() - hiddenitems.Count(), model.Count);
+                Assert.AreEqual(items.Count() - hiddenitems.Count(), model.Count());
         }
 
         [DataRow(true)]
@@ -933,19 +945,19 @@ namespace YoFi.Tests
             if (hasreceipt.HasValue)
                 searchterm = hasreceipt.Value ? "R=1" : "R=0";
             var result = await controller.Index(q:searchterm);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             // Then: Only the items with a matching receipt state are returned
             if (hasreceipt.HasValue)
             {
                 if (hasreceipt.Value)
-                    Assert.AreEqual(receiptitems.Count(), model.Count);
+                    Assert.AreEqual(receiptitems.Count(), model.Count());
                 else
-                    Assert.AreEqual(items.Count() - receiptitems.Count(), model.Count);
+                    Assert.AreEqual(items.Count() - receiptitems.Count(), model.Count());
             }
             else
-                Assert.AreEqual(items.Count(), model.Count);
+                Assert.AreEqual(items.Count(), model.Count());
         }
 
         [DataRow(true)]
@@ -968,19 +980,19 @@ namespace YoFi.Tests
             if (hasreceipt.HasValue)
                 search = hasreceipt.Value ? $"P={payee},R=1" : $"P={payee},R=0";
             var result = await controller.Index(q:search);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             // Then: Only the items with a matching payee AND receipt state are returned
             if (hasreceipt.HasValue)
             {
                 if (hasreceipt.Value)
-                    Assert.AreEqual(items.Where(x => x.Payee.Contains(payee) && x.ReceiptUrl != null).Count(), model.Count);
+                    Assert.AreEqual(items.Where(x => x.Payee.Contains(payee) && x.ReceiptUrl != null).Count(), model.Count());
                 else
-                    Assert.AreEqual(items.Where(x => x.Payee.Contains(payee) && x.ReceiptUrl == null).Count(), model.Count);
+                    Assert.AreEqual(items.Where(x => x.Payee.Contains(payee) && x.ReceiptUrl == null).Count(), model.Count());
             }
             else
-                Assert.AreEqual(items.Where(x=>x.Payee.Contains(payee)).Count(), model.Count);
+                Assert.AreEqual(items.Where(x=>x.Payee.Contains(payee)).Count(), model.Count());
         }
 
         [TestMethod]
@@ -994,10 +1006,10 @@ namespace YoFi.Tests
             // When: Calling Index page 1
             var result = await controller.Index(p:1);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as List<Transaction>;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             // Then: Only one page's worth of items are returned
-            Assert.AreEqual(TransactionsController.PageSize, model.Count);
+            Assert.AreEqual(TransactionsController.PageSize, model.Count());
 
             // And: Page Item values are as expected
             Assert.AreEqual(1,viewresult.ViewData["PageFirstItem"]);
@@ -1016,10 +1028,10 @@ namespace YoFi.Tests
             // When: Calling Index page 2
             var result = await controller.Index(p:2);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as List<Transaction>;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             // Then: Only items after one page's worth of items are returned
-            Assert.AreEqual(TransactionsController.PageSize / 2, model.Count);
+            Assert.AreEqual(TransactionsController.PageSize / 2, model.Count());
 
             // And: Page Item values are as expected
             Assert.AreEqual(1 + TransactionsController.PageSize, viewresult.ViewData["PageFirstItem"]);
@@ -1171,45 +1183,45 @@ namespace YoFi.Tests
             context.SaveChanges();
         }
 
-        async Task<List<Transaction>> WhenCallingIndexEmpty()
+        async Task<IEnumerable<Dto>> WhenCallingIndexEmpty()
         {
             var result = await controller.Index();
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             return model;
         }
 
-        async Task<List<Transaction>> WhenCallingIndexWithQ(string q)
+        async Task<IEnumerable<Dto>> WhenCallingIndexWithQ(string q)
         {
             var result = await controller.Index(q: q);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             return model;
         }
 
-        async Task<List<Transaction>> WhenCallingIndexWithV(string v)
+        async Task<IEnumerable<Dto>> WhenCallingIndexWithV(string v)
         {
             var result = await controller.Index(v: v);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
 
             return model;
         }
 
-        void ThenOnlyReturnedTxWith(IEnumerable<Transaction> items, IEnumerable<Transaction> model, Func<Transaction, string> predicate, string word)
+        void ThenOnlyReturnedTxWith(IEnumerable<Transaction> items, IEnumerable<Dto> model, Func<Transaction, string> predicate, string word)
         {
             Assert.AreNotEqual(0, model.Count());
             Assert.AreEqual(items.Where(x => predicate(x) != null && predicate(x).Contains(word)).Count(), model.Count());
-            Assert.AreEqual(model.Where(x => predicate(x).Contains(word)).Count(), model.Count());
+            Assert.AreEqual(model.Where(x => predicate((Transaction)x).Contains(word)).Count(), model.Count());
         }
 
-        void ThenTxWithWereReturned(IEnumerable<Transaction> items, IEnumerable<Transaction> model, Func<Transaction, string> predicate, string word)
+        void ThenTxWithWereReturned(IEnumerable<Transaction> items, IEnumerable<Dto> model, Func<Transaction, string> predicate, string word)
         {
             Assert.AreNotEqual(0, model.Count());
             Assert.AreEqual(items.Where(x => predicate(x) != null && predicate(x).Contains(word)).Count(), model.Count());
-            Assert.AreEqual(model.Where(x => predicate(x).Contains(word)).Count(), model.Count());
+            Assert.AreEqual(model.Where(x => predicate((Transaction)x).Contains(word)).Count(), model.Count());
         }
 
         [TestMethod]
@@ -1243,7 +1255,7 @@ namespace YoFi.Tests
 
             // Then: All the transactions with '{word}' directly in their category OR in their splits category are returned
             var expected = items.Where(tx => tx.Category?.Contains(word) == true || (tx.Splits?.Any(s => s.Category?.Contains(word) == true) == true));
-            Assert.IsTrue(expected.All(x => model.Contains(x)));
+            Assert.IsTrue(expected.All(x => model.Where(m=>m.Equals(x)).Any()));
         }
         [TestMethod]
         public async Task IndexQMemoAny()
@@ -1276,7 +1288,7 @@ namespace YoFi.Tests
 
             // Then: All the transactions with '{word}' directly in their memo OR in their splits memo are returned
             var expected = items.Where(tx => tx.Memo?.Contains(word) == true || (tx.Splits?.Any(s => s.Memo?.Contains(word) == true) == true));
-            Assert.IsTrue(expected.All(x => model.Contains(x)));
+            Assert.IsTrue(expected.All(x => model.Where(m => m.Equals(x)).Any()));
         }
 
         [TestMethod]
@@ -1308,7 +1320,7 @@ namespace YoFi.Tests
             var model = await WhenCallingIndexWithQ(word);
 
             // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
-            Assert.AreEqual(6, model.Count);
+            Assert.AreEqual(6, model.Count());
             Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
         }
 
@@ -1375,8 +1387,11 @@ namespace YoFi.Tests
             var model = await WhenCallingIndexWithQ($"C={word}");
 
             // Then: Only the transactions with '{word}' in their category are returned
-            Assert.AreEqual(5, model.Count);
-            Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || (tx.Splits?.Any(s=>s.Category?.Contains(word) == true) == true )));
+            Assert.AreEqual(5, model.Count());
+
+            // We can't actually test this anymore, because Index doesn't return the actual
+            // splits anymore. That was overfetching.
+            //Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || (tx.Splits?.Any(s=>s.Category?.Contains(word) == true) == true )));
         }
 
 
@@ -1410,9 +1425,9 @@ namespace YoFi.Tests
 
             // Then: Only the transactions with (or without) receipts are returned
             if (with)
-                Assert.AreEqual(moditems.Count(),model.Count);
+                Assert.AreEqual(moditems.Count(),model.Count());
             else
-                Assert.AreEqual(items.Count() - moditems.Count(), model.Count);
+                Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
         }
 
         [DataTestMethod]
@@ -1426,7 +1441,7 @@ namespace YoFi.Tests
             var model = await WhenCallingIndexWithV("h");
 
             // Then: All transactions are returned
-            Assert.AreEqual(items.Count(), model.Count);
+            Assert.AreEqual(items.Count(), model.Count());
         }
 
         [TestMethod]
@@ -1440,7 +1455,7 @@ namespace YoFi.Tests
             var model = await WhenCallingIndexEmpty();
 
             // Then: Only non-hidden transactions are returned
-            Assert.AreEqual(items.Count() - moditems.Count(), model.Count);
+            Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
         }
 
         [TestMethod]
@@ -1455,7 +1470,7 @@ namespace YoFi.Tests
             var model = await WhenCallingIndexWithQ($"Y={year}");
 
             // Then: Only the transactions in {year} are returned
-            Assert.AreEqual(moditems.Count(), model.Count);
+            Assert.AreEqual(moditems.Count(), model.Count());
         }
 
         [DataRow("c=B,p=4",3)]
@@ -1481,7 +1496,7 @@ namespace YoFi.Tests
             var model = await WhenCallingIndexWithQ(q);
 
             // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are returned
-            Assert.AreEqual(expected, model.Count);
+            Assert.AreEqual(expected, model.Count());
         }
     }
 }
