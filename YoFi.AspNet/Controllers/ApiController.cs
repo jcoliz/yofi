@@ -217,33 +217,27 @@ namespace YoFi.AspNet.Controllers
                 //
                 // Save the file to blob storage
                 //
+                // TODO: Consolodate this with the exact same copy which is in TransactionsController
+                //
 
                 if (null == _storage)
                     throw new InvalidOperationException("Unable to upload receipt. Azure Blob Storage is not configured for this application.");
 
                 _storage.Initialize();
 
-                string contenttype = null;
+                string blobname = id.ToString();
 
                 using (var stream = file.OpenReadStream())
                 {
-
                     // Upload the file
-                    await _storage.UploadToBlob(BlobStoreName, id.ToString(), stream, file.ContentType);
-
-                    // Remember the content type
-                    // TODO: This can just be a true/false bool, cuz now we store content type in blob store.
-                    contenttype = file.ContentType;
+                    await _storage.UploadToBlob(BlobStoreName, blobname, stream, file.ContentType);
                 }
 
                 // Save it in the Transaction
 
-                if (null != contenttype)
-                {
-                    transaction.ReceiptUrl = contenttype;
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
-                }
+                transaction.ReceiptUrl = blobname;
+                _context.Update(transaction);
+                await _context.SaveChangesAsync();
 
                 return new ApiResult();
             }

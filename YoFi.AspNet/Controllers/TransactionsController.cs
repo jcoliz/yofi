@@ -661,32 +661,30 @@ namespace YoFi.AspNet.Controllers
                 //
                 // Save the file to blob storage
                 //
+                // TODO: Consolodate this with the exact same copy which is in ApiController
+                //
 
                 _storage.Initialize();
 
-                string contenttype = null;
+                string blobname = id.ToString();
 
                 foreach (var formFile in files)
                 {
+                    // TODO: There is a bug lurking here!! We are accepting multiple files,
+                    // uploading each! This will overwrite all but the last one.
                     using (var stream = formFile.OpenReadStream())
                     {
                         // Upload the file
-                        await _storage.UploadToBlob(BlobStoreName, id.ToString(), stream, formFile.ContentType);
-
-                        // Remember the content type
-                        // TODO: This can just be a true/false bool, cuz now we store content type in blob store.
-                        contenttype = formFile.ContentType;
+                        await _storage.UploadToBlob(BlobStoreName, blobname, stream, formFile.ContentType);
                     }
                 }
 
                 // Save it in the Transaction
+                // If there was a problem, UploadToBlob will throw an exception.
 
-                if (null != contenttype)
-                {
-                    transaction.ReceiptUrl = contenttype;
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
-                }
+                transaction.ReceiptUrl = blobname;
+                _context.Update(transaction);
+                await _context.SaveChangesAsync();
 
                 return Redirect($"/Transactions/Edit/{id}");
             }
