@@ -32,30 +32,38 @@ namespace YoFi.Tests
 
         TestAzureStorage storage;
 
-        List<Transaction> TransactionItems = new List<Transaction>()
+        public static List<Transaction> TransactionItems
         {
-            new Transaction() { Category = "B", SubCategory = "A", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m },
-            new Transaction() { Category = "A", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m },
-            new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m },
-            new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
-            new Transaction() { Category = "B", SubCategory = "B", Payee = "34", Memo = "222", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
-            new Transaction() { Category = "B", SubCategory = "B", Payee = "1234", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
-            new Transaction() { Category = "C", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "ABC", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "DE:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "2", Memo = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "2", Memo = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Category = "GH:RGB", SubCategory = "A", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-            new Transaction() { Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-        };
-
+            get
+            {
+                // Need to make a new one every time we ask for it, because the old items
+                // tracked IDs for a previous test
+                return new List<Transaction>()
+                {
+                    new Transaction() { Category = "B", SubCategory = "A", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m },
+                    new Transaction() { Category = "A", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "C", SubCategory = "A", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m },
+                    new Transaction() { Category = "B", SubCategory = "A", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m },
+                    new Transaction() { Category = "B", SubCategory = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
+                    new Transaction() { Category = "B", SubCategory = "B", Payee = "34", Memo = "222", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
+                    new Transaction() { Category = "B", SubCategory = "B", Payee = "1234", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m },
+                    new Transaction() { Category = "C", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "ABC", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "DE:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "GH:CAF", SubCategory = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "2", Memo = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "2", Memo = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "2", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "DE:RGB", SubCategory = "A", Payee = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "GH:RGB", SubCategory = "A", Payee = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "GH:XYZ", SubCategory = "A", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Category = "GH:RGB", SubCategory = "A", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                    new Transaction() { Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
+                };
+            }
+        }
+            
         List<Split> SplitItems = new List<Split>()
         {
             new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
@@ -938,7 +946,7 @@ namespace YoFi.Tests
         {
             // Given: A set of items, some with receipts some not
             IEnumerable<Transaction> items, receiptitems;
-            GivenItemsWithAndWithoutReceipt(out items, out receiptitems);
+            GivenItemsWithAndWithoutReceipt(context, out items, out receiptitems);
 
             // When: Calling Index with indirect search term for items with/without a receipt
             string searchterm = null;
@@ -1150,15 +1158,17 @@ namespace YoFi.Tests
             Assert.AreEqual(contenttype, fsresult.ContentType);
         }
 
-        void GivenItemsWithAndWithoutReceipt(out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
+        // This is public & static so I can share it with other tests.
+        // TODO: There is probably a more elegant way.
+        public static void GivenItemsWithAndWithoutReceipt(ApplicationDbContext _context,out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
         {
             items = TransactionItems.Take(10);
             moditems = items.Take(3);
             foreach (var i in moditems)
                 i.ReceiptUrl = "I have a receipt!";
 
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
+            _context.Transactions.AddRange(items);
+            _context.SaveChanges();
         }
 
         void GivenItemsHiddenAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
@@ -1418,7 +1428,7 @@ namespace YoFi.Tests
         {
             // Given: A mix of transactions, some with receipts, some without
             IEnumerable<Transaction> items, moditems;
-            GivenItemsWithAndWithoutReceipt(out items, out moditems);
+            GivenItemsWithAndWithoutReceipt(context, out items, out moditems);
 
             // When: Calling index q='r=1' (or r=0)
             var model = await WhenCallingIndexWithQ($"R={(with?'1':'0')}");

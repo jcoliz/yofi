@@ -49,23 +49,16 @@ namespace YoFi.AspNet.Controllers
         }
 
         /// <summary>
-        /// Fetch list of transactions for display
+        /// Interprets the "q" (Query) parameter on a transactions search
         /// </summary>
-        /// <param name="o">Order of transactions</param>
-        /// <param name="p">Page number, where 1 is first page</param>
-        /// <param name="q">Query (or filter) specifying which transactions</param>
-        /// <param name="v">View modifiers, specifying how the view should look</param>
-        /// <returns></returns>
-        public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
+        /// <remarks>
+        /// Public so can be used by other controllers
+        /// </remarks>
+        /// <param name="result">Initial query to further refine</param>
+        /// <param name="q">Query parameter</param>
+        /// <returns>Resulting query refined by <paramref name="q"/></returns>
+        public static IQueryable<Transaction> TransactionsForQuery(IQueryable<Transaction> result, string q)
         {
-            //
-            // Process QUERY (Q) parameters
-            //
-
-            ViewData["Query"] = q;
-
-            var result = _context.Transactions.Include(x => x.Splits).AsQueryable<Models.Transaction>();
-
             if (!string.IsNullOrEmpty(q))
             {
                 var terms = q.Split(',');
@@ -134,6 +127,27 @@ namespace YoFi.AspNet.Controllers
                     }
                 }
             }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Fetch list of transactions for display
+        /// </summary>
+        /// <param name="o">Order of transactions</param>
+        /// <param name="p">Page number, where 1 is first page</param>
+        /// <param name="q">Query (or filter) specifying which transactions</param>
+        /// <param name="v">View modifiers, specifying how the view should look</param>
+        /// <returns></returns>
+        public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
+        {
+            //
+            // Process QUERY (Q) parameters
+            //
+
+            ViewData["Query"] = q;
+
+            var result = TransactionsForQuery(_context.Transactions.Include(x => x.Splits),q);
 
             //
             // Process VIEW (V) parameters
@@ -1032,7 +1046,7 @@ namespace YoFi.AspNet.Controllers
         // POST: Transactions/Download
         //[ActionName("Download")]
         [HttpPost]
-        public async Task<IActionResult> Download(bool allyears, bool mapcheck)
+        public async Task<IActionResult> Download(bool allyears, bool mapcheck, string q = null)
         {
             try
             {

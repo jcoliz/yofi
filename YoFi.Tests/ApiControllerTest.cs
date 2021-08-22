@@ -853,5 +853,53 @@ namespace YoFi.Tests
             var expected = await context.Transactions.Select(x=>x.Category).Distinct().Where(c => c.Contains(word)).ToListAsync();
             CollectionAssert.AreEqual(expected, result);
         }
+
+        async Task<IEnumerable<Transaction>> WhenCallingGetTxWithQ(string q)
+        {
+            var result = await controller.GetTransactions(q: q);
+            var jsonresult = result as JsonResult;
+            var model = jsonresult.Value as IEnumerable<Transaction>;
+
+            return model;
+        }
+
+        // Note that I have stolen these tests directly from TransactionControllerTest.
+
+        [TestMethod]
+        public async Task GetTxQAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = TransactionControllerTest.TransactionItems.Take(19);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling GetTransactions q={word}
+            var word = "CAF";
+            var model = await WhenCallingGetTxWithQ(word);
+
+            // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
+            Assert.AreEqual(6, model.Count());
+            Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task GetTxQReceipt(bool with)
+        {
+            // Given: A mix of transactions, some with receipts, some without
+            IEnumerable<Transaction> items, moditems;
+            TransactionControllerTest.GivenItemsWithAndWithoutReceipt(context, out items, out moditems);
+
+            // When: Calling GetTransactions q='r=1' (or r=0)
+            var model = await WhenCallingGetTxWithQ($"R={(with ? '1' : '0')}");
+
+            // Then: Only the transactions with (or without) receipts are returned
+            if (with)
+                Assert.AreEqual(moditems.Count(), model.Count());
+            else
+                Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
+        }
+
     }
 }

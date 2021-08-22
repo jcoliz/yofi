@@ -436,6 +436,27 @@ namespace YoFi.AspNet.Controllers
             */
         }
 
+        [HttpGet("txi")]
+        public async Task<ActionResult> GetTransactions(string q = null)
+        {
+            try
+            {
+                CheckApiAuth(Request.Headers);
+
+                var result = TransactionsController.TransactionsForQuery(_context.Transactions,q);
+
+                return new JsonResult(await result.ToListAsync());
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
+
         private string BlobStoreName => _configuration["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
     }
 
