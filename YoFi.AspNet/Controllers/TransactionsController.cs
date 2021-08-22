@@ -1068,6 +1068,7 @@ namespace YoFi.AspNet.Controllers
                         Category = x.Category,
                         Payee = x.Payee,
                         Memo = x.Memo,
+                        ReceiptUrl = x.ReceiptUrl,
                         BankReference = x.BankReference
                     }
                     );
@@ -1228,6 +1229,7 @@ namespace YoFi.AspNet.Controllers
             public string Category { get; set; }
             public string Memo { get; set; }
             public string BankReference { get; set; }
+            public string ReceiptUrl { get; set; }
             string ICatSubcat.SubCategory { get => null; set { } }
         }
         #endregion
