@@ -662,7 +662,9 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
-        public async Task<FileStreamResult> DownloadAllYears()
+        public async Task DownloadAllYears() => await DownloadAllYears_Internal();
+
+        public async Task<FileStreamResult> DownloadAllYears_Internal()
         {
             var item_new = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
             var item_old = new Transaction() { Payee = "4", Timestamp = new DateTime(DateTime.Now.Year - 5, 01, 03), Amount = 200m };
@@ -689,7 +691,7 @@ namespace YoFi.Tests
             // So if there are no SPLITS there should be do splits tab.
             // For convenience we'll use a different test and just grab those results.
 
-            var fcresult = await DownloadAllYears();
+            var fcresult = await DownloadAllYears_Internal();
             var stream = fcresult.FileStream;
 
             IEnumerable<Transaction> txitems;
