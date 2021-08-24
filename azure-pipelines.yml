@@ -10,7 +10,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln'
+  solution: 'YoFi.AspNet\YoFi.AspNet.csproj'
   buildPlatform: 'x64'
   buildConfiguration: 'Release'
 
