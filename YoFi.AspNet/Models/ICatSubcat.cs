@@ -5,9 +5,31 @@ using System.Threading.Tasks;
 
 namespace YoFi.AspNet.Models
 {
+    /// <summary>
+    /// Object has a Category and SubCategory field
+    /// </summary>
+    /// <remarks>
+    /// Used by the category remapper. If it has a cat and subcat,
+    /// it can be remapped.
+    /// </remarks>
     public interface ICatSubcat
     {
+        /// <summary>
+        /// Cagtegorization of this item
+        /// </summary>
+        /// <remarks>
+        /// Separate successive levels of depth with a colon, e.g. "Housing:Mortgage"
+        /// </remarks>
         string Category { get; set; }
+
+        /// <summary>
+        /// Second-level category
+        /// </summary>
+        /// <remarks>
+        /// This property is obsolete. Category can now take multiple
+        /// levels of information separated with colons.
+        /// TODO: Still need to refactor tests to remove this
+        /// </remarks>
         string SubCategory { get; set; }
     }
 }
