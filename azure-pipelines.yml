@@ -8,27 +8,39 @@ trigger:
 
 pool:
   vmImage: 'windows-latest'
-
+  
 variables:
-  solution: '**/*.sln'
+  solution: 'YoFi.AspNet\YoFi.AspNet.csproj'
   buildPlatform: 'x64'
   buildConfiguration: 'Release'
 
 steps:
+- checkout: self
+  submodules: true
+
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
   inputs:
-    restoreSolution: '$(solution)'
+    restoreSolution: '**\*.sln'
 
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    msbuildArgs: '/p:Configuration=$(buildConfiguration) /p:Platform=$(buildPlatform) /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+
+- task: VSBuild@1
+  inputs:
+    solution: 'YoFi.Tests\YoFi.Tests.csproj'
 
 - task: VSTest@2
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: 'YoFi.Tests\bin\Debug\netcoreapp3.1\YoFi.Tests.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
