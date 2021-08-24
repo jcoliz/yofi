@@ -7,30 +7,85 @@ using System.Threading.Tasks;
 
 namespace YoFi.AspNet.Models
 {
-    public interface IID
-    {
-        int ID { get; set;  }
-    }
-
+    /// <summary>
+    /// A mapping from one categorization scheme to another
+    /// </summary>
+    /// <remarks>
+    /// At some point I realized I wanted to completely re-engineer how I
+    /// represent my categories, so the category mapper was born.
+    /// This class holds a single category mapping rule
+    /// </remarks>
     public class CategoryMap: IID
     {
+        /// <summary>
+        /// Object identity in Entity Framework
+        /// </summary>
         public int ID { get; set; }
+
+        /// <summary>
+        /// Categorization of the existing item to match
+        /// </summary>
         public string Category { get; set; }
+
+        /// <summary>
+        /// Second-level categorization of the existing item to match
+        /// </summary>
         public string SubCategory { get; set; }
+
+        /// <summary>
+        /// First-level resulting category
+        /// </summary>
+        /// <remarks>
+        /// After an object has been remapped, the category will consist
+        /// of all the Key1-4 items from here separated by colons.
+        /// </remarks>
         public string Key1 { get; set; }
+
+        /// <summary>
+        /// Second-level resulting category
+        /// </summary>
         public string Key2 { get; set; }
+
+        /// <summary>
+        /// Third-level resulting category
+        /// </summary>
         public string Key3 { get; set; }
 
-        // As I am phasing out CategoryMap, Key4 is only supported for automatically-generated
-        // mapping rules
+        /// <summary>
+        /// Fourth-level resulting category
+        /// </summary>
+        /// <remarks>
+        /// As I am phasing out CategoryMap, Key4 is only supported for automatically-generated
+        /// mapping rules
+        /// </remarks>
         [NotMapped]
         public string Key4 { get; private set; }
 
-        // See Product Backlog Item #801: Add an automatic mapping rule for categories with a colon
-        // If Category contains a colon, then we don't need a hard-coded mapping rule for it, 
-        // we can figure it out by definition.
 
+        /// <summary>
+        /// Whether there is an automatic mapping rule for this <paramref name="category"/>
+        /// </summary>
+        /// <remarks>
+        /// See Product Backlog Item #801: Add an automatic mapping rule for categories with a colon
+        /// If Category contains a colon, then we don't need a hard-coded mapping rule for it, 
+        /// we can figure it out by definition.
+        /// </remarks>
+        /// <param name="category"></param>
+        /// <returns>True if there is</returns>
         public static bool HasDefaultMapFor(string category) => category?.Contains(':') ?? false;
+
+        /// <summary>
+        /// Create the default mapping rule for this category
+        /// </summary>
+        /// <remarks>
+        /// If a category has a colon in it, then there exists a default rule by definition.
+        /// This method creates it and returns in.
+        /// The rule is: Split category into Key1:Key2, and then look in subcategory for
+        /// Key3:Key4.
+        /// </remarks>
+        /// <param name="category"></param>
+        /// <returns></returns>
+
         public static CategoryMap DefaultFor(string category)
         {
             CategoryMap result = null;
