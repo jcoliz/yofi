@@ -26,30 +26,60 @@ namespace YoFi.AspNet.Controllers.Reports
         /// </remarks>
         public class Parameters
         {
+            /// <summary>
+            /// The identifier, or name, of the report we want
+            /// </summary>
             public string id { get; set; } 
+
+            /// <summary>
+            /// Optionally set the constraint year, else will use current year
+            /// </summary>
             public int? year { get; set; } 
+
+            /// <summary>
+            /// Optionally set the ending month, else will report on data from
+            /// current year through current month for this year, or if a 
+            /// previous year, then through the end of that year
+            /// </summary>
             public int? month { get; set; } 
+
+            /// <summary>
+            /// Optionally whether to show month columns, else will use the default for
+            /// the given report id.
+            /// </summary>
             public bool? showmonths { get; set; } 
+
+            /// <summary>
+            /// Optionally how many levels deep to show, else will use the dafault for
+            /// the given report id
+            /// </summary>
             public int? level { get; set; }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="context">Where to pull report data from</param>
         public ReportBuilder(ApplicationDbContext context)
         {
             _context = context;
             _qbuilder = new QueryBuilder(context);
         }
 
-        private int Year;
-        private int Month;
         private readonly ApplicationDbContext _context;
         private readonly QueryBuilder _qbuilder;
 
-        public Report BuildReport(Parameters parms)
+        /// <summary>
+        /// Build the report from the given <paramref name="parameters"/>
+        /// </summary>
+        /// <param name="parameters">Parameters describing the report to be built</param>
+        /// <returns>The report we built</returns>
+        public Report BuildReport(Parameters parameters)
         {
             var result = new Report();
 
-            _qbuilder.Month = Month = parms.month ?? 12;
-            _qbuilder.Year = Year = parms.year ?? DateTime.Now.Year;
+            int Month = _qbuilder.Month = parameters.month ?? 12;
+            int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
 
             var period = new DateTime(Year, Month, 1);
             result.Description = $"For {Year} through {period.ToString("MMMM")} ";
@@ -83,7 +113,7 @@ namespace YoFi.AspNet.Controllers.Reports
                     cols.GetValueOrDefault("ID:Actual") - cols.GetValueOrDefault("ID:Budget")
             };
 
-            if (parms.id == "all")
+            if (parameters.id == "all")
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 2;
@@ -91,7 +121,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "All Transactions";
             }
-            else if (parms.id == "income")
+            else if (parameters.id == "income")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.Source = _qbuilder.QueryTransactionsComplete(top: "Income");
@@ -100,7 +130,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalAscending;
                 result.Name = "Income";
             }
-            else if (parms.id == "taxes")
+            else if (parameters.id == "taxes")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.Source = _qbuilder.QueryTransactionsComplete(top: "Taxes");
@@ -109,7 +139,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Taxes";
             }
-            else if (parms.id == "savings")
+            else if (parameters.id == "savings")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.Source = _qbuilder.QueryTransactionsComplete(top: "Savings");
@@ -118,7 +148,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Savings";
             }
-            else if (parms.id == "expenses")
+            else if (parameters.id == "expenses")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.WithMonthColumns = true;
@@ -127,7 +157,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
             }
-            else if (parms.id == "expenses-budget")
+            else if (parameters.id == "expenses-budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
                 result.Description = $"For {Year}";
@@ -136,7 +166,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses Budget";
             }
-            else if (parms.id == "expenses-v-budget")
+            else if (parameters.id == "expenses-v-budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
                 var source = _qbuilder.QueryActualVsBudgetExcept(tops: notexpenses);
@@ -155,7 +185,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses vs. Budget";
             }
-            else if (parms.id == "all-v-budget")
+            else if (parameters.id == "all-v-budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
                 result.Description = $"For {Year}";
@@ -166,7 +196,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "All vs. Budget";
             }
-            else if (parms.id == "managed-budget")
+            else if (parameters.id == "managed-budget")
             {
                 result.AddCustomColumn(budgetpctcolumn);
                 result.AddCustomColumn(budgetavailablecolumn);
@@ -177,7 +207,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.NameAscending;
                 result.Name = "Managed Budget";
             }
-            else if (parms.id == "budget")
+            else if (parameters.id == "budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
                 result.Description = $"For {Year}";
@@ -186,7 +216,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Full Budget";
             }
-            else if (parms.id == "yoy")
+            else if (parameters.id == "yoy")
             {
                 var years = new int[] { };
                 result.Source = _qbuilder.QueryYearOverYear(out years);
@@ -195,7 +225,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Year over Year";
             }
-            else if (parms.id == "export")
+            else if (parameters.id == "export")
             {
                 result.Source = _qbuilder.QueryActualVsBudget(leafrows:true);
                 result.WithTotalColumn = false;
@@ -204,15 +234,15 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.Name = "Transaction Export";
             }
 
-            if (parms.level.HasValue)
+            if (parameters.level.HasValue)
             {
-                result.NumLevels = parms.level.Value;
+                result.NumLevels = parameters.level.Value;
                 if (result.NumLevels == 1)
                     result.DisplayLevelAdjustment = 1;
             }
 
-            if (parms.showmonths.HasValue)
-                result.WithMonthColumns = parms.showmonths.Value;
+            if (parameters.showmonths.HasValue)
+                result.WithMonthColumns = parameters.showmonths.Value;
 
             result.Build();
             result.WriteToConsole();
