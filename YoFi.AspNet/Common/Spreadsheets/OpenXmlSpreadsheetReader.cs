@@ -13,10 +13,9 @@ namespace YoFi.AspNet.Common
     /// <summary>
     /// Read spreadsheets into memory, using Office OpenXML
     /// </summary>
+    /// <see href="https://github.com/OfficeDev/Open-XML-SDK"/>
     /// <remarks>
-    /// https://github.com/OfficeDev/Open-XML-SDK
-    /// 
-    /// Originally, I used EPPlus. However, that library is commercial use and closed source.
+    /// Originally, I used EPPlus. However, that library has terms for commercial use.
     /// </remarks>
     public class OpenXmlSpreadsheetReader : ISpreadsheetReader
     {
