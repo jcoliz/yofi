@@ -8,8 +8,15 @@ using Azure.Storage.Blobs.Models;
 
 namespace Common.NET
 {
+    /// <summary>
+    /// Manage connection to Azure Storage
+    /// </summary>
     public class DotNetAzureStorage : IPlatformAzureStorage
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="connection">Connection string to use for this connection</param>
         public DotNetAzureStorage(string connection)
         {
             Connection = connection;
@@ -23,65 +30,57 @@ namespace Common.NET
         /// </exception>
         void IPlatformAzureStorage.Initialize()
         {
-
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        async Task<string> IPlatformAzureStorage.PostTableEntry(string TableName, IReadOnlyDictionary<string, string> Fields)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        /// <summary>
+        /// Post these <paramref name="fields"/> as a line in the <paramref name="table"/>
+        /// </summary>
+        /// <param name="table">Which table to post into</param>
+        /// <param name="fields">Fields which constitute a table line</param>
+        /// <returns>Row key for this item, or null if failed</returns>
+        Task<string> IPlatformAzureStorage.PostTableEntry(string table, IReadOnlyDictionary<string, string> fields)
         {
-#if true
             // Needs to be rewritten for SDK v12, but I don't use table entires here, so task for later.
             throw new NotImplementedException();
-
-#else
-            //var app = Platform.Get<IApp>();
-            var table = tableClient.GetTableReference(TableName);
-            await table.CreateIfNotExistsAsync();
-
-            var properties = Fields.ToDictionary(x => x.Key, x => new EntityProperty(x.Value));
-            var rowkey = DateTime.Now.ToBinary().ToString("X");
-            var entry = new DynamicTableEntity("1.0" /*app.Version*/, rowkey, "*", properties);
-
-            TableOperation operation = TableOperation.InsertOrReplace(entry);
-            var result = await table.ExecuteAsync(operation);
-
-            if (result.HttpStatusCode >= 300)
-                throw new Exception($"Azure operation failed: Status {result.HttpStatusCode}");
-
-            return rowkey;
-#endif
         }
 
-        async Task<Uri> IPlatformAzureStorage.UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
+        /// <summary>
+        /// Upload file to blob
+        /// </summary>
+        /// <param name="container">Which container to upload into</param>
+        /// <param name="name">Filename for the blob within the container</param>
+        /// <param name="stream">Source for the data</param>
+        /// <param name="contenttype">MIME Content Type of the data</param>
+        /// <returns>Uri where the data is stored</returns>
+        async Task<Uri> IPlatformAzureStorage.UploadToBlob(string container, string name, Stream stream, string contenttype)
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(Connection);
-            BlobContainerClient container = blobServiceClient.GetBlobContainerClient(ContainerName);
-            await container.CreateIfNotExistsAsync();
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(container);
+            await containerClient.CreateIfNotExistsAsync();
 
-            BlobClient blobClient = container.GetBlobClient(FileName);
+            BlobClient blobClient = containerClient.GetBlobClient(name);
 
             var options = new BlobUploadOptions();
-            options.HttpHeaders = new BlobHttpHeaders() { ContentType = ContentType };
+            options.HttpHeaders = new BlobHttpHeaders() { ContentType = contenttype };
 
             await blobClient.UploadAsync(stream,options);
             return blobClient.Uri;
         }
 
         /// <summary>
-        /// Check whether the given file exists
+        /// Check whether the given file <paramref name="name"/> exists in the <paramref name="container"/>
         /// </summary>
-        /// <param name="ContainerName">Name of the container</param>
-        /// <param name="stream">Stream of data</param>
+        /// <param name="container">Name of the container</param>
+        /// <param name="name">Filename for the blob within the container</param>
         /// <returns>true if exists</returns>
-        async Task<bool> IPlatformAzureStorage.DoesBlobExist(string ContainerName, string FileName)
+        async Task<bool> IPlatformAzureStorage.DoesBlobExist(string container, string name)
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(Connection);
-            BlobContainerClient container = blobServiceClient.GetBlobContainerClient(ContainerName);
-            if (!await container.ExistsAsync())
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(container);
+            if (!await containerClient.ExistsAsync())
                 return false;
 
-            var blob = container.GetBlobClient(FileName);
+            var blob = containerClient.GetBlobClient(name);
             if (!await blob.ExistsAsync())
                 return false;
 
@@ -89,19 +88,21 @@ namespace Common.NET
         }
 
         /// <summary>
-        /// Download from the given ContainerName, the given FileName
+        /// Download the file <paramref name="name"/> from the given <paramref name="container"/> into the given
+        /// <paramref name="stream"/>
         /// </summary>
-        /// <param name="ContainerName">Name of the container</param>
-        /// <param name="FileName">Name of file</param>
-        /// <returns></returns>
-        async Task<string> IPlatformAzureStorage.DownloadBlob(string ContainerName, string FileName, Stream stream)
+        /// <param name="container">Name of the container</param>
+        /// <param name="name">Filename for the blob within the container</param>
+        /// <param name="stream">Where to place the data</param>
+        /// <returns>Content type of the blob or empty string if failed</returns>
+        async Task<string> IPlatformAzureStorage.DownloadBlob(string container, string name, Stream stream)
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(Connection);
-            BlobContainerClient container = blobServiceClient.GetBlobContainerClient(ContainerName);
-            if (!await container.ExistsAsync())
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(container);
+            if (!await containerClient.ExistsAsync())
                 return string.Empty;
 
-            var blob = container.GetBlobClient(FileName);
+            var blob = containerClient.GetBlobClient(name);
             if (!await blob.ExistsAsync())
                 return string.Empty;
 
@@ -111,7 +112,9 @@ namespace Common.NET
             return props.Value.ContentType;
         }
 
-        private string Connection;
-       
+        /// <summary>
+        /// Connection sttring for this connection
+        /// </summary>
+        private string Connection;       
     }
 }

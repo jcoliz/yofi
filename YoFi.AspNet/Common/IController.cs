@@ -11,9 +11,8 @@ namespace Common.AspNet
     /// Standard ASP.NET controller functionality
     /// </summary>
     /// <remarks>
-    /// User for standard controller unit tests
+    /// User for standard controller unit tests operating on type <typeparamref name="T"/>
     /// </remarks>
-    /// <typeparam name="T">Model object which the controller operates on</typeparam>
     public interface IController<T>
     {
         Task<IActionResult> Index();
