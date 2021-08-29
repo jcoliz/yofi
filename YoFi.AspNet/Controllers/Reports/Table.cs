@@ -13,27 +13,42 @@ namespace YoFi.AspNet.Controllers.Reports
     /// <typeparam name="TValue">Class to represent each cell value</typeparam>
     public class Table<TColumn, TRow, TValue>
     {
+        /// <summary>
+        /// Combined key of <typeparamref name="TColumn"/> and <typeparamref name="TRow"/>
+        /// </summary>
         class Key
         {
-            public TColumn col { get; }
+            /// <summary>
+            /// Column
+            /// </summary>
+            public TColumn column { get; }
+
+            /// <summary>
+            /// Row
+            /// </summary>
             public TRow row { get; }
 
-            public Key(TColumn _col, TRow _row)
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="_column">Column</param>
+            /// <param name="_row">Row</param>
+            public Key(TColumn _column, TRow _row)
             {
-                col = _col;
+                column = _column;
                 row = _row;
             }
 
             public override bool Equals(object obj)
             {
                 return obj is Key key &&
-                       EqualityComparer<TColumn>.Default.Equals(col, key.col) &&
+                       EqualityComparer<TColumn>.Default.Equals(column, key.column) &&
                        EqualityComparer<TRow>.Default.Equals(row, key.row);
             }
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(col, row);
+                return HashCode.Combine(column, row);
             }
         }
 
@@ -55,23 +70,23 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Value at this (C,R) position, or default
         /// </summary>
-        /// <param name="collabel">Column label</param>
+        /// <param name="columnlabel">Column label</param>
         /// <param name="rowlabel">Row label</param>
         /// <returns>Value at this (C,R) position, or default</returns>
-        public TValue this[TColumn collabel, TRow rowlabel]
+        public TValue this[TColumn columnlabel, TRow rowlabel]
         {
             get
             {
-                var key = new Key(_col: collabel, _row: rowlabel);
+                var key = new Key(_column: columnlabel, _row: rowlabel);
 
                 return DataSet.GetValueOrDefault(key);
             }
             set
             {
-                var key = new Key(_col: collabel, _row: rowlabel);
+                var key = new Key(_column: columnlabel, _row: rowlabel);
 
                 DataSet[key] = value;
-                ColumnLabels.Add(collabel);
+                ColumnLabels.Add(columnlabel);
                 RowLabels.Add(rowlabel);
            }
         }
