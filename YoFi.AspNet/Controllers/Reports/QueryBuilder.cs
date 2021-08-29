@@ -19,6 +19,10 @@ namespace YoFi.AspNet.Controllers.Reports
     /// The challenge is building queries that EF can translate later on
     /// when month/category groupings are built. Sometimes it can't be done
     /// in which case we'll turn it into a client-side query here.
+    /// 
+    /// Note that all public methods return an IEnumerable(NamedQuery) because
+    /// this is what the Report class expects as a source, even if there is only
+    /// a single query in it.
     /// </remarks>
     public class QueryBuilder
     {
@@ -32,6 +36,11 @@ namespace YoFi.AspNet.Controllers.Reports
         public int Year { get; set; }
         public int Month { get; set; }
 
+        /// <summary>
+        /// Generate a query for transactions, optionally limited to only those with given <paramref name="top"/> category
+        /// </summary>
+        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
+        /// <returns>Resulting query</returns>
         private NamedQuery QueryTransactions(string top = null)
         {
             IQueryable<IReportable> txs = _context.Transactions
@@ -67,14 +76,19 @@ namespace YoFi.AspNet.Controllers.Reports
         // "Except" pipelines. If I remove them, EF Core can't generate queries. So I will
         // have to study more on this.
 
-        private NamedQuery QueryTransactionsExcept(IEnumerable<string> excludetopcategories)
+        /// <summary>
+        /// Generate a query for transactions, excluding those with <paramref name="selected"/> top categories
+        /// </summary>
+        /// <param name="selected">Which top categories to exclude</param>
+        /// <returns>Resulting query</returns>
+        private NamedQuery QueryTransactionsExcept(IEnumerable<string> selected)
         {
-            var excludetopcategoriesstartswith = excludetopcategories
+            var excludetopcategoriesstartswith = selected
                 .Select(x => $"{x}:")
                 .ToList();
 
             var txsExcept = QueryTransactions().Query
-                .Where(x => x.Category != null && !excludetopcategories.Contains(x.Category))
+                .Where(x => x.Category != null && !selected.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
@@ -82,6 +96,11 @@ namespace YoFi.AspNet.Controllers.Reports
             return new NamedQuery() { Query = txsExcept };
         }
 
+        /// <summary>
+        /// Generate a query for splits, optionally limited to only those with given <paramref name="top"/> category
+        /// </summary>
+        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
+        /// <returns>Resulting query</returns>
         private NamedQuery QuerySplits(string top = null)
         {
             var splits = _context.Splits
@@ -124,14 +143,19 @@ namespace YoFi.AspNet.Controllers.Reports
          * place it was really needed.
          */
 
-        private NamedQuery QuerySplitsExcept(IEnumerable<string> tops)
+        /// <summary>
+        /// Generate a query for splits, excluding those with <paramref name="selected"/> top categories
+        /// </summary>
+        /// <param name="selected">Which top categories to exclude</param>
+        /// <returns>Resulting query</returns>
+        private NamedQuery QuerySplitsExcept(IEnumerable<string> selected)
         {
-            var excludetopcategoriesstartswith = tops
+            var excludetopcategoriesstartswith = selected
                 .Select(x => $"{x}:")
                 .ToList();
 
             var splitsExcept = QuerySplits().Query
-                .Where(x => !tops.Contains(x.Category))
+                .Where(x => !selected.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
@@ -139,6 +163,11 @@ namespace YoFi.AspNet.Controllers.Reports
             return new NamedQuery() { Query = splitsExcept };
         }
 
+        /// <summary>
+        /// Generate queries for transactions AND splits, optionally limited to only those with given <paramref name="top"/> category
+        /// </summary>
+        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
+        /// <returns>Resulting queries</returns>
         public IEnumerable<NamedQuery> QueryTransactionsComplete(string top = null)
         {
             var txs = QueryTransactions(top).Query;
@@ -175,6 +204,11 @@ namespace YoFi.AspNet.Controllers.Reports
          * I will still need to figure out how to do the same on the "except" queries.
          */
 
+        /// <summary>
+        /// Generate a queries for transactions AND splits, excluding those with <paramref name="selected"/> top categories
+        /// </summary>
+        /// <param name="selected">Which top categories to exclude</param>
+        /// <returns>Resulting queries</returns>
         public IEnumerable<NamedQuery> QueryTransactionsCompleteExcept(IEnumerable<string> tops)
         {
             var txs = QueryTransactionsExcept(tops).Query;
@@ -188,6 +222,10 @@ namespace YoFi.AspNet.Controllers.Reports
             };
         }
 
+        /// <summary>
+        /// Generate a query for budget line items
+        /// </summary>
+        /// <returns>Resulting query</returns>
         private NamedQuery QueryBudgetSingle()
         {
             // Maybe don't need a DTO for BudgetTx, because they don't have any extra fields?
@@ -198,22 +236,47 @@ namespace YoFi.AspNet.Controllers.Reports
             return new NamedQuery() { Query = budgettxs };
         }
 
+        /// <summary>
+        /// Generate queries for budget line items
+        /// </summary>
+        /// <remarks>
+        /// Report ultimately needs an enumerable of queries, so this method puts it in the right format
+        /// for the Report.
+        /// </remarks>
+        /// <see cref="Report"/>
+        /// <returns>Resulting queries</returns>
         public IEnumerable<NamedQuery> QueryBudget() => new List<NamedQuery>() { QueryBudgetSingle() };
 
-        private NamedQuery QueryBudgetSingleExcept(IEnumerable<string> tops)
+        /// <summary>
+        /// Generate a query for budget line items, excluding those with <paramref name="selected"/> top categories
+        /// </summary>
+        /// <param name="selected">Which top categories to exclude</param>
+        /// <returns>Resulting query</returns>
+        private NamedQuery QueryBudgetSingleExcept(IEnumerable<string> selected)
         {
-            var topstarts = tops
+            var topstarts = selected
                 .Select(x => $"{x}:")
                 .ToList();
 
             var budgetExcept = QueryBudgetSingle().Query
-                .Where(x => x.Category != null && !tops.Contains(x.Category))
+                .Where(x => x.Category != null && !selected.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
 
             return new NamedQuery() { Query = budgetExcept };
         }
+
+        /// <summary>
+        /// Generate queries for budget line items, excluding those with <paramref name="selected"/> top categories
+        /// </summary>
+        /// <param name="selected">Which top categories to exclude</param>
+        /// <remarks>
+        /// Report ultimately needs an enumerable of queries, so this method puts it in the right format
+        /// for the Report.
+        /// </remarks>
+        /// <see cref="Report"/>
+        /// <returns>Resulting queries</returns>
         public IEnumerable<NamedQuery> QueryBudgetExcept(IEnumerable<string> tops) => new List<NamedQuery>() { QueryBudgetSingleExcept(tops) };
 
         public IEnumerable<NamedQuery> QueryActualVsBudget(bool leafrows = false)

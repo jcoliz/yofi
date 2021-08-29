@@ -41,6 +41,10 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Where to get items
         /// </summary>
+        /// <remarks>
+        /// Multiple queries can have the same name, in which case they
+        /// are added together as if we concatenated the queries
+        /// </remarks>
         public IEnumerable<NamedQuery> Source { get; set; }
 
         /// <summary>
