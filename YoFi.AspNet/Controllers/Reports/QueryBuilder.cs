@@ -228,7 +228,8 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <returns>Resulting query</returns>
         private NamedQuery QueryBudgetSingle()
         {
-            // Maybe don't need a DTO for BudgetTx, because they don't have any extra fields?
+            // Note that using a DTO for budget line items protects against overfetching in the future if we add new
+            // fields to that object which are not used for reports.
             var budgettxs = _context.BudgetTxs
                 .Where(x => x.Timestamp.Year == Year)
                 .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
