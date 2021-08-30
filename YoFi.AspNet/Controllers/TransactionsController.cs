@@ -673,6 +673,9 @@ namespace YoFi.AspNet.Controllers
                 if (files == null || !files.Any())
                     throw new ApplicationException("Must choose a receipt file before uploading.");
 
+                if (files.Skip(1).Any())
+                    throw new ApplicationException("Must choose a only single receipt file. Uploading multiple receipts for a single transaction is not supported.");
+
                 var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
 
                 //
@@ -685,15 +688,10 @@ namespace YoFi.AspNet.Controllers
 
                 string blobname = id.ToString();
 
-                foreach (var formFile in files)
+                var formFile = files.Single();
+                using (var stream = formFile.OpenReadStream())
                 {
-                    // TODO: There is a bug lurking here!! We are accepting multiple files,
-                    // uploading each! This will overwrite all but the last one.
-                    using (var stream = formFile.OpenReadStream())
-                    {
-                        // Upload the file
-                        await _storage.UploadToBlob(BlobStoreName, blobname, stream, formFile.ContentType);
-                    }
+                    await _storage.UploadToBlob(BlobStoreName, blobname, stream, formFile.ContentType);
                 }
 
                 // Save it in the Transaction

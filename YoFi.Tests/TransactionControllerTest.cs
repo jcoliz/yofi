@@ -1095,6 +1095,14 @@ namespace YoFi.Tests
             Assert.AreEqual(0, dbset.Where(x => x.Selected == true).Count());
         }
 
+        FormFile FormFileFromSampleData(string filename, string contenttype)
+        {
+            var stream = SampleData.Open(filename);
+            var length = stream.Length;
+
+            return new FormFile(stream, 0, length, filename, filename) { Headers = new HeaderDictionary(), ContentType = contenttype };
+        }
+
         [TestMethod]
         public async Task UpReceipt()
         {
@@ -1104,12 +1112,8 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Uploading a receipt
-            var filename = "First10.ofx";
-            var stream = SampleData.Open(filename);
-            var length = stream.Length;
             var contenttype = "application/ofx";
-
-            var file = new FormFile(stream, 0, length, filename, filename) { Headers = new HeaderDictionary(), ContentType = contenttype };
+            var file = FormFileFromSampleData("First10.ofx", contenttype);
             var result = await controller.UpReceipt(new List<IFormFile>() { file },tx.ID);
             Assert.IsTrue(result is RedirectResult);
 
@@ -1129,6 +1133,27 @@ namespace YoFi.Tests
 
             // When: Uploading an empty set for the receipt
             var result = await controller.UpReceipt(new List<IFormFile>(), tx.ID);
+
+            // Then: The the operation fails
+            Assert.IsTrue(result is BadRequestObjectResult);
+
+            // And: Storage is unmodified
+            Assert.AreEqual(0, storage.BlobItems.Count);
+        }
+
+        [TestMethod]
+        public async Task UpReceiptTooMany()
+        {
+            // Given: A transaction with no receipt
+            var tx = TransactionItems.First();
+            context.Transactions.Add(tx);
+            context.SaveChanges();
+
+            // When: Uploading multiple receipt files
+            var contenttype = "application/ofx";
+            var file1 = FormFileFromSampleData("First10.ofx", contenttype);
+            var file2 = FormFileFromSampleData("NoRefnums.ofx", contenttype);
+            var result = await controller.UpReceipt(new List<IFormFile>() { file1, file2 }, tx.ID);
 
             // Then: The the operation fails
             Assert.IsTrue(result is BadRequestObjectResult);
