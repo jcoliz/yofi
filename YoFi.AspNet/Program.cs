@@ -33,6 +33,25 @@ namespace YoFi.AspNet
                 logger.LogInformation("**                                                          **");
                 logger.LogInformation("**************************************************************");
 
+                try
+                {
+                    if (File.Exists("version.txt"))
+                    {
+                        using (var sr = File.OpenText("version.txt"))
+                        {
+                            var version = sr.ReadToEnd();
+                            logger.LogInformation($"** Version: {version,8}                                        **");
+                        }
+                    }
+                    else
+                        logger.LogInformation(" Unable to locate version info.");
+
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while loading version info");
+                }
+
                 while (logme.Any())
                     logger.LogInformation(logme.Dequeue());
 
@@ -42,9 +61,9 @@ namespace YoFi.AspNet
                     var configuration = services.GetRequiredService<IConfiguration>();
                     Data.Seed.CreateRoles(serviceProvider, configuration).Wait();
                 }
-                catch (Exception exception)
+                catch (Exception ex)
                 {
-                    logger.LogError(exception, "An error occurred while creating roles");
+                    logger.LogError(ex, "An error occurred while creating roles");
                 }
             }
 
