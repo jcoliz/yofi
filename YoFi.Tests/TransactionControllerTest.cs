@@ -1119,6 +1119,23 @@ namespace YoFi.Tests
             // And: The receipt is contained in storage
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
         }
+        [TestMethod]
+        public async Task UpReceiptEmpty()
+        {
+            // Given: A transaction with no receipt
+            var tx = TransactionItems.First();
+            context.Transactions.Add(tx);
+            context.SaveChanges();
+
+            // When: Uploading an empty set for the receipt
+            var result = await controller.UpReceipt(new List<IFormFile>(), tx.ID);
+
+            // Then: The the operation fails
+            Assert.IsTrue(result is BadRequestObjectResult);
+
+            // And: Storage is unmodified
+            Assert.AreEqual(0, storage.BlobItems.Count);
+        }
 
         [TestMethod]
         public async Task DeleteReceipt()

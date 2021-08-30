@@ -670,6 +670,9 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
+                if (files == null || !files.Any())
+                    throw new ApplicationException("Must choose a receipt file before uploading.");
+
                 var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
 
                 //
@@ -704,7 +707,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
         }
 
