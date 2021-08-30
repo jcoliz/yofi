@@ -36,8 +36,9 @@ namespace YoFi.AspNet.Models
         /// year-long budget, and then multiple for budget that becomes available
         /// over time.
         /// </remarks>
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         [Display(Name = "Date")]
+        [DataType(DataType.Date)]
         public DateTime Timestamp { get; set; }
 
         /// <summary>

@@ -25,8 +25,9 @@ namespace YoFi.AspNet.Models
         /// <summary>
         /// Time transaction was created originally
         /// </summary>
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         [Display(Name = "Date")]
+        [DataType(DataType.Date)]
         public DateTime Timestamp { get; set; }
 
         /// <summary>
