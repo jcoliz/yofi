@@ -1095,7 +1095,7 @@ namespace YoFi.Tests
             Assert.AreEqual(0, dbset.Where(x => x.Selected == true).Count());
         }
 
-        FormFile FormFileFromSampleData(string filename, string contenttype)
+        public static FormFile FormFileFromSampleData(string filename, string contenttype)
         {
             var stream = SampleData.Open(filename);
             var length = stream.Length;
