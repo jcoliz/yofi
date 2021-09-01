@@ -74,7 +74,7 @@
 {
     <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpSplits">
         <div class="input-group mb-3">
-            <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03">Upload</button>
+            <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
             <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files">
             <input type="hidden" asp-for="ID" />
         </div>
@@ -152,7 +152,7 @@
 {
     <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
         <div class="input-group mb-3">
-            <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03">Upload</button>
+            <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
             <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files">
             <input type="hidden" asp-for="ID" />
         </div>
