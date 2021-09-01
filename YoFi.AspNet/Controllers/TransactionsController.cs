@@ -831,6 +831,9 @@ namespace YoFi.AspNet.Controllers
             ILookup<int, Models.Split> splits = null;
             try
             {
+                if (files == null || !files.Any())
+                    throw new ApplicationException("Please choose a file to upload, first.");
+
                 // Unless otherwise specified, cut off transactions before
                 // 1/1/2020, in case there's a huge file of ancient transactions.
                 DateTime cutoff = new DateTime(2020, 01, 01);
@@ -1035,7 +1038,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
 
             // This is kind of a crappy way to communicate the potential false negative conflicts.

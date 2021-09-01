@@ -279,6 +279,16 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public async Task UploadEmpty()
+        {
+            // When: Uploading an empty set for imported transactions
+            var result = await controller.Upload(new List<IFormFile>(), null);
+
+            // Then: The the operation fails
+            Assert.IsTrue(result is BadRequestObjectResult);
+        }
+
+        [TestMethod]
         public async Task Bug883()
         {
             // Bug 883: Apparantly duplicate transactions in import are coalesced to single transaction for input
@@ -1123,6 +1133,7 @@ namespace YoFi.Tests
             // And: The receipt is contained in storage
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
         }
+
         [TestMethod]
         public async Task UpReceiptEmpty()
         {
