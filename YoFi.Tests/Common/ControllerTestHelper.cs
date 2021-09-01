@@ -371,6 +371,16 @@ namespace Common.AspNet.Test
 
             return model;
         }
+
+        public async Task UploadEmpty()
+        {
+            // When: Uploading an empty set for imported transactions
+            var result = await controller.Upload(new List<IFormFile>());
+
+            // Then: The the operation fails
+            Assert.IsTrue(result is BadRequestObjectResult);
+        }
+
         public async Task UploadWithID()
         {
             // Start out with one item in the DB. We are picking the ONE item that Upload doesn't upload.
