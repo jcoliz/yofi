@@ -556,6 +556,23 @@ namespace YoFi.Tests
             Assert.IsTrue(item.IsSplitsOK);
         }
 
+        [TestMethod]
+        public async Task UploadSplitsEmpty()
+        {
+            // Given: One transaction in the database
+            // Don't add the splits here, we'll upload them
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            // When: Uploading an empty set for splits transactions for that transaction
+            var result = await controller.UpSplits(new List<IFormFile>(), item.ID);
+
+            // Then: The the operation fails
+            Assert.IsTrue(result is BadRequestObjectResult);
+        }
+
         [DataRow(true)]
         [DataRow(false)]
         [DataTestMethod]

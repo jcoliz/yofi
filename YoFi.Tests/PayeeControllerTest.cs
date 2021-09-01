@@ -96,6 +96,8 @@ namespace YoFi.Tests
         public async Task UploadWithID() => await helper.UploadWithID();
         [TestMethod]
         public async Task UploadDuplicate() => await helper.UploadDuplicate();
+        [TestMethod]
+        public async Task UploadEmpty() => await helper.UploadEmpty();
 
         [TestMethod]
         public async Task EditModal()
