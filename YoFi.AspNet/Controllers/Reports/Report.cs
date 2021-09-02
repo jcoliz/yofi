@@ -585,7 +585,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <param name="first">First row for comparison</param>
         /// <param name="second">Second row for comparison</param>
         /// <returns>Comparsion value. -1 if <paramref name="first"/> sorts before <paramref name="second"/></returns>
-        int IComparer<RowLabel>.Compare(RowLabel first, RowLabel second)
+        int CompareRows(RowLabel first, RowLabel second)
         {
             int result = 0;
             var n = new RowLabel() { Name = "null" };
@@ -651,18 +651,18 @@ namespace YoFi.AspNet.Controllers.Reports
             if (first.Level < second.Level)
             {
                 Debug.WriteLineIf(debugout, $"Try {first} Parent vs {second}");
-                result = ((IComparer<RowLabel>)this).Compare(first.Parent as RowLabel, second);
+                result = CompareRows(first.Parent, second);
             }
             else if (second.Level < first.Level)
             {
                 Debug.WriteLineIf(debugout, $"Try {first} vs {second} Parent");
-                result = ((IComparer<RowLabel>)this).Compare(first, second.Parent as RowLabel);
+                result = CompareRows(first, second.Parent);
             }
             else
             {
                 // If we're at the SAME level, run both parents upwards
                 Debug.WriteLineIf(debugout, $"Try {first} Parent vs {second} Parent");
-                result = ((IComparer<RowLabel>)this).Compare(first.Parent as RowLabel, second.Parent as RowLabel);
+                result = CompareRows(first.Parent, second.Parent);
             }
 
 #if false
@@ -683,8 +683,18 @@ namespace YoFi.AspNet.Controllers.Reports
             return result;
         }
 
-#endregion
+        /// <summary>
+        /// Row comparer for use by IComparer
+        /// </summary>
+        /// <see cref="Report.CompareRows(RowLabel, RowLabel)"/>
+        /// <param name="first">First row for comparison</param>
+        /// <param name="second">Second row for comparison</param>
+        /// <returns>Comparsion value. -1 if <paramref name="first"/> sorts before <paramref name="second"/></returns>
+        int IComparer<RowLabel>.Compare(RowLabel first, RowLabel second) => CompareRows(first, second);
+
+        #endregion
     }
+
 
     /// <summary>
     /// Common elements which are shared by both rows and columns
@@ -713,15 +723,6 @@ namespace YoFi.AspNet.Controllers.Reports
         /// True if this row or column should sort AFTER the totals
         /// </summary>
         public bool IsSortingAfterTotal { get; set; }
-
-        /// <summary>
-        /// In a multi-level report, whom are we under? or null for top-level
-        /// </summary>
-        /// <remarks>
-        /// TODO: Does Parent really belong in the base label? Only rows have
-        /// parents so probably should be in the row label.
-        /// </remarks>
-        public BaseLabel Parent { get; set; }
 
         /// <summary>
         /// Determins whether this instance and the specified object have the same value
@@ -785,6 +786,11 @@ namespace YoFi.AspNet.Controllers.Reports
     /// </summary>
     public class RowLabel: BaseLabel
     {
+        /// <summary>
+        /// In a multi-level report, whom are we under? or null for top-level
+        /// </summary>
+        public RowLabel Parent { get; set; }
+
         /// <summary>
         /// How many levels ABOVE regular data is this?
         /// </summary>
