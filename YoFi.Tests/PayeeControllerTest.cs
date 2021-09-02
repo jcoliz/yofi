@@ -138,7 +138,7 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task CreateFromTx()
         {
-            var tx = new Transaction() { Payee = "A", SubCategory = "B", Category = "C" };
+            var tx = new Transaction() { Payee = "A", Category = "C" };
             context.Add(tx);
             await context.SaveChangesAsync();
 
@@ -153,7 +153,7 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task CreateModalFromTx()
         {
-            var tx = new Transaction() { Payee = "A", SubCategory = "B", Category = "C" };
+            var tx = new Transaction() { Payee = "A", Category = "C" };
             context.Add(tx);
             await context.SaveChangesAsync();
 
