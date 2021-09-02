@@ -121,21 +121,16 @@ namespace YoFi.AspNet.Controllers.Reports
         /// Report ultimately needs an enumerable of queries, so this method puts it in the right format
         /// for the Report.
         /// </remarks>
+        /// <param name="excluded">Optional limiter. Which top categories to exclude</param>
         /// <see cref="Report"/>
         /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryBudget() => new List<NamedQuery>() { QueryBudgetSingle() };
-
-        /// <summary>
-        /// Generate queries for budget line items, except those with <paramref name="excluded"/> top categories
-        /// </summary>
-        /// <param name="excluded">Which top categories to exclude</param>
-        /// <remarks>
-        /// Report ultimately needs an enumerable of queries, so this method puts it in the right format
-        /// for the Report.
-        /// </remarks>
-        /// <see cref="Report"/>
-        /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryBudgetExcept(IEnumerable<string> excluded) => new List<NamedQuery>() { QueryBudgetSingleExcept(excluded) };
+        public IEnumerable<NamedQuery> QueryBudget(IEnumerable<string> excluded = null)
+        {
+            if (excluded?.Any() == true)
+                return new List<NamedQuery>() { QueryBudgetSingleExcept(excluded) };
+            else
+                return new List<NamedQuery>() { QueryBudgetSingle() };
+        }
 
         /// <summary>
         /// Generate queries for transactions & splits compared to budget line items

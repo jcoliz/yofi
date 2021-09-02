@@ -161,7 +161,7 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
                 result.Description = $"For {Year}";
-                result.Source = _qbuilder.QueryBudgetExcept(excluded: notexpenses);
+                result.Source = _qbuilder.QueryBudget(excluded: notexpenses);
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses Budget";
