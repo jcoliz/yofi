@@ -59,14 +59,29 @@ namespace YoFi.AspNet.Controllers.Reports
         #region Public Methods
 
         /// <summary>
-        /// Generate queries for transactions AND splits, optionally limited to only those with given <paramref name="top"/> category
+        /// Generate queries for transactions AND splits
         /// </summary>
         /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
+        /// <param name="excluded">Optional limited. If set, will excluded items in these top categories</param>
         /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryTransactionsComplete(string top = null)
+        public IEnumerable<NamedQuery> QueryTransactionsComplete(string top = null, IEnumerable<string> excluded = null)
         {
-            var txs = QueryTransactions(top).Query;
-            var splits = QuerySplits(top).Query;
+            IQueryable<IReportable> txs = null;
+            IQueryable<IReportable> splits = null;
+
+            if (excluded?.Any() == true)
+            {
+                if (!string.IsNullOrEmpty(top))
+                    throw new ArgumentException("Cannot set top and excluded in the same query");
+
+                txs = QueryTransactionsExcept(excluded).Query;
+                splits = QuerySplitsExcept(excluded).Query;
+            }
+            else
+            {
+                txs = QueryTransactions(top).Query;
+                splits = QuerySplits(top).Query;
+            }
 
             return new List<NamedQuery>() {
                 new NamedQuery()
@@ -98,24 +113,6 @@ namespace YoFi.AspNet.Controllers.Reports
          *
          * I will still need to figure out how to do the same on the "except" queries.
          */
-
-        /// <summary>
-        /// Generate queries for transactions AND splits, except those with <paramref name="excluded"/> top categories
-        /// </summary>
-        /// <param name="excluded">Which top categories to exclude</param>
-        /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryTransactionsCompleteExcept(IEnumerable<string> excluded)
-        {
-            var txs = QueryTransactionsExcept(excluded).Query;
-            var splits = QuerySplitsExcept(excluded).Query;
-
-            return new List<NamedQuery>() {
-                new NamedQuery()
-                {
-                    Query = txs.Concat(splits)
-                }
-            };
-        }
 
         /// <summary>
         /// Generate queries for budget line items
@@ -185,7 +182,7 @@ namespace YoFi.AspNet.Controllers.Reports
         {
             var result = new List<NamedQuery>();
 
-            result.AddRange(QueryTransactionsCompleteExcept(excluded).Select(x => x.Labeled("Actual")));
+            result.AddRange(QueryTransactionsComplete(excluded:excluded).Select(x => x.Labeled("Actual")));
             result.Add(QueryBudgetSingleExcept(excluded).Labeled("Budget"));
 
             return result;

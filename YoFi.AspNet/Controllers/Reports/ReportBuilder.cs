@@ -152,7 +152,7 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.WithMonthColumns = true;
-                result.Source = _qbuilder.QueryTransactionsCompleteExcept(excluded: notexpenses);
+                result.Source = _qbuilder.QueryTransactionsComplete(excluded: notexpenses);
                 result.NumLevels = 2;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
