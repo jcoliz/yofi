@@ -116,23 +116,6 @@ namespace YoFi.AspNet.Models
         public bool IsSplitsOK => !HasSplits || ( Splits.Select(x=>x.Amount).Sum() == Amount );
 
         /// <summary>
-        /// Collapse subcategory into category for sake of reports
-        /// </summary>
-        /// <remarks>
-        /// REally should get rid of this
-        /// </remarks>
-        string IReportable.Category
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(SubCategory))
-                    return Category;
-                else
-                    return $"{Category}:{SubCategory}";
-            }
-        }
-
-        /// <summary>
         /// Remove all characters from payee which are not whitespace or alpha-numeric
         /// </summary>
         public void FixupPayee()

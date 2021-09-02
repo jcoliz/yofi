@@ -98,7 +98,6 @@ namespace YoFi.AspNet.Controllers
                     throw new KeyNotFoundException("Payee unknown");
 
                 transaction.Category = payee.Category;
-                transaction.SubCategory = payee.SubCategory;
                 _context.Update(transaction);
                 await _context.SaveChangesAsync();
 

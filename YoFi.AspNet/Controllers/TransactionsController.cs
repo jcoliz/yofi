@@ -351,7 +351,7 @@ namespace YoFi.AspNet.Controllers
                 return NotFound();
             }
 
-            var split = new Split() { Category = transaction.Category, SubCategory = transaction.SubCategory };
+            var split = new Split() { Category = transaction.Category };
 
             // Calculate the amount based on how much is remaining.
 
@@ -364,7 +364,6 @@ namespace YoFi.AspNet.Controllers
             // Remove the category information, that's now contained in the splits.
 
             transaction.Category = null;
-            transaction.SubCategory = null;
 
             _context.Update(transaction);
             await _context.SaveChangesAsync();
@@ -492,7 +491,7 @@ namespace YoFi.AspNet.Controllers
 
             // Handle payee auto-assignment
 
-            if (string.IsNullOrEmpty(transaction.Category) && string.IsNullOrEmpty(transaction.SubCategory))
+            if (string.IsNullOrEmpty(transaction.Category))
             {
                 // See if the payee exists
                 var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
@@ -500,7 +499,6 @@ namespace YoFi.AspNet.Controllers
                 if (payee != null)
                 {
                     transaction.Category = payee.Category;
-                    transaction.SubCategory = payee.SubCategory;
                     ViewData["AutoCategory"] = true;
                 }
             }
@@ -529,7 +527,7 @@ namespace YoFi.AspNet.Controllers
 
             // Handle payee auto-assignment
 
-            if (string.IsNullOrEmpty(transaction.Category) && string.IsNullOrEmpty(transaction.SubCategory))
+            if (string.IsNullOrEmpty(transaction.Category))
             {
                 // See if the payee exists
                 var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
@@ -537,7 +535,6 @@ namespace YoFi.AspNet.Controllers
                 if (payee != null)
                 {
                     transaction.Category = payee.Category;
-                    transaction.SubCategory = payee.SubCategory;
                     ViewData["AutoCategory"] = true;
                 }
             }
@@ -1012,7 +1009,6 @@ namespace YoFi.AspNet.Controllers
                         if (null != payee)
                         {
                             item.Category = payee.Category;
-                            item.SubCategory = payee.SubCategory;
                         }
                     }
 
@@ -1022,7 +1018,6 @@ namespace YoFi.AspNet.Controllers
                     {
                         item.Splits = new List<Split>();
                         item.Category = null;
-                        item.SubCategory = null;
                         foreach (var split in splits[item.ID])
                         {
                             split.ID = 0;

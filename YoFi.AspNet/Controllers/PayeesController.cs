@@ -125,7 +125,7 @@ namespace YoFi.AspNet.Controllers
                 if (transaction == null)
                     return NotFound();
 
-                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim(), SubCategory = transaction.SubCategory };
+                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
                 return View(payee);
             }
 
@@ -143,7 +143,7 @@ namespace YoFi.AspNet.Controllers
                 if (transaction == null)
                     return NotFound();
 
-                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim(), SubCategory = transaction.SubCategory };
+                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
                 return PartialView("CreatePartial",payee);
             }
 
