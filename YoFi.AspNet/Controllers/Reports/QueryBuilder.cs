@@ -69,19 +69,8 @@ namespace YoFi.AspNet.Controllers.Reports
             IQueryable<IReportable> txs = null;
             IQueryable<IReportable> splits = null;
 
-            if (excluded?.Any() == true)
-            {
-                if (!string.IsNullOrEmpty(top))
-                    throw new ArgumentException("Cannot set top and excluded in the same query");
-
-                txs = QueryTransactionsExcept(excluded:excluded).Query;
-                splits = QuerySplits(excluded:excluded).Query;
-            }
-            else
-            {
-                txs = QueryTransactions(top:top).Query;
-                splits = QuerySplits(top:top).Query;
-            }
+            txs = QueryTransactions(top,excluded).Query;
+            splits = QuerySplits(top,excluded).Query;
 
             return new List<NamedQuery>() {
                 new NamedQuery()
@@ -195,29 +184,6 @@ namespace YoFi.AspNet.Controllers.Reports
 
         #region Internals
 
-        /// <summary>
-        /// Generate a query for transactions, optionally limited to only those with given <paramref name="top"/> category
-        /// </summary>
-        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
-        /// <returns>Resulting query</returns>
-        private NamedQuery QueryTransactions(string top = null)
-        {
-            IQueryable<IReportable> txs = _context.Transactions
-                .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
-                .Where(x => !x.Splits.Any());
-
-            if (top != null)
-            {
-                string ecolon = $"{top}:";
-                txs = txs.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
-            }
-
-            txs = txs
-                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
-
-            return new NamedQuery() { Query = txs };
-        }
-
         /*
          * EF Core does a great job of the above. This is the final single query that it creates later
          * when doing GroupBy.
@@ -240,19 +206,38 @@ namespace YoFi.AspNet.Controllers.Reports
         /// </summary>
         /// <param name="excluded">Which top categories to exclude</param>
         /// <returns>Resulting query</returns>
-        private NamedQuery QueryTransactionsExcept(IEnumerable<string> excluded)
+        private NamedQuery QueryTransactions(string top = null, IEnumerable<string> excluded = null)
         {
-            var excludetopcategoriesstartswith = excluded
-                .Select(x => $"{x}:")
-                .ToList();
+            IQueryable<IReportable> result = _context.Transactions
+                .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
+                .Where(x => !x.Splits.Any());
 
-            var txsExcept = QueryTransactions().Query
-                .Where(x => x.Category != null && !excluded.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
-                .AsQueryable<IReportable>();
+            if (top != null)
+            {
+                string ecolon = $"{top}:";
+                result = result.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
+            }
 
-            return new NamedQuery() { Query = txsExcept };
+            result = result
+                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
+
+            if (excluded?.Any() == true)
+            {
+                if (!string.IsNullOrEmpty(top))
+                    throw new ArgumentException("Cannot set top and excluded in the same query");
+
+                var excludetopcategoriesstartswith = excluded
+                    .Select(x => $"{x}:")
+                    .ToList();
+
+                result = result
+                    .Where(x => x.Category != null && !excluded.Contains(x.Category))
+                    .AsEnumerable()
+                    .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                    .AsQueryable();
+            }
+
+            return new NamedQuery() { Query = result };
         }
 
         /*
@@ -301,6 +286,9 @@ namespace YoFi.AspNet.Controllers.Reports
 
             if (excluded?.Any() == true)
             {
+                if (!string.IsNullOrEmpty(top))
+                    throw new ArgumentException("Cannot set top and excluded in the same query");
+
                 var excludetopcategoriesstartswith = excluded
                     .Select(x => $"{x}:")
                     .ToList();
@@ -309,7 +297,7 @@ namespace YoFi.AspNet.Controllers.Reports
                     .Where(x => !excluded.Contains(x.Category))
                     .AsEnumerable()
                     .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
-                    .AsQueryable<IReportable>();
+                    .AsQueryable();
             }
 
             return new NamedQuery() { Query = result };
@@ -337,7 +325,7 @@ namespace YoFi.AspNet.Controllers.Reports
                     .Where(x => x.Category != null && !excluded.Contains(x.Category))
                     .AsEnumerable()
                     .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
-                    .AsQueryable<IReportable>();
+                    .AsQueryable();
             }
 
             return new NamedQuery() { Query = result };
