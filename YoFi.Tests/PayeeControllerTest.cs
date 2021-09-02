@@ -148,7 +148,6 @@ namespace YoFi.Tests
 
             Assert.AreEqual(tx.Payee, model.Name);
             Assert.AreEqual(tx.Category, model.Category);
-            Assert.AreEqual(tx.SubCategory, model.SubCategory);
         }
 
         [TestMethod]
@@ -165,7 +164,6 @@ namespace YoFi.Tests
             Assert.AreEqual("CreatePartial", actual.ViewName);
             Assert.AreEqual(tx.Payee, model.Name);
             Assert.AreEqual(tx.Category, model.Category);
-            Assert.AreEqual(tx.SubCategory, model.SubCategory);
         }
 
         [TestMethod]

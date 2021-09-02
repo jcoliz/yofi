@@ -330,7 +330,6 @@ namespace YoFi.Tests
             Assert.AreEqual(expected, result.Item);
 
             Assert.AreEqual(expected.Category, tx.Category);
-            Assert.AreEqual(expected.SubCategory, tx.SubCategory);
         }
         [TestMethod]
         public async Task ApplyPayeeFailsNoTxId()
@@ -389,7 +388,6 @@ namespace YoFi.Tests
             Assert.AreEqual(expected, result.Item);
 
             Assert.AreEqual(expected.Category, tx.Category);
-            Assert.AreEqual(expected.SubCategory, tx.SubCategory);
         }
 
         [TestMethod]

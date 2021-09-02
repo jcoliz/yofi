@@ -386,7 +386,6 @@ namespace YoFi.Tests
             Assert.AreEqual(item.Amount, actual.Amount);
             Assert.AreEqual(expectedcategory, actual.Category);
             Assert.IsNull(actual.Transaction.Category);
-            Assert.IsNull(actual.Transaction.SubCategory);
         }
 
         [TestMethod]
