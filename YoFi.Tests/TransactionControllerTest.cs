@@ -279,6 +279,9 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public async Task UploadEmpty() => await helper.UploadEmpty();
+
+        [TestMethod]
         public async Task Bug883()
         {
             // Bug 883: Apparantly duplicate transactions in import are coalesced to single transaction for input
@@ -551,6 +554,23 @@ namespace YoFi.Tests
             Assert.IsNotNull(redir);
             Assert.IsTrue(item.HasSplits);
             Assert.IsTrue(item.IsSplitsOK);
+        }
+
+        [TestMethod]
+        public async Task UploadSplitsEmpty()
+        {
+            // Given: One transaction in the database
+            // Don't add the splits here, we'll upload them
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            // When: Uploading an empty set for splits transactions for that transaction
+            var result = await controller.UpSplits(new List<IFormFile>(), item.ID);
+
+            // Then: The the operation fails
+            Assert.IsTrue(result is BadRequestObjectResult);
         }
 
         [DataRow(true)]
@@ -1095,6 +1115,14 @@ namespace YoFi.Tests
             Assert.AreEqual(0, dbset.Where(x => x.Selected == true).Count());
         }
 
+        public static FormFile FormFileFromSampleData(string filename, string contenttype)
+        {
+            var stream = SampleData.Open(filename);
+            var length = stream.Length;
+
+            return new FormFile(stream, 0, length, filename, filename) { Headers = new HeaderDictionary(), ContentType = contenttype };
+        }
+
         [TestMethod]
         public async Task UpReceipt()
         {
@@ -1104,12 +1132,8 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Uploading a receipt
-            var filename = "First10.ofx";
-            var stream = SampleData.Open(filename);
-            var length = stream.Length;
             var contenttype = "application/ofx";
-
-            var file = new FormFile(stream, 0, length, filename, filename) { Headers = new HeaderDictionary(), ContentType = contenttype };
+            var file = FormFileFromSampleData("First10.ofx", contenttype);
             var result = await controller.UpReceipt(new List<IFormFile>() { file },tx.ID);
             Assert.IsTrue(result is RedirectResult);
 
@@ -1118,6 +1142,45 @@ namespace YoFi.Tests
 
             // And: The receipt is contained in storage
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
+        }
+
+        [TestMethod]
+        public async Task UpReceiptEmpty()
+        {
+            // Given: A transaction with no receipt
+            var tx = TransactionItems.First();
+            context.Transactions.Add(tx);
+            context.SaveChanges();
+
+            // When: Uploading an empty set for the receipt
+            var result = await controller.UpReceipt(new List<IFormFile>(), tx.ID);
+
+            // Then: The the operation fails
+            Assert.IsTrue(result is BadRequestObjectResult);
+
+            // And: Storage is unmodified
+            Assert.AreEqual(0, storage.BlobItems.Count);
+        }
+
+        [TestMethod]
+        public async Task UpReceiptTooMany()
+        {
+            // Given: A transaction with no receipt
+            var tx = TransactionItems.First();
+            context.Transactions.Add(tx);
+            context.SaveChanges();
+
+            // When: Uploading multiple receipt files
+            var contenttype = "application/ofx";
+            var file1 = FormFileFromSampleData("First10.ofx", contenttype);
+            var file2 = FormFileFromSampleData("NoRefnums.ofx", contenttype);
+            var result = await controller.UpReceipt(new List<IFormFile>() { file1, file2 }, tx.ID);
+
+            // Then: The the operation fails
+            Assert.IsTrue(result is BadRequestObjectResult);
+
+            // And: Storage is unmodified
+            Assert.AreEqual(0, storage.BlobItems.Count);
         }
 
         [TestMethod]

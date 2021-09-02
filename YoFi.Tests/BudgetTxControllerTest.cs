@@ -100,6 +100,8 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task UploadDuplicate() => await helper.UploadDuplicate();
         [TestMethod]
+        public async Task UploadEmpty() => await helper.UploadEmpty();
+        [TestMethod]
         public async Task UploadAddNewDuplicate()
         {
             // These items are not EXACTLY duplicates, just duplicate enough to trigger the

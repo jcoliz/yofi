@@ -178,6 +178,10 @@
         }
     });
 
+    $('input:file').change(function (event) {
+        $(this).siblings(':submit').prop("disabled", false);
+    });
+
 });
 
 function applyPayee(tr)

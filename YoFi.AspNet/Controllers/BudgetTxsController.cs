@@ -239,6 +239,9 @@ namespace YoFi.AspNet.Controllers
             IEnumerable<BudgetTx> result = Enumerable.Empty<BudgetTx>();
             try
             {
+                if (files == null || !files.Any())
+                    throw new ApplicationException("Please choose a file to upload, first.");
+
                 foreach (var file in files)
                 {
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
@@ -262,7 +265,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
 
             return View(result.OrderBy(x => x.Timestamp.Year).ThenBy(x=>x.Timestamp.Month).ThenBy(x => x.Category));

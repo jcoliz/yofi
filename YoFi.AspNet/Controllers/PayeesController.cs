@@ -305,6 +305,9 @@ namespace YoFi.AspNet.Controllers
             IEnumerable<Payee> result = Enumerable.Empty<Payee>();
             try
             {
+                if (files == null || !files.Any())
+                    throw new ApplicationException("Please choose a file to upload, first.");
+
                 // Extract submitted file into a list objects
 
                 foreach (var file in files)
@@ -334,7 +337,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
 
             return View(result.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory));

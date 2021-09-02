@@ -488,9 +488,9 @@ namespace YoFi.Tests
 
             // Create a formfile with it
             var contenttype = "text/html";
-            var bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            var stream = new MemoryStream(bytes);
-            var file = new FormFile(stream, 0, 10, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
+            var count = 10;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
+            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
             
             var result = await controller.UpReceipt(original.ID,file);
 

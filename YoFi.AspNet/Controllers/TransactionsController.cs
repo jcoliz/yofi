@@ -670,6 +670,12 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
+                if (files == null || !files.Any())
+                    throw new ApplicationException("Must choose a receipt file before uploading.");
+
+                if (files.Skip(1).Any())
+                    throw new ApplicationException("Must choose a only single receipt file. Uploading multiple receipts for a single transaction is not supported.");
+
                 var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
 
                 //
@@ -682,15 +688,10 @@ namespace YoFi.AspNet.Controllers
 
                 string blobname = id.ToString();
 
-                foreach (var formFile in files)
+                var formFile = files.Single();
+                using (var stream = formFile.OpenReadStream())
                 {
-                    // TODO: There is a bug lurking here!! We are accepting multiple files,
-                    // uploading each! This will overwrite all but the last one.
-                    using (var stream = formFile.OpenReadStream())
-                    {
-                        // Upload the file
-                        await _storage.UploadToBlob(BlobStoreName, blobname, stream, formFile.ContentType);
-                    }
+                    await _storage.UploadToBlob(BlobStoreName, blobname, stream, formFile.ContentType);
                 }
 
                 // Save it in the Transaction
@@ -704,7 +705,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -780,6 +781,9 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
+                if (files == null || !files.Any())
+                    throw new ApplicationException("Please choose a file to upload, first.");
+
                 var transaction = await _context.Transactions.Include(x => x.Splits)
                     .SingleAsync(m => m.ID == id);
 
@@ -817,7 +821,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -830,6 +834,9 @@ namespace YoFi.AspNet.Controllers
             ILookup<int, Models.Split> splits = null;
             try
             {
+                if (files == null || !files.Any())
+                    throw new ApplicationException("Please choose a file to upload, first.");
+
                 // Unless otherwise specified, cut off transactions before
                 // 1/1/2020, in case there's a huge file of ancient transactions.
                 DateTime cutoff = new DateTime(2020, 01, 01);
@@ -1034,7 +1041,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
 
             // This is kind of a crappy way to communicate the potential false negative conflicts.
