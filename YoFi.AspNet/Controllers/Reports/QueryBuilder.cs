@@ -74,13 +74,13 @@ namespace YoFi.AspNet.Controllers.Reports
                 if (!string.IsNullOrEmpty(top))
                     throw new ArgumentException("Cannot set top and excluded in the same query");
 
-                txs = QueryTransactionsExcept(excluded).Query;
-                splits = QuerySplitsExcept(excluded).Query;
+                txs = QueryTransactionsExcept(excluded:excluded).Query;
+                splits = QuerySplits(excluded:excluded).Query;
             }
             else
             {
-                txs = QueryTransactions(top).Query;
-                splits = QuerySplits(top).Query;
+                txs = QueryTransactions(top:top).Query;
+                splits = QuerySplits(top:top).Query;
             }
 
             return new List<NamedQuery>() {
@@ -255,28 +255,6 @@ namespace YoFi.AspNet.Controllers.Reports
             return new NamedQuery() { Query = txsExcept };
         }
 
-        /// <summary>
-        /// Generate a query for splits, optionally limited to only those with given <paramref name="top"/> category
-        /// </summary>
-        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
-        /// <returns>Resulting query</returns>
-        private NamedQuery QuerySplits(string top = null)
-        {
-            var splits = _context.Splits
-                .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
-                .Include(x => x.Transaction)
-                .Select(x=> new ReportableDto() { Amount = x.Amount, Timestamp = x.Transaction.Timestamp, Category = x.Category })
-                .AsQueryable<IReportable>();
-
-            if (top != null)
-            {
-                string ecolon = $"{top}:";
-                splits = splits.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
-            }
-
-            return new NamedQuery() { Query = splits };
-        }
-
         /*
          * EF Core does a decent job of the above as well. It's straightforward because we have the AsQueryable() here
          * which is needed for an of the Except* reports.
@@ -307,19 +285,34 @@ namespace YoFi.AspNet.Controllers.Reports
         /// </summary>
         /// <param name="excluded">Which top categories to exclude</param>
         /// <returns>Resulting query</returns>
-        private NamedQuery QuerySplitsExcept(IEnumerable<string> excluded)
+        private NamedQuery QuerySplits(string top = null, IEnumerable<string> excluded = null)
         {
-            var excludetopcategoriesstartswith = excluded
-                .Select(x => $"{x}:")
-                .ToList();
-
-            var splitsExcept = QuerySplits().Query
-                .Where(x => !excluded.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+            var result = _context.Splits
+                .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
+                .Include(x => x.Transaction)
+                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Transaction.Timestamp, Category = x.Category })
                 .AsQueryable<IReportable>();
 
-            return new NamedQuery() { Query = splitsExcept };
+            if (top != null)
+            {
+                string ecolon = $"{top}:";
+                result = result.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
+            }
+
+            if (excluded?.Any() == true)
+            {
+                var excludetopcategoriesstartswith = excluded
+                    .Select(x => $"{x}:")
+                    .ToList();
+
+                result = result
+                    .Where(x => !excluded.Contains(x.Category))
+                    .AsEnumerable()
+                    .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                    .AsQueryable<IReportable>();
+            }
+
+            return new NamedQuery() { Query = result };
         }
 
         /// <summary>
