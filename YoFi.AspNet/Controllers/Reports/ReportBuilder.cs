@@ -152,7 +152,7 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.WithMonthColumns = true;
-                result.Source = _qbuilder.QueryTransactionsCompleteExcept(tops: notexpenses);
+                result.Source = _qbuilder.QueryTransactionsCompleteExcept(excluded: notexpenses);
                 result.NumLevels = 2;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
@@ -161,7 +161,7 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
                 result.Description = $"For {Year}";
-                result.Source = _qbuilder.QueryBudgetExcept(tops: notexpenses);
+                result.Source = _qbuilder.QueryBudgetExcept(excluded: notexpenses);
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses Budget";
@@ -169,7 +169,7 @@ namespace YoFi.AspNet.Controllers.Reports
             else if (parameters.id == "expenses-v-budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
-                var source = _qbuilder.QueryActualVsBudgetExcept(tops: notexpenses);
+                var source = _qbuilder.QueryActualVsBudgetExcept(excluded: notexpenses);
                 result.Source = source;
 
                 // What is the highest transaction in the "Actuals"?

@@ -26,142 +26,38 @@ namespace YoFi.AspNet.Controllers.Reports
     /// </remarks>
     public class QueryBuilder
     {
-        private ApplicationDbContext _context;
+        #region Properties
 
+        /// <summary>
+        /// Which year does this report cover
+        /// </summary>
+        /// <remarks>
+        /// Almost all reports are constrained to a single year
+        /// </remarks>
+        public int Year { get; set; }
+
+        /// <summary>
+        /// How many months into the year should be included
+        /// </summary>
+        /// <remarks>
+        /// Most reports are "year to date" reports. This tell us, "to which date?"
+        /// </remarks>
+        public int Month { get; set; }
+
+        #endregion
+
+        #region Constructor(s)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="context">Which database context to create queries against</param>
         public QueryBuilder(ApplicationDbContext context)
         {
             _context = context;
         }
+        #endregion
 
-        public int Year { get; set; }
-        public int Month { get; set; }
-
-        /// <summary>
-        /// Generate a query for transactions, optionally limited to only those with given <paramref name="top"/> category
-        /// </summary>
-        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
-        /// <returns>Resulting query</returns>
-        private NamedQuery QueryTransactions(string top = null)
-        {
-            IQueryable<IReportable> txs = _context.Transactions
-                .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
-                .Where(x => !x.Splits.Any());
-
-            if (top != null)
-            {
-                string ecolon = $"{top}:";
-                txs = txs.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
-            }
-
-            txs = txs
-                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
-
-            return new NamedQuery() { Query = txs };
-        }
-
-        /*
-         * EF Core does a great job of the above. This is the final single query that it creates later
-         * when doing GroupBy.
-         *
-            SELECT [t].[Category] AS [Name], DATEPART(month, [t].[Timestamp]) AS [Month], SUM([t].[Amount]) AS [Total]
-            FROM [Transactions] AS [t]
-            WHERE (((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)) AND NOT (EXISTS (
-                SELECT 1
-                FROM [Split] AS [s]
-                WHERE [t].[ID] = [s].[TransactionID]))
-            GROUP BY [t].[Category], DATEPART(month, [t].[Timestamp])
-         */
-
-        // TODO: Need to figure out how to get rid of the AsEnumerable() calls in the
-        // "Except" pipelines. If I remove them, EF Core can't generate queries. So I will
-        // have to study more on this.
-
-        /// <summary>
-        /// Generate a query for transactions, excluding those with <paramref name="selected"/> top categories
-        /// </summary>
-        /// <param name="selected">Which top categories to exclude</param>
-        /// <returns>Resulting query</returns>
-        private NamedQuery QueryTransactionsExcept(IEnumerable<string> selected)
-        {
-            var excludetopcategoriesstartswith = selected
-                .Select(x => $"{x}:")
-                .ToList();
-
-            var txsExcept = QueryTransactions().Query
-                .Where(x => x.Category != null && !selected.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
-                .AsQueryable<IReportable>();
-
-            return new NamedQuery() { Query = txsExcept };
-        }
-
-        /// <summary>
-        /// Generate a query for splits, optionally limited to only those with given <paramref name="top"/> category
-        /// </summary>
-        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
-        /// <returns>Resulting query</returns>
-        private NamedQuery QuerySplits(string top = null)
-        {
-            var splits = _context.Splits
-                .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
-                .Include(x => x.Transaction)
-                .Select(x=> new ReportableDto() { Amount = x.Amount, Timestamp = x.Transaction.Timestamp, Category = x.Category })
-                .AsQueryable<IReportable>();
-
-            if (top != null)
-            {
-                string ecolon = $"{top}:";
-                splits = splits.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
-            }
-
-            return new NamedQuery() { Query = splits };
-        }
-
-        /*
-         * EF Core does a decent job of the above as well. It's straightforward because we have the ToList() here
-         * which is needed for an of the Except* reports.
-         * 
-            SELECT [s].[Amount], [t].[Timestamp], [s].[Category]
-            FROM [Split] AS [s]
-            INNER JOIN [Transactions] AS [t] ON [s].[TransactionID] = [t].[ID]
-            WHERE ((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)
-         *
-         * Leaving the ToList() out above works fine on All report, and generates the following
-         * when doing GroupBy, which is perfect.
-         * 
-            SELECT [s].[Category] AS [Name], DATEPART(month, [t].[Timestamp]) AS [Month], SUM([s].[Amount]) AS [Total]
-            FROM [Split] AS [s]
-            INNER JOIN [Transactions] AS [t] ON [s].[TransactionID] = [t].[ID]
-            WHERE ((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)
-            GROUP BY [s].[Category], DATEPART(month, [t].[Timestamp])
-         
-         * Unfortunately, taking out the AsEnumerable() leads "QuerySplitsExcept" below to fail with a
-         * "could not be translated" error.
-         * 
-         * OK so what I did was move the AsEnumerable() down to QuerySplitsExcept(), which is the only
-         * place it was really needed.
-         */
-
-        /// <summary>
-        /// Generate a query for splits, excluding those with <paramref name="selected"/> top categories
-        /// </summary>
-        /// <param name="selected">Which top categories to exclude</param>
-        /// <returns>Resulting query</returns>
-        private NamedQuery QuerySplitsExcept(IEnumerable<string> selected)
-        {
-            var excludetopcategoriesstartswith = selected
-                .Select(x => $"{x}:")
-                .ToList();
-
-            var splitsExcept = QuerySplits().Query
-                .Where(x => !selected.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
-                .AsQueryable<IReportable>();
-
-            return new NamedQuery() { Query = splitsExcept };
-        }
+        #region Public Methods
 
         /// <summary>
         /// Generate queries for transactions AND splits, optionally limited to only those with given <paramref name="top"/> category
@@ -205,21 +101,252 @@ namespace YoFi.AspNet.Controllers.Reports
          */
 
         /// <summary>
-        /// Generate a queries for transactions AND splits, excluding those with <paramref name="selected"/> top categories
+        /// Generate queries for transactions AND splits, except those with <paramref name="excluded"/> top categories
         /// </summary>
-        /// <param name="selected">Which top categories to exclude</param>
+        /// <param name="excluded">Which top categories to exclude</param>
         /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryTransactionsCompleteExcept(IEnumerable<string> tops)
+        public IEnumerable<NamedQuery> QueryTransactionsCompleteExcept(IEnumerable<string> excluded)
         {
-            var txs = QueryTransactionsExcept(tops).Query;
-            var splits = QuerySplitsExcept(tops).Query;
+            var txs = QueryTransactionsExcept(excluded).Query;
+            var splits = QuerySplitsExcept(excluded).Query;
 
             return new List<NamedQuery>() {
-                new NamedQuery() 
-                { 
+                new NamedQuery()
+                {
                     Query = txs.Concat(splits)
                 }
             };
+        }
+
+        /// <summary>
+        /// Generate queries for budget line items
+        /// </summary>
+        /// <remarks>
+        /// Report ultimately needs an enumerable of queries, so this method puts it in the right format
+        /// for the Report.
+        /// </remarks>
+        /// <see cref="Report"/>
+        /// <returns>Resulting queries</returns>
+        public IEnumerable<NamedQuery> QueryBudget() => new List<NamedQuery>() { QueryBudgetSingle() };
+
+        /// <summary>
+        /// Generate queries for budget line items, except those with <paramref name="excluded"/> top categories
+        /// </summary>
+        /// <param name="excluded">Which top categories to exclude</param>
+        /// <remarks>
+        /// Report ultimately needs an enumerable of queries, so this method puts it in the right format
+        /// for the Report.
+        /// </remarks>
+        /// <see cref="Report"/>
+        /// <returns>Resulting queries</returns>
+        public IEnumerable<NamedQuery> QueryBudgetExcept(IEnumerable<string> excluded) => new List<NamedQuery>() { QueryBudgetSingleExcept(excluded) };
+
+        /// <summary>
+        /// Generate queries for transactions & splits compared to budget line items
+        /// </summary>
+        /// <param name="leafrows">Whether to include only the leaf row. 'false' will also include summary headings</param>
+        /// <returns>Resulting queries</returns>
+        public IEnumerable<NamedQuery> QueryActualVsBudget(bool leafrows = false)
+        {
+            var result = new List<NamedQuery>();
+
+            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
+            result.Add(QueryBudgetSingle().Labeled("Budget").AsLeafRowsOnly(leafrows));
+
+            return result;
+        }
+
+        /// <summary>
+        /// Generate a query for "managed" budget line items vs. transactions and splits
+        /// </summary>
+        /// <remarks>
+        /// "Managed", here means we manage them more carefully because they have monthly or weekly budget
+        /// amounts, not just a single annual amount like 'unmanaged' budget line items
+        /// </remarks>
+        /// <returns>Resulting queries</returns>
+        public IEnumerable<NamedQuery> QueryManagedBudget()
+        {
+            var result = new List<NamedQuery>();
+
+            // "Budget" items need to go in first, because they will control which rows show up in the
+            // final report
+            result.Add(QueryManagedBudgetSingle().Labeled("Budget"));
+            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual")));
+
+            return result;
+        }
+
+        /// <summary>
+        /// Generate queries for transactions & splits compared to budget line items, excluding those 
+        /// with <paramref name="excluded"/> top categories
+        /// </summary>
+        /// <param name="excluded">Which top categories to exclude</param>
+        /// <returns>Resulting queries</returns>
+        public IEnumerable<NamedQuery> QueryActualVsBudgetExcept(IEnumerable<string> excluded)
+        {
+            var result = new List<NamedQuery>();
+
+            result.AddRange(QueryTransactionsCompleteExcept(excluded).Select(x => x.Labeled("Actual")));
+            result.Add(QueryBudgetSingleExcept(excluded).Labeled("Budget"));
+
+            return result;
+        }
+
+        /// <summary>
+        /// Generate queries for a year-over-year report, comparing multiple <paramref name="years"/> of data
+        /// </summary>
+        /// <param name="years">Which years to include</param>
+        /// <returns>Resulting queries</returns>
+        public IEnumerable<NamedQuery> QueryYearOverYear(out int[] years)
+        {
+            var result = new List<NamedQuery>();
+
+            years = _context.Transactions.Select(x => x.Timestamp.Year).Distinct().ToArray();
+            foreach (var year in years)
+            {
+                var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
+                var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
+
+                result.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear });
+                result.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear });
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Fields
+        private ApplicationDbContext _context;
+        #endregion
+
+        #region Internals
+
+        /// <summary>
+        /// Generate a query for transactions, optionally limited to only those with given <paramref name="top"/> category
+        /// </summary>
+        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
+        /// <returns>Resulting query</returns>
+        private NamedQuery QueryTransactions(string top = null)
+        {
+            IQueryable<IReportable> txs = _context.Transactions
+                .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
+                .Where(x => !x.Splits.Any());
+
+            if (top != null)
+            {
+                string ecolon = $"{top}:";
+                txs = txs.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
+            }
+
+            txs = txs
+                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
+
+            return new NamedQuery() { Query = txs };
+        }
+
+        /*
+         * EF Core does a great job of the above. This is the final single query that it creates later
+         * when doing GroupBy.
+         *
+            SELECT [t].[Category] AS [Name], DATEPART(month, [t].[Timestamp]) AS [Month], SUM([t].[Amount]) AS [Total]
+            FROM [Transactions] AS [t]
+            WHERE (((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)) AND NOT (EXISTS (
+                SELECT 1
+                FROM [Split] AS [s]
+                WHERE [t].[ID] = [s].[TransactionID]))
+            GROUP BY [t].[Category], DATEPART(month, [t].[Timestamp])
+         */
+
+        // TODO: Need to figure out how to get rid of the AsEnumerable() calls in the
+        // "Except" pipelines. If I remove them, EF Core can't generate queries. So I will
+        // have to study more on this.
+
+        /// <summary>
+        /// Generate a query for transactions, except those with <paramref name="excluded"/> top categories
+        /// </summary>
+        /// <param name="excluded">Which top categories to exclude</param>
+        /// <returns>Resulting query</returns>
+        private NamedQuery QueryTransactionsExcept(IEnumerable<string> excluded)
+        {
+            var excludetopcategoriesstartswith = excluded
+                .Select(x => $"{x}:")
+                .ToList();
+
+            var txsExcept = QueryTransactions().Query
+                .Where(x => x.Category != null && !excluded.Contains(x.Category))
+                .AsEnumerable()
+                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                .AsQueryable<IReportable>();
+
+            return new NamedQuery() { Query = txsExcept };
+        }
+
+        /// <summary>
+        /// Generate a query for splits, optionally limited to only those with given <paramref name="top"/> category
+        /// </summary>
+        /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
+        /// <returns>Resulting query</returns>
+        private NamedQuery QuerySplits(string top = null)
+        {
+            var splits = _context.Splits
+                .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
+                .Include(x => x.Transaction)
+                .Select(x=> new ReportableDto() { Amount = x.Amount, Timestamp = x.Transaction.Timestamp, Category = x.Category })
+                .AsQueryable<IReportable>();
+
+            if (top != null)
+            {
+                string ecolon = $"{top}:";
+                splits = splits.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
+            }
+
+            return new NamedQuery() { Query = splits };
+        }
+
+        /*
+         * EF Core does a decent job of the above as well. It's straightforward because we have the AsQueryable() here
+         * which is needed for an of the Except* reports.
+         * 
+            SELECT [s].[Amount], [t].[Timestamp], [s].[Category]
+            FROM [Split] AS [s]
+            INNER JOIN [Transactions] AS [t] ON [s].[TransactionID] = [t].[ID]
+            WHERE ((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)
+         *
+         * Leaving the AsQueryable() out above works fine on All report, and generates the following
+         * when doing GroupBy, which is perfect.
+         * 
+            SELECT [s].[Category] AS [Name], DATEPART(month, [t].[Timestamp]) AS [Month], SUM([s].[Amount]) AS [Total]
+            FROM [Split] AS [s]
+            INNER JOIN [Transactions] AS [t] ON [s].[TransactionID] = [t].[ID]
+            WHERE ((DATEPART(year, [t].[Timestamp]) = @__Year_0) AND (([t].[Hidden] <> CAST(1 AS bit)) OR [t].[Hidden] IS NULL)) AND (DATEPART(month, [t].[Timestamp]) <= @__Month_1)
+            GROUP BY [s].[Category], DATEPART(month, [t].[Timestamp])
+         
+         * Unfortunately, taking out the AsEnumerable() leads "QuerySplitsExcept" below to fail with a
+         * "could not be translated" error.
+         * 
+         * OK so what I did was move the AsEnumerable() down to QuerySplitsExcept(), which is the only
+         * place it was really needed.
+         */
+
+        /// <summary>
+        /// Generate a query for splits, excluding those with <paramref name="excluded"/> top categories
+        /// </summary>
+        /// <param name="excluded">Which top categories to exclude</param>
+        /// <returns>Resulting query</returns>
+        private NamedQuery QuerySplitsExcept(IEnumerable<string> excluded)
+        {
+            var excludetopcategoriesstartswith = excluded
+                .Select(x => $"{x}:")
+                .ToList();
+
+            var splitsExcept = QuerySplits().Query
+                .Where(x => !excluded.Contains(x.Category))
+                .AsEnumerable()
+                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                .AsQueryable<IReportable>();
+
+            return new NamedQuery() { Query = splitsExcept };
         }
 
         /// <summary>
@@ -238,29 +365,18 @@ namespace YoFi.AspNet.Controllers.Reports
         }
 
         /// <summary>
-        /// Generate queries for budget line items
+        /// Generate a query for budget line items, except those with <paramref name="excluded"/> top categories
         /// </summary>
-        /// <remarks>
-        /// Report ultimately needs an enumerable of queries, so this method puts it in the right format
-        /// for the Report.
-        /// </remarks>
-        /// <see cref="Report"/>
-        /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryBudget() => new List<NamedQuery>() { QueryBudgetSingle() };
-
-        /// <summary>
-        /// Generate a query for budget line items, excluding those with <paramref name="selected"/> top categories
-        /// </summary>
-        /// <param name="selected">Which top categories to exclude</param>
+        /// <param name="excluded">Which top categories to exclude</param>
         /// <returns>Resulting query</returns>
-        private NamedQuery QueryBudgetSingleExcept(IEnumerable<string> selected)
+        private NamedQuery QueryBudgetSingleExcept(IEnumerable<string> excluded)
         {
-            var topstarts = selected
+            var topstarts = excluded
                 .Select(x => $"{x}:")
                 .ToList();
 
             var budgetExcept = QueryBudgetSingle().Query
-                .Where(x => x.Category != null && !selected.Contains(x.Category))
+                .Where(x => x.Category != null && !excluded.Contains(x.Category))
                 .AsEnumerable()
                 .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
                 .AsQueryable<IReportable>();
@@ -269,27 +385,13 @@ namespace YoFi.AspNet.Controllers.Reports
         }
 
         /// <summary>
-        /// Generate queries for budget line items, excluding those with <paramref name="selected"/> top categories
+        /// Generate a query for "managed" budget line items
         /// </summary>
-        /// <param name="selected">Which top categories to exclude</param>
         /// <remarks>
-        /// Report ultimately needs an enumerable of queries, so this method puts it in the right format
-        /// for the Report.
+        /// "Managed", here means we manage them more carefully because they have monthly or weekly budget
+        /// amounts, not just a single annual amount like 'unmanaged' budget line items
         /// </remarks>
-        /// <see cref="Report"/>
-        /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryBudgetExcept(IEnumerable<string> tops) => new List<NamedQuery>() { QueryBudgetSingleExcept(tops) };
-
-        public IEnumerable<NamedQuery> QueryActualVsBudget(bool leafrows = false)
-        {
-            var result = new List<NamedQuery>();
-
-            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
-            result.Add(QueryBudgetSingle().Labeled("Budget").AsLeafRowsOnly(leafrows));
-
-            return result;
-        }
-
+        /// <returns>Resulting query</returns>
         private NamedQuery QueryManagedBudgetSingle()
         {
             // Start with the usual transactions
@@ -300,6 +402,7 @@ namespace YoFi.AspNet.Controllers.Reports
             var managedtxs = budgettxs.Where(x => x.Timestamp.Month <= Month && categories.Contains(x.Category));
 
 #if false
+            // Review the results for debugging
             foreach (var it in managedtxs.ToList())
                 Console.WriteLine($"{it.Timestamp} {it.Category} {it.Amount}");
 #endif
@@ -323,42 +426,7 @@ namespace YoFi.AspNet.Controllers.Reports
             GROUP BY [b].[Category]
          */
 
-        public IEnumerable<NamedQuery> QueryManagedBudget()
-        {
-            var result = new List<NamedQuery>();
-
-            result.Add(QueryManagedBudgetSingle().Labeled("Budget"));
-            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual")));
-
-            return result;
-        }
-
-        public IEnumerable<NamedQuery> QueryActualVsBudgetExcept(IEnumerable<string> tops)
-        {
-            var result = new List<NamedQuery>();
-
-            result.AddRange(QueryTransactionsCompleteExcept(tops).Select(x => x.Labeled("Actual")));
-            result.Add(QueryBudgetSingleExcept(tops).Labeled("Budget"));
-
-            return result;
-        }
-
-        public IEnumerable<NamedQuery> QueryYearOverYear(out int[] years)
-        {
-            var result = new List<NamedQuery>();
-
-            years = _context.Transactions.Select(x => x.Timestamp.Year).Distinct().ToArray();
-            foreach (var year in years)
-            {
-                var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
-                var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
-
-                result.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear });
-                result.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear });
-            }
-
-            return result;
-        }
+        #endregion
     }
 
     /// <summary>
@@ -383,5 +451,4 @@ namespace YoFi.AspNet.Controllers.Reports
 
         public string Category { get; set; }
     }
-
 }
