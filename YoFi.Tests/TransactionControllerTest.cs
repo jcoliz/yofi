@@ -301,8 +301,8 @@ namespace YoFi.Tests
 
             // Given: Two payee matching rules, with differing payees, one with a regex one without (ergo it's a substring match)
             // And: A transaction which could match either
-            var regexpayee = new Payee() { Category = "Y", SubCategory = "E", Name = "/DOG.*123/" };
-            var substrpayee = new Payee() { Category = "X", SubCategory = "E", Name = "BIGDOG" };
+            var regexpayee = new Payee() { Category = "Y", Name = "/DOG.*123/" };
+            var substrpayee = new Payee() { Category = "X", Name = "BIGDOG" };
             var tx = new Transaction() { Payee = "BIGDOG SAYS 1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
 
             context.Payees.Add(regexpayee);
