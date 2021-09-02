@@ -126,10 +126,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <returns>Resulting queries</returns>
         public IEnumerable<NamedQuery> QueryBudget(IEnumerable<string> excluded = null)
         {
-            if (excluded?.Any() == true)
-                return new List<NamedQuery>() { QueryBudgetSingleExcept(excluded) };
-            else
-                return new List<NamedQuery>() { QueryBudgetSingle() };
+            return new List<NamedQuery>() { QueryBudgetSingle(excluded) };
         }
 
         /// <summary>
@@ -142,16 +139,8 @@ namespace YoFi.AspNet.Controllers.Reports
         {
             var result = new List<NamedQuery>();
 
-            if (excluded?.Any() == true)
-            {
-                result.AddRange(QueryActual(excluded: excluded).Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
-                result.Add(QueryBudgetSingleExcept(excluded).Labeled("Budget").AsLeafRowsOnly(leafrows));
-            }
-            else
-            {
-                result.AddRange(QueryActual().Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
-                result.Add(QueryBudgetSingle().Labeled("Budget").AsLeafRowsOnly(leafrows));
-            }
+            result.AddRange(QueryActual(excluded: excluded).Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
+            result.Add(QueryBudgetSingle(excluded).Labeled("Budget").AsLeafRowsOnly(leafrows));
 
             return result;
         }
@@ -336,36 +325,29 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Generate a query for budget line items
         /// </summary>
+        /// <param name="excluded">Optional limiter. Which top categories to exclude</param>
         /// <returns>Resulting query</returns>
-        private NamedQuery QueryBudgetSingle()
+        private NamedQuery QueryBudgetSingle(IEnumerable<string> excluded = null)
         {
-            // Note that using a DTO for budget line items protects against overfetching in the future if we add new
-            // fields to that object which are not used for reports.
-            var budgettxs = _context.BudgetTxs
+            var result = _context.BudgetTxs
                 .Where(x => x.Timestamp.Year == Year)
-                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
-
-            return new NamedQuery() { Query = budgettxs };
-        }
-
-        /// <summary>
-        /// Generate a query for budget line items, except those with <paramref name="excluded"/> top categories
-        /// </summary>
-        /// <param name="excluded">Which top categories to exclude</param>
-        /// <returns>Resulting query</returns>
-        private NamedQuery QueryBudgetSingleExcept(IEnumerable<string> excluded)
-        {
-            var topstarts = excluded
-                .Select(x => $"{x}:")
-                .ToList();
-
-            var budgetExcept = QueryBudgetSingle().Query
-                .Where(x => x.Category != null && !excluded.Contains(x.Category))
-                .AsEnumerable()
-                .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
+                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category })
                 .AsQueryable<IReportable>();
 
-            return new NamedQuery() { Query = budgetExcept };
+            if (excluded?.Any() == true)
+            {
+                var topstarts = excluded
+                    .Select(x => $"{x}:")
+                    .ToList();
+
+                result = result
+                    .Where(x => x.Category != null && !excluded.Contains(x.Category))
+                    .AsEnumerable()
+                    .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
+                    .AsQueryable<IReportable>();
+            }
+
+            return new NamedQuery() { Query = result };
         }
 
         /// <summary>
