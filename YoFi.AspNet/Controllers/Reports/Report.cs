@@ -122,17 +122,17 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Indexer to retrieve report cells
         /// </summary>
-        /// <param name="collabel">Which column</param>
-        /// <param name="rowlabel">Which row</param>
-        /// <returns>Value at that column,row position </returns>
-        public decimal this[ColumnLabel collabel, RowLabel rowlabel]
+        /// <param name="column">Which column</param>
+        /// <param name="row">Which row</param>
+        /// <returns>Value at that <paramref name="column"/>,<paramref name="row"/> position </returns>
+        public decimal this[ColumnLabel column, RowLabel row]
         {
             get
             {
-                if (collabel.IsCalculated)
-                    return collabel.Custom(RowDetails(rowlabel));
+                if (column.IsCalculated)
+                    return column.Custom(RowDetails(row));
                 else
-                    return Table[collabel, rowlabel];
+                    return Table[column, row];
             }
         }
 
@@ -200,8 +200,9 @@ namespace YoFi.AspNet.Controllers.Reports
             if (Source == null)
                 throw new ArgumentOutOfRangeException(nameof(Source), "Must set a source");
 
-            foreach (var kvp in Source)
-                BuildPhase_Group(kvp);
+            // Build each query individually
+            foreach (var query in Source)
+                BuildPhase_Group(query);
         }
 
         /// <summary>
@@ -235,29 +236,29 @@ namespace YoFi.AspNet.Controllers.Reports
             // Rows
 
             var rows = sorted ? RowLabelsOrdered : RowLabels;
-            foreach (var line in rows)
+            foreach (var row in rows)
             {
                 builder = new StringBuilder();
 
-                name = line.Name;
-                if (line.IsTotal)
+                name = row.Name;
+                if (row.IsTotal)
                     name = "TOTAL";
                 if (name == null)
                     name = "-";
 
-                var padding_before = string.Concat( Enumerable.Repeat<char>('>', line.IsTotal ? 0 : maxlevel - line.Level));
-                var padding_after = string.Concat( Enumerable.Repeat<char>(' ', line.IsTotal ? maxlevel : line.Level));
+                var padding_before = string.Concat( Enumerable.Repeat<char>('>', row.IsTotal ? 0 : maxlevel - row.Level));
+                var padding_after = string.Concat( Enumerable.Repeat<char>(' ', row.IsTotal ? maxlevel : row.Level));
 
-                builder.Append($"{line.Level} {padding_before}{name,-15}{padding_after} ");
+                builder.Append($"{row.Level} {padding_before}{name,-15}{padding_after} ");
 
                 foreach (var col in ColumnLabelsFiltered)
                 {
-                    var val = this[col, line];
+                    var val = this[col, row];
                     var format = col.DisplayAsPercent ? "P0" : "C2";
                     builder.Append($"| {val.ToString(format),10} ");
                 }
 
-                builder.Append($" {line}");
+                builder.Append($" {row}");
 
                 Console.WriteLine(builder.ToString());
             }
@@ -430,27 +431,29 @@ namespace YoFi.AspNet.Controllers.Reports
                     // Place the value in the total column
                     Table[TotalColumn, row] += cell.Total;
 
-                    //  3. Propagate. Propagate those values upward into totalling rows.
+                    // 3. Propagate. Propagate those values upward into totalling rows.
+                    // By definition "leaf rows only" means DON'T propagate into totalling rows
                     if (!oquery.LeafRowsOnly)
                         BuildPhase_Propagate(row: row, column: column, seriescolumn: seriescolumn, amount: cell.Total);
                 }
             }
 
             //  4. Prune. Prune out rows that are not really needed.
+            // Don't need to prune leaf rows only, because extraneous rows were never propagated in the first place
             if (!oquery.LeafRowsOnly)
                 BuildPhase_Prune();
         }
 
         /// <summary>
-        /// Propagate values upward to be collected byall generations of parents
+        /// Propagate values upward to be collected by all generations of parents
         /// </summary>
-        /// <param name="amount"></param>
-        /// <param name="row"></param>
-        /// <param name="column"></param>
-        /// <param name="seriescolumn"></param>
+        /// <param name="amount">The amount value for this cell</param>
+        /// <param name="row">The current row, upward from which we are going to propagate</param>
+        /// <param name="column">The month column where this cell exists, or null</param>
+        /// <param name="seriescolumn">The series column which is collecting series totals, or null if there isn't one</param>
         private void BuildPhase_Propagate(decimal amount, RowLabel row, ColumnLabel column = null, ColumnLabel seriescolumn = null)
         {
-            // Who is our parent? Based on ID.
+            // Who is our parent? Based on ID. e.g. if we are A:B:C, our parent is A:B
             var split = row.UniqueID.Split(':');
             var parentsplit = split.SkipLast(1);
 
@@ -509,16 +512,18 @@ namespace YoFi.AspNet.Controllers.Reports
                     }
                 }
             }
-            // Else we a top-level row
+            // Else we are a top-level row
             else
             {
-                // In this case, we accumulate into the report total.
-                row.Level = NumLevels - 1;
+                // In this case, we accumulate into the report total, for all applicable columns
                 Table[TotalColumn, TotalRow] += amount;
                 if (column != null)
                     Table[column, TotalRow] += amount;
                 if (seriescolumn != null)
                     Table[seriescolumn, TotalRow] += amount;
+
+                // We now know what level we are, so we can set it here.
+                row.Level = NumLevels - 1;
             }
         }
 
@@ -577,49 +582,49 @@ namespace YoFi.AspNet.Controllers.Reports
         /// This is the row-sorter. It's somewhat of a challenge to sort a tree of values to sort
         /// within each level but keep the tree sructure intact
         /// </remarks>
-        /// <param name="x">First row for comparison</param>
-        /// <param name="y">Second row for comparison</param>
-        /// <returns>Comparsion value. -1 if first row sorts before second row</returns>
-        int IComparer<RowLabel>.Compare(RowLabel x, RowLabel y)
+        /// <param name="first">First row for comparison</param>
+        /// <param name="second">Second row for comparison</param>
+        /// <returns>Comparsion value. -1 if <paramref name="first"/> sorts before <paramref name="second"/></returns>
+        int IComparer<RowLabel>.Compare(RowLabel first, RowLabel second)
         {
             int result = 0;
             var n = new RowLabel() { Name = "null" };
 
             // Turn this on if need to trace the sort logic
             bool debugout = false;
-            Debug.WriteLineIf(debugout,$"Compare [{x??n}] vs [{y??n}]");
+            Debug.WriteLineIf(debugout,$"Compare [{first??n}] vs [{second??n}]");
 
             // (1) Total rows always come after other rows
-            if (x.IsTotal && y.IsTotal)
+            if (first.IsTotal && second.IsTotal)
                 goto done;
-            if (x.IsTotal)
+            if (first.IsTotal)
             {
                 result = 1;
                 goto done;
             }
-            if (y.IsTotal)
+            if (second.IsTotal)
             {
                 result = -1;
                 goto done;
             }
 
             // (2) If these two share a common parent, we can compare based on SortOrder
-            if (x.Parent == y.Parent)
+            if (first.Parent == second.Parent)
             {
-                var yval = Table[OrderingColumn, y as RowLabel];
-                var xval = Table[OrderingColumn, x as RowLabel];
+                var secondval = Table[OrderingColumn, second];
+                var firstval = Table[OrderingColumn, first];
                 switch (SortOrder)
                 {
                     case SortOrders.TotalAscending:
-                        Debug.WriteLineIf(debugout, $"Checking Totals: {xval:C2} vs {yval:C2}...");
-                        result = yval.CompareTo(xval);
+                        Debug.WriteLineIf(debugout, $"Checking Totals: {firstval:C2} vs {secondval:C2}...");
+                        result = secondval.CompareTo(firstval);
                         break;
                     case SortOrders.TotalDescending:
-                        Debug.WriteLineIf(debugout, $"Checking Totals: {xval:C2} vs {yval:C2}...");
-                        result = xval.CompareTo(yval);
+                        Debug.WriteLineIf(debugout, $"Checking Totals: {firstval:C2} vs {secondval:C2}...");
+                        result = firstval.CompareTo(secondval);
                         break;
                     case SortOrders.NameAscending:
-                        result = x.Name?.CompareTo(y.Name) ?? -1;
+                        result = first.Name?.CompareTo(second.Name) ?? -1;
                         break;
                 }
                 goto done;
@@ -627,13 +632,13 @@ namespace YoFi.AspNet.Controllers.Reports
 
             // (3) Parents always come before their own children
 
-            if (x.Parent == y)
+            if (first.Parent == second)
             {
                 Debug.WriteLineIf(debugout, "Parent relationship");
                 result = 1;
                 goto done;
             }
-            else if (y.Parent == x)
+            else if (second.Parent == first)
             {
                 Debug.WriteLineIf(debugout, "Parent relationship");
                 result = -1;
@@ -643,21 +648,21 @@ namespace YoFi.AspNet.Controllers.Reports
             // (4) Search upward if can't resolve at this level
 
             // If one is deeper than the other, run up that parent chain
-            if (x.Level < y.Level)
+            if (first.Level < second.Level)
             {
-                Debug.WriteLineIf(debugout, $"Try {x} Parent vs {y}");
-                result = ((IComparer<RowLabel>)this).Compare(x.Parent as RowLabel, y);
+                Debug.WriteLineIf(debugout, $"Try {first} Parent vs {second}");
+                result = ((IComparer<RowLabel>)this).Compare(first.Parent as RowLabel, second);
             }
-            else if (y.Level < x.Level)
+            else if (second.Level < first.Level)
             {
-                Debug.WriteLineIf(debugout, $"Try {x} vs {y} Parent");
-                result = ((IComparer<RowLabel>)this).Compare(x, y.Parent as RowLabel);
+                Debug.WriteLineIf(debugout, $"Try {first} vs {second} Parent");
+                result = ((IComparer<RowLabel>)this).Compare(first, second.Parent as RowLabel);
             }
             else
             {
                 // If we're at the SAME level, run both parents upwards
-                Debug.WriteLineIf(debugout, $"Try {x} Parent vs {y} Parent");
-                result = ((IComparer<RowLabel>)this).Compare(x.Parent as RowLabel, y.Parent as RowLabel);
+                Debug.WriteLineIf(debugout, $"Try {first} Parent vs {second} Parent");
+                result = ((IComparer<RowLabel>)this).Compare(first.Parent as RowLabel, second.Parent as RowLabel);
             }
 
 #if false
@@ -669,11 +674,11 @@ namespace YoFi.AspNet.Controllers.Reports
         done:
 
             if (result < 0)
-                Debug.WriteLineIf(debugout, $">> {x??n} is before {y??n}");
+                Debug.WriteLineIf(debugout, $">> {first??n} is before {second??n}");
             else if (result > 0)
-                Debug.WriteLineIf(debugout, $">> {x??n} is after {y??n}");
+                Debug.WriteLineIf(debugout, $">> {first??n} is after {second??n}");
             else
-                Debug.WriteLineIf(debugout, $">> {x??n} is same as {y??n}");
+                Debug.WriteLineIf(debugout, $">> {first??n} is same as {second??n}");
 
             return result;
         }
@@ -700,18 +705,22 @@ namespace YoFi.AspNet.Controllers.Reports
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Final total-displaying column
+        /// Final total-displaying row or column
         /// </summary>
         public bool IsTotal { get; set; }
 
         /// <summary>
-        /// True if this column should sort AFTER the totals
+        /// True if this row or column should sort AFTER the totals
         /// </summary>
         public bool IsSortingAfterTotal { get; set; }
 
         /// <summary>
         /// In a multi-level report, whom are we under? or null for top-level
         /// </summary>
+        /// <remarks>
+        /// TODO: Does Parent really belong in the base label? Only rows have
+        /// parents so probably should be in the row label.
+        /// </remarks>
         public BaseLabel Parent { get; set; }
 
         /// <summary>
