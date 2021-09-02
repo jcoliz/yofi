@@ -119,7 +119,7 @@ namespace YoFi.Tests
             Items[4].Selected = true;
             await context.SaveChangesAsync();
 
-            var result = await controller.BulkEdit("Category", "SubCategory");
+            var result = await controller.BulkEdit("Category");
             var actual = result as RedirectToActionResult;
 
             Assert.AreEqual("Index", actual.ActionName);
@@ -172,7 +172,7 @@ namespace YoFi.Tests
             var map = new CategoryMap() { Category = "Food", Key1 = "A", Key2 = "B" };
             context.CategoryMaps.Add(map);
 
-            var item = new Payee() { Category = "Food", SubCategory = "Stuff", Name = "3" };
+            var item = new Payee() { Category = "Food", Name = "3" };
             context.Payees.Add(item);
 
             context.SaveChanges();
@@ -183,7 +183,7 @@ namespace YoFi.Tests
             var incoming = helper.ExtractFromSpreadsheet<Payee>(stream);
 
             Assert.AreEqual(1, incoming.Count);
-            Assert.AreEqual("A:B:Stuff", incoming.Single().Category);
+            Assert.AreEqual("A:B", incoming.Single().Category);
         }
 
         [DataRow(true)]

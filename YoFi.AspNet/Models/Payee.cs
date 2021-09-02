@@ -40,6 +40,25 @@ namespace YoFi.AspNet.Models
         /// </remarks>
         public string SubCategory { get; set; }
 
+
+        /// <summary>
+        /// Pacify ICatSubcat
+        /// </summary>
+        /// <remarks>
+        /// This property is obsolete
+        /// </remarks>
+        string ICatSubcat.SubCategory
+        {
+            get
+            {
+                return null;
+            }
+            set
+            {
+                // Ignore
+            }
+        }
+
         /// <summary>
         /// Whether this object will be included in the next bulk operation
         /// </summary>
@@ -58,13 +77,12 @@ namespace YoFi.AspNet.Models
         {
             return obj is Payee payee &&
                    Name == payee.Name &&
-                   Category == payee.Category &&
-                   SubCategory == payee.SubCategory;
+                   Category == payee.Category;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Name, Category, SubCategory);
+            return HashCode.Combine(Name, Category);
         }
     }
 }

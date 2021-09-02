@@ -31,7 +31,7 @@ namespace YoFi.AspNet.Controllers
             // Process QUERY (Q) parameters
             //
 
-            var result = _context.Payees.OrderBy(x => x.Category).ThenBy(x => x.SubCategory).ThenBy(x => x.Name).AsQueryable();
+            var result = _context.Payees.OrderBy(x => x.Category).ThenBy(x => x.Name).AsQueryable();
 
             ViewData["Query"] = q;
 
@@ -236,7 +236,7 @@ namespace YoFi.AspNet.Controllers
         // POST: Payees/BulkEdit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BulkEdit(string Category, string SubCategory)
+        public async Task<IActionResult> BulkEdit(string Category)
         {
             var result = from s in _context.Payees
                          where s.Selected == true
@@ -248,18 +248,6 @@ namespace YoFi.AspNet.Controllers
             {
                 if (!string.IsNullOrEmpty(Category))
                     item.Category = Category;
-
-                if (!string.IsNullOrEmpty(SubCategory))
-                {
-                    if ("-" == SubCategory)
-                    {
-                        item.SubCategory = string.Empty;
-                    }
-                    else
-                    {
-                        item.SubCategory = SubCategory;
-                    }
-                }
 
                 item.Selected = false;
             }
@@ -340,7 +328,7 @@ namespace YoFi.AspNet.Controllers
                 return BadRequest(ex.Message);
             }
 
-            return View(result.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory));
+            return View(result.OrderBy(x => x.Category));
         }
 
         // GET: Payees/Download
@@ -349,7 +337,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var items = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.SubCategory).ThenBy(x=>x.Name).ToListAsync();
+                var items = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.Name).ToListAsync();
 
                 if (mapped ?? false)
                 {
