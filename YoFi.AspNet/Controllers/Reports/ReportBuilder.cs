@@ -169,7 +169,7 @@ namespace YoFi.AspNet.Controllers.Reports
             else if (parameters.id == "expenses-v-budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
-                var source = _qbuilder.QueryActualVsBudgetExcept(excluded: notexpenses);
+                var source = _qbuilder.QueryActualVsBudget(excluded: notexpenses);
                 result.Source = source;
 
                 // What is the highest transaction in the "Actuals"?

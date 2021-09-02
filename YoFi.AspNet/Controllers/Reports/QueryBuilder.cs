@@ -136,13 +136,22 @@ namespace YoFi.AspNet.Controllers.Reports
         /// Generate queries for transactions & splits compared to budget line items
         /// </summary>
         /// <param name="leafrows">Whether to include only the leaf row. 'false' will also include summary headings</param>
+        /// <param name="excluded">Optional limiter. Which top categories to exclude</param>
         /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryActualVsBudget(bool leafrows = false)
+        public IEnumerable<NamedQuery> QueryActualVsBudget(bool leafrows = false, IEnumerable<string> excluded = null)
         {
             var result = new List<NamedQuery>();
 
-            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
-            result.Add(QueryBudgetSingle().Labeled("Budget").AsLeafRowsOnly(leafrows));
+            if (excluded?.Any() == true)
+            {
+                result.AddRange(QueryTransactionsComplete(excluded: excluded).Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
+                result.Add(QueryBudgetSingleExcept(excluded).Labeled("Budget").AsLeafRowsOnly(leafrows));
+            }
+            else
+            {
+                result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
+                result.Add(QueryBudgetSingle().Labeled("Budget").AsLeafRowsOnly(leafrows));
+            }
 
             return result;
         }
@@ -163,22 +172,6 @@ namespace YoFi.AspNet.Controllers.Reports
             // final report
             result.Add(QueryManagedBudgetSingle().Labeled("Budget"));
             result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual")));
-
-            return result;
-        }
-
-        /// <summary>
-        /// Generate queries for transactions & splits compared to budget line items, excluding those 
-        /// with <paramref name="excluded"/> top categories
-        /// </summary>
-        /// <param name="excluded">Which top categories to exclude</param>
-        /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryActualVsBudgetExcept(IEnumerable<string> excluded)
-        {
-            var result = new List<NamedQuery>();
-
-            result.AddRange(QueryTransactionsComplete(excluded:excluded).Select(x => x.Labeled("Actual")));
-            result.Add(QueryBudgetSingleExcept(excluded).Labeled("Budget"));
 
             return result;
         }
