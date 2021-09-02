@@ -96,16 +96,6 @@ namespace YoFi.Tests
             
             await context.SaveChangesAsync();
         }
-        async Task AddFiveTransactionsWithFourLevels(int year)
-        {
-            context.Transactions.Add(new Transaction() { SubCategory = "C:D", Category = "A:B", Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m });
-            context.Transactions.Add(new Transaction() { SubCategory = "C:D", Category = "A:B", Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = 100m });
-            context.Transactions.Add(new Transaction() { SubCategory = "E:F", Category = "A:B", Payee = "5", Timestamp = new DateTime(year, 01, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { SubCategory = "G", Category = "E:F", Payee = "1", Timestamp = new DateTime(year, 01, 05), Amount = 400m });
-            context.Transactions.Add(new Transaction() { SubCategory = "G:R", Category = "E:F", Payee = "4", Timestamp = new DateTime(year, 01, 03), Amount = 500m });
-
-            await context.SaveChangesAsync();
-        }
 
         async Task AddFivePayees()
         {
