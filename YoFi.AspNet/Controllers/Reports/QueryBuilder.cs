@@ -59,12 +59,12 @@ namespace YoFi.AspNet.Controllers.Reports
         #region Public Methods
 
         /// <summary>
-        /// Generate queries for transactions AND splits
+        /// Generate queries for actual spending (transactions AND splits)
         /// </summary>
         /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
         /// <param name="excluded">Optional limited. If set, will excluded items in these top categories</param>
         /// <returns>Resulting queries</returns>
-        public IEnumerable<NamedQuery> QueryTransactionsComplete(string top = null, IEnumerable<string> excluded = null)
+        public IEnumerable<NamedQuery> QueryActual(string top = null, IEnumerable<string> excluded = null)
         {
             IQueryable<IReportable> txs = null;
             IQueryable<IReportable> splits = null;
@@ -144,12 +144,12 @@ namespace YoFi.AspNet.Controllers.Reports
 
             if (excluded?.Any() == true)
             {
-                result.AddRange(QueryTransactionsComplete(excluded: excluded).Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
+                result.AddRange(QueryActual(excluded: excluded).Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
                 result.Add(QueryBudgetSingleExcept(excluded).Labeled("Budget").AsLeafRowsOnly(leafrows));
             }
             else
             {
-                result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
+                result.AddRange(QueryActual().Select(x => x.Labeled("Actual").AsLeafRowsOnly(leafrows)));
                 result.Add(QueryBudgetSingle().Labeled("Budget").AsLeafRowsOnly(leafrows));
             }
 
@@ -171,7 +171,7 @@ namespace YoFi.AspNet.Controllers.Reports
             // "Budget" items need to go in first, because they will control which rows show up in the
             // final report
             result.Add(QueryManagedBudgetSingle().Labeled("Budget"));
-            result.AddRange(QueryTransactionsComplete().Select(x => x.Labeled("Actual")));
+            result.AddRange(QueryActual().Select(x => x.Labeled("Actual")));
 
             return result;
         }

@@ -117,14 +117,14 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 2;
-                result.Source = _qbuilder.QueryTransactionsComplete();
+                result.Source = _qbuilder.QueryActual();
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "All Transactions";
             }
             else if (parameters.id == "income")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
-                result.Source = _qbuilder.QueryTransactionsComplete(top: "Income");
+                result.Source = _qbuilder.QueryActual(top: "Income");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1;
                 result.SortOrder = Report.SortOrders.TotalAscending;
@@ -133,7 +133,7 @@ namespace YoFi.AspNet.Controllers.Reports
             else if (parameters.id == "taxes")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
-                result.Source = _qbuilder.QueryTransactionsComplete(top: "Taxes");
+                result.Source = _qbuilder.QueryActual(top: "Taxes");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1;
                 result.SortOrder = Report.SortOrders.TotalDescending;
@@ -142,7 +142,7 @@ namespace YoFi.AspNet.Controllers.Reports
             else if (parameters.id == "savings")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
-                result.Source = _qbuilder.QueryTransactionsComplete(top: "Savings");
+                result.Source = _qbuilder.QueryActual(top: "Savings");
                 result.SkipLevels = 1;
                 result.DisplayLevelAdjustment = 1;
                 result.SortOrder = Report.SortOrders.TotalDescending;
@@ -152,7 +152,7 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.WithMonthColumns = true;
-                result.Source = _qbuilder.QueryTransactionsComplete(excluded: notexpenses);
+                result.Source = _qbuilder.QueryActual(excluded: notexpenses);
                 result.NumLevels = 2;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses";
