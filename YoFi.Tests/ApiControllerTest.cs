@@ -399,7 +399,7 @@ namespace YoFi.Tests
             // detach the original so we have an unmodified copy around
             context.Entry(original).State = EntityState.Detached;
 
-            var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
+            var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", Timestamp = original.Timestamp, Amount = original.Amount };
 
             var result = await controller.Edit(original.ID, false, newtx);
 
@@ -420,7 +420,7 @@ namespace YoFi.Tests
             // detach the original so we have an unmodified copy around
             context.Entry(original).State = EntityState.Detached;
 
-            var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", SubCategory = original.SubCategory, Timestamp = original.Timestamp, Amount = original.Amount };
+            var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", Timestamp = original.Timestamp, Amount = original.Amount };
 
             var result = await controller.Edit(original.ID, true, newtx);
 
@@ -443,7 +443,7 @@ namespace YoFi.Tests
             // detach the original so we have an unmodified copy around
             context.Entry(original).State = EntityState.Detached;
 
-            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
+            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
 
             var result = await controller.EditPayee(original.ID, false, newitem);
 
@@ -464,7 +464,7 @@ namespace YoFi.Tests
             // detach the original so we have an unmodified copy around
             context.Entry(original).State = EntityState.Detached;
 
-            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", SubCategory = original.SubCategory, Category = original.Category };
+            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
 
             var result = await controller.EditPayee(original.ID, true, newitem);
 
