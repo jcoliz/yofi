@@ -202,7 +202,7 @@ namespace YoFi.Tests
         {
             // Given: A single empty transaction
             // Note that an empty timestamp does not serialize well
-            var Items = new List<Payee>() { new Payee() { ID = 1, Category = "A", SubCategory = "B", Name = "C", Selected = true } };
+            var Items = new List<Payee>() { new Payee() { ID = 1, Category = "A", Name = "C", Selected = true } };
 
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods

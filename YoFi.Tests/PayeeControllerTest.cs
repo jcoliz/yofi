@@ -27,11 +27,11 @@ namespace YoFi.Tests
             {
                 return  new List<Payee>()
                 {
-                    new Payee() { Category = "B", SubCategory = "A", Name = "3" },
-                    new Payee() { Category = "A", SubCategory = "A", Name = "2" },
-                    new Payee() { Category = "C", SubCategory = "A", Name = "5" },
-                    new Payee() { Category = "A", SubCategory = "A", Name = "1" },
-                    new Payee() { Category = "B", SubCategory = "B", Name = "4" },
+                    new Payee() { Category = "B", Name = "3" },
+                    new Payee() { Category = "A", Name = "2" },
+                    new Payee() { Category = "C", Name = "5" },
+                    new Payee() { Category = "A", Name = "1" },
+                    new Payee() { Category = "B", Name = "4" },
 
                     new Payee() { Category = "ABCD", Name = "3" },
                     new Payee() { Category = "X", Name = "2" },

@@ -99,11 +99,11 @@ namespace YoFi.Tests
 
         async Task AddFivePayees()
         {
-            context.Payees.Add(new Payee() { Category = "Y", SubCategory = "E", Name = "3" });
-            context.Payees.Add(new Payee() { Category = "X", SubCategory = "E", Name = "2" });
-            context.Payees.Add(new Payee() { Category = "Z", SubCategory = "E", Name = "5" });
-            context.Payees.Add(new Payee() { Category = "X", SubCategory = "E", Name = "1" });
-            context.Payees.Add(new Payee() { Category = "Y", SubCategory = "F", Name = "4" });
+            context.Payees.Add(new Payee() { Category = "Y", Name = "3" });
+            context.Payees.Add(new Payee() { Category = "X", Name = "2" });
+            context.Payees.Add(new Payee() { Category = "Z", Name = "5" });
+            context.Payees.Add(new Payee() { Category = "X", Name = "1" });
+            context.Payees.Add(new Payee() { Category = "Y", Name = "4" });
 
             await context.SaveChangesAsync();
         }
@@ -295,7 +295,7 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task AddPayee()
         {
-            var expected = new Payee() { Category = "B", SubCategory = "A", Name = "3" };
+            var expected = new Payee() { Category = "B", Name = "3" };
 
             var result = await controller.AddPayee(expected);
 
@@ -364,7 +364,7 @@ namespace YoFi.Tests
 
             context.Transactions.Add(new Transaction() { Payee = name, Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
 
-            var expected = new Payee() { Category = "Y", SubCategory = "E", Name = "/1234567.*XN/" };
+            var expected = new Payee() { Category = "Y", Name = "/1234567.*XN/" };
             context.Payees.Add(expected);
 
             await context.SaveChangesAsync();
