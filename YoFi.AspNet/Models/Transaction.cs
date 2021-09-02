@@ -59,6 +59,18 @@ namespace YoFi.AspNet.Models
         /// </remarks>
         public string SubCategory { get; set; }
 
+        string ICatSubcat.SubCategory 
+        { 
+            get
+            {
+                return null;
+            }
+            set
+            {
+                // Ignore
+            }
+        }
+
         /// <summary>
         /// Optional commentary about this transaction
         /// </summary>
