@@ -185,7 +185,7 @@ namespace YoFi.AspNet.Controllers.Reports
         #region Internals
 
         /*
-         * EF Core does a great job of the above. This is the final single query that it creates later
+         * EF Core does a great job of the transactions query. This is the final single query that it creates later
          * when doing GroupBy.
          *
             SELECT [t].[Category] AS [Name], DATEPART(month, [t].[Timestamp]) AS [Month], SUM([t].[Amount]) AS [Total]
@@ -218,6 +218,10 @@ namespace YoFi.AspNet.Controllers.Reports
                 result = result.Where(x => x.Category == top || x.Category.StartsWith(ecolon));
             }
 
+            // Transform into DTO's. This is not strictly needed in all cases. It could be moved into just before
+            // the AsEnumerable() below. Reason it's not needed is that this query ultimately will be later
+            // Selected into just the items needed for the report. However, the AsEnumerable() here will run 
+            // the query now, so we do need it for that case.
             result = result
                 .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category });
 
@@ -341,7 +345,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <returns>Resulting query</returns>
         private NamedQuery QueryManagedBudgetSingle()
         {
-            // Start with the usual transactions
+            // Start with the full set of all budget line items
             var budgettxs = QueryBudgetSingle().Query;
 
             // "Managed" Categories are those with more than one budgettx in a year.
