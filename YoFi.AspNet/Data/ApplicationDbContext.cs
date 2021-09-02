@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Models;
 
 namespace YoFi.AspNet.Data

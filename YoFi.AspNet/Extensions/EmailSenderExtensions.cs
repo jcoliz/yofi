@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using YoFi.AspNet.Services;
 
-namespace YoFi.AspNet.Services
+namespace YoFi.AspNet.Boilerplate.Services
 {
     public static class EmailSenderExtensions
     {

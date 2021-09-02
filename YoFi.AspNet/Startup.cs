@@ -9,9 +9,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
-using YoFi.AspNet.Services;
+using YoFi.AspNet.Boilerplate.Services;
 using System.Collections.Generic;
 using System.Linq;
+using YoFi.AspNet.Boilerplate.Models;
 
 namespace YoFi.AspNet
 {

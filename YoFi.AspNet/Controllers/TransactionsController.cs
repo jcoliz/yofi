@@ -19,6 +19,7 @@ using YoFi.AspNet.Common;
 using Transaction = YoFi.AspNet.Models.Transaction;
 using System.IO;
 using System.ComponentModel.DataAnnotations;
+using YoFi.AspNet.Boilerplate.Models;
 
 namespace YoFi.AspNet.Controllers
 {

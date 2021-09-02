@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using YoFi.AspNet.Models;
+using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Models.ManageViewModels;
-using YoFi.AspNet.Services;
+using YoFi.AspNet.Boilerplate.Services;
 
 namespace YoFi.AspNet.Controllers.Boilerplate
 {

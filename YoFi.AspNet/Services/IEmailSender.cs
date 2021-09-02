@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.AspNet.Services
+namespace YoFi.AspNet.Boilerplate.Services
 {
     public interface IEmailSender
     {
