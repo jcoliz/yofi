@@ -103,7 +103,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 IsSortingAfterTotal = true,
                 DisplayAsPercent = true,
                 Custom = (cols) =>
-                    result.GrandTotal == 0 ? 0 : cols.GetValueOrDefault("TOTAL") / result.GrandTotal
+                    (result.GrandTotal == 0) ? 0 : cols.GetValueOrDefault("TOTAL") / result.GrandTotal
             };
 
             var budgetavailablecolumn = new ColumnLabel()

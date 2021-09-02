@@ -763,7 +763,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Default comparison between base labels
         /// </summary>
-        /// <param name="other"></param>
+        /// <param name="other">Another base label for comparison</param>
         /// <returns></returns>
         int IComparable<BaseLabel>.CompareTo(BaseLabel other)
         {
