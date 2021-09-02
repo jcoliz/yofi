@@ -74,11 +74,11 @@ namespace YoFi.Tests
 
         List<Payee> PayeeItems = new List<Payee>()
         {
-            new Payee() { Category = "Y", SubCategory = "E", Name = "3" },
-            new Payee() { Category = "X", SubCategory = "E", Name = "2" },
-            new Payee() { Category = "Z", SubCategory = "E", Name = "5" },
-            new Payee() { Category = "X", SubCategory = "E", Name = "1" },
-            new Payee() { Category = "Y", SubCategory = "F", Name = "4" }
+            new Payee() { Category = "Y", Name = "3" },
+            new Payee() { Category = "X", Name = "2" },
+            new Payee() { Category = "Z", Name = "5" },
+            new Payee() { Category = "X", Name = "1" },
+            new Payee() { Category = "Y", Name = "4" }
         };
 
         List<CategoryMap> CategoryMapItems = new List<CategoryMap>()
