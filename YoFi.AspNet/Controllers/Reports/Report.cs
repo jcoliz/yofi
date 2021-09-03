@@ -195,11 +195,11 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <param name="definition"></param>
         public void LoadFrom(ReportDefinition definition)
         {
-            if (string.IsNullOrEmpty(definition.Name))
+            if (!string.IsNullOrEmpty(definition.Name))
                 Name = definition.Name;
 
             Report.SortOrders order;
-            if (string.IsNullOrEmpty(definition.SortOrder) && Enum.TryParse<Report.SortOrders>(definition.SortOrder, out order))
+            if (!string.IsNullOrEmpty(definition.SortOrder) && Enum.TryParse<Report.SortOrders>(definition.SortOrder, out order))
                 SortOrder = order;
 
             if (definition.WithMonthColumns.HasValue)

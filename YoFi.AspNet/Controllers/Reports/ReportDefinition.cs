@@ -60,6 +60,11 @@ namespace YoFi.AspNet.Controllers.Reports
         public string Name { get; set; }
 
         /// <summary>
+        /// In-depth description of the report for display
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
         /// Order to sort in, or null for default
         /// </summary>
         /// <remarks>

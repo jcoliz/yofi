@@ -120,6 +120,9 @@ namespace YoFi.AspNet.Controllers.Reports
                 { "budgetavailable", budgetavailablecolumn }
             };
 
+            if (parameters.id == "expenses-budget")
+                _qbuilder.Month = 12; // Budget reports are whole-year, generally
+
             var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
 
             if (definition != null)
@@ -130,27 +133,15 @@ namespace YoFi.AspNet.Controllers.Reports
                 if (!string.IsNullOrEmpty(definition.CustomColumns))
                     foreach (var col in definition.CustomColumns.Split(","))
                         result.AddCustomColumn(customcolumns[col]);
+
+                // String replacement for description
+                if (!string.IsNullOrEmpty(result.Description))
+                {
+                    result.Description.Replace("{Year}", Year.ToString());
+                }
             }
             
-            if (parameters.id == "expenses")
-            {
-                result.AddCustomColumn(pctoftotalcolumn);
-                result.WithMonthColumns = true;
-                result.Source = _qbuilder.QueryActual(excluded: notexpenses);
-                result.NumLevels = 2;
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "Expenses";
-            }
-            else if (parameters.id == "expenses-budget")
-            {
-                _qbuilder.Month = 12; // Budget reports are whole-year, generally
-                result.Description = $"For {Year}";
-                result.Source = _qbuilder.QueryBudget(excluded: notexpenses);
-                result.NumLevels = 3;
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "Expenses Budget";
-            }
-            else if (parameters.id == "expenses-v-budget")
+            if (parameters.id == "expenses-v-budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
                 var source = _qbuilder.QueryActualVsBudget(excluded: notexpenses);
@@ -229,7 +220,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.WithMonthColumns = parameters.showmonths.Value;
 
             result.Build();
-            result.WriteToConsole();
+            result.WriteToConsole(sorted:true);
 
             return result;
         }
@@ -274,6 +265,25 @@ namespace YoFi.AspNet.Controllers.Reports
                 DisplayLevelAdjustment = 1,
                 Name = "Savings",
                 CustomColumns = "pctoftotal"
+            },
+            new ReportDefinition()
+            {
+                id = "expenses",
+                CustomColumns = "pctoftotal",
+                Source = "Actual",
+                SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
+                WithMonthColumns = true,
+                NumLevels = 2,
+                Name = "Expenses"
+            },
+            new ReportDefinition()
+            {
+                id = "expenses-budget",
+                Description = "For {Year}",
+                Source = "Budget",
+                SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
+                NumLevels = 3,
+                Name = "Expenses Budget"
             }
         };
    }

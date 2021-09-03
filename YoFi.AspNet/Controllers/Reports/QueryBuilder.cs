@@ -76,7 +76,7 @@ namespace YoFi.AspNet.Controllers.Reports
 
                 if (parms[0] == "top")
                     top = parms[1];
-                else if (parms[1] == "excluded")
+                else if (parms[0] == "excluded")
                     excluded = parms[1].Split(',');
             }
 
