@@ -120,7 +120,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 { "budgetavailable", budgetavailablecolumn }
             };
 
-            if (parameters.id == "expenses-budget")
+            if (new string[] { "all-v-budget", "expenses-budget" }.Contains(parameters.id))
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
 
             var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
@@ -159,17 +159,6 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses vs. Budget";
-            }
-            else if (parameters.id == "all-v-budget")
-            {
-                _qbuilder.Month = 12; // Budget reports are whole-year, generally
-                result.Description = $"For {Year}";
-                result.AddCustomColumn(budgetpctcolumn);
-                result.Source = _qbuilder.QueryActualVsBudget();
-                result.WithTotalColumn = false;
-                result.NumLevels = 3;
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "All vs. Budget";
             }
             else if (parameters.id == "managed-budget")
             {
@@ -284,6 +273,16 @@ namespace YoFi.AspNet.Controllers.Reports
                 SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
                 NumLevels = 3,
                 Name = "Expenses Budget"
+            },
+            new ReportDefinition()
+            {
+                id = "all-v-budget",
+                Description = "For {Year}",
+                CustomColumns = "budgetpct",
+                Source = "ActualVsBudget",
+                WithTotalColumn = false,
+                NumLevels = 3,
+                Name = "All vs. Budget"
             }
         };
    }
