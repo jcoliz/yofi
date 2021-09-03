@@ -160,17 +160,6 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses vs. Budget";
             }
-            else if (parameters.id == "managed-budget")
-            {
-                result.AddCustomColumn(budgetpctcolumn);
-                result.AddCustomColumn(budgetavailablecolumn);
-                result.Source = _qbuilder.QueryManagedBudget();
-                result.WithTotalColumn = false;
-                result.NumLevels = 4;
-                result.DisplayLevelAdjustment = 1;
-                result.SortOrder = Report.SortOrders.NameAscending;
-                result.Name = "Managed Budget";
-            }
             else if (parameters.id == "budget")
             {
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
@@ -214,7 +203,7 @@ namespace YoFi.AspNet.Controllers.Reports
             return result;
         }
 
-        private List<ReportDefinition> Defintions = new List<ReportDefinition>()
+        private static List<ReportDefinition> Defintions = new List<ReportDefinition>()
         {
             new ReportDefinition()
             {
@@ -277,12 +266,23 @@ namespace YoFi.AspNet.Controllers.Reports
             new ReportDefinition()
             {
                 id = "all-v-budget",
+                Name = "All vs. Budget",
                 Description = "For {Year}",
-                CustomColumns = "budgetpct",
                 Source = "ActualVsBudget",
                 WithTotalColumn = false,
                 NumLevels = 3,
-                Name = "All vs. Budget"
+                CustomColumns = "budgetpct",
+            },
+            new ReportDefinition()
+            {
+                id = "managed-budget",
+                Name = "Managed Budget",
+                Source = "ManagedBudget",
+                WithTotalColumn = false,
+                NumLevels = 4,
+                DisplayLevelAdjustment = 1,
+                SortOrder = "NameAscending",
+                CustomColumns = "budgetpct,budgetavailable",
             }
         };
    }
