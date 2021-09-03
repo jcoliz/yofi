@@ -120,7 +120,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 { "budgetavailable", budgetavailablecolumn }
             };
 
-            if (new string[] { "all-v-budget", "expenses-budget", "budget" }.Contains(parameters.id))
+            if (new string[] { "all-v-budget", "expenses-budget", "budget", "expenses-v-budget" }.Contains(parameters.id))
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
 
             var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
@@ -138,29 +138,21 @@ namespace YoFi.AspNet.Controllers.Reports
                 if (!string.IsNullOrEmpty(result.Description))
                 {
                     result.Description.Replace("{Year}", Year.ToString());
+
+                    if (result.Description.Contains("{yearprogress}"))
+                    {
+                        // What is the highest transaction in the "Actuals"?
+                        var latesttime = result.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
+
+                        // What % of the way is it through that year?
+                        var yearprogress = (double)latesttime.DayOfYear / 365.0;
+
+                        result.Description.Replace("{yearprogress}", yearprogress.ToString("P0"));
+                    }
                 }
             }
             
-            if (parameters.id == "expenses-v-budget")
-            {
-                _qbuilder.Month = 12; // Budget reports are whole-year, generally
-                var source = _qbuilder.QueryActualVsBudget(excluded: notexpenses);
-                result.Source = source;
-
-                // What is the highest transaction in the "Actuals"?
-                var latesttime = source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a==null)?DateTime.MinValue:a.Timestamp )).Max();
-
-                // What % of the way is it through that year?
-                var yearprogress = (double)latesttime.DayOfYear / 365.0;
-
-                result.Description = $"For {Year} ({yearprogress:P0})";
-                result.AddCustomColumn(budgetpctcolumn);
-                result.WithTotalColumn = false;
-                result.NumLevels = 3;
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "Expenses vs. Budget";
-            }
-            else if (parameters.id == "yoy")
+            if (parameters.id == "yoy")
             {
                 var years = new int[] { };
                 result.Source = _qbuilder.QueryYearOverYear(out years);
@@ -284,7 +276,19 @@ namespace YoFi.AspNet.Controllers.Reports
                 Description = "For {Year}",
                 NumLevels = 3,
                 Source = "Budget",
+            },
+            new ReportDefinition()
+            {
+                id = "expenses-v-budget",
+                Name = "Expenses vs. Budget",
+                Source = "ActualVsBudget",
+                SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
+                Description = "For {Year} ({yearprogress})",
+                CustomColumns = "budgetpct",
+                WithTotalColumn = false,
+                NumLevels = 3,
             }
+
         };
    }
 }
