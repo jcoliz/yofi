@@ -113,42 +113,26 @@ namespace YoFi.AspNet.Controllers.Reports
                     cols.GetValueOrDefault("ID:Actual") - cols.GetValueOrDefault("ID:Budget")
             };
 
+            var customcolumns = new Dictionary<string, ColumnLabel>()
+            {
+                { "pctoftotal", pctoftotalcolumn },
+                { "budgetpct", budgetpctcolumn },
+                { "budgetavailable", budgetavailablecolumn }
+            };
+
             var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
 
             if (definition != null)
             {
                 result.LoadFrom(definition);
                 result.Source = _qbuilder.LoadFrom(definition);
+
+                if (!string.IsNullOrEmpty(definition.CustomColumns))
+                    foreach (var col in definition.CustomColumns.Split(","))
+                        result.AddCustomColumn(customcolumns[col]);
             }
             
-            if (parameters.id == "income")
-            {
-                result.AddCustomColumn(pctoftotalcolumn);
-                result.Source = _qbuilder.QueryActual(top: "Income");
-                result.SkipLevels = 1;
-                result.DisplayLevelAdjustment = 1;
-                result.SortOrder = Report.SortOrders.TotalAscending;
-                result.Name = "Income";
-            }
-            else if (parameters.id == "taxes")
-            {
-                result.AddCustomColumn(pctoftotalcolumn);
-                result.Source = _qbuilder.QueryActual(top: "Taxes");
-                result.SkipLevels = 1;
-                result.DisplayLevelAdjustment = 1;
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "Taxes";
-            }
-            else if (parameters.id == "savings")
-            {
-                result.AddCustomColumn(pctoftotalcolumn);
-                result.Source = _qbuilder.QueryActual(top: "Savings");
-                result.SkipLevels = 1;
-                result.DisplayLevelAdjustment = 1;
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "Savings";
-            }
-            else if (parameters.id == "expenses")
+            if (parameters.id == "expenses")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.WithMonthColumns = true;
@@ -259,6 +243,37 @@ namespace YoFi.AspNet.Controllers.Reports
                 NumLevels = 2,
                 Source = "Actual",
                 Name = "All Transactions"
+            },
+            new ReportDefinition()
+            {
+                id = "income",
+                SkipLevels = 1,
+                DisplayLevelAdjustment = 1,
+                SortOrder = "TotalAscending",
+                Name = "Income",
+                Source = "Actual",
+                SourceParameters = "top:Income",
+                CustomColumns = "pctoftotal"
+            },
+            new ReportDefinition()
+            {
+                id = "taxes",
+                Source = "Actual",
+                SourceParameters = "top:Taxes",
+                SkipLevels = 1,
+                DisplayLevelAdjustment = 1,
+                Name = "Taxes",
+                CustomColumns = "pctoftotal"
+            },
+            new ReportDefinition()
+            {
+                id = "savings",
+                Source = "Actual",
+                SourceParameters = "top:Savings",
+                SkipLevels = 1,
+                DisplayLevelAdjustment = 1,
+                Name = "Savings",
+                CustomColumns = "pctoftotal"
             }
         };
    }
