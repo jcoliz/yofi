@@ -50,6 +50,11 @@ namespace YoFi.AspNet.Controllers.Reports
         /// </remarks>
         public string CustomColumns { get; set; }
 
+        /// <summary>
+        /// Cover the whole year, despite current months parameter
+        /// </summary>
+        public bool? WholeYear { get; set; }
+
         #endregion
 
         #region Direct Members of Report

@@ -81,16 +81,21 @@ namespace YoFi.AspNet.Controllers.Reports
             int Month = _qbuilder.Month = parameters.month ?? 12;
             int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
 
-            var period = new DateTime(Year, Month, 1);
-            _report.Description = $"For {Year} through {period.ToString("MMMM")} ";
-                        
-            if (new string[] { "all-v-budget", "expenses-budget", "budget", "expenses-v-budget" }.Contains(parameters.id))
-                _qbuilder.Month = 12; // Budget reports are whole-year, generally
-
             var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
 
             if (definition != null)
             {
+                if (definition.WholeYear == true)
+                {
+                    _qbuilder.Month = 12;
+                    _report.Description = $"For {Year}";
+                }
+                else
+                {
+                    var period = new DateTime(Year, Month, 1);
+                    _report.Description = $"For {Year} through {period.ToString("MMMM")} ";
+                }
+
                 _report.LoadFrom(definition);
                 _report.Source = _qbuilder.LoadFrom(definition);
 
@@ -229,9 +234,9 @@ namespace YoFi.AspNet.Controllers.Reports
             new ReportDefinition()
             {
                 id = "expenses-budget",
-                Description = "For {Year}",
                 Source = "Budget",
                 SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
+                WholeYear = true,
                 NumLevels = 3,
                 Name = "Expenses Budget"
             },
@@ -239,8 +244,8 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 id = "all-v-budget",
                 Name = "All vs. Budget",
-                Description = "For {Year}",
                 Source = "ActualVsBudget",
+                WholeYear = true,
                 WithTotalColumn = false,
                 NumLevels = 3,
                 CustomColumns = "budgetpct",
@@ -270,9 +275,9 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 id = "budget",
                 Name = "Full Budget",
-                Description = "For {Year}",
-                NumLevels = 3,
                 Source = "Budget",
+                WholeYear = true,
+                NumLevels = 3,
             },
             new ReportDefinition()
             {
@@ -280,12 +285,12 @@ namespace YoFi.AspNet.Controllers.Reports
                 Name = "Expenses vs. Budget",
                 Source = "ActualVsBudget",
                 SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
+                WholeYear = true,
                 Description = "For {Year} ({yearprogress})",
                 CustomColumns = "budgetpct",
                 WithTotalColumn = false,
                 NumLevels = 3,
             }
-
         };
    }
 }
