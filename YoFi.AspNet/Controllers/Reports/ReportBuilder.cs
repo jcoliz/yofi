@@ -85,52 +85,55 @@ namespace YoFi.AspNet.Controllers.Reports
 
             if (definition != null)
             {
+                // Timeframe and description (which displays timeframe)
+
+                _report.Description = $"For {Year}";
                 if (definition.WholeYear == true)
                 {
                     _qbuilder.Month = 12;
-                    _report.Description = $"For {Year}";
                 }
                 else
                 {
                     var period = new DateTime(Year, Month, 1);
-                    _report.Description = $"For {Year} through {period.ToString("MMMM")} ";
+                    _report.Description += $"through {period.ToString("MMMM")} ";
                 }
 
+                // Most properties are set by report directly
+
                 _report.LoadFrom(definition);
+
+                // Set Source
+
                 _report.Source = _qbuilder.LoadFrom(definition);
+
+                // WholeYear needs to be handled after source is set
+
+                if (definition.YearProgress == true)
+                {
+                    // What is the highest transaction in the "Actuals"?
+                    var latesttime = _report.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
+
+                    // What % of the way is it through that year?
+                    var yearprogress = (double)latesttime.DayOfYear / 365.0;
+
+                    _report.Description += $" {yearprogress:P0}";
+                }
+
+                // Special case for yoy report
+
+                if (parameters.id == "yoy")
+                {
+                    var years = _report.Source.Select(x => Int32.Parse(x.Name));
+                    _report.Description = $"For {years.Min()} to {years.Max()}";
+                }
+
+                // Set custom columns
 
                 if (!string.IsNullOrEmpty(definition.CustomColumns))
                     foreach (var col in definition.CustomColumns.Split(","))
                         _report.AddCustomColumn(CustomColumnFor(col));
-
-                // String replacement for description
-                if (!string.IsNullOrEmpty(_report.Description))
-                {
-                    _report.Description.Replace("{Year}", Year.ToString());
-
-                    if (_report.Description.Contains("{yearprogress}"))
-                    {
-                        // What is the highest transaction in the "Actuals"?
-                        var latesttime = _report.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
-
-                        // What % of the way is it through that year?
-                        var yearprogress = (double)latesttime.DayOfYear / 365.0;
-
-                        _report.Description.Replace("{yearprogress}", yearprogress.ToString("P0"));
-                    }
-                }
             }
             
-            if (parameters.id == "yoy")
-            {
-                var years = new int[] { };
-                _report.Source = _qbuilder.QueryYearOverYear(out years);
-                _report.Description = $"For {years.Min()} to {years.Max()}";
-                _report.NumLevels = 3;
-                _report.SortOrder = Report.SortOrders.TotalDescending;
-                _report.Name = "Year over Year";
-            }
-
             if (parameters.level.HasValue)
             {
                 _report.NumLevels = parameters.level.Value;
@@ -286,9 +289,16 @@ namespace YoFi.AspNet.Controllers.Reports
                 Source = "ActualVsBudget",
                 SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
                 WholeYear = true,
-                Description = "For {Year} ({yearprogress})",
+                YearProgress = true,
                 CustomColumns = "budgetpct",
                 WithTotalColumn = false,
+                NumLevels = 3,
+            },
+            new ReportDefinition()
+            {
+                id = "yoy",
+                Name = "Year over Year",
+                Source = "YearOverYear",
                 NumLevels = 3,
             }
         };

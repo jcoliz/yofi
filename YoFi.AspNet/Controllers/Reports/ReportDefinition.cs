@@ -55,6 +55,11 @@ namespace YoFi.AspNet.Controllers.Reports
         /// </summary>
         public bool? WholeYear { get; set; }
 
+        /// <summary>
+        /// Whether to display the precise year progress in description
+        /// </summary>
+        public bool? YearProgress { get; set; }
+
         #endregion
 
         #region Direct Members of Report
@@ -63,11 +68,6 @@ namespace YoFi.AspNet.Controllers.Reports
         /// The long readable name of the report
         /// </summary>
         public string Name { get; set; }
-
-        /// <summary>
-        /// In-depth description of the report for display
-        /// </summary>
-        public string Description { get; set; }
 
         /// <summary>
         /// Order to sort in, or null for default

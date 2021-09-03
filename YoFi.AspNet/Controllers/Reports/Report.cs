@@ -36,6 +36,10 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// In-depth description of the report for display
         /// </summary>
+        /// <remarks>
+        /// In practice, this is used exclusively to describe the timeframe covered by
+        /// the report, so could be renamed "timeframe"
+        /// </remarks>
         public string Description { get; set; }
 
         /// <summary>
