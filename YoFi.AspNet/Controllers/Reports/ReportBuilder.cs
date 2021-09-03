@@ -120,7 +120,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 { "budgetavailable", budgetavailablecolumn }
             };
 
-            if (new string[] { "all-v-budget", "expenses-budget" }.Contains(parameters.id))
+            if (new string[] { "all-v-budget", "expenses-budget", "budget" }.Contains(parameters.id))
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
 
             var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
@@ -159,15 +159,6 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.NumLevels = 3;
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Expenses vs. Budget";
-            }
-            else if (parameters.id == "budget")
-            {
-                _qbuilder.Month = 12; // Budget reports are whole-year, generally
-                result.Description = $"For {Year}";
-                result.NumLevels = 3;
-                result.Source = _qbuilder.QueryBudget();
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "Full Budget";
             }
             else if (parameters.id == "yoy")
             {
@@ -285,6 +276,14 @@ namespace YoFi.AspNet.Controllers.Reports
                 WithTotalColumn = false,
                 NumLevels = 4,
                 SortOrder = "NameAscending",
+            },
+            new ReportDefinition()
+            {
+                id = "budget",
+                Name = "Full Budget",
+                Description = "For {Year}",
+                NumLevels = 3,
+                Source = "Budget",
             }
         };
    }
