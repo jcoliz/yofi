@@ -83,57 +83,59 @@ namespace YoFi.AspNet.Controllers.Reports
 
             var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
 
-            if (definition != null)
+            if (definition == null)
+                throw new ArgumentOutOfRangeException(nameof(parameters.id), $"Unable to find report {parameters.id}");
+
+            // Timeframe and description (which displays timeframe)
+
+            _report.Description = $"For {Year}";
+            if (definition.WholeYear == true)
             {
-                // Timeframe and description (which displays timeframe)
-
-                _report.Description = $"For {Year}";
-                if (definition.WholeYear == true)
-                {
-                    _qbuilder.Month = 12;
-                }
-                else
-                {
-                    var period = new DateTime(Year, Month, 1);
-                    _report.Description += $"through {period.ToString("MMMM")} ";
-                }
-
-                // Most properties are set by report directly
-
-                _report.LoadFrom(definition);
-
-                // Set Source
-
-                _report.Source = _qbuilder.LoadFrom(definition);
-
-                // WholeYear needs to be handled after source is set
-
-                if (definition.YearProgress == true)
-                {
-                    // What is the highest transaction in the "Actuals"?
-                    var latesttime = _report.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
-
-                    // What % of the way is it through that year?
-                    var yearprogress = (double)latesttime.DayOfYear / 365.0;
-
-                    _report.Description += $" {yearprogress:P0}";
-                }
-
-                // Special case for yoy report
-
-                if (parameters.id == "yoy")
-                {
-                    var years = _report.Source.Select(x => Int32.Parse(x.Name));
-                    _report.Description = $"For {years.Min()} to {years.Max()}";
-                }
-
-                // Set custom columns
-
-                if (!string.IsNullOrEmpty(definition.CustomColumns))
-                    foreach (var col in definition.CustomColumns.Split(","))
-                        _report.AddCustomColumn(CustomColumnFor(col));
+                _qbuilder.Month = 12;
             }
-            
+            else
+            {
+                var period = new DateTime(Year, Month, 1);
+                _report.Description += $"through {period.ToString("MMMM")} ";
+            }
+
+            // Most properties are set by report directly
+
+            _report.LoadFrom(definition);
+
+            // Set Source
+
+            _report.Source = _qbuilder.LoadFrom(definition);
+
+            // WholeYear needs to be handled after source is set
+
+            if (definition.YearProgress == true)
+            {
+                // What is the highest transaction in the "Actuals"?
+                var latesttime = _report.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
+
+                // What % of the way is it through that year?
+                var yearprogress = (double)latesttime.DayOfYear / 365.0;
+
+                _report.Description += $" {yearprogress:P0}";
+            }
+
+            // Special case for yoy report
+
+            if (parameters.id == "yoy")
+            {
+                var years = _report.Source.Select(x => Int32.Parse(x.Name));
+                _report.Description = $"For {years.Min()} to {years.Max()}";
+            }
+
+            // Set custom columns
+
+            if (!string.IsNullOrEmpty(definition.CustomColumns))
+                foreach (var col in definition.CustomColumns.Split(","))
+                    _report.AddCustomColumn(CustomColumnFor(col));
+
+            // Override level based on parameters
+
             if (parameters.level.HasValue)
             {
                 _report.NumLevels = parameters.level.Value;
@@ -141,8 +143,12 @@ namespace YoFi.AspNet.Controllers.Reports
                     _report.DisplayLevelAdjustment = 1;
             }
 
+            // Override showmonths based on parameters
+
             if (parameters.showmonths.HasValue)
                 _report.WithMonthColumns = parameters.showmonths.Value;
+
+            // Go!
 
             _report.Build();
             _report.WriteToConsole(sorted:true);
