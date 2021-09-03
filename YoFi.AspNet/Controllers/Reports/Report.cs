@@ -190,6 +190,35 @@ namespace YoFi.AspNet.Controllers.Reports
         }
 
         /// <summary>
+        /// Load configuration parameters from supplied <paramref name="definition"/>
+        /// </summary>
+        /// <param name="definition"></param>
+        public void LoadFrom(ReportDefinition definition)
+        {
+            if (string.IsNullOrEmpty(definition.Name))
+                Name = definition.Name;
+
+            Report.SortOrders order;
+            if (string.IsNullOrEmpty(definition.SortOrder) && Enum.TryParse<Report.SortOrders>(definition.SortOrder, out order))
+                SortOrder = order;
+
+            if (definition.WithMonthColumns.HasValue)
+                WithMonthColumns = definition.WithMonthColumns.Value;
+
+            if (definition.WithTotalColumn.HasValue)
+                WithTotalColumn = definition.WithTotalColumn.Value;
+
+            if (definition.SkipLevels.HasValue)
+                SkipLevels = definition.SkipLevels.Value;
+
+            if (definition.NumLevels.HasValue)
+                NumLevels = definition.NumLevels.Value;
+
+            if (definition.DisplayLevelAdjustment.HasValue)
+                DisplayLevelAdjustment = definition.DisplayLevelAdjustment.Value;
+        }
+
+        /// <summary>
         /// Build the report
         /// </summary>
         public void Build()

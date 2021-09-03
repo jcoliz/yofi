@@ -113,7 +113,14 @@ namespace YoFi.AspNet.Controllers.Reports
                     cols.GetValueOrDefault("ID:Actual") - cols.GetValueOrDefault("ID:Budget")
             };
 
-            if (parameters.id == "all")
+            var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
+
+            if (definition != null)
+            {
+                result.LoadFrom(definition);
+                result.Source = _qbuilder.LoadFrom(definition);
+            }
+            else if (parameters.id == "all")
             {
                 result.WithMonthColumns = true;
                 result.NumLevels = 2;
@@ -249,5 +256,17 @@ namespace YoFi.AspNet.Controllers.Reports
 
             return result;
         }
+
+        private List<ReportDefinition> Defintions = new List<ReportDefinition>()
+        {
+            new ReportDefinition()
+            {
+                id = "all",
+                WithMonthColumns = true,
+                NumLevels = 2,
+                Source = "Actual",
+                Name = "All Transactions"
+            }
+        };
    }
 }

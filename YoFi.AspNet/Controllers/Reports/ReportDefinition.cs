@@ -30,17 +30,13 @@ namespace YoFi.AspNet.Controllers.Reports
         public string Source { get; set; }
 
         /// <summary>
-        /// The 'top' parameter to be used when generating the source query
-        /// </summary>
-        public string SourceTop { get; set; }
-
-        /// <summary>
-        /// The 'except' parameter to be used when generating the source query
+        /// Parameter to be used when generating the source query
         /// </summary>
         /// <remarks>
-        /// This is a comma-separated list of top cetegories to be excluded
+        /// In the form of "paramter:value,value,value"
+        /// This name must be known to <see cref="QueryBuilder"/>
         /// </remarks>
-        public string SourceExcept { get; set; }
+        public string SourceParameters { get; set; }
 
         #endregion
 

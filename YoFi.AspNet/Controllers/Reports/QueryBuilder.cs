@@ -59,6 +59,42 @@ namespace YoFi.AspNet.Controllers.Reports
         #region Public Methods
 
         /// <summary>
+        /// Determine the needed source queries as specified in the <paramref name="definition"/>
+        /// </summary>
+        /// <param name="definition">Report definition which defines the source queries</param>
+        /// <returns></returns>
+        public IEnumerable<NamedQuery> LoadFrom(ReportDefinition definition)
+        {
+            string top = null;
+            IEnumerable<string> excluded = null;
+
+            if (!string.IsNullOrEmpty(definition.SourceParameters))
+            {
+                var parms = definition.SourceParameters.ToLowerInvariant().Split(':');
+                if (parms.Count() != 2)
+                    throw new ArgumentException(nameof(definition.SourceParameters), "Expected: Parameter:Value(s)");
+
+                if (parms[0] == "top")
+                    top = parms[1];
+                else if (parms[1] == "excluded")
+                    excluded = parms[1].Split(',');
+            }
+
+            if (definition.Source == "Actual")
+                return QueryActual(top, excluded);
+            else if (definition.Source == "Budget")
+                return QueryBudget(excluded);
+            else if (definition.Source == "ActualVsBudget")
+                return QueryActualVsBudget(excluded: excluded);
+            else if (definition.Source == "ManagedBudget")
+                return QueryManagedBudget();
+            else if (definition.Source == "YearOverYear")
+                return QueryYearOverYear(out _); // TODO: How do I get years back out??
+            else
+                return null;
+        }
+
+        /// <summary>
         /// Generate queries for actual spending (transactions AND splits)
         /// </summary>
         /// <param name="top">Optional limiter. If set, will only include items with this top category</param>
@@ -157,7 +193,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Generate queries for a year-over-year report, comparing multiple <paramref name="years"/> of data
         /// </summary>
-        /// <param name="years">Which years to include</param>
+        /// <param name="years">Which years were included</param>
         /// <returns>Resulting queries</returns>
         public IEnumerable<NamedQuery> QueryYearOverYear(out int[] years)
         {
