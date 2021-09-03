@@ -64,10 +64,12 @@ namespace YoFi.AspNet.Controllers.Reports
         {
             _context = context;
             _qbuilder = new QueryBuilder(context);
+            _report = new Report();
         }
 
         private readonly ApplicationDbContext _context;
         private readonly QueryBuilder _qbuilder;
+        private Report _report;
 
         /// <summary>
         /// Build the report from the given <paramref name="parameters"/>
@@ -76,50 +78,12 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <returns>The report we built</returns>
         public Report BuildReport(Parameters parameters)
         {
-            var result = new Report();
-
             int Month = _qbuilder.Month = parameters.month ?? 12;
             int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
 
             var period = new DateTime(Year, Month, 1);
-            result.Description = $"For {Year} through {period.ToString("MMMM")} ";
-            
-            var notexpenses = new List<string>() { "Savings", "Taxes", "Income", "Transfer", "Unmapped" };
-            
-            var budgetpctcolumn = new ColumnLabel()
-            {
-                Name = "% Progress",
-                UniqueID = "Z",
-                DisplayAsPercent = true,
-                Custom = (cols) =>
-                    cols.GetValueOrDefault("ID:Budget") == 0 || (Math.Abs(cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")) > 10m ) ? 
-                        0 : 
-                        cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")
-            };
-
-            var pctoftotalcolumn = new ColumnLabel()
-            {
-                Name = "% Total",
-                IsSortingAfterTotal = true,
-                DisplayAsPercent = true,
-                Custom = (cols) =>
-                    (result.GrandTotal == 0) ? 0 : cols.GetValueOrDefault("TOTAL") / result.GrandTotal
-            };
-
-            var budgetavailablecolumn = new ColumnLabel()
-            {
-                Name = "Available",
-                Custom = (cols) =>
-                    cols.GetValueOrDefault("ID:Actual") - cols.GetValueOrDefault("ID:Budget")
-            };
-
-            var customcolumns = new Dictionary<string, ColumnLabel>()
-            {
-                { "pctoftotal", pctoftotalcolumn },
-                { "budgetpct", budgetpctcolumn },
-                { "budgetavailable", budgetavailablecolumn }
-            };
-
+            _report.Description = $"For {Year} through {period.ToString("MMMM")} ";
+                        
             if (new string[] { "all-v-budget", "expenses-budget", "budget", "expenses-v-budget" }.Contains(parameters.id))
                 _qbuilder.Month = 12; // Budget reports are whole-year, generally
 
@@ -127,27 +91,27 @@ namespace YoFi.AspNet.Controllers.Reports
 
             if (definition != null)
             {
-                result.LoadFrom(definition);
-                result.Source = _qbuilder.LoadFrom(definition);
+                _report.LoadFrom(definition);
+                _report.Source = _qbuilder.LoadFrom(definition);
 
                 if (!string.IsNullOrEmpty(definition.CustomColumns))
                     foreach (var col in definition.CustomColumns.Split(","))
-                        result.AddCustomColumn(customcolumns[col]);
+                        _report.AddCustomColumn(CustomColumnFor(col));
 
                 // String replacement for description
-                if (!string.IsNullOrEmpty(result.Description))
+                if (!string.IsNullOrEmpty(_report.Description))
                 {
-                    result.Description.Replace("{Year}", Year.ToString());
+                    _report.Description.Replace("{Year}", Year.ToString());
 
-                    if (result.Description.Contains("{yearprogress}"))
+                    if (_report.Description.Contains("{yearprogress}"))
                     {
                         // What is the highest transaction in the "Actuals"?
-                        var latesttime = result.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
+                        var latesttime = _report.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
 
                         // What % of the way is it through that year?
                         var yearprogress = (double)latesttime.DayOfYear / 365.0;
 
-                        result.Description.Replace("{yearprogress}", yearprogress.ToString("P0"));
+                        _report.Description.Replace("{yearprogress}", yearprogress.ToString("P0"));
                     }
                 }
             }
@@ -155,27 +119,60 @@ namespace YoFi.AspNet.Controllers.Reports
             if (parameters.id == "yoy")
             {
                 var years = new int[] { };
-                result.Source = _qbuilder.QueryYearOverYear(out years);
-                result.Description = $"For {years.Min()} to {years.Max()}";
-                result.NumLevels = 3;
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "Year over Year";
+                _report.Source = _qbuilder.QueryYearOverYear(out years);
+                _report.Description = $"For {years.Min()} to {years.Max()}";
+                _report.NumLevels = 3;
+                _report.SortOrder = Report.SortOrders.TotalDescending;
+                _report.Name = "Year over Year";
             }
 
             if (parameters.level.HasValue)
             {
-                result.NumLevels = parameters.level.Value;
-                if (result.NumLevels == 1)
-                    result.DisplayLevelAdjustment = 1;
+                _report.NumLevels = parameters.level.Value;
+                if (_report.NumLevels == 1)
+                    _report.DisplayLevelAdjustment = 1;
             }
 
             if (parameters.showmonths.HasValue)
-                result.WithMonthColumns = parameters.showmonths.Value;
+                _report.WithMonthColumns = parameters.showmonths.Value;
 
-            result.Build();
-            result.WriteToConsole(sorted:true);
+            _report.Build();
+            _report.WriteToConsole(sorted:true);
 
-            return result;
+            return _report;
+        }
+
+        private ColumnLabel CustomColumnFor(string name)
+        {
+            if (name == "budgetpct")
+                return new ColumnLabel()
+                {
+                    Name = "% Progress",
+                    UniqueID = "Z",
+                    DisplayAsPercent = true,
+                    Custom = (cols) =>
+                        cols.GetValueOrDefault("ID:Budget") == 0 || (Math.Abs(cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")) > 10m) ?
+                            0 :
+                            cols.GetValueOrDefault("ID:Actual") / cols.GetValueOrDefault("ID:Budget")
+                };
+            else if (name == "pctoftotal")
+                return new ColumnLabel()
+                {
+                    Name = "% Total",
+                    IsSortingAfterTotal = true,
+                    DisplayAsPercent = true,
+                    Custom = (cols) =>
+                        (_report.GrandTotal == 0) ? 0 : cols.GetValueOrDefault("TOTAL") / _report.GrandTotal
+                };
+            else if (name == "budgetavailable")
+                return new ColumnLabel()
+                {
+                    Name = "Available",
+                    Custom = (cols) =>
+                        cols.GetValueOrDefault("ID:Actual") - cols.GetValueOrDefault("ID:Budget")
+                };
+            else 
+                return null;
         }
 
         private static List<ReportDefinition> Defintions = new List<ReportDefinition>()
