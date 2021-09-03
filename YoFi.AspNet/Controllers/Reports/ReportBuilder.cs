@@ -178,14 +178,6 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.SortOrder = Report.SortOrders.TotalDescending;
                 result.Name = "Year over Year";
             }
-            else if (parameters.id == "export")
-            {
-                result.Source = _qbuilder.QueryActualVsBudget(leafrows:true);
-                result.WithTotalColumn = false;
-                result.NumLevels = 4;
-                result.SortOrder = Report.SortOrders.NameAscending;
-                result.Name = "Transaction Export";
-            }
 
             if (parameters.level.HasValue)
             {
@@ -283,6 +275,16 @@ namespace YoFi.AspNet.Controllers.Reports
                 DisplayLevelAdjustment = 1,
                 SortOrder = "NameAscending",
                 CustomColumns = "budgetpct,budgetavailable",
+            },
+            new ReportDefinition()
+            {
+                id = "export",
+                Name = "Transaction Export",
+                Source = "ActualVsBudget",
+                SourceParameters = "leafrows:true",
+                WithTotalColumn = false,
+                NumLevels = 4,
+                SortOrder = "NameAscending",
             }
         };
    }

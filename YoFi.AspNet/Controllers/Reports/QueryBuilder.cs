@@ -67,6 +67,7 @@ namespace YoFi.AspNet.Controllers.Reports
         {
             string top = null;
             IEnumerable<string> excluded = null;
+            bool leafrows = false;
 
             if (!string.IsNullOrEmpty(definition.SourceParameters))
             {
@@ -78,6 +79,8 @@ namespace YoFi.AspNet.Controllers.Reports
                     top = parms[1];
                 else if (parms[0] == "excluded")
                     excluded = parms[1].Split(',');
+                else if (parms[0] == "leafrows")
+                    leafrows = true;
             }
 
             if (definition.Source == "Actual")
@@ -85,7 +88,7 @@ namespace YoFi.AspNet.Controllers.Reports
             else if (definition.Source == "Budget")
                 return QueryBudget(excluded);
             else if (definition.Source == "ActualVsBudget")
-                return QueryActualVsBudget(excluded: excluded);
+                return QueryActualVsBudget(leafrows, excluded);
             else if (definition.Source == "ManagedBudget")
                 return QueryManagedBudget();
             else if (definition.Source == "YearOverYear")
