@@ -120,15 +120,8 @@ namespace YoFi.AspNet.Controllers.Reports
                 result.LoadFrom(definition);
                 result.Source = _qbuilder.LoadFrom(definition);
             }
-            else if (parameters.id == "all")
-            {
-                result.WithMonthColumns = true;
-                result.NumLevels = 2;
-                result.Source = _qbuilder.QueryActual();
-                result.SortOrder = Report.SortOrders.TotalDescending;
-                result.Name = "All Transactions";
-            }
-            else if (parameters.id == "income")
+            
+            if (parameters.id == "income")
             {
                 result.AddCustomColumn(pctoftotalcolumn);
                 result.Source = _qbuilder.QueryActual(top: "Income");
