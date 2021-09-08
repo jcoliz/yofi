@@ -96,7 +96,7 @@ namespace YoFi.AspNet.Controllers.Reports
             else
             {
                 var period = new DateTime(Year, Month, 1);
-                _report.Description += $"through {period.ToString("MMMM")} ";
+                _report.Description += $" through {period.ToString("MMMM")} ";
             }
 
             // Most properties are set by report directly
