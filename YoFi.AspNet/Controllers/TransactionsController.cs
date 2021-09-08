@@ -1162,6 +1162,8 @@ namespace YoFi.AspNet.Controllers
             ViewData["showmonths"] = result.WithMonthColumns;
             ViewData["Title"] = result.Name;
 
+            ViewData["AvailableReports"] = ReportBuilder.Definitions.Select(x => new ReportLinkViewModel() { id = x.id, Name = x.Name }).ToList();
+
             return View(result);
         }
 
@@ -1241,6 +1243,17 @@ namespace YoFi.AspNet.Controllers
             public string ReceiptUrl { get; set; }
             string ICatSubcat.SubCategory { get => null; set { } }
         }
+
+        #endregion
+
+        #region ViewModels
+
+        public class ReportLinkViewModel
+        {
+            public string id { get; set; }
+            public string Name { get; set; }
+        }
+
         #endregion
     }
 }

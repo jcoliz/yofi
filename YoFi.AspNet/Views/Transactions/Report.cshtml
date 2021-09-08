@@ -1,9 +1,12 @@
 ﻿@using YoFi.AspNet.Controllers.Reports
+@using YoFi.AspNet.Controllers 
 @model Report
 @{
     var icons = new[] { "&check;", "!!", "X" };
     string report = (string)ViewData["report"];
     int month = (int)ViewData["month"];
+
+    var reports = ViewData["AvailableReports"] as IEnumerable<TransactionsController.ReportLinkViewModel>;
 }
 
 <nav class="navbar navbar-expand-lg navbar-light navbar-page mb-3">
@@ -16,18 +19,10 @@
                 Choose a Report
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuReportId">
-                <a asp-action="Report" asp-route-id="all" class="dropdown-item">All</a>
-                <a asp-action="Report" asp-route-id="expenses" class="dropdown-item">Expenses</a>
-                <a asp-action="Report" asp-route-id="income" class="dropdown-item">Income</a>
-                <a asp-action="Report" asp-route-id="taxes" class="dropdown-item">Taxes</a>
-                <a asp-action="Report" asp-route-id="savings" class="dropdown-item">Savings</a>
-                <a asp-action="Report" asp-route-id="budget" class="dropdown-item">Full Budget</a>
-                <a asp-action="Report" asp-route-id="expenses-budget" class="dropdown-item">Expenses Budget</a>
-                <a asp-action="Report" asp-route-id="all-v-budget" class="dropdown-item">All v Budget</a>
-                <a asp-action="Report" asp-route-id="expenses-v-budget" class="dropdown-item">Expenses v Budget</a>
-                <a asp-action="Report" asp-route-id="managed-budget" class="dropdown-item">Managed Budget</a>
-                <a asp-action="Report" asp-route-id="yoy" class="dropdown-item">Year over Year</a>
-                <a asp-action="Report" asp-route-id="export" class="dropdown-item">Export</a>
+                @foreach (var item in reports)
+                {
+                    <a asp-action="Report" asp-route-id="@item.id" class="dropdown-item">@item.Name</a>
+                }
             </div>
         </div>
 

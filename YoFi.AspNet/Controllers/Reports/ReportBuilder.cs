@@ -189,7 +189,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 return null;
         }
 
-        private static List<ReportDefinition> Definitions = new List<ReportDefinition>()
+        public static List<ReportDefinition> Definitions = new List<ReportDefinition>()
         {
             new ReportDefinition()
             {
