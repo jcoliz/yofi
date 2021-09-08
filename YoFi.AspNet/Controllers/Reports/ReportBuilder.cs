@@ -81,7 +81,7 @@ namespace YoFi.AspNet.Controllers.Reports
             int Month = _qbuilder.Month = parameters.month ?? 12;
             int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
 
-            var definition = Defintions.Where(x => x.id == parameters.id).SingleOrDefault();
+            var definition = Definitions.Where(x => x.id == parameters.id).SingleOrDefault();
 
             if (definition == null)
                 throw new ArgumentOutOfRangeException(nameof(parameters.id), $"Unable to find report {parameters.id}");
@@ -189,7 +189,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 return null;
         }
 
-        private static List<ReportDefinition> Defintions = new List<ReportDefinition>()
+        private static List<ReportDefinition> Definitions = new List<ReportDefinition>()
         {
             new ReportDefinition()
             {
