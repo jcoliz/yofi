@@ -207,14 +207,14 @@ namespace YoFi.AspNet.Controllers.Reports
                 SortOrder = "TotalAscending",
                 Name = "Income",
                 Source = "Actual",
-                SourceParameters = "top:Income",
+                SourceParameters = "top=Income",
                 CustomColumns = "pctoftotal"
             },
             new ReportDefinition()
             {
                 id = "taxes",
                 Source = "Actual",
-                SourceParameters = "top:Taxes",
+                SourceParameters = "top=Taxes",
                 SkipLevels = 1,
                 DisplayLevelAdjustment = 1,
                 Name = "Taxes",
@@ -224,7 +224,7 @@ namespace YoFi.AspNet.Controllers.Reports
             {
                 id = "savings",
                 Source = "Actual",
-                SourceParameters = "top:Savings",
+                SourceParameters = "top=Savings",
                 SkipLevels = 1,
                 DisplayLevelAdjustment = 1,
                 Name = "Savings",
@@ -235,19 +235,28 @@ namespace YoFi.AspNet.Controllers.Reports
                 id = "expenses",
                 CustomColumns = "pctoftotal",
                 Source = "Actual",
-                SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
+                SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
                 WithMonthColumns = true,
                 NumLevels = 2,
                 Name = "Expenses"
             },
             new ReportDefinition()
             {
-                id = "expenses-budget",
+                id = "trips",
+                Source = "Actual",
+                SourceParameters = "top=Travel:Trips",
+                SkipLevels = 2,
+                NumLevels = 2,
+                Name = "Travel Trips",
+                CustomColumns = "pctoftotal"
+            },
+            new ReportDefinition()
+            {
+                id = "budget",
+                Name = "Full Budget",
                 Source = "Budget",
-                SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
                 WholeYear = true,
                 NumLevels = 3,
-                Name = "Expenses Budget"
             },
             new ReportDefinition()
             {
@@ -258,6 +267,27 @@ namespace YoFi.AspNet.Controllers.Reports
                 WithTotalColumn = false,
                 NumLevels = 3,
                 CustomColumns = "budgetpct",
+            },
+            new ReportDefinition()
+            {
+                id = "expenses-budget",
+                Source = "Budget",
+                SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
+                WholeYear = true,
+                NumLevels = 3,
+                Name = "Expenses Budget"
+            },
+            new ReportDefinition()
+            {
+                id = "expenses-v-budget",
+                Name = "Expenses vs. Budget",
+                Source = "ActualVsBudget",
+                SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
+                WholeYear = true,
+                YearProgress = true,
+                CustomColumns = "budgetpct",
+                WithTotalColumn = false,
+                NumLevels = 3,
             },
             new ReportDefinition()
             {
@@ -275,30 +305,10 @@ namespace YoFi.AspNet.Controllers.Reports
                 id = "export",
                 Name = "Transaction Export",
                 Source = "ActualVsBudget",
-                SourceParameters = "leafrows:true",
+                SourceParameters = "leafrows=true",
                 WithTotalColumn = false,
                 NumLevels = 4,
                 SortOrder = "NameAscending",
-            },
-            new ReportDefinition()
-            {
-                id = "budget",
-                Name = "Full Budget",
-                Source = "Budget",
-                WholeYear = true,
-                NumLevels = 3,
-            },
-            new ReportDefinition()
-            {
-                id = "expenses-v-budget",
-                Name = "Expenses vs. Budget",
-                Source = "ActualVsBudget",
-                SourceParameters = "excluded:Savings,Taxes,Income,Transfer,Unmapped",
-                WholeYear = true,
-                YearProgress = true,
-                CustomColumns = "budgetpct",
-                WithTotalColumn = false,
-                NumLevels = 3,
             },
             new ReportDefinition()
             {

@@ -71,7 +71,7 @@ namespace YoFi.AspNet.Controllers.Reports
 
             if (!string.IsNullOrEmpty(definition.SourceParameters))
             {
-                var parms = definition.SourceParameters.Split(':');
+                var parms = definition.SourceParameters.Split('=');
                 if (parms.Count() != 2)
                     throw new ArgumentException(nameof(definition.SourceParameters), "Expected: Parameter:Value(s)");
 
