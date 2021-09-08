@@ -33,7 +33,7 @@ namespace YoFi.AspNet.Controllers
 
         #region Constructor
 
-        public TransactionsController(ApplicationDbContext context, IPlatformAzureStorage storage, IConfiguration config)
+        public TransactionsController(ApplicationDbContext context, IConfiguration config, IPlatformAzureStorage storage = null)
         {
             _context = context;
             _storage = storage;
@@ -674,6 +674,9 @@ namespace YoFi.AspNet.Controllers
                 if (files.Skip(1).Any())
                     throw new ApplicationException("Must choose a only single receipt file. Uploading multiple receipts for a single transaction is not supported.");
 
+                if (null == _storage)
+                    throw new InvalidOperationException("Unable to upload receipt. Azure Blob Storage is not configured for this application.");
+
                 var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
 
                 //
@@ -744,6 +747,9 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
+                if (null == _storage)
+                    throw new InvalidOperationException("Unable to download receipt. Azure Blob Storage is not configured for this application.");
+
                 var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
 
                 if (string.IsNullOrEmpty(transaction.ReceiptUrl))

@@ -120,7 +120,7 @@ namespace YoFi.Tests
                 .AddInMemoryCollection(strings)
                 .Build();
 
-            helper.controller = new TransactionsController(helper.context, storage, configuration);
+            helper.controller = new TransactionsController(helper.context,storage:storage, config:configuration);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 
