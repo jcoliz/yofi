@@ -1471,7 +1471,7 @@ namespace YoFi.Tests
             var model = await WhenCallingIndexWithQ($"C={word}");
 
             // *** This is failing on VSO but passing locally.
-            // Assert.AreEqual below returns SIX items?!
+            // Assert.AreEqual below finds SIX items in model?!
 
             // https://developercommunity.visualstudio.com/t/printing-the-console-output-in-the-azure-devops-te/631082
             var resultfile = "IndexQCategorySplits.txt";
@@ -1479,6 +1479,8 @@ namespace YoFi.Tests
 
             using (var writer = File.CreateText(resultfile))
             {
+                writer.WriteLine("---");
+                writer.WriteLine($"{model.Count()} items:");
                 writer.WriteLine("---");
                 foreach (var item in model)
                     if (null != item)
@@ -1493,8 +1495,10 @@ namespace YoFi.Tests
 
             TestContext.AddResultFile(resultfile);
 
+            // I wonder if this inspection has trued up the model result?
+
             // Then: Only the transactions with '{word}' in their category are returned
-            //Assert.AreEqual(5, model.Count());
+            Assert.AreEqual(5, model.Count());
 
             // We can't actually test this anymore, because Index doesn't return the actual
             // splits anymore. That was overfetching.
