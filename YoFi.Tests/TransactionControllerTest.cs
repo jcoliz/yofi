@@ -1477,9 +1477,19 @@ namespace YoFi.Tests
             var resultfile = "IndexQCategorySplits.txt";
             File.Delete(resultfile);
 
-            using (var writer = File.CreateText(resultfile) )
+            using (var writer = File.CreateText(resultfile))
+            {
+                writer.WriteLine("---");
                 foreach (var item in model)
-                    writer.WriteLine(item.ID.ToString() + " / " + (item.Category ?? "(n)") + " / " + (item.Payee ?? "(n)"));
+                    if (null != item)
+                    {
+                        writer.WriteLine(item.ID.ToString());
+                        writer.WriteLine("  " + (item.Category ?? "(n)") + " / " + (item.Payee ?? "(n)"));
+                    }
+                    else
+                        writer.WriteLine("null");
+                writer.WriteLine("---");
+            }
 
             TestContext.AddResultFile(resultfile);
 
