@@ -21,6 +21,11 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
+    projects: 'submodules/OFXSharp/source/OfxSharp/OfxSharp.csproj'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
     projects: 'YoFi.AspNet/YoFi.AspNet.csproj'
     arguments: '--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release'
 
