@@ -30,7 +30,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'test'
-    projects: 'YoFi.Tests\YoFi.Tests.csproj'
+    projects: 'YoFi.Tests/YoFi.Tests.csproj'
 
 - task: ArchiveFiles@2
   displayName: 'Archive files'
