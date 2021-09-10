@@ -13,6 +13,9 @@ steps:
 - checkout: self
   submodules: true
 
+- task: CmdLine@2
+  inputs:
+    script: 'git describe --long --always --abbrev=8 > YoFi.AspNet/version.txt'
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
