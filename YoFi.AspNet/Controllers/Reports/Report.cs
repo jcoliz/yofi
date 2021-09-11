@@ -202,8 +202,7 @@ namespace YoFi.AspNet.Controllers.Reports
             if (!string.IsNullOrEmpty(definition.Name))
                 Name = definition.Name;
 
-            Report.SortOrders order;
-            if (!string.IsNullOrEmpty(definition.SortOrder) && Enum.TryParse<Report.SortOrders>(definition.SortOrder, out order))
+            if (!string.IsNullOrEmpty(definition.SortOrder) && Enum.TryParse<Report.SortOrders>(definition.SortOrder, out Report.SortOrders order))
                 SortOrder = order;
 
             if (definition.WithMonthColumns.HasValue)

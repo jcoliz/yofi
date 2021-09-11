@@ -105,11 +105,8 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <returns>Resulting queries</returns>
         public IEnumerable<NamedQuery> QueryActual(string top = null, IEnumerable<string> excluded = null)
         {
-            IQueryable<IReportable> txs = null;
-            IQueryable<IReportable> splits = null;
-
-            txs = QueryTransactions(top,excluded).Query;
-            splits = QuerySplits(top,excluded).Query;
+            IQueryable<IReportable> txs = QueryTransactions(top,excluded).Query;
+            IQueryable<IReportable> splits = QuerySplits(top,excluded).Query;
 
             return new List<NamedQuery>() {
                 new NamedQuery()

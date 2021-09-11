@@ -62,12 +62,10 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <param name="context">Where to pull report data from</param>
         public ReportBuilder(ApplicationDbContext context)
         {
-            _context = context;
             _qbuilder = new QueryBuilder(context);
             _report = new Report();
         }
 
-        private readonly ApplicationDbContext _context;
         private readonly QueryBuilder _qbuilder;
         private readonly Report _report;
 
