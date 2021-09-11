@@ -69,7 +69,7 @@ namespace YoFi.AspNet.Controllers.Reports
 
         private readonly ApplicationDbContext _context;
         private readonly QueryBuilder _qbuilder;
-        private Report _report;
+        private readonly Report _report;
 
         /// <summary>
         /// Build the report from the given <paramref name="parameters"/>
@@ -96,7 +96,7 @@ namespace YoFi.AspNet.Controllers.Reports
             else
             {
                 var period = new DateTime(Year, Month, 1);
-                _report.Description += $" through {period.ToString("MMMM")} ";
+                _report.Description += $" through {period:MMMM} ";
             }
 
             // Most properties are set by report directly

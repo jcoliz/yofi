@@ -59,8 +59,8 @@ namespace YoFi.AspNet.Common
         #region Fields
         SpreadsheetDocument spreadSheet;
 
-        Dictionary<string, string> stringTableIDs = new Dictionary<string, string>();
-        List<string> stringTable = new List<string>();
+        readonly Dictionary<string, string> stringTableIDs = new Dictionary<string, string>();
+        readonly List<string> stringTable = new List<string>();
         int stringTableNextID = 0;
         #endregion
         
@@ -246,7 +246,7 @@ namespace YoFi.AspNet.Common
         /// <returns>Lookup key for where the string can be found in the table</returns>
         private string InsertSharedStringItem(string text)
         {
-            string result = null;
+            string result;
             if (!stringTableIDs.TryGetValue(text,out result))
             {
                 result = stringTableNextID.ToString();

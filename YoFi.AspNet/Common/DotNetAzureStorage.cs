@@ -60,8 +60,10 @@ namespace Common.NET
 
             BlobClient blobClient = containerClient.GetBlobClient(name);
 
-            var options = new BlobUploadOptions();
-            options.HttpHeaders = new BlobHttpHeaders() { ContentType = contenttype };
+            var options = new BlobUploadOptions()
+            {
+                HttpHeaders = new BlobHttpHeaders() { ContentType = contenttype }
+            };
 
             await blobClient.UploadAsync(stream,options);
             return blobClient.Uri;
@@ -115,6 +117,6 @@ namespace Common.NET
         /// <summary>
         /// Connection sttring for this connection
         /// </summary>
-        private string Connection;       
+        private readonly string Connection;       
     }
 }

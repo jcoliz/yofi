@@ -161,13 +161,11 @@ namespace YoFi.AspNet.Controllers
                 {
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
-                        using (var stream = file.OpenReadStream())
-                        using (var ssr = new OpenXmlSpreadsheetReader())
-                        {
-                            ssr.Open(stream);
-                            var items = ssr.Read<CategoryMap>(exceptproperties: new string[] { "ID" });
-                            incoming.UnionWith(items);
-                        }
+                        using var stream = file.OpenReadStream();
+                        using var ssr = new OpenXmlSpreadsheetReader();
+                        ssr.Open(stream);
+                        var items = ssr.Read<CategoryMap>(exceptproperties: new string[] { "ID" });
+                        incoming.UnionWith(items);
                     }
                 }
 

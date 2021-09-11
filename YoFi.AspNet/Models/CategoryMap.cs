@@ -129,7 +129,7 @@ namespace YoFi.AspNet.Models
 
     public class CategoryMapper
     {
-        Dictionary<string, CategoryMap> maptable;
+        readonly Dictionary<string, CategoryMap> maptable;
 
         public CategoryMapper(IQueryable<CategoryMap> maps)
         {

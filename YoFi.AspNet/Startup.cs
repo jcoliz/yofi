@@ -18,7 +18,7 @@ namespace YoFi.AspNet
 {
     public class Startup
     {
-        private Queue<string> logme = new Queue<string>();
+        private readonly Queue<string> logme = new Queue<string>();
 
         public IConfiguration Configuration { get; }
 

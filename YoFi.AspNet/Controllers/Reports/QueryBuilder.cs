@@ -218,7 +218,7 @@ namespace YoFi.AspNet.Controllers.Reports
         #endregion
 
         #region Fields
-        private ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
         #endregion
 
         #region Internals

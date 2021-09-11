@@ -307,42 +307,40 @@ namespace YoFi.AspNet.Controllers.Reports
 
             using (var stream = new MemoryStream())
             {
-                using (var writer = new Utf8JsonWriter(stream,options:new JsonWriterOptions() { Indented = true }))
+                using var writer = new Utf8JsonWriter(stream, options: new JsonWriterOptions() { Indented = true });
+                writer.WriteStartArray();
+
+                foreach (var line in RowLabelsOrdered)
                 {
-                    writer.WriteStartArray();
+                    writer.WriteStartObject();
 
-                    foreach (var line in RowLabelsOrdered)
+                    writer.WritePropertyName("Name");
+                    writer.WriteStringValue(line.Name ?? "-");
+                    writer.WritePropertyName("ID");
+                    writer.WriteStringValue(line.UniqueID);
+                    writer.WritePropertyName("IsTotal");
+                    writer.WriteBooleanValue(line.IsTotal);
+                    writer.WritePropertyName("Level");
+                    writer.WriteNumberValue(line.Level);
+
+                    foreach (var col in ColumnLabelsFiltered)
                     {
-                        writer.WriteStartObject();
+                        var val = this[col, line];
+                        var name = col.ToString();
+                        if (col.DisplayAsPercent)
+                            name += "%";
 
-                        writer.WritePropertyName("Name");
-                        writer.WriteStringValue(line.Name ?? "-");
-                        writer.WritePropertyName("ID");
-                        writer.WriteStringValue(line.UniqueID);
-                        writer.WritePropertyName("IsTotal");
-                        writer.WriteBooleanValue(line.IsTotal);
-                        writer.WritePropertyName("Level");
-                        writer.WriteNumberValue(line.Level);
-
-                        foreach (var col in ColumnLabelsFiltered)
-                        {
-                            var val = this[col, line];
-                            var name = col.ToString();
-                            if (col.DisplayAsPercent)
-                                name += "%";
-
-                            writer.WritePropertyName(name);
-                            writer.WriteNumberValue(val);
-                        }
-                        writer.WriteEndObject();
+                        writer.WritePropertyName(name);
+                        writer.WriteNumberValue(val);
                     }
-                    writer.WriteEndArray();
-
-                    writer.Flush();
-
-                    var bytes = stream.ToArray();
-                    result = Encoding.UTF8.GetString(bytes);
+                    writer.WriteEndObject();
                 }
+                writer.WriteEndArray();
+
+                writer.Flush();
+
+                var bytes = stream.ToArray();
+                result = Encoding.UTF8.GetString(bytes);
             }
 
             return result;
@@ -352,7 +350,7 @@ namespace YoFi.AspNet.Controllers.Reports
         #endregion
 
         #region Fields
-        Table<ColumnLabel, RowLabel, decimal> Table = new Table<ColumnLabel, RowLabel, decimal>();
+        readonly Table<ColumnLabel, RowLabel, decimal> Table = new Table<ColumnLabel, RowLabel, decimal>();
         #endregion
 
         #region Internal Methods
@@ -532,7 +530,7 @@ namespace YoFi.AspNet.Controllers.Reports
                         var rule = collectorrow.Collector;
                         var isnotlist = rule.StartsWith('^');
                         if (isnotlist)
-                            rule = rule.Substring(1);
+                            rule = rule[1..];
                         var categories = rule.Split(';');
 
                         // When 'isnotlist' is false, the catgories array contains categories

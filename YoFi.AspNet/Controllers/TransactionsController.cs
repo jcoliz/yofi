@@ -70,7 +70,7 @@ namespace YoFi.AspNet.Controllers
                     if (term.Length > 2 && term[1] == '=')
                     {
                         var key = term.ToLowerInvariant().First();
-                        var value = term.Substring(2);
+                        var value = term[2..];
 
                         switch (key)
                         {
@@ -798,13 +798,11 @@ namespace YoFi.AspNet.Controllers
                 {
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
-                        using (var stream = file.OpenReadStream())
-                        using (var ssr = new OpenXmlSpreadsheetReader())
-                        {
-                            ssr.Open(stream);
-                            var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
-                            incoming.UnionWith(items);
-                        }
+                        using var stream = file.OpenReadStream();
+                        using var ssr = new OpenXmlSpreadsheetReader();
+                        ssr.Open(stream);
+                        var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
+                        incoming.UnionWith(items);
                     }
                 }
 
@@ -857,22 +855,20 @@ namespace YoFi.AspNet.Controllers
                 {
                     if (formFile.FileName.ToLower().EndsWith(".ofx"))
                     {
-                        using (var stream = formFile.OpenReadStream())
-                        {
-                             OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
+                        using var stream = formFile.OpenReadStream();
+                        OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
                             
-                            await Task.Run(() =>
+                        await Task.Run(() =>
+                        {
+                            foreach (var tx in Document.Statements.SelectMany(x=>x.Transactions))
                             {
-                                foreach (var tx in Document.Statements.SelectMany(x=>x.Transactions))
-                                {
-                                    var txmodel = new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo?.Trim(), BankReference = tx.ReferenceNumber?.Trim(), Timestamp = tx.Date.Value.DateTime, Selected = true };
-                                    if (string.IsNullOrEmpty(txmodel.BankReference))
-                                        txmodel.GenerateBankReference();
+                                var txmodel = new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo?.Trim(), BankReference = tx.ReferenceNumber?.Trim(), Timestamp = tx.Date.Value.DateTime, Selected = true };
+                                if (string.IsNullOrEmpty(txmodel.BankReference))
+                                    txmodel.GenerateBankReference();
 
-                                    incoming.Add(txmodel);
-                                }
-                            });
-                        }
+                                incoming.Add(txmodel);
+                            }
+                        });
                     }
                     else
                     if (formFile.FileName.ToLower().EndsWith(".xlsx"))
@@ -999,7 +995,7 @@ namespace YoFi.AspNet.Controllers
                         // Product Backlog Item 871: Match payee on regex, optionally
                         foreach (var regexpayee in regexpayees)
                         {
-                            var regex = new Regex(regexpayee.Name.Substring(1, regexpayee.Name.Length - 2));
+                            var regex = new Regex(regexpayee.Name[1..^2]);
                             if (regex.Match(item.Payee).Success)
                             {
                                 payee = regexpayee;

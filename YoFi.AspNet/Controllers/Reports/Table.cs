@@ -55,7 +55,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <summary>
         /// Primary representation of data.
         /// </summary>
-        Dictionary<Key,TValue> DataSet = new Dictionary<Key,TValue>();
+        readonly Dictionary<Key,TValue> DataSet = new Dictionary<Key,TValue>();
 
         /// <summary>
         /// Column labels

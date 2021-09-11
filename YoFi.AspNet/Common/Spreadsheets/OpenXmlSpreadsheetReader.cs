@@ -143,11 +143,6 @@ namespace YoFi.AspNet.Common
             return result;
         }
 
-        private Dictionary<string,Cell> CellDictionary(IEnumerable<Cell> cells)
-        {
-            return cells.ToDictionary(x => x.CellReference.Value, x=>x);
-        }
-
         /// <summary>
         /// Look up a string from the shared string table part
         /// </summary>

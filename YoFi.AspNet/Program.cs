@@ -16,7 +16,7 @@ namespace YoFi.AspNet
 {
     public class Program
     {
-        private static Queue<string> logme = new Queue<string>();
+        private static readonly Queue<string> logme = new Queue<string>();
 
         public static void Main(string[] args)
         {
@@ -37,11 +37,9 @@ namespace YoFi.AspNet
                 {
                     if (File.Exists("version.txt"))
                     {
-                        using (var sr = File.OpenText("version.txt"))
-                        {
-                            var version = sr.ReadToEnd();
-                            logger.LogInformation($"** Version: {version,8}                                        **");
-                        }
+                        using var sr = File.OpenText("version.txt");
+                        var version = sr.ReadToEnd();
+                        logger.LogInformation($"** Version: {version,8}                                        **");
                     }
                     else
                         logger.LogInformation(" Unable to locate version info.");
