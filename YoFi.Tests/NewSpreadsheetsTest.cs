@@ -34,6 +34,16 @@ namespace YoFi.Tests
             }
         }
 
+        public TestContext TestContext { get; set; }
+
+        private static TestContext _testContext;
+
+        [ClassInitialize]
+        public static void SetupTests(TestContext testContext)
+        {
+            _testContext = testContext;
+        }
+
         void WhenWritingToNewSpreadsheet<T>(Stream stream,IEnumerable<T> items, string name,bool writetodisk = true) where T: class
         {
             using (var writer = new OpenXmlSpreadsheetWriter())
@@ -48,11 +58,9 @@ namespace YoFi.Tests
             {
                 var filename = $"Test-{name}.xlsx";
                 File.Delete(filename);
-                using (var outstream = File.OpenWrite(filename))
-                {
-                    Console.WriteLine($"Writing {outstream.Name}...");
-                    stream.CopyTo(outstream);
-                }
+                using var outstream = File.OpenWrite(filename);
+                stream.CopyTo(outstream);
+                TestContext.AddResultFile(filename);
             }
         }
 
