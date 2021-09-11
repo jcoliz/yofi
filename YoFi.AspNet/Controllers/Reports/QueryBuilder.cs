@@ -180,6 +180,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <returns>Resulting queries</returns>
         public IEnumerable<NamedQuery> QueryManagedBudget()
         {
+#pragma warning disable IDE0028 // Simplify collection initialization
             var result = new List<NamedQuery>();
 
             // "Budget" items need to go in first, because they will control which rows show up in the
@@ -188,6 +189,7 @@ namespace YoFi.AspNet.Controllers.Reports
             result.AddRange(QueryActual().Select(x => x.Labeled("Actual")));
 
             return result;
+#pragma warning restore IDE0028 // Simplify collection initialization
         }
 
         /// <summary>

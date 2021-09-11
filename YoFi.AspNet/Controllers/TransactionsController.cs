@@ -183,40 +183,19 @@ namespace YoFi.AspNet.Controllers
             ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
             ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
 
-            switch (o)
-            {
-                case "aa": // "amount_asc":
-                    result = result.OrderBy(s => s.Amount);
-                    break;
-                case "ad": // "amount_desc":
-                    result = result.OrderByDescending(s => s.Amount);
-                    break;
-                case "ra": // "ref_asc":
-                    result = result.OrderBy(s => s.BankReference);
-                    break;
-                case "rd": // "ref_desc":
-                    result = result.OrderByDescending(s => s.BankReference);
-                    break;
-                case "pa": // "payee_asc":
-                    result = result.OrderBy(s => s.Payee);
-                    break;
-                case "pd": // "payee_desc":
-                    result = result.OrderByDescending(s => s.Payee);
-                    break;
-                case "ca": // "category_asc":
-                    result = result.OrderBy(s => s.Category);
-                    break;
-                case "cd": // "category_desc":
-                    result = result.OrderByDescending(s => s.Category);
-                    break;
-                case "da": // "date_asc":
-                    result = result.OrderBy(s => s.Timestamp).ThenBy(s => s.BankReference);
-                    break;
-                case "dd": // "date_desc":
-                default:
-                    result = result.OrderByDescending(s => s.Timestamp).ThenByDescending(s => s.BankReference);
-                    break;
-            }
+            result = o switch 
+            { 
+                "aa" => result.OrderBy(s => s.Amount),
+                "ad" => result.OrderByDescending(s => s.Amount), // "amount_desc":
+                "ra" => result.OrderBy(s => s.BankReference), // "ref_asc":
+                "rd" => result.OrderByDescending(s => s.BankReference), // "ref_desc":
+                "pa" => result.OrderBy(s => s.Payee), // "payee_asc":
+                "pd" => result.OrderByDescending(s => s.Payee), // "payee_desc":
+                "ca" => result.OrderBy(s => s.Category), // "category_asc":
+                "cd" => result.OrderByDescending(s => s.Category),// "category_desc":
+                "da" => result.OrderBy(s => s.Timestamp).ThenBy(s => s.BankReference), // "date_asc":
+                 _ => result.OrderByDescending(s => s.Timestamp).ThenByDescending(s => s.BankReference) // "date_desc":
+            };
 
             //
             // Process PAGE (P) parameters
@@ -1187,9 +1166,11 @@ namespace YoFi.AspNet.Controllers
                     }
                     else
                     {
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
                         int y = DateTime.Now.Year;
                         int.TryParse(value, out y);
                         _Year = y;
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
                     }
                 }
 

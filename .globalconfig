@@ -1,2 +1,3 @@
 is_global = true
 dotnet_style_prefer_inferred_tuple_names = false
+dotnet_naming_style.first_word_upper_case_style.capitalization = none
