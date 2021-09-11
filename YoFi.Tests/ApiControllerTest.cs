@@ -23,7 +23,7 @@ namespace YoFi.Tests
     [TestClass]
     public class ApiControllerTest
     {
-        public ApiController controller { set; get; } = default(ApiController);
+        public ApiController controller { set; get; } = default;
 
         public ApplicationDbContext context = null;
 
@@ -70,8 +70,7 @@ namespace YoFi.Tests
             var http = new DefaultHttpContext();
             var userpass = $"user:{password}";
             http.Request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(userpass)));
-            controller.ControllerContext = new ControllerContext();
-            controller.ControllerContext.HttpContext = http;
+            controller.ControllerContext = new ControllerContext() { HttpContext = http };
         }
 
         [TestCleanup]
@@ -83,7 +82,7 @@ namespace YoFi.Tests
             // https://stackoverflow.com/questions/33490696/how-can-i-reset-an-ef7-inmemory-provider-between-unit-tests
             context?.Database.EnsureDeleted();
             context = null;
-            controller = default(ApiController);
+            controller = default;
         }
 
         async Task AddFiveTransactions()
@@ -496,9 +495,11 @@ namespace YoFi.Tests
             context.Transactions.Add(item);
             context.SaveChanges();
 
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B" });
-            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D" });
+            var splits = new List<Split>()
+            {
+                new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
+                new Split() { Amount = 75m, Category = "C", SubCategory = "D" }
+            };
 
             // Make an HTML Form file containg a spreadsheet containing those splits
             var file = ControllerTestHelper<Split,SplitsController>.PrepareUpload(splits);
@@ -876,8 +877,7 @@ namespace YoFi.Tests
         public async Task GetTxQReceipt(bool with)
         {
             // Given: A mix of transactions, some with receipts, some without
-            IEnumerable<Transaction> items, moditems;
-            TransactionControllerTest.GivenItemsWithAndWithoutReceipt(context, out items, out moditems);
+           TransactionControllerTest.GivenItemsWithAndWithoutReceipt(context, out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems);
 
             // When: Calling GetTransactions q='r=1' (or r=0)
             var model = await WhenCallingGetTxWithQ($"R={(with ? '1' : '0')}");

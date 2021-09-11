@@ -156,7 +156,7 @@ namespace YoFi.Tests
             helper.Items[2].Amount = 3000m;
 
             // Upload these three. They should be rejected.
-            var actual = await helper.Upload(3, 0);
+            await helper.Upload(3, 0);
         }
         [TestMethod]
         public async Task Bug890()
@@ -174,7 +174,7 @@ namespace YoFi.Tests
             helper.Items[0].Amount += 0.001m;
 
             // Upload it. It should be rejected.
-            var actual = await helper.Upload(1, 0);
+            await helper.Upload(1, 0);
         }
 
 
