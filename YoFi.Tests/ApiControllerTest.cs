@@ -707,7 +707,11 @@ namespace YoFi.Tests
         {
             await AddFiveBudgetTxs();
 
+            // An expression tree may not contain a reference to a local function.
+            // SO this code analysis rule is incorrectly applied in this case.
+#pragma warning disable IDE0039 // Use local function
             Func<IReportable, bool> inscope_t = x => true;
+#pragma warning restore IDE0039 // Use local function
 
             var budgettxs = context.BudgetTxs.Where(inscope_t);
 
@@ -730,7 +734,11 @@ namespace YoFi.Tests
         {
             await AddFiveTransactions();
 
+            // An expression tree may not contain a reference to a local function.
+            // SO this code analysis rule is incorrectly applied in this case.
+#pragma warning disable IDE0039 // Use local function
             Func<IReportable, bool> inscope_t = x => true;
+#pragma warning restore IDE0039 // Use local function
 
             var txs = context.Transactions.Where(inscope_t);
 

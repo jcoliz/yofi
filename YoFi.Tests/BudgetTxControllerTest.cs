@@ -20,9 +20,12 @@ namespace YoFi.Tests
 
         BudgetTxsController controller => helper.controller;
         ApplicationDbContext context => helper.context;
-        List<BudgetTx> Items => helper.Items;
         DbSet<BudgetTx> dbset => helper.dbset;
 
+        // Enable if needed in the future.
+#if false
+        List<BudgetTx> Items => helper.Items;
+#endif
         public static List<BudgetTx> BudgetTxItems
         {
             get
