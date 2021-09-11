@@ -204,8 +204,7 @@ namespace YoFi.AspNet.Common
                         // If the original source is an actual date type, that should
                         // be adjusted before now.
 
-                        double dvalue;
-                        if ( double.TryParse(kvp.Value, out dvalue) )
+                        if ( double.TryParse(kvp.Value, out double dvalue) )
                         {
                             var value = DateTime.FromOADate(dvalue);
                             property.SetValue(item, value);
@@ -213,14 +212,12 @@ namespace YoFi.AspNet.Common
                     }
                     else if (property.PropertyType == typeof(int))
                     {
-                        int value;
-                        if (int.TryParse(kvp.Value, out value))
+                        if (int.TryParse(kvp.Value, out int value))
                             property.SetValue(item, value);
                     }
                     else if (property.PropertyType == typeof(decimal))
                     {
-                        decimal value;
-                        if (decimal.TryParse(kvp.Value, out value))
+                        if (decimal.TryParse(kvp.Value, out decimal value))
                             property.SetValue(item, value);
                     }
                     else if (property.PropertyType == typeof(bool))
@@ -229,13 +226,11 @@ namespace YoFi.AspNet.Common
                         // But maybe somettimes it will come in as true/false
                         // So I'll deal with each
 
-                        int intvalue;
-                        if (int.TryParse(kvp.Value, out intvalue))
+                        if (int.TryParse(kvp.Value, out int intvalue))
                             property.SetValue(item, intvalue != 0);
                         else
                         {
-                            bool value;
-                            if (bool.TryParse(kvp.Value, out value))
+                            if (bool.TryParse(kvp.Value, out bool value))
                                 property.SetValue(item, value);
                         }
                     }

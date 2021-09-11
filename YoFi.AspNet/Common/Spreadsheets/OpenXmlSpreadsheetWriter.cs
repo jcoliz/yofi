@@ -246,8 +246,7 @@ namespace YoFi.AspNet.Common
         /// <returns>Lookup key for where the string can be found in the table</returns>
         private string InsertSharedStringItem(string text)
         {
-            string result;
-            if (!stringTableIDs.TryGetValue(text,out result))
+            if (!stringTableIDs.TryGetValue(text,out string result))
             {
                 result = stringTableNextID.ToString();
                 ++stringTableNextID;
