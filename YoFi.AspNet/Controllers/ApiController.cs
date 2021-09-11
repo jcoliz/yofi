@@ -21,7 +21,7 @@ namespace YoFi.AspNet.Controllers
     public class ApiController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private IPlatformAzureStorage _storage;
+        private readonly IPlatformAzureStorage _storage;
         private readonly IConfiguration _configuration;
 
         public ApiController(ApplicationDbContext context, IConfiguration configuration, IPlatformAzureStorage storage = null)
@@ -80,7 +80,7 @@ namespace YoFi.AspNet.Controllers
                 var regexpayees = _context.Payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
                 foreach (var regexpayee in regexpayees)
                 {
-                    var regex = new Regex(regexpayee.Name.Substring(1, regexpayee.Name.Length - 2));
+                    var regex = new Regex(regexpayee.Name[1..^2]);
                     if (regex.Match(transaction.Payee).Success)
                     {
                         payee = regexpayee;
@@ -263,13 +263,11 @@ namespace YoFi.AspNet.Controllers
 
                 if (file.FileName.ToLower().EndsWith(".xlsx"))
                 {
-                    using (var stream = file.OpenReadStream())
-                    using (var ssr = new OpenXmlSpreadsheetReader())
-                    {
-                        ssr.Open(stream);
-                        var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
-                        incoming.UnionWith(items);
-                    }
+                    using var stream = file.OpenReadStream();
+                    using var ssr = new OpenXmlSpreadsheetReader();
+                    ssr.Open(stream);
+                    var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
+                    incoming.UnionWith(items);
                 }
 
                 if (incoming.Any())
@@ -354,10 +352,9 @@ namespace YoFi.AspNet.Controllers
             if (!authorization.StartsWith("Basic "))
                 throw new UnauthorizedAccessException();
 
-            var base64 = authorization.Substring(6);
+            var base64 = authorization[6..];
             var credentialBytes = Convert.FromBase64String(base64);
             var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
-            var username = credentials[0];
             var password = credentials[1];
 
             var expectedpassword = _configuration["Api:Key"];
