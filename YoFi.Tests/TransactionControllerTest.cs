@@ -74,7 +74,7 @@ namespace YoFi.Tests
             }
         }
             
-        List<Split> SplitItems = new List<Split>()
+        readonly List<Split> SplitItems = new List<Split>()
         {
             new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
             new Split() { Amount = 75m, Category = "C", SubCategory = "D" },
@@ -82,7 +82,7 @@ namespace YoFi.Tests
             new Split() { Amount = 75m, Category = "C", SubCategory = "D", Memo = "WHOCAFD" }
         };
 
-        List<Payee> PayeeItems = new List<Payee>()
+        readonly List<Payee> PayeeItems = new List<Payee>()
         {
             new Payee() { Category = "Y", Name = "3" },
             new Payee() { Category = "X", Name = "2" },
@@ -91,7 +91,7 @@ namespace YoFi.Tests
             new Payee() { Category = "Y", Name = "4" }
         };
 
-        List<CategoryMap> CategoryMapItems = new List<CategoryMap>()
+        readonly List<CategoryMap> CategoryMapItems = new List<CategoryMap>()
         {
             new CategoryMap() { Category = "A", Key1 = "X", Key2 = "Y" },
             new CategoryMap() { Category = "C", Key1 = "Z", Key2 = "R" }
@@ -935,8 +935,7 @@ namespace YoFi.Tests
         public async Task IndexShowHidden(bool ishidden)
         {
             // Given: A set of items, some hidden some not
-            IEnumerable<Transaction> items, hiddenitems;
-            GivenItemsHiddenAndNot(out items, out hiddenitems);
+            GivenItemsHiddenAndNot(out var items, out var hiddenitems);
 
             // When: Calling Index with indirect search term for hidden items
             var searchterm = ishidden ? "H" : null;
@@ -973,8 +972,7 @@ namespace YoFi.Tests
         public async Task IndexShowHasReceipt(bool? hasreceipt)
         {
             // Given: A set of items, some with receipts some not
-            IEnumerable<Transaction> items, receiptitems;
-            GivenItemsWithAndWithoutReceipt(context, out items, out receiptitems);
+            GivenItemsWithAndWithoutReceipt(context, out var items, out var receiptitems);
 
             // When: Calling Index with indirect search term for items with/without a receipt
             string searchterm = null;
@@ -1525,8 +1523,7 @@ namespace YoFi.Tests
         public async Task IndexQReceipt(bool with)
         {
             // Given: A mix of transactions, some with receipts, some without
-            IEnumerable<Transaction> items, moditems;
-            GivenItemsWithAndWithoutReceipt(context, out items, out moditems);
+            GivenItemsWithAndWithoutReceipt(context, out var items, out var moditems);
 
             // When: Calling index q='r=1' (or r=0)
             var model = await WhenCallingIndexWithQ($"R={(with?'1':'0')}");
@@ -1542,8 +1539,7 @@ namespace YoFi.Tests
         public async Task IndexVHidden()
         {
             // Given: A mix of transactions, some hidden, some not
-            IEnumerable<Transaction> items, moditems;
-            GivenItemsHiddenAndNot(out items, out moditems);
+            GivenItemsHiddenAndNot(out var items, out var moditems);
 
             // When: Calling index v='h'
             var model = await WhenCallingIndexWithV("h");
@@ -1556,8 +1552,7 @@ namespace YoFi.Tests
         public async Task IndexNoHidden()
         {
             // Given: A mix of transactions, some hidden, some not
-            IEnumerable<Transaction> items, moditems;
-            GivenItemsHiddenAndNot(out items, out moditems);
+            GivenItemsHiddenAndNot(out var items, out var moditems);
 
             // When: Calling index without qualifiers
             var model = await WhenCallingIndexEmpty();
@@ -1571,8 +1566,7 @@ namespace YoFi.Tests
         {
             // Given: A mix of transactions, in differing years
             int year = 2000;
-            IEnumerable<Transaction> items, moditems;
-            GivenItemsInYearAndNot(out items, out moditems, year);
+            GivenItemsInYearAndNot(out var items, out var moditems, year);
 
             // When: Calling index q='y={year}'
             var model = await WhenCallingIndexWithQ($"Y={year}");
