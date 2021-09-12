@@ -44,19 +44,19 @@ namespace YoFi.Tests
             _testContext = testContext;
         }
 
-        void WhenWritingToNewSpreadsheet<T>(Stream stream,IEnumerable<T> items, string name,bool writetodisk = true) where T: class
+        void WhenWritingToNewSpreadsheet<T>(Stream stream,IEnumerable<T> items,bool writetodisk = true) where T: class
         {
             using (var writer = new OpenXmlSpreadsheetWriter())
             {
                 writer.Open(stream);
-                writer.Write(items, name);
+                writer.Write(items, TestContext.TestName);
             }
 
             stream.Seek(0, SeekOrigin.Begin);
 
             if (writetodisk)
             {
-                var filename = $"Test-{name}.xlsx";
+                var filename = $"Test-{TestContext.TestName}.xlsx";
                 File.Delete(filename);
                 using var outstream = File.OpenWrite(filename);
                 stream.CopyTo(outstream);
@@ -64,7 +64,7 @@ namespace YoFi.Tests
             }
         }
 
-        private void WhenReadAsOldSpreadsheet<T>(MemoryStream stream, string name, List<T> actual, List<string> sheets) where T: class, new()
+        private void WhenReadAsOldSpreadsheet<T>(MemoryStream stream,  List<T> actual, List<string> sheets) where T: class, new()
         {
 #if EPPLUS
             stream.Seek(0, SeekOrigin.Begin);
@@ -79,32 +79,32 @@ namespace YoFi.Tests
 #endif
         }
 
-        private void WhenReadAsNewSpreadsheet<T>(MemoryStream stream, string name, List<T> actual, List<string> sheets) where T : class, new()
+        private void WhenReadAsNewSpreadsheet<T>(MemoryStream stream, List<T> actual, List<string> sheets) where T : class, new()
         {
             stream.Seek(0, SeekOrigin.Begin);
             using (var reader = new OpenXmlSpreadsheetReader())
             {
                 reader.Open(stream);
-                actual.AddRange(reader.Read<T>(name));
+                actual.AddRange(reader.Read<T>(TestContext.TestName));
                 sheets.AddRange(reader.SheetNames.ToList());
             }
         }
 
-        public void WriteThenReadBack<T>(string name, IEnumerable<T> items, bool newreader = false, bool writetodisk = true) where T : class, new()
+        public void WriteThenReadBack<T>(IEnumerable<T> items, bool newreader = false, bool writetodisk = true) where T : class, new()
         {
             // Given: Some items
 
             // When: Writing it to a spreadsheet using the new methods
             using (var stream = new MemoryStream())
             {
-                WhenWritingToNewSpreadsheet(stream, items, name, writetodisk);
+                WhenWritingToNewSpreadsheet(stream, items, writetodisk);
 
                 // And: Reading it back to a spreadsheet using the old methods
                 var actual = new List<T>();
                 var sheets = new List<string>();
 
                 if (newreader)
-                    WhenReadAsNewSpreadsheet<T>(stream, name, actual, sheets);
+                    WhenReadAsNewSpreadsheet<T>(stream, actual, sheets);
 #if EPPLUS
                 else
                     WhenReadAsOldSpreadsheet<T>(stream, name, actual, sheets);
@@ -114,7 +114,7 @@ namespace YoFi.Tests
 #endif
                 // Then: The spreadsheet is valid, and contains the expected item
                 Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(name, sheets.Single());
+                Assert.AreEqual(TestContext.TestName, sheets.Single());
                 Assert.IsTrue(actual.SequenceEqual(items));
             }
         }
@@ -130,7 +130,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteString", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -144,7 +144,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteStringNull", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -158,7 +158,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteDateTime", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -172,7 +172,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteInt32", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -186,7 +186,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteDecimal", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -200,7 +200,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("SimpleWriteBoolean", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -215,7 +215,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("OnePayee", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -230,7 +230,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("AllPayees", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -245,7 +245,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("AllSplits", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -260,7 +260,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("AllBudgetTxs", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -275,7 +275,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("OneTransactionEmpty", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -289,7 +289,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("TransactionItemsFew", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
         [DataRow(true)]
@@ -303,7 +303,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack("TransactionItems20", Items, newreader);
+            WriteThenReadBack(Items, newreader);
         }
 
 
@@ -317,7 +317,7 @@ namespace YoFi.Tests
             // When: Writing it to a spreadsheet using the new methods
             // And: Reading it back to a spreadsheet using the old methods
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack<Transaction>("TransactionItems200", Items, newreader:true, writetodisk:false);
+            WriteThenReadBack<Transaction>(Items, newreader:true, writetodisk:false);
         }
 
         [DataRow(true)]
@@ -344,7 +344,7 @@ namespace YoFi.Tests
                 }
 
                 stream.Seek(0, SeekOrigin.Begin);
-                var filename = $"Test-MultipleDataSeries.xlsx";
+                var filename = $"Test-{TestContext.TestName}.xlsx";
                 File.Delete(filename);
                 using (var outstream = File.OpenWrite(filename))
                 {
