@@ -241,7 +241,14 @@ namespace YoFi.AspNet.Controllers.Reports
         /// Render the report to console
         /// </summary>
         /// <param name="sorted">Whether to show rows in sorted order</param>
-        public void WriteToConsole(bool sorted = false)
+        public void WriteToConsole(bool sorted = false) => Write(Console.Out, sorted);
+
+        /// <summary>
+        /// Render the report to the given <paramref name="writer"/>
+        /// </summary>
+        /// <param name="writer">Where to write</param>
+        /// <param name="sorted">Whether to show rows in sorted order</param>
+        public void Write(TextWriter writer, bool sorted = false)
         {
             if (!RowLabels.Any())
                 return;
@@ -263,7 +270,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 builder.Append($"| {name,10} ");
             }
 
-            Console.WriteLine(builder.ToString());
+            writer.WriteLine(builder.ToString());
 
             // Rows
 
@@ -292,7 +299,7 @@ namespace YoFi.AspNet.Controllers.Reports
 
                 builder.Append($" {row}");
 
-                Console.WriteLine(builder.ToString());
+                writer.WriteLine(builder.ToString());
             }
         }
 

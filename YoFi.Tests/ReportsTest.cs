@@ -43,6 +43,32 @@ namespace YoFi.Tests
             return result;
         }
 
+        void WhenBuildingTheReport(bool sorted = false)
+        {
+            report.Build();
+
+            var hash = (DataHash == 0) ? string.Empty : $"-{DataHash:X}";
+            var filename = $"Report-{TestContext.TestName}{hash}.txt";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            using var writer = new StreamWriter(outstream);
+            report.Write(writer,sorted);
+            writer.Close();
+            TestContext.AddResultFile(filename);
+        }
+
+        public TestContext TestContext { get; set; }
+
+        private static TestContext _testContext;
+
+        private int DataHash;
+
+        [ClassInitialize]
+        public static void SetupTests(TestContext testContext)
+        {
+            _testContext = testContext;
+        }
+
         [TestInitialize]
         public void SetUp()
         {
@@ -90,6 +116,8 @@ namespace YoFi.Tests
             BudgetItems = new List<Item>();
             BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:^C" });
             BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:E" });
+
+            DataHash = 0;
         }
 
         [TestMethod]
@@ -103,8 +131,9 @@ namespace YoFi.Tests
         {
             report.WithMonthColumns = true;
             report.Source = new NamedQueryList( Items.Take(1).AsQueryable() );
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name");
             var Jan = GetColumn(x => x.Name == "Jan");
@@ -117,7 +146,9 @@ namespace YoFi.Tests
         {
             report.WithMonthColumns = true;
             report.Source = new NamedQueryList( Items.Take(1).AsQueryable() );
-            report.Build();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             string json = report.ToJson();
 
@@ -142,7 +173,9 @@ namespace YoFi.Tests
         {
             report.WithMonthColumns = true;
             report.Source = new NamedQueryList(Items.Take(5).AsQueryable());
-            report.Build();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name");
             var Feb = GetColumn(x => x.Name == "Feb");
@@ -157,7 +190,9 @@ namespace YoFi.Tests
         {
             report.WithMonthColumns = true;
             report.Source = new NamedQueryList(Items.Take(9).AsQueryable());
-            report.Build();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Other = GetRow(x => x.Name == "Other");
             var Feb = GetColumn(x => x.Name == "Feb");
@@ -181,8 +216,9 @@ namespace YoFi.Tests
             report.AddCustomColumn(custom);
             report.WithMonthColumns = true;
             report.Source = new NamedQueryList(Items.Take(9).AsQueryable());
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Other = GetRow(x => x.Name == "Other");
             var Feb = GetColumn(x => x.Name == "Feb");
@@ -216,8 +252,9 @@ namespace YoFi.Tests
             report.AddCustomColumn(custom);
             report.WithMonthColumns = true;
             report.Source = new NamedQueryList(Items.Take(9).AsQueryable());
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Other = GetRow(x => x.Name == "Other");
             var Feb = GetColumn(x => x.Name == "Feb");
@@ -235,7 +272,9 @@ namespace YoFi.Tests
         {
             report.WithMonthColumns = true;
             report.Source = new NamedQueryList(Items.Skip(5).Take(8).AsQueryable());
-            report.Build();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Other = GetRow(x => x.Name == "Other");
             var Apr = GetColumn(x => x.Name == "Apr");
@@ -250,8 +289,9 @@ namespace YoFi.Tests
         public void Simple()
         {
             report.Source = new NamedQueryList(Items.Take(13).AsQueryable());
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
@@ -267,8 +307,9 @@ namespace YoFi.Tests
         public void NullCategory()
         {
             report.Source = new NamedQueryList(Items.Skip(25).Take(1).AsQueryable());
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Blank = GetRow(x => x.Name == "[Blank]" && !x.IsTotal);
             Assert.AreEqual(100m, report[report.TotalColumn, Blank]);
@@ -277,7 +318,9 @@ namespace YoFi.Tests
         public void SimpleJson()
         {
             report.Source = new NamedQueryList(Items.Take(13).AsQueryable());
-            report.Build();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             string json = report.ToJson();
 
@@ -299,8 +342,9 @@ namespace YoFi.Tests
         {
             report.Source = new NamedQueryList(Items.Skip(3).Take(6).AsQueryable());
             report.SortOrder = Report.SortOrders.TotalAscending;
-            report.Build();
-            report.WriteToConsole(sorted:true);
+
+            // When: Building the report
+            WhenBuildingTheReport(sorted:true);
 
             var actual = report.RowLabelsOrdered;
 
@@ -312,8 +356,9 @@ namespace YoFi.Tests
         {
             report.Source = new NamedQueryList(Items.Skip(3).Take(6).AsQueryable());
             report.SortOrder = Report.SortOrders.NameAscending;
-            report.Build();
-            report.WriteToConsole(sorted: true);
+
+            // When: Building the report
+            WhenBuildingTheReport(sorted:true);
 
             var actual = report.RowLabelsOrdered;
 
@@ -324,7 +369,9 @@ namespace YoFi.Tests
         public void SubItems()
         {
             report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());
-            report.Build();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Other = GetRow(x => x.Name == "Other");
 
@@ -338,7 +385,9 @@ namespace YoFi.Tests
         {
             report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());
             report.NumLevels = 2;
-            report.Build();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
@@ -357,8 +406,9 @@ namespace YoFi.Tests
             report.Source = new NamedQueryList(Items.Skip(9).Take(6).AsQueryable());
             report.NumLevels = 2;
             report.SortOrder = Report.SortOrders.TotalAscending;
-            report.Build();
-            report.WriteToConsole(sorted: true);
+
+            // When: Building the report
+            WhenBuildingTheReport(sorted:true);
 
             var actual = report.RowLabelsOrdered.ToList();
 
@@ -375,8 +425,9 @@ namespace YoFi.Tests
         {
             report.Source = new NamedQueryList(Items.Take(19).AsQueryable());
             report.NumLevels = 2;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -399,8 +450,7 @@ namespace YoFi.Tests
 
             // When: Building a report with two levels of depth
             report.NumLevels = 2;
-            report.Build();
-            report.WriteToConsole();
+            WhenBuildingTheReport();
 
             // Then: Empty row is a top-level row
 
@@ -414,8 +464,9 @@ namespace YoFi.Tests
         {
             report.Source = new NamedQueryList(Items.Take(19).AsQueryable());
             report.NumLevels = 2;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             string json = report.ToJson();
 
@@ -442,8 +493,9 @@ namespace YoFi.Tests
             report.Source = new NamedQueryList(Items.Take(24).AsQueryable());
             report.NumLevels = 2;
             report.SortOrder = Report.SortOrders.TotalAscending;
-            report.Build();
-            report.WriteToConsole(sorted:true);
+
+            // When: Building the report
+            WhenBuildingTheReport(sorted:true);
 
             var actual = report.RowLabelsOrdered.ToList();
 
@@ -460,8 +512,9 @@ namespace YoFi.Tests
             report.Source = new NamedQueryList(Items.Take(25).AsQueryable());
             report.NumLevels = 3;
             report.SortOrder = Report.SortOrders.TotalAscending;
-            report.Build();
-            report.WriteToConsole(sorted: true);
+
+            // When: Building the report
+            WhenBuildingTheReport(sorted:true);
 
             var actual = report.RowLabelsOrdered.ToList();
 
@@ -479,8 +532,9 @@ namespace YoFi.Tests
             report.WithMonthColumns = true;
             report.NumLevels = 2;
             report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             string json = report.ToJson();
 
@@ -509,8 +563,9 @@ namespace YoFi.Tests
             report.WithMonthColumns = true;
             report.NumLevels = 2;
             report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 1);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 1);
@@ -533,8 +588,9 @@ namespace YoFi.Tests
         {
             report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());
             report.SkipLevels = 1;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 0);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
@@ -552,7 +608,9 @@ namespace YoFi.Tests
             report.Source = new NamedQueryList(Items.Skip(9).Take(10).AsQueryable());
             report.SkipLevels = 1;
             report.NumLevels = 2;
-            report.Build();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Something = GetRow(x => x.Name == "Something" && x.Level == 1);
             var Else = GetRow(x => x.Name == "Else" && x.Level == 1);
@@ -575,8 +633,9 @@ namespace YoFi.Tests
             report.WithMonthColumns = true;
             report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
             report.NumLevels = 3;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 2);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 2);
@@ -604,8 +663,9 @@ namespace YoFi.Tests
         {
             report.Source = new NamedQueryList(Items.Take(20).AsQueryable());
             report.NumLevels = 3;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport(sorted:true);
 
             var sortedrows = report.RowLabelsOrdered;
             Console.WriteLine(string.Join(',', sortedrows.Select(x => x.Name)));
@@ -615,8 +675,9 @@ namespace YoFi.Tests
         public void ThreeLevelsDeepLeafs()
         {
             report.Source = new NamedQueryList(new NamedQuery() { Query = Items.Take(20).AsQueryable(), LeafRowsOnly = true });
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 0);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 0);
@@ -645,8 +706,9 @@ namespace YoFi.Tests
         public void TwoSeries()
         {
             report.Source = MultiSeriesSource;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name" );
             var Other = GetRow(x => x.Name == "Other" );
@@ -665,8 +727,9 @@ namespace YoFi.Tests
         {
             report.Source = MultiSeriesSource;
             report.NumLevels = 2;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
@@ -696,8 +759,9 @@ namespace YoFi.Tests
             );
             report.Source = MultiSeriesSource;
             report.NumLevels = 2;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
@@ -725,8 +789,9 @@ namespace YoFi.Tests
             report.WithMonthColumns = true;
             report.Source = MultiSeriesSource;
             report.NumLevels = 2;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
@@ -762,8 +827,9 @@ namespace YoFi.Tests
             );
 
             report.NumLevels = 2;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
@@ -793,6 +859,8 @@ namespace YoFi.Tests
         [DataTestMethod]
         public void MixedLeafRowsAndCollector(string budget, string actual, int expected )
         {
+            DataHash = HashCode.Combine(budget, actual, expected);
+
             report.Source = new NamedQueryList()
             {
                 new NamedQuery() 
@@ -809,8 +877,9 @@ namespace YoFi.Tests
             };
 
             report.NumLevels = 3;
-            report.Build();
-            report.WriteToConsole();
+
+            // When: Building the report
+            WhenBuildingTheReport();
 
             var Row = report.RowLabels.First();
             var Actual = GetColumn(x => x.Name == "Actual");
@@ -894,14 +963,8 @@ namespace YoFi.Tests
         public void EmptyReportNoConsoleOut()
         {
             var sw = new StringWriter();
-            Console.SetOut(sw);
-            string result = sw.ToString();
-
-            report.WriteToConsole();
-
-            var standardOutput = new StreamWriter(Console.OpenStandardOutput());
-            standardOutput.AutoFlush = true;
-            Console.SetOut(standardOutput);
+            sw.Close();
+            report.Write(sw);
 
             Assert.AreEqual(0, sw.ToString().Length);
         }
