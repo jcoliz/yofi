@@ -38,6 +38,7 @@ namespace YoFi.AspNet.Common
             spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
             var workbookpart = spreadSheet.AddWorkbookPart();
             workbookpart.Workbook = new Workbook();
+            InsertStyleSheet();
         }
 
         /// <summary>
@@ -165,12 +166,69 @@ namespace YoFi.AspNet.Common
         /// Insert just a single <paramref name="objectrow"/> into <paramref name="worksheetPart"/>.
         /// </summary>
         /// <see cref="InsertIntoSheet(WorksheetPart, IEnumerable{IEnumerable{object}}, ref uint)"/>
-        /// <param name="worksheetPart"></param>
+        /// <param name="worksheetPart">Insert into this</param>
         /// <param name="objectrow"></param>
         /// <param name="rowindex"></param>
         private void InsertIntoSheet(WorksheetPart worksheetPart, IEnumerable<object> objectrow, ref uint rowindex)
         {
             InsertIntoSheet(worksheetPart, new List<IEnumerable<object>>() { objectrow }, ref rowindex);
+        }
+
+        /// <summary>
+        /// Insert a minimal stylesheet into current workbook
+        /// </summary>
+        /// <see href="https://stackoverflow.com/questions/26050708/minimal-style-sheet-for-excel-open-xml-with-dates"/>
+        private void InsertStyleSheet()
+        {
+            var workbookPart = spreadSheet.WorkbookPart;
+
+            WorkbookStylesPart wbsp = workbookPart.AddNewPart<WorkbookStylesPart>();
+            var stylesheet = wbsp.Stylesheet = new Stylesheet();
+
+            // Default Font
+            var fonts = new Fonts() { Count = 1, KnownFonts = BooleanValue.FromBoolean(true) };
+            var font = new Font
+            {
+                FontSize = new FontSize() { Val = 11 },
+                FontName = new FontName() { Val = "Segoe UI" },
+                FontFamilyNumbering = new FontFamilyNumbering() { Val = 2 },
+                FontScheme = new FontScheme() { Val = new EnumValue<FontSchemeValues>(FontSchemeValues.Minor) }
+            };
+            fonts.Append(font);
+            stylesheet.Append(fonts);
+
+            // Default Fill
+            var fills = new Fills() { Count = 1 };
+            var fill = new Fill() { PatternFill = new PatternFill() { PatternType = new EnumValue<PatternValues>(PatternValues.None) } };
+            fills.Append(fill);
+            stylesheet.Append(fills);
+
+            // Default Border
+            var borders = new Borders() { Count = 1 };
+            var border = new Border
+            {
+                LeftBorder = new LeftBorder(),
+                RightBorder = new RightBorder(),
+                TopBorder = new TopBorder(),
+                BottomBorder = new BottomBorder(),
+                DiagonalBorder = new DiagonalBorder()
+            };
+            borders.Append(border);
+            stylesheet.Append(borders);
+
+            // Default cell format and a date cell format
+            var cellFormats = new CellFormats() { Count = 2 };
+
+            var cellFormatDefault = new CellFormat { NumberFormatId = 0, FormatId = 0, FontId = 0, BorderId = 0, FillId = 0 };
+            cellFormats.Append(cellFormatDefault);
+
+            var cellFormatDate = new CellFormat { NumberFormatId = 14, FormatId = 0, FontId = 0, BorderId = 0, FillId = 0, ApplyNumberFormat = BooleanValue.FromBoolean(true) };
+            cellFormats.Append(cellFormatDate);
+
+            var cellFormatCurrency = new CellFormat { NumberFormatId = 44, FormatId = 0, FontId = 0, BorderId = 0, FillId = 0, ApplyNumberFormat = BooleanValue.FromBoolean(true) };
+            cellFormats.Append(cellFormatCurrency);
+
+            stylesheet.Append(cellFormats);
         }
 
         /// <summary>
@@ -184,6 +242,7 @@ namespace YoFi.AspNet.Common
         {
             string Value = null;
             CellValues DataType = CellValues.Error;
+            UInt32 Format = 0;
 
             if (@object != null)
             {
@@ -198,6 +257,7 @@ namespace YoFi.AspNet.Common
                 {
                     Value = @object.ToString();
                     DataType = CellValues.Number;
+                    Format = 2; // Currency
                 }
                 else if (t == typeof(Int32))
                 {
@@ -210,6 +270,7 @@ namespace YoFi.AspNet.Common
                     double oaValue = ((DateTime)@object).ToOADate();
                     Value = oaValue.ToString(CultureInfo.InvariantCulture);
                     DataType = CellValues.Number;
+                    Format = 1; // Date
                 }
                 else if (t == typeof(Boolean))
                 {
@@ -218,12 +279,17 @@ namespace YoFi.AspNet.Common
                 }
             }
 
-            return new Cell()
+            var result = new Cell()
             {
                 CellReference = cellref,
                 CellValue = new CellValue(DataType == CellValues.SharedString ? InsertSharedStringItem(Value) : Value),
                 DataType = new EnumValue<CellValues>(DataType)
             };
+
+            if (Format != 0)
+                result.StyleIndex = Format;
+
+            return result;
         }
      
         /// <summary>
