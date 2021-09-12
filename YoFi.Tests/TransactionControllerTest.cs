@@ -104,12 +104,9 @@ namespace YoFi.Tests
         {
             if (null == TransactionItemsLong)
             {
-                using (var stream = SampleData.Open("ExportedTransactions.ofx"))
-                {
-                    OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
-
-                    TransactionItemsLong = Document.Statements.SelectMany(x=>x.Transactions).Select(tx=> new Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date.Value.DateTime });
-                }
+                using var stream = SampleData.Open("ExportedTransactions.ofx");
+                OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
+                TransactionItemsLong = Document.Statements.SelectMany(x=>x.Transactions).Select(tx=> new Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date.Value.DateTime });
             }
             return TransactionItemsLong;
         }

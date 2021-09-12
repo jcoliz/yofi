@@ -82,12 +82,10 @@ namespace YoFi.Tests
         private void WhenReadAsNewSpreadsheet<T>(MemoryStream stream, List<T> actual, List<string> sheets) where T : class, new()
         {
             stream.Seek(0, SeekOrigin.Begin);
-            using (var reader = new OpenXmlSpreadsheetReader())
-            {
-                reader.Open(stream);
-                actual.AddRange(reader.Read<T>(TestContext.TestName));
-                sheets.AddRange(reader.SheetNames.ToList());
-            }
+            using var reader = new OpenXmlSpreadsheetReader();
+            reader.Open(stream);
+            actual.AddRange(reader.Read<T>(TestContext.TestName));
+            sheets.AddRange(reader.SheetNames.ToList());
         }
 
         public void WriteThenReadBack<T>(IEnumerable<T> items, bool newreader = false, bool writetodisk = true) where T : class, new()
@@ -95,28 +93,26 @@ namespace YoFi.Tests
             // Given: Some items
 
             // When: Writing it to a spreadsheet using the new methods
-            using (var stream = new MemoryStream())
-            {
-                WhenWritingToNewSpreadsheet(stream, items, writetodisk);
+            using var stream = new MemoryStream();
+            WhenWritingToNewSpreadsheet(stream, items, writetodisk);
 
-                // And: Reading it back to a spreadsheet using the old methods
-                var actual = new List<T>();
-                var sheets = new List<string>();
+            // And: Reading it back to a spreadsheet using the old methods
+            var actual = new List<T>();
+            var sheets = new List<string>();
 
-                if (newreader)
-                    WhenReadAsNewSpreadsheet<T>(stream, actual, sheets);
+            if (newreader)
+                WhenReadAsNewSpreadsheet<T>(stream, actual, sheets);
 #if EPPLUS
-                else
-                    WhenReadAsOldSpreadsheet<T>(stream, name, actual, sheets);
+            else
+                WhenReadAsOldSpreadsheet<T>(stream, name, actual, sheets);
 #else
-                else
-                    return;
+            else
+                return;
 #endif
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(1, sheets.Count());
-                Assert.AreEqual(TestContext.TestName, sheets.Single());
-                Assert.IsTrue(actual.SequenceEqual(items));
-            }
+            // Then: The spreadsheet is valid, and contains the expected item
+            Assert.AreEqual(1, sheets.Count());
+            Assert.AreEqual(TestContext.TestName, sheets.Single());
+            Assert.IsTrue(actual.SequenceEqual(items));
         }
 
         [DataRow(true)]
@@ -334,52 +330,50 @@ namespace YoFi.Tests
             // Then: All spreadsheets are valid, and contain the expected items
 
             // When: Writing it to a spreadsheet using the new methods
-            using (var stream = new MemoryStream())
+            using var stream = new MemoryStream();
+            using (var writer = new OpenXmlSpreadsheetWriter())
             {
-                using (var writer = new OpenXmlSpreadsheetWriter())
-                {
-                    writer.Open(stream);
-                    writer.Write(TxItems);
-                    writer.Write(SplitItems);
-                }
-
-                stream.Seek(0, SeekOrigin.Begin);
-                var filename = $"Test-{TestContext.TestName}.xlsx";
-                File.Delete(filename);
-                using (var outstream = File.OpenWrite(filename))
-                {
-                    Console.WriteLine($"Writing {outstream.Name}...");
-                    stream.CopyTo(outstream);
-                }
-
-                // And: Reading it back to a spreadsheet using the old methods
-                var actual_t = new List<Transaction>();
-                var actual_s = new List<Split>();
-                var sheets = new List<string>();
-
-                stream.Seek(0, SeekOrigin.Begin);
-                ISpreadsheetReader reader;
-                if (newreader)
-                    reader = new OpenXmlSpreadsheetReader();
-#if EPPLUS
-                else
-                    reader = new EPPlusSpreadsheetReader();
-                using (reader)
-                {
-                    reader.Open(stream);
-                    actual_t.AddRange(reader.Read<Transaction>());
-                    actual_s.AddRange(reader.Read<Split>());
-                    sheets.AddRange(reader.SheetNames.ToList());
-                }
-
-                // Then: The spreadsheet is valid, and contains the expected item
-                Assert.AreEqual(2, sheets.Count());
-                Assert.IsTrue(sheets.Contains("Transaction"));
-                Assert.IsTrue(sheets.Contains("Split"));
-                CollectionAssert.AreEqual(TxItems, actual_t);
-                CollectionAssert.AreEqual(SplitItems, actual_s);
-#endif
+                writer.Open(stream);
+                writer.Write(TxItems);
+                writer.Write(SplitItems);
             }
+
+            stream.Seek(0, SeekOrigin.Begin);
+            var filename = $"Test-{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using (var outstream = File.OpenWrite(filename))
+            {
+                Console.WriteLine($"Writing {outstream.Name}...");
+                stream.CopyTo(outstream);
+            }
+
+            // And: Reading it back to a spreadsheet using the old methods
+            var actual_t = new List<Transaction>();
+            var actual_s = new List<Split>();
+            var sheets = new List<string>();
+
+            stream.Seek(0, SeekOrigin.Begin);
+            ISpreadsheetReader reader;
+            if (newreader)
+                reader = new OpenXmlSpreadsheetReader();
+#if EPPLUS
+            else
+                reader = new EPPlusSpreadsheetReader();
+            using (reader)
+            {
+                reader.Open(stream);
+                actual_t.AddRange(reader.Read<Transaction>());
+                actual_s.AddRange(reader.Read<Split>());
+                sheets.AddRange(reader.SheetNames.ToList());
+            }
+
+            // Then: The spreadsheet is valid, and contains the expected item
+            Assert.AreEqual(2, sheets.Count());
+            Assert.IsTrue(sheets.Contains("Transaction"));
+            Assert.IsTrue(sheets.Contains("Split"));
+            CollectionAssert.AreEqual(TxItems, actual_t);
+            CollectionAssert.AreEqual(SplitItems, actual_s);
+#endif
         }
 
         [TestMethod]
