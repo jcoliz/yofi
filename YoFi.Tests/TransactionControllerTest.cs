@@ -617,10 +617,12 @@ namespace YoFi.Tests
             // Here's the test data set. Note that "Transaction ID" in this case is used just
             // as a matching ID for the current spreadsheet. It should be discarded.
             var transactions = new List<Transaction>();
-            var splits = new List<Split>();
-            splits.Add(new Split() { Amount = 25m, Category = "A", SubCategory = "B", TransactionID = 1000 });
-            splits.Add(new Split() { Amount = 75m, Category = "C", SubCategory = "D", TransactionID = 1000 });
-            splits.Add(new Split() { Amount = 175m, Category = "X", SubCategory = "Y", TransactionID = 12000 }); // Not going to be matched!
+            var splits = new List<Split>()
+            {
+                new Split() { Amount = 25m, Category = "A", SubCategory = "B", TransactionID = 1000 },
+                new Split() { Amount = 75m, Category = "C", SubCategory = "D", TransactionID = 1000 },
+                new Split() { Amount = 175m, Category = "X", SubCategory = "Y", TransactionID = 12000 } // Not going to be matched!
+            };
 
             var item = new Transaction() { ID = 1000, Payee = "3", Category = "RemoveMe", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
             transactions.Add(item);
@@ -723,14 +725,11 @@ namespace YoFi.Tests
             IEnumerable<Transaction> txitems;
             IEnumerable<Split> splititems;
             IEnumerable<string> sheetnames;
-            string singlesheet = string.Empty;
-            using (var ssr = new OpenXmlSpreadsheetReader())
-            {
-                ssr.Open(stream);
-                txitems = ssr.Read<Transaction>();
-                splititems = ssr.Read<Split>();
-                sheetnames = ssr.SheetNames.ToList();
-            }
+            using var ssr = new OpenXmlSpreadsheetReader();
+            ssr.Open(stream);
+            txitems = ssr.Read<Transaction>();
+            splititems = ssr.Read<Split>();
+            sheetnames = ssr.SheetNames.ToList();
 
             Assert.AreEqual(1, sheetnames.Count());
             Assert.AreEqual("Transaction", sheetnames.Single());
@@ -810,7 +809,7 @@ namespace YoFi.Tests
             await helper.AddFiveItems();
 
             // When: Cancelling the import
-            var result = await controller.ProcessImported("cancel");
+            await controller.ProcessImported("cancel");
 
             // Then: Only items without imported flag remain
             Assert.AreEqual(expected, dbset.Count());
@@ -957,9 +956,7 @@ namespace YoFi.Tests
         {
             // When: Calling index with view set to 'selected'
             var searchterm = isselected ? "S" : null;
-            var result = await controller.Index(v:searchterm);
-            var actual = result as ViewResult;
-            var model = actual.Model as List<Transaction>;
+            await controller.Index(v:searchterm);
 
             // Then: The "show selected" state is transmitted through to the view in the view data
             Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
@@ -1539,7 +1536,7 @@ namespace YoFi.Tests
         public async Task IndexVHidden()
         {
             // Given: A mix of transactions, some hidden, some not
-            GivenItemsHiddenAndNot(out var items, out var moditems);
+            GivenItemsHiddenAndNot(out var items, out _);
 
             // When: Calling index v='h'
             var model = await WhenCallingIndexWithV("h");
@@ -1566,7 +1563,7 @@ namespace YoFi.Tests
         {
             // Given: A mix of transactions, in differing years
             int year = 2000;
-            GivenItemsInYearAndNot(out var items, out var moditems, year);
+            GivenItemsInYearAndNot(out _, out var moditems, year);
 
             // When: Calling index q='y={year}'
             var model = await WhenCallingIndexWithQ($"Y={year}");

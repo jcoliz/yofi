@@ -36,14 +36,6 @@ namespace YoFi.Tests
 
         public TestContext TestContext { get; set; }
 
-        private static TestContext _testContext;
-
-        [ClassInitialize]
-        public static void SetupTests(TestContext testContext)
-        {
-            _testContext = testContext;
-        }
-
         void WhenWritingToNewSpreadsheet<T>(Stream stream,IEnumerable<T> items,bool writetodisk = true) where T: class
         {
             using (var writer = new OpenXmlSpreadsheetWriter())
@@ -64,9 +56,9 @@ namespace YoFi.Tests
             }
         }
 
+#if EPPLUS
         private void WhenReadAsOldSpreadsheet<T>(MemoryStream stream,  List<T> actual, List<string> sheets) where T: class, new()
         {
-#if EPPLUS
             stream.Seek(0, SeekOrigin.Begin);
             using (var reader = new EPPlusSpreadsheetReader())
             {
@@ -74,10 +66,9 @@ namespace YoFi.Tests
                 actual.AddRange(reader.Read<T>(name));
                 sheets.AddRange(reader.SheetNames.ToList());
             }
-#else
             throw new ApplicationException("Old spreadsheets not included. Define EPPLUS to include them.");
-#endif
         }
+#endif
 
         private void WhenReadAsNewSpreadsheet<T>(MemoryStream stream, List<T> actual, List<string> sheets) where T : class, new()
         {
