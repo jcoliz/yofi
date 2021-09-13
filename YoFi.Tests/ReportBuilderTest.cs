@@ -440,7 +440,6 @@ namespace YoFi.Tests
             const int numtx = 1000;
             var year = 2020;
             var random = new Random();
-            Func<decimal,decimal> nextamount = x => ((decimal)random.Next(-(int)(x * 100m), 0)) / 100m;
 
             string[] categories = new string[] { "A", "A:B:C", "A:B:C:D", "E", "E:F", "E:F:G", "H", "H:I", "J", "Income:K", "Income:L", "Taxes:M", "Taxes:N", "Savings:O", "Savings:P", string.Empty };
            
@@ -476,14 +475,12 @@ namespace YoFi.Tests
 
             // Serialize to JSON
 
-            using (var stream = File.OpenWrite("Transactions1000.json"))
             {
+                using var stream = File.OpenWrite("Transactions1000.json");
                 Console.WriteLine($"Writing {stream.Name}...");
-                using (var writer = new StreamWriter(stream))
-                {
-                    var output = System.Text.Json.JsonSerializer.Serialize(transactions, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
-                    writer.Write(output);
-                }
+                using var writer = new StreamWriter(stream);
+                var output = System.Text.Json.JsonSerializer.Serialize(transactions, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
+                writer.Write(output);
             }
 
             // Generate annual budget txs
@@ -494,14 +491,12 @@ namespace YoFi.Tests
 
             // Serialize to JSON
 
-            using (var stream = File.OpenWrite("BudgetTxs.json"))
             {
+                using var stream = File.OpenWrite("BudgetTxs.json");
                 Console.WriteLine($"Writing {stream.Name}...");
-                using (var writer = new StreamWriter(stream))
-                {
-                    var output = System.Text.Json.JsonSerializer.Serialize(budgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
-                    writer.Write(output);
-                }
+                using var writer = new StreamWriter(stream);
+                var output = System.Text.Json.JsonSerializer.Serialize(budgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
+                writer.Write(output);
             }
 
             // Generate managed budget txs
@@ -516,15 +511,15 @@ namespace YoFi.Tests
 
             // Serialize to JSON
 
-            using (var stream = File.OpenWrite("BudgetTxsManaged.json"))
             {
+                using var stream = File.OpenWrite("BudgetTxsManaged.json");
                 Console.WriteLine($"Writing {stream.Name}...");
-                using (var writer = new StreamWriter(stream))
-                {
-                    var output = System.Text.Json.JsonSerializer.Serialize(managedbudgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
-                    writer.Write(output);
-                }
+                using var writer = new StreamWriter(stream);
+                var output = System.Text.Json.JsonSerializer.Serialize(managedbudgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
+                writer.Write(output);
             }
+
+            decimal nextamount(decimal x) => ((decimal)random.Next(-(int)(x * 100m), 0)) / 100m;
         }
     }
 }

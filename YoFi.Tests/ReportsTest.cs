@@ -22,7 +22,7 @@ namespace YoFi.Tests
             public string Category { get; set; }
         }
 
-        List<Item> Items, ActualItems, BudgetItems;
+        List<Item> Items;
 
         Report report = null;
 
@@ -59,63 +59,42 @@ namespace YoFi.Tests
 
         public TestContext TestContext { get; set; }
 
-        private static TestContext _testContext;
-
         private int DataHash;
-
-        [ClassInitialize]
-        public static void SetupTests(TestContext testContext)
-        {
-            _testContext = testContext;
-        }
 
         [TestInitialize]
         public void SetUp()
         {
             report = new Report();
 
-            Items = new List<Item>();
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 03, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 03, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something:A" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something:A" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 05, 01), Category = "Other:Something:A" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something:B" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Else" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else:X" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:X" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Name" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else:X" });
-            Items.Add(new Item() { Amount = 1000, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something:B" });
-            Items.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01) });
-
-            // User Story 819: Managed Budget Report
-            // ActualItems and Budget items are used for Managed Budget report
-            ActualItems = new List<Item>();
-            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B" });
-            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:C" });
-            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:X" });
-            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D" });
-            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:X" });
-            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:E" });
-            ActualItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:E:X" });
-
-            BudgetItems = new List<Item>();
-            BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "A:B:^C" });
-            BudgetItems.Add(new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "D:E" });
+            Items = new List<Item>()
+            {
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "Name" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = "Name" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Name" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Name" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 03, 01), Category = "Name" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Other" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 02, 01), Category = "Other" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 03, 01), Category = "Other" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something:A" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other:Something:A" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 05, 01), Category = "Other:Something:A" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something:B" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Else" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Else" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else:X" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:X" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01), Category = "Name" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 04, 01), Category = "Other" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 08, 01), Category = "Other:Else:Y" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 07, 01), Category = "Other:Else:X" },
+                new Item() { Amount = 1000, Timestamp = new DateTime(2000, 06, 01), Category = "Other:Something:B" },
+                new Item() { Amount = 100, Timestamp = new DateTime(2000, 06, 01) },
+            };
 
             DataHash = 0;
         }
@@ -234,6 +213,7 @@ namespace YoFi.Tests
         [TestMethod]
         public void TwoCategoriesColsCustomComplex()
         {
+#pragma warning disable IDE0039 // Use local function -- Leave us alone, we need this to test ColumnLabel.Custom
             Func<Dictionary<string, decimal>, decimal> func = (cols) =>
             {
                 var feb = cols["ID:02"];
@@ -241,6 +221,7 @@ namespace YoFi.Tests
 
                 return feb + mar;
             };
+#pragma warning restore IDE0039 // Use local function
 
             var custom = new ColumnLabel()
             {
@@ -690,17 +671,12 @@ namespace YoFi.Tests
         }
 
 
-        NamedQueryList MultiSeriesSource
+        NamedQueryList MultiSeriesSource =>new NamedQueryList()
         {
-            get
-            {
-                var result = new NamedQueryList();
-                result.Add("One",Items.Take(20).Where(x => Items.IndexOf(x) % 3 == 0).ToList().AsQueryable());
-                result.Add("Two",Items.Take(20).Where(x => Items.IndexOf(x) % 3 != 0).ToList().AsQueryable());
+            { "One",Items.Take(20).Where(x => Items.IndexOf(x) % 3 == 0).ToList().AsQueryable() },
+            { "Two",Items.Take(20).Where(x => Items.IndexOf(x) % 3 != 0).ToList().AsQueryable() }
+        };
 
-                return result;
-            }
-        }
 
         [TestMethod]
         public void TwoSeries()
