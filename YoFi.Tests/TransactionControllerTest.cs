@@ -1105,7 +1105,7 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Calling Bulk Edit with a new category which includes positional wildcards
-            var newcategory = "/(1):New Category:(3+)/";
+            var newcategory = "(1):New Category:(3+)";
             var result = await controller.BulkEdit(newcategory);
             var rdresult = result as RedirectToActionResult;
 

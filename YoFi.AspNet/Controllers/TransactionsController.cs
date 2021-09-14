@@ -426,41 +426,39 @@ namespace YoFi.AspNet.Controllers
 
                 if (!string.IsNullOrEmpty(Category))
                 {
-                    if (Category.StartsWith("/") && Category.EndsWith("/"))
+                    // This may be a pattern-matching search, treat it like one
+                    // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
+                    // matching one, it's just slower.
+                    if (Category.Contains("("))
                     {
-                        // Pattern-matching replacement
-                        // Which only works if the original item has something to match against
-                        if (!string.IsNullOrEmpty(item.Category))
+                        var originals = item.Category?.Split(":") ?? default;
+                        var result = new List<string>();
+                        foreach (var component in Category.Split(":"))
                         {
-                            var pattern = Category[1..^1];
-                            var components = pattern.Split(":");
-                            var originals = item.Category.Split(":");
-                            var result = new List<string>();
-                            foreach(var component in components)
+                            if (component.StartsWith("(") && component.EndsWith("+)"))
                             {
-                                if (component.StartsWith("(") && component.EndsWith("+)"))
-                                {
-                                    if (Int32.TryParse(component[1..^2], out var position))
-                                        if (originals.Count() >= position)
-                                            result.AddRange(originals.Skip(position - 1));
-                                }
-                                else if (component.StartsWith("(") && component.EndsWith(")"))
-                                {
-                                    if (Int32.TryParse(component[1..^1], out var position))
-                                        if (originals.Count() >= position)
-                                            result.AddRange(originals.Skip(position - 1).Take(1));
-                                }
-                                else 
-                                    result.Add(component);
+                                if (Int32.TryParse(component[1..^2], out var position))
+                                    if (originals.Count() >= position)
+                                        result.AddRange(originals.Skip(position - 1));
                             }
-   
-                            if (result.Any())
-                                item.Category = string.Join(":", result);
+                            else if (component.StartsWith("(") && component.EndsWith(")"))
+                            {
+                                if (Int32.TryParse(component[1..^1], out var position))
+                                    if (originals.Count() >= position)
+                                        result.AddRange(originals.Skip(position - 1).Take(1));
+                            }
+                            else
+                                result.Add(component);
                         }
+
+                        if (result.Any())
+                            item.Category = string.Join(":", result);
                     }
+                    // It's just a simple replacement
                     else
-                        // Simple replacement
+                    {
                         item.Category = Category;
+                    }
                 }
             }
 
