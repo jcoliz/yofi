@@ -425,7 +425,43 @@ namespace YoFi.AspNet.Controllers
                 item.Selected = false;
 
                 if (!string.IsNullOrEmpty(Category))
-                    item.Category = Category;
+                {
+                    if (Category.StartsWith("/") && Category.EndsWith("/"))
+                    {
+                        // Pattern-matching replacement
+                        // Which only works if the original item has something to match against
+                        if (!string.IsNullOrEmpty(item.Category))
+                        {
+                            var pattern = Category[1..^1];
+                            var components = pattern.Split(":");
+                            var originals = item.Category.Split(":");
+                            var result = new List<string>();
+                            foreach(var component in components)
+                            {
+                                if (component.StartsWith("(") && component.EndsWith("+)"))
+                                {
+                                    if (Int32.TryParse(component[1..^2], out var position))
+                                        if (originals.Count() >= position)
+                                            result.AddRange(originals.Skip(position - 1));
+                                }
+                                else if (component.StartsWith("(") && component.EndsWith(")"))
+                                {
+                                    if (Int32.TryParse(component[1..^1], out var position))
+                                        if (originals.Count() >= position)
+                                            result.AddRange(originals.Skip(position - 1).Take(1));
+                                }
+                                else 
+                                    result.Add(component);
+                            }
+   
+                            if (result.Any())
+                                item.Category = string.Join(":", result);
+                        }
+                    }
+                    else
+                        // Simple replacement
+                        item.Category = Category;
+                }
             }
 
             await _context.SaveChangesAsync();

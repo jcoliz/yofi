@@ -1096,6 +1096,26 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public async Task BulkEditParts()
+        {
+            // Given: A list of items with varying categories, some of which match the pattern *:B:*
+
+            var categories = new string[] { "AB:Second:E", "AB:Second:E:F", "AB:Second:A:B:C", "G H:Second:KLM NOP" };
+            context.Transactions.AddRange(categories.Select(x=>new Transaction() { Category = x, Amount = 100m, Timestamp = new DateTime(2001,1,1), Selected = true }));
+            context.SaveChanges();
+
+            // When: Calling Bulk Edit with a new category which includes positional wildcards
+            var newcategory = "/(1):New Category:(3+)/";
+            var result = await controller.BulkEdit(newcategory);
+            var rdresult = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", rdresult.ActionName);
+
+            // Then: All previously-selected items are now correctly matching the expected category
+            CollectionAssert.AreEqual(categories.Select(x => x.Replace("Second", "New Category")).ToList(), dbset.Select(x => x.Category).ToList());
+        }
+
+        [TestMethod]
         public async Task BulkEditCancel()
         {
             // Given: A list of items with varying categories, and varying selection states
