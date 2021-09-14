@@ -9,24 +9,28 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  application: YoFi.AspNet
+  tests: YoFi.Tests
+
 steps:
 - checkout: self
   submodules: true
 
 - task: CmdLine@2
   inputs:
-    script: 'git describe --long --always --abbrev=8 > YoFi.AspNet/version.txt'
+    script: 'git describe --long --always --abbrev=8 > $(application)/version.txt'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: 'YoFi.AspNet/YoFi.AspNet.csproj'
+    projects: '$(application)/$(application).csproj'
     arguments: '--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'test'
-    projects: 'YoFi.Tests/YoFi.Tests.csproj'
+    projects: '$(tests)/$(tests).csproj'
 
 - task: ArchiveFiles@2
   displayName: 'Archive files'
