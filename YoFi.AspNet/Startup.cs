@@ -55,22 +55,11 @@ namespace YoFi.AspNet
                 }
                 );
 
-            logme.Enqueue($"*** AZURESTORAGE *** Looking...");
-
-            // Build connection string out of component key parts
-            var storagesection = Configuration.GetSection("AzureStorage");
-
-            if (null != storagesection)
+            var storageconnection = Configuration.GetConnectionString("StorageConnection");
+            if (!string.IsNullOrEmpty(storageconnection))
             {
-                var AccountKey = storagesection.GetValue<string>("AccountKey");
-                var AccountName = storagesection.GetValue<string>("AccountName");
-                if (null != AccountKey && null != AccountName)
-                {
-                    logme.Enqueue($"*** AZURESTORAGE *** Found Account {AccountName}");
-
-                    var storageconnection = string.Join(';', storagesection.GetChildren().Select(x => $"{x.Key}={x.Value}"));
-                    services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
-                }
+                logme.Enqueue($"*** AZURESTORAGE *** Found Storage Connection String");
+                services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
             }
         }
 
