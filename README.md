@@ -22,7 +22,7 @@ transaction, then create reports based on those categories. Its full feature set
 * Bulk reassignment of categories
 * Unlimited levels of subcategories
 
-Also please refer to the [Roadmap](/docs/Roadmap.md) to see whats's coming.
+Please refer to the [Roadmap](/docs/Roadmap.md) to see whats's coming next.
 
 ## Background
 
