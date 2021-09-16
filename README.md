@@ -15,10 +15,10 @@ transaction, then create reports based on those categories. Its full feature set
 * Creating and tracking budgets on a yearly or monthly basis
 * Automatic assignment of categories based on the payee for a transaction, using either partial text match or regular expressions
 * Super flexible reporting system
-* Access to all reports via REST API
-* Attaching receipt images to individual transactions
 * Importing OFX files downloaded from your bank
 * Importing from and exporting to XLSX spreadsheets for all data types 
+* Access to all reports via REST API
+* Attaching receipt images to individual transactions
 * Bulk reassignment of categories
 * Unlimited levels of subcategories
 
