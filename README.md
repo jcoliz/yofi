@@ -2,7 +2,7 @@
 
 Your own finances. Your own code.
 
-YoFi is an open source web-based personal finance manager written in C# on ASP<meta>.NET Core. Host it on a cloud service to enable access to your personal finances from any device anywhere anytime, while running on hardware you control. 
+YoFi is an open source web-based personal finance manager written in C# on ASP<meta/>.NET Core. Host it on a cloud service to enable access to your personal finances from any device anywhere anytime, while running on hardware you control. 
 
 [![Build Status](https://jcoliz.visualstudio.com/Ofx/_apis/build/status/YoFi%20DotNet?branchName=master)](https://jcoliz.visualstudio.com/Ofx/_build/latest?definitionId=20&branchName=master)
 [![Release](https://jcoliz.vsrm.visualstudio.com/_apis/public/Release/badge/c9089da1-9273-4ee3-b0a0-b26a5e1661d7/1/1)](https://jcoliz.vsrm.visualstudio.com/_apis/public/Release/badge/c9089da1-9273-4ee3-b0a0-b26a5e1661d7/1/1)
@@ -22,13 +22,15 @@ transaction, then create reports based on those categories. Its full feature set
 * Bulk reassignment of categories
 * Unlimited levels of subcategories
 
+Also please refer to the [Roadmap](/docs/Roadmap.md) to see whats's coming.
+
 ## Background
 
 What's the best way to manage your money? I always thought Microsoft Excel was the answer to this
 question. It's powerful enough to do whatever you want, and set things up however you need. After
 years of this, though, I found it cumbersome to consistently maintain all the structure I wanted.
 
-Thus, YoFi was born of my desire to have a transaction manager work just the way I wanted. C#, ASP<meta>.NET and SQL Server are probably still yet more powerful than Excel, so I could have everything work the
+Thus, YoFi was born of my desire to have a transaction manager work just the way I wanted. C#, ASP<meta/>.NET and SQL Server are probably still yet more powerful than Excel, so I could have everything work the
 way I want, and not have to keep maintaining complex spreadsheets.
 
 From time to time, people have asked what I use to manage my income & expenses. When I say, "I wrote
