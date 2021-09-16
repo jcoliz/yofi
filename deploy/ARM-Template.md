@@ -1,0 +1,57 @@
+# Azure Resource Manager template
+
+YoFi comes with a pre-configured ARM template to deploy the service to Azure
+quickly and easily. Find it at [yofi.azuredeploy.json](/deploy/yofi.azuredeploy.json).
+
+Check out the [ARM Template Docs](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/) for more details on these templates.
+
+## How do deploy it
+
+The easiest method is to simply click the Deploy to Azure button, which launches 
+directly into the Azure Portal with the template already loaded. The [documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/)
+describes more details on how you can deploy them through the portal, or cloud shell.
+
+[![Deploy To Azure](/docs/images/deploytoazure.png)](https://portal.azure.com/#create/Microsoft.Template/)
+
+## What it needs from you
+
+The deployment UI will need a few things from you:
+
+* Which resource group to deploy into. Always create a new resource group. This will make
+it easy to clean up all the resources later when you're done.
+* Which location to host the resources in. Choose the one closest to you.
+* The email address to use for a default account. Once the application is deployed, you'll
+need to log in. The email address you give will be used to create a default account.
+
+## Resources
+
+Here's what it creates:
+
+* App Service. Named 'yofi-{id}', where {id} is a unique identifier for the resource group its created in.
+* App Service Plan. Named 'appservice-yofi-{id}'. A server farm where the app service lives.
+* Storage Account. Named 'storage{id}'. Used for storing receipts which correspond to transactions.
+* SQL Server. Named 'db-yofi-{id}'. Where your data lives.
+* SQL Database. Named 'sqlserver-yofi-{id}. Manages connections to your data.
+
+## Connection Strings
+
+The app service needs connections strings for the database and storage account.
+The template wires them up onto the app service configuration, so it's ready to go.
+
+## What to do next
+
+At the conclusion of deployment, the UI will give you some imporant information:
+
+* The URL of your new service, e.g. https://yofi-abcdefghijklm.azurewebsites.net
+* The username of the initial account, in case you forgot from above
+* The password of the initial account
+
+That's all you need! Hit that URL, and log in with those credentials.
+
+## Generating secrets
+
+The template generates its own secrets for the SQL Server admin password, for the API access key,
+and for the initial account password. This is contrary to established best practices. 
+Instead, Microsoft recommends that the user always create them. In this case, I'm optimizing for
+getting the site up quickly and easily, so the template generates its own. If you choose to use
+YoFi with real data over the long term, I recommend deploying with secrets you create yourself. 

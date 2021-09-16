@@ -15,7 +15,7 @@ secrets show up as configuration variables in the usual way.
 ### In production
 
 There are multiple was to get secrets in production. This app is configured to use the [Azure Key Vault Configuration Provider in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/key-vault-configuration),
-if you want to use that. If so, set the "KEYVAULTURL" environment variable in your production environment the 
+if you want to use that. To do so, set the "KEYVAULTURL" environment variable in your production environment the 
 fully-qualified keyvault URL, e.g. "https://myspecialkeys.vault.azure.net/".
 
 ## Specific Secrets Used
