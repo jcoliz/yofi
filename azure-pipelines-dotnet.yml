@@ -24,8 +24,10 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
-    projects: '$(application)/$(application).csproj'
+    publishWebProjects: true
     arguments: '--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release'
+    zipAfterPublish: false
+    modifyOutputPath: false
 
 - task: DotNetCoreCLI@2
   inputs:
