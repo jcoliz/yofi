@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using YoFi.AspNet.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace YoFi.AspNet
 {
@@ -62,6 +64,16 @@ namespace YoFi.AspNet
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "An error occurred while creating roles");
+                }
+
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while migrating database");
                 }
             }
 
