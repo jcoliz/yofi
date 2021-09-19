@@ -1070,7 +1070,9 @@ namespace YoFi.AspNet.Controllers
             {
                 // Which transactions?
 
-                var transactionsquery = _context.Transactions.Where(x => x.Hidden != true);
+                var transactionsquery = TransactionsForQuery(_context.Transactions.Include(x => x.Splits), q);
+
+                transactionsquery = transactionsquery.Where(x => x.Hidden != true);
                 if (!allyears)
                     transactionsquery = transactionsquery.Where(x => x.Timestamp.Year == Year);
                 transactionsquery = transactionsquery
