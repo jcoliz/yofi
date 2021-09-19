@@ -1,202 +1,163 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": 
-    { 
-        "name": 
-        { 
-            "type": "string",
-            "defaultValue": "[concat('yofi-',uniqueString(resourceGroup().id))]", 
-            "minLength": 2,
-            "metadata": 
-            { 
-                "description": "Web app name" 
-            } 
-        },
-        "sql-user": {
-            "type": "string",
-            "defaultValue": "[concat('Sq0$',uniqueString('Sq0$',resourceGroup().id,utcNow('FFFFFFF')))]",
-            "minLength": 10,
-            "metadata": 
-            { 
-                "description": "SQL Server admin username"
-            }
-        },
-        "sql-pword": {
-            "type": "string",
-            "defaultValue": "[concat('sQ1$',uniqueString('sQ1$',resourceGroup().id,utcNow('FFFFFFF')))]",
-            "minLength": 10,
-            "metadata": 
-            { 
-                "description": "SQL Server admin password"
-            }
-        },
-        "api-key": {
-            "type": "string",
-            "defaultValue": "[concat('Ap2$',uniqueString('Ap2$',resourceGroup().id,utcNow('FFFFFFF')))]",
-            "minLength": 10,
-            "metadata": 
-            { 
-                "description": "API Access key"
-            }
-        },
-        "web-pword": {
-            "type": "string",
-            "defaultValue": "[concat('We3$',uniqueString('We3$',resourceGroup().id,utcNow('FFFFFFF')))]",
-            "minLength": 10,
-            "metadata": 
-            { 
-                "description": "Default web user password"
-            }
-        },
-        "web-user": {
-            "type": "string",
-            "metadata": 
-            { 
-                "description": "Default web user name"
-            }
-        },
-        "location": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]",
-            "metadata": {
-                "description": "Location for all resources."
-            }
-        },
-        "app-sku": {
-            "type": "string",
-            "defaultValue": "F1",
-            "metadata": {
-                "description": "The SKU of App Service Plan."
-            }
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "web-user": {
+      "type": "string",
+      "metadata": {
+        "description": "Email address for default web administrator"
+      }
     },
-    "functions": [],
-    "variables": {
-        "appservice-name": "[concat('appservice-',parameters('name'))]",
-        "sqlserver-name": "[concat('sqlserver-',parameters('name'))]",
-        "db-name": "[concat('db-',parameters('name'))]",
-        "storage-name": "[concat('storage',uniqueString(resourceGroup().id))]",
-        "keyvault-name": "[concat('keyvault-',parameters('name'))]"
+    "web-pword": {
+      "type": "string",
+      "defaultValue": "[concat('We3$',uniqueString('We3$',resourceGroup().id,utcNow('FFFFFFF')))]",
+      "minLength": 10,
+      "metadata": {
+        "description": "Default web administrator password"
+      }
     },
-    "resources": [ 
+    "sql-pword": {
+      "type": "string",
+      "defaultValue": "[concat('sQ1$',uniqueString('sQ1$',resourceGroup().id,utcNow('FFFFFFF')))]",
+      "minLength": 10,
+      "metadata": {
+        "description": "SQL Server admin password"
+      }
+    },
+    "api-key": {
+      "type": "string",
+      "defaultValue": "[concat('Ap2$',uniqueString('Ap2$',resourceGroup().id,utcNow('FFFFFFF')))]",
+      "minLength": 10,
+      "metadata": {
+        "description": "API Access key"
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "name": "[concat('yofi-',uniqueString(resourceGroup().id))]",
+    "location": "[resourceGroup().location]",
+    "appservice-name": "[concat('appservice-',variables('name'))]",
+    "sqlserver-name": "[concat('sqlserver-',variables('name'))]",
+    "db-name": "[concat('db-',variables('name'))]",
+    "storage-name": "[concat('storage',uniqueString(resourceGroup().id))]",
+    "sql-user": "sql-user",
+    "app-sku": "F1",
+    "packageUri": "https://jcolizreleases.blob.core.windows.net/yofi-release/latest.zip"
+  },
+  "resources": [
     {
-        "name": "[variables('sqlserver-name')]",
-        "type": "Microsoft.Sql/servers",
-        "apiVersion": "2014-04-01",
-        "location": "[parameters('location')]",
-        "properties": {
-            "administratorLogin": "[parameters('sql-user')]",
-            "administratorLoginPassword": "[parameters('sql-pword')]"
-        },
-        "resources": [
-            {
-                "type": "firewallRules",
-                "apiVersion": "2014-04-01",
-                "dependsOn": [
-                    "[resourceId('Microsoft.Sql/servers', variables('sqlserver-name'))]"
-                ],
-                "location": "[parameters('location')]",
-                "name": "AllowAllWindowsAzureIps",
-                "properties": {
-                    "startIpAddress": "0.0.0.0",
-                    "endIpAddress": "0.0.0.0"
-                }
-            }
-        ]
-    },
-    {
-        "name": "[concat(variables('sqlserver-name'),'/',variables('db-name'))]",
-        "type": "Microsoft.Sql/servers/databases",
-        "apiVersion": "2014-04-01",
-        "location": "[parameters('location')]",
-        "dependsOn": [
+      "name": "[variables('sqlserver-name')]",
+      "type": "Microsoft.Sql/servers",
+      "apiVersion": "2014-04-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "administratorLogin": "[variables('sql-user')]",
+        "administratorLoginPassword": "[parameters('sql-pword')]"
+      },
+      "resources": [
+        {
+          "type": "firewallRules",
+          "apiVersion": "2014-04-01",
+          "dependsOn": [
             "[resourceId('Microsoft.Sql/servers', variables('sqlserver-name'))]"
-        ],
-        "properties": {
-            "collation": "SQL_Latin1_General_CP1_CI_AS",
-            "edition": "Basic",
-            "maxSizeBytes": "1073741824",
-            "requestedServiceObjectiveName": "Basic"
+          ],
+          "location": "[variables('location')]",
+          "name": "AllowAllWindowsAzureIps",
+          "properties": {
+            "startIpAddress": "0.0.0.0",
+            "endIpAddress": "0.0.0.0"
+          }
         }
+      ]
     },
     {
-        "name": "[variables('storage-name')]",
-        "type": "Microsoft.Storage/storageAccounts",
-        "apiVersion": "2019-06-01",
-        "location": "[parameters('location')]",
-        "kind": "StorageV2",
-        "sku": {
-            "name": "Standard_LRS",
-            "tier": "Standard"
-        }
+      "name": "[concat(variables('sqlserver-name'),'/',variables('db-name'))]",
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "2014-04-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', variables('sqlserver-name'))]"
+      ],
+      "properties": {
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
+        "edition": "Basic",
+        "maxSizeBytes": "1073741824",
+        "requestedServiceObjectiveName": "Basic"
+      }
     },
     {
+      "name": "[variables('storage-name')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-06-01",
+      "location": "[variables('location')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      }
+    },
+    {
+      "name": "[variables('appservice-name')]",
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "[variables('app-sku')]",
+        "capacity": 1
+      },
+      "kind": "linux",
+      "properties": {
         "name": "[variables('appservice-name')]",
-        "type": "Microsoft.Web/serverfarms",
-        "apiVersion": "2018-02-01",
-        "location": "[parameters('location')]",
-        "sku": {
-            "name": "[parameters('app-sku')]",
-            "capacity": 1
-        },
-        "kind": "linux",
-        "properties": {
-            "name": "[variables('appservice-name')]",
-            "reserved": true
-        }
+        "reserved": true
+      }
     },
     {
-        "name": "[parameters('name')]",
-        "type": "Microsoft.Web/sites",
-        "apiVersion": "2018-11-01",
-        "location": "[parameters('location')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Web/serverfarms', variables('appservice-name'))]"
-        ],
-        "properties": {
-            "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appservice-name'))]",
-            "siteConfig": {
-                "linuxFxVersion": "DOTNETCORE|3.1",                
-                "connectionStrings": [
-                    {
-                        "name": "DefaultConnection",
-                        "type": "SQLAzure",
-                        "connectionString": "[concat('Server=tcp:',reference(variables('sqlserver-name')).fullyQualifiedDomainName,',1433;Initial Catalog=',variables('db-name'),';Persist Security Info=False;User ID=',parameters('sql-user'),'@',variables('sqlserver-name'),';Password=',parameters('sql-pword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
-                    },
-                    {
-                        "name": "StorageConnection",
-                            "type": "Custom",
-                        "connectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storage-name'), ';AccountKey=', listKeys(variables('storage-name'), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"  
-                    }
-                ]                
-            }
-        },
-        "resources": [
+      "name": "[variables('name')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appservice-name'))]",
+        "[concat('Microsoft.Sql/servers/', variables('sqlserver-name'), '/databases/', variables('db-name'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appservice-name'))]",
+        "siteConfig": {
+          "linuxFxVersion": "DOTNETCORE|3.1",
+          "connectionStrings": [
             {
-                "type": "config",
-                "name": "appsettings",
-                "apiVersion": "2018-11-01",
-                "dependsOn": [
-                    "[resourceId('Microsoft.Web/sites',parameters('name'))]"
-                ],
-                "properties": {
-                    "ASPNETCORE_ENVIRONMENT": "Production",
-                    "ADMINUSER__EMAIL": "[parameters('web-user')]",
-                    "ADMINUSER__PASSWORD": "[parameters('web-pword')]"
-                }
+              "name": "DefaultConnection",
+              "type": "SQLAzure",
+              "connectionString": "[concat('Server=tcp:',reference(variables('sqlserver-name')).fullyQualifiedDomainName,',1433;Initial Catalog=',variables('db-name'),';Persist Security Info=False;User ID=',variables('sql-user'),'@',variables('sqlserver-name'),';Password=',parameters('sql-pword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+            },
+            {
+              "name": "StorageConnection",
+              "type": "Custom",
+              "connectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storage-name'), ';AccountKey=', listKeys(variables('storage-name'), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
             }
-        ]
-    }
-    ],
-    "outputs": {
-        "hostName": {
-            "type": "string",
-            "value": "[reference(parameters('name')).hostNames[0]]"
-        },
-        "webUserPassword": {
-            "type": "string",
-            "value": "[parameters('web-pword')]"
+          ]
         }
+      },
+      "resources": [
+        {
+          "type": "config",
+          "name": "appsettings",
+          "apiVersion": "2018-11-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('name'))]"
+          ],
+          "properties": {
+            "WEBSITE_RUN_FROM_PACKAGE": "[variables('packageUri')]",
+            "ASPNETCORE_ENVIRONMENT": "Production",
+            "ADMINUSER__EMAIL": "[parameters('web-user')]",
+            "ADMINUSER__PASSWORD": "[parameters('web-pword')]",
+            "API__KEY": "parameters('api-key')"
+          }
+        }
+      ]
     }
+  ],
+  "outputs": {
   }
+}
