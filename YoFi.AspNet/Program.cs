@@ -52,8 +52,15 @@ namespace YoFi.AspNet
                     logger.LogError(ex, "An error occurred while loading version info");
                 }
 
-                while (logme.Any())
-                    logger.LogInformation(logme.Dequeue());
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while migrating database");
+                }
 
                 try
                 {
@@ -66,15 +73,8 @@ namespace YoFi.AspNet
                     logger.LogError(ex, "An error occurred while creating roles");
                 }
 
-                try
-                {
-                    var context = services.GetRequiredService<ApplicationDbContext>();
-                    context.Database.Migrate();
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "An error occurred while migrating database");
-                }
+                while (logme.Any())
+                    logger.LogInformation(logme.Dequeue());
             }
 
             host.Run();
