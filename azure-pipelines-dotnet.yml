@@ -45,11 +45,3 @@ steps:
 
 - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
   artifact: drop
-
-- task: AzureFileCopy@4
-  inputs:
-    SourcePath: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-    azureSubscription: 'vs-jcoliz'
-    Destination: 'AzureBlob'
-    storage: 'jcolizreleases'
-    ContainerName: 'yofi-release'
