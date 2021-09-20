@@ -23,6 +23,18 @@ it easy to clean up all the resources later when you're done.
 * The email address to use for a default account. Once the application is deployed, you'll
 need to log in. The email address you give will be used to create a default account.
 
+## Generating secrets
+
+You also have the option to enter values for the various secrets used in deployment. You can
+leave the default values alone, to let the template generatee its own secrets for the SQL
+Server admin password, for the API access key,
+and for the initial account password. 
+
+This is contrary to established best practices. 
+Instead, Microsoft recommends that the user always create them. In this case, I'm optimizing for
+getting the site up quickly and easily, so the template generates its own. If you choose to use
+YoFi with real data over the long term, I recommend deploying with secrets you create yourself. 
+
 ## Resources
 
 Here's what it creates:
@@ -30,8 +42,12 @@ Here's what it creates:
 * App Service. Named 'yofi-{id}', where {id} is a unique identifier for the resource group its created in.
 * App Service Plan. Named 'appservice-yofi-{id}'. A server farm where the app service lives.
 * Storage Account. Named 'storage{id}'. Used for storing receipts which correspond to transactions.
-* SQL Server. Named 'db-yofi-{id}'. Where your data lives.
-* SQL Database. Named 'sqlserver-yofi-{id}. Manages connections to your data.
+* SQL Database. Named 'db-yofi-{id}'. Where your data lives.
+* SQL Server. Named 'sqlserver-yofi-{id}. Manages connections to your data.
+
+The template configures the App Service to load the release package directly from blob storage
+every time the site is loaded. While this is convenient for evaluation, you'll definitely want
+to take control over your own deployments if you use the app for real.
 
 ## Connection Strings
 
@@ -40,18 +56,32 @@ The template wires them up onto the app service configuration, so it's ready to 
 
 ## What to do next
 
-At the conclusion of deployment, the UI will give you some imporant information:
+At the conclusion of deployment, your site will be ready for you to log in and start using right away!
+Here's what you'll need:
 
 * The URL of your new service, e.g. https://yofi-abcdefghijklm.azurewebsites.net
-* The username of the initial account, in case you forgot from above
+* The username of the initial account
 * The password of the initial account
 
-That's all you need! Hit that URL, and log in with those credentials.
+To find the URL of your new service, expand the "deployment details" after the
+deployment is complete, then click on the resource of type "Microsoft.Web/sites".
 
-## Generating secrets
+![Deployment complete](/docs/images/postdeploy-1.png)
 
-The template generates its own secrets for the SQL Server admin password, for the API access key,
-and for the initial account password. This is contrary to established best practices. 
-Instead, Microsoft recommends that the user always create them. In this case, I'm optimizing for
-getting the site up quickly and easily, so the template generates its own. If you choose to use
-YoFi with real data over the long term, I recommend deploying with secrets you create yourself. 
+This takes you to the resource page for your new site. Once there, look for 
+the URL. Click the copy icon to copy this to the clipboard. 
+Fire up your favorite browser, and paste the link.
+
+![App Service Resource Page](/docs/images/postdeploy-2.png)
+
+After the page loads, you'll be ready to log in. You'll need the email and
+password for the default user. 
+
+![Deployment Navigation](/docs/images/postdeploy-3.png)
+
+You can find those again from the deployment 
+page. Navigate to "inputs" from the left side.
+
+![Deployment Inputs](/docs/images/postdeploy-4.png)
+
+Then copy the "web-user" and "web-pword" items into the site login.
