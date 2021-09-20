@@ -842,7 +842,7 @@ namespace YoFi.AspNet.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Upload(List<IFormFile> files, string date)
+        public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var highlights = new List<Models.Transaction>();
             var incoming = new List<Models.Transaction>();
@@ -851,16 +851,6 @@ namespace YoFi.AspNet.Controllers
             {
                 if (files == null || !files.Any())
                     throw new ApplicationException("Please choose a file to upload, first.");
-
-                // Unless otherwise specified, cut off transactions before
-                // 1/1/2020, in case there's a huge file of ancient transactions.
-                DateTime cutoff = new DateTime(2020, 01, 01);
-
-                // Check on the date we are sent
-                if (!string.IsNullOrEmpty(date))
-                {
-                    DateTime.TryParse(date, out cutoff);
-                }
 
                 // Build the submitted file into a list of transactions
 
@@ -907,12 +897,6 @@ namespace YoFi.AspNet.Controllers
                                 import.GenerateBankReference();
                         }
                     }
-                }
-
-                // REmove too early transactions
-                if (cutoff > DateTime.MinValue)
-                {
-                    incoming.RemoveAll(x => x.Timestamp < cutoff);
                 }
 
                 // Deselect duplicate transactions. By default, deselected transactions will not be imported. User can override.
@@ -1234,8 +1218,6 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Models.Transaction>.Index() => Index();
 
         Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
-
-        Task<IActionResult> IController<Models.Transaction>.Upload(List<IFormFile> files) => Upload(files, string.Empty);
 
         Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
         #endregion

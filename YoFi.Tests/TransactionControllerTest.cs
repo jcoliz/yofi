@@ -643,7 +643,7 @@ namespace YoFi.Tests
             IFormFile file = new FormFile(stream, 0, stream.Length, filename, $"{filename}.xlsx");
 
             // Upload it!
-            var result = await controller.Upload(new List<IFormFile>() { file },null);
+            var result = await controller.Upload(new List<IFormFile>() { file });
             Assert.IsTrue(result is RedirectToActionResult);
 
             // Did the transaction and splits find each other?
@@ -758,24 +758,6 @@ namespace YoFi.Tests
             Assert.AreEqual(2, context.Transactions.Count());
         }
 
-        [DataRow("1/1/2017",1000)]
-        [DataRow("6/1/2018", 4)]
-        [DataTestMethod]
-        public async Task OfxUpload(string date, int expected)
-        {
-            var filename = "ExportedTransactions.ofx";
-            var stream = SampleData.Open(filename);
-            var length = stream.Length;
-            IFormFile file = new FormFile(stream, 0, length, filename, filename);
-            var result = await controller.Upload(new List<IFormFile>() { file },date);
-
-            // Test the status
-            var rdresult = result as RedirectToActionResult;
-
-            Assert.AreEqual("Import", rdresult.ActionName);
-            Assert.AreEqual(expected, dbset.Count());
-        }
-
         [TestMethod]
         public async Task OfxUploadNoBankRef()
         {
@@ -787,7 +769,7 @@ namespace YoFi.Tests
             var stream = SampleData.Open(filename);
             var length = stream.Length;
             IFormFile file = new FormFile(stream, 0, length, filename, filename);
-            var result = await controller.Upload(new List<IFormFile>() { file }, null);
+            var result = await controller.Upload(new List<IFormFile>() { file });
 
             // Then: All transactions are imported successfully
             var rdresult = result as RedirectToActionResult;
