@@ -895,7 +895,8 @@ namespace YoFi.AspNet.Controllers
 
                             // If there are also splits included here, let's grab those
                             // And transform the flat data into something easier to use.
-                            splits = ssr.Read<Split>()?.ToLookup(x => x.TransactionID);
+                            if (ssr.SheetNames.Contains("Split"))
+                                splits = ssr.Read<Split>()?.ToLookup(x => x.TransactionID);
                         }
 
                         // Need to select all of these, so they import by default

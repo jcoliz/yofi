@@ -723,18 +723,15 @@ namespace YoFi.Tests
             var stream = fcresult.FileStream;
 
             IEnumerable<Transaction> txitems;
-            IEnumerable<Split> splititems;
             IEnumerable<string> sheetnames;
             using var ssr = new OpenXmlSpreadsheetReader();
             ssr.Open(stream);
             txitems = ssr.Read<Transaction>();
-            splititems = ssr.Read<Split>();
             sheetnames = ssr.SheetNames.ToList();
 
             Assert.AreEqual(1, sheetnames.Count());
             Assert.AreEqual("Transaction", sheetnames.Single());
             Assert.IsTrue(txitems.Any());
-            Assert.IsNull(splititems);
         }
 
         [TestMethod]

@@ -87,7 +87,7 @@ namespace YoFi.Tests
             using var stream = new MemoryStream();
             WhenWritingToNewSpreadsheet(stream, items, writetodisk);
 
-            // And: Reading it back to a spreadsheet using the old methods
+            // And: Reading it back to a spreadsheet using the old (or new) methods, as specified
             var actual = new List<T>();
             var sheets = new List<string>();
 
@@ -387,6 +387,27 @@ namespace YoFi.Tests
             Assert.AreEqual(3, actual.Count(x => x.Category.Contains("A")));
             // Last item is a total row
             Assert.AreEqual(actual.TakeLast(1).Single().Amount, actual.SkipLast(1).Sum(x => x.Amount));
+        }
+
+        [TestMethod]
+        public async Task LoadAnyName()
+        {
+            // User Story 1042: Upload spreadsheet shouldn't be worried about name of sheet
+
+            // Given: A file created with an arbitrary non-confirming sheet name
+            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20) /*.ToList()*/;
+            using var stream = new MemoryStream();
+            WhenWritingToNewSpreadsheet(stream, Items, writetodisk:true);
+
+            // When: Loading the file, without specifying the sheet name
+            var actual = new List<Transaction>();
+            stream.Seek(0, SeekOrigin.Begin);
+            using var reader = new OpenXmlSpreadsheetReader();
+            reader.Open(stream);
+            actual.AddRange(reader.Read<Transaction>());
+
+            // Then: Data is loaded as expected.
+            Assert.IsTrue(actual.SequenceEqual(Items));
         }
     }
 }

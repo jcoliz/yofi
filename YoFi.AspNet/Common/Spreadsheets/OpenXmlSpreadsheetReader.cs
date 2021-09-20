@@ -44,7 +44,8 @@ namespace YoFi.AspNet.Common
         /// This can be called multiple times on the same open reader
         /// </remarks>
         /// <typeparam name="T">Type of the items to return</typeparam>
-        /// <param name="sheetname">Name of sheet. Will be inferred from name of <typeparamref name="T"/> if not supplied</param>
+        /// <param name="sheetname">Name of sheet. Will be inferred from name of <typeparamref name="T"/> if not supplied.
+        /// Will use first sheet in workbook if it's not found.</param>
         /// <param name="exceptproperties">Properties to exclude from the import</param>
         /// <returns>Enumerable of <typeparamref name="T"/> items, OR null if  <paramref name="sheetname"/> is not found</returns>
         public IEnumerable<T> Read<T>(string sheetname = null, IEnumerable<string> exceptproperties = null) where T : class, new()
@@ -57,11 +58,18 @@ namespace YoFi.AspNet.Common
             var workbookpart = spreadSheet.WorkbookPart;
             var matching = workbookpart.Workbook.Descendants<Sheet>().Where(x => x.Name == name);
 
-            if (!matching.Any())
-                return null;
+            if (matching.Any())
+            {
+                if (matching.Skip(1).Any())
+                    throw new ApplicationException($"Ambiguous sheet name. Shreadsheet has multiple sheets matching {name}.");
+            }
+            else
+            {
+                matching = workbookpart.Workbook.Descendants<Sheet>();
 
-            if (matching.Skip(1).Any())
-                throw new ApplicationException($"Ambiguous sheet name. Shreadsheet has multiple sheets matching {name}.");
+                if (!matching.Any())
+                    return null;
+            }
 
             var sheet = matching.Single();
             WorksheetPart worksheetPart = (WorksheetPart)(workbookpart.GetPartById(sheet.Id));
