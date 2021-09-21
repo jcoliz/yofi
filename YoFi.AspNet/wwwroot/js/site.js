@@ -182,6 +182,9 @@
         $(this).siblings(':submit').prop("disabled", false);
     });
 
+    // Enable all tooltips on page
+    $('[data-bs-toggle=tooltip]').tooltip();
+
 });
 
 function applyPayee(tr)

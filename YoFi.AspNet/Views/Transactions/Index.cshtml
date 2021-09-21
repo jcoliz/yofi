@@ -43,11 +43,13 @@
         <span class="navbar-brand">Transactions</span>
         <form class="d-flex" asp-action="Index" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["Order"]" method="post">
             <input class="form-control me-2 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" value="@ViewData["Query"]" autocomplete="off">
-            <button type="submit" class="btn btn-secondary me-1">
+            <button type="submit" class="btn btn-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Search">
                 <i class="fas fa-search"></i>
             </button>
-            <a a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary me-1"><i class="fas fa-question"></i></a>
-            <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary me-1"><i class="fas fa-times"></i></a>
+            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Help">
+                <a a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary me-1"><i class="fas fa-question"></i></a>
+            </span>
+            <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear"><i class="fas fa-times"></i></a>
         </form>
         <div class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -83,7 +85,7 @@
             <div class="form-actions">
                 <p>
                     Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
-                    <input type="submit" value="OK" class="btn btn-primary" />
+                    <input type="submit" value="OK" class="btn btn-primary" data-bs-toggle="tooltip" title="Submit" />
                     <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ToggleSelected"]" class="btn btn-outline-secondary">Cancel</a>
                 </p>
             </div>
@@ -188,7 +190,7 @@
                     else
                     {
                         <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editModal">
-                            <i class="fa fa-edit"></i>
+                            <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
                         </a>
                     }
                 </td>
@@ -197,25 +199,25 @@
                        asp-route-o="@ViewData["Order"]"
                        asp-route-v="@ViewData["ViewP"]"
                        asp-route-q="p=@item.Payee?.Trim()">
-                        <i class="fa fa-search"></i>
+                        <i class="fa fa-search" data-bs-toggle="tooltip" title="Search Payee"></i>
                     </a>
                 </td>
                 <td style="padding-left:0; padding-right:5px">
                     <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#addPayeeModal">
-                        <i class="fa fa-plus"></i>
+                        <i class="fa fa-plus" data-bs-toggle="tooltip" title="Add Payee"></i>
                     </a>
                 </td>
                 <td style="padding-left:0; padding-right:5px">
-                    <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush"></i></a>
+                    <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush" data-bs-toggle="tooltip" title="Apply Payee"></i></a>
                 </td>
                 <td style="padding-left:0; padding-right:0" class="display-receipt">
                     @if (item.HasReceipt)
                     {
-                        <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="far fa-file-pdf"></i></a>
+                        <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="far fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
                     }
                     else
                     {
-                        <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank"><i class="fa fa-file-pdf"></i></a>
+                        <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank"><i class="fa fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
                     }
                 </td>
             </tr>
