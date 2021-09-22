@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
-using YoFi.AspNet.Boilerplate.Services;
 using System.Collections.Generic;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
@@ -35,10 +34,12 @@ namespace YoFi.AspNet
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultUI()
                 .AddDefaultTokenProviders();
 
             // Add application services.
-            services.AddTransient<IEmailSender, EmailSender>();
+            // Story #1024: Moving to built-in UI. Not sure if I need this?
+            //services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
@@ -48,7 +49,7 @@ namespace YoFi.AspNet
 
             // Bug 916: Reports endpoint should return content type json, not text.
             // http://www.binaryintellect.net/articles/a1e0e49e-d4d0-4b7c-b758-84234f14047b.aspx
-            services.AddControllers()
+            services.AddControllersWithViews()
                 .AddJsonOptions(options => 
                 { 
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -93,7 +94,13 @@ namespace YoFi.AspNet
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(x => x.MapControllerRoute(name: "default", pattern: "{controller=Transactions}/{action=Index}/{id?}"));
+            app.UseEndpoints(x => 
+            {
+                //x.MapControllers();
+                x.MapControllerRoute(name: "default", pattern: "{controller=Transactions}/{action=Index}/{id?}");
+                //x.MapDefaultControllerRoute();
+                x.MapRazorPages();
+            });
 
             SetupBlobContainerName(env.IsDevelopment());
         }
