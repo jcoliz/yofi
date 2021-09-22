@@ -1,51 +1,51 @@
 ﻿@page
 @model Microsoft.AspNetCore.Identity.UI.V4.Pages.Account.Internal.LoginModel
-
+@using System.Collections.Generic
+@using System.Linq
+@using Microsoft.AspNetCore.Http
+@using YoFi.AspNet.Boilerplate.Models
+@using Microsoft.Extensions.Configuration;
+@inject IConfiguration _config
 @{
-    ViewData["Title"] = "Log in";
+    var hasbrandconfig = _config.GetSection("Brand").Exists();
+    var sitename = hasbrandconfig ? _config["Brand:Name"] : _config["Codebase:Name"];
+    ViewData["Title"] = "Login";
 }
 
-<h1>@ViewData["Title"]</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form id="account" method="post">
-                <h4>Use a local account to log in.</h4>
-                <hr />
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Input.Email"></label>
-                    <input asp-for="Input.Email" class="form-control" />
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Input.Password"></label>
-                    <input asp-for="Input.Password" class="form-control" />
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <div class="checkbox">
-                        <label asp-for="Input.RememberMe">
-                            <input asp-for="Input.RememberMe" />
-                            @Html.DisplayNameFor(m => m.Input.RememberMe)
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Log in</button>
-                </div>
-                <div class="form-group">
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    </p>
-                </div>
-            </form>
-        </section>
-    </div>
-</div>
+<main class="form-signin">
+    <form id="account" method="post">
+
+        @if (hasbrandconfig)
+        {
+            <a class="d-inline-flex align-items-center mb-4 link-dark text-decoration-none" href="/" aria-label="@_config["Brand:Name"]">
+                <span class="fs-1"><i class="@_config["Brand:Icon"]"></i> @_config["Brand:Name"]</span>
+            </a>
+        }
+
+        <h1 class="h4 mb-3 fw-normal">Please sign in</h1>
+
+        <div class="form-floating">
+            <input asp-for="Input.Email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+            <label asp-for="Input.Email" for="floatingInput">Email address</label>
+        </div>
+        <div class="form-floating">
+            <input asp-for="Input.Password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+            <label asp-for="Input.Password" for="floatingPassword">Password</label>
+        </div>
+
+        <div class="checkbox mb-3">
+            <label asp-for="Input.RememberMe">
+                <input asp-for="Input.RememberMe" />
+                @Html.DisplayNameFor(m => m.Input.RememberMe)
+            </label>
+        </div>
+        <button class="w-100 btn btn-lg btn-primary mb-3" type="submit">Sign in</button>
+        <p>or</p>
+        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="w-100 btn btn-lg btn-secondary">Create Account</a>
+        <hr />
+        <a id="forgot-password" asp-page="./ForgotPassword" class="w-100 btn btn-lg btn-light">Forgot Password?</a>
+    </form>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

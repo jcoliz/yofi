@@ -3,7 +3,8 @@
     var hasbrandconfig = _config.GetSection("Brand").Exists();
     var sitename = hasbrandconfig ? _config["Brand:Name"] : _config["Codebase:Name"];
 
-    var bodyclass = (bool?)ViewData["Login"] == true ? "signin text-center" : string.Empty;
+    var islogin = (string)ViewData["Title"] == "Login";
+    var bodyclass = islogin ? "signin text-center" : string.Empty;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +33,7 @@
     <!-- Navbar needs fixing for bootstrap 4.0 -->
     <!-- https://getbootstrap.com/docs/4.0/components/navbar/ -->
 
-    @if ((bool?)ViewData["Login"] != true)
+    @if (!islogin)
     {
         <nav class="navbar navbar-expand-md navbar-dark bg-dark">
             <div class="container-fluid">
@@ -64,7 +65,7 @@
         @RenderBody()
     </div>
 
-    @if ((bool?)ViewData["Login"] != true)
+    @if (!islogin)
     {
         <footer class="bd-footer py-5 mt-5 bg-light">
             <div class="container py-5">
