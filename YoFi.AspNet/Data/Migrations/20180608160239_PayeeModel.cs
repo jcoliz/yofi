@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace YoFi.AspNet.Data.Migrations
 {
+    [ExcludeFromCodeCoverage]
     public partial class PayeeModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

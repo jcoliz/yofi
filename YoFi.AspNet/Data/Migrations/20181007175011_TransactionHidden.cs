@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace YoFi.AspNet.Data.Migrations
 {
+    [ExcludeFromCodeCoverage]
     public partial class TransactionHidden : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

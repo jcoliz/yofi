@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace YoFi.AspNet.Data.Migrations
 {
+    [ExcludeFromCodeCoverage]
     public partial class CategoryMapsTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -5,12 +5,19 @@ using System.Threading.Tasks;
 using System.IO;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Common.NET
 {
     /// <summary>
     /// Manage connection to Azure Storage
     /// </summary>
+    /// <remarks>
+    /// This class is marked as untestable because it directly connects to azure
+    /// storage. In fact, it implements an interface which is widely used in well-tested
+    /// business logic code.
+    /// </remarks>
+    [ExcludeFromCodeCoverage]
     public class DotNetAzureStorage : IPlatformAzureStorage
     {
         /// <summary>
