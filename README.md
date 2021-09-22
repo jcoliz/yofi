@@ -72,3 +72,5 @@ service on Azure Dev Ops, then create an Azure Pipeline to build and release upd
 ## Give feedback
 
 I'd love to hear what you think! If you'd like to see something change, please feel free to open an issue. Or just send me a mail!
+
+Updated 9/22/21
