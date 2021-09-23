@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 using YoFi.AspNet.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace YoFi.AspNet
+namespace YoFi.AspNet.Root
 {
     public class Program
     {

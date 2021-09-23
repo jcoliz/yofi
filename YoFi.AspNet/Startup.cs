@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
 
-namespace YoFi.AspNet
+namespace YoFi.AspNet.Root
 {
     public class Startup
     {

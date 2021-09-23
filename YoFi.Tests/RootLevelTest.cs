@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using YoFi.AspNet;
+using YoFi.AspNet.Root;
 
 namespace YoFi.Tests
 {
