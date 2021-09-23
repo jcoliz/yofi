@@ -891,10 +891,26 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        private void LoadTransactionsFromXlsx(IFormFile file, List<Models.Transaction> transactions, out ILookup<int, Models.Split> splits)
+        private async Task LoadTransactionsFromOfxAsync(IFormFile file, List<Models.Transaction> transactions)
         {
-            splits = null;
+            using var stream = file.OpenReadStream();
+            OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
 
+            var created = Document.Statements.SelectMany(x=>x.Transactions).Select(
+                tx => new Models.Transaction() 
+                {
+                    Amount = tx.Amount, 
+                    Payee = tx.Memo?.Trim(), 
+                    BankReference = tx.ReferenceNumber?.Trim(), 
+                    Timestamp = tx.Date.Value.DateTime
+                }
+            );
+
+            transactions.AddRange(created);
+        }
+
+        private void LoadTransactionsFromXlsx(IFormFile file, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
+        {
             using (var stream = file.OpenReadStream())
             using (var ssr = new OpenXmlSpreadsheetReader())
             {
@@ -905,18 +921,7 @@ namespace YoFi.AspNet.Controllers
                 // If there are also splits included here, let's grab those
                 // And transform the flat data into something easier to use.
                 if (ssr.SheetNames.Contains("Split"))
-                    splits = ssr.Read<Split>()?.ToLookup(x => x.TransactionID);
-            }
-
-            // Process needed changes on each
-            foreach (var item in transactions)
-            {
-                // Need to select all of these, so they import by default
-                item.Selected = true;
-
-                // Generate a bank reference if doesn't already exist
-                if (string.IsNullOrEmpty(item.BankReference))
-                    item.GenerateBankReference();
+                    splits.AddRange(ssr.Read<Split>()?.ToLookup(x => x.TransactionID));
             }
         }
 
@@ -930,7 +935,7 @@ namespace YoFi.AspNet.Controllers
             //
 
             var incoming = new List<Models.Transaction>();
-            ILookup<int, Models.Split> splits = null;
+            var splits = new List<IGrouping<int, Models.Split>>();
             try
             {
                 if (files == null || !files.Any())
@@ -940,27 +945,28 @@ namespace YoFi.AspNet.Controllers
 
                 foreach (var formFile in files)
                 {
-                    if (formFile.FileName.ToLower().EndsWith(".ofx"))
+                    var extension = System.IO.Path.GetExtension(formFile.FileName).ToLowerInvariant();
+                    if (extension == ".ofx")
                     {
-                        using var stream = formFile.OpenReadStream();
-                        OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
-                            
-                        await Task.Run(() =>
-                        {
-                            foreach (var tx in Document.Statements.SelectMany(x=>x.Transactions))
-                            {
-                                var txmodel = new Models.Transaction() { Amount = tx.Amount, Payee = tx.Memo?.Trim(), BankReference = tx.ReferenceNumber?.Trim(), Timestamp = tx.Date.Value.DateTime, Selected = true };
-                                if (string.IsNullOrEmpty(txmodel.BankReference))
-                                    txmodel.GenerateBankReference();
+                        await LoadTransactionsFromOfxAsync(formFile,incoming);
+                    }
+                    else if (extension == ".xlsx")
+                    {
+                        LoadTransactionsFromXlsx(formFile,incoming,splits);
+                    }
+                }
 
-                                incoming.Add(txmodel);
-                            }
-                        });
-                    }
-                    else if (formFile.FileName.ToLower().EndsWith(".xlsx"))
-                    {
-                        LoadTransactionsFromXlsx(formFile,incoming, out splits);
-                    }
+                // Process needed changes on each
+                foreach (var item in incoming)
+                {
+                    // Default status for imported items
+                    item.Selected = true;
+                    item.Imported = true;
+                    item.Hidden = true;
+
+                    // Generate a bank reference if doesn't already exist
+                    if (string.IsNullOrEmpty(item.BankReference))
+                        item.GenerateBankReference();
                 }
 
                 //
@@ -968,9 +974,6 @@ namespace YoFi.AspNet.Controllers
                 //
 
                 // Deselect duplicate transactions. By default, deselected transactions will not be imported. User can override.
-
-                // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
-                var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
 
                 var conflictrange = _context.Transactions;
 
@@ -988,6 +991,8 @@ namespace YoFi.AspNet.Controllers
                     await _context.SaveChangesAsync();
                 }
 
+                // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
+
                 // The approach is to create a lookup, from bankreference to a list of possible matching conflicts. Note that it is possible for multiple different
                 // transactions to collide on a single hash. We will have to step through all the possible conflicts to see if there is really a match.
 
@@ -998,6 +1003,7 @@ namespace YoFi.AspNet.Controllers
                     WHERE [x].[BankReference] IN (N'A1ABC7FE34871F02304982126CAF5C5C', N'EE49717DE89A3D97A9003230734A94B7')
                  */
                 //
+                var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
                 var conflicts = conflictrange.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
 
                 if (conflicts.Any())
@@ -1042,9 +1048,9 @@ namespace YoFi.AspNet.Controllers
 
                 foreach (var item in incoming)
                 {
+                    // (3A) Fixup and match payees
+
                     item.FixupPayee();
-                    item.Imported = true;
-                    item.Hidden = true;
 
                     if (string.IsNullOrEmpty(item.Category))
                     {
@@ -1072,21 +1078,23 @@ namespace YoFi.AspNet.Controllers
                         }
                     }
 
+                    // (3B) Import splits
                     // Product Backlog Item 870: Export & import transactions with splits
 
-                    if (splits?.Contains(item.ID) ?? false)
+                    var mysplits = splits.Where(x=>x.Key == item.ID).SelectMany(x=>x);
+                    if (mysplits.Any())
                     {
-                        item.Splits = new List<Split>();
+                        item.Splits = mysplits.ToList();
                         item.Category = null;
-                        foreach (var split in splits[item.ID])
+                        foreach (var split in item.Splits)
                         {
+                            // Clear any imported IDs
                             split.ID = 0;
                             split.TransactionID = 0;
-                            item.Splits.Add(split);
                         }
                     }
 
-                    // Clear any imported ID
+                    // (3C) Clear any imported ID
                     item.ID = 0;
                 }
 
