@@ -279,7 +279,7 @@ namespace YoFi.AspNet.Controllers
             // Process PAGE (P) parameters
             //
 
-            result = await TransactionsForPage(result, p, PageSize, ViewData);
+            result = await TransactionsForPage(result, p, PageSize, ViewData) as IQueryable<Transaction>;
 
             // Use the Transaction object itself as a DTO, filtering out what we don't need to return
 
@@ -682,16 +682,12 @@ namespace YoFi.AspNet.Controllers
                         await _context.SaveChangesAsync();
                     }
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!TransactionExists(transaction.ID))
-                    {
+                    if (!_context.Transactions.Any(e => e.ID == transaction.ID))
                         return NotFound();
-                    }
                     else
-                    {
-                        throw;
-                    }
+                        return StatusCode(500,ex.Message);
                 }
                 return RedirectToAction(nameof(Index));
             }

@@ -56,16 +56,12 @@ namespace YoFi.AspNet.Controllers
                     _context.Update(split);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!SplitExists(split.ID))
-                    {
+                    if (!_context.Splits.Any(e => e.ID == split.ID))
                         return NotFound();
-                    }
                     else
-                    {
-                        throw;
-                    }
+                        return StatusCode(500,ex.Message);
                 }
                 return RedirectToAction("Edit","Transactions", new { id = split.TransactionID });
             }
@@ -86,12 +82,6 @@ namespace YoFi.AspNet.Controllers
             _context.Splits.Remove(split);
             await _context.SaveChangesAsync();
             return RedirectToAction("Edit", "Transactions", new { id = txid });
-
-        }
-
-        private bool SplitExists(int id)
-        {
-            return _context.Splits.Any(e => e.ID == id);
         }
 
         Task<IActionResult> IController<Split>.Download() =>
