@@ -33,6 +33,7 @@ steps:
   inputs:
     command: 'test'
     projects: '$(tests)/$(tests).csproj'
+    arguments: '--collect:"XPlat Code Coverage"'
 
 - task: ArchiveFiles@2
   displayName: 'Archive files'
