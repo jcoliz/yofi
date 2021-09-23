@@ -77,7 +77,8 @@ namespace YoFi.AspNet
                     logger.LogInformation(logme.Dequeue());
             }
 
-            host.Run();
+            if (!args.Contains("--norun"))
+                host.Run();
         }
 
         public static IWebHost BuildWebHost(string[] args) =>

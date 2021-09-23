@@ -15,5 +15,11 @@ namespace YoFi.Tests
             var webHost = Microsoft.AspNetCore.WebHost.CreateDefaultBuilder().UseStartup<Startup>().Build();
             Assert.IsNotNull(webHost);
         }
+
+        [TestMethod]
+        public void MainTest()
+        {
+            Program.Main(new string[] { "--norun" });
+        }
     }
 }
