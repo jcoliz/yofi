@@ -1038,11 +1038,8 @@ namespace YoFi.AspNet.Controllers
                 // (3) Final processing on each transction
                 //
 
-                // Load all categories into memory. This is an optimization. Rather than run a separate payee query for every 
-                // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
-
-                var payees = await _context.Payees.ToListAsync();
-                var regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
+                var payeematcher = new PayeeMatcher(_context);
+                await payeematcher.LoadAsync();
 
                 // Process each item
 
@@ -1050,33 +1047,7 @@ namespace YoFi.AspNet.Controllers
                 {
                     // (3A) Fixup and match payees
 
-                    item.FixupPayee();
-
-                    if (string.IsNullOrEmpty(item.Category))
-                    {
-                        Payee payee = null;
-
-                        // Product Backlog Item 871: Match payee on regex, optionally
-                        foreach (var regexpayee in regexpayees)
-                        {
-                            var regex = new Regex(regexpayee.Name[1..^2]);
-                            if (regex.Match(item.Payee).Success)
-                            {
-                                payee = regexpayee;
-                                break;
-                            }
-                        }
-
-                        if (null == payee)
-                        {
-                            payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
-                        }
-
-                        if (null != payee)
-                        {
-                            item.Category = payee.Category;
-                        }
-                    }
+                    payeematcher.FixAndMatch(item);
 
                     // (3B) Import splits
                     // Product Backlog Item 870: Export & import transactions with splits
@@ -1288,6 +1259,67 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
 
         Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
+        #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Set categories for imported transactions based on payee matching rules
+        /// </summary>
+        class PayeeMatcher
+        {
+            List<Payee> payees;
+            IEnumerable<Payee> regexpayees;
+
+            readonly ApplicationDbContext _mycontext;
+
+            public PayeeMatcher(ApplicationDbContext context)
+            {
+                _mycontext = context;
+            }
+
+            public async Task LoadAsync()
+            {
+                // Load all payees into memory. This is an optimization. Rather than run a separate payee query for every 
+                // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
+
+                payees = await _mycontext.Payees.ToListAsync();
+                regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
+            }
+
+            public void FixAndMatch(Transaction item)
+            {
+                item.FixupPayee();
+
+                if (string.IsNullOrEmpty(item.Category))
+                {
+                    Payee payee = null;
+
+                    // Product Backlog Item 871: Match payee on regex, optionally
+                    foreach (var regexpayee in regexpayees)
+                    {
+                        var regex = new Regex(regexpayee.Name[1..^2]);
+                        if (regex.Match(item.Payee).Success)
+                        {
+                            payee = regexpayee;
+                            break;
+                        }
+                    }
+
+                    if (null == payee)
+                    {
+                        payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
+                    }
+
+                    if (null != payee)
+                    {
+                        item.Category = payee.Category;
+                    }
+                }
+            }
+        };
+
+
         #endregion
 
         #region Data Transfer Objects
