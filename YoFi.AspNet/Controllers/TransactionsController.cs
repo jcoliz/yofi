@@ -891,11 +891,44 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
+        private void LoadTransactionsFromXlsx(IFormFile file, List<Models.Transaction> transactions, out ILookup<int, Models.Split> splits)
+        {
+            splits = null;
+
+            using (var stream = file.OpenReadStream())
+            using (var ssr = new OpenXmlSpreadsheetReader())
+            {
+                ssr.Open(stream);
+                var items = ssr.Read<Transaction>();
+                transactions.AddRange(items);
+
+                // If there are also splits included here, let's grab those
+                // And transform the flat data into something easier to use.
+                if (ssr.SheetNames.Contains("Split"))
+                    splits = ssr.Read<Split>()?.ToLookup(x => x.TransactionID);
+            }
+
+            // Process needed changes on each
+            foreach (var item in transactions)
+            {
+                // Need to select all of these, so they import by default
+                item.Selected = true;
+
+                // Generate a bank reference if doesn't already exist
+                if (string.IsNullOrEmpty(item.BankReference))
+                    item.GenerateBankReference();
+            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var highlights = new List<Models.Transaction>();
+
+            //
+            // (1) Load file(s) into 'incoming' list
+            //
+
             var incoming = new List<Models.Transaction>();
             ILookup<int, Models.Split> splits = null;
             try
@@ -924,48 +957,20 @@ namespace YoFi.AspNet.Controllers
                             }
                         });
                     }
-                    else
-                    if (formFile.FileName.ToLower().EndsWith(".xlsx"))
+                    else if (formFile.FileName.ToLower().EndsWith(".xlsx"))
                     {
-                        using (var stream = formFile.OpenReadStream())
-                        using (var ssr = new OpenXmlSpreadsheetReader())
-                        {
-                            ssr.Open(stream);
-                            var items = ssr.Read<Transaction>();
-                            incoming.AddRange(items);
-
-                            // If there are also splits included here, let's grab those
-                            // And transform the flat data into something easier to use.
-                            if (ssr.SheetNames.Contains("Split"))
-                                splits = ssr.Read<Split>()?.ToLookup(x => x.TransactionID);
-                        }
-
-                        // Need to select all of these, so they import by default
-                        foreach (var import in incoming)
-                        {
-                            import.Selected = true;
-                            if (string.IsNullOrEmpty(import.BankReference))
-                                import.GenerateBankReference();
-                        }
+                        LoadTransactionsFromXlsx(formFile,incoming, out splits);
                     }
                 }
+
+                //
+                // (2) Handle duplicates
+                //
 
                 // Deselect duplicate transactions. By default, deselected transactions will not be imported. User can override.
 
                 // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
                 var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
-
-                /*
-                 * Rethinking this. If you later move a transaction to a new date, it will probably not be caught
-                 * by this check, because we are narrowing to only the imported dates.
-                 * 
-
-                // This is the set of transactions which overlap with the timeframe of the imported transactions.
-                // By definitions, all duplicate transactions (conflicts) will be in this set.
-                var mindate = incoming.Min(x => x.Timestamp);
-                var maxdate = incoming.Max(x => x.Timestamp);
-                var conflictrange = _context.Transactions.Where(x => x.Timestamp >= mindate && x.Timestamp <= maxdate);
-                */
 
                 var conflictrange = _context.Transactions;
 
@@ -1022,6 +1027,10 @@ namespace YoFi.AspNet.Controllers
                         }
                     }
                 }
+
+                //
+                // (3) Final processing on each transction
+                //
 
                 // Load all categories into memory. This is an optimization. Rather than run a separate payee query for every 
                 // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
