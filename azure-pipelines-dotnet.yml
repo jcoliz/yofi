@@ -33,12 +33,12 @@ steps:
   inputs:
     command: 'test'
     projects: '$(tests)/$(tests).csproj'
-    arguments: '--collect:"XPlat Code Coverage" --settings:$(tests)/coverlet.runsettings -r $(System.DefaultWorkingDirectory)/test_output'
+    arguments: '--collect:"XPlat Code Coverage" --settings:$(tests)/coverlet.runsettings'
 
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: 'Cobertura'
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/test_output/**/coverage.cobertura.xml'
+    summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
 
 - task: ArchiveFiles@2
   displayName: 'Archive files'
