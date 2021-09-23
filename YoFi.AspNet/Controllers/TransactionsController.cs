@@ -133,6 +133,64 @@ namespace YoFi.AspNet.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Interprets the "v" (View) parameter on a transactions search
+        /// </summary>
+        /// <remarks>
+        /// Public so can be used by other controllers.
+        /// </remarks>
+        /// <param name="result">Initial query to further refine</param>
+        /// <param name="p">View parameter</param>
+        /// <returns>Resulting query refined by <paramref name="v"/></returns>
+        public static IQueryable<Transaction> TransactionsForViewspec(IQueryable<Transaction> result, string v, ViewDataDictionary ViewData, out bool showHidden, out bool showSelected)
+        {
+            showHidden = v?.ToLowerInvariant().Contains("h") == true;
+            showSelected = v?.ToLowerInvariant().Contains("s") == true;
+
+            ViewData["ShowHidden"] = showHidden;
+            ViewData["ShowSelected"] = showSelected;
+            ViewData["ToggleHidden"] = (showHidden ? string.Empty : "h") + (showSelected ? "s" : string.Empty);
+            ViewData["ToggleSelected"] = (showHidden ? "h" : string.Empty) + (showSelected ? string.Empty : "s");
+
+            if (!showHidden)
+                return result.Where(x => x.Hidden != true);
+            else
+                return result;
+        } 
+
+        /// <summary>
+        /// Interprets the "o" (Order) parameter on a transactions search
+        /// </summary>
+        /// <remarks>
+        /// Public so can be used by other controllers.
+        /// </remarks>
+        /// <param name="result">Initial query to further refine</param>
+        /// <param name="p">Order parameter</param>
+        /// <returns>Resulting query refined by <paramref name="o"/></returns>
+        public static IQueryable<Transaction> TransactionsForOrdering(IQueryable<Transaction> result, string o, ViewDataDictionary ViewData) => o switch 
+        { 
+            // Coverlet finds cyclomatic complexity of 42 in this function!!?? No clue why it's not just 10.
+            "aa" => result.OrderBy(s => s.Amount),
+            "ad" => result.OrderByDescending(s => s.Amount),
+            "ra" => result.OrderBy(s => s.BankReference), 
+            "rd" => result.OrderByDescending(s => s.BankReference), 
+            "pa" => result.OrderBy(s => s.Payee), 
+            "pd" => result.OrderByDescending(s => s.Payee), 
+            "ca" => result.OrderBy(s => s.Category),
+            "cd" => result.OrderByDescending(s => s.Category),
+            "da" => result.OrderBy(s => s.Timestamp).ThenBy(s => s.BankReference), 
+                _ => result.OrderByDescending(s => s.Timestamp).ThenByDescending(s => s.BankReference)
+        };
+
+        /// <summary>
+        /// Interprets the "p" (Page) parameter on a transactions search
+        /// </summary>
+        /// <remarks>
+        /// Public so can be used by other controllers
+        /// </remarks>
+        /// <param name="result">Initial query to further refine</param>
+        /// <param name="p">Page parameter</param>
+        /// <returns>Resulting query refined by <paramref name="p"/></returns>
         public static async Task<IQueryable<Transaction>> TransactionsForPage(IQueryable<Transaction> result, int? p, int pagesize, ViewDataDictionary ViewData)
         {
             if (!p.HasValue)
@@ -197,16 +255,7 @@ namespace YoFi.AspNet.Controllers
 
             ViewData["ViewP"] = v;
 
-            bool showHidden = v?.ToLowerInvariant().Contains("h") == true;
-            bool showSelected = v?.ToLowerInvariant().Contains("s") == true;
-
-            ViewData["ShowHidden"] = showHidden;
-            ViewData["ShowSelected"] = showSelected;
-            ViewData["ToggleHidden"] = (showHidden ? string.Empty : "h") + (showSelected ? "s" : string.Empty);
-            ViewData["ToggleSelected"] = (showHidden ? "h" : string.Empty) + (showSelected ? string.Empty : "s"); ;
-
-            if (!showHidden)
-                result = result.Where(x => x.Hidden != true);
+            result = TransactionsForViewspec(result, v, ViewData, out bool showHidden, out bool showSelected);
 
             //
             // Process ORDER (O) parameters
@@ -224,19 +273,7 @@ namespace YoFi.AspNet.Controllers
             ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
             ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
 
-            result = o switch 
-            { 
-                "aa" => result.OrderBy(s => s.Amount),
-                "ad" => result.OrderByDescending(s => s.Amount), // "amount_desc":
-                "ra" => result.OrderBy(s => s.BankReference), // "ref_asc":
-                "rd" => result.OrderByDescending(s => s.BankReference), // "ref_desc":
-                "pa" => result.OrderBy(s => s.Payee), // "payee_asc":
-                "pd" => result.OrderByDescending(s => s.Payee), // "payee_desc":
-                "ca" => result.OrderBy(s => s.Category), // "category_asc":
-                "cd" => result.OrderByDescending(s => s.Category),// "category_desc":
-                "da" => result.OrderBy(s => s.Timestamp).ThenBy(s => s.BankReference), // "date_asc":
-                 _ => result.OrderByDescending(s => s.Timestamp).ThenByDescending(s => s.BankReference) // "date_desc":
-            };
+            result = TransactionsForOrdering(result, o, ViewData);
 
             //
             // Process PAGE (P) parameters
