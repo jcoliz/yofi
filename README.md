@@ -19,6 +19,7 @@ transaction, then create reports based on those categories. Its full feature set
 * Importing from and exporting to XLSX spreadsheets for all data types 
 * Access to all reports via REST API
 * Attaching receipt images to individual transactions
+* Splitting transactions across multiple categories
 * Bulk reassignment of categories
 * Unlimited levels of subcategories
 
