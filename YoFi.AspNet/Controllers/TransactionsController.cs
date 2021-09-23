@@ -975,21 +975,11 @@ namespace YoFi.AspNet.Controllers
 
                 // Deselect duplicate transactions. By default, deselected transactions will not be imported. User can override.
 
-                var conflictrange = _context.Transactions;
-
                 // To handle the case where there may be transactions already in the system before the importer
                 // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
                 // transactions in the system.
 
-                var needbankrefs = conflictrange.Where(x => null == x.BankReference);
-                if (await needbankrefs.AnyAsync())
-                {
-                    foreach (var tx in needbankrefs)
-                    {
-                        tx.GenerateBankReference();
-                    }
-                    await _context.SaveChangesAsync();
-                }
+                await EnsureAllTransactionsHaveBankRefs();
 
                 // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
 
@@ -1004,7 +994,7 @@ namespace YoFi.AspNet.Controllers
                  */
                 //
                 var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
-                var conflicts = conflictrange.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
+                var conflicts = _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
 
                 if (conflicts.Any())
                 {
@@ -1083,6 +1073,23 @@ namespace YoFi.AspNet.Controllers
             // If user returns to Import page directly, these highlights will be lost. Really probably
             // should persist this to the database somehow. Or at least stick it in the session??
             return RedirectToAction(nameof(Import), new { highlight = string.Join(':', highlights.Select(x => x.ID)) });
+        }
+
+        async Task EnsureAllTransactionsHaveBankRefs()
+        {
+            // To handle the case where there may be transactions already in the system before the importer
+            // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
+            // transactions in the system.
+
+            var needbankrefs = _context.Transactions.Where(x => null == x.BankReference);
+            if (await needbankrefs.AnyAsync())
+            {
+                foreach (var tx in needbankrefs)
+                {
+                    tx.GenerateBankReference();
+                }
+                await _context.SaveChangesAsync();
+            }
         }
 
         // POST: Transactions/Download
