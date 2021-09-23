@@ -193,22 +193,28 @@ namespace YoFi.AspNet.Controllers
         /// <returns>Resulting query refined by <paramref name="p"/></returns>
         public static async Task<IQueryable<Transaction>> TransactionsForPage(IQueryable<Transaction> result, int? p, int pagesize, ViewDataDictionary ViewData)
         {
+            var count = await result.CountAsync();
+            PageDivider(count,p,pagesize,out int offset, ViewData);
+            if (count > pagesize)
+                result = result.Skip(offset).Take(pagesize);
+
+            return result;
+        }
+
+        public static void PageDivider(int count, int? p, int pagesize, out int offset, ViewDataDictionary ViewData)
+        {
             if (!p.HasValue)
                 p = 1;
             else
                 ViewData["Page"] = p;
 
-            var count = await result.CountAsync();
-
-            int offset = (p.Value - 1) * pagesize;
+            offset = (p.Value - 1) * pagesize;
             ViewData["PageFirstItem"] = offset + 1;
             ViewData["PageLastItem"] = Math.Min(count, offset + pagesize);
             ViewData["PageTotalItems"] = count;
 
             if (count > PageSize)
             {
-                result = result.Skip(offset).Take(pagesize);
-
                 if (p > 1)
                     ViewData["PreviousPage"] = p.Value - 1;
                 else
@@ -227,8 +233,6 @@ namespace YoFi.AspNet.Controllers
                 if ((p + 1) * PageSize < count)
                     ViewData["LastPage"] = 1 + (count - 1) / pagesize;
             }
-
-            return result;
         }
 
         /// <summary>
