@@ -390,6 +390,16 @@ namespace YoFi.AspNet.Controllers.Reports
         }
 
         /// <summary>
+        /// Pre-calculated set of labels for month columns
+        /// </summary>
+        private static Dictionary<int,ColumnLabel> MonthColumnLabels { get; } = Enumerable.Range(1,12).ToDictionary(x=>x,x=>new ColumnLabel() 
+            { 
+                UniqueID = x.ToString("D2"), 
+                Name = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(x)
+            }
+        );
+
+        /// <summary>
         /// Place data into report, and call remaining phases
         /// </summary>
         /// <remarks>
@@ -450,15 +460,11 @@ namespace YoFi.AspNet.Controllers.Reports
                         row = new RowLabel() { Name = name, UniqueID = id, Collector = collector };
 
                     // Place the value in the correct month column if applicable
-                    ColumnLabel column = null;
+                    ColumnLabel monthcolumn = null;
                     if (WithMonthColumns)
                     {
-                        column = new ColumnLabel() 
-                        { 
-                            UniqueID = cell.Key.Month.ToString("D2"), 
-                            Name = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(cell.Key.Month)
-                        };
-                        Table[column, row] += cell.Total;
+                        monthcolumn = MonthColumnLabels[cell.Key.Month];
+                        Table[monthcolumn, row] += cell.Total;
                     }
 
                     // Place the value in the correct series column, if applicable
@@ -471,7 +477,7 @@ namespace YoFi.AspNet.Controllers.Reports
                     // 3. Propagate. Propagate those values upward into totalling rows.
                     // By definition "leaf rows only" means DON'T propagate into totalling rows
                     if (!oquery.LeafRowsOnly)
-                        BuildPhase_Propagate(row: row, column: column, seriescolumn: seriescolumn, amount: cell.Total);
+                        BuildPhase_Propagate(row: row, column: monthcolumn, seriescolumn: seriescolumn, amount: cell.Total);
                 }
             }
 
