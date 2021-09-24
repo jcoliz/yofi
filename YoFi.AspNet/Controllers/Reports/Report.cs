@@ -649,28 +649,21 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <returns>Comparsion value. -1 if <paramref name="first"/> sorts before <paramref name="second"/></returns>
         int CompareRows(RowLabel first, RowLabel second)
         {
-            int result = 0;
-            var n = new RowLabel() { Name = "null" };
-
-            // Turn this on if need to trace the sort logic
-            bool debugout = false;
-            Debug.WriteLineIf(debugout,$"Compare [{first??n}] vs [{second??n}]");
-
             // (1) Total rows always come after other rows
             if (first.IsTotal && second.IsTotal)
-                goto done;
-            if (first.IsTotal)
-            {
-                result = 1;
-                goto done;
-            }
-            if (second.IsTotal)
-            {
-                result = -1;
-                goto done;
-            }
+                return 0;
+            else if (first.IsTotal)
+                return 1;
+            else if (second.IsTotal)
+                return -1;
 
-            // (2) If these two share a common parent, we can compare based on SortOrder
+            // (2) Parents always come before their own children
+            if (first.Parent == second)
+                return 1;
+            else if (second.Parent == first)
+                return -1;
+
+            // (3) If these two share a common parent, we can compare based on SortOrder
             if (first.Parent == second.Parent)
             {
                 var secondval = Table[OrderingColumn, second];
@@ -678,71 +671,24 @@ namespace YoFi.AspNet.Controllers.Reports
                 switch (SortOrder)
                 {
                     case SortOrders.TotalAscending:
-                        Debug.WriteLineIf(debugout, $"Checking Totals: {firstval:C2} vs {secondval:C2}...");
-                        result = secondval.CompareTo(firstval);
-                        break;
+                        return secondval.CompareTo(firstval);
                     case SortOrders.TotalDescending:
-                        Debug.WriteLineIf(debugout, $"Checking Totals: {firstval:C2} vs {secondval:C2}...");
-                        result = firstval.CompareTo(secondval);
-                        break;
+                        return firstval.CompareTo(secondval);
                     case SortOrders.NameAscending:
-                        result = first.Name?.CompareTo(second.Name) ?? -1;
-                        break;
+                        return first.Name?.CompareTo(second.Name) ?? -1;
                 }
-                goto done;
-            }
-
-            // (3) Parents always come before their own children
-
-            if (first.Parent == second)
-            {
-                Debug.WriteLineIf(debugout, "Parent relationship");
-                result = 1;
-                goto done;
-            }
-            else if (second.Parent == first)
-            {
-                Debug.WriteLineIf(debugout, "Parent relationship");
-                result = -1;
-                goto done;
             }
 
             // (4) Search upward if can't resolve at this level
 
             // If one is deeper than the other, run up that parent chain
+            // Or if not, we're at the SAME level, run both parents upwards
             if (first.Level < second.Level)
-            {
-                Debug.WriteLineIf(debugout, $"Try {first} Parent vs {second}");
-                result = CompareRows(first.Parent, second);
-            }
+                return CompareRows(first.Parent, second);
             else if (second.Level < first.Level)
-            {
-                Debug.WriteLineIf(debugout, $"Try {first} vs {second} Parent");
-                result = CompareRows(first, second.Parent);
-            }
+                return CompareRows(first, second.Parent);
             else
-            {
-                // If we're at the SAME level, run both parents upwards
-                Debug.WriteLineIf(debugout, $"Try {first} Parent vs {second} Parent");
-                result = CompareRows(first.Parent, second.Parent);
-            }
-
-#if false
-            // This is a bit of defensive coding. I have never been able to give inputs which get
-            // the result to zero, so I don't think we really need this.
-            if (result == 0)
-                Debug.WriteLineIf(debugout, $"??? Unable to resolve");
-#endif
-        done:
-
-            if (result < 0)
-                Debug.WriteLineIf(debugout, $">> {first??n} is before {second??n}");
-            else if (result > 0)
-                Debug.WriteLineIf(debugout, $">> {first??n} is after {second??n}");
-            else
-                Debug.WriteLineIf(debugout, $">> {first??n} is same as {second??n}");
-
-            return result;
+                return CompareRows(first.Parent, second.Parent);
         }
 
         /// <summary>
