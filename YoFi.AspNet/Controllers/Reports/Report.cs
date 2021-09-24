@@ -360,6 +360,28 @@ namespace YoFi.AspNet.Controllers.Reports
         #endregion
 
         #region Internal Methods
+        
+        /// <summary>
+        /// This is the object which we use as the grouping key for IReportable items
+        /// </summary>
+        class CellGroupDto
+        {
+            public string Row { get; set; }
+            public int? Column { get; set; } = null;
+
+            public string FilteredRowName => string.IsNullOrEmpty(Row) ? "[Blank]" : Row;
+        };
+
+        /// <summary>
+        /// This holds the sum total of all items in a grouping, which is in fact
+        /// the location (key) and value of a cell.
+        /// </summary>
+        class CellTotalDto
+        {
+            public CellGroupDto Location { get; set; }
+
+            public decimal Value { get; set; }
+        };
 
         /// <summary>
         /// Group source transactions by name/month and calculate totals, and call remaining
@@ -376,17 +398,17 @@ namespace YoFi.AspNet.Controllers.Reports
 
         private void BuildPhase_Group(NamedQuery source)
         {
-            IQueryable<IGrouping<object, IReportable>> groups;
+            IQueryable<IGrouping<CellGroupDto, IReportable>> groups;
             if (WithMonthColumns)
-                groups = source.Query.GroupBy(x => new { Name = x.Category, Month = x.Timestamp.Month });
+                groups = source.Query.GroupBy(x => new CellGroupDto() { Row = x.Category, Column = x.Timestamp.Month });
             else
-                groups = source.Query.GroupBy(x => new { Name = x.Category });
+                groups = source.Query.GroupBy(x => new CellGroupDto() { Row = x.Category });
 
             //  1. Group. Group source transactions by name/month and calculate totals
-            var selected = groups.Select(g => new { Key = g.Key, Total = g.Sum(y => y.Amount) });
+            var selected = groups.Select(g => new CellTotalDto() { Location = g.Key, Value = g.Sum(y => y.Amount) });
 
             //  2. Place. Place each incoming data point into a report cell.
-            BuildPhase_Place(source: selected, oquery: source);
+            BuildPhase_Place(cells: selected, oquery: source);
         }
 
         /// <summary>
@@ -407,9 +429,9 @@ namespace YoFi.AspNet.Controllers.Reports
         /// This method is the first place where data is actually brought into the client
         /// and worked on.
         /// </remarks>
-        /// <param name="source">Report data</param>
+        /// <param name="cells">Report data</param>
         /// <param name="oquery">Original query</param>
-        private void BuildPhase_Place(IQueryable<dynamic> source, NamedQuery oquery)
+        private void BuildPhase_Place(IQueryable<CellTotalDto> cells, NamedQuery oquery)
         {
             // If this query has a NAME, then we are also collecting the values in a
             // series column.
@@ -426,12 +448,9 @@ namespace YoFi.AspNet.Controllers.Reports
             var collectorregex = new Regex("(.+?)\\[(.+?)\\]");
 
             //  2. Place. Place each incoming data point into a report cell.
-            foreach (var cell in source)
+            foreach (var cell in cells)
             {
-                string dynamicname = "[Blank]";
-                if (!string.IsNullOrEmpty(cell.Key.Name))
-                    dynamicname = cell.Key.Name;
-                var keys = dynamicname.Split(':').Skip(SkipLevels).ToList();
+                var keys = cell.Location.FilteredRowName.Split(':').Skip(SkipLevels).ToList();
                 if (keys.Any())
                 {
                     // Is this a collector row?
@@ -461,23 +480,23 @@ namespace YoFi.AspNet.Controllers.Reports
 
                     // Place the value in the correct month column if applicable
                     ColumnLabel monthcolumn = null;
-                    if (WithMonthColumns)
+                    if (WithMonthColumns && cell.Location.Column.HasValue)
                     {
-                        monthcolumn = MonthColumnLabels[cell.Key.Month];
-                        Table[monthcolumn, row] += cell.Total;
+                        monthcolumn = MonthColumnLabels[cell.Location.Column.Value];
+                        Table[monthcolumn, row] += cell.Value;
                     }
 
                     // Place the value in the correct series column, if applicable
                     if (seriescolumn != null)
-                        Table[seriescolumn, row] += cell.Total;
+                        Table[seriescolumn, row] += cell.Value;
 
                     // Place the value in the total column
-                    Table[TotalColumn, row] += cell.Total;
+                    Table[TotalColumn, row] += cell.Value;
 
                     // 3. Propagate. Propagate those values upward into totalling rows.
                     // By definition "leaf rows only" means DON'T propagate into totalling rows
                     if (!oquery.LeafRowsOnly)
-                        BuildPhase_Propagate(row: row, column: monthcolumn, seriescolumn: seriescolumn, amount: cell.Total);
+                        BuildPhase_Propagate(row: row, column: monthcolumn, seriescolumn: seriescolumn, amount: cell.Value);
                 }
             }
 
