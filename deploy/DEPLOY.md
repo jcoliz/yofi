@@ -14,3 +14,7 @@ Don't have an Azure subscription? You can easily [Create a free account](https:/
 ## Hosting Provider
 
 I am also planning to deploy to a regular hosting provider. I'll report back how that goes here!
+
+## What's next?
+
+After deploying, read up on [How to configure](/docs/Configuration.md) the site.

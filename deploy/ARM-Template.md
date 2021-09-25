@@ -85,3 +85,7 @@ page. Navigate to "inputs" from the left side.
 ![Deployment Inputs](/docs/images/postdeploy-4.png)
 
 Then copy the "web-user" and "web-pword" items into the site login.
+
+## Configuration
+
+Read up on [How to configure](/docs/Configuration.md) the site for more details on fine-tuning the configuration.

@@ -48,7 +48,7 @@ There is a read-only demo instance of YoFi hosted at www.try-yofi.com, with real
 ## Deploy it
 
 The fastest and simplest way to bring up YoFi for your own use is to deploy it to Azure.
-Click the Deploy button below to deploy the [Azure Resource Manager template](/deploy/ARM-Template.md).
+Click the Deploy button below to deploy the [Azure Resource Manager template](./deploy/ARM-Template.md).
 This creates all the needed resources in Azure, including an App Service, SQL Database, 
 Storage, etc., then deploys the most recent build. 
 
@@ -69,6 +69,8 @@ From there, you can Publish updates from Visual Studio to the Azure App Service 
 
 For serious developers, there is an Azure Pipelines definition file included, [azure-pipelines-dotnet.yml](/azure-pipelines-dotnet.yml). You can host your build
 service on Azure Dev Ops, then create an Azure Pipeline to build and release updates to your Azure App Service.
+
+Also see the full list of [Dependencies](/docs/Dependencies.md) taken by the project.
 
 ## Give feedback
 
