@@ -1117,7 +1117,7 @@ namespace YoFi.AspNet.Controllers
         // POST: Transactions/Download
         //[ActionName("Download")]
         [HttpPost]
-        public async Task<IActionResult> Download(bool allyears, bool mapcheck, string q = null)
+        public async Task<IActionResult> Download(bool allyears, string q = null)
         {
             try
             {
@@ -1156,19 +1156,6 @@ namespace YoFi.AspNet.Controllers
                     splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
                 splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
                 var splits = await splitsquery.ToListAsync();
-
-                // Map categories, if requested
-
-                if (mapcheck)
-                {
-                    var maptable = new CategoryMapper(_context.CategoryMaps);
-                    foreach (var tx in transactions)
-                        maptable.MapObject(tx);
-
-                    if (splits.Any())
-                        foreach (var split in splits)
-                            maptable.MapObject(split);
-                }
 
                 // Create the spreadsheet result
 
@@ -1287,7 +1274,7 @@ namespace YoFi.AspNet.Controllers
 
         Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
 
-        Task<IActionResult> IController<Models.Transaction>.Download() => Download(false, false);
+        Task<IActionResult> IController<Models.Transaction>.Download() => Download(false);
         #endregion
 
         #region Helpers

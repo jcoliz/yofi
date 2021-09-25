@@ -301,18 +301,11 @@ namespace YoFi.AspNet.Controllers
 
         // GET: Payees/Download
         [ActionName("Download")]
-        public async Task<IActionResult> Download(bool? mapped = false)
+        public async Task<IActionResult> Download()
         {
             try
             {
                 var items = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.Name).ToListAsync();
-
-                if (mapped ?? false)
-                {
-                    var maptable = new CategoryMapper(_context.CategoryMaps);
-                    foreach (var item in items)
-                        maptable.MapObject(item);
-                }
 
                 FileStreamResult result = null;
                 var stream = new MemoryStream();
@@ -338,8 +331,6 @@ namespace YoFi.AspNet.Controllers
         {
             return _context.Payees.Any(e => e.ID == id);
         }
-
-        Task<IActionResult> IController<Payee>.Download() => Download(false);
     }
 
     class PayeeNameComparer : IEqualityComparer<Models.Payee>

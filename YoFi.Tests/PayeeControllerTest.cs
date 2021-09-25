@@ -166,26 +166,6 @@ namespace YoFi.Tests
             Assert.AreEqual(tx.Category, model.Category);
         }
 
-        [TestMethod]
-        public async Task DownloadMapped()
-        {
-            var map = new CategoryMap() { Category = "Food", Key1 = "A", Key2 = "B" };
-            context.CategoryMaps.Add(map);
-
-            var item = new Payee() { Category = "Food", Name = "3" };
-            context.Payees.Add(item);
-
-            context.SaveChanges();
-
-            var result = await controller.Download(mapped:true);
-            var fcresult = result as FileStreamResult;
-            var stream = fcresult.FileStream;
-            var incoming = helper.ExtractFromSpreadsheet<Payee>(stream);
-
-            Assert.AreEqual(1, incoming.Count);
-            Assert.AreEqual("A:B", incoming.Single().Category);
-        }
-
         [DataRow(true)]
         [DataRow(false)]
         [DataTestMethod]

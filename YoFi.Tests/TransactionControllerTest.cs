@@ -579,20 +579,15 @@ namespace YoFi.Tests
             Assert.IsTrue(result is BadRequestObjectResult);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task SplitsShownDownload(bool mapped)
+        [TestMethod]
+        public async Task SplitsShownDownload()
         {
-            if (mapped)
-                context.CategoryMaps.AddRange(CategoryMapItems.Take(2)); 
-
             var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
 
             context.Transactions.Add(item);
             context.SaveChanges();
 
-            var result = await controller.Download(false,mapped);
+            var result = await controller.Download(false);
             var fcresult = result as FileStreamResult;
             var stream = fcresult.FileStream;
             var incoming = helper.ExtractFromSpreadsheet<Split>(stream);
@@ -600,12 +595,6 @@ namespace YoFi.Tests
             Assert.AreEqual(2, incoming.Count);
             Assert.AreEqual(item.ID, incoming.First().TransactionID);
             Assert.AreEqual(item.ID, incoming.Last().TransactionID);
-
-            if (mapped)
-            {
-                Assert.AreEqual("X:Y:B", incoming.First().Category);
-                Assert.AreEqual("Z:R:D", incoming.Last().Category);
-            }
         }
 
         [TestMethod]
@@ -653,41 +642,6 @@ namespace YoFi.Tests
             // The transaction should NOT have a category anymore, even if it had one to begin with
             Assert.IsNull(actual.Category);
         }
-        [TestMethod]
-        public async Task DownloadMapped()
-        {
-            context.CategoryMaps.AddRange(CategoryMapItems.Take(1));
-            context.Transactions.AddRange(TransactionItems.Skip(1).Take(1));
-            context.SaveChanges();
-
-            var result = await controller.Download(false, true);
-            var fcresult = result as FileStreamResult;
-            var stream = fcresult.FileStream;
-            var incoming = helper.ExtractFromSpreadsheet<Transaction>(stream);
-
-            Assert.AreEqual(1, incoming.Count);
-
-            // Note that we now expect X:Y not X:Y:A because the transaction mapper
-            // now ignores subcategory.
-
-            Assert.AreEqual("X:Y", incoming.Single().Category);
-        }
-
-        [TestMethod]
-        public async Task NullTransactionsOKinMappedDownload()
-        {
-            var item = new Transaction() { Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-            context.Transactions.Add(item);
-            context.SaveChanges();
-
-            var result = await controller.Download(false, true);
-            var fcresult = result as FileStreamResult;
-            var stream = fcresult.FileStream;
-            var incoming = helper.ExtractFromSpreadsheet<Transaction>(stream);
-
-            Assert.AreEqual(1, incoming.Count);
-            Assert.AreEqual(null, incoming.Single().Category);
-        }
 
         [TestMethod]
         public async Task DownloadAllYears() => await DownloadAllYears_Internal();
@@ -701,7 +655,7 @@ namespace YoFi.Tests
             context.Transactions.Add(item_new);
             context.SaveChanges();
 
-            var result = await controller.Download(true, false);
+            var result = await controller.Download(true);
             var fcresult = result as FileStreamResult;
             var stream = fcresult.FileStream;
             var incoming = helper.ExtractFromSpreadsheet<Transaction>(stream);
@@ -1617,7 +1571,7 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Downloading transactions with q='{word},{key}={value}' in various combinations
-            var result = await controller.Download(allyears:true, mapcheck:false, q: q);
+            var result = await controller.Download(allyears:true, q: q);
             var fcresult = result as FileStreamResult;
             var stream = fcresult.FileStream;
             var model = helper.ExtractFromSpreadsheet<Transaction>(stream);
