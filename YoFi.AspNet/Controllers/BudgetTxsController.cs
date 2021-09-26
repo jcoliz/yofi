@@ -1,4 +1,5 @@
 ﻿using Common.AspNet;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using YoFi.AspNet.Models;
 
 namespace YoFi.AspNet.Controllers
 {
+    [Authorize(Roles = "Verified")]
     public class BudgetTxsController : Controller, IController<BudgetTx>
     {
         public static int PageSize { get; } = 25;
