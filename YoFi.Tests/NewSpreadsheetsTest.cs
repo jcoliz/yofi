@@ -418,5 +418,49 @@ namespace YoFi.Tests
             var sheets = writer.SheetNames;
         }
 
+        class ThirtyMembers
+        {
+            public int Member_01 { get; set; }
+            public int Member_02 { get; set; }
+            public int Member_03 { get; set; }
+            public int Member_04 { get; set; }
+            public int Member_05 { get; set; }
+            public int Member_06 { get; set; }
+            public int Member_07 { get; set; }
+            public int Member_08 { get; set; }
+            public int Member_09 { get; set; }
+            public int Member_10 { get; set; }
+            public int Member_11 { get; set; }
+            public int Member_12 { get; set; }
+            public int Member_13 { get; set; }
+            public int Member_14 { get; set; }
+            public int Member_15 { get; set; }
+            public int Member_16 { get; set; }
+            public int Member_17 { get; set; }
+            public int Member_18 { get; set; }
+            public int Member_19 { get; set; }
+            public int Member_20 { get; set; }
+            public int Member_21 { get; set; }
+            public int Member_22 { get; set; }
+            public int Member_23 { get; set; }
+            public int Member_24 { get; set; }
+            public int Member_25 { get; set; }
+            public int Member_26 { get; set; }
+            public int Member_27 { get; set; }
+            public int Member_28 { get; set; }
+            public int Member_29 { get; set; }
+            public int Member_30 { get; set; }
+        };
+
+        [TestMethod]
+        public void WriteLongClass()
+        {
+            var items = new List<ThirtyMembers>()
+            {
+                new ThirtyMembers() { Member_23 = 23 }
+            };
+
+            WriteThenReadBack(items);
+        }
     }
 }
