@@ -452,6 +452,15 @@ namespace YoFi.Tests
             public int Member_30 { get; set; }
         };
 
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
+        public void SheetNamesFails()
+        {
+            var writer = new OpenXmlSpreadsheetWriter();
+            var sheets = writer.SheetNames;
+        }
+
         [TestMethod]
         public void WriteLongClass()
         {
