@@ -51,15 +51,6 @@ namespace YoFi.AspNet.Models
         public string Category { get; set; }
 
         /// <summary>
-        /// Second-level category
-        /// </summary>
-        /// <remarks>
-        /// This property is obsolete. Category can now take multiple
-        /// levels of information separated with colons.
-        /// </remarks>
-        public string SubCategory { get; set; }
-
-        /// <summary>
         /// Pacify ICatSubcat
         /// </summary>
         /// <remarks>
