@@ -400,6 +400,23 @@ namespace YoFi.Tests
             Assert.AreEqual(newtx, actual);
             Assert.AreNotEqual(original, actual);
         }
+
+        [TestMethod]
+        public async Task EditNotFound()
+        {
+            await AddFiveTransactions();
+            await context.SaveChangesAsync();
+
+            var original = await context.Transactions.FirstAsync();
+            var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", Timestamp = original.Timestamp, Amount = original.Amount };
+            var maxid = context.Transactions.Max(x => x.ID);
+            var badid = maxid + 1;
+
+            var result = await controller.Edit(badid,false,newtx);
+            Assert.IsFalse(result.Ok);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
+        }
+
         [TestMethod]
         public async Task EditDuplicate()
         {
@@ -483,7 +500,22 @@ namespace YoFi.Tests
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(original.ID.ToString(), original.ReceiptUrl);
+        }
+        [TestMethod]
+        public async Task UpReceiptAgainFails()
+        {
+            await UpReceipt();
+            var original = await context.Transactions.LastAsync();
 
+            // Create a formfile with it
+            var contenttype = "text/html";
+            var count = 10;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
+            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
+            
+            var result = await controller.UpReceipt(original.ID,file);
+            Assert.IsFalse(result.Ok);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
 
         [TestMethod]
@@ -512,6 +544,31 @@ namespace YoFi.Tests
             Assert.IsTrue(item.IsSplitsOK);
         }
 
+        [TestMethod]
+        public async Task UploadSplitsNotFound()
+        {
+            // Don't add the splits here, we'll upload them
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            var splits = new List<Split>()
+            {
+                new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
+                new Split() { Amount = 75m, Category = "C", SubCategory = "D" }
+            };
+
+            // Make an HTML Form file containg a spreadsheet containing those splits
+            var file = ControllerTestHelper<Split,SplitsController>.PrepareUpload(splits);
+
+            var maxid = context.Transactions.Max(x => x.ID);
+            var badid = maxid + 1;
+            var result = await controller.UpSplits(badid, file);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
+        }
 
 #if false
         // TODO: Wrtire for V3 reports
