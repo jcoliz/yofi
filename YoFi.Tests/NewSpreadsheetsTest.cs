@@ -409,5 +409,14 @@ namespace YoFi.Tests
             // Then: Data is loaded as expected.
             Assert.IsTrue(actual.SequenceEqual(Items));
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
+        public void CustomColumnNullFails()
+        {
+            var writer = new OpenXmlSpreadsheetWriter();
+            var sheets = writer.SheetNames;
+        }
+
     }
 }
