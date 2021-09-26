@@ -91,12 +91,6 @@ namespace YoFi.Tests
             new Payee() { Category = "Y", Name = "4" }
         };
 
-        readonly List<CategoryMap> CategoryMapItems = new List<CategoryMap>()
-        {
-            new CategoryMap() { Category = "A", Key1 = "X", Key2 = "Y" },
-            new CategoryMap() { Category = "C", Key1 = "Z", Key2 = "R" }
-        };
-
         static IEnumerable<Transaction> TransactionItemsLong;
 
         // This is public in case someone ELSE wants a big boatload of transactions

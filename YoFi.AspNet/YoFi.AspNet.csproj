@@ -56,9 +56,6 @@
     <Content Update="Views\BudgetTxs\Upload.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\CategoryMaps\Upload.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
     <Content Update="Views\Payees\CreatePartial.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
