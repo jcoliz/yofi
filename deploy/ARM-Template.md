@@ -13,6 +13,12 @@ describes more details on how you can deploy them through the portal, or cloud s
 
 [![Deploy To Azure](/docs/images/deploytoazure.png)](https://portal.azure.com/#create/Microsoft.Template/)
 
+If you're familiar with the az cli tool, you can do it there too. Of course, replace the $ items with proper values for your enviroment.
+
+```
+az deployment group create -g $ResourceGroup -f .\deploy\yofi.azuredeploy.json -p "{ 'web-user': { 'value': '$AdminEmail' } }"
+```
+
 ## What it needs from you
 
 The deployment UI will need a few things from you:
@@ -89,3 +95,8 @@ Then copy the "web-user" and "web-pword" items into the site login.
 ## Configuration
 
 Read up on [How to configure](/docs/Configuration.md) the site for more details on fine-tuning the configuration.
+
+## Deploying new bits
+
+Note that this template configures the web app to run from a ZIP package. If you later decide to deploy new
+bits after building it, you'll need to remove the WEBSITE_RUN_FROM_PACKAGE environment variable and restart.
