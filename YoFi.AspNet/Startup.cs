@@ -97,6 +97,7 @@ namespace YoFi.AspNet.Root
             };
             app.UseRequestLocalization(localizationOptions);
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseSession();
