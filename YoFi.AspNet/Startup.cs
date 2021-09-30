@@ -12,6 +12,8 @@ using YoFi.AspNet.Models;
 using System.Collections.Generic;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 
 namespace YoFi.AspNet.Root
 {
@@ -84,6 +86,16 @@ namespace YoFi.AspNet.Root
 
                 app.UseExceptionHandler("/Transactions/Error");
             }
+
+            // https://stackoverflow.com/questions/41336783/set-culture-and-ui-culture-in-appsettings-json-asp-net-core-localization
+            var locale = "en-US"; // Configuration["SiteLocale"];
+            RequestLocalizationOptions localizationOptions = new RequestLocalizationOptions
+            {
+                SupportedCultures = new List<CultureInfo> { new CultureInfo(locale) },
+                SupportedUICultures = new List<CultureInfo> { new CultureInfo(locale) },
+                DefaultRequestCulture = new RequestCulture(locale)
+            };
+            app.UseRequestLocalization(localizationOptions);
 
             app.UseStaticFiles();
 
