@@ -35,7 +35,7 @@ namespace jcoliz.OfficeOpenXml.Easy
             var workbookpart = spreadSheet.WorkbookPart;
             SheetNames = workbookpart.Workbook.Descendants<Sheet>().Select(x => x.Name.Value).ToList();
         }
-
+        
         /// <summary>
         /// Read the sheet named <paramref name="sheetname"/> into items
         /// </summary>

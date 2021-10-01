@@ -37,8 +37,8 @@ namespace YoFi.Tests
 
         void WhenWritingToSpreadsheet<T>(Stream stream,IEnumerable<T> items,bool writetodisk = true) where T: class
         {
-            using (var writer = new OpenXmlSpreadsheetWriter())
             {
+                using var writer = new OpenXmlSpreadsheetWriter();
                 writer.Open(stream);
                 writer.Write(items, TestContext.TestName);
             }
@@ -55,13 +55,14 @@ namespace YoFi.Tests
             }
         }
 
-        private void WhenReadAsSpreadsheet<T>(MemoryStream stream, List<T> actual, List<string> sheets) where T : class, new()
+        private IEnumerable<T> WhenReadAsSpreadsheet<T>(MemoryStream stream, List<string> sheets) where T : class, new()
         {
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new OpenXmlSpreadsheetReader();
             reader.Open(stream);
-            actual.AddRange(reader.Read<T>(TestContext.TestName));
-            sheets.AddRange(reader.SheetNames.ToList());
+            sheets.AddRange(reader.SheetNames);
+
+            return reader.Read<T>(TestContext.TestName).ToList();
         }
 
         public void WriteThenReadBack<T>(IEnumerable<T> items, bool writetodisk = true) where T : class, new()
@@ -73,10 +74,8 @@ namespace YoFi.Tests
             WhenWritingToSpreadsheet(stream, items, writetodisk);
 
             // And: Reading it back to a spreadsheet
-            var actual = new List<T>();
             var sheets = new List<string>();
-
-            WhenReadAsSpreadsheet<T>(stream, actual, sheets);
+            var actual = WhenReadAsSpreadsheet<T>(stream, sheets);
 
             // Then: The spreadsheet is valid, and contains the expected item
             Assert.AreEqual(1, sheets.Count());
