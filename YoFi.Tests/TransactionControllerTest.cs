@@ -4,19 +4,19 @@ using jcoliz.OfficeOpenXml.Easy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxSharp;
-using YoFi.AspNet.Controllers;
-using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Transaction = YoFi.AspNet.Models.Transaction;
-using Microsoft.Extensions.Configuration;
+using YoFi.AspNet.Controllers;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
 using Dto = YoFi.AspNet.Controllers.TransactionsController.TransactionIndexDto;
+using Transaction = YoFi.AspNet.Models.Transaction;
 
 namespace YoFi.Tests
 {
