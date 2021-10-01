@@ -36,7 +36,7 @@ namespace YoFi.Tests
 
         public TestContext TestContext { get; set; }
 
-        void WhenWritingToNewSpreadsheet<T>(Stream stream,IEnumerable<T> items,bool writetodisk = true) where T: class
+        void WhenWritingToSpreadsheet<T>(Stream stream,IEnumerable<T> items,bool writetodisk = true) where T: class
         {
             using (var writer = new OpenXmlSpreadsheetWriter())
             {
@@ -56,7 +56,7 @@ namespace YoFi.Tests
             }
         }
 
-        private void WhenReadAsNewSpreadsheet<T>(MemoryStream stream, List<T> actual, List<string> sheets) where T : class, new()
+        private void WhenReadAsSpreadsheet<T>(MemoryStream stream, List<T> actual, List<string> sheets) where T : class, new()
         {
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new OpenXmlSpreadsheetReader();
@@ -71,13 +71,13 @@ namespace YoFi.Tests
 
             // When: Writing it to a spreadsheet using the new methods
             using var stream = new MemoryStream();
-            WhenWritingToNewSpreadsheet(stream, items, writetodisk);
+            WhenWritingToSpreadsheet(stream, items, writetodisk);
 
             // And: Reading it back to a spreadsheet
             var actual = new List<T>();
             var sheets = new List<string>();
 
-            WhenReadAsNewSpreadsheet<T>(stream, actual, sheets);
+            WhenReadAsSpreadsheet<T>(stream, actual, sheets);
 
             // Then: The spreadsheet is valid, and contains the expected item
             Assert.AreEqual(1, sheets.Count());
@@ -91,8 +91,8 @@ namespace YoFi.Tests
             // Given: A very simple string item
             var Items = new List<SimpleItem<string>>() { new SimpleItem<string>() { Key = "Hello, world!" } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -103,8 +103,8 @@ namespace YoFi.Tests
             // Given: A small list of simple string items, one with null key
             var Items = new List<SimpleItem<string>>() { new SimpleItem<string>(), new SimpleItem<string>() { Key = "Hello, world!" } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -115,8 +115,8 @@ namespace YoFi.Tests
             // Given: A very simple item w/ DateTime member
             var Items = new List<SimpleItem<DateTime>>() { new SimpleItem<DateTime>() { Key = new DateTime(2021,06,08) } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -127,8 +127,8 @@ namespace YoFi.Tests
             // Given: A very simple item w/ Int32 member
             var Items = new List<SimpleItem<Int32>>() { new SimpleItem<Int32>() { Key = 12345 } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -139,8 +139,8 @@ namespace YoFi.Tests
             // Given: A very simple item w/ decimal member
             var Items = new List<SimpleItem<decimal>>() { new SimpleItem<decimal>() { Key = 123.45m } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -151,8 +151,8 @@ namespace YoFi.Tests
             // Given: A very simple item w/ boolean member
             var Items = new List<SimpleItem<Boolean>>() { new SimpleItem<Boolean>() { Key = true } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -164,8 +164,8 @@ namespace YoFi.Tests
             // Note that an empty timestamp does not serialize well
             var Items = new List<Payee>() { new Payee() { ID = 1, Category = "A", Name = "C", Selected = true } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -177,8 +177,8 @@ namespace YoFi.Tests
             // Note that an empty timestamp does not serialize well
             var Items = PayeeControllerTest.PayeeItems;
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -190,8 +190,8 @@ namespace YoFi.Tests
             // Note that an empty timestamp does not serialize well
             var Items = SplitControllerTest.SplitItems;
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -203,8 +203,8 @@ namespace YoFi.Tests
             // Note that an empty timestamp does not serialize well
             var Items = BudgetTxControllerTest.BudgetTxItems;
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -216,8 +216,8 @@ namespace YoFi.Tests
             // Note that an empty timestamp does not serialize well
             var Items = new List<Transaction>() { new Transaction() { Timestamp = new DateTime(2021, 01, 03) } };
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -228,8 +228,8 @@ namespace YoFi.Tests
             // Given: A small number of transactions
             var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(2) /*.ToList()*/;
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -240,8 +240,8 @@ namespace YoFi.Tests
             // Given: A ton of transactions
             var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20) /*.ToList()*/;
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack(Items);
         }
@@ -254,8 +254,8 @@ namespace YoFi.Tests
             // Given: A ton of transactions
             var Items = (await TransactionControllerTest.GetTransactionItemsLong()) /*.ToList()*/;
 
-            // When: Writing it to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
             WriteThenReadBack<Transaction>(Items, writetodisk:false);
         }
@@ -267,8 +267,8 @@ namespace YoFi.Tests
             var TxItems = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20).ToList();
             var SplitItems = SplitControllerTest.SplitItems;
 
-            // When: Writing both to a spreadsheet using the new methods
-            // And: Reading it back to a spreadsheet using the old methods
+            // When: Writing it to a spreadsheet 
+            // And: Reading it back to a spreadsheet
             // Then: All spreadsheets are valid, and contain the expected items
 
             // When: Writing it to a spreadsheet using the new methods
@@ -329,7 +329,7 @@ namespace YoFi.Tests
             // Given: A file created with an arbitrary non-confirming sheet name
             var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20) /*.ToList()*/;
             using var stream = new MemoryStream();
-            WhenWritingToNewSpreadsheet(stream, Items, writetodisk:true);
+            WhenWritingToSpreadsheet(stream, Items, writetodisk:true);
 
             // When: Loading the file, without specifying the sheet name
             var actual = new List<Transaction>();
