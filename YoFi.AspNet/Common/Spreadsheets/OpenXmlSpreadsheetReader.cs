@@ -105,6 +105,10 @@ namespace YoFi.AspNet.Common
                 var line = rowdata
                     .Where(
                         x => exceptproperties?.Any(p=>p == headers[x.Key]) != true
+                        &&
+                        headers.ContainsKey(x.Key)
+                        &&
+                        ! string.IsNullOrEmpty(headers[x.Key])
                     )
                     .ToDictionary(x => headers[x.Key], x => x.Value);
 
@@ -267,7 +271,7 @@ namespace YoFi.AspNet.Common
             var last = (uint)colname.Last() - (uint)'A';
             var others = ColNumberFor(colname.SkipLast(1));
 
-            return last + 26U * others;
+            return last + 26U * (1 + others);
         }
 
         /// <summary>
@@ -275,12 +279,12 @@ namespace YoFi.AspNet.Common
         /// </summary>
         /// <param name="colnumber">0-based integer column number, e.g. "A" = 0</param>
         /// <returns>Base 26-style column name, e.g. "AF"</returns>
-        private static string ColNameFor(uint colnumber)
+        private static string ColNameFor(uint number)
         {
-            if (colnumber < 26)
-                return new string(new char[] { (char)((uint)'A' + colnumber) });
+            if (number < 26)
+                return new string(new char[] { (char)((int)'A' + number) });
             else
-                return ColNameFor(colnumber / 26) + ColNameFor(colnumber % 26);
+                return ColNameFor((number / 26) - 1) + ColNameFor(number % 26);
         }
 
         #endregion

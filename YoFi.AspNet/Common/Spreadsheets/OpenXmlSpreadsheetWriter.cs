@@ -302,7 +302,7 @@ namespace YoFi.AspNet.Common
             if (number < 26)
                 return new string(new char[] { (char)((int)'A' + number) });
             else
-                return ColNameFor(number / 26) + ColNameFor(number % 26);
+                return ColNameFor((number / 26) - 1) + ColNameFor(number % 26);
         }
 
         /// <summary>
