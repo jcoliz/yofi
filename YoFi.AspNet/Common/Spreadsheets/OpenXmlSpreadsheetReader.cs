@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace YoFi.AspNet.Common
+namespace jcoliz.OfficeOpenXml.Easy
 {
     /// <summary>
     /// Read spreadsheets into memory, using Office OpenXML

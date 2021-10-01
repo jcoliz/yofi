@@ -1,12 +1,11 @@
 ﻿using Common.NET.Test;
+using jcoliz.OfficeOpenXml.Easy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using YoFi.AspNet.Common;
 using YoFi.AspNet.Models;
 
 namespace YoFi.Tests

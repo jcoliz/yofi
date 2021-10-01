@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace YoFi.AspNet.Common
+namespace jcoliz.OfficeOpenXml.Easy
 {
     /// <summary>
     /// Interface for spreadsheet writing

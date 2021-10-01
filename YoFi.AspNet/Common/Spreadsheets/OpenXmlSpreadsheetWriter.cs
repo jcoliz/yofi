@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace YoFi.AspNet.Common
+namespace jcoliz.OfficeOpenXml.Easy
 {
     /// <summary>
     /// Write spreadsheets from memory, using Office OpenXML
