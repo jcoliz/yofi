@@ -48,6 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\submodules\OfficeOpenXMLEasy\src\OfficeOpenXmlEasy.csproj" />
     <ProjectReference Include="..\submodules\OFXSharp\source\OfxSharp\OfxSharp.csproj" />
   </ItemGroup>
 

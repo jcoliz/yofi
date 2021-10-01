@@ -1,3 +1,6 @@
 [submodule "submodules/OFXSharp"]
 	path = submodules/OFXSharp
 	url = https://github.com/jcoliz/OFXSharp
+[submodule "submodules/OfficeOpenXMLEasy"]
+	path = submodules/OfficeOpenXMLEasy
+	url = https://github.com/jcoliz/OfficeOpenXMLEasy.git
