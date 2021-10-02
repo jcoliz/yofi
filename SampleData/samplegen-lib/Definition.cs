@@ -100,9 +100,9 @@ namespace YoFi.SampleGen
         {
             SetDateWindow();
 
-            return Enumerable.Range(1, 4).Select
+            return Enumerable.Range(0, 4).Select
             (
-                q => new Transaction() { Amount = JitterizeAmount(YearlyAmount / 4), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, q*3-2, 1) + JitterizedDate }
+                q => new Transaction() { Amount = JitterizeAmount(YearlyAmount / 4), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, 1+q*3, 1) + JitterizedDate }
             );
         }
 
