@@ -26,11 +26,14 @@ namespace YoFi.SampleGen.Tests
             Assert.AreEqual(item.Payee, actual.Single().Payee);
             Assert.AreEqual(item.Category, actual.Single().Category);
         }
-        [TestMethod]
-        public void YearlyLowJitter()
+
+        [DataRow(JitterEnum.Low)]
+        [DataRow(JitterEnum.Moderate)]
+        [DataRow(JitterEnum.High)]
+        [DataTestMethod]
+        public void YearlyAmountJitter(JitterEnum jitter)
         {
-            // Given: Yearly Scheme, Low Amount Jitter
-            var jitter = JitterEnum.Low;
+            // Given: Yearly Scheme, Amount Jitter as supplied
             var amount = 1234.56m;
             var item = new Definition() { Scheme = SchemeEnum.Yearly, YearlyAmount = amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
@@ -44,12 +47,12 @@ namespace YoFi.SampleGen.Tests
             // And: The amounts vary
             Assert.IsTrue(actual.Any(x => x.Amount != actual.First().Amount));
 
-            // And: The amounts are within the expected range for low jitter
+            // And: The amounts are within the expected range for the supplied jitter
             var jittervalue = Definition.AmountJitterValues[jitter];
             var min = actual.Min(x => x.Amount);
             var max = actual.Max(x => x.Amount);
-            Assert.AreEqual((double)(amount * (1 - jittervalue)),(double)min, (double)amount * 0.01);
-            Assert.AreEqual((double)(amount * (1 + jittervalue)), (double)max, (double)amount * 0.01);
+            Assert.AreEqual((double)(amount * (1 - jittervalue)),(double)min, (double)amount * (double)jittervalue / 5.0);
+            Assert.AreEqual((double)(amount * (1 + jittervalue)), (double)max, (double)amount * (double)jittervalue / 5.0);
         }
     }
 }
