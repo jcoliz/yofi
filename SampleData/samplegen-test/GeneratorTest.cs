@@ -254,21 +254,12 @@ namespace YoFi.SampleGen.Tests
         public void QuarterlyDateJitterOnce(JitterEnum jitter)
         {
             // Given: Quarterly Scheme, Date Jitter as supplied
-            var amount = 100.00m;
-            var scheme = SchemeEnum.Quarterly;
-            var periods = 4;
-            var item = new Definition() { Scheme = scheme, YearlyAmount = periods * amount, AmountJitter = JitterEnum.None, DateJitter = jitter, Category = "Category", Payee = "Payee" };
-
             // When: Generating transactions for this specific year
             var year = 2000;
             Definition.Year = year;
-            var actual = item.GetTransactions();
-
-            // Then: There are the correct number of transactions
-            Assert.AreEqual(periods, actual.Count());
-
-            // And: The amounts are the same
-            Assert.IsTrue(actual.All(x => x.Amount == actual.First().Amount));
+            // Then: Transactions pass all standard tests
+            var scheme = SchemeEnum.Quarterly;
+            var actual = SimpleTest(scheme, datejitter: jitter);
 
             // And: The days within quarter vary
             var firstdayofquarter = Enumerable.Range(1, 4).Select(x => new DateTime(year, x * 3 - 2, 1));
@@ -280,7 +271,7 @@ namespace YoFi.SampleGen.Tests
             var min = daysofquarter.Min();
             var max = daysofquarter.Max();
             var actualrange = max - min;
-            var expectedrange = Definition.SchemeTimespans[item.Scheme].Days * (double)jittervalue;
+            var expectedrange = Definition.SchemeTimespans[scheme].Days * (double)jittervalue;
             Assert.IsTrue(actualrange <= expectedrange);
 
             // Note: There are not enough quarters to be certain that the randomness will spread out
@@ -294,21 +285,12 @@ namespace YoFi.SampleGen.Tests
         public void WeeklyDateJitterOnce(JitterEnum jitter)
         {
             // Given: Weekly Scheme, Date Jitter as supplied
-            var amount = 100.00m;
-            var scheme = SchemeEnum.Weekly;
-            var periods = 52;
-            var item = new Definition() { Scheme = scheme, YearlyAmount = periods * amount, AmountJitter = JitterEnum.None, DateJitter = jitter, Category = "Category", Payee = "Payee" };
-
             // When: Generating transactions for this specific year
             var year = 2000;
             Definition.Year = year;
-            var actual = item.GetTransactions();
-
-            // Then: There are the correct number of transactions
-            Assert.AreEqual(periods, actual.Count());
-
-            // And: The amounts are the same
-            Assert.IsTrue(actual.All(x => x.Amount == actual.First().Amount));
+            // Then: Transactions pass all standard tests
+            var scheme = SchemeEnum.Weekly;
+            var actual = SimpleTest(scheme, datejitter: jitter);
 
             // And: The days of week vary
             Assert.IsTrue(actual.Any(x => x.Timestamp.DayOfWeek != actual.First().Timestamp.DayOfWeek));
@@ -323,7 +305,7 @@ namespace YoFi.SampleGen.Tests
             var actualrange = max - min;
 
             var jittervalue = Definition.DateJitterValues[jitter];
-            var expectedrange = Definition.SchemeTimespans[item.Scheme].Days * (double)jittervalue;
+            var expectedrange = Definition.SchemeTimespans[scheme].Days * (double)jittervalue;
 
             Assert.IsTrue(actualrange <= expectedrange);
 
