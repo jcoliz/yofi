@@ -21,6 +21,7 @@ namespace YoFi.SampleGen
             SchemeEnum.Monthly => GenerateMonthly(),
             SchemeEnum.Quarterly => GenerateQuarterly(),
             SchemeEnum.Weekly => GenerateWeekly(),
+            SchemeEnum.ManyPerWeek => GenerateManyPerWeek(),
             _ => throw new NotImplementedException()
         };
 
@@ -47,6 +48,7 @@ namespace YoFi.SampleGen
         public static Dictionary<SchemeEnum, TimeSpan> SchemeTimespans = new Dictionary<SchemeEnum, TimeSpan>()
         {
             { SchemeEnum.Weekly, TimeSpan.FromDays(7) },
+            { SchemeEnum.ManyPerWeek, TimeSpan.FromDays(7) },
             { SchemeEnum.Monthly, TimeSpan.FromDays(28) },
             { SchemeEnum.Quarterly, TimeSpan.FromDays(90) },
             { SchemeEnum.Yearly, TimeSpan.FromDays(365) },
@@ -85,14 +87,29 @@ namespace YoFi.SampleGen
             );
         }
 
-        private IEnumerable<Transaction> GenerateWeekly()
+        private IEnumerable<Transaction> GenerateWeekly(decimal amount = 0)
         {
+            if (0 == amount)
+                amount = YearlyAmount / 52;
+
             SetDateWindow();
 
             return Enumerable.Range(0, 52).Select
             (
-                week => new Transaction() { Amount = JitterizeAmount(YearlyAmount / 52), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * week) + JitterizedDate }
+                week => new Transaction() { Amount = JitterizeAmount(amount), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * week) + JitterizedDate }
             );
+        }
+
+        private IEnumerable<Transaction> GenerateManyPerWeek()
+        {
+            // Many Per Week overrides the date jitter to high
+            DateJitter = JitterEnum.High;
+
+            SetDateWindow();
+
+            int numperweek = 3;
+
+            return Enumerable.Repeat(0, numperweek).SelectMany(x => GenerateWeekly(YearlyAmount/52/numperweek)).OrderBy(x=>x.Timestamp);
         }
 
         private decimal JitterizeAmount(decimal amount)
@@ -123,6 +140,6 @@ namespace YoFi.SampleGen
 
     }
 
-    public enum SchemeEnum { Invalid = 0, Weekly, Monthly, Quarterly, Yearly };
+    public enum SchemeEnum { Invalid = 0, ManyPerWeek, Weekly, Monthly, Quarterly, Yearly };
     public enum JitterEnum { Invalid = 0, None, Low, Moderate, High };
 }

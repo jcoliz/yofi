@@ -119,6 +119,9 @@ namespace YoFi.SampleGen.Tests
         [DataRow(SchemeEnum.Weekly, JitterEnum.Low)]
         [DataRow(SchemeEnum.Weekly, JitterEnum.Moderate)]
         [DataRow(SchemeEnum.Weekly, JitterEnum.High)]
+        [DataRow(SchemeEnum.ManyPerWeek, JitterEnum.Low)]
+        [DataRow(SchemeEnum.ManyPerWeek, JitterEnum.Moderate)]
+        [DataRow(SchemeEnum.ManyPerWeek, JitterEnum.High)]
         [DataTestMethod]
         public void AmountJitterMany(SchemeEnum scheme, JitterEnum jitter)
         {
@@ -127,6 +130,7 @@ namespace YoFi.SampleGen.Tests
                 SchemeEnum.Monthly => 12,
                 SchemeEnum.Quarterly => 4,
                 SchemeEnum.Weekly => 52,
+                SchemeEnum.ManyPerWeek => 52*3,
                 _ => throw new NotImplementedException()
             };
 
@@ -324,6 +328,35 @@ namespace YoFi.SampleGen.Tests
 
             // Note: There are not enough quarters to be certain that the randomness will spread out
             // enough to test that the range is not too narrow.
+        }
+
+        [TestMethod]
+        public void ManyPerWeekSimple()
+        {
+            // Given: Many Per Week Scheme, No Jitter
+            var scheme = SchemeEnum.ManyPerWeek;
+            var amount = 3*5200.00m;
+            var item = new Definition() { Scheme = scheme, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions();
+
+            // Then: There are exactly 52*3 transactions 
+            Assert.AreEqual(52*3, actual.Count());
+
+            // And: The days of week vary
+            Assert.IsTrue(actual.Any(x => x.Timestamp.DayOfWeek != actual.First().Timestamp.DayOfWeek));
+
+            // And: For each transaction...
+            foreach (var result in actual)
+            {
+                // And: The amounts are exactly 1/52/3 what's in the definition
+                Assert.AreEqual(amount / 52 / 3, result.Amount);
+
+                // And: The category and payee match
+                Assert.AreEqual(item.Payee, result.Payee);
+                Assert.AreEqual(item.Category, result.Category);
+            }
         }
 
     }
