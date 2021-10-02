@@ -8,61 +8,14 @@ namespace YoFi.SampleGen.Tests
     [TestClass]
     public class GeneratorTest
     {
-        [TestMethod]
-        public void YearlySimple()
-        {
-            // Given: Yearly Scheme, No Jitter
-            var item = new Definition() { Scheme = SchemeEnum.Yearly, YearlyAmount = 1234.56m, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
-
-            // When: Generating transactions
-            var actual = item.GetTransactions();
-
-            // Then: There is only one transaction (it's yearly)
-            Assert.AreEqual(1, actual.Count());
-
-            // And: The amount is exactly what's in the definition
-            Assert.AreEqual(item.YearlyAmount, actual.Single().Amount);
-
-            // And: The category and payee match
-            Assert.AreEqual(item.Payee, actual.Single().Payee);
-            Assert.AreEqual(item.Category, actual.Single().Category);
-        }
-
-        [DataRow(JitterEnum.Low)]
-        [DataRow(JitterEnum.Moderate)]
-        [DataRow(JitterEnum.High)]
-        [DataTestMethod]
-        public void YearlyAmountJitter(JitterEnum jitter)
-        {
-            // Given: Yearly Scheme, Amount Jitter as supplied
-            var amount = 1234.56m;
-            var item = new Definition() { Scheme = SchemeEnum.Yearly, YearlyAmount = amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
-
-            // When: Generating transactions x100
-            var numtries = 100;
-            var actual = Enumerable.Repeat(1, numtries).SelectMany(x => item.GetTransactions());
-
-            // Then: There is only one transaction per time we called
-            Assert.AreEqual(numtries, actual.Count());
-
-            // And: The amounts vary
-            Assert.IsTrue(actual.Any(x => x.Amount != actual.First().Amount));
-
-            // And: The amounts are within the expected range for the supplied jitter
-            var jittervalue = Definition.AmountJitterValues[jitter];
-            var min = actual.Min(x => x.Amount);
-            var max = actual.Max(x => x.Amount);
-            Assert.AreEqual(((double)amount * (1 - jittervalue)), (double)min, (double)amount * jittervalue / 5.0);
-            Assert.AreEqual(((double)amount * (1 + jittervalue)), (double)max, (double)amount * jittervalue / 5.0);
-        }
-
         private int NumPeriodsFor(SchemeEnum scheme) => scheme switch
         {
+            SchemeEnum.Yearly => 1,
+            SchemeEnum.Quarterly => 4,
             SchemeEnum.Monthly => 12,
             SchemeEnum.SemiMonthly => 24,
-            SchemeEnum.Quarterly => 4,
             SchemeEnum.Weekly => 52,
-            SchemeEnum.ManyPerWeek => 52*3,
+            SchemeEnum.ManyPerWeek => 52 * 3,
             _ => throw new NotImplementedException()
         };
 
@@ -107,32 +60,94 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(actual.All(x => x.Timestamp.Day == actual.First().Timestamp.Day));
         }
 
+
+        [TestMethod]
+        public void YearlySimple()
+        {
+            // Given: Yearly Scheme, No Jitter
+            // When: Generating transactions
+            // Then: Transactions pass all standard tests
+            SimpleTestNoJitten(SchemeEnum.Yearly);
+        }
+
         [TestMethod]
         public void SemiMonthlySimple()
         {
-            // Given: Monthly Scheme, No Jitter
-            var amount = 1200.00m;
-            var item = new Definition() { Scheme = SchemeEnum.SemiMonthly, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
-
+            // Given: SemiMonthly Scheme, No Jitter
             // When: Generating transactions
-            var actual = item.GetTransactions();
-
-            // Then: There are exactly 24 transactions (it's monthly)
-            Assert.AreEqual(24, actual.Count());
+            // Then: Transactions pass all standard tests
+            var actual = SimpleTestNoJitten(SchemeEnum.SemiMonthly);
 
             // And: They are all on the first or 15th
             Assert.IsTrue(actual.All(x => x.Timestamp.Day == 1 || x.Timestamp.Day == 15));
+        }
 
-            // And: For each transaction...
-            foreach (var result in actual)
-            {
-                // And: The amounts are exactly 1/12 what's in the definition
-                Assert.AreEqual(amount / 24, result.Amount);
+        [TestMethod]
+        public void QuarterlySimple()
+        {
+            // Given: Quarterly Scheme, No Jitter
+            // When: Generating transactions for this specific year
+            var year = 2000;
+            Definition.Year = year;
+            // Then: Transactions pass all standard tests
+            var actual = SimpleTestNoJitten(SchemeEnum.Quarterly);
 
-                // And: The category and payee match
-                Assert.AreEqual(item.Payee, result.Payee);
-                Assert.AreEqual(item.Category, result.Category);
-            }
+            // And: They are all on the same day of the quarter
+            var firstdayofquarter = Enumerable.Range(1, 4).Select(x => new DateTime(year, x * 3 - 2, 1));
+            var daysofquarter = actual.Select(x => x.Timestamp.DayOfYear - firstdayofquarter.Last(y => x.Timestamp >= y).DayOfYear);
+            Assert.IsTrue(daysofquarter.All(x => x == daysofquarter.First()));
+        }
+
+        [TestMethod]
+        public void WeeklySimple()
+        {
+            // Given: Weekly Scheme, No Jitter
+            // When: Generating transactions
+            // Then: Transactions pass all standard tests
+            var actual = SimpleTestNoJitten(SchemeEnum.Weekly);
+
+            // And: They are all on the same day of the week
+            Assert.IsTrue(actual.All(x => x.Timestamp.DayOfWeek == actual.First().Timestamp.DayOfWeek));
+        }
+
+        [TestMethod]
+        public void ManyPerWeekSimple()
+        {
+            // Given: Many Per Week Scheme, No Jitter
+            // When: Generating transactions
+            // Then: Transactions pass all standard tests
+            var actual = SimpleTestNoJitten(SchemeEnum.ManyPerWeek);
+
+            // And: The days of week vary
+            Assert.IsTrue(actual.Any(x => x.Timestamp.DayOfWeek != actual.First().Timestamp.DayOfWeek));
+        }
+
+        [DataRow(JitterEnum.Low)]
+        [DataRow(JitterEnum.Moderate)]
+        [DataRow(JitterEnum.High)]
+        [DataTestMethod]
+        public void YearlyAmountJitter(JitterEnum jitter)
+        {
+            // Given: Yearly Scheme, Amount Jitter as supplied
+            var amount = 1234.56m;
+            var item = new Definition() { Scheme = SchemeEnum.Yearly, YearlyAmount = amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions x100
+            var numtries = 100;
+            var actual = Enumerable.Repeat(1, numtries).SelectMany(x => item.GetTransactions());
+
+            // Then: There is only one transaction per time we called
+            Assert.AreEqual(numtries, actual.Count());
+
+            // And: The amounts vary
+            Assert.IsTrue(actual.Any(x => x.Amount != actual.First().Amount));
+
+            // And: The amounts are within the expected range for the supplied jitter
+            var jittervalue = Definition.AmountJitterValues[jitter];
+            var min = actual.Min(x => x.Amount);
+            var max = actual.Max(x => x.Amount);
+            Assert.AreEqual(((double)amount * (1 - jittervalue)), (double)min, (double)amount * jittervalue / 5.0);
+            Assert.AreEqual(((double)amount * (1 + jittervalue)), (double)max, (double)amount * jittervalue / 5.0);
         }
 
         [DataRow(JitterEnum.Low)]
@@ -177,16 +192,8 @@ namespace YoFi.SampleGen.Tests
         [DataTestMethod]
         public void AmountJitterMany(SchemeEnum scheme, JitterEnum jitter)
         {
-            var periods = scheme switch
-            {
-                SchemeEnum.Monthly => 12,
-                SchemeEnum.Quarterly => 4,
-                SchemeEnum.Weekly => 52,
-                SchemeEnum.ManyPerWeek => 52*3,
-                _ => throw new NotImplementedException()
-            };
-
             // Given: Monthly Scheme, Amount Jitter as supplied
+            var periods = NumPeriodsFor(scheme);
             var amount = 100.00m;
             var item = new Definition() { Scheme = scheme, YearlyAmount = periods * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
@@ -237,38 +244,6 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(actualrange <= expectedrange);
         }
 
-        [TestMethod]
-        public void QuarterlySimple()
-        {
-            // Given: Monthly Scheme, No Jitter
-            var amount = 1200.00m;
-            var item = new Definition() { Scheme = SchemeEnum.Quarterly, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
-
-            // When: Generating transactions for this specific year
-            var year = 2000;
-            Definition.Year = year;
-            var actual = item.GetTransactions();
-
-            // Then: There are exactly 4 transactions
-            Assert.AreEqual(4, actual.Count());
-
-            // And: They are all on the same day of the quarter
-            var firstdayofquarter = Enumerable.Range(1, 4).Select(x => new DateTime(year, x * 3 - 2, 1));
-            var daysofquarter = actual.Select(x => x.Timestamp.DayOfYear - firstdayofquarter.Last(y => x.Timestamp >= y).DayOfYear);
-            Assert.IsTrue(daysofquarter.All(x => x == daysofquarter.First()));
-            
-            // And: For each transaction...
-            foreach (var result in actual)
-            {
-                // And: The amounts are exactly 1/4 what's in the definition
-                Assert.AreEqual(amount / 4, result.Amount);
-
-                // And: The category and payee match
-                Assert.AreEqual(item.Payee, result.Payee);
-                Assert.AreEqual(item.Category, result.Category);
-            }
-        }
-
         [DataRow(JitterEnum.Low)]
         [DataRow(JitterEnum.Moderate)]
         [DataRow(JitterEnum.High)]
@@ -307,35 +282,6 @@ namespace YoFi.SampleGen.Tests
 
             // Note: There are not enough quarters to be certain that the randomness will spread out
             // enough to test that the range is not too narrow.
-        }
-
-        [TestMethod]
-        public void WeeklySimple()
-        {
-            // Given: Weekly Scheme, No Jitter
-            var scheme = SchemeEnum.Weekly;
-            var amount = 5200.00m;
-            var item = new Definition() { Scheme = scheme, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
-
-            // When: Generating transactions
-            var actual = item.GetTransactions();
-
-            // Then: There are exactly 52 transactions 
-            Assert.AreEqual(52, actual.Count());
-
-            // And: They are all on the same day pf wek
-            Assert.IsTrue(actual.All(x => x.Timestamp.DayOfWeek == actual.First().Timestamp.DayOfWeek));
-
-            // And: For each transaction...
-            foreach (var result in actual)
-            {
-                // And: The amounts are exactly 1/52 what's in the definition
-                Assert.AreEqual(amount / 52, result.Amount);
-
-                // And: The category and payee match
-                Assert.AreEqual(item.Payee, result.Payee);
-                Assert.AreEqual(item.Category, result.Category);
-            }
         }
 
         //[DataRow(JitterEnum.Low)] // Note that Low Jitter on Weekly doesn't make much sense
@@ -381,35 +327,5 @@ namespace YoFi.SampleGen.Tests
             // Note: There are not enough quarters to be certain that the randomness will spread out
             // enough to test that the range is not too narrow.
         }
-
-        [TestMethod]
-        public void ManyPerWeekSimple()
-        {
-            // Given: Many Per Week Scheme, No Jitter
-            var scheme = SchemeEnum.ManyPerWeek;
-            var amount = 3*5200.00m;
-            var item = new Definition() { Scheme = scheme, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
-
-            // When: Generating transactions
-            var actual = item.GetTransactions();
-
-            // Then: There are exactly 52*3 transactions 
-            Assert.AreEqual(52*3, actual.Count());
-
-            // And: The days of week vary
-            Assert.IsTrue(actual.Any(x => x.Timestamp.DayOfWeek != actual.First().Timestamp.DayOfWeek));
-
-            // And: For each transaction...
-            foreach (var result in actual)
-            {
-                // And: The amounts are exactly 1/52/3 what's in the definition
-                Assert.AreEqual(amount / 52 / 3, result.Amount);
-
-                // And: The category and payee match
-                Assert.AreEqual(item.Payee, result.Payee);
-                Assert.AreEqual(item.Category, result.Category);
-            }
-        }
-
     }
 }
