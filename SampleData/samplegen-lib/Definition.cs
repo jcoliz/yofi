@@ -60,11 +60,11 @@ namespace YoFi.SampleGen
 
         private IEnumerable<Transaction> GenerateYearly()
         {
-            var day = TimeSpan.FromDays(random.Next(0, 364));
+            SetDateWindow();
 
             return new List<Transaction>()
             {
-                new Transaction() { Amount = JitterizeAmount(YearlyAmount), Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + day }
+                new Transaction() { Amount = JitterizeAmount(YearlyAmount), Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + JitterizedDate }
             };
         }
 
