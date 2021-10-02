@@ -23,7 +23,13 @@ namespace YoFi.SampleGen
             if (Scheme == SchemeEnum.ManyPerWeek)
                 DateJitter = JitterEnum.High;
 
-            SetDateWindow();
+            // Randomly choose a window. The Window must be entirely within the Scheme Timespan, but chosen at random.
+            // The size of the window is given by the Date Jitter.
+            if (Scheme != SchemeEnum.SemiMonthly)
+            {
+                DateWindowLength = (DateJitter == JitterEnum.None) ? TimeSpan.FromDays(1) : SchemeTimespans[Scheme] * DateJitterValues[DateJitter];
+                DateWindowStarts = TimeSpan.FromDays(random.Next(0, SchemeTimespans[Scheme].Days - DateWindowLength.Days));
+            }
 
             var splits = insplits ?? new List<Definition> { this };
 
@@ -143,20 +149,8 @@ namespace YoFi.SampleGen
             (AmountJitter == JitterEnum.None) ? amount :
                 (decimal)((double)amount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * AmountJitterValues[AmountJitter]));
 
-        private void SetDateWindow()
-        {
-            // No date windows for semimonthly
-            if (Scheme == SchemeEnum.SemiMonthly)
-                return;
-
-            // Randomly choose a window. The Window must be entirely within the Scheme Timespan, but chosen at random.
-            // The size of the window is given by the Date Jitter.
-
-            DateWindowLength = (DateJitter == JitterEnum.None) ? TimeSpan.FromDays(1) : SchemeTimespans[Scheme] * DateJitterValues[DateJitter];
-            DateWindowStarts = TimeSpan.FromDays(random.Next(0, SchemeTimespans[Scheme].Days - DateWindowLength.Days));
-        }
-
-        private TimeSpan JitterizedDate => DateWindowStarts + ((DateJitter != JitterEnum.None) ? TimeSpan.FromDays(random.Next(0, DateWindowLength.Days)) : TimeSpan.Zero);
+        private TimeSpan JitterizedDate => 
+            DateWindowStarts + ((DateJitter != JitterEnum.None) ? TimeSpan.FromDays(random.Next(0, DateWindowLength.Days)) : TimeSpan.Zero);
     }
 
     public enum SchemeEnum { Invalid = 0, ManyPerWeek, Weekly, SemiMonthly, Monthly, Quarterly, Yearly };
