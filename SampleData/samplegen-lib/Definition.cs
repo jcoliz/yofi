@@ -76,19 +76,23 @@ namespace YoFi.SampleGen
             result.Timestamp = Scheme switch
             {
                 SchemeEnum.Monthly => new DateTime(Year, index, 1) + JitterizedDate,
+                SchemeEnum.Yearly => new DateTime(Year, 1, 1) + JitterizedDate,
+                SchemeEnum.Quarterly => new DateTime(Year, index * 3 - 2, 1) + JitterizedDate,
+                SchemeEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index-1)) + JitterizedDate,
+                SchemeEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index-1)) + JitterizedDate,
                 _ => throw new NotImplementedException()
             };
 
             return result;
         }
 
-        private IEnumerable<Transaction> GenerateYearly() => 
-            new List<Transaction>()
-            {
-                new Transaction() { Amount = JitterizeAmount(YearlyAmount), Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + JitterizedDate }
-            };
+        private IEnumerable<Transaction> GenerateYearly() => Enumerable.Range(1, 1).Select(x => GenerateOneTransaction(x, 1));
 
-        private IEnumerable<Transaction> GenerateMonthly() => Enumerable.Range(1, 12).Select(month => GenerateOneTransaction(month, 12));
+        private IEnumerable<Transaction> GenerateMonthly() => Enumerable.Range(1, 12).Select(x => GenerateOneTransaction(x, 12));
+
+        private IEnumerable<Transaction> GenerateQuarterly() => Enumerable.Range(1, 4).Select(x => GenerateOneTransaction(x, 4));
+
+        private IEnumerable<Transaction> GenerateWeekly() => Enumerable.Range(1, 52).Select(x => GenerateOneTransaction(x, 52));
 
         private IEnumerable<Transaction> GenerateSemiMonthly()
         {
@@ -108,13 +112,8 @@ namespace YoFi.SampleGen
             );
         }
 
-        private IEnumerable<Transaction> GenerateQuarterly() => 
-            Enumerable.Range(0, 4).Select
-            (
-                q => new Transaction() { Amount = JitterizeAmount(YearlyAmount / 4), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, 1+q*3, 1) + JitterizedDate }
-            );
 
-        private IEnumerable<Transaction> GenerateWeekly(decimal amount = 0)
+        private IEnumerable<Transaction> GenerateWeekly(decimal amount)
         {
             if (0 == amount)
                 amount = YearlyAmount / 52;
@@ -129,7 +128,7 @@ namespace YoFi.SampleGen
         {
             int numperweek = 3;
 
-            return Enumerable.Repeat(0, numperweek).SelectMany(x => GenerateWeekly(YearlyAmount/52/numperweek)).OrderBy(x=>x.Timestamp);
+            return Enumerable.Repeat(0, numperweek).SelectMany(x => Enumerable.Range(1, 52).Select(x => GenerateOneTransaction(x, 52*numperweek))).OrderBy(x=>x.Timestamp);
         }
 
         private decimal JitterizeAmount(decimal amount)
