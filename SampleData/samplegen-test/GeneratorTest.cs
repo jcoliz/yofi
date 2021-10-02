@@ -113,12 +113,22 @@ namespace YoFi.SampleGen.Tests
         [DataRow(SchemeEnum.Monthly, JitterEnum.Low)]
         [DataRow(SchemeEnum.Monthly, JitterEnum.Moderate)]
         [DataRow(SchemeEnum.Monthly, JitterEnum.High)]
+        [DataRow(SchemeEnum.Quarterly, JitterEnum.Low)]
+        [DataRow(SchemeEnum.Quarterly, JitterEnum.Moderate)]
+        [DataRow(SchemeEnum.Quarterly, JitterEnum.High)]
         [DataTestMethod]
         public void AmountJitterMany(SchemeEnum scheme, JitterEnum jitter)
         {
+            var periods = scheme switch
+            {
+                SchemeEnum.Monthly => 12,
+                SchemeEnum.Quarterly => 4,
+                _ => throw new NotImplementedException()
+            };
+
             // Given: Monthly Scheme, Amount Jitter as supplied
             var amount = 100.00m;
-            var item = new Definition() { Scheme = scheme, YearlyAmount = 12 * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new Definition() { Scheme = scheme, YearlyAmount = periods * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions x100
             var numtries = 100;
