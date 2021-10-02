@@ -38,28 +38,31 @@ namespace YoFi.SampleGen
         {
             var day = TimeSpan.FromDays(random.Next(0, 364));
 
-            var amount = YearlyAmount;
-            if (AmountJitter != JitterEnum.None)
-            {
-                var amountjittervalue = AmountJitterValues[AmountJitter];
-                amount = (decimal)((double)YearlyAmount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * (double)amountjittervalue));
-            }
-
             return new List<Transaction>()
             {
-                new Transaction() { Amount = amount, Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + day }
+                new Transaction() { Amount = Jitterize(YearlyAmount), Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + day }
             };
         }
 
         private IEnumerable<Transaction> GenerateMonthly()
         {
             var day = TimeSpan.FromDays(random.Next(0, 28));
-            var amount = YearlyAmount / 12;
 
             return Enumerable.Range(1, 12).Select
             (
-                month => new Transaction() { Amount = amount, Category = Category, Payee = Payee, Timestamp = new DateTime(Year, month, 1) + day }
+                month => new Transaction() { Amount = Jitterize(YearlyAmount/12), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, month, 1) + day }
             );
+        }
+
+        private decimal Jitterize(decimal amount)
+        {
+            if (AmountJitter != JitterEnum.None)
+            {
+                var amountjittervalue = AmountJitterValues[AmountJitter];
+                amount = (decimal)((double)amount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * (double)amountjittervalue));
+            }
+
+            return amount;
         }
     }
 
