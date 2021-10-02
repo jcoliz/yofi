@@ -8,6 +8,7 @@ namespace YoFi.SampleGen.Tests
     [TestClass]
     public class GeneratorTest
     {
+        #region Helpers
         private int NumPeriodsFor(SchemeEnum scheme) => scheme switch
         {
             SchemeEnum.Yearly => 1,
@@ -19,13 +20,13 @@ namespace YoFi.SampleGen.Tests
             _ => throw new NotImplementedException()
         };
 
-        private IEnumerable<Transaction> SimpleTestNoJitten(SchemeEnum scheme)
+        private IEnumerable<Transaction> SimpleTest(SchemeEnum scheme, JitterEnum datejitter = JitterEnum.None)
         {
             // Given: Scheme as supplied, No Jitter
             var periods = NumPeriodsFor(scheme);
             var periodicamount = 100m;
             var amount = periodicamount * periods;
-            var item = new Definition() { Scheme = scheme, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new Definition() { Scheme = scheme, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = datejitter, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
@@ -47,6 +48,9 @@ namespace YoFi.SampleGen.Tests
             // And: Return to the test for more processing
             return actual;
         }
+        #endregion
+
+        #region No Jitter
 
         [TestMethod]
         public void MonthlySimple()
@@ -54,7 +58,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Monthly Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTestNoJitten(SchemeEnum.Monthly);
+            var actual = SimpleTest(SchemeEnum.Monthly);
 
             // And: They are all on the same day
             Assert.IsTrue(actual.All(x => x.Timestamp.Day == actual.First().Timestamp.Day));
@@ -67,7 +71,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Yearly Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            SimpleTestNoJitten(SchemeEnum.Yearly);
+            SimpleTest(SchemeEnum.Yearly);
         }
 
         [TestMethod]
@@ -76,7 +80,7 @@ namespace YoFi.SampleGen.Tests
             // Given: SemiMonthly Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTestNoJitten(SchemeEnum.SemiMonthly);
+            var actual = SimpleTest(SchemeEnum.SemiMonthly);
 
             // And: They are all on the first or 15th
             Assert.IsTrue(actual.All(x => x.Timestamp.Day == 1 || x.Timestamp.Day == 15));
@@ -90,7 +94,7 @@ namespace YoFi.SampleGen.Tests
             var year = 2000;
             Definition.Year = year;
             // Then: Transactions pass all standard tests
-            var actual = SimpleTestNoJitten(SchemeEnum.Quarterly);
+            var actual = SimpleTest(SchemeEnum.Quarterly);
 
             // And: They are all on the same day of the quarter
             var firstdayofquarter = Enumerable.Range(1, 4).Select(x => new DateTime(year, x * 3 - 2, 1));
@@ -104,7 +108,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Weekly Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTestNoJitten(SchemeEnum.Weekly);
+            var actual = SimpleTest(SchemeEnum.Weekly);
 
             // And: They are all on the same day of the week
             Assert.IsTrue(actual.All(x => x.Timestamp.DayOfWeek == actual.First().Timestamp.DayOfWeek));
@@ -116,11 +120,14 @@ namespace YoFi.SampleGen.Tests
             // Given: Many Per Week Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTestNoJitten(SchemeEnum.ManyPerWeek);
+            var actual = SimpleTest(SchemeEnum.ManyPerWeek);
 
             // And: The days of week vary
             Assert.IsTrue(actual.Any(x => x.Timestamp.DayOfWeek != actual.First().Timestamp.DayOfWeek));
         }
+        #endregion
+
+        #region Amount Jitter
 
         [DataRow(JitterEnum.Low)]
         [DataRow(JitterEnum.Moderate)]
@@ -212,6 +219,9 @@ namespace YoFi.SampleGen.Tests
             Assert.AreEqual(((double)amount * (1 + jittervalue)), (double)max, (double)amount * (double)jittervalue / 5.0);
         }
 
+        #endregion 
+
+        #region Date Jitter
 
         [DataRow(JitterEnum.Low)]
         [DataRow(JitterEnum.Moderate)]
@@ -220,17 +230,10 @@ namespace YoFi.SampleGen.Tests
         public void MonthlyDateJitterOnce(JitterEnum jitter)
         {
             // Given: Monthly Scheme, Date Jitter as supplied
-            var amount = 100.00m;
-            var item = new Definition() { Scheme = SchemeEnum.Monthly, YearlyAmount = 12 * amount, AmountJitter = JitterEnum.None, DateJitter = jitter, Category = "Category", Payee = "Payee" };
-
             // When: Generating transactions
-            var actual = item.GetTransactions();
-
-            // Then: There are exactly 12 transactions (it's monthly)
-            Assert.AreEqual(12, actual.Count());
-
-            // And: The amounts are the same
-            Assert.IsTrue(actual.All(x => x.Amount == actual.First().Amount));
+            // Then: Transactions pass all standard tests
+            var scheme = SchemeEnum.Monthly;
+            var actual = SimpleTest(scheme, datejitter:jitter);
 
             // And: The dates vary
             Assert.IsTrue(actual.Any(x => x.Timestamp.Day != actual.First().Timestamp.Day));
@@ -240,7 +243,7 @@ namespace YoFi.SampleGen.Tests
             var min = actual.Min(x => x.Timestamp.Day);
             var max = actual.Max(x => x.Timestamp.Day);
             var actualrange = max - min;
-            var expectedrange = Definition.SchemeTimespans[item.Scheme].Days * (double)jittervalue;
+            var expectedrange = Definition.SchemeTimespans[scheme].Days * (double)jittervalue;
             Assert.IsTrue(actualrange <= expectedrange);
         }
 
@@ -327,5 +330,6 @@ namespace YoFi.SampleGen.Tests
             // Note: There are not enough quarters to be certain that the randomness will spread out
             // enough to test that the range is not too narrow.
         }
+        #endregion 
     }
 }
