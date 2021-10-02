@@ -84,30 +84,25 @@ namespace YoFi.SampleGen
         private TimeSpan DateWindowStarts;
         private TimeSpan DateWindowLength;
 
-        private Transaction GenerateOneTransaction(int index, int numperiods, IEnumerable<Definition> splits)
-        {
-            var result = new Transaction() 
+        private Transaction GenerateOneTransaction(int index, int numperiods, IEnumerable<Definition> splits) =>
+            new Transaction() 
             { 
                 Payee = Payee,
                 Splits = splits.Select(s => new CategoryAmount()
                 {
                     Category = s.Category,
                     Amount = s.JitterizeAmount(s.YearlyAmount / numperiods)
-                }).ToList()
+                }).ToList(),
+                Timestamp = Scheme switch
+                {
+                    SchemeEnum.Monthly => new DateTime(Year, index, 1),
+                    SchemeEnum.Yearly => new DateTime(Year, 1, 1),
+                    SchemeEnum.Quarterly => new DateTime(Year, index * 3 - 2, 1),
+                    SchemeEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index-1)),
+                    SchemeEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index-1)),
+                    _ => throw new NotImplementedException()
+                } + JitterizedDate
             };
-
-            result.Timestamp = Scheme switch
-            {
-                SchemeEnum.Monthly => new DateTime(Year, index, 1) + JitterizedDate,
-                SchemeEnum.Yearly => new DateTime(Year, 1, 1) + JitterizedDate,
-                SchemeEnum.Quarterly => new DateTime(Year, index * 3 - 2, 1) + JitterizedDate,
-                SchemeEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index-1)) + JitterizedDate,
-                SchemeEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index-1)) + JitterizedDate,
-                _ => throw new NotImplementedException()
-            };
-
-            return result;
-        }
 
         private IEnumerable<Transaction> GenerateTypical(IEnumerable<Definition> splits)
         {
