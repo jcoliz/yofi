@@ -110,22 +110,19 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(max <= amount * (1 + (decimal)jittervalue));
         }
 
-        [DataRow(JitterEnum.Low)]
-        [DataRow(JitterEnum.Moderate)]
-        [DataRow(JitterEnum.High)]
+        [DataRow(SchemeEnum.Monthly, JitterEnum.Low)]
+        [DataRow(SchemeEnum.Monthly, JitterEnum.Moderate)]
+        [DataRow(SchemeEnum.Monthly, JitterEnum.High)]
         [DataTestMethod]
-        public void MonthlyAmountJitterMany(JitterEnum jitter)
+        public void AmountJitterMany(SchemeEnum scheme, JitterEnum jitter)
         {
             // Given: Monthly Scheme, Amount Jitter as supplied
             var amount = 100.00m;
-            var item = new Definition() { Scheme = SchemeEnum.Monthly, YearlyAmount = 12 * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new Definition() { Scheme = scheme, YearlyAmount = 12 * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions x100
             var numtries = 100;
             var actual = Enumerable.Repeat(1, numtries).SelectMany(x => item.GetTransactions());
-
-            // Then: There are 12 transactions per time we called
-            Assert.AreEqual(numtries * 12, actual.Count());
 
             // And: The amounts vary
             Assert.IsTrue(actual.Any(x => x.Amount != actual.First().Amount));
