@@ -179,7 +179,6 @@ namespace YoFi.SampleGen.Tests
             var actualrange = max - min;
             var expectedrange = Definition.SchemeTimespans[item.Scheme].Days * (double)jittervalue;
             Assert.IsTrue(actualrange <= expectedrange);
-            Assert.IsTrue(actualrange > expectedrange / 2);
         }
 
         [TestMethod]
@@ -282,5 +281,50 @@ namespace YoFi.SampleGen.Tests
                 Assert.AreEqual(item.Category, result.Category);
             }
         }
+
+        //[DataRow(JitterEnum.Low)] // Note that Low Jitter on Weekly doesn't make much sense
+        [DataRow(JitterEnum.Moderate)]
+        [DataRow(JitterEnum.High)]
+        [DataTestMethod]
+        public void WeeklyDateJitterOnce(JitterEnum jitter)
+        {
+            // Given: Weekly Scheme, Date Jitter as supplied
+            var amount = 100.00m;
+            var scheme = SchemeEnum.Weekly;
+            var periods = 52;
+            var item = new Definition() { Scheme = scheme, YearlyAmount = periods * amount, AmountJitter = JitterEnum.None, DateJitter = jitter, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions for this specific year
+            var year = 2000;
+            Definition.Year = year;
+            var actual = item.GetTransactions();
+
+            // Then: There are the correct number of transactions
+            Assert.AreEqual(periods, actual.Count());
+
+            // And: The amounts are the same
+            Assert.IsTrue(actual.All(x => x.Amount == actual.First().Amount));
+
+            // And: The days of week vary
+            Assert.IsTrue(actual.Any(x => x.Timestamp.DayOfWeek != actual.First().Timestamp.DayOfWeek));
+
+            // And: The day of week ranges are within the expected range for the supplied jitter
+
+            // Note that I can't use DayOfWeek, because there are cases where the week wraps around
+            var firstdayofweek = Enumerable.Range(0, 52).Select(x => new DateTime(year, 1, 1) + TimeSpan.FromDays(7*x));
+            var daysofweek = actual.Select(x => x.Timestamp.DayOfYear - firstdayofweek.Last(y => x.Timestamp >= y).DayOfYear);
+            var min = daysofweek.Min();
+            var max = daysofweek.Max();
+            var actualrange = max - min;
+
+            var jittervalue = Definition.DateJitterValues[jitter];
+            var expectedrange = Definition.SchemeTimespans[item.Scheme].Days * (double)jittervalue;
+
+            Assert.IsTrue(actualrange <= expectedrange);
+
+            // Note: There are not enough quarters to be certain that the randomness will spread out
+            // enough to test that the range is not too narrow.
+        }
+
     }
 }
