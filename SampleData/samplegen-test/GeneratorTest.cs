@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace YoFi.SampleGen.Tests
@@ -55,32 +56,55 @@ namespace YoFi.SampleGen.Tests
             Assert.AreEqual(((double)amount * (1 + jittervalue)), (double)max, (double)amount * jittervalue / 5.0);
         }
 
-        [TestMethod]
-        public void MonthlySimple()
+        private int NumPeriodsFor(SchemeEnum scheme) => scheme switch
         {
-            // Given: Monthly Scheme, No Jitter
-            var amount = 1200.00m;
-            var item = new Definition() { Scheme = SchemeEnum.Monthly, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            SchemeEnum.Monthly => 12,
+            SchemeEnum.SemiMonthly => 24,
+            SchemeEnum.Quarterly => 4,
+            SchemeEnum.Weekly => 52,
+            SchemeEnum.ManyPerWeek => 52*3,
+            _ => throw new NotImplementedException()
+        };
+
+        private IEnumerable<Transaction> SimpleTestNoJitten(SchemeEnum scheme)
+        {
+            // Given: Scheme as supplied, No Jitter
+            var periods = NumPeriodsFor(scheme);
+            var periodicamount = 100m;
+            var amount = periodicamount * periods;
+            var item = new Definition() { Scheme = scheme, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
 
-            // Then: There are exactly 12 transactions (it's monthly)
-            Assert.AreEqual(12, actual.Count());
-
-            // And: They are all on the same day
-            Assert.IsTrue(actual.All(x => x.Timestamp.Day == actual.First().Timestamp.Day));
+            // Then: There are the right amount of transactions
+            Assert.AreEqual(periods, actual.Count());
 
             // And: For each transaction...
             foreach (var result in actual)
             {
-                // And: The amounts are exactly 1/12 what's in the definition
-                Assert.AreEqual(amount / 12, result.Amount);
+                // And: The amounts are exactly as expected
+                Assert.AreEqual(periodicamount, result.Amount);
 
                 // And: The category and payee match
                 Assert.AreEqual(item.Payee, result.Payee);
                 Assert.AreEqual(item.Category, result.Category);
             }
+
+            // And: Return to the test for more processing
+            return actual;
+        }
+
+        [TestMethod]
+        public void MonthlySimple()
+        {
+            // Given: Monthly Scheme, No Jitter
+            // When: Generating transactions
+            // Then: Transactions pass all standard tests
+            var actual = SimpleTestNoJitten(SchemeEnum.Monthly);
+
+            // And: They are all on the same day
+            Assert.IsTrue(actual.All(x => x.Timestamp.Day == actual.First().Timestamp.Day));
         }
 
         [TestMethod]
