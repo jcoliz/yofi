@@ -26,13 +26,30 @@ namespace YoFi.SampleGen
 
         private static Random random = new Random();
 
-        public static Dictionary<JitterEnum, decimal> AmountJitterValues = new Dictionary<JitterEnum, decimal>()
+        public static Dictionary<JitterEnum, double> AmountJitterValues = new Dictionary<JitterEnum, double>()
         {
             { JitterEnum.None, 0 },
-            { JitterEnum.Low, 0.1m },
-            { JitterEnum.Moderate, 0.4m },
-            { JitterEnum.High, 0.9m }
+            { JitterEnum.Low, 0.1 },
+            { JitterEnum.Moderate, 0.4 },
+            { JitterEnum.High, 0.9 }
         };
+
+        public static Dictionary<JitterEnum, double> DateJitterValues = new Dictionary<JitterEnum, double>()
+        {
+            { JitterEnum.None, 0 },
+            { JitterEnum.Low, 0.25 },
+            { JitterEnum.Moderate, 0.4 },
+            { JitterEnum.High, 1.0 }
+        };
+
+        public static Dictionary<SchemeEnum, TimeSpan> SchemeTimespans = new Dictionary<SchemeEnum, TimeSpan>()
+        {
+            { SchemeEnum.Monthly, TimeSpan.FromDays(28) },
+            { SchemeEnum.Yearly, TimeSpan.FromDays(365) },
+        };
+
+        private TimeSpan DateWindowStarts;
+        private TimeSpan DateWindowLength;
 
         private IEnumerable<Transaction> GenerateYearly()
         {
@@ -40,30 +57,46 @@ namespace YoFi.SampleGen
 
             return new List<Transaction>()
             {
-                new Transaction() { Amount = Jitterize(YearlyAmount), Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + day }
+                new Transaction() { Amount = JitterizeAmount(YearlyAmount), Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + day }
             };
         }
 
         private IEnumerable<Transaction> GenerateMonthly()
         {
-            var day = TimeSpan.FromDays(random.Next(0, 28));
+            SetDateWindow();
 
             return Enumerable.Range(1, 12).Select
             (
-                month => new Transaction() { Amount = Jitterize(YearlyAmount/12), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, month, 1) + day }
+                month => new Transaction() { Amount = JitterizeAmount(YearlyAmount/12), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, month, 1) + JitterizedDate }
             );
         }
 
-        private decimal Jitterize(decimal amount)
+        private decimal JitterizeAmount(decimal amount)
         {
             if (AmountJitter != JitterEnum.None)
             {
                 var amountjittervalue = AmountJitterValues[AmountJitter];
-                amount = (decimal)((double)amount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * (double)amountjittervalue));
+                amount = (decimal)((double)amount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * amountjittervalue));
             }
 
             return amount;
         }
+
+        private void SetDateWindow()
+        {
+            // Randomly choose a window. The Window must be entirely within the Scheme Timespan, but chosen at random.
+            // The size of the window is given by the Date Jitter.
+
+            DateWindowLength = TimeSpan.FromDays(1);
+            if (DateJitter != JitterEnum.None)
+            {
+                DateWindowLength = SchemeTimespans[Scheme] * DateJitterValues[DateJitter];
+            }
+            DateWindowStarts = TimeSpan.FromDays(random.Next(0, SchemeTimespans[Scheme].Days - DateWindowLength.Days));
+        }
+
+        private TimeSpan JitterizedDate => DateWindowStarts + ((DateJitter != JitterEnum.None) ? TimeSpan.FromDays(random.Next(0, DateWindowLength.Days)) : TimeSpan.Zero);
+
     }
 
     public enum SchemeEnum { Invalid = 0, Monthly, Yearly };

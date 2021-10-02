@@ -51,8 +51,8 @@ namespace YoFi.SampleGen.Tests
             var jittervalue = Definition.AmountJitterValues[jitter];
             var min = actual.Min(x => x.Amount);
             var max = actual.Max(x => x.Amount);
-            Assert.AreEqual((double)(amount * (1 - jittervalue)), (double)min, (double)amount * (double)jittervalue / 5.0);
-            Assert.AreEqual((double)(amount * (1 + jittervalue)), (double)max, (double)amount * (double)jittervalue / 5.0);
+            Assert.AreEqual(((double)amount * (1 - jittervalue)), (double)min, (double)amount * jittervalue / 5.0);
+            Assert.AreEqual(((double)amount * (1 + jittervalue)), (double)max, (double)amount * jittervalue / 5.0);
         }
 
         [TestMethod]
@@ -106,8 +106,8 @@ namespace YoFi.SampleGen.Tests
             var jittervalue = Definition.AmountJitterValues[jitter];
             var min = actual.Min(x => x.Amount);
             var max = actual.Max(x => x.Amount);
-            Assert.IsTrue(min >= amount * (1 - jittervalue));
-            Assert.IsTrue(max <= amount * (1 + jittervalue));
+            Assert.IsTrue(min >= amount * (1 - (decimal)jittervalue));
+            Assert.IsTrue(max <= amount * (1 + (decimal)jittervalue));
         }
 
         [DataRow(JitterEnum.Low)]
@@ -134,9 +134,41 @@ namespace YoFi.SampleGen.Tests
             var jittervalue = Definition.AmountJitterValues[jitter];
             var min = actual.Min(x => x.Amount);
             var max = actual.Max(x => x.Amount);
-            Assert.AreEqual((double)(amount * (1 - jittervalue)), (double)min, (double)amount * (double)jittervalue / 5.0);
-            Assert.AreEqual((double)(amount * (1 + jittervalue)), (double)max, (double)amount * (double)jittervalue / 5.0);
+            Assert.AreEqual(((double)amount * (1 - jittervalue)), (double)min, (double)amount * (double)jittervalue / 5.0);
+            Assert.AreEqual(((double)amount * (1 + jittervalue)), (double)max, (double)amount * (double)jittervalue / 5.0);
         }
 
+
+        [DataRow(JitterEnum.Low)]
+        //[DataRow(JitterEnum.Moderate)]
+        //[DataRow(JitterEnum.High)]
+        [DataTestMethod]
+        public void MonthlyDateJitterOnce(JitterEnum jitter)
+        {
+            // Given: Monthly Scheme, Date Jitter as supplied
+            var amount = 100.00m;
+            var item = new Definition() { Scheme = SchemeEnum.Monthly, YearlyAmount = 12 * amount, AmountJitter = JitterEnum.None, DateJitter = jitter, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions();
+
+            // Then: There are exactly 12 transactions (it's monthly)
+            Assert.AreEqual(12, actual.Count());
+
+            // And: The amounts are the same
+            Assert.IsTrue(actual.All(x => x.Amount == actual.First().Amount));
+
+            // And: The dates vary
+            Assert.IsTrue(actual.Any(x => x.Timestamp.Day != actual.First().Timestamp.Day));
+
+            // And: The amounts are within the expected range for the supplied jitter
+            var jittervalue = Definition.DateJitterValues[jitter];
+            var min = actual.Min(x => x.Timestamp.Day);
+            var max = actual.Max(x => x.Timestamp.Day);
+            var actualrange = max - min;
+            var expectedrange = Definition.SchemeTimespans[item.Scheme].Days * (double)jittervalue;
+            Assert.IsTrue(actualrange <= expectedrange);
+            Assert.IsTrue(actualrange > expectedrange / 2);
+        }
     }
 }
