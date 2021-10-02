@@ -140,8 +140,8 @@ namespace YoFi.SampleGen.Tests
 
 
         [DataRow(JitterEnum.Low)]
-        //[DataRow(JitterEnum.Moderate)]
-        //[DataRow(JitterEnum.High)]
+        [DataRow(JitterEnum.Moderate)]
+        [DataRow(JitterEnum.High)]
         [DataTestMethod]
         public void MonthlyDateJitterOnce(JitterEnum jitter)
         {
