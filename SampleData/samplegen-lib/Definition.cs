@@ -19,6 +19,7 @@ namespace YoFi.SampleGen
             SchemeEnum.Invalid => throw new ApplicationException("Invalid scheme"),
             SchemeEnum.Yearly => GenerateYearly(),
             SchemeEnum.Monthly => GenerateMonthly(),
+            SchemeEnum.SemiMonthly => GenerateSemiMonthly(),
             SchemeEnum.Quarterly => GenerateQuarterly(),
             SchemeEnum.Weekly => GenerateWeekly(),
             SchemeEnum.ManyPerWeek => GenerateManyPerWeek(),
@@ -74,6 +75,24 @@ namespace YoFi.SampleGen
             return Enumerable.Range(1, 12).Select
             (
                 month => new Transaction() { Amount = JitterizeAmount(YearlyAmount/12), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, month, 1) + JitterizedDate }
+            );
+        }
+
+        private IEnumerable<Transaction> GenerateSemiMonthly()
+        {
+            if (DateJitter != JitterEnum.None && DateJitter != JitterEnum.Invalid)
+                throw new NotImplementedException("SemiMonthly with date jitter is not implemented");
+
+            var days = new int[] { 1, 15 };
+
+            return Enumerable.Range(1, 12).SelectMany
+            (
+                month => 
+                days.Select
+                ( 
+                    day =>                
+                    new Transaction() { Amount = JitterizeAmount(YearlyAmount / 24), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, month, day) }
+                )
             );
         }
 
@@ -140,6 +159,6 @@ namespace YoFi.SampleGen
 
     }
 
-    public enum SchemeEnum { Invalid = 0, ManyPerWeek, Weekly, Monthly, Quarterly, Yearly };
+    public enum SchemeEnum { Invalid = 0, ManyPerWeek, Weekly, SemiMonthly, Monthly, Quarterly, Yearly };
     public enum JitterEnum { Invalid = 0, None, Low, Moderate, High };
 }

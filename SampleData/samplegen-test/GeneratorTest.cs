@@ -83,6 +83,34 @@ namespace YoFi.SampleGen.Tests
             }
         }
 
+        [TestMethod]
+        public void SemiMonthlySimple()
+        {
+            // Given: Monthly Scheme, No Jitter
+            var amount = 1200.00m;
+            var item = new Definition() { Scheme = SchemeEnum.SemiMonthly, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions();
+
+            // Then: There are exactly 24 transactions (it's monthly)
+            Assert.AreEqual(24, actual.Count());
+
+            // And: They are all on the first or 15th
+            Assert.IsTrue(actual.All(x => x.Timestamp.Day == 1 || x.Timestamp.Day == 15));
+
+            // And: For each transaction...
+            foreach (var result in actual)
+            {
+                // And: The amounts are exactly 1/12 what's in the definition
+                Assert.AreEqual(amount / 24, result.Amount);
+
+                // And: The category and payee match
+                Assert.AreEqual(item.Payee, result.Payee);
+                Assert.AreEqual(item.Category, result.Category);
+            }
+        }
+
         [DataRow(JitterEnum.Low)]
         [DataRow(JitterEnum.Moderate)]
         [DataRow(JitterEnum.High)]
