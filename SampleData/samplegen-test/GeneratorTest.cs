@@ -116,6 +116,9 @@ namespace YoFi.SampleGen.Tests
         [DataRow(SchemeEnum.Quarterly, JitterEnum.Low)]
         [DataRow(SchemeEnum.Quarterly, JitterEnum.Moderate)]
         [DataRow(SchemeEnum.Quarterly, JitterEnum.High)]
+        [DataRow(SchemeEnum.Weekly, JitterEnum.Low)]
+        [DataRow(SchemeEnum.Weekly, JitterEnum.Moderate)]
+        [DataRow(SchemeEnum.Weekly, JitterEnum.High)]
         [DataTestMethod]
         public void AmountJitterMany(SchemeEnum scheme, JitterEnum jitter)
         {
@@ -123,6 +126,7 @@ namespace YoFi.SampleGen.Tests
             {
                 SchemeEnum.Monthly => 12,
                 SchemeEnum.Quarterly => 4,
+                SchemeEnum.Weekly => 52,
                 _ => throw new NotImplementedException()
             };
 
