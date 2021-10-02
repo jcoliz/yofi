@@ -127,7 +127,11 @@ namespace YoFi.SampleGen
                     { 
                         Payee = Payee, 
                         Timestamp = new DateTime(Year, month, day),
-                        Splits = splits.Select(s=>new CategoryAmount() { Category = s.Category, Amount = s.JitterizeAmount(s.YearlyAmount/24) }).ToList()
+                        Splits = splits.Select(s=>new CategoryAmount() 
+                        { 
+                            Category = s.Category, 
+                            Amount = s.JitterizeAmount(s.YearlyAmount/24) 
+                        }).ToList()
                     }
                 )
             );

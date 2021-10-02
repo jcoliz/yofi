@@ -32,6 +32,8 @@ namespace YoFi.SampleGen
             }
         }
 
+        public decimal TotalAmount => Splits.Sum(x => x.Amount);
+
         public List<CategoryAmount> Splits = new List<CategoryAmount>() { new CategoryAmount() };
     }
 

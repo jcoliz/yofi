@@ -303,6 +303,59 @@ namespace YoFi.SampleGen.Tests
             // Note: There are not enough quarters to be certain that the randomness will spread out
             // enough to test that the range is not too narrow.
         }
-        #endregion 
+        #endregion
+
+        #region Splits
+        [TestMethod]
+        public void SemiMonthlySplits()
+        {
+            // Given: SemiMonthly Scheme
+            var scheme = SchemeEnum.SemiMonthly;
+            var periods = NumPeriodsFor(scheme);
+            var periodicamount = 100m;
+            var amount = periodicamount * periods;
+            var item = new Definition() { Scheme = scheme, DateJitter = JitterEnum.None, Payee = "Payee" };
+
+            // And: A set of "split" category/amount items
+            var splits = new List<Definition>()
+            {
+                new Definition() { Category = "1", YearlyAmount = periodicamount * periods * -1, AmountJitter = JitterEnum.None },
+                new Definition() { Category = "2", YearlyAmount = periodicamount * periods * -2, AmountJitter = JitterEnum.None },
+                new Definition() { Category = "3", YearlyAmount = periodicamount * periods * -3, AmountJitter = JitterEnum.None },
+                new Definition() { Category = "4", YearlyAmount = periodicamount * periods * 10, AmountJitter = JitterEnum.None },
+            };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions(splits);
+
+            // Then: There are the right amount of transactions
+            Assert.AreEqual(periods, actual.Count());
+
+            // And: They are all on the first or 15th
+            Assert.IsTrue(actual.All(x => x.Timestamp.Day == 1 || x.Timestamp.Day == 15));
+
+            // And: For each transaction...
+            foreach (var result in actual)
+            {
+                // And: The amounts are exactly as expected
+                Assert.AreEqual(periodicamount * 4, result.TotalAmount);
+
+                // And: The payee matches
+                Assert.AreEqual(item.Payee, result.Payee);
+
+                // And: For each split...
+                int i = splits.Count();
+                while(i-- > 0)
+                {
+                    // And: The category matches
+                    Assert.AreEqual(splits[i].Category, result.Splits[i].Category);
+
+                    // And: The amounts are exactly as expected
+                    Assert.AreEqual(splits[i].YearlyAmount / periods, result.Splits[i].Amount);
+                }
+            }
+        }
+
+        #endregion
     }
 }
