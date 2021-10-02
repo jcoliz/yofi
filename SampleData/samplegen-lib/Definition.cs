@@ -17,38 +17,7 @@ namespace YoFi.SampleGen
 
         public string Group { get; set; }
 
-        public IEnumerable<Transaction> GetTransactions(IEnumerable<Definition> insplits = null)
-        {
-            // Many Per Week overrides the date jitter to high
-            if (Scheme == SchemeEnum.ManyPerWeek)
-                DateJitter = JitterEnum.High;
-
-            // Randomly choose a window. The Window must be entirely within the Scheme Timespan, but chosen at random.
-            // The size of the window is given by the Date Jitter.
-            if (Scheme != SchemeEnum.SemiMonthly)
-            {
-                DateWindowLength = (DateJitter == JitterEnum.None) ? TimeSpan.FromDays(1) : SchemeTimespans[Scheme] * DateJitterValues[DateJitter];
-                DateWindowStarts = TimeSpan.FromDays(random.Next(0, SchemeTimespans[Scheme].Days - DateWindowLength.Days));
-            }
-
-            var splits = insplits ?? new List<Definition> { this };
-
-            return Scheme switch
-            {
-                SchemeEnum.Invalid => throw new ApplicationException("Invalid scheme"),
-                SchemeEnum.Yearly => GenerateTypical(splits),
-                SchemeEnum.Monthly => GenerateTypical(splits),
-                SchemeEnum.Quarterly => GenerateTypical(splits),
-                SchemeEnum.Weekly => GenerateTypical(splits),
-                SchemeEnum.SemiMonthly => GenerateSemiMonthly(splits),
-                SchemeEnum.ManyPerWeek => GenerateManyPerWeek(splits),
-                _ => throw new NotImplementedException()
-            };
-        }
-        
         public static int Year { get; set; } = DateTime.Now.Year;
-
-        private static Random random = new Random();
 
         public const int HowManyPerWeek = 3;
 
@@ -87,28 +56,38 @@ namespace YoFi.SampleGen
             { SchemeEnum.Yearly, 1 },
         };
 
+        public IEnumerable<Transaction> GetTransactions(IEnumerable<Definition> insplits = null)
+        {
+            // Many Per Week overrides the date jitter to high
+            if (Scheme == SchemeEnum.ManyPerWeek)
+                DateJitter = JitterEnum.High;
+
+            // Randomly choose a window. The Window must be entirely within the Scheme Timespan, but chosen at random.
+            // The size of the window is given by the Date Jitter.
+            if (Scheme != SchemeEnum.SemiMonthly)
+            {
+                DateWindowLength = (DateJitter == JitterEnum.None) ? TimeSpan.FromDays(1) : SchemeTimespans[Scheme] * DateJitterValues[DateJitter];
+                DateWindowStarts = TimeSpan.FromDays(random.Next(0, SchemeTimespans[Scheme].Days - DateWindowLength.Days));
+            }
+
+            var splits = insplits ?? new List<Definition> { this };
+
+            return Scheme switch
+            {
+                SchemeEnum.Invalid => throw new ApplicationException("Invalid scheme"),
+                SchemeEnum.Yearly => GenerateTypical(splits),
+                SchemeEnum.Monthly => GenerateTypical(splits),
+                SchemeEnum.Quarterly => GenerateTypical(splits),
+                SchemeEnum.Weekly => GenerateTypical(splits),
+                SchemeEnum.SemiMonthly => GenerateSemiMonthly(splits),
+                SchemeEnum.ManyPerWeek => GenerateManyPerWeek(splits),
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        private static Random random = new Random();
         private TimeSpan DateWindowStarts;
         private TimeSpan DateWindowLength;
-
-        private Transaction GenerateOneTransaction(int index, IEnumerable<Definition> splits) =>
-            new Transaction() 
-            { 
-                Payee = Payee,
-                Splits = splits.Select(s => new CategoryAmount()
-                {
-                    Category = s.Category,
-                    Amount = s.JitterizeAmount(s.YearlyAmount / SchemeNumPeriods[Scheme])
-                }).ToList(),
-                Timestamp = Scheme switch
-                {
-                    SchemeEnum.Monthly => new DateTime(Year, index, 1),
-                    SchemeEnum.Yearly => new DateTime(Year, 1, 1),
-                    SchemeEnum.Quarterly => new DateTime(Year, index * 3 - 2, 1),
-                    SchemeEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index-1)),
-                    SchemeEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index-1)),
-                    _ => throw new NotImplementedException()
-                } + JitterizedDate
-            };
 
         private IEnumerable<Transaction> GenerateTypical(IEnumerable<Definition> splits) =>
             Enumerable.Range(1, SchemeNumPeriods[Scheme]).Select(x => GenerateOneTransaction(x, splits));
@@ -144,6 +123,26 @@ namespace YoFi.SampleGen
                 )
             );
         }
+
+        private Transaction GenerateOneTransaction(int index, IEnumerable<Definition> splits) =>
+            new Transaction()
+            {
+                Payee = Payee,
+                Splits = splits.Select(s => new CategoryAmount()
+                {
+                    Category = s.Category,
+                    Amount = s.JitterizeAmount(s.YearlyAmount / SchemeNumPeriods[Scheme])
+                }).ToList(),
+                Timestamp = Scheme switch
+                {
+                    SchemeEnum.Monthly => new DateTime(Year, index, 1),
+                    SchemeEnum.Yearly => new DateTime(Year, 1, 1),
+                    SchemeEnum.Quarterly => new DateTime(Year, index * 3 - 2, 1),
+                    SchemeEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index - 1)),
+                    SchemeEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index - 1)),
+                    _ => throw new NotImplementedException()
+                } + JitterizedDate
+            };
 
         private decimal JitterizeAmount(decimal amount) =>
             (AmountJitter == JitterEnum.None) ? amount :
