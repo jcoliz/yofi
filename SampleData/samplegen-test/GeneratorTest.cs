@@ -170,5 +170,37 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(actualrange <= expectedrange);
             Assert.IsTrue(actualrange > expectedrange / 2);
         }
+
+        [TestMethod]
+        public void QuarterlySimple()
+        {
+            // Given: Monthly Scheme, No Jitter
+            var amount = 1200.00m;
+            var item = new Definition() { Scheme = SchemeEnum.Quarterly, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions for this specific year
+            var year = 2000;
+            Definition.Year = year;
+            var actual = item.GetTransactions();
+
+            // Then: There are exactly 4 transactions
+            Assert.AreEqual(4, actual.Count());
+
+            // And: They are all on the same day of the quarter
+            var firstdayofquarter = Enumerable.Range(1, 4).Select(x => new DateTime(year, x * 3 - 2, 1));
+            var daysofquarter = actual.Select(x => x.Timestamp.DayOfYear - firstdayofquarter.Last(y => x.Timestamp >= y).DayOfYear);
+            Assert.IsTrue(daysofquarter.All(x => x == daysofquarter.First()));
+            
+            // And: For each transaction...
+            foreach (var result in actual)
+            {
+                // And: The amounts are exactly 1/4 what's in the definition
+                Assert.AreEqual(amount / 4, result.Amount);
+
+                // And: The category and payee match
+                Assert.AreEqual(item.Payee, result.Payee);
+                Assert.AreEqual(item.Category, result.Category);
+            }
+        }
     }
 }
