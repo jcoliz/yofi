@@ -20,6 +20,10 @@ namespace YoFi.SampleGen.Tests
 
             // And: The amount is exactly what's in the definition
             Assert.AreEqual(item.YearlyAmount, actual.Single().Amount);
+
+            // And: The category and payee match
+            Assert.AreEqual(item.Payee, actual.Single().Payee);
+            Assert.AreEqual(item.Category, actual.Single().Category);
         }
     }
 }
