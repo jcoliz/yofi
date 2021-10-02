@@ -168,7 +168,7 @@ namespace YoFi.SampleGen.Tests
             // And: The dates vary
             Assert.IsTrue(actual.Any(x => x.Timestamp.Day != actual.First().Timestamp.Day));
 
-            // And: The amounts are within the expected range for the supplied jitter
+            // And: The date ranges are within the expected range for the supplied jitter
             var jittervalue = Definition.DateJitterValues[jitter];
             var min = actual.Min(x => x.Timestamp.Day);
             var max = actual.Max(x => x.Timestamp.Day);
@@ -208,6 +208,46 @@ namespace YoFi.SampleGen.Tests
                 Assert.AreEqual(item.Payee, result.Payee);
                 Assert.AreEqual(item.Category, result.Category);
             }
+        }
+
+        [DataRow(JitterEnum.Low)]
+        [DataRow(JitterEnum.Moderate)]
+        [DataRow(JitterEnum.High)]
+        [DataTestMethod]
+        public void QuarterlyDateJitterOnce(JitterEnum jitter)
+        {
+            // Given: Quarterly Scheme, Date Jitter as supplied
+            var amount = 100.00m;
+            var scheme = SchemeEnum.Quarterly;
+            var periods = 4;
+            var item = new Definition() { Scheme = scheme, YearlyAmount = periods * amount, AmountJitter = JitterEnum.None, DateJitter = jitter, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions for this specific year
+            var year = 2000;
+            Definition.Year = year;
+            var actual = item.GetTransactions();
+
+            // Then: There are the correct number of transactions
+            Assert.AreEqual(periods, actual.Count());
+
+            // And: The amounts are the same
+            Assert.IsTrue(actual.All(x => x.Amount == actual.First().Amount));
+
+            // And: The days within quarter vary
+            var firstdayofquarter = Enumerable.Range(1, 4).Select(x => new DateTime(year, x * 3 - 2, 1));
+            var daysofquarter = actual.Select(x => x.Timestamp.DayOfYear - firstdayofquarter.Last(y => x.Timestamp >= y).DayOfYear);
+            Assert.IsTrue(daysofquarter.Any(x => x != daysofquarter.First()));
+
+            // And: The date ranges are within the expected range for the supplied jitter
+            var jittervalue = Definition.DateJitterValues[jitter];
+            var min = daysofquarter.Min();
+            var max = daysofquarter.Max();
+            var actualrange = max - min;
+            var expectedrange = Definition.SchemeTimespans[item.Scheme].Days * (double)jittervalue;
+            Assert.IsTrue(actualrange <= expectedrange);
+
+            // Note: There are not enough quarters to be certain that the randomness will spread out
+            // enough to test that the range is not too narrow.
         }
     }
 }
