@@ -51,8 +51,37 @@ namespace YoFi.SampleGen.Tests
             var jittervalue = Definition.AmountJitterValues[jitter];
             var min = actual.Min(x => x.Amount);
             var max = actual.Max(x => x.Amount);
-            Assert.AreEqual((double)(amount * (1 - jittervalue)),(double)min, (double)amount * (double)jittervalue / 5.0);
+            Assert.AreEqual((double)(amount * (1 - jittervalue)), (double)min, (double)amount * (double)jittervalue / 5.0);
             Assert.AreEqual((double)(amount * (1 + jittervalue)), (double)max, (double)amount * (double)jittervalue / 5.0);
         }
+
+        [TestMethod]
+        public void MonthlySimple()
+        {
+            // Given: Monthly Scheme, No Jitter
+            var amount = 1200.00m;
+            var item = new Definition() { Scheme = SchemeEnum.Monthly, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions();
+
+            // Then: There are exactly 12 transactions (it's monthly)
+            Assert.AreEqual(12, actual.Count());
+
+            // And: They are all on the same day
+            Assert.IsTrue(actual.All(x => x.Timestamp.Day == actual.First().Timestamp.Day));
+
+            // And: For each transaction...
+            foreach (var result in actual)
+            {
+                // And: The amounts are exactly 1/12 what's in the definition
+                Assert.AreEqual(amount / 12, result.Amount);
+
+                // And: The category and payee match
+                Assert.AreEqual(item.Payee, result.Payee);
+                Assert.AreEqual(item.Category, result.Category);
+            }
+        }
+
     }
 }

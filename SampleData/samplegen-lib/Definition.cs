@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace YoFi.SampleGen
@@ -17,6 +18,7 @@ namespace YoFi.SampleGen
         {
             SchemeEnum.Invalid => throw new ApplicationException("Invalid scheme"),
             SchemeEnum.Yearly => GenerateYearly(),
+            SchemeEnum.Monthly => GenerateMonthly(),
             _ => throw new NotImplementedException()
         };
 
@@ -47,6 +49,17 @@ namespace YoFi.SampleGen
             {
                 new Transaction() { Amount = amount, Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + day }
             };
+        }
+
+        private IEnumerable<Transaction> GenerateMonthly()
+        {
+            var day = TimeSpan.FromDays(random.Next(0, 28));
+            var amount = YearlyAmount / 12;
+
+            return Enumerable.Range(1, 12).Select
+            (
+                month => new Transaction() { Amount = amount, Category = Category, Payee = Payee, Timestamp = new DateTime(Year, month, 1) + day }
+            );
         }
     }
 
