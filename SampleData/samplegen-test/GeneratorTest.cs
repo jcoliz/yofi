@@ -249,5 +249,34 @@ namespace YoFi.SampleGen.Tests
             // Note: There are not enough quarters to be certain that the randomness will spread out
             // enough to test that the range is not too narrow.
         }
+
+        [TestMethod]
+        public void WeeklySimple()
+        {
+            // Given: Weekly Scheme, No Jitter
+            var scheme = SchemeEnum.Weekly;
+            var amount = 5200.00m;
+            var item = new Definition() { Scheme = scheme, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions();
+
+            // Then: There are exactly 52 transactions 
+            Assert.AreEqual(52, actual.Count());
+
+            // And: They are all on the same day pf wek
+            Assert.IsTrue(actual.All(x => x.Timestamp.DayOfWeek == actual.First().Timestamp.DayOfWeek));
+
+            // And: For each transaction...
+            foreach (var result in actual)
+            {
+                // And: The amounts are exactly 1/52 what's in the definition
+                Assert.AreEqual(amount / 52, result.Amount);
+
+                // And: The category and payee match
+                Assert.AreEqual(item.Payee, result.Payee);
+                Assert.AreEqual(item.Category, result.Category);
+            }
+        }
     }
 }

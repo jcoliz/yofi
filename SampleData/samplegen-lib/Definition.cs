@@ -20,6 +20,7 @@ namespace YoFi.SampleGen
             SchemeEnum.Yearly => GenerateYearly(),
             SchemeEnum.Monthly => GenerateMonthly(),
             SchemeEnum.Quarterly => GenerateQuarterly(),
+            SchemeEnum.Weekly => GenerateWeekly(),
             _ => throw new NotImplementedException()
         };
 
@@ -45,6 +46,7 @@ namespace YoFi.SampleGen
 
         public static Dictionary<SchemeEnum, TimeSpan> SchemeTimespans = new Dictionary<SchemeEnum, TimeSpan>()
         {
+            { SchemeEnum.Weekly, TimeSpan.FromDays(7) },
             { SchemeEnum.Monthly, TimeSpan.FromDays(28) },
             { SchemeEnum.Quarterly, TimeSpan.FromDays(90) },
             { SchemeEnum.Yearly, TimeSpan.FromDays(365) },
@@ -83,6 +85,16 @@ namespace YoFi.SampleGen
             );
         }
 
+        private IEnumerable<Transaction> GenerateWeekly()
+        {
+            SetDateWindow();
+
+            return Enumerable.Range(0, 52).Select
+            (
+                week => new Transaction() { Amount = JitterizeAmount(YearlyAmount / 52), Category = Category, Payee = Payee, Timestamp = new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * week) + JitterizedDate }
+            );
+        }
+
         private decimal JitterizeAmount(decimal amount)
         {
             if (AmountJitter != JitterEnum.None)
@@ -111,6 +123,6 @@ namespace YoFi.SampleGen
 
     }
 
-    public enum SchemeEnum { Invalid = 0, Monthly, Quarterly, Yearly };
+    public enum SchemeEnum { Invalid = 0, Weekly, Monthly, Quarterly, Yearly };
     public enum JitterEnum { Invalid = 0, None, Low, Moderate, High };
 }
