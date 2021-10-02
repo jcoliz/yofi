@@ -9,16 +9,7 @@ namespace YoFi.SampleGen.Tests
     public class GeneratorTest
     {
         #region Helpers
-        private int NumPeriodsFor(SchemeEnum scheme) => scheme switch
-        {
-            SchemeEnum.Yearly => 1,
-            SchemeEnum.Quarterly => 4,
-            SchemeEnum.Monthly => 12,
-            SchemeEnum.SemiMonthly => 24,
-            SchemeEnum.Weekly => 52,
-            SchemeEnum.ManyPerWeek => 52 * 3,
-            _ => throw new NotImplementedException()
-        };
+        private int NumPeriodsFor(SchemeEnum scheme) => Definition.SchemeNumPeriods[scheme];
 
         private IEnumerable<Transaction> SimpleTest(SchemeEnum scheme, JitterEnum datejitter = JitterEnum.None)
         {
