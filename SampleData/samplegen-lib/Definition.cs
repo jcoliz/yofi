@@ -24,12 +24,28 @@ namespace YoFi.SampleGen
 
         private static Random random = new Random();
 
+        public static Dictionary<JitterEnum, decimal> AmountJitterValues = new Dictionary<JitterEnum, decimal>()
+        {
+            { JitterEnum.None, 0 },
+            { JitterEnum.Low, 0.1m },
+            { JitterEnum.Moderate, 0.4m },
+            { JitterEnum.High, 0.9m }
+        };
+
         private IEnumerable<Transaction> GenerateYearly()
         {
             var day = TimeSpan.FromDays(random.Next(0, 364));
+
+            var amount = YearlyAmount;
+            if (AmountJitter != JitterEnum.None)
+            {
+                var amountjittervalue = AmountJitterValues[AmountJitter];
+                amount = (decimal)((double)YearlyAmount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * (double)amountjittervalue));
+            }
+
             return new List<Transaction>()
             {
-                new Transaction() { Amount = YearlyAmount, Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + day }
+                new Transaction() { Amount = amount, Category = Category, Payee = Payee, Timestamp = new DateTime(Year,1,1) + day }
             };
         }
     }
