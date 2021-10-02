@@ -9,29 +9,9 @@ namespace YoFi.SampleGen
     {
         public string Payee { get; set; }
         public DateTime Timestamp { get; set; }
-        public string Category 
-        { 
-            get
-            {
-                return Splits.First().Category;
-            }
-            set
-            {
-                Splits.First().Category = value;
-            }
-        }
-        public decimal Amount
-        {
-            get
-            {
-                return Splits.First().Amount;
-            }
-            set
-            {
-                Splits.First().Amount = value;
-            }
-        }
 
+        public string Category => Splits.First().Category;
+        public decimal Amount => Splits.First().Amount;
         public decimal TotalAmount => Splits.Sum(x => x.Amount);
 
         public List<CategoryAmount> Splits = new List<CategoryAmount>() { new CategoryAmount() };

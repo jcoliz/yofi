@@ -306,11 +306,16 @@ namespace YoFi.SampleGen.Tests
         #endregion
 
         #region Splits
-        [TestMethod]
-        public void SemiMonthlySplits()
+
+        [DataRow(SchemeEnum.SemiMonthly)]
+        [DataRow(SchemeEnum.Monthly)]
+        [DataRow(SchemeEnum.Quarterly)]
+        [DataRow(SchemeEnum.Weekly)]
+        [DataRow(SchemeEnum.Yearly)]
+        [DataTestMethod]
+        public void Splits(SchemeEnum scheme)
         {
             // Given: SemiMonthly Scheme
-            var scheme = SchemeEnum.SemiMonthly;
             var periods = NumPeriodsFor(scheme);
             var periodicamount = 100m;
             var amount = periodicamount * periods;
@@ -331,14 +336,11 @@ namespace YoFi.SampleGen.Tests
             // Then: There are the right amount of transactions
             Assert.AreEqual(periods, actual.Count());
 
-            // And: They are all on the first or 15th
-            Assert.IsTrue(actual.All(x => x.Timestamp.Day == 1 || x.Timestamp.Day == 15));
-
             // And: For each transaction...
             foreach (var result in actual)
             {
                 // And: The amounts are exactly as expected
-                Assert.AreEqual(periodicamount * 4, result.TotalAmount);
+                Assert.AreEqual(periodicamount * (10 - 3 - 2 - 1), result.TotalAmount);
 
                 // And: The payee matches
                 Assert.AreEqual(item.Payee, result.Payee);
@@ -355,7 +357,6 @@ namespace YoFi.SampleGen.Tests
                 }
             }
         }
-
         #endregion
     }
 }

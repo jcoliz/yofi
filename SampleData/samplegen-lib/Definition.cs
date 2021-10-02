@@ -17,7 +17,7 @@ namespace YoFi.SampleGen
 
         public string Group { get; set; }
 
-        public IEnumerable<Transaction> GetTransactions(IEnumerable<Definition> splits = null)
+        public IEnumerable<Transaction> GetTransactions(IEnumerable<Definition> insplits = null)
         {
             // Many Per Week overrides the date jitter to high
             if (Scheme == SchemeEnum.ManyPerWeek)
@@ -25,15 +25,17 @@ namespace YoFi.SampleGen
 
             SetDateWindow();
 
+            var splits = insplits ?? new List<Definition> { this };
+
             return Scheme switch
             {
                 SchemeEnum.Invalid => throw new ApplicationException("Invalid scheme"),
-                SchemeEnum.Yearly => GenerateTypical(),
-                SchemeEnum.Monthly => GenerateTypical(),
-                SchemeEnum.Quarterly => GenerateTypical(),
-                SchemeEnum.Weekly => GenerateTypical(),
-                SchemeEnum.SemiMonthly => GenerateSemiMonthly(splits ?? new List<Definition> { this }),
-                SchemeEnum.ManyPerWeek => GenerateManyPerWeek(),
+                SchemeEnum.Yearly => GenerateTypical(splits),
+                SchemeEnum.Monthly => GenerateTypical(splits),
+                SchemeEnum.Quarterly => GenerateTypical(splits),
+                SchemeEnum.Weekly => GenerateTypical(splits),
+                SchemeEnum.SemiMonthly => GenerateSemiMonthly(splits),
+                SchemeEnum.ManyPerWeek => GenerateManyPerWeek(splits),
                 _ => throw new NotImplementedException()
             };
         }
@@ -82,9 +84,17 @@ namespace YoFi.SampleGen
         private TimeSpan DateWindowStarts;
         private TimeSpan DateWindowLength;
 
-        private Transaction GenerateOneTransaction(int index, int numperiods)
+        private Transaction GenerateOneTransaction(int index, int numperiods, IEnumerable<Definition> splits)
         {
-            var result = new Transaction() { Amount = JitterizeAmount(YearlyAmount / numperiods), Category = Category, Payee = Payee };
+            var result = new Transaction() 
+            { 
+                Payee = Payee,
+                Splits = splits.Select(s => new CategoryAmount()
+                {
+                    Category = s.Category,
+                    Amount = s.JitterizeAmount(s.YearlyAmount / numperiods)
+                }).ToList()
+            };
 
             result.Timestamp = Scheme switch
             {
@@ -99,14 +109,14 @@ namespace YoFi.SampleGen
             return result;
         }
 
-        private IEnumerable<Transaction> GenerateTypical()
+        private IEnumerable<Transaction> GenerateTypical(IEnumerable<Definition> splits)
         {
             var periods = SchemeNumPeriods[Scheme];
-            return Enumerable.Range(1, periods).Select(x => GenerateOneTransaction(x, periods));
+            return Enumerable.Range(1, periods).Select(x => GenerateOneTransaction(x, periods, splits));
         }
 
-        private IEnumerable<Transaction> GenerateManyPerWeek() =>
-            Enumerable.Repeat(0, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, 52).Select(x => GenerateOneTransaction(x, 52 * HowManyPerWeek))).OrderBy(x => x.Timestamp);
+        private IEnumerable<Transaction> GenerateManyPerWeek(IEnumerable<Definition> splits) =>
+            Enumerable.Repeat(0, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, 52).Select(x => GenerateOneTransaction(x, 52 * HowManyPerWeek, splits))).OrderBy(x => x.Timestamp);
 
         private IEnumerable<Transaction> GenerateSemiMonthly(IEnumerable<Definition> splits)
         {
