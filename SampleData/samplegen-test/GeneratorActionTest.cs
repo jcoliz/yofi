@@ -27,5 +27,22 @@ namespace YoFi.SampleGen.Tests
             Assert.AreEqual(6, generator.Definitions.Count(x => x.Scheme == SchemeEnum.Quarterly));
             Assert.AreEqual(2, generator.Definitions.Count(x => x.AmountJitter == JitterEnum.Moderate));
         }
+
+        [TestMethod]
+        public void Generator()
+        {
+            // Given: An existing file of defitions
+            var stream = TestData.Open("TestData1.xlsx");
+
+            // When: Loading them
+            var generator = new SampleDataGenerator();
+            generator.LoadDefinitions(stream);
+
+            // And: Generating transactions
+            generator.GenerateTransactions();
+
+            // Then: They are all generated
+            Assert.AreEqual(435, generator.Transactions.Count);
+        }
     }
 }

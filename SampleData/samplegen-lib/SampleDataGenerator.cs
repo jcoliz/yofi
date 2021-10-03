@@ -25,9 +25,9 @@ namespace YoFi.SampleGen
             var groupings = Definitions.ToLookup(x => x.Group);
 
             // Handle the solos
-            if (groupings.Contains(string.Empty))
+            if (groupings.Contains(null))
             {
-                Transactions.AddRange(groupings[string.Empty].SelectMany(x => x.GetTransactions()));
+                Transactions.AddRange(groupings[null].SelectMany(x => x.GetTransactions()));
             }
 
             foreach(var group in groupings.Where(x => !string.IsNullOrEmpty(x.Key)))
@@ -42,6 +42,8 @@ namespace YoFi.SampleGen
 
                 Transactions.AddRange(main.Single().GetTransactions(group));
             }
+
+            Transactions.Sort((x, y) => x.Timestamp.CompareTo(y.Timestamp));
         }
 
         /// <summary>
