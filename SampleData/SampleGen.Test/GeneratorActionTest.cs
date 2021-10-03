@@ -63,7 +63,7 @@ namespace YoFi.SampleGen.Tests
             generator.GeneratePayees();
 
             // Then: They are all generated
-            Assert.AreEqual(19, generator.Payees.Count);
+            Assert.AreEqual(21, generator.Payees.Count);
         }
 
         [TestMethod]
@@ -183,7 +183,7 @@ namespace YoFi.SampleGen.Tests
             var actual = reader.Read<Payee>().ToList();
 
             // Then: The file contains all the transactions
-            Assert.AreEqual(19, actual.Count);
+            Assert.AreEqual(21, actual.Count);
         }
 
         [TestMethod]
