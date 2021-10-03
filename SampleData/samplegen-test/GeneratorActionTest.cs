@@ -63,14 +63,12 @@ namespace YoFi.SampleGen.Tests
             using var stream = new MemoryStream();
             generator.Save(stream);
 
-            {
-                stream.Seek(0, SeekOrigin.Begin);
-                var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
-                File.Delete(filename);
-                using var outstream = File.OpenWrite(filename);
-                stream.CopyTo(outstream);
-                TestContext.AddResultFile(filename);
-            }
+            stream.Seek(0, SeekOrigin.Begin);
+            var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
 
             // And: Reading it back to a list
             stream.Seek(0, SeekOrigin.Begin);
@@ -93,14 +91,12 @@ namespace YoFi.SampleGen.Tests
             using var stream = new MemoryStream();
             generator.Save(stream);
 
-            {
-                stream.Seek(0, SeekOrigin.Begin);
-                var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
-                File.Delete(filename);
-                using var outstream = File.OpenWrite(filename);
-                stream.CopyTo(outstream);
-                TestContext.AddResultFile(filename);
-            }
+            stream.Seek(0, SeekOrigin.Begin);
+            var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
 
             // And: Reading it back to a list
             stream.Seek(0, SeekOrigin.Begin);
