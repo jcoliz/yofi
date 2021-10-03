@@ -52,7 +52,9 @@ namespace YoFi.SampleGen
         /// <param name="stream"></param>
         public void Save(Stream stream)
         {
-            throw new NotImplementedException();
+            using var ssr = new OpenXmlSpreadsheetWriter();
+            ssr.Open(stream);
+            ssr.Write(Transactions);
         }
 
         public List<Definition> Definitions { get; } = new List<Definition>();

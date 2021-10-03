@@ -1,7 +1,9 @@
 ﻿using Common.NET.Test;
+using jcoliz.OfficeOpenXml.Easy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -10,6 +12,16 @@ namespace YoFi.SampleGen.Tests
     [TestClass]
     public class GeneratorActionTest
     {
+        public TestContext TestContext { get; set; }
+
+        SampleDataGenerator generator;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            generator = new SampleDataGenerator();
+        }
+
         [TestMethod]
         public void Loader()
         {
@@ -17,7 +29,6 @@ namespace YoFi.SampleGen.Tests
             var stream = TestData.Open("TestData1.xlsx");
 
             // When: Loading them
-            var generator = new SampleDataGenerator();
             generator.LoadDefinitions(stream);
 
             // Then: They are all loaded
@@ -31,18 +42,43 @@ namespace YoFi.SampleGen.Tests
         [TestMethod]
         public void Generator()
         {
-            // Given: An existing file of defitions
-            var stream = TestData.Open("TestData1.xlsx");
+            // Given: An generator with an existing file of defitions already loaded
+            Loader();
 
-            // When: Loading them
-            var generator = new SampleDataGenerator();
-            generator.LoadDefinitions(stream);
-
-            // And: Generating transactions
+            // When: Generating transactions
             generator.GenerateTransactions();
 
             // Then: They are all generated
             Assert.AreEqual(435, generator.Transactions.Count);
+        }
+
+        [TestMethod]
+        public void Writer()
+        {
+            // Given: An generator with an existing file of defitions already loaded and generated
+            Generator();
+
+            // When: Writing them to an output file
+            using var stream = new MemoryStream();
+            generator.Save(stream);
+
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+                File.Delete(filename);
+                using var outstream = File.OpenWrite(filename);
+                stream.CopyTo(outstream);
+                TestContext.AddResultFile(filename);
+            }
+
+            // And: Reading it back to a list
+            stream.Seek(0, SeekOrigin.Begin);
+            using var reader = new OpenXmlSpreadsheetReader();
+            reader.Open(stream);
+            var actual = reader.Read<Transaction>().ToList();
+
+            // Then: The file contains all the transactions
+            Assert.AreEqual(435, actual.Count);
         }
     }
 }
