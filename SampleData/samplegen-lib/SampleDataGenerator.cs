@@ -55,6 +55,7 @@ namespace YoFi.SampleGen
             using var ssr = new OpenXmlSpreadsheetWriter();
             ssr.Open(stream);
             ssr.Write(Transactions);
+            ssr.Write(Transactions.Where(x=>x.HasMultipleSplits).SelectMany(x => x.Splits));
         }
 
         public List<Definition> Definitions { get; } = new List<Definition>();

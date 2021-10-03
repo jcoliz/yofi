@@ -82,5 +82,34 @@ namespace YoFi.SampleGen.Tests
             Assert.AreEqual(435, actual.Count);
             Assert.AreEqual(24, actual.Count(x => x.Payee == "Big Megacorp"));
         }
+
+        [TestMethod]
+        public void Splits()
+        {
+            // Given: An generator with an existing file of defitions already loaded and generated
+            Generator();
+
+            // When: Writing them to an output file
+            using var stream = new MemoryStream();
+            generator.Save(stream);
+
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+                File.Delete(filename);
+                using var outstream = File.OpenWrite(filename);
+                stream.CopyTo(outstream);
+                TestContext.AddResultFile(filename);
+            }
+
+            // And: Reading it back to a list
+            stream.Seek(0, SeekOrigin.Begin);
+            using var reader = new OpenXmlSpreadsheetReader();
+            reader.Open(stream);
+            var actual = reader.Read<CategoryAmount>().ToList();
+
+            // Then: The file contains all the splits
+            Assert.AreEqual(312, actual.Count);
+        }
     }
 }

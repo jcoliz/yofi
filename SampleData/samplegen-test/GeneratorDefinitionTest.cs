@@ -340,7 +340,7 @@ namespace YoFi.SampleGen.Tests
             foreach (var result in actual)
             {
                 // And: The amounts are exactly as expected
-                Assert.AreEqual(periodicamount * (10 - 3 - 2 - 1), result.TotalAmount);
+                Assert.AreEqual(periodicamount * (10 - 3 - 2 - 1), result.Amount);
 
                 // And: The payee matches
                 Assert.AreEqual(item.Payee, result.Payee);
