@@ -7,10 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestData\FullSampleDataDefinition.xlsx" />
     <None Remove="TestData\TestData1.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="TestData\FullSampleDataDefinition.xlsx" />
     <EmbeddedResource Include="TestData\TestData1.xlsx" />
   </ItemGroup>
 

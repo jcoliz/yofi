@@ -142,5 +142,22 @@ namespace YoFi.SampleGen.Tests
             // Then: They all match
             Assert.AreEqual(36, transactions.Count(x => x.HasMultipleSplits));
         }
+
+        [TestMethod]
+        public void GenerateFullSampleData()
+        {
+            var instream = TestData.Open("FullSampleDataDefinition.xlsx");
+            generator.LoadDefinitions(instream);
+            generator.GenerateTransactions();
+
+            using var stream = new MemoryStream();
+            generator.Save(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
+        }
     }
 }
