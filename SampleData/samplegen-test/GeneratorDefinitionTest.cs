@@ -6,7 +6,7 @@ using System.Linq;
 namespace YoFi.SampleGen.Tests
 {
     [TestClass]
-    public class GeneratorTest
+    public class GeneratorDefinitionTest
     {
         #region Helpers
         private int NumPeriodsFor(SchemeEnum scheme) => Definition.SchemeNumPeriods[scheme];

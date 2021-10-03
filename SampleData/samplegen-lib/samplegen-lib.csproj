@@ -4,4 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\submodules\OfficeOpenXMLEasy\src\OfficeOpenXmlEasy.csproj" />
+  </ItemGroup>
+
 </Project>
