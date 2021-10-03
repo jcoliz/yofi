@@ -102,7 +102,7 @@ namespace YoFi.SampleGen.Tests
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new OpenXmlSpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Read<CategoryAmount>().ToList();
+            var actual = reader.Read<CategoryAmount>("Split").ToList();
 
             // Then: The file contains all the splits
             Assert.AreEqual(312, actual.Count);
@@ -130,7 +130,7 @@ namespace YoFi.SampleGen.Tests
             using var reader = new OpenXmlSpreadsheetReader();
             reader.Open(stream);
             var transactions = reader.Read<Transaction>();
-            var splits = reader.Read<CategoryAmount>();
+            var splits = reader.Read<CategoryAmount>("Split");
 
             // And: Matching the spits up to their transaction
             var lookup = splits.Where(x => x.TransactionID != 0).ToLookup(x => x.TransactionID);
