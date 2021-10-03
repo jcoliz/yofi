@@ -107,5 +107,40 @@ namespace YoFi.SampleGen.Tests
             // Then: The file contains all the splits
             Assert.AreEqual(312, actual.Count);
         }
+
+        [TestMethod]
+        public void SplitsMatch()
+        {
+            // Given: An generator with an existing file of defitions already loaded and generated
+            Generator();
+
+            // When: Writing them to an output file
+            using var stream = new MemoryStream();
+            generator.Save(stream);
+
+            stream.Seek(0, SeekOrigin.Begin);
+            var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
+
+            // And: Reading it back to a lists
+            stream.Seek(0, SeekOrigin.Begin);
+            using var reader = new OpenXmlSpreadsheetReader();
+            reader.Open(stream);
+            var transactions = reader.Read<Transaction>();
+            var splits = reader.Read<CategoryAmount>();
+
+            // And: Matching the spits up to their transaction
+            var lookup = splits.Where(x => x.TransactionID != 0).ToLookup(x => x.TransactionID);
+            foreach(var group in lookup)
+            {
+                transactions.Where(x => x.ID == group.Key).Single().Splits = group.ToList();
+            }
+
+            // Then: They all match
+            Assert.AreEqual(36, transactions.Count(x => x.HasMultipleSplits));
+        }
     }
 }

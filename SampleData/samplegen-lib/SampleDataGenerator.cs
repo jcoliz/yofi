@@ -24,12 +24,14 @@ namespace YoFi.SampleGen
         {
             var groupings = Definitions.ToLookup(x => x.Group);
 
-            // Handle the solos
+            // Generate the solos
             if (groupings.Contains(null))
             {
                 Transactions.AddRange(groupings[null].SelectMany(x => x.GetTransactions()));
             }
 
+            // Generate the groups
+            int nextid = 1;
             foreach(var group in groupings.Where(x => !string.IsNullOrEmpty(x.Key)))
             {
                 var main = group.Where(x => !string.IsNullOrEmpty(x.Payee));
@@ -40,7 +42,18 @@ namespace YoFi.SampleGen
                 if (main.Skip(1).Any())
                     throw new ApplicationException($"Group {group.Key} has multiple definitions with a payee. Expecting only one");
 
-                Transactions.AddRange(main.Single().GetTransactions(group));
+                var txs = main.Single().GetTransactions(group).ToList();
+                
+                // Add ID matchers so we can later get the tranactions and splits matched up
+                foreach(var tx in txs)
+                {
+                    var id = nextid++;
+                    tx.ID = id;
+                    foreach (var split in tx.Splits)
+                        split.TransactionID = id;
+                }
+
+                Transactions.AddRange(txs);
             }
 
             Transactions.Sort((x, y) => x.Timestamp.CompareTo(y.Timestamp));

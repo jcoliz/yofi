@@ -7,6 +7,7 @@ namespace YoFi.SampleGen
 {
     public class Transaction
     {
+        public int ID { get; set; }
         public string Payee { get; set; }
         public DateTime Timestamp { get; set; }
 
@@ -21,5 +22,6 @@ namespace YoFi.SampleGen
     {
         public string Category { get; set; }
         public decimal Amount { get; set; }
+        public int TransactionID { get; set; }
     }
 }
