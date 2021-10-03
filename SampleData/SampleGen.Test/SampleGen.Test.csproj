@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\samplegen-lib\samplegen-lib.csproj" />
+    <ProjectReference Include="..\SampleGen.Lib\SampleGen.Lib.csproj" />
   </ItemGroup>
 
 </Project>

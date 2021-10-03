@@ -18,13 +18,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OfficeOpenXmlEasy", "submodules\OfficeOpenXMLEasy\src\OfficeOpenXmlEasy.csproj", "{2A22D22B-0C79-4FEF-9BA8-D4699EF86483}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samplegen", "samplegen", "{8928D20E-A24B-4146-BAE1-7B40DE02588A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleGen", "SampleGen", "{8928D20E-A24B-4146-BAE1-7B40DE02588A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "samplegen-lib", "SampleData\samplegen-lib\samplegen-lib.csproj", "{FFFFB9D1-1834-4718-A6E0-E0A4B89512BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "samplegen-lib", "SampleData\SampleGen.Lib\SampleGen.Lib.csproj", "{FFFFB9D1-1834-4718-A6E0-E0A4B89512BF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "samplegen-exe", "SampleData\samplegen-exe\samplegen-exe.csproj", "{602EA084-D1DB-49D6-8497-6B55C35A65BE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "samplegen-test", "SampleData\samplegen-test\samplegen-test.csproj", "{A4314596-1FF6-4E73-88A9-B5B2F23B3F50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "samplegen-test", "SampleData\SampleGen.Test\SampleGen.Test.csproj", "{A4314596-1FF6-4E73-88A9-B5B2F23B3F50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
