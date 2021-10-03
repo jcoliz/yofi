@@ -41,6 +41,28 @@ namespace YoFi.SampleGen.Tests
         }
         #endregion
 
+        #region Invididual features
+
+        [TestMethod]
+        public void MultiplePayees()
+        {
+            // Given: Weekly definition with multiple payee options
+            var payees = new List<string>() { "First", "Second", "Third" };
+            var item = new Definition() { Scheme = SchemeEnum.Weekly, YearlyAmount = 5200m, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = string.Join(",",payees) };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions();
+
+            // Then: The Payees are different
+            Assert.IsTrue(actual.Any(x => x.Payee != actual.First().Payee));
+
+            // And: All the payees are one of the expected payees
+            Assert.IsTrue(actual.All(x => payees.Contains(x.Payee)));
+        }
+
+        #endregion
+
+
         #region No Jitter
 
         [TestMethod]

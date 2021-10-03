@@ -70,6 +70,8 @@ namespace YoFi.SampleGen
                 DateWindowStarts = TimeSpan.FromDays(random.Next(0, SchemeTimespans[Scheme].Days - DateWindowLength.Days));
             }
 
+            Payees = Payee.Split(",").ToList();
+
             var splits = insplits ?? new List<Definition> { this };
 
             return Scheme switch
@@ -112,7 +114,7 @@ namespace YoFi.SampleGen
                     day =>                
                     new Transaction() 
                     { 
-                        Payee = Payee, 
+                        Payee = JitterizedPayee, 
                         Timestamp = new DateTime(Year, month, day),
                         Splits = splits.Select(s=>new CategoryAmount() 
                         { 
@@ -127,7 +129,7 @@ namespace YoFi.SampleGen
         private Transaction GenerateOneTransaction(int index, IEnumerable<Definition> splits) =>
             new Transaction()
             {
-                Payee = Payee,
+                Payee = JitterizedPayee,
                 Splits = splits.Select(s => new CategoryAmount()
                 {
                     Category = s.Category,
@@ -144,12 +146,16 @@ namespace YoFi.SampleGen
                 } + JitterizedDate
             };
 
+        private List<string> Payees;
+
         private decimal JitterizeAmount(decimal amount) =>
             (AmountJitter == JitterEnum.None) ? amount :
                 (decimal)((double)amount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * AmountJitterValues[AmountJitter]));
 
         private TimeSpan JitterizedDate => 
             DateWindowStarts + ((DateJitter != JitterEnum.None) ? TimeSpan.FromDays(random.Next(0, DateWindowLength.Days)) : TimeSpan.Zero);
+
+        private string JitterizedPayee => Payees[random.Next(0, Payees.Count)];
     }
 
     public enum SchemeEnum { Invalid = 0, ManyPerWeek, Weekly, SemiMonthly, Monthly, Quarterly, Yearly };
