@@ -54,6 +54,19 @@ namespace YoFi.SampleGen.Tests
         }
 
         [TestMethod]
+        public void PayeeGenerator()
+        {
+            // Given: An generator with an existing file of defitions already loaded
+            Loader();
+
+            // When: Generating payees
+            generator.GeneratePayees();
+
+            // Then: They are all generated
+            Assert.AreEqual(19, generator.Payees.Count);
+        }
+
+        [TestMethod]
         public void Writer()
         {
             // Given: An generator with an existing file of defitions already loaded and generated
@@ -142,6 +155,37 @@ namespace YoFi.SampleGen.Tests
             // Then: They all match
             Assert.AreEqual(36, transactions.Count(x => x.HasMultipleSplits));
         }
+
+        [TestMethod]
+        public void PayeeWriter()
+        {
+            // Given: An generator with an existing file of defitions already loaded and generated
+            Generator();
+
+            // When: Generating payees
+            generator.GeneratePayees();
+
+            // And: Writing them to an output file
+            using var stream = new MemoryStream();
+            generator.Save(stream);
+
+            stream.Seek(0, SeekOrigin.Begin);
+            var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
+
+            // And: Reading it back to a list of Payees
+            stream.Seek(0, SeekOrigin.Begin);
+            using var reader = new OpenXmlSpreadsheetReader();
+            reader.Open(stream);
+            var actual = reader.Read<Payee>().ToList();
+
+            // Then: The file contains all the transactions
+            Assert.AreEqual(19, actual.Count);
+        }
+
 
         [TestMethod]
         public void GenerateFullSampleData()

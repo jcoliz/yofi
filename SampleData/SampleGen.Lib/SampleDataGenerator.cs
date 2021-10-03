@@ -59,6 +59,11 @@ namespace YoFi.SampleGen
             Transactions.Sort((x, y) => x.Timestamp.CompareTo(y.Timestamp));
         }
 
+        public void GeneratePayees()
+        {
+            Payees = Definitions.Where(x => x.Payee != null).ToLookup(x=>x.Payee).Select(x=>new Payee() { Name = x.Key, Category = x.First().Category }).ToList();
+        }
+
         /// <summary>
         /// Save all generated data to spreadsheet at <paramref name="stream"/>
         /// </summary>
@@ -69,10 +74,13 @@ namespace YoFi.SampleGen
             ssr.Open(stream);
             ssr.Write(Transactions);
             ssr.Write(Transactions.Where(x=>x.HasMultipleSplits).SelectMany(x => x.Splits),"Split");
+            ssr.Write(Payees);
         }
 
         public List<Definition> Definitions { get; } = new List<Definition>();
 
         public List<Transaction> Transactions { get; } = new List<Transaction>();
+
+        public List<Payee> Payees { get; private set; } = new List<Payee>();
     }
 }
