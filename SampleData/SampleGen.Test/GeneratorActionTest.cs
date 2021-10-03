@@ -186,6 +186,35 @@ namespace YoFi.SampleGen.Tests
             Assert.AreEqual(19, actual.Count);
         }
 
+        [TestMethod]
+        public void BudgetWriter()
+        {
+            // Given: An generator with an existing file of defitions already loaded and generated
+            Generator();
+
+            // When: Generating budget
+            generator.GenerateBudget();
+
+            // And: Writing them to an output file
+            using var stream = new MemoryStream();
+            generator.Save(stream);
+
+            stream.Seek(0, SeekOrigin.Begin);
+            var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
+
+            // And: Reading it back to a list of budget line items
+            stream.Seek(0, SeekOrigin.Begin);
+            using var reader = new OpenXmlSpreadsheetReader();
+            reader.Open(stream);
+            var actual = reader.Read<BudgetTx>().ToList();
+
+            // Then: The file contains all the budget line items
+            Assert.AreEqual(32, actual.Count);
+        }
 
         [TestMethod]
         public void GenerateFullSampleData()
@@ -193,6 +222,8 @@ namespace YoFi.SampleGen.Tests
             var instream = TestData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions();
+            generator.GeneratePayees();
+            generator.GenerateBudget();
 
             using var stream = new MemoryStream();
             generator.Save(stream);

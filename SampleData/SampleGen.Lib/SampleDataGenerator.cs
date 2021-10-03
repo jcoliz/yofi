@@ -64,6 +64,15 @@ namespace YoFi.SampleGen
             Payees = Definitions.Where(x => x.Payee != null).ToLookup(x=>x.Payee).Select(x=>new Payee() { Name = x.Key, Category = x.First().Category }).ToList();
         }
 
+        public void GenerateBudget()
+        {
+            BudgetTxs = Definitions
+                            .Where(x => x.Category != null)
+                            .ToLookup(x => x.Category)
+                            .Select(x => new BudgetTx { Category = x.Key, Amount = x.Sum(y => y.YearlyAmount), Timestamp = new DateTime(Definition.Year,1,1) })
+                            .ToList();
+        }
+
         /// <summary>
         /// Save all generated data to spreadsheet at <paramref name="stream"/>
         /// </summary>
@@ -75,6 +84,7 @@ namespace YoFi.SampleGen
             ssr.Write(Transactions);
             ssr.Write(Transactions.Where(x=>x.HasMultipleSplits).SelectMany(x => x.Splits),"Split");
             ssr.Write(Payees);
+            ssr.Write(BudgetTxs);
         }
 
         public List<Definition> Definitions { get; } = new List<Definition>();
@@ -82,5 +92,7 @@ namespace YoFi.SampleGen
         public List<Transaction> Transactions { get; } = new List<Transaction>();
 
         public List<Payee> Payees { get; private set; } = new List<Payee>();
+
+        public List<BudgetTx> BudgetTxs { get; private set; } = new List<BudgetTx>();
     }
 }
