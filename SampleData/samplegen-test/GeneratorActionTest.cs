@@ -50,6 +50,7 @@ namespace YoFi.SampleGen.Tests
 
             // Then: They are all generated
             Assert.AreEqual(435, generator.Transactions.Count);
+            Assert.AreEqual(24, generator.Transactions.Count(x => x.Payee == "Big Megacorp"));
         }
 
         [TestMethod]
@@ -79,6 +80,7 @@ namespace YoFi.SampleGen.Tests
 
             // Then: The file contains all the transactions
             Assert.AreEqual(435, actual.Count);
+            Assert.AreEqual(24, actual.Count(x => x.Payee == "Big Megacorp"));
         }
     }
 }
