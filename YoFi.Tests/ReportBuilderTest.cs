@@ -167,8 +167,8 @@ namespace YoFi.Tests
             var expected = Transactions1000.Sum(x => x.Amount);
             Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
 
-            // And: Report has the correct # columns (One for each month plus total)
-            Assert.AreEqual(13, report.ColumnLabels.Count());
+            // And: Report has the correct # columns (just total)
+            Assert.AreEqual(1, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
             var rowset = new int[] { 9, 21, 24, 26 };
@@ -196,8 +196,8 @@ namespace YoFi.Tests
             var expected = Transactions1000.Where(x=>x.Timestamp.Month <= month).Sum(x => x.Amount);
             Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
 
-            // And: Report has the correct # columns (One for each month plus total)
-            Assert.AreEqual(month + 1, report.ColumnLabels.Count());
+            // And: Report has the correct # columns (Just total)
+            Assert.AreEqual(1, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
             var rowset = new int[] { 9, 21, 24, 26 };
@@ -332,7 +332,7 @@ namespace YoFi.Tests
             Assert.AreEqual(3, report.ColumnLabelsFiltered.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(16, report.RowLabels.Count());
+            Assert.AreEqual(12, report.RowLabels.Count());
         }
 
         [TestMethod]
@@ -358,7 +358,7 @@ namespace YoFi.Tests
             Assert.AreEqual(3, report.ColumnLabelsFiltered.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(26, report.RowLabels.Count());
+            Assert.AreEqual(22, report.RowLabels.Count());
         }
 
         [DataRow(1)]

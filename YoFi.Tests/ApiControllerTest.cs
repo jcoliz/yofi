@@ -753,7 +753,7 @@ namespace YoFi.Tests
             var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
 
             Assert.AreEqual(7, root.GetArrayLength());
-            Assert.AreEqual(6, Total.EnumerateObject().Count());
+            Assert.AreEqual(5, Total.EnumerateObject().Count());
             Assert.AreEqual(200m, AAAA.GetProperty("TOTAL").GetDecimal());
             Assert.AreEqual(1000m, BB.GetProperty("TOTAL").GetDecimal());
             Assert.AreEqual(300m, CC.GetProperty("TOTAL").GetDecimal());
