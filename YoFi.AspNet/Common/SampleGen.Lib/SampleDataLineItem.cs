@@ -118,6 +118,14 @@ namespace YoFi.SampleGen
         };
 
         /// <summary>
+        /// In case you forgot
+        /// </summary>
+        const int MonthsPerYear = 12;
+        const int WeeksPerYear = 52;
+        const int DaysPerWeek = 7;
+        const int MonthsPerQuarter = 3;
+
+        /// <summary>
         /// For a given frequency, how many transactions will be in a year?
         /// </summary>
         /// <remarks>
@@ -125,11 +133,11 @@ namespace YoFi.SampleGen
         /// </remarks>
         public static Dictionary<FrequencyEnum, int> FrequencyPerYear = new Dictionary<FrequencyEnum, int>()
         {
-            { FrequencyEnum.ManyPerWeek, 52 * HowManyPerWeek },
-            { FrequencyEnum.Weekly, 52 },
-            { FrequencyEnum.SemiMonthly, 24 },
-            { FrequencyEnum.Monthly, 12 },
-            { FrequencyEnum.Quarterly, 4 },
+            { FrequencyEnum.ManyPerWeek, WeeksPerYear * HowManyPerWeek },
+            { FrequencyEnum.Weekly, WeeksPerYear },
+            { FrequencyEnum.SemiMonthly, 2 * MonthsPerYear },
+            { FrequencyEnum.Monthly, MonthsPerYear },
+            { FrequencyEnum.Quarterly, MonthsPerYear / MonthsPerQuarter },
             { FrequencyEnum.Yearly, 1 },
         };
 
@@ -172,9 +180,9 @@ namespace YoFi.SampleGen
             if (DateFrequency == FrequencyEnum.Invalid)
                 throw new ApplicationException("Invalid date frequency");
             else if (DateFrequency == FrequencyEnum.SemiMonthly)
-                return Enumerable.Range(1, 12).SelectMany(month => SemiWeeklyDays.Select(day => GenerateBaseTransaction(splits, new DateTime(Year, month, day))));
+                return Enumerable.Range(1, MonthsPerYear).SelectMany(month => SemiWeeklyDays.Select(day => GenerateBaseTransaction(splits, new DateTime(Year, month, day))));
             else if (DateFrequency == FrequencyEnum.ManyPerWeek)
-                return Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, 52).Select(w => GenerateTypicalTransaction(w, splits))).OrderBy(x => x.Timestamp);
+                return Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, WeeksPerYear).Select(w => GenerateTypicalTransaction(w, splits))).OrderBy(x => x.Timestamp);
             else
                 return Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTypicalTransaction(x, splits));
         }
@@ -206,9 +214,9 @@ namespace YoFi.SampleGen
                 {
                     FrequencyEnum.Monthly => new DateTime(Year, index, 1),
                     FrequencyEnum.Yearly => new DateTime(Year, 1, 1),
-                    FrequencyEnum.Quarterly => new DateTime(Year, index * 3 - 2, 1),
-                    FrequencyEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index - 1)),
-                    FrequencyEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index - 1)),
+                    FrequencyEnum.Quarterly => new DateTime(Year, index * MonthsPerQuarter - 2, 1),
+                    FrequencyEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(DaysPerWeek * (index - 1)),
+                    FrequencyEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(DaysPerWeek * (index - 1)),
                     _ => throw new NotImplementedException()
                 } + JitterizedDate
             );
