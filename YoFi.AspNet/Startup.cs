@@ -109,9 +109,7 @@ namespace YoFi.AspNet.Root
 
             app.UseEndpoints(x => 
             {
-                //x.MapControllers();
                 x.MapControllerRoute(name: "default", pattern: "{controller=Transactions}/{action=Index}/{id?}");
-                //x.MapDefaultControllerRoute();
                 x.MapRazorPages();
             });
 
