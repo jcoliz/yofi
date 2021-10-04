@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using YoFi.AspNet.Models;
 
 namespace YoFi.SampleGen
 {
@@ -82,7 +83,7 @@ namespace YoFi.SampleGen
             using var ssr = new OpenXmlSpreadsheetWriter();
             ssr.Open(stream);
             ssr.Write(Transactions);
-            ssr.Write(Transactions.Where(x=>x.HasMultipleSplits).SelectMany(x => x.Splits),"Split");
+            ssr.Write(Transactions.Where(x=>x.Splits?.Count > 1).SelectMany(x => x.Splits),"Split");
             ssr.Write(Payees);
             ssr.Write(BudgetTxs);
         }
@@ -91,8 +92,8 @@ namespace YoFi.SampleGen
 
         public List<Transaction> Transactions { get; } = new List<Transaction>();
 
-        public List<AspNet.Models.Payee> Payees { get; private set; } = new List<AspNet.Models.Payee>();
+        public List<Payee> Payees { get; private set; } = new List<Payee>();
 
-        public List<AspNet.Models.BudgetTx> BudgetTxs { get; private set; } = new List<AspNet.Models.BudgetTx>();
+        public List<BudgetTx> BudgetTxs { get; private set; } = new List<BudgetTx>();
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using YoFi.AspNet.Models;
 
 namespace YoFi.SampleGen.Tests
 {
@@ -372,10 +373,10 @@ namespace YoFi.SampleGen.Tests
                 while(i-- > 0)
                 {
                     // And: The category matches
-                    Assert.AreEqual(splits[i].Category, result.Splits[i].Category);
+                    Assert.AreEqual(splits[i].Category, result.Splits.Skip(i).First().Category);
 
                     // And: The amounts are exactly as expected
-                    Assert.AreEqual(splits[i].YearlyAmount / periods, result.Splits[i].Amount);
+                    Assert.AreEqual(splits[i].YearlyAmount / periods, result.Splits.Skip(i).First().Amount);
                 }
             }
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using YoFi.AspNet.Models;
 
 namespace YoFi.SampleGen
 {
@@ -56,11 +57,17 @@ namespace YoFi.SampleGen
             { SchemeEnum.Yearly, 1 },
         };
 
+        private readonly int[] SemiWeeklyDays = new int[] { 1, 15 };
+
         public IEnumerable<Transaction> GetTransactions(IEnumerable<Definition> insplits = null)
         {
             // Many Per Week overrides the date jitter to high
             if (Scheme == SchemeEnum.ManyPerWeek)
                 DateJitter = JitterEnum.High;
+
+            // Check for invalid parameter combinations
+            if (Scheme == SchemeEnum.SemiMonthly && DateJitter != JitterEnum.None && DateJitter != JitterEnum.Invalid)
+                throw new NotImplementedException("SemiMonthly with date jitter is not implemented");
 
             // Randomly choose a window. The Window must be entirely within the Scheme Timespan, but chosen at random.
             // The size of the window is given by the Date Jitter.
@@ -92,50 +99,17 @@ namespace YoFi.SampleGen
         private TimeSpan DateWindowLength;
 
         private IEnumerable<Transaction> GenerateTypical(IEnumerable<Definition> splits) =>
-            Enumerable.Range(1, SchemeNumPeriods[Scheme]).Select(x => GenerateOneTransaction(x, splits));
+            Enumerable.Range(1, SchemeNumPeriods[Scheme]).Select(x => GenerateTypicalTransaction(x, splits));
 
         private IEnumerable<Transaction> GenerateManyPerWeek(IEnumerable<Definition> splits) =>
-            Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, 52).Select(w => GenerateOneTransaction(w, splits))).OrderBy(x => x.Timestamp);
+            Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, 52).Select(w => GenerateTypicalTransaction(w, splits))).OrderBy(x => x.Timestamp);
 
-        private IEnumerable<Transaction> GenerateSemiMonthly(IEnumerable<Definition> splits)
-        {
-            // The "Splits" give us category and amount
+        private IEnumerable<Transaction> GenerateSemiMonthly(IEnumerable<Definition> splits) =>
+            Enumerable.Range(1, 12).SelectMany(month => SemiWeeklyDays.Select(day => GenerateBaseTransaction(splits, new DateTime(Year, month, day))));
 
-            if (DateJitter != JitterEnum.None && DateJitter != JitterEnum.Invalid)
-                throw new NotImplementedException("SemiMonthly with date jitter is not implemented");
-
-            var days = new int[] { 1, 15 };
-
-            return Enumerable.Range(1, 12).SelectMany
-            (
-                month => 
-                days.Select
-                ( 
-                    day =>                
-                    new Transaction() 
-                    { 
-                        Payee = JitterizedPayee, 
-                        Timestamp = new DateTime(Year, month, day),
-                        Splits = splits.Select(s=>new CategoryAmount() 
-                        { 
-                            Category = s.Category, 
-                            Amount = s.JitterizeAmount(s.YearlyAmount/24) 
-                        }).ToList()
-                    }
-                )
-            );
-        }
-
-        private Transaction GenerateOneTransaction(int index, IEnumerable<Definition> splits) =>
-            new Transaction()
-            {
-                Payee = JitterizedPayee,
-                Splits = splits.Select(s => new CategoryAmount()
-                {
-                    Category = s.Category,
-                    Amount = s.JitterizeAmount(s.YearlyAmount / SchemeNumPeriods[Scheme])
-                }).ToList(),
-                Timestamp = Scheme switch
+        private Transaction GenerateTypicalTransaction(int index, IEnumerable<Definition> splits) =>
+            GenerateBaseTransaction(splits,
+                Scheme switch
                 {
                     SchemeEnum.Monthly => new DateTime(Year, index, 1),
                     SchemeEnum.Yearly => new DateTime(Year, 1, 1),
@@ -144,7 +118,25 @@ namespace YoFi.SampleGen
                     SchemeEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(7 * (index - 1)),
                     _ => throw new NotImplementedException()
                 } + JitterizedDate
+            );
+
+        private Transaction GenerateBaseTransaction(IEnumerable<Definition> splits, DateTime timestamp)
+        {
+            var generatedsplits = splits.Select(s => new Split()
+            {
+                Category = s.Category,
+                Amount = s.JitterizeAmount(s.YearlyAmount / SchemeNumPeriods[Scheme])
+            }).ToList();
+
+            return new Transaction()
+            {
+                Payee = JitterizedPayee,
+                Splits = generatedsplits.Count > 1 ? generatedsplits : null,
+                Timestamp = timestamp,
+                Category = generatedsplits.Count == 1 ? generatedsplits.Single().Category : null,
+                Amount = generatedsplits.Sum(x => x.Amount)
             };
+        }
 
         private List<string> Payees;
 

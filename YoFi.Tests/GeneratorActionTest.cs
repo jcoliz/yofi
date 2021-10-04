@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using YoFi.AspNet.Models;
 
 namespace YoFi.SampleGen.Tests
 {
@@ -115,7 +116,7 @@ namespace YoFi.SampleGen.Tests
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new OpenXmlSpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Read<CategoryAmount>("Split").ToList();
+            var actual = reader.Read<Split>("Split").ToList();
 
             // Then: The file contains all the splits
             Assert.AreEqual(312, actual.Count);
@@ -143,7 +144,7 @@ namespace YoFi.SampleGen.Tests
             using var reader = new OpenXmlSpreadsheetReader();
             reader.Open(stream);
             var transactions = reader.Read<Transaction>();
-            var splits = reader.Read<CategoryAmount>("Split");
+            var splits = reader.Read<Split>("Split");
 
             // And: Matching the spits up to their transaction
             var lookup = splits.Where(x => x.TransactionID != 0).ToLookup(x => x.TransactionID);
@@ -153,7 +154,7 @@ namespace YoFi.SampleGen.Tests
             }
 
             // Then: They all match
-            Assert.AreEqual(36, transactions.Count(x => x.HasMultipleSplits));
+            Assert.AreEqual(36, transactions.Count(x => x.Splits?.Count > 1));
         }
 
         [TestMethod]
