@@ -174,7 +174,7 @@ body.iscarousel {
 -------------------------------------------------- */
 
 /* Center align the text within the three columns below the carousel */
-.marketing .col-lg-4 {
+.marketing .col-lg-3 {
     margin-bottom: 1.5rem;
     text-align: center;
 }
@@ -183,8 +183,21 @@ body.iscarousel {
     font-weight: 400;
 }
 /* rtl:begin:ignore */
-.marketing .col-lg-4 p {
+.marketing .col-lg-3 p {
     margin-right: .75rem;
     margin-left: .75rem;
 }
 /* rtl:end:ignore */
+
+/* https://stackoverflow.com/questions/37455968/how-overlay-two-pictures-to-another-using-html-css */
+
+.img-container {
+    position: relative;
+}
+
+.overlay-img {
+    position: absolute;
+    left: 118px;
+    top: 18px;
+    z-index: 1;
+}
