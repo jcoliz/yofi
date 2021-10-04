@@ -19,7 +19,7 @@
                 <div class="carousel-caption text-start">
                     <h1>Your own finances. Your own code.</h1>
                     <p>YoFi is an open source web-based personal finance manager written in C# on ASP.NET Core. Host it on a cloud service to enable access to your personal finances from any device anywhere anytime, while running on hardware you control.</p>
-                    <p><a class="btn btn-lg btn-primary" href="#">Try the demo</a></p>
+                    <p><a class="btn btn-lg btn-primary" asp-controller="Transactions" asp-action="Index">Try the demo</a></p>
                 </div>
             </div>
         </div>
@@ -30,7 +30,7 @@
                 <div class="carousel-caption">
                     <h1>100% free and Open Source.</h1>
                     <p>YoFi is MIT-licensed, hosted on GitHub, and will always be free and open source. Fork it today and get hacking!</p>
-                    <p><a class="btn btn-lg btn-primary" href="#">See the code</a></p>
+                    <p><a class="btn btn-lg btn-primary" href="https://jcoliz.visualstudio.com/Ofx" target="_blank">See the code</a></p>
                 </div>
             </div>
         </div>
@@ -43,9 +43,9 @@
                     <p>
                         The fastest and simplest way to bring up YoFi for your own use is to deploy it to Azure.
                         Use the included ARM deployment template to create all the needed resources in 
-                        Azure, including an App Service, SQL Database, Storage, etc., and deploy the most recent build.
+                        Azure, including an App Service, SQL Database, Storage, etc., and automatically deploy the most recent build.
                     </p>
-                    <p><a class="btn btn-lg btn-primary" href="#">Learn more</a></p>
+                    <p><a class="btn btn-lg btn-primary" href="https://jcoliz.visualstudio.com/_git/Ofx?path=/deploy/ARM-Template.md&version=GBmaster&_a=preview" target="_blank">Learn more</a></p>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@
 
             <h2>Import</h2>
             <p>Download your debit & credit card statements from your bank in OFX or CSV format. Import them into YoFi to get started.</p>
-            <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+            <p><a class="btn btn-secondary"asp-controller="Transactions" asp-action="Import">Go to Imports &raquo;</a></p>
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-3">
             <div class="img-container">
@@ -91,7 +91,7 @@
             </p><p>
                 With unlimited levels of subcategories, bulk assignment, and splitting across multiple categories, you can clearly follow where you're spending your money.
             </p>
-            <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+            <p><a class="btn btn-secondary" asp-controller="Transactions" asp-action="Index">Go to Transactions &raquo;</a></p>
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-3">
             <div class="img-container">
@@ -101,7 +101,7 @@
 
             <h2>Budget</h2>
             <p>Create and track your budget on a yearly or monthly basis</p>
-            <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+            <p><a class="btn btn-secondary" asp-area="" asp-controller="BudgetTxs" asp-action="Index">Go to Budgets &raquo;</a></p>
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-3">
             <div class="img-container">
@@ -110,7 +110,7 @@
             </div>
             <h2>Report</h2>
             <p>Gain insights on where your money is going over time, and how you're doing on your budget. YoFi's super flexible reporting system gives you the insight.</p>
-            <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+            <p><a class="btn btn-secondary" asp-controller="Transactions" asp-action="Report">Go to Reports &raquo;</a></p>
         </div><!-- /.col-lg-4 -->
     </div><!-- /.row -->
 </div><!-- /.container -->
