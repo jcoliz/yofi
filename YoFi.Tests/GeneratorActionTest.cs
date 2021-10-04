@@ -36,7 +36,7 @@ namespace YoFi.SampleGen.Tests
             Assert.AreEqual(32, generator.Definitions.Count);
 
             // And: Quick spot check of schemes looks good
-            Assert.AreEqual(6, generator.Definitions.Count(x => x.Scheme == SchemeEnum.Quarterly));
+            Assert.AreEqual(6, generator.Definitions.Count(x => x.DateFrequency == FrequencyEnum.Quarterly));
             Assert.AreEqual(2, generator.Definitions.Count(x => x.AmountJitter == JitterEnum.Moderate));
         }
 

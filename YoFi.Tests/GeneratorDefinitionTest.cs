@@ -10,15 +10,15 @@ namespace YoFi.SampleGen.Tests
     public class GeneratorDefinitionTest
     {
         #region Helpers
-        private int NumPeriodsFor(SchemeEnum scheme) => Definition.SchemeNumPeriods[scheme];
+        private int NumPeriodsFor(FrequencyEnum scheme) => Definition.FrequencyPerYear[scheme];
 
-        private IEnumerable<Transaction> SimpleTest(SchemeEnum scheme, JitterEnum datejitter = JitterEnum.None)
+        private IEnumerable<Transaction> SimpleTest(FrequencyEnum scheme, JitterEnum datejitter = JitterEnum.None)
         {
             // Given: Scheme as supplied, No Jitter
             var periods = NumPeriodsFor(scheme);
             var periodicamount = 100m;
             var amount = periodicamount * periods;
-            var item = new Definition() { Scheme = scheme, YearlyAmount = amount, AmountJitter = JitterEnum.None, DateJitter = datejitter, Category = "Category", Payee = "Payee" };
+            var item = new Definition() { DateFrequency = scheme, AmountYearly = amount, AmountJitter = JitterEnum.None, DateJitter = datejitter, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
@@ -49,7 +49,7 @@ namespace YoFi.SampleGen.Tests
         {
             // Given: Weekly definition with multiple payee options
             var payees = new List<string>() { "First", "Second", "Third" };
-            var item = new Definition() { Scheme = SchemeEnum.Weekly, YearlyAmount = 5200m, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = string.Join(",",payees) };
+            var item = new Definition() { DateFrequency = FrequencyEnum.Weekly, AmountYearly = 5200m, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = string.Join(",",payees) };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
@@ -72,7 +72,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Monthly Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTest(SchemeEnum.Monthly);
+            var actual = SimpleTest(FrequencyEnum.Monthly);
 
             // And: They are all on the same day
             Assert.IsTrue(actual.All(x => x.Timestamp.Day == actual.First().Timestamp.Day));
@@ -85,7 +85,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Yearly Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            SimpleTest(SchemeEnum.Yearly);
+            SimpleTest(FrequencyEnum.Yearly);
         }
 
         [TestMethod]
@@ -94,7 +94,7 @@ namespace YoFi.SampleGen.Tests
             // Given: SemiMonthly Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTest(SchemeEnum.SemiMonthly);
+            var actual = SimpleTest(FrequencyEnum.SemiMonthly);
 
             // And: They are all on the first or 15th
             Assert.IsTrue(actual.All(x => x.Timestamp.Day == 1 || x.Timestamp.Day == 15));
@@ -108,7 +108,7 @@ namespace YoFi.SampleGen.Tests
             var year = 2000;
             Definition.Year = year;
             // Then: Transactions pass all standard tests
-            var actual = SimpleTest(SchemeEnum.Quarterly);
+            var actual = SimpleTest(FrequencyEnum.Quarterly);
 
             // And: They are all on the same day of the quarter
             var firstdayofquarter = Enumerable.Range(1, 4).Select(x => new DateTime(year, x * 3 - 2, 1));
@@ -122,7 +122,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Weekly Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTest(SchemeEnum.Weekly);
+            var actual = SimpleTest(FrequencyEnum.Weekly);
 
             // And: They are all on the same day of the week
             Assert.IsTrue(actual.All(x => x.Timestamp.DayOfWeek == actual.First().Timestamp.DayOfWeek));
@@ -134,7 +134,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Many Per Week Scheme, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTest(SchemeEnum.ManyPerWeek);
+            var actual = SimpleTest(FrequencyEnum.ManyPerWeek);
 
             // And: The days of week vary
             Assert.IsTrue(actual.Any(x => x.Timestamp.DayOfWeek != actual.First().Timestamp.DayOfWeek));
@@ -151,7 +151,7 @@ namespace YoFi.SampleGen.Tests
         {
             // Given: Yearly Scheme, Amount Jitter as supplied
             var amount = 1234.56m;
-            var item = new Definition() { Scheme = SchemeEnum.Yearly, YearlyAmount = amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new Definition() { DateFrequency = FrequencyEnum.Yearly, AmountYearly = amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions x100
             var numtries = 100;
@@ -179,7 +179,7 @@ namespace YoFi.SampleGen.Tests
         {
             // Given: Monthly Scheme, Amount Jitter as supplied
             var amount = 100.00m;
-            var item = new Definition() { Scheme = SchemeEnum.Monthly, YearlyAmount = 12 * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new Definition() { DateFrequency = FrequencyEnum.Monthly, AmountYearly = 12 * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
@@ -198,25 +198,25 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(max <= amount * (1 + (decimal)jittervalue));
         }
 
-        [DataRow(SchemeEnum.Monthly, JitterEnum.Low)]
-        [DataRow(SchemeEnum.Monthly, JitterEnum.Moderate)]
-        [DataRow(SchemeEnum.Monthly, JitterEnum.High)]
-        [DataRow(SchemeEnum.Quarterly, JitterEnum.Low)]
-        [DataRow(SchemeEnum.Quarterly, JitterEnum.Moderate)]
-        [DataRow(SchemeEnum.Quarterly, JitterEnum.High)]
-        [DataRow(SchemeEnum.Weekly, JitterEnum.Low)]
-        [DataRow(SchemeEnum.Weekly, JitterEnum.Moderate)]
-        [DataRow(SchemeEnum.Weekly, JitterEnum.High)]
-        [DataRow(SchemeEnum.ManyPerWeek, JitterEnum.Low)]
-        [DataRow(SchemeEnum.ManyPerWeek, JitterEnum.Moderate)]
-        [DataRow(SchemeEnum.ManyPerWeek, JitterEnum.High)]
+        [DataRow(FrequencyEnum.Monthly, JitterEnum.Low)]
+        [DataRow(FrequencyEnum.Monthly, JitterEnum.Moderate)]
+        [DataRow(FrequencyEnum.Monthly, JitterEnum.High)]
+        [DataRow(FrequencyEnum.Quarterly, JitterEnum.Low)]
+        [DataRow(FrequencyEnum.Quarterly, JitterEnum.Moderate)]
+        [DataRow(FrequencyEnum.Quarterly, JitterEnum.High)]
+        [DataRow(FrequencyEnum.Weekly, JitterEnum.Low)]
+        [DataRow(FrequencyEnum.Weekly, JitterEnum.Moderate)]
+        [DataRow(FrequencyEnum.Weekly, JitterEnum.High)]
+        [DataRow(FrequencyEnum.ManyPerWeek, JitterEnum.Low)]
+        [DataRow(FrequencyEnum.ManyPerWeek, JitterEnum.Moderate)]
+        [DataRow(FrequencyEnum.ManyPerWeek, JitterEnum.High)]
         [DataTestMethod]
-        public void AmountJitterMany(SchemeEnum scheme, JitterEnum jitter)
+        public void AmountJitterMany(FrequencyEnum scheme, JitterEnum jitter)
         {
             // Given: Monthly Scheme, Amount Jitter as supplied
             var periods = NumPeriodsFor(scheme);
             var amount = 100.00m;
-            var item = new Definition() { Scheme = scheme, YearlyAmount = periods * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new Definition() { DateFrequency = scheme, AmountYearly = periods * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions x100
             var numtries = 100;
@@ -246,7 +246,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Monthly Scheme, Date Jitter as supplied
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var scheme = SchemeEnum.Monthly;
+            var scheme = FrequencyEnum.Monthly;
             var actual = SimpleTest(scheme, datejitter:jitter);
 
             // And: The dates vary
@@ -272,7 +272,7 @@ namespace YoFi.SampleGen.Tests
             var year = 2000;
             Definition.Year = year;
             // Then: Transactions pass all standard tests
-            var scheme = SchemeEnum.Quarterly;
+            var scheme = FrequencyEnum.Quarterly;
             var actual = SimpleTest(scheme, datejitter: jitter);
 
             // And: The days within quarter vary
@@ -303,7 +303,7 @@ namespace YoFi.SampleGen.Tests
             var year = 2000;
             Definition.Year = year;
             // Then: Transactions pass all standard tests
-            var scheme = SchemeEnum.Weekly;
+            var scheme = FrequencyEnum.Weekly;
             var actual = SimpleTest(scheme, datejitter: jitter);
 
             // And: The days of week vary
@@ -330,27 +330,27 @@ namespace YoFi.SampleGen.Tests
 
         #region Splits
 
-        [DataRow(SchemeEnum.SemiMonthly)]
-        [DataRow(SchemeEnum.Monthly)]
-        [DataRow(SchemeEnum.Quarterly)]
-        [DataRow(SchemeEnum.Weekly)]
-        [DataRow(SchemeEnum.Yearly)]
+        [DataRow(FrequencyEnum.SemiMonthly)]
+        [DataRow(FrequencyEnum.Monthly)]
+        [DataRow(FrequencyEnum.Quarterly)]
+        [DataRow(FrequencyEnum.Weekly)]
+        [DataRow(FrequencyEnum.Yearly)]
         [DataTestMethod]
-        public void Splits(SchemeEnum scheme)
+        public void Splits(FrequencyEnum scheme)
         {
             // Given: SemiMonthly Scheme
             var periods = NumPeriodsFor(scheme);
             var periodicamount = 100m;
             var amount = periodicamount * periods;
-            var item = new Definition() { Scheme = scheme, DateJitter = JitterEnum.None, Payee = "Payee" };
+            var item = new Definition() { DateFrequency = scheme, DateJitter = JitterEnum.None, Payee = "Payee" };
 
             // And: A set of "split" category/amount items
             var splits = new List<Definition>()
             {
-                new Definition() { Category = "1", YearlyAmount = periodicamount * periods * -1, AmountJitter = JitterEnum.None },
-                new Definition() { Category = "2", YearlyAmount = periodicamount * periods * -2, AmountJitter = JitterEnum.None },
-                new Definition() { Category = "3", YearlyAmount = periodicamount * periods * -3, AmountJitter = JitterEnum.None },
-                new Definition() { Category = "4", YearlyAmount = periodicamount * periods * 10, AmountJitter = JitterEnum.None },
+                new Definition() { Category = "1", AmountYearly = periodicamount * periods * -1, AmountJitter = JitterEnum.None },
+                new Definition() { Category = "2", AmountYearly = periodicamount * periods * -2, AmountJitter = JitterEnum.None },
+                new Definition() { Category = "3", AmountYearly = periodicamount * periods * -3, AmountJitter = JitterEnum.None },
+                new Definition() { Category = "4", AmountYearly = periodicamount * periods * 10, AmountJitter = JitterEnum.None },
             };
 
             // When: Generating transactions
@@ -376,7 +376,7 @@ namespace YoFi.SampleGen.Tests
                     Assert.AreEqual(splits[i].Category, result.Splits.Skip(i).First().Category);
 
                     // And: The amounts are exactly as expected
-                    Assert.AreEqual(splits[i].YearlyAmount / periods, result.Splits.Skip(i).First().Amount);
+                    Assert.AreEqual(splits[i].AmountYearly / periods, result.Splits.Skip(i).First().Amount);
                 }
             }
         }

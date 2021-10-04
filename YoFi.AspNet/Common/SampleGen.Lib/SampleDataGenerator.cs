@@ -70,7 +70,7 @@ namespace YoFi.SampleGen
             BudgetTxs = Definitions
                             .Where(x => x.Category != null)
                             .ToLookup(x => x.Category)
-                            .Select(x => new AspNet.Models.BudgetTx { Category = x.Key, Amount = x.Sum(y => y.YearlyAmount), Timestamp = new DateTime(Definition.Year,1,1) })
+                            .Select(x => new AspNet.Models.BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(Definition.Year,1,1) })
                             .ToList();
         }
 
