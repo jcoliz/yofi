@@ -169,17 +169,14 @@ namespace YoFi.SampleGen
 
             var splits = group ?? new List<SampleDataLineItem> { this };
 
-            return DateFrequency switch
-            {
-                FrequencyEnum.Invalid => throw new ApplicationException("Invalid scheme"),
-                FrequencyEnum.Yearly => GenerateTypical(splits),
-                FrequencyEnum.Monthly => GenerateTypical(splits),
-                FrequencyEnum.Quarterly => GenerateTypical(splits),
-                FrequencyEnum.Weekly => GenerateTypical(splits),
-                FrequencyEnum.SemiMonthly => GenerateSemiMonthly(splits),
-                FrequencyEnum.ManyPerWeek => GenerateManyPerWeek(splits),
-                _ => throw new NotImplementedException()
-            };
+            if (DateFrequency == FrequencyEnum.Invalid)
+                throw new ApplicationException("Invalid date frequency");
+            else if (DateFrequency == FrequencyEnum.SemiMonthly)
+                return Enumerable.Range(1, 12).SelectMany(month => SemiWeeklyDays.Select(day => GenerateBaseTransaction(splits, new DateTime(Year, month, day))));
+            else if (DateFrequency == FrequencyEnum.ManyPerWeek)
+                return Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, 52).Select(w => GenerateTypicalTransaction(w, splits))).OrderBy(x => x.Timestamp);
+            else
+                return Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTypicalTransaction(x, splits));
         }
 
         /// <summary>
@@ -196,30 +193,6 @@ namespace YoFi.SampleGen
         /// For transactions generated in this pattern, how large of a possible dates is there?
         /// </summary>
         private TimeSpan DateWindowLength;
-
-        /// <summary>
-        /// Generate transactions for MOST frequencies
-        /// </summary>
-        /// <param name="group">Optional grouping of patterns to be turned into single transactions</param>
-        /// <returns>The transactions generated</returns>
-        private IEnumerable<Transaction> GenerateTypical(IEnumerable<SampleDataLineItem> splits) =>
-            Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTypicalTransaction(x, splits));
-
-        /// <summary>
-        /// Generate transactions for ManyPerWeek frequency
-        /// </summary>
-        /// <param name="group">Optional grouping of patterns to be turned into single transactions</param>
-        /// <returns>The transactions generated</returns>
-        private IEnumerable<Transaction> GenerateManyPerWeek(IEnumerable<SampleDataLineItem> splits) =>
-            Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, 52).Select(w => GenerateTypicalTransaction(w, splits))).OrderBy(x => x.Timestamp);
-
-        /// <summary>
-        /// Generate transactions for SemiMonthly frequency
-        /// </summary>
-        /// <param name="group">Optional grouping of patterns to be turned into single transactions</param>
-        /// <returns>The transactions generated</returns>
-        private IEnumerable<Transaction> GenerateSemiMonthly(IEnumerable<SampleDataLineItem> splits) =>
-            Enumerable.Range(1, 12).SelectMany(month => SemiWeeklyDays.Select(day => GenerateBaseTransaction(splits, new DateTime(Year, month, day))));
 
         /// <summary>
         /// Generate an invidifual transaction for MOST freqencies
