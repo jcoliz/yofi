@@ -192,7 +192,6 @@ namespace YoFi.AspNet.Controllers.Reports
             new ReportDefinition()
             {
                 id = "all",
-                WithMonthColumns = true,
                 NumLevels = 2,
                 Source = "Actual",
                 Name = "All Transactions"
@@ -254,7 +253,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 Name = "Full Budget",
                 Source = "Budget",
                 WholeYear = true,
-                NumLevels = 3,
+                NumLevels = 2,
             },
             new ReportDefinition()
             {
@@ -263,7 +262,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 Source = "ActualVsBudget",
                 WholeYear = true,
                 WithTotalColumn = false,
-                NumLevels = 3,
+                NumLevels = 2,
                 CustomColumns = "budgetpct",
             },
             new ReportDefinition()
@@ -272,7 +271,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 Source = "Budget",
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
                 WholeYear = true,
-                NumLevels = 3,
+                NumLevels = 2,
                 Name = "Expenses Budget"
             },
             new ReportDefinition()
@@ -285,7 +284,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 YearProgress = true,
                 CustomColumns = "budgetpct",
                 WithTotalColumn = false,
-                NumLevels = 3,
+                NumLevels = 2,
             },
             new ReportDefinition()
             {
@@ -313,7 +312,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 id = "yoy",
                 Name = "Year over Year",
                 Source = "YearOverYear",
-                NumLevels = 3,
+                NumLevels = 2,
             }
         };
    }
