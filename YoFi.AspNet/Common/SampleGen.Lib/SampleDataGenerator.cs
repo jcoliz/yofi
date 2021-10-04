@@ -69,7 +69,7 @@ namespace YoFi.SampleGen
             BudgetTxs = Definitions
                             .Where(x => x.Category != null)
                             .ToLookup(x => x.Category)
-                            .Select(x => new BudgetTx { Category = x.Key, Amount = x.Sum(y => y.YearlyAmount), Timestamp = new DateTime(Definition.Year,1,1) })
+                            .Select(x => new AspNet.Models.BudgetTx { Category = x.Key, Amount = x.Sum(y => y.YearlyAmount), Timestamp = new DateTime(Definition.Year,1,1) })
                             .ToList();
         }
 
@@ -93,6 +93,6 @@ namespace YoFi.SampleGen
 
         public List<AspNet.Models.Payee> Payees { get; private set; } = new List<AspNet.Models.Payee>();
 
-        public List<BudgetTx> BudgetTxs { get; private set; } = new List<BudgetTx>();
+        public List<AspNet.Models.BudgetTx> BudgetTxs { get; private set; } = new List<AspNet.Models.BudgetTx>();
     }
 }

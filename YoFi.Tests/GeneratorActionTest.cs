@@ -210,7 +210,7 @@ namespace YoFi.SampleGen.Tests
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new OpenXmlSpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Read<BudgetTx>().ToList();
+            var actual = reader.Read<AspNet.Models.BudgetTx>().ToList();
 
             // Then: The file contains all the budget line items
             Assert.AreEqual(32, actual.Count);
