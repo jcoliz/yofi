@@ -214,6 +214,8 @@ namespace YoFi.SampleGen
         /// <returns>The transactions generated</returns>
         private Transaction GenerateTransaction(IEnumerable<SampleDataLineItem> group, DateTime timestamp)
         {
+            // I was tempted to refactor this by moving up to GetTransactions(). However,
+            // it needs to be refigured every time to accomplish amount jitter
             var generatedsplits = group.Select(s => new Split()
             {
                 Category = s.Category,
