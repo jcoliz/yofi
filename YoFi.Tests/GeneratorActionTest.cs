@@ -26,7 +26,7 @@ namespace YoFi.SampleGen.Tests
         public void Loader()
         {
             // Given: An existing file of defitions
-            var stream = TestData.Open("TestData1.xlsx");
+            var stream = SampleData.Open("TestData1.xlsx");
 
             // When: Loading them
             generator.LoadDefinitions(stream);
@@ -219,7 +219,7 @@ namespace YoFi.SampleGen.Tests
         [TestMethod]
         public void GenerateFullSampleData()
         {
-            var instream = TestData.Open("FullSampleDataDefinition.xlsx");
+            var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions();
             generator.GeneratePayees();
