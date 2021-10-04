@@ -180,11 +180,11 @@ namespace YoFi.SampleGen
             if (DateFrequency == FrequencyEnum.Invalid)
                 throw new ApplicationException("Invalid date frequency");
             else if (DateFrequency == FrequencyEnum.SemiMonthly)
-                return Enumerable.Range(1, MonthsPerYear).SelectMany(month => SemiWeeklyDays.Select(day => GenerateBaseTransaction(splits, new DateTime(Year, month, day))));
+                return Enumerable.Range(1, MonthsPerYear).SelectMany(month => SemiWeeklyDays.Select(day => GenerateTransaction(splits, new DateTime(Year, month, day))));
             else if (DateFrequency == FrequencyEnum.ManyPerWeek)
-                return Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, WeeksPerYear).Select(w => GenerateTypicalTransaction(w, splits))).OrderBy(x => x.Timestamp);
+                return Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, WeeksPerYear).Select(w => GenerateTransaction(splits, MakeDate(w)))).OrderBy(x => x.Timestamp);
             else
-                return Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTypicalTransaction(x, splits));
+                return Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTransaction(splits, MakeDate(x)));
         }
 
         /// <summary>
@@ -203,25 +203,6 @@ namespace YoFi.SampleGen
         private TimeSpan DateWindowLength;
 
         /// <summary>
-        /// Generate an invidifual transaction for MOST freqencies
-        /// </summary>
-        /// <param name="index">Which # within the frequency are we so far?</param>
-        /// <param name="group">Optional grouping of patterns to be turned into single transactions</param>
-        /// <returns>The transactions generated</returns>
-        private Transaction GenerateTypicalTransaction(int index, IEnumerable<SampleDataLineItem> group) =>
-            GenerateBaseTransaction(group,
-                DateFrequency switch
-                {
-                    FrequencyEnum.Monthly => new DateTime(Year, index, 1),
-                    FrequencyEnum.Yearly => new DateTime(Year, 1, 1),
-                    FrequencyEnum.Quarterly => new DateTime(Year, index * MonthsPerQuarter - 2, 1),
-                    FrequencyEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(DaysPerWeek * (index - 1)),
-                    FrequencyEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(DaysPerWeek * (index - 1)),
-                    _ => throw new NotImplementedException()
-                } + JitterizedDate
-            );
-
-        /// <summary>
         /// Foundational generator. Actually generates the transaction
         /// </summary>
         /// <remarks>
@@ -231,17 +212,17 @@ namespace YoFi.SampleGen
         /// <param name="timestamp">What exact timestamp to assign to this transaction</param>
         /// <param name="group">Optional grouping of patterns to be turned into single transactions</param>
         /// <returns>The transactions generated</returns>
-        private Transaction GenerateBaseTransaction(IEnumerable<SampleDataLineItem> group, DateTime timestamp)
+        private Transaction GenerateTransaction(IEnumerable<SampleDataLineItem> group, DateTime timestamp)
         {
             var generatedsplits = group.Select(s => new Split()
             {
                 Category = s.Category,
-                Amount = s.JitterizeAmount(s.AmountYearly / FrequencyPerYear[DateFrequency])
+                Amount = s.MakeAmount(s.AmountYearly / FrequencyPerYear[DateFrequency])
             }).ToList();
 
             return new Transaction()
             {
-                Payee = JitterizedPayee,
+                Payee = MakePayee,
                 Splits = generatedsplits.Count > 1 ? generatedsplits : null,
                 Timestamp = timestamp,
                 Category = generatedsplits.Count == 1 ? generatedsplits.Single().Category : null,
@@ -263,21 +244,29 @@ namespace YoFi.SampleGen
         /// </summary>
         /// <param name="amount">Target amount</param>
         /// <returns>Randomized amount within the desired ditter</returns>
-        private decimal JitterizeAmount(decimal amount) =>
+        private decimal MakeAmount(decimal amount) =>
             (AmountJitter == JitterEnum.None) ? amount :
                 (decimal)((double)amount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * AmountJitterValues[AmountJitter]));
 
         /// <summary>
-        /// Create a date modifer to apply to a base date such that the resulting date
-        /// will fit within the date jitter parameters
+        /// Create a date that fits within the frequency and date jitter parameters
         /// </summary>
-        private TimeSpan JitterizedDate => 
-            DateWindowStarts + ((DateJitter != JitterEnum.None) ? TimeSpan.FromDays(random.Next(0, DateWindowLength.Days)) : TimeSpan.Zero);
+        private DateTime MakeDate(int periodindex) => DateFrequency switch
+            {
+                FrequencyEnum.Monthly => new DateTime(Year, periodindex, 1),
+                FrequencyEnum.Yearly => new DateTime(Year, 1, 1),
+                FrequencyEnum.Quarterly => new DateTime(Year, periodindex * MonthsPerQuarter - 2, 1),
+                FrequencyEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(DaysPerWeek * (periodindex - 1)),
+                FrequencyEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(DaysPerWeek * (periodindex - 1)),
+                _ => throw new NotImplementedException()
+            } 
+            + DateWindowStarts 
+            + ((DateJitter != JitterEnum.None) ? TimeSpan.FromDays(random.Next(0, DateWindowLength.Days)) : TimeSpan.Zero);
 
         /// <summary>
         /// Create a payee within the set specified
         /// </summary>
-        private string JitterizedPayee => Payees[random.Next(0, Payees.Count)];
+        private string MakePayee => Payees[random.Next(0, Payees.Count)];
     }
 
     /// <summary>
