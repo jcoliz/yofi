@@ -180,7 +180,7 @@ namespace YoFi.SampleGen.Tests
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new OpenXmlSpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Read<Payee>().ToList();
+            var actual = reader.Read<AspNet.Models.Payee>().ToList();
 
             // Then: The file contains all the transactions
             Assert.AreEqual(21, actual.Count);

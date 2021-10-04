@@ -61,7 +61,7 @@ namespace YoFi.SampleGen
 
         public void GeneratePayees()
         {
-            Payees = Definitions.Where(x => x.Payee != null).ToLookup(x=>x.Payee).SelectMany(x=>x.Key.Split(',').Select(y=>new Payee() { Name = y, Category = x.First().Category })).ToList();
+            Payees = Definitions.Where(x => x.Payee != null).ToLookup(x=>x.Payee).SelectMany(x=>x.Key.Split(',').Select(y=>new AspNet.Models.Payee() { Name = y, Category = x.First().Category })).ToList();
         }
 
         public void GenerateBudget()
@@ -91,7 +91,7 @@ namespace YoFi.SampleGen
 
         public List<Transaction> Transactions { get; } = new List<Transaction>();
 
-        public List<Payee> Payees { get; private set; } = new List<Payee>();
+        public List<AspNet.Models.Payee> Payees { get; private set; } = new List<AspNet.Models.Payee>();
 
         public List<BudgetTx> BudgetTxs { get; private set; } = new List<BudgetTx>();
     }
