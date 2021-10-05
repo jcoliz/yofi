@@ -1,4 +1,5 @@
-﻿using Common.NET.Test;
+﻿using Common.NET.Data;
+using Common.NET.Test;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;

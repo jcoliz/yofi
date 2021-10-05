@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
+using Common.NET.Data;
 
 namespace YoFi.AspNet.Data
 {
@@ -55,6 +56,36 @@ namespace YoFi.AspNet.Data
                         await UserManager.AddToRoleAsync(poweruser, "Admin");
                         await UserManager.AddToRoleAsync(poweruser, "Verified");
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add sample data to the database
+        /// </summary>
+        /// <remarks>
+        /// ONLY IF: This is not a branded site, AND there is no data of any time already there
+        /// </remarks>
+        /// <returns></returns>
+        public static void AddSampleData(ApplicationDbContext context, IConfiguration Configuration)
+        {
+            if (!Configuration.GetSection("Brand").Exists())
+            {
+                if (! context.Transactions.Any() && ! context.Payees.Any() && ! context.BudgetTxs.Any() )
+                {
+                    // Load sample data
+                    var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
+                    var generator = new SampleGen.SampleDataGenerator();
+                    generator.LoadDefinitions(instream);
+                    generator.GenerateTransactions(addids: false);
+                    generator.GeneratePayees();
+                    generator.GenerateBudget();
+
+                    // Insert into database
+                    context.Transactions.AddRange(generator.Transactions);
+                    context.Payees.AddRange(generator.Payees);
+                    context.BudgetTxs.AddRange(generator.BudgetTxs);
+                    context.SaveChanges();
                 }
             }
         }

@@ -73,6 +73,17 @@ namespace YoFi.AspNet.Root
                     logger.LogError(ex, "An error occurred while creating roles");
                 }
 
+                try
+                {
+                    var configuration = services.GetRequiredService<IConfiguration>();
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    Data.Seed.AddSampleData(context, configuration);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while seeding the database");
+                }
+
                 while (logme.Any())
                     logger.LogInformation(logme.Dequeue());
             }
