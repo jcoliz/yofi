@@ -21,7 +21,7 @@ namespace YoFi.SampleGen
             Definitions.AddRange(ssr.Read<SampleDataLineItem>());
         }
 
-        public void GenerateTransactions()
+        public void GenerateTransactions(bool addids = true)
         {
             var groupings = Definitions.ToLookup(x => x.Group);
 
@@ -46,12 +46,15 @@ namespace YoFi.SampleGen
                 var txs = main.Single().GetTransactions(group).ToList();
                 
                 // Add ID matchers so we can later get the tranactions and splits matched up
-                foreach(var tx in txs)
+                if (addids)
                 {
-                    var id = nextid++;
-                    tx.ID = id;
-                    foreach (var split in tx.Splits)
-                        split.TransactionID = id;
+                    foreach (var tx in txs)
+                    {
+                        var id = nextid++;
+                        tx.ID = id;
+                        foreach (var split in tx.Splits)
+                            split.TransactionID = id;
+                    }
                 }
 
                 Transactions.AddRange(txs);
