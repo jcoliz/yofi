@@ -10,7 +10,7 @@ namespace YoFi.SampleGen.Tests
     public class GeneratorDefinitionTest
     {
         #region Helpers
-        private int NumPeriodsFor(FrequencyEnum scheme) => SampleDataLineItem.FrequencyPerYear[scheme];
+        private int NumPeriodsFor(FrequencyEnum scheme) => SampleDataPattern.FrequencyPerYear[scheme];
 
         private IEnumerable<Transaction> SimpleTest(FrequencyEnum scheme, JitterEnum datejitter = JitterEnum.None)
         {
@@ -18,7 +18,7 @@ namespace YoFi.SampleGen.Tests
             var periods = NumPeriodsFor(scheme);
             var periodicamount = 100m;
             var amount = periodicamount * periods;
-            var item = new SampleDataLineItem() { DateFrequency = scheme, AmountYearly = amount, AmountJitter = JitterEnum.None, DateJitter = datejitter, Category = "Category", Payee = "Payee" };
+            var item = new SampleDataPattern() { DateFrequency = scheme, AmountYearly = amount, AmountJitter = JitterEnum.None, DateJitter = datejitter, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
@@ -49,7 +49,7 @@ namespace YoFi.SampleGen.Tests
         {
             // Given: Weekly definition with multiple payee options
             var payees = new List<string>() { "First", "Second", "Third" };
-            var item = new SampleDataLineItem() { DateFrequency = FrequencyEnum.Weekly, AmountYearly = 5200m, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = string.Join(",",payees) };
+            var item = new SampleDataPattern() { DateFrequency = FrequencyEnum.Weekly, AmountYearly = 5200m, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = string.Join(",",payees) };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
@@ -106,7 +106,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Quarterly Scheme, No Jitter
             // When: Generating transactions for this specific year
             var year = 2000;
-            SampleDataLineItem.Year = year;
+            SampleDataPattern.Year = year;
             // Then: Transactions pass all standard tests
             var actual = SimpleTest(FrequencyEnum.Quarterly);
 
@@ -151,7 +151,7 @@ namespace YoFi.SampleGen.Tests
         {
             // Given: Yearly Scheme, Amount Jitter as supplied
             var amount = 1234.56m;
-            var item = new SampleDataLineItem() { DateFrequency = FrequencyEnum.Yearly, AmountYearly = amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new SampleDataPattern() { DateFrequency = FrequencyEnum.Yearly, AmountYearly = amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions x100
             var numtries = 100;
@@ -164,7 +164,7 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(actual.Any(x => x.Amount != actual.First().Amount));
 
             // And: The amounts are within the expected range for the supplied jitter
-            var jittervalue = SampleDataLineItem.AmountJitterValues[jitter];
+            var jittervalue = SampleDataPattern.AmountJitterValues[jitter];
             var min = actual.Min(x => x.Amount);
             var max = actual.Max(x => x.Amount);
             Assert.AreEqual(((double)amount * (1 - jittervalue)), (double)min, (double)amount * jittervalue / 5.0);
@@ -179,7 +179,7 @@ namespace YoFi.SampleGen.Tests
         {
             // Given: Monthly Scheme, Amount Jitter as supplied
             var amount = 100.00m;
-            var item = new SampleDataLineItem() { DateFrequency = FrequencyEnum.Monthly, AmountYearly = 12 * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new SampleDataPattern() { DateFrequency = FrequencyEnum.Monthly, AmountYearly = 12 * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
@@ -191,7 +191,7 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(actual.Any(x => x.Amount != actual.First().Amount));
 
             // And: The amounts are within the expected range for the supplied jitter
-            var jittervalue = SampleDataLineItem.AmountJitterValues[jitter];
+            var jittervalue = SampleDataPattern.AmountJitterValues[jitter];
             var min = actual.Min(x => x.Amount);
             var max = actual.Max(x => x.Amount);
             Assert.IsTrue(min >= amount * (1 - (decimal)jittervalue));
@@ -216,7 +216,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Monthly Scheme, Amount Jitter as supplied
             var periods = NumPeriodsFor(scheme);
             var amount = 100.00m;
-            var item = new SampleDataLineItem() { DateFrequency = scheme, AmountYearly = periods * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+            var item = new SampleDataPattern() { DateFrequency = scheme, AmountYearly = periods * amount, AmountJitter = jitter, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions x100
             var numtries = 100;
@@ -226,7 +226,7 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(actual.Any(x => x.Amount != actual.First().Amount));
 
             // And: The amounts are within the expected range for the supplied jitter
-            var jittervalue = SampleDataLineItem.AmountJitterValues[jitter];
+            var jittervalue = SampleDataPattern.AmountJitterValues[jitter];
             var min = actual.Min(x => x.Amount);
             var max = actual.Max(x => x.Amount);
             Assert.AreEqual(((double)amount * (1 - jittervalue)), (double)min, (double)amount * (double)jittervalue / 5.0);
@@ -253,11 +253,11 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(actual.Any(x => x.Timestamp.Day != actual.First().Timestamp.Day));
 
             // And: The date ranges are within the expected range for the supplied jitter
-            var jittervalue = SampleDataLineItem.DateJitterValues[jitter];
+            var jittervalue = SampleDataPattern.DateJitterValues[jitter];
             var min = actual.Min(x => x.Timestamp.Day);
             var max = actual.Max(x => x.Timestamp.Day);
             var actualrange = max - min;
-            var expectedrange = SampleDataLineItem.SchemeTimespans[scheme].Days * (double)jittervalue;
+            var expectedrange = SampleDataPattern.SchemeTimespans[scheme].Days * (double)jittervalue;
             Assert.IsTrue(actualrange <= expectedrange);
         }
 
@@ -270,7 +270,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Quarterly Scheme, Date Jitter as supplied
             // When: Generating transactions for this specific year
             var year = 2000;
-            SampleDataLineItem.Year = year;
+            SampleDataPattern.Year = year;
             // Then: Transactions pass all standard tests
             var scheme = FrequencyEnum.Quarterly;
             var actual = SimpleTest(scheme, datejitter: jitter);
@@ -281,11 +281,11 @@ namespace YoFi.SampleGen.Tests
             Assert.IsTrue(daysofquarter.Any(x => x != daysofquarter.First()));
 
             // And: The date ranges are within the expected range for the supplied jitter
-            var jittervalue = SampleDataLineItem.DateJitterValues[jitter];
+            var jittervalue = SampleDataPattern.DateJitterValues[jitter];
             var min = daysofquarter.Min();
             var max = daysofquarter.Max();
             var actualrange = max - min;
-            var expectedrange = SampleDataLineItem.SchemeTimespans[scheme].Days * (double)jittervalue;
+            var expectedrange = SampleDataPattern.SchemeTimespans[scheme].Days * (double)jittervalue;
             Assert.IsTrue(actualrange <= expectedrange);
 
             // Note: There are not enough quarters to be certain that the randomness will spread out
@@ -301,7 +301,7 @@ namespace YoFi.SampleGen.Tests
             // Given: Weekly Scheme, Date Jitter as supplied
             // When: Generating transactions for this specific year
             var year = 2000;
-            SampleDataLineItem.Year = year;
+            SampleDataPattern.Year = year;
             // Then: Transactions pass all standard tests
             var scheme = FrequencyEnum.Weekly;
             var actual = SimpleTest(scheme, datejitter: jitter);
@@ -318,8 +318,8 @@ namespace YoFi.SampleGen.Tests
             var max = daysofweek.Max();
             var actualrange = max - min;
 
-            var jittervalue = SampleDataLineItem.DateJitterValues[jitter];
-            var expectedrange = SampleDataLineItem.SchemeTimespans[scheme].Days * (double)jittervalue;
+            var jittervalue = SampleDataPattern.DateJitterValues[jitter];
+            var expectedrange = SampleDataPattern.SchemeTimespans[scheme].Days * (double)jittervalue;
 
             Assert.IsTrue(actualrange <= expectedrange);
 
@@ -342,15 +342,15 @@ namespace YoFi.SampleGen.Tests
             var periods = NumPeriodsFor(scheme);
             var periodicamount = 100m;
             var amount = periodicamount * periods;
-            var item = new SampleDataLineItem() { DateFrequency = scheme, DateJitter = JitterEnum.None, Payee = "Payee" };
+            var item = new SampleDataPattern() { DateFrequency = scheme, DateJitter = JitterEnum.None, Payee = "Payee" };
 
             // And: A set of "split" category/amount items
-            var splits = new List<SampleDataLineItem>()
+            var splits = new List<SampleDataPattern>()
             {
-                new SampleDataLineItem() { Category = "1", AmountYearly = periodicamount * periods * -1, AmountJitter = JitterEnum.None },
-                new SampleDataLineItem() { Category = "2", AmountYearly = periodicamount * periods * -2, AmountJitter = JitterEnum.None },
-                new SampleDataLineItem() { Category = "3", AmountYearly = periodicamount * periods * -3, AmountJitter = JitterEnum.None },
-                new SampleDataLineItem() { Category = "4", AmountYearly = periodicamount * periods * 10, AmountJitter = JitterEnum.None },
+                new SampleDataPattern() { Category = "1", AmountYearly = periodicamount * periods * -1, AmountJitter = JitterEnum.None },
+                new SampleDataPattern() { Category = "2", AmountYearly = periodicamount * periods * -2, AmountJitter = JitterEnum.None },
+                new SampleDataPattern() { Category = "3", AmountYearly = periodicamount * periods * -3, AmountJitter = JitterEnum.None },
+                new SampleDataPattern() { Category = "4", AmountYearly = periodicamount * periods * 10, AmountJitter = JitterEnum.None },
             };
 
             // When: Generating transactions

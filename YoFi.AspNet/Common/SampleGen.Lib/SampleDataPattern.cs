@@ -13,7 +13,7 @@ namespace YoFi.SampleGen
     /// The sample data generator will use this to generate a series of transactions to
     /// match this spending pattern in a year
     /// </remarks>
-    public class SampleDataLineItem
+    public class SampleDataPattern
     {
         /// <summary>
         /// Comma-separated list of possible transaction payees
@@ -155,7 +155,7 @@ namespace YoFi.SampleGen
         /// </remarks>
         /// <param name="group">Optional grouping of patterns to be turned into single transactions</param>
         /// <returns>The transactions generated</returns>
-        public IEnumerable<Transaction> GetTransactions(IEnumerable<SampleDataLineItem> group = null)
+        public IEnumerable<Transaction> GetTransactions(IEnumerable<SampleDataPattern> group = null)
         {
             // Many Per Week overrides the date jitter to high
             if (DateFrequency == FrequencyEnum.ManyPerWeek)
@@ -175,7 +175,7 @@ namespace YoFi.SampleGen
 
             Payees = Payee.Split(",").ToList();
 
-            var splits = group ?? new List<SampleDataLineItem> { this };
+            var splits = group ?? new List<SampleDataPattern> { this };
 
             if (DateFrequency == FrequencyEnum.Invalid)
                 throw new ApplicationException("Invalid date frequency");
@@ -212,7 +212,7 @@ namespace YoFi.SampleGen
         /// <param name="timestamp">What exact timestamp to assign to this transaction</param>
         /// <param name="group">Optional grouping of patterns to be turned into single transactions</param>
         /// <returns>The transactions generated</returns>
-        private Transaction GenerateTransaction(IEnumerable<SampleDataLineItem> group, DateTime timestamp)
+        private Transaction GenerateTransaction(IEnumerable<SampleDataPattern> group, DateTime timestamp)
         {
             // I was tempted to refactor this by moving up to GetTransactions(). However,
             // it needs to be refigured every time to accomplish amount jitter

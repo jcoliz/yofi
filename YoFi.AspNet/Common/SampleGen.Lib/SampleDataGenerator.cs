@@ -18,7 +18,7 @@ namespace YoFi.SampleGen
         {
             using var ssr = new OpenXmlSpreadsheetReader();
             ssr.Open(stream);
-            Definitions.AddRange(ssr.Read<SampleDataLineItem>());
+            Definitions.AddRange(ssr.Read<SampleDataPattern>());
         }
 
         public void GenerateTransactions(bool addids = true)
@@ -73,7 +73,7 @@ namespace YoFi.SampleGen
             BudgetTxs = Definitions
                             .Where(x => x.Category != null)
                             .ToLookup(x => x.Category)
-                            .Select(x => new AspNet.Models.BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(SampleDataLineItem.Year,1,1) })
+                            .Select(x => new AspNet.Models.BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(SampleDataPattern.Year,1,1) })
                             .ToList();
         }
 
@@ -91,7 +91,7 @@ namespace YoFi.SampleGen
             ssr.Write(BudgetTxs);
         }
 
-        public List<SampleDataLineItem> Definitions { get; } = new List<SampleDataLineItem>();
+        public List<SampleDataPattern> Definitions { get; } = new List<SampleDataPattern>();
 
         public List<Transaction> Transactions { get; } = new List<Transaction>();
 
