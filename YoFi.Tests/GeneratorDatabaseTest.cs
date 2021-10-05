@@ -39,7 +39,7 @@ namespace YoFi.SampleGen.Tests
         }
 
         [TestMethod]
-        public async Task GenerateAndAdd()
+        public async Task GenerateAndAddTransactions()
         {
             // Given: An existing file of defitions
             // And: Loading them
@@ -62,5 +62,44 @@ namespace YoFi.SampleGen.Tests
             var splitcount = await context.Splits.CountAsync();
             Assert.AreEqual(312, splitcount);
         }
+
+        [TestMethod]
+        public async Task GenerateAndAddPayees()
+        {
+            // Given: An existing file of defitions
+            // And: Loading them
+            // And: Generating transactions
+            var stream = SampleData.Open("TestData1.xlsx");
+            generator.LoadDefinitions(stream);
+            generator.GeneratePayees();
+
+            // When: Adding them to the database
+            context.Payees.AddRange(generator.Payees);
+            await context.SaveChangesAsync();
+
+            // Then: They are in the database as expected
+            var count = await context.Payees.CountAsync();
+            Assert.AreEqual(21, count);
+        }
+
+        [TestMethod]
+        public async Task GenerateAndAddBudget()
+        {
+            // Given: An existing file of defitions
+            // And: Loading them
+            // And: Generating transactions
+            var stream = SampleData.Open("TestData1.xlsx");
+            generator.LoadDefinitions(stream);
+            generator.GenerateBudget();
+
+            // When: Adding them to the database
+            context.BudgetTxs.AddRange(generator.BudgetTxs);
+            await context.SaveChangesAsync();
+
+            // Then: They are in the database as expected
+            var count = await context.BudgetTxs.CountAsync();
+            Assert.AreEqual(32, count);
+        }
+
     }
 }
