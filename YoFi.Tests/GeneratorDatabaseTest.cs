@@ -58,6 +58,9 @@ namespace YoFi.SampleGen.Tests
 
             var spotcheckcount = await context.Transactions.CountAsync(x => x.Payee == "Big Megacorp");
             Assert.AreEqual(24, spotcheckcount);
+
+            var splitcount = await context.Splits.CountAsync();
+            Assert.AreEqual(312, splitcount);
         }
     }
 }
