@@ -84,6 +84,12 @@
                                 <li class="mb-2">@_config["Brand:Owner"]</li>
                             </ul>
                         }
+                        @if (ishome)
+                        {
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-2"><a asp-page="IconCredits" target="_blank">icon credits</a></li>
+                            </ul>
+                        }
                     </div>
                     <div class="col-sm-5 offset-sm-2 text-end">
                         <ul class="list-unstyled small text-muted mb-0">
