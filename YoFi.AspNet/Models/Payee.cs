@@ -32,24 +32,6 @@ namespace YoFi.AspNet.Models
         public string Category { get; set; }
 
         /// <summary>
-        /// Pacify ICatSubcat
-        /// </summary>
-        /// <remarks>
-        /// This property is obsolete
-        /// </remarks>
-        string ICatSubcat.SubCategory
-        {
-            get
-            {
-                return null;
-            }
-            set
-            {
-                // Ignore
-            }
-        }
-
-        /// <summary>
         /// Whether this object will be included in the next bulk operation
         /// </summary>
         public bool? Selected { get; set; }

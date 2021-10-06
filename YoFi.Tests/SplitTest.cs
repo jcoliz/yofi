@@ -51,25 +51,5 @@ namespace YoFi.Tests
             Assert.AreEqual(2, actual[0].Splits.Count);
             Assert.AreEqual(75m, actual[0].Splits.Where(x => x.Category == "C").Single().Amount);
         }
-
-        [DataTestMethod]
-        [DataRow("A:B:C:D:E", "A:B", "C:D:E")]
-        [DataRow("A:B:C:D:", "A:B", "C:D")]
-        [DataRow("A:B:C:D", "A:B", "C:D")]
-        [DataRow("A:B:C:", "A:B", "C")]
-        [DataRow("A:B:C", "A:B", "C")]
-        [DataRow("A:B:", "A:B", null)]
-        [DataRow("A::::B", "A:B", null)]
-        [DataRow("A:B", "A:B", null)]
-        [DataRow("A", "A", null)]
-        public void FixupCategories(string incategory, string expectcategory, string expectsubcategory)
-        {
-            var split = new Split() { Category = incategory };
-            split.FixupCategories();
-
-            Assert.AreEqual(expectcategory, split.Category);
-            Assert.AreEqual(expectsubcategory, split.SubCategory);
-
-        }
     }
 }

@@ -875,7 +875,6 @@ namespace YoFi.AspNet.Controllers
                     // Why no has AddRange??
                     foreach (var split in incoming)
                     {
-                        split.FixupCategories();
                         transaction.Splits.Add(split);
                     }
 
@@ -1353,7 +1352,6 @@ namespace YoFi.AspNet.Controllers
             public string Memo { get; set; }
             public string BankReference { get; set; }
             public string ReceiptUrl { get; set; }
-            string ICatSubcat.SubCategory { get => null; set { } }
         }
 
         #endregion

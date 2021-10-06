@@ -51,24 +51,6 @@ namespace YoFi.AspNet.Models
         public string Category { get; set; }
 
         /// <summary>
-        /// Pacify ICatSubcat
-        /// </summary>
-        /// <remarks>
-        /// This property is obsolete
-        /// </remarks>
-        string ICatSubcat.SubCategory 
-        { 
-            get
-            {
-                return null;
-            }
-            set
-            {
-                // Ignore
-            }
-        }
-
-        /// <summary>
         /// Optional commentary about this transaction
         /// </summary>
         public string Memo { get; set; }

@@ -21,15 +21,5 @@ namespace YoFi.AspNet.Models
         /// Separate successive levels of depth with a colon, e.g. "Housing:Mortgage"
         /// </remarks>
         string Category { get; set; }
-
-        /// <summary>
-        /// Second-level category
-        /// </summary>
-        /// <remarks>
-        /// This property is obsolete. Category can now take multiple
-        /// levels of information separated with colons.
-        /// TODO: Still need to refactor tests to remove this
-        /// </remarks>
-        string SubCategory { get; set; }
     }
 }
