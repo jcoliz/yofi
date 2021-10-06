@@ -38,7 +38,20 @@
         "siteConfig": {
           "linuxFxVersion": "DOTNETCORE|3.1"
         }
-      }
+      },
+      "resources": [
+        {
+          "type": "config",
+          "name": "appsettings",
+          "apiVersion": "2018-11-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('name'))]"
+          ],
+          "properties": {
+            "ASPNETCORE_ENVIRONMENT": "Production"
+          }
+        }
+      ]
     },
     {
       "name": "[concat(variables('name'), '/ZipDeploy')]",
@@ -48,7 +61,8 @@
         "packageUri": "[variables('packageUri')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', variables('name'))]"
+        "[resourceId('Microsoft.Web/sites', variables('name'))]",
+        "[resourceId('Microsoft.Web/sites/config', variables('name'), 'appsettings')]"
       ]
     }
   ],
