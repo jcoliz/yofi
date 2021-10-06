@@ -36,8 +36,8 @@ namespace YoFi.Tests
 
             var splits = new List<Split>()
             {
-                new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
-                new Split() { Amount = 75m, Category = "C", SubCategory = "D" },
+                new Split() { Amount = 25m, Category = "A" },
+                new Split() { Amount = 75m, Category = "C" },
             };
 
             var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };

@@ -12,7 +12,7 @@ namespace YoFi.AspNet.Models
     /// Used by the category remapper. If it has a cat and subcat,
     /// it can be remapped.
     /// </remarks>
-    public interface ICatSubcat
+    public interface ICategory
     {
         /// <summary>
         /// Cagtegorization of this item

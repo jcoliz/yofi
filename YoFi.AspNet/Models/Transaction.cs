@@ -15,7 +15,7 @@ namespace YoFi.AspNet.Models
     /// <remarks>
     /// The basic building blocks!
     /// </remarks>
-    public class Transaction : ICatSubcat, IID, IReportable
+    public class Transaction : ICategory, IID, IReportable
     {
         /// <summary>
         /// Object identity in Entity Framework

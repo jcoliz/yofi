@@ -32,11 +32,11 @@ namespace YoFi.Tests
             {
                 return new List<Split>()
                 {
-                    new Split() { Category = "B", SubCategory = "A", Memo = "3", Amount = 300m },
-                    new Split() { Category = "A", SubCategory = "A", Memo = "2", Amount = 200m },
-                    new Split() { Category = "C", SubCategory = "A", Memo = "5", Amount = 500m },
-                    new Split() { Category = "A", SubCategory = "A", Memo = "1", Amount = 100m },
-                    new Split() { Category = "B", SubCategory = "B", Memo = "4", Amount = 400m }
+                    new Split() { Category = "B", Memo = "3", Amount = 300m },
+                    new Split() { Category = "A", Memo = "2", Amount = 200m },
+                    new Split() { Category = "C", Memo = "5", Amount = 500m },
+                    new Split() { Category = "A", Memo = "1", Amount = 100m },
+                    new Split() { Category = "B", Memo = "4", Amount = 400m }
                 };
             }
         }
@@ -104,7 +104,7 @@ namespace YoFi.Tests
         public async Task EditObjectValuesShowsInTransaction()
         {
             var splits = new List<Split>();
-            var initial = new Split() { Amount = 25m, Category = "A", SubCategory = "B" };
+            var initial = new Split() { Amount = 25m, Category = "A" };
             splits.Add(initial);
 
             var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
@@ -118,7 +118,7 @@ namespace YoFi.Tests
             context.Entry(initial).State = EntityState.Detached;
             context.Entry(item).State = EntityState.Detached;
 
-            var updated = new Split() { ID = id, TransactionID = item.ID, Amount = 75m, Category = "C", SubCategory = "D" };
+            var updated = new Split() { ID = id, TransactionID = item.ID, Amount = 75m, Category = "C" };
 
             var result = await controller.Edit(id, updated);
             var redirresult = result as RedirectToActionResult;
@@ -140,7 +140,7 @@ namespace YoFi.Tests
             // Given: A transaction with 1 splits in the database
             var splits = new List<Split>();
             var expected = "A";
-            var initial = new Split() { Amount = 25m, Category = expected, SubCategory = "B" };
+            var initial = new Split() { Amount = 25m, Category = expected };
             splits.Add(initial);
 
             var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
@@ -161,7 +161,7 @@ namespace YoFi.Tests
         {
             // Given: A transaction with 2 splits in the database
             var splits = new List<Split>();
-            var initial = new Split() { Amount = 25m, Category = "A", SubCategory = "B" };
+            var initial = new Split() { Amount = 25m, Category = "A" };
             splits.Add(initial);
             splits.Add(new Split() { Amount = 75m, Category = "C" });
 

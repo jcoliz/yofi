@@ -76,10 +76,10 @@ namespace YoFi.Tests
             
         readonly List<Split> SplitItems = new List<Split>()
         {
-            new Split() { Amount = 25m, Category = "A", SubCategory = "B" },
-            new Split() { Amount = 75m, Category = "C", SubCategory = "D" },
-            new Split() { Amount = 75m, Category = "C", SubCategory = "D", Memo = "CAFES" },
-            new Split() { Amount = 75m, Category = "C", SubCategory = "D", Memo = "WHOCAFD" }
+            new Split() { Amount = 25m, Category = "A" },
+            new Split() { Amount = 75m, Category = "C" },
+            new Split() { Amount = 75m, Category = "C", Memo = "CAFES" },
+            new Split() { Amount = 75m, Category = "C", Memo = "WHOCAFD" }
         };
 
         readonly List<Payee> PayeeItems = new List<Payee>()
@@ -408,7 +408,6 @@ namespace YoFi.Tests
 
             // Second split shouldn't have a category/subcat
             Assert.IsNull(actual.Category);
-            Assert.IsNull(actual.SubCategory);
         }
 
         [TestMethod]
@@ -602,9 +601,9 @@ namespace YoFi.Tests
             var transactions = new List<Transaction>();
             var splits = new List<Split>()
             {
-                new Split() { Amount = 25m, Category = "A", SubCategory = "B", TransactionID = 1000 },
-                new Split() { Amount = 75m, Category = "C", SubCategory = "D", TransactionID = 1000 },
-                new Split() { Amount = 175m, Category = "X", SubCategory = "Y", TransactionID = 12000 } // Not going to be matched!
+                new Split() { Amount = 25m, Category = "A", TransactionID = 1000 },
+                new Split() { Amount = 75m, Category = "C", TransactionID = 1000 },
+                new Split() { Amount = 175m, Category = "X", TransactionID = 12000 } // Not going to be matched!
             };
 
             var item = new Transaction() { ID = 1000, Payee = "3", Category = "RemoveMe", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };

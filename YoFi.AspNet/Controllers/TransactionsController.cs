@@ -1342,7 +1342,7 @@ namespace YoFi.AspNet.Controllers
         /// <summary>
         /// The transaction data for export
         /// </summary>
-        class TransactionExportDto: ICatSubcat
+        class TransactionExportDto: ICategory
         {
             public int ID { get; set; }
             public DateTime Timestamp { get; set; }
