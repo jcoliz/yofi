@@ -131,5 +131,51 @@ namespace YoFi.Tests
 
             Assert.AreEqual(updated.Amount, tx.Splits.Single().Amount);
         }
+
+        [TestMethod]
+        public async Task DeleteLastSplitReplacesCategory()
+        {
+            // Bug 1003: Delete split leaves category blank in index
+
+            // Given: A transaction with 1 splits in the database
+            var splits = new List<Split>();
+            var expected = "A";
+            var initial = new Split() { Amount = 25m, Category = expected, SubCategory = "B" };
+            splits.Add(initial);
+
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            // When: Deleting that split
+            await controller.DeleteConfirmed(initial.ID);
+
+            // Then: The transaction now has the category from the split
+            var actual = context.Transactions.Single();
+            Assert.AreEqual(expected, actual.Category);
+        }
+
+        [TestMethod]
+        public async Task DeleteNotLastSplitDoesntReplaceCategory()
+        {
+            // Given: A transaction with 2 splits in the database
+            var splits = new List<Split>();
+            var initial = new Split() { Amount = 25m, Category = "A", SubCategory = "B" };
+            splits.Add(initial);
+            splits.Add(new Split() { Amount = 75m, Category = "C" });
+
+            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
+
+            context.Transactions.Add(item);
+            context.SaveChanges();
+
+            // When: Deleting one split
+            await controller.DeleteConfirmed(initial.ID);
+
+            // Then: The transaction still has null category
+            var actual = context.Transactions.Single();
+            Assert.IsNull(actual.Category);
+        }
     }
 }

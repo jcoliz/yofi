@@ -76,10 +76,19 @@ namespace YoFi.AspNet.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var split = await _context.Splits.SingleOrDefaultAsync(m => m.ID == id);
+            var category = split.Category;
             var txid = split.TransactionID;
 
             _context.Splits.Remove(split);
             await _context.SaveChangesAsync();
+
+            var tx = _context.Transactions.Where(x => x.ID == txid).FirstOrDefault();
+            if (tx?.HasSplits == false)
+            {
+                tx.Category = category;
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction("Edit", "Transactions", new { id = txid });
         }
 
