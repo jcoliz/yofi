@@ -31,6 +31,10 @@ namespace YoFi.SampleGen
         /// </summary>
         public JitterEnum DateJitter { get; set; }
 
+        /// <summary>
+        /// How many times this spending happens within the DateFrequency
+        /// </summary>
+        public int DateRepeats { get; set; } = 1;
 
         /// <summary>
         /// Transaction category
@@ -61,15 +65,6 @@ namespace YoFi.SampleGen
         /// What is the year we are operating on?
         /// </summary>
         public static int Year { get; set; } = DateTime.Now.Year;
-
-        /// <summary>
-        /// How many per week do we mean when the frequency is "manyperweek"?
-        /// </summary>
-        /// <remarks>
-        /// This will be generalized into the pattern definition in the future
-        /// See Task #1098: Add a multiplier generally
-        /// </remarks>
-        public const int HowManyPerWeek = 3;
 
         /// <summary>
         /// How much jitter exactly is there in a given kind of amount jitter?
@@ -111,7 +106,6 @@ namespace YoFi.SampleGen
         public static Dictionary<FrequencyEnum, TimeSpan> SchemeTimespans = new Dictionary<FrequencyEnum, TimeSpan>()
         {
             { FrequencyEnum.Weekly, TimeSpan.FromDays(7) },
-            { FrequencyEnum.ManyPerWeek, TimeSpan.FromDays(7) },
             { FrequencyEnum.Monthly, TimeSpan.FromDays(28) },
             { FrequencyEnum.Quarterly, TimeSpan.FromDays(90) },
             { FrequencyEnum.Yearly, TimeSpan.FromDays(365) },
@@ -133,7 +127,6 @@ namespace YoFi.SampleGen
         /// </remarks>
         public static Dictionary<FrequencyEnum, int> FrequencyPerYear = new Dictionary<FrequencyEnum, int>()
         {
-            { FrequencyEnum.ManyPerWeek, WeeksPerYear * HowManyPerWeek },
             { FrequencyEnum.Weekly, WeeksPerYear },
             { FrequencyEnum.SemiMonthly, 2 * MonthsPerYear },
             { FrequencyEnum.Monthly, MonthsPerYear },
@@ -157,13 +150,9 @@ namespace YoFi.SampleGen
         /// <returns>The transactions generated</returns>
         public IEnumerable<Transaction> GetTransactions(IEnumerable<SampleDataPattern> group = null)
         {
-            // Many Per Week overrides the date jitter to high
-            if (DateFrequency == FrequencyEnum.ManyPerWeek)
-                DateJitter = JitterEnum.High;
-
             // Check for invalid parameter combinations
-            if (DateFrequency == FrequencyEnum.SemiMonthly && DateJitter != JitterEnum.None && DateJitter != JitterEnum.Invalid)
-                throw new NotImplementedException("SemiMonthly with date jitter is not implemented");
+            if (DateFrequency == FrequencyEnum.SemiMonthly && ((DateJitter != JitterEnum.None && DateJitter != JitterEnum.Invalid) || DateRepeats != 1))
+                throw new NotImplementedException("SemiMonthly with date jitter or date repeats is not implemented");
 
             // Randomly choose a window. The Window must be entirely within the Scheme Timespan, but chosen at random.
             // The size of the window is given by the Date Jitter.
@@ -179,12 +168,11 @@ namespace YoFi.SampleGen
 
             if (DateFrequency == FrequencyEnum.Invalid)
                 throw new ApplicationException("Invalid date frequency");
-            else if (DateFrequency == FrequencyEnum.SemiMonthly)
+            
+            if (DateFrequency == FrequencyEnum.SemiMonthly)
                 return Enumerable.Range(1, MonthsPerYear).SelectMany(month => SemiWeeklyDays.Select(day => GenerateTransaction(splits, new DateTime(Year, month, day))));
-            else if (DateFrequency == FrequencyEnum.ManyPerWeek)
-                return Enumerable.Range(1, HowManyPerWeek).SelectMany(x => Enumerable.Range(1, WeeksPerYear).Select(w => GenerateTransaction(splits, MakeDate(w)))).OrderBy(x => x.Timestamp);
-            else
-                return Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTransaction(splits, MakeDate(x)));
+        
+            return Enumerable.Repeat(1,DateRepeats).SelectMany(i=>Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTransaction(splits, MakeDate(x))));
         }
 
         /// <summary>
@@ -219,7 +207,7 @@ namespace YoFi.SampleGen
             var generatedsplits = group.Select(s => new Split()
             {
                 Category = s.Category,
-                Amount = s.MakeAmount(s.AmountYearly / FrequencyPerYear[DateFrequency])
+                Amount = s.MakeAmount(s.AmountYearly / s.DateRepeats / FrequencyPerYear[DateFrequency])
             }).ToList();
 
             return new Transaction()
@@ -258,7 +246,6 @@ namespace YoFi.SampleGen
                 FrequencyEnum.Monthly => new DateTime(Year, periodindex, 1),
                 FrequencyEnum.Yearly => new DateTime(Year, 1, 1),
                 FrequencyEnum.Quarterly => new DateTime(Year, periodindex * MonthsPerQuarter - 2, 1),
-                FrequencyEnum.ManyPerWeek => new DateTime(Year, 1, 1) + TimeSpan.FromDays(DaysPerWeek * (periodindex - 1)),
                 FrequencyEnum.Weekly => new DateTime(Year, 1, 1) + TimeSpan.FromDays(DaysPerWeek * (periodindex - 1)),
                 _ => throw new NotImplementedException()
             } 
@@ -274,7 +261,7 @@ namespace YoFi.SampleGen
     /// <summary>
     /// Defines how frequently a pattern may occur
     /// </summary>
-    public enum FrequencyEnum { Invalid = 0, ManyPerWeek, Weekly, SemiMonthly, Monthly, Quarterly, Yearly };
+    public enum FrequencyEnum { Invalid = 0, Weekly, SemiMonthly, Monthly, Quarterly, Yearly };
 
     /// <summary>
     /// Describes the severity of jitter which may be applied to dates or amounts

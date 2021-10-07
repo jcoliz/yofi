@@ -12,19 +12,19 @@ namespace YoFi.SampleGen.Tests
         #region Helpers
         private int NumPeriodsFor(FrequencyEnum scheme) => SampleDataPattern.FrequencyPerYear[scheme];
 
-        private IEnumerable<Transaction> SimpleTest(FrequencyEnum scheme, JitterEnum datejitter = JitterEnum.None)
+        private IEnumerable<Transaction> SimpleTest(FrequencyEnum scheme, JitterEnum datejitter = JitterEnum.None, int numperperiod = 1)
         {
             // Given: Scheme as supplied, No Jitter
             var periods = NumPeriodsFor(scheme);
             var periodicamount = 100m;
-            var amount = periodicamount * periods;
-            var item = new SampleDataPattern() { DateFrequency = scheme, AmountYearly = amount, AmountJitter = JitterEnum.None, DateJitter = datejitter, Category = "Category", Payee = "Payee" };
+            var amount = periodicamount * periods * numperperiod;
+            var item = new SampleDataPattern() { DateFrequency = scheme, AmountYearly = amount, AmountJitter = JitterEnum.None, DateJitter = datejitter, DateRepeats = numperperiod, Category = "Category", Payee = "Payee" };
 
             // When: Generating transactions
             var actual = item.GetTransactions();
 
             // Then: There are the right amount of transactions
-            Assert.AreEqual(periods, actual.Count());
+            Assert.AreEqual(periods * numperperiod, actual.Count());
 
             // And: For each transaction...
             foreach (var result in actual)
@@ -131,10 +131,10 @@ namespace YoFi.SampleGen.Tests
         [TestMethod]
         public void ManyPerWeekSimple()
         {
-            // Given: Many Per Week Scheme, No Jitter
+            // Given: Weekly Scheme, DateRepeats = 3, No Jitter
             // When: Generating transactions
             // Then: Transactions pass all standard tests
-            var actual = SimpleTest(FrequencyEnum.ManyPerWeek);
+            var actual = SimpleTest(FrequencyEnum.Weekly, datejitter:JitterEnum.High, numperperiod: 3);
 
             // And: The days of week vary
             Assert.IsTrue(actual.Any(x => x.Timestamp.DayOfWeek != actual.First().Timestamp.DayOfWeek));
@@ -207,9 +207,6 @@ namespace YoFi.SampleGen.Tests
         [DataRow(FrequencyEnum.Weekly, JitterEnum.Low)]
         [DataRow(FrequencyEnum.Weekly, JitterEnum.Moderate)]
         [DataRow(FrequencyEnum.Weekly, JitterEnum.High)]
-        [DataRow(FrequencyEnum.ManyPerWeek, JitterEnum.Low)]
-        [DataRow(FrequencyEnum.ManyPerWeek, JitterEnum.Moderate)]
-        [DataRow(FrequencyEnum.ManyPerWeek, JitterEnum.High)]
         [DataTestMethod]
         public void AmountJitterMany(FrequencyEnum scheme, JitterEnum jitter)
         {
