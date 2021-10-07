@@ -104,7 +104,7 @@ namespace YoFi.SampleGen.Tests
         [TestMethod]
         public async Task GenerateAndAddFullSampleData()
         {
-            var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
+            var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions(addids:false);
             generator.GeneratePayees();
@@ -121,7 +121,7 @@ namespace YoFi.SampleGen.Tests
             count = await context.Splits.CountAsync();
             Assert.AreEqual(312, count);
             count = await context.Payees.CountAsync();
-            Assert.AreEqual(38, count);
+            Assert.AreEqual(36, count);
             count = await context.BudgetTxs.CountAsync();
             Assert.AreEqual(45, count);
         }
