@@ -242,6 +242,29 @@ namespace YoFi.Tests
             CollectionAssert.AreEquivalent(expected, model);
         }
 
+        [TestMethod]
+        public async Task CreateEmpty()
+        {
+            // When: Calling Creat with null value
+            int? value = null;
+            var result = await controller.Create(value);
+
+            // Then: It returns an empty model
+            var viewresult = result as ViewResult;
+            Assert.IsNull(viewresult.Model);
+        }
+
+        [TestMethod]
+        public async Task CreateModelZero()
+        {
+            // When: Calling Create partial with zerovalue
+            var result = await controller.CreateModal(0);
+
+            // Then: It returns an empty model
+            var viewresult = result as PartialViewResult;
+            Assert.IsNull(viewresult.Model);
+        }
+
         // TODO: Upload duplicate where ONLY the NAME is the same
         // TODO: Upload payee name stripping
     }

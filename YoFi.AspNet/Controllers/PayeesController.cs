@@ -119,7 +119,7 @@ namespace YoFi.AspNet.Controllers
                 return PartialView("CreatePartial",payee);
             }
 
-            return View();
+            return PartialView();
         }
 
         // POST: Payees/Create
