@@ -111,8 +111,9 @@ namespace YoFi.AspNet.Controllers
 
             return View(budgetTx);
         }
-
+#if false
         // Note that this is not currently implemented in the UI
+        // Also, these days my practice is to generate all the budgettx at the beginning of the year
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Generate()
@@ -131,6 +132,7 @@ namespace YoFi.AspNet.Controllers
 
             return Redirect("/BudgetTxs");
         }
+#endif
 
         // GET: BudgetTxs/Create
         public IActionResult Create()
