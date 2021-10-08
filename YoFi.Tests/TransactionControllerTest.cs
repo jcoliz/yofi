@@ -1609,5 +1609,18 @@ namespace YoFi.Tests
             CollectionAssert.AreEqual(numbers, (viewresult.ViewData["Highlight"] as HashSet<int>).ToList());
 
         }
+
+        [TestMethod]
+        public void Report()
+        {
+            // When: Calling Report with no information
+            var result = controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters());
+            var viewresult = result as ViewResult;
+
+            // Then: Everthing is filled in while proper defaults
+            Assert.AreEqual("all", viewresult.ViewData["report"]);
+            Assert.AreEqual(DateTime.Now.Month, viewresult.ViewData["month"]);
+
+        }
     }
 }
