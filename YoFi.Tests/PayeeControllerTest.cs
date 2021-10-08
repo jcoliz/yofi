@@ -265,6 +265,18 @@ namespace YoFi.Tests
             Assert.IsNull(viewresult.Model);
         }
 
+        [TestMethod]
+        public async Task EditNullNotFound() =>
+            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task EditModalNullNotFound() =>
+            Assert.IsTrue(await controller.EditModal(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task DeleteNullNotFound() =>
+            Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
         // TODO: Upload duplicate where ONLY the NAME is the same
         // TODO: Upload payee name stripping
     }
