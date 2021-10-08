@@ -1659,6 +1659,17 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public void DownloadPartial()
+        {
+            // When: Calling Download Partial
+            var result = controller.DownloadPartial();
+
+            // Then: It returns an empty model
+            var viewresult = result as PartialViewResult;
+            Assert.IsNull(viewresult.Model);
+        }
+
+        [TestMethod]
         public async Task EditPartial()
         {
             // Given: A transaction with no category
@@ -1703,6 +1714,31 @@ namespace YoFi.Tests
             // Then: The transaction DID NOT get the matching payee category
             Assert.AreNotEqual(payee.Category, actual.Category);
 
+        }
+
+        [TestMethod]
+        public async Task EditPayeeMatch()
+        {
+            // Given: A transaction with no category
+            var transaction = Items.First();
+            transaction.Category = null;
+            context.Transactions.Add(transaction);
+
+            // And: A payee which matches the category payee
+            var payee = PayeeItems.First();
+            context.Payees.Add(payee);
+            context.SaveChanges();
+
+            // When: Calling Edit 
+            var result = await controller.Edit(transaction.ID);
+            var viewresult = result as ViewResult;
+            var actual = viewresult.Model as Transaction;
+
+            // Then: The expectedtransasction is returned
+            Assert.AreEqual(transaction.Payee, actual.Payee);
+
+            // And: The transaction gets the matching payee category
+            Assert.AreEqual(payee.Category, actual.Category);
         }
     }
 }
