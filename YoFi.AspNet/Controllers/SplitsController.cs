@@ -41,13 +41,8 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
+        public async Task<IActionResult> Edit([Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
         {
-            if (id != split.ID)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
@@ -106,5 +101,8 @@ namespace YoFi.AspNet.Controllers
 
         Task<IActionResult> IController<Split>.Create(Split item) =>
             throw new NotImplementedException();
+
+        Task<IActionResult> IController<Split>.Edit(int id, Split item) =>
+            Edit(item);
     }
 }

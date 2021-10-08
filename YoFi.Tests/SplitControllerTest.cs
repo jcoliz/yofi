@@ -120,7 +120,7 @@ namespace YoFi.Tests
 
             var updated = new Split() { ID = id, TransactionID = item.ID, Amount = 75m, Category = "C" };
 
-            var result = await controller.Edit(id, updated);
+            var result = await controller.Edit(updated);
             var redirresult = result as RedirectToActionResult;
 
             Assert.AreEqual("Edit", redirresult.ActionName);
@@ -177,5 +177,9 @@ namespace YoFi.Tests
             var actual = context.Transactions.Single();
             Assert.IsNull(actual.Category);
         }
+
+        [TestMethod]
+        public async Task EditNullNotFound() =>
+            Assert.IsTrue(await controller.Edit(null as int?) is Microsoft.AspNetCore.Mvc.NotFoundResult);
     }
 }
