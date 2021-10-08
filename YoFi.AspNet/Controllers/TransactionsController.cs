@@ -1194,12 +1194,12 @@ namespace YoFi.AspNet.Controllers
 
             if (!parms.month.HasValue)
             {
-                bool iscurrentyear = (Year == DateTime.Now.Year);
+                bool iscurrentyear = (Year == Now.Year);
 
                 // By default, month is the current month when looking at the current year.
                 // When looking at previous years, default is the whole year (december)
                 if (iscurrentyear)
-                    parms.month = DateTime.Now.Month;
+                    parms.month = Now.Month;
                 else
                     parms.month = 12;
             }
@@ -1237,12 +1237,12 @@ namespace YoFi.AspNet.Controllers
                     var value = HttpContext?.Session.GetString(nameof(Year));
                     if (string.IsNullOrEmpty(value))
                     {
-                        Year = DateTime.Now.Year;
+                        Year = Now.Year;
                     }
                     else
                     {
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
-                        int y = DateTime.Now.Year;
+                        int y = Now.Year;
                         int.TryParse(value, out y);
                         _Year = y;
 #pragma warning restore IDE0059 // Unnecessary assignment of a value
@@ -1259,6 +1259,25 @@ namespace YoFi.AspNet.Controllers
                 HttpContext?.Session.SetString(nameof(Year), serialisedDate);
             }
         }
+
+        /// <summary>
+        /// Current datetime
+        /// </summary>
+        /// <remarks>
+        /// Which may be overridden by tests
+        /// </remarks>
+        public DateTime Now
+        {
+            get
+            {
+                return _Now ?? DateTime.Now;
+            }
+            set
+            {
+                _Now = value;
+            }
+        }
+        private DateTime? _Now;
 
         private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 

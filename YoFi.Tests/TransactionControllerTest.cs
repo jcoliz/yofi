@@ -1613,14 +1613,38 @@ namespace YoFi.Tests
         [TestMethod]
         public void Report()
         {
+            // Given: Current time is 1/1/2002
+            var now = new DateTime(2002, 1, 1);
+            controller.Now = now;
+
             // When: Calling Report with no information
             var result = controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters());
             var viewresult = result as ViewResult;
 
             // Then: Everthing is filled in while proper defaults
             Assert.AreEqual("all", viewresult.ViewData["report"]);
-            Assert.AreEqual(DateTime.Now.Month, viewresult.ViewData["month"]);
+            Assert.AreEqual(now.Month, viewresult.ViewData["month"]);
+        }
 
+        [TestMethod]
+        public void ReportSetsYear()
+        {
+            // Given: Current time is 1/1/2002
+            var now = new DateTime(2002, 1, 1);
+            controller.Now = now;
+            var year = 2000;
+
+            // And: First calling report with a defined year
+            controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters() { year = year });
+
+            // When: Later calling report with no year
+            var result = controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters());
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as AspNet.Controllers.Reports.Report;
+
+            // Then: The year from the first call is used
+            Assert.AreEqual(12, viewresult.ViewData["month"]);
+            Assert.IsTrue(model.Description.Contains(year.ToString()));
         }
     }
 }
