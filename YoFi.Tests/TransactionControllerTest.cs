@@ -1572,5 +1572,37 @@ namespace YoFi.Tests
             // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are downloaded
             Assert.AreEqual(expected, model.Count());
         }
+
+        [TestMethod]
+        public async Task Import()
+        {
+            // Given: A mix of transactions, some flagged as imported, some as not
+            var noimportitems = TransactionItems.Take(10);
+            var importitems = TransactionItems.Skip(10).Take(5).ToList();
+            foreach(var item in importitems)
+                item.Imported = true;
+                
+            context.Transactions.AddRange(noimportitems.Concat(importitems));
+            context.SaveChanges();
+
+            // When: Calling Import
+            var result = await controller.Import();
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Transaction>;
+
+            // Then: Only the imported transactions are flagged
+            CollectionAssert.AreEqual(importitems,model.ToList());
+        }
+
+        [TestMethod]
+        public async Task ImportHighlight()
+        {
+            // Given: A set of numbers
+
+            // When: Calling Import with highlight set to those numbers separated by colons
+
+            // Then: The "Highlight" viewdata is set to a hashset of those numbers
+
+        }
     }
 }
