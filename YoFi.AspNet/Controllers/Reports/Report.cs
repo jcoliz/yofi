@@ -105,19 +105,12 @@ namespace YoFi.AspNet.Controllers.Reports
         {
             get
             {
-                if (_OrderingColumn != null)
-                    return _OrderingColumn;
                 if (WithTotalColumn)
                     return TotalColumn;
 
                 return ColumnLabels.First();
             }
-            set
-            {
-                _OrderingColumn = value;
-            }
         }
-        ColumnLabel _OrderingColumn;
 
         #endregion
 
