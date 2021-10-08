@@ -502,6 +502,26 @@ namespace YoFi.Tests
             Assert.AreEqual(original.ID.ToString(), original.ReceiptUrl);
         }
         [TestMethod]
+        public async Task UpReceiptNoStorage()
+        {
+            await AddFiveTransactions();
+            var original = await context.Transactions.LastAsync();
+
+            // Create a formfile with it
+            var contenttype = "text/html";
+            var count = 10;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
+            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
+
+            // Make a new controller with no storage
+            controller = new ApiController(context, null, null);
+
+            var result = await controller.UpReceipt(original.ID, file);
+
+            Assert.IsFalse(result.Ok);
+        }
+
+        [TestMethod]
         public async Task UpReceiptAgainFails()
         {
             await UpReceipt();
