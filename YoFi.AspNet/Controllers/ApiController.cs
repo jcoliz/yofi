@@ -292,13 +292,10 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("EditPayee/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<ApiResult> EditPayee(int id, bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
+        public async Task<ApiResult> EditPayee(bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
         {
             try
             {
-                if (id != payee.ID && duplicate != true)
-                    throw new Exception("not found");
-
                 if (!ModelState.IsValid)
                     throw new Exception("invalid");
 

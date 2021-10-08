@@ -451,7 +451,7 @@ namespace YoFi.Tests
 
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
 
-            var result = await controller.EditPayee(original.ID, false, newitem);
+            var result = await controller.EditPayee(false, newitem);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newitem, result.Item);
@@ -472,7 +472,7 @@ namespace YoFi.Tests
 
             var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
 
-            var result = await controller.EditPayee(original.ID, true, newitem);
+            var result = await controller.EditPayee(true, newitem);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newitem, result.Item);
