@@ -786,13 +786,8 @@ namespace YoFi.AspNet.Controllers
                 return RedirectToAction(nameof(Edit), new { id });
         }
 
-        private async Task<IActionResult> DeleteReceipt(int? id)
+        private async Task<IActionResult> DeleteReceipt(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
             if (transaction == null)
             {

@@ -1740,5 +1740,25 @@ namespace YoFi.Tests
             // And: The transaction gets the matching payee category
             Assert.AreEqual(payee.Category, actual.Category);
         }
+
+        [TestMethod]
+        public async Task DetailsNullNotFound() => 
+            Assert.IsTrue(await controller.Details(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task EditNullNotFound() =>
+            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task EditModalNullNotFound() =>
+            Assert.IsTrue(await controller.EditModal(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task DeleteNullNotFound() =>
+            Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task ReceiptActionOther() =>
+            Assert.IsTrue(await controller.ReceiptAction(1,string.Empty) is RedirectToActionResult);
     }
 }
