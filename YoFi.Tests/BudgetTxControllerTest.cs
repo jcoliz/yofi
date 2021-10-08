@@ -40,7 +40,7 @@ namespace YoFi.Tests
                 };
             }
         }
-            
+
         IEnumerable<BudgetTx> ItemsLong;
 
         IEnumerable<BudgetTx> GetItemsLong()
@@ -240,10 +240,32 @@ namespace YoFi.Tests
             var model = actual.Model as List<BudgetTx>;
 
             // Then: Only the items with '{word}' in their category are returned
-            var expected = items.Where(x=>x.Category.Contains(word)).ToList();
+            var expected = items.Where(x => x.Category.Contains(word)).ToList();
             CollectionAssert.AreEquivalent(expected, model);
         }
 
+        [TestMethod]
+        public void CreateInitial()
+        {
+            // When: Calling Create
+            var result = controller.Create();
+
+            // Then: It returns an empty model
+            var viewresult = result as ViewResult;
+            Assert.IsNull(viewresult.Model);
+        }
+
+        [TestMethod]
+        public async Task DetailsNullNotFound() =>
+            Assert.IsTrue(await controller.Details(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task EditNullNotFound() =>
+            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task DeleteNullNotFound() =>
+            Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
         // TODO: Generate next month's TXs
     }
