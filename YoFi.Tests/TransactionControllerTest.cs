@@ -1646,5 +1646,16 @@ namespace YoFi.Tests
             Assert.AreEqual(12, viewresult.ViewData["month"]);
             Assert.IsTrue(model.Description.Contains(year.ToString()));
         }
+
+        [TestMethod]
+        public void CreateInitial()
+        {
+            // When: Calling Create
+            var result = controller.Create();
+
+            // Then: It returns an empty model
+            var viewresult = result as ViewResult;
+            Assert.IsNull(viewresult.Model);
+        }
     }
 }
