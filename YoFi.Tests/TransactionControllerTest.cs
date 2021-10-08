@@ -1657,5 +1657,52 @@ namespace YoFi.Tests
             var viewresult = result as ViewResult;
             Assert.IsNull(viewresult.Model);
         }
+
+        [TestMethod]
+        public async Task EditPartial()
+        {
+            // Given: A transaction with no category
+            var transaction = Items.First();
+            transaction.Category = null;
+            context.Transactions.Add(transaction);
+
+            // And: A payee which matches the category payee
+            var payee = PayeeItems.First();
+            context.Payees.Add(payee);
+            context.SaveChanges();
+
+            // When: Calling Edit Partial
+            var result = await controller.EditModal(transaction.ID);
+            var partial = result as PartialViewResult;
+            var actual = partial.Model as Transaction;
+
+            // Then: The expectedtransasction is returned
+            Assert.AreEqual(transaction.Payee, actual.Payee);
+
+            // And: The transaction gets the matching payee category
+            Assert.AreEqual(payee.Category, actual.Category);
+        }
+
+        [TestMethod]
+        public async Task EditPartialNoPayeeMatch()
+        {
+            // Given: A transaction with an existing category
+            var transaction = Items.First();
+            context.Transactions.Add(transaction);
+
+            // And: A payee which matches the transaction payee, but has a different category
+            var payee = PayeeItems.First();
+            context.Payees.Add(payee);
+            context.SaveChanges();
+
+            // When: Calling Edit Partial
+            var result = await controller.EditModal(transaction.ID);
+            var partial = result as PartialViewResult;
+            var actual = partial.Model as Transaction;
+
+            // Then: The transaction DID NOT get the matching payee category
+            Assert.AreNotEqual(payee.Category, actual.Category);
+
+        }
     }
 }
