@@ -1598,10 +1598,15 @@ namespace YoFi.Tests
         public async Task ImportHighlight()
         {
             // Given: A set of numbers
+            var numbers = new List<int>() { 3, 5, 7, 27, 107 };
 
             // When: Calling Import with highlight set to those numbers separated by colons
+            var highlight = string.Join(':', numbers.Select(x => x.ToString()));
+            var result = await controller.Import(highlight:highlight);
+            var viewresult = result as ViewResult;
 
             // Then: The "Highlight" viewdata is set to a hashset of those numbers
+            CollectionAssert.AreEqual(numbers, (viewresult.ViewData["Highlight"] as HashSet<int>).ToList());
 
         }
     }
