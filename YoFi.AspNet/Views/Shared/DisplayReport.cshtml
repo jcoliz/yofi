@@ -1,0 +1,54 @@
+﻿@model YoFi.AspNet.Controllers.Reports.IDisplayReport
+@{
+}
+<table class="table report">
+    <thead>
+        <tr>
+        <tr class="report-header">
+            <th>@Model.Name</th>
+            @foreach (var column in Model.ColumnLabelsFiltered)
+            {
+                <th>
+                    @(column.IsTotal ? "$ Total" : column.Name)
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Model.RowLabelsOrdered)
+        {
+            var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level + Model.DisplayLevelAdjustment}";
+            <tr class="@rowformat">
+
+                <td class="report-col-name">
+                    @{
+                        var name = row.Name;
+                        if (row.IsTotal)
+                        {
+                            name = "TOTAL";
+
+                        }
+                        if (name == null)
+                        {
+                            name = "-";
+                        }
+                    }
+                    @name
+                </td>
+
+                @foreach (var column in Model.ColumnLabelsFiltered)
+                {
+                    var cell = Model[column, row];
+
+                    var colformat = "report-col-amount" + (column.IsTotal ? " report-col-total" : string.Empty);
+
+                    var cellformat = column.DisplayAsPercent ? "P0" : "C2";
+
+                    <td class="@colformat">
+                        @cell.ToString(cellformat)
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
