@@ -72,14 +72,15 @@ namespace YoFi.AspNet.Controllers.Reports
         /// </summary>
         /// <param name="parameters">Parameters describing the report to be built</param>
         /// <returns>The report we built</returns>
-        public Report BuildReport(Parameters parameters)
+        public Report BuildReport(Parameters parameters,ReportDefinition definition = null)
         {
             var report = new Report();
 
             int Month = _qbuilder.Month = parameters.month ?? 12;
             int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
 
-            var definition = Definitions.Where(x => x.id == parameters.id).SingleOrDefault();
+            if (null == definition)
+                definition = Definitions.Where(x => x.id == parameters.id).SingleOrDefault();
 
             if (definition == null)
                 throw new ArgumentOutOfRangeException(nameof(parameters.id), $"Unable to find report {parameters.id}");
