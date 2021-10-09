@@ -63,11 +63,9 @@ namespace YoFi.AspNet.Controllers.Reports
         public ReportBuilder(ApplicationDbContext context)
         {
             _qbuilder = new QueryBuilder(context);
-            _report = new Report();
         }
 
         private readonly QueryBuilder _qbuilder;
-        private readonly Report _report;
 
         /// <summary>
         /// Build the report from the given <paramref name="parameters"/>
@@ -76,6 +74,8 @@ namespace YoFi.AspNet.Controllers.Reports
         /// <returns>The report we built</returns>
         public Report BuildReport(Parameters parameters)
         {
+            var report = new Report();
+
             int Month = _qbuilder.Month = parameters.month ?? 12;
             int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
 
@@ -86,7 +86,7 @@ namespace YoFi.AspNet.Controllers.Reports
 
             // Timeframe and description (which displays timeframe)
 
-            _report.Description = $"For {Year}";
+            report.Description = $"For {Year}";
             if (definition.WholeYear == true)
             {
                 _qbuilder.Month = 12;
@@ -94,67 +94,67 @@ namespace YoFi.AspNet.Controllers.Reports
             else
             {
                 var period = new DateTime(Year, Month, 1);
-                _report.Description += $" through {period:MMMM} ";
+                report.Description += $" through {period:MMMM} ";
             }
 
             // Most properties are set by report directly
 
-            _report.LoadFrom(definition);
+            report.LoadFrom(definition);
 
             // Set Source
 
-            _report.Source = _qbuilder.LoadFrom(definition);
+            report.Source = _qbuilder.LoadFrom(definition);
 
             // WholeYear needs to be handled after source is set
 
             if (definition.YearProgress == true)
             {
                 // What is the highest transaction in the "Actuals"?
-                var latesttime = _report.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
+                var latesttime = report.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
 
                 // What % of the way is it through that year?
                 var yearprogress = (double)latesttime.DayOfYear / 365.0;
 
-                _report.Description += $" {yearprogress:P0}";
+                report.Description += $" {yearprogress:P0}";
             }
 
             // Special case for yoy report
 
             if (parameters.id == "yoy")
             {
-                var years = _report.Source.Select(x => Int32.Parse(x.Name));
-                _report.Description = $"For {years.Min()} to {years.Max()}";
+                var years = report.Source.Select(x => Int32.Parse(x.Name));
+                report.Description = $"For {years.Min()} to {years.Max()}";
             }
 
             // Set custom columns
 
             if (!string.IsNullOrEmpty(definition.CustomColumns))
                 foreach (var col in definition.CustomColumns.Split(","))
-                    _report.AddCustomColumn(CustomColumnFor(col));
+                    report.AddCustomColumn(CustomColumnFor(col,report));
 
             // Override level based on parameters
 
             if (parameters.level.HasValue)
             {
-                _report.NumLevels = parameters.level.Value;
-                if (_report.NumLevels == 1)
-                    _report.DisplayLevelAdjustment = 1;
+                report.NumLevels = parameters.level.Value;
+                if (report.NumLevels == 1)
+                    report.DisplayLevelAdjustment = 1;
             }
 
             // Override showmonths based on parameters
 
             if (parameters.showmonths.HasValue)
-                _report.WithMonthColumns = parameters.showmonths.Value;
+                report.WithMonthColumns = parameters.showmonths.Value;
 
             // Go!
 
-            _report.Build();
-            _report.WriteToConsole(sorted:true);
+            report.Build();
+            report.WriteToConsole(sorted:true);
 
-            return _report;
+            return report;
         }
 
-        private ColumnLabel CustomColumnFor(string name)
+        private ColumnLabel CustomColumnFor(string name,Report report)
         {
             if (name == "budgetpct")
                 return new ColumnLabel()
@@ -174,7 +174,7 @@ namespace YoFi.AspNet.Controllers.Reports
                     IsSortingAfterTotal = true,
                     DisplayAsPercent = true,
                     Custom = (cols) =>
-                        (_report.GrandTotal == 0) ? 0 : cols.GetValueOrDefault("TOTAL") / _report.GrandTotal
+                        (report.GrandTotal == 0) ? 0 : cols.GetValueOrDefault("TOTAL") / report.GrandTotal
                 };
             else if (name == "budgetavailable")
                 return new ColumnLabel()
