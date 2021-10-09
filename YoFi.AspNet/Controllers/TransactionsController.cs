@@ -126,10 +126,20 @@ namespace YoFi.AspNet.Controllers
 
                             // Date: On this day or up to a week later
                             case 'd':
-                                if (DateTime.TryParse(value,out DateTime dtval))
+                                DateTime? dtval = null;
+                                if (Int32.TryParse(value, out ival) && ival >= 101 && ival <= 1231)
                                 {
-                                    result = result.Where(x => x.Timestamp >= dtval && x.Timestamp < dtval.AddDays(7));
+                                    dtval = new DateTime(DateTime.Now.Year, ival / 100, ival % 100);
                                 }
+                                else if (DateTime.TryParse(value,out DateTime dtvalout))
+                                {
+                                    dtval = dtvalout;
+                                }
+                                if (dtval.HasValue)
+                                {
+                                    result = result.Where(x => x.Timestamp >= dtval.Value && x.Timestamp < dtval.Value.AddDays(7));
+                                }
+
                                 break;
                         }
                     }
