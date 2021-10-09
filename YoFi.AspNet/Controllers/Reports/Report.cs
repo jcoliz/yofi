@@ -43,6 +43,11 @@ namespace YoFi.AspNet.Controllers.Reports
         public string Description { get; set; }
 
         /// <summary>
+        /// The definition ID used to generate this report
+        /// </summary>
+        public string Definition { get; set; }
+
+        /// <summary>
         /// Where to get items
         /// </summary>
         /// <remarks>
@@ -212,6 +217,9 @@ namespace YoFi.AspNet.Controllers.Reports
 
             if (definition.DisplayLevelAdjustment.HasValue)
                 DisplayLevelAdjustment = definition.DisplayLevelAdjustment.Value;
+
+            if (!string.IsNullOrEmpty(definition.id))
+                Definition = definition.id;
         }
 
         /// <summary>

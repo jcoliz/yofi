@@ -38,5 +38,13 @@ namespace YoFi.AspNet.Controllers.Reports
         /// The total of the total column
         /// </summary>
         public decimal GrandTotal => this[TotalColumn, TotalRow];
+
+        /// <summary>
+        /// Report definition returns null
+        /// </summary>
+        /// <remarks>
+        /// Because this is a manual report, no definition was used in its making
+        /// </remarks>
+        string IDisplayReport.Definition => null;
     }
 }

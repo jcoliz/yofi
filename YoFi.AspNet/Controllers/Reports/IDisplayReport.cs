@@ -28,6 +28,11 @@ namespace YoFi.AspNet.Controllers.Reports
         string Description { get; }
 
         /// <summary>
+        /// The definition ID used to generate this report
+        /// </summary>
+        string Definition { get; }
+
+        /// <summary>
         /// All the column labels which should be displayed
         /// </summary>
         IEnumerable<ColumnLabel> ColumnLabelsFiltered { get; }
