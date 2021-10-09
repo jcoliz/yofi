@@ -123,6 +123,14 @@ namespace YoFi.AspNet.Controllers
                                     result = result.Where(x => x.Amount == dval);
                                 }
                                 break;
+
+                            // Date: On this day or up to a week later
+                            case 'd':
+                                if (DateTime.TryParse(value,out DateTime dtval))
+                                {
+                                    result = result.Where(x => x.Timestamp >= dtval && x.Timestamp < dtval.AddDays(7));
+                                }
+                                break;
                         }
                     }
                     else
