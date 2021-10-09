@@ -55,7 +55,10 @@ namespace YoFi.AspNet.Pages
             },
         };
 
-        public IEnumerable<Report> Reports { get; private set; }
+        public List<Report> Reports { get; private set; }
+
+        public List<Table<ColumnLabel, RowLabel, decimal>> Tables { get; private set; }
+
 
         public ReportsModel(ApplicationDbContext context)
         {
@@ -69,6 +72,28 @@ namespace YoFi.AspNet.Pages
             // Build the reports
 
             Reports = Definitions.Select(x => _builder.BuildReport(new ReportBuilder.Parameters(),x)).ToList();
+
+            // Calculate the summary
+
+            Tables = new List<Table<ColumnLabel, RowLabel, decimal>>();
+
+            // Net Income: Income + Taxes
+
+            var netincome = new Table<ColumnLabel, RowLabel, decimal>();
+            var totalcolumn = new ColumnLabel() { IsTotal = true };
+            var totalrow = new RowLabel() { IsTotal = true };
+            var incomerow = new RowLabel() { Name = "Income" };
+            var taxesrow = new RowLabel() { Name = "Taxes" };
+            netincome[totalcolumn, incomerow] = Reports[0].GrandTotal;
+            netincome[totalcolumn, taxesrow] = Reports[1].GrandTotal;
+            netincome[totalcolumn, totalrow] = Reports[0].GrandTotal + Reports[1].GrandTotal;
+            Tables.Add(netincome);
+
+            // Profit: Income + Taxes + Savings + Expenses
+
+            // Savings Rate: ( Savings + Profit ) / ( Income + Taxes )
+
+            // For visual consistency, I could make tables and render them like reports
         }
     }
 }
