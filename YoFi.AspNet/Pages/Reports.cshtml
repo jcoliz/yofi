@@ -3,11 +3,12 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Home";
+    var i = 1;
 }
 
-@foreach(var report in Model.Reports)
+@foreach (var report in Model.Reports)
 {
-    <div class="row">
+    <div class="col-lg-6">
         <!-- TODO: Move this into its own partial html or somesuch-->
         <table class="table report">
             <thead>
