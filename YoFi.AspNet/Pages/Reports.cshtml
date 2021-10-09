@@ -7,62 +7,12 @@
 
 @foreach (var report in Model.Reports)
 {
-<div class="col-lg-6">
-    <!-- TODO: Move this into its own partial html or somesuch-->
-    <table class="table report">
-        <thead>
-            <tr>
-            <tr class="report-header">
-                <th>@report.Name</th>
-                @foreach (var column in report.ColumnLabelsFiltered)
-                {
-                    <th>
-                        @(column.IsTotal ? "$ Total" : column.Name)
-                    </th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var row in report.RowLabelsOrdered)
-            {
-                var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level + report.DisplayLevelAdjustment}";
-                <tr class="@rowformat">
-
-                    <td class="report-col-name">
-                        @{
-                            var name = row.Name;
-                            if (row.IsTotal)
-                            {
-                                name = "TOTAL";
-
-                            }
-                            if (name == null)
-                            {
-                                name = "-";
-                            }
-                        }
-                        @name
-                    </td>
-
-                    @foreach (var column in report.ColumnLabelsFiltered)
-                    {
-                        var cell = report[column, row];
-
-                        var colformat = "report-col-amount" + (column.IsTotal ? " report-col-total" : string.Empty);
-
-                        var cellformat = column.DisplayAsPercent ? "P0" : "C2";
-
-                        <td class="@colformat">
-                            @cell.ToString(cellformat)
-                        </td>
-                    }
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-                @if (report.Description == "--")
-                {
-                    <hr />
-                }
+    <div class="col-lg-6">
+        @await Html.PartialAsync("DisplayReport", report)
+    </div>
+    
+    @if (report.Description == "--")
+    {
+        <hr />
+    }
 }
