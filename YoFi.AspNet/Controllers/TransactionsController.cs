@@ -111,6 +111,18 @@ namespace YoFi.AspNet.Controllers
                                 else if (value == "1")
                                     result = result.Where(x => x.ReceiptUrl != null);
                                 break;
+
+                            // Amount
+                            case 'a':
+                                if (Int32.TryParse(value, out Int32 ival))
+                                {
+                                    result = result.Where(x => x.Amount == (decimal)ival || x.Amount == ((decimal)ival)/100);
+                                }
+                                else if (decimal.TryParse(value,out decimal dval))
+                                {
+                                    result = result.Where(x => x.Amount == dval);
+                                }
+                                break;
                         }
                     }
                     else
