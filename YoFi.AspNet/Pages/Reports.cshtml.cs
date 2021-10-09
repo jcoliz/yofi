@@ -26,10 +26,14 @@ namespace YoFi.AspNet.Pages
 
         private readonly ReportBuilder _builder;
 
-        public void OnGet()
+        public void OnGet([Bind("year,month")] ReportBuilder.Parameters parms)
         {
+            // Fixup parameter
+            if (!parms.month.HasValue)
+                parms.month = DateTime.Now.Month;
+
             // Build the reports
-            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportBuilder.Parameters() { id = y })).ToList<IDisplayReport>()).ToList();
+            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportBuilder.Parameters() { id = y, month = parms.month })).ToList<IDisplayReport>()).ToList();
 
             // Calculate the summary
 
