@@ -55,10 +55,7 @@ namespace YoFi.AspNet.Pages
             },
         };
 
-        public List<Report> Reports { get; private set; }
-
-        public List<Table<ColumnLabel, RowLabel, decimal>> Tables { get; private set; }
-
+        public List<IDisplayReport> Reports { get; private set; }
 
         public ReportsModel(ApplicationDbContext context)
         {
@@ -71,41 +68,37 @@ namespace YoFi.AspNet.Pages
         {
             // Build the reports
 
-            Reports = Definitions.Select(x => _builder.BuildReport(new ReportBuilder.Parameters(),x)).ToList();
+            Reports = Definitions.Select(x => _builder.BuildReport(new ReportBuilder.Parameters(),x)).ToList<IDisplayReport>();
 
             // Calculate the summary
-
-            Tables = new List<Table<ColumnLabel, RowLabel, decimal>>();
 
             var ReportsByName = Reports.ToDictionary(x => x.Name, x => x);
 
             // Net Income: Income + Taxes
 
-            var netincome = new Table<ColumnLabel, RowLabel, decimal>();
-            var totalcolumn = new ColumnLabel() { IsTotal = true };
-            var totalrow = new RowLabel() { IsTotal = true };
+            var netincome = new ManualReport() { Name = "Net Income" };
             var incomerow = new RowLabel() { Name = "Income" };
             var taxesrow = new RowLabel() { Name = "Taxes" };
-            netincome[totalcolumn, incomerow] = ReportsByName["Income"].GrandTotal;
-            netincome[totalcolumn, taxesrow] = ReportsByName["Taxes"].GrandTotal;
-            var netincometotal = netincome[totalcolumn, totalrow] = ReportsByName["Income"].GrandTotal + ReportsByName["Taxes"].GrandTotal;
-            Tables.Add(netincome);
+            netincome[netincome.TotalColumn, incomerow] = ReportsByName["Income"].GrandTotal;
+            netincome[netincome.TotalColumn, taxesrow] = ReportsByName["Taxes"].GrandTotal;
+            netincome[netincome.TotalColumn, netincome.TotalRow] = ReportsByName["Income"].GrandTotal + ReportsByName["Taxes"].GrandTotal;
+            Reports.Add(netincome);
 
             // Profit: Income + Taxes + Expenses
 
-            var profit = new Table<ColumnLabel, RowLabel, decimal>();
+            var profit = new ManualReport() { Name = "Profit" };
             var netincomerow = new RowLabel() { Name = "Net Income" };
             var expensesrow = new RowLabel() { Name = "Expenses" };
             var pctcol = new ColumnLabel() { Name = "% of Net Income", IsSortingAfterTotal = true, DisplayAsPercent = true };
             //var savingsrow = new RowLabel() { Name = "Savings" };
-            profit[totalcolumn, netincomerow] = netincometotal;
+            profit[profit.TotalColumn, netincomerow] = netincome.GrandTotal;
             profit[pctcol, netincomerow] = 1m;
-            profit[totalcolumn, expensesrow] = ReportsByName["Expenses"].GrandTotal;
-            profit[pctcol, expensesrow] = ReportsByName["Expenses"].GrandTotal / netincometotal;
+            profit[profit.TotalColumn, expensesrow] = ReportsByName["Expenses"].GrandTotal;
+            profit[pctcol, expensesrow] = ReportsByName["Expenses"].GrandTotal / netincome.GrandTotal;
             //profit[totalcolumn, savingsrow] = ReportsByName["Savings"].GrandTotal;
-            profit[totalcolumn, totalrow] = netincometotal + ReportsByName["Expenses"].GrandTotal; //    + ReportsByName["Savings"].GrandTotal;
-            profit[pctcol, totalrow] = (netincometotal + ReportsByName["Expenses"].GrandTotal) / netincometotal;
-            Tables.Add(profit);
+            profit[profit.TotalColumn, profit.TotalRow] = netincome.GrandTotal + ReportsByName["Expenses"].GrandTotal; //    + ReportsByName["Savings"].GrandTotal;
+            profit[pctcol, profit.TotalRow] = (netincome.GrandTotal + ReportsByName["Expenses"].GrandTotal) / netincome.GrandTotal;
+            Reports.Add(profit);
 
             // Savings Rate: ( Savings + Profit ) / ( Income + Taxes )
 

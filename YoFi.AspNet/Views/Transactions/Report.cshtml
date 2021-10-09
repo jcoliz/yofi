@@ -1,6 +1,6 @@
 ﻿@using YoFi.AspNet.Controllers.Reports
 @using YoFi.AspNet.Controllers 
-@model Report
+@model IDisplayReport
 @{
     var icons = new[] { "&check;", "!!", "X" };
     string report = (string)ViewData["report"];
@@ -135,7 +135,7 @@
             @foreach (var column in Model.ColumnLabelsFiltered)
             {
                 <th>
-                    @(column.IsTotal ? "TOTAL" : column.Name)
+                    @(column.IsTotal ? "$ Total" : column.Name)
                 </th>
             }
         </tr>

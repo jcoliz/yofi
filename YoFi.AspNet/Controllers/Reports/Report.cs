@@ -24,7 +24,7 @@ namespace YoFi.AspNet.Controllers.Reports
     /// Note that there is no app-specific logic of any form in this
     /// class.
     /// </remarks>
-    public class Report : IComparer<RowLabel>
+    public class Report : IDisplayReport, IComparer<RowLabel>
     {
         #region Configuration Properties
 
