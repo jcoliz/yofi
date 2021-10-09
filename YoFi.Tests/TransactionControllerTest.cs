@@ -1634,6 +1634,22 @@ namespace YoFi.Tests
             Assert.AreEqual(expected, model.Count());
         }
 
+        [TestMethod]
+        public async Task IndexQIntAnyMultiple()
+        {
+            // Given: A mix of transactions, with differing amounts, dates, and payees
+            var items = TransactionItems.Take(23);
+            context.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index with q='###,###'
+            var model = await WhenCallingIndexWithQ($"123,500");
+
+            // Then: Only matching transactions are returned
+            var expected = 1; // I'll just tell you there's 1 of these
+            Assert.AreEqual(expected, model.Count());
+        }
+
         [DataRow("c=B,p=4",3)]
         [DataRow("p=2,y=2000", 2)]
         [DataRow("c=C,p=2,y=2000", 1)]
