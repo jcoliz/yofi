@@ -4,17 +4,27 @@
     Layout = "_Layout";
     ViewData["Title"] = "Home";
 }
+
+<h2>Summary</h2>
+
+@if (!string.IsNullOrEmpty(Model.Reports.First().First().Description))
+{
+<h3>
+@Model.Reports.First().First().Description
+</h3>
+}
+
 @foreach (var section in Model.Reports)
 {
-<div class="col-lg-6">
-    @foreach (var report in section)
-    {
-        @await Html.PartialAsync("DisplayReport", report)
-        @if (!string.IsNullOrEmpty(report.Definition))
+    <div class="col-lg-6">
+        @foreach (var report in section)
         {
-            <a asp-controller="Transactions" asp-action="Report" asp-route-id="@report.Definition-detail" class="dropdown-item">Details &raquo;</a>
+            @await Html.PartialAsync("DisplayReport", report)
+            @if (!string.IsNullOrEmpty(report.Definition))
+            {
+                <a asp-controller="Transactions" asp-action="Report" asp-route-id="@report.Definition-detail" class="dropdown-item">Details &raquo;</a>
+            }
         }
-    }
     </div>
-    <hr/>
+    <hr />
 }
