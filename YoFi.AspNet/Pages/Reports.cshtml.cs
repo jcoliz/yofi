@@ -11,54 +11,10 @@ namespace YoFi.AspNet.Pages
 {
     public class ReportsModel : PageModel
     {
-        public static List<List<ReportDefinition>> Definitions = new List<List<ReportDefinition>>()
+        public static List<List<string>> Definitions = new List<List<string>>()
         {
-            new List<ReportDefinition>()
-            {
-            new ReportDefinition()
-            {
-                id = "income",
-                SkipLevels = 1,
-                //DisplayLevelAdjustment = 1,
-                SortOrder = "TotalAscending",
-                Name = "Income",
-                Source = "Actual",
-                SourceParameters = "top=Income",
-                CustomColumns = "pctoftotal"
-            },
-            new ReportDefinition()
-            {
-                id = "taxes",
-                Source = "Actual",
-                SourceParameters = "top=Taxes",
-                SkipLevels = 1,
-                //DisplayLevelAdjustment = 1,
-                Name = "Taxes",
-                CustomColumns = "pctoftotal"
-            },
-            },
-            new List<ReportDefinition>()
-            {
-            new ReportDefinition()
-            {
-                id = "expenses",
-                CustomColumns = "pctoftotal",
-                Source = "Actual",
-                SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
-                //DisplayLevelAdjustment = 1,
-                Name = "Expenses"
-            },
-            new ReportDefinition()
-            {
-                id = "savings",
-                Source = "Actual",
-                SourceParameters = "top=Savings",
-                SkipLevels = 1,
-                //DisplayLevelAdjustment = 1,
-                Name = "Savings",
-                CustomColumns = "pctoftotal"
-            },
-            }
+            new List<string>() { "income","taxes" },
+            new List<string>() { "expenses", "savings"}
         };
 
         public List<List<IDisplayReport>> Reports { get; private set; }
@@ -73,7 +29,7 @@ namespace YoFi.AspNet.Pages
         public void OnGet()
         {
             // Build the reports
-            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportBuilder.Parameters(), y)).ToList<IDisplayReport>()).ToList();
+            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportBuilder.Parameters() { id = y })).ToList<IDisplayReport>()).ToList();
 
             // Calculate the summary
 
