@@ -4,15 +4,11 @@
     Layout = "_Layout";
     ViewData["Title"] = "Home";
 }
-
-@foreach (var report in Model.Reports)
+@foreach (var section in Model.Reports)
 {
     <div class="col-lg-6">
-        @await Html.PartialAsync("DisplayReport", report)
+        @foreach (var report in section)
+            @await Html.PartialAsync("DisplayReport", report)
     </div>
-    
-    @if (report.Description == "--")
-    {
-        <hr />
-    }
+    <hr/>
 }

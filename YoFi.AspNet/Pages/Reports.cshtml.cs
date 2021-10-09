@@ -11,8 +11,10 @@ namespace YoFi.AspNet.Pages
 {
     public class ReportsModel : PageModel
     {
-        public static List<ReportDefinition> Definitions = new List<ReportDefinition>()
+        public static List<List<ReportDefinition>> Definitions = new List<List<ReportDefinition>>()
         {
+            new List<ReportDefinition>()
+            {
             new ReportDefinition()
             {
                 id = "income",
@@ -34,6 +36,9 @@ namespace YoFi.AspNet.Pages
                 Name = "Taxes",
                 CustomColumns = "pctoftotal"
             },
+            },
+            new List<ReportDefinition>()
+            {
             new ReportDefinition()
             {
                 id = "expenses",
@@ -53,9 +58,10 @@ namespace YoFi.AspNet.Pages
                 Name = "Savings",
                 CustomColumns = "pctoftotal"
             },
+            }
         };
 
-        public List<IDisplayReport> Reports { get; private set; }
+        public List<List<IDisplayReport>> Reports { get; private set; }
 
         public ReportsModel(ApplicationDbContext context)
         {
@@ -67,12 +73,11 @@ namespace YoFi.AspNet.Pages
         public void OnGet()
         {
             // Build the reports
-
-            Reports = Definitions.Select(x => _builder.BuildReport(new ReportBuilder.Parameters(),x)).ToList<IDisplayReport>();
+            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportBuilder.Parameters(), y)).ToList<IDisplayReport>()).ToList();
 
             // Calculate the summary
 
-            var ReportsByName = Reports.ToDictionary(x => x.Name, x => x);
+            var ReportsByName = Reports.SelectMany(x=>x).ToDictionary(x => x.Name, x => x);
 
             // Net Income: Income + Taxes
 
@@ -86,7 +91,7 @@ namespace YoFi.AspNet.Pages
             netincome[pctcol, taxesrow] = - ReportsByName["Taxes"].GrandTotal / ReportsByName["Income"].GrandTotal;
             netincome[netincome.TotalColumn, netincome.TotalRow] = ReportsByName["Income"].GrandTotal + ReportsByName["Taxes"].GrandTotal;
             netincome[pctcol, netincome.TotalRow] = netincome.GrandTotal / ReportsByName["Income"].GrandTotal;
-            Reports.Insert(2,netincome);
+            Reports[0].Add(netincome);
 
             // Profit: Income + Taxes + Expenses
 
@@ -102,7 +107,7 @@ namespace YoFi.AspNet.Pages
             //profit[totalcolumn, savingsrow] = ReportsByName["Savings"].GrandTotal;
             profit[profit.TotalColumn, profit.TotalRow] = netincome.GrandTotal + ReportsByName["Expenses"].GrandTotal; //    + ReportsByName["Savings"].GrandTotal;
             profit[pctcol, profit.TotalRow] = (netincome.GrandTotal + ReportsByName["Expenses"].GrandTotal) / netincome.GrandTotal;
-            Reports.Add(profit);
+            Reports[1].Add(profit);
 
             // Savings Rate: ( Savings + Profit ) / ( Income + Taxes )
 
