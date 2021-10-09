@@ -192,16 +192,8 @@ namespace YoFi.AspNet.Controllers.Reports
         {
             new ReportDefinition()
             {
-                id = "all",
-                NumLevels = 2,
-                Source = "Actual",
-                Name = "All Transactions"
-            },
-            new ReportDefinition()
-            {
                 id = "income",
                 SkipLevels = 1,
-                DisplayLevelAdjustment = 1,
                 SortOrder = "TotalAscending",
                 Name = "Income",
                 Source = "Actual",
@@ -214,18 +206,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 Source = "Actual",
                 SourceParameters = "top=Taxes",
                 SkipLevels = 1,
-                DisplayLevelAdjustment = 1,
                 Name = "Taxes",
-                CustomColumns = "pctoftotal"
-            },
-            new ReportDefinition()
-            {
-                id = "savings",
-                Source = "Actual",
-                SourceParameters = "top=Savings",
-                SkipLevels = 1,
-                DisplayLevelAdjustment = 1,
-                Name = "Savings",
                 CustomColumns = "pctoftotal"
             },
             new ReportDefinition()
@@ -234,9 +215,69 @@ namespace YoFi.AspNet.Controllers.Reports
                 CustomColumns = "pctoftotal",
                 Source = "Actual",
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
+                Name = "Expenses",
+            },
+            new ReportDefinition()
+            {
+                id = "savings",
+                Source = "Actual",
+                SourceParameters = "top=Savings",
+                SkipLevels = 1,
+                Name = "Savings",
+                CustomColumns = "pctoftotal"
+            },
+            new ReportDefinition()
+            {
+                id = "income-detail",
+                SkipLevels = 1,
+                SortOrder = "TotalAscending",
+                Name = "Income Detail",
+                Source = "Actual",
+                SourceParameters = "top=Income",
+                CustomColumns = "pctoftotal",
+                NumLevels = 2,
+                WithMonthColumns = true,
+            },
+            new ReportDefinition()
+            {
+                id = "taxes-detail",
+                Source = "Actual",
+                SourceParameters = "top=Taxes",
+                SkipLevels = 1,
+                Name = "Taxes Detail",
+                CustomColumns = "pctoftotal",
+                NumLevels = 2,
+                WithMonthColumns = true,
+
+            },
+            new ReportDefinition()
+            {
+                id = "expenses-detail",
+                CustomColumns = "pctoftotal",
+                Source = "Actual",
+                SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
+                Name = "Expenses Detail",
+                NumLevels = 2,
+                WithMonthColumns = true,
+            },
+            new ReportDefinition()
+            {
+                id = "savings-detail",
+                Source = "Actual",
+                SourceParameters = "top=Savings",
+                SkipLevels = 1,
+                Name = "Savings Detail",
+                CustomColumns = "pctoftotal",
                 WithMonthColumns = true,
                 NumLevels = 2,
-                Name = "Expenses"
+            },
+            new ReportDefinition()
+            {
+                id = "all",
+                NumLevels = 2,
+                Source = "Actual",
+                Name = "All Transactions",
+                WithMonthColumns = true,
             },
             new ReportDefinition()
             {

@@ -167,8 +167,8 @@ namespace YoFi.Tests
             var expected = Transactions1000.Sum(x => x.Amount);
             Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
 
-            // And: Report has the correct # columns (just total)
-            Assert.AreEqual(1, report.ColumnLabels.Count());
+            // And: Report has the correct # columns (all months and total)
+            Assert.AreEqual(13, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
             var rowset = new int[] { 9, 21, 24, 26 };
@@ -197,7 +197,7 @@ namespace YoFi.Tests
             Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
 
             // And: Report has the correct # columns (Just total)
-            Assert.AreEqual(1, report.ColumnLabels.Count());
+            Assert.AreEqual(month+1, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
             var rowset = new int[] { 9, 21, 24, 26 };
@@ -255,7 +255,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the '{Category}' report for the correct year
-            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "expenses", year = 2020, showmonths = showmonths});
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "expenses-detail", year = 2020, showmonths = showmonths});
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
