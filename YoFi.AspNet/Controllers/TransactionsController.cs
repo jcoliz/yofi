@@ -116,9 +116,9 @@ namespace YoFi.AspNet.Controllers
                             case 'a':
                                 if (Int32.TryParse(value, out Int32 ival))
                                 {
-                                    result = result.Where(x => x.Amount == (decimal)ival || x.Amount == ((decimal)ival)/100);
+                                    result = result.Where(x => x.Amount == (decimal)ival || x.Amount == ((decimal)ival) / 100);
                                 }
-                                else if (decimal.TryParse(value,out decimal dval))
+                                else if (decimal.TryParse(value, out decimal dval))
                                 {
                                     result = result.Where(x => x.Amount == dval);
                                 }
@@ -131,7 +131,7 @@ namespace YoFi.AspNet.Controllers
                                 {
                                     dtval = new DateTime(DateTime.Now.Year, ival / 100, ival % 100);
                                 }
-                                else if (DateTime.TryParse(value,out DateTime dtvalout))
+                                else if (DateTime.TryParse(value, out DateTime dtvalout))
                                 {
                                     dtval = dtvalout;
                                 }
@@ -142,6 +142,57 @@ namespace YoFi.AspNet.Controllers
 
                                 break;
                         }
+                    }
+                    else if (Int32.TryParse(term, out Int32 intval))
+                    {
+                        // If this is an integer search term, there's a lot of places it can be. It will
+                        // the the SAME as the text search, below, plus amount or date.
+
+                        // One tricky thing is figuring out of it's a valid date
+                        DateTime? dtval = null;
+                        try
+                        {
+                            dtval = new DateTime(DateTime.Now.Year, intval / 100, intval % 100);
+                        }
+                        catch
+                        {
+                            // Any issues, we'll leave dtval as null
+                        }
+
+                        if (dtval.HasValue)
+                        {
+                            result = result.Where(x =>
+                                x.Category.Contains(term) ||
+                                x.Memo.Contains(term) ||
+                                x.Payee.Contains(term) ||
+                                x.Amount == (decimal)intval ||
+                                x.Amount == ((decimal)intval) / 100 ||
+                                (x.Timestamp >= dtval && x.Timestamp <= dtval.Value.AddDays(7)) ||
+                                x.Splits.Any(s =>
+                                    s.Category.Contains(term) ||
+                                    s.Memo.Contains(term) ||
+                                    s.Amount == (decimal)intval ||
+                                    s.Amount == ((decimal)intval) / 100
+                                )
+                            );
+                        }
+                        else
+                        {
+                            result = result.Where(x =>
+                                x.Category.Contains(term) ||
+                                x.Memo.Contains(term) ||
+                                x.Payee.Contains(term) ||
+                                x.Amount == (decimal)intval ||
+                                x.Amount == ((decimal)intval) / 100 ||
+                                x.Splits.Any(s =>
+                                    s.Category.Contains(term) ||
+                                    s.Memo.Contains(term) ||
+                                    s.Amount == (decimal)intval ||
+                                    s.Amount == ((decimal)intval) / 100
+                                )
+                            );
+                        }
+
                     }
                     else
                     {

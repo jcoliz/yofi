@@ -71,7 +71,8 @@ namespace YoFi.Tests
                     new Transaction() { Category = "GH:RGB", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
                     new Transaction() { Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
                     new Transaction() { Amount = 123m },
-                    new Transaction() { Amount = 1.23m }
+                    new Transaction() { Amount = 1.23m },
+                    new Transaction() { Memo = "123" },
                 };
             }
         }
@@ -1613,6 +1614,24 @@ namespace YoFi.Tests
             var expected = items.Count(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7));
             Assert.AreEqual(expected, model.Count());
             Assert.IsTrue(model.All(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7)));
+        }
+
+        [TestMethod]
+        public async Task IndexQIntAny()
+        {
+            // Given: A mix of transactions, with differing amounts, dates, and payees
+            var items = TransactionItems.Take(23);
+            context.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index with q='###'
+            var model = await WhenCallingIndexWithQ($"123");
+
+            // Then: Transactions with {###} in the memo or payee are returned AS WELL AS
+            // transactions on or within a week of #/## AS WELL AS transactions with amounts
+            // of ###.00 and #.##.
+            var expected = 4; // I'll just tell you there's 4 of these
+            Assert.AreEqual(expected, model.Count());
         }
 
         [DataRow("c=B,p=4",3)]
