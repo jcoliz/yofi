@@ -40,6 +40,7 @@ namespace YoFi.AspNet.Pages
                 CustomColumns = "pctoftotal",
                 Source = "Actual",
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
+                DisplayLevelAdjustment = 1,
                 Name = "Expenses"
             },
             new ReportDefinition()
