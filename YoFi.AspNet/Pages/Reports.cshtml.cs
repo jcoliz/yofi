@@ -68,9 +68,7 @@ namespace YoFi.AspNet.Pages
             profit[pctcol, profit.TotalRow] = (netincome.GrandTotal + TotalForReport("Expenses")) / netincome.GrandTotal;
             Reports[1].Add(profit);
 
-            // Savings Rate: ( Savings + Profit ) / ( Income + Taxes )
-
-            // For visual consistency, I could make tables and render them like reports
+            // Budget Reports: I think I want Budget vs Expenses on the left, and perhaps managed budget on the right
         }
     }
 }
