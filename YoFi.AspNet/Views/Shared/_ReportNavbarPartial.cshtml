@@ -31,43 +31,46 @@
         <div class="collapse navbar-collapse" id="navbarPage">
 
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonLevel" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Depth
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLevel">
-                        @{
-                            for (int i = 1; i <= 4; i++)
-                            {
-                                <a asp-action="Report"
-                                   asp-route-id="@ViewData["report"]"
-                                   asp-route-month="@ViewData["month"]"
-                                   asp-route-showmonths="@ViewData["showmonths"]"
-                                   asp-route-level="@i"
-                                   class="dropdown-item">@i-Level</a>
+                @if (report != "summary")
+                {
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonLevel" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Depth
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLevel">
+                            @{
+                                for (int i = 1; i <= 4; i++)
+                                {
+                                    <a asp-action="Report"
+                                       asp-route-id="@ViewData["report"]"
+                                       asp-route-month="@ViewData["month"]"
+                                       asp-route-showmonths="@ViewData["showmonths"]"
+                                       asp-route-level="@i"
+                                       class="dropdown-item">@i-Level</a>
+                                }
                             }
-                        }
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonColumns" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Show Months
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
-                        <a asp-action="Report"
-                           asp-route-id="@ViewData["report"]"
-                           asp-route-level="@ViewData["level"]"
-                           asp-route-month="@ViewData["month"]"
-                           asp-route-showmonths="true"
-                           class="dropdown-item">Show</a>
-                        <a asp-action="Report"
-                           asp-route-id="@ViewData["report"]"
-                           asp-route-level="@ViewData["level"]"
-                           asp-route-month="@ViewData["month"]"
-                           asp-route-showmonths="false"
-                           class="dropdown-item">Hide</a>
-                    </div>
-                </li>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonColumns" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Show Months
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
+                            <a asp-action="Report"
+                               asp-route-id="@ViewData["report"]"
+                               asp-route-level="@ViewData["level"]"
+                               asp-route-month="@ViewData["month"]"
+                               asp-route-showmonths="true"
+                               class="dropdown-item">Show</a>
+                            <a asp-action="Report"
+                               asp-route-id="@ViewData["report"]"
+                               asp-route-level="@ViewData["level"]"
+                               asp-route-month="@ViewData["month"]"
+                               asp-route-showmonths="false"
+                               class="dropdown-item">Hide</a>
+                        </div>
+                    </li>
+                }
 
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonMonth" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
