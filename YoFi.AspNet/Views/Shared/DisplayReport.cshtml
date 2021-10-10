@@ -42,7 +42,7 @@
 
                     var colformat = "report-col-amount" + (column.IsTotal ? " report-col-total" : string.Empty);
 
-                    var cellformat = column.DisplayAsPercent ? "P0" : "C2";
+                    var cellformat = column.DisplayAsPercent ? "P0" : "C0";
 
                     <td class="@colformat">
                         @cell.ToString(cellformat)
