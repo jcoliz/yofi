@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using YoFi.AspNet.Models;
 
 namespace YoFi.SampleGen.Tests
@@ -218,7 +219,7 @@ namespace YoFi.SampleGen.Tests
         }
 
         [TestMethod]
-        public void GenerateFullSampleData()
+        public async Task GenerateFullSampleData()
         {
             var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
@@ -233,6 +234,14 @@ namespace YoFi.SampleGen.Tests
             File.Delete(filename);
             using var outstream = File.OpenWrite(filename);
             stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
+
+            // Also write it to JSON for use in tests
+            filename = "FullSampleData.json";
+            File.Delete(filename);
+            using var jsonstream = File.OpenWrite(filename);
+            await System.Text.Json.JsonSerializer.SerializeAsync<SampleDataGenerator>(jsonstream,generator);
+
             TestContext.AddResultFile(filename);
         }
     }
