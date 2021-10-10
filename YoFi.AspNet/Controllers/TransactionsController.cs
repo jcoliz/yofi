@@ -116,11 +116,12 @@ namespace YoFi.AspNet.Controllers
                             case 'a':
                                 if (Int32.TryParse(value, out Int32 ival))
                                 {
-                                    result = result.Where(x => x.Amount == (decimal)ival || x.Amount == ((decimal)ival) / 100);
+                                    var cents = ((decimal)ival) / 100;
+                                    result = result.Where(x => x.Amount == (decimal)ival || x.Amount == cents || x.Amount == -(decimal)ival || x.Amount == -cents);
                                 }
                                 else if (decimal.TryParse(value, out decimal dval))
                                 {
-                                    result = result.Where(x => x.Amount == dval);
+                                    result = result.Where(x => x.Amount == dval || x.Amount == -dval);
                                 }
                                 break;
 
@@ -167,12 +168,16 @@ namespace YoFi.AspNet.Controllers
                                 x.Payee.Contains(term) ||
                                 x.Amount == (decimal)intval ||
                                 x.Amount == ((decimal)intval) / 100 ||
+                                x.Amount == -(decimal)intval ||
+                                x.Amount == -((decimal)intval) / 100 ||
                                 (x.Timestamp >= dtval && x.Timestamp <= dtval.Value.AddDays(7)) ||
                                 x.Splits.Any(s =>
                                     s.Category.Contains(term) ||
                                     s.Memo.Contains(term) ||
                                     s.Amount == (decimal)intval ||
-                                    s.Amount == ((decimal)intval) / 100
+                                    s.Amount == ((decimal)intval) / 100 ||
+                                    s.Amount == -(decimal)intval ||
+                                    s.Amount == -((decimal)intval) / 100
                                 )
                             );
                         }
@@ -184,11 +189,15 @@ namespace YoFi.AspNet.Controllers
                                 x.Payee.Contains(term) ||
                                 x.Amount == (decimal)intval ||
                                 x.Amount == ((decimal)intval) / 100 ||
+                                x.Amount == -(decimal)intval ||
+                                x.Amount == -((decimal)intval) / 100 ||
                                 x.Splits.Any(s =>
                                     s.Category.Contains(term) ||
                                     s.Memo.Contains(term) ||
                                     s.Amount == (decimal)intval ||
-                                    s.Amount == ((decimal)intval) / 100
+                                    s.Amount == ((decimal)intval) / 100 ||
+                                    s.Amount == -(decimal)intval ||
+                                    s.Amount == -((decimal)intval) / 100
                                 )
                             );
                         }
