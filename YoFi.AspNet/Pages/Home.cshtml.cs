@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 
-namespace Yofi.AspNet.Pages
+namespace YoFi.AspNet.Pages
 {
     public class HomeModel : PageModel
     {
