@@ -1,131 +1,16 @@
 ﻿@using YoFi.AspNet.Controllers.Reports
-@using YoFi.AspNet.Controllers 
+@using YoFi.AspNet.Controllers
 @model IDisplayReport
-@{
-    var icons = new[] { "&check;", "!!", "X" };
-    string report = (string)ViewData["report"];
-    int month = (int)ViewData["month"];
 
-    var reports = ViewData["AvailableReports"] as IEnumerable<TransactionsController.ReportLinkViewModel>;
-}
+@await Html.PartialAsync("_ReportNavbarPartial")
 
-<nav class="navbar navbar-expand-lg navbar-light navbar-page mb-3">
-    <div class="container">
-
-        <span class="navbar-brand mb-0 h1">Reports</span>
-
-        <div class="nav-item dropdown me-auto">
-            <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuReportId" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Choose a Report
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuReportId">
-                @foreach (var item in reports)
-                {
-                    <a asp-action="Report" asp-route-id="@item.id" class="dropdown-item">@item.Name</a>
-                }
-            </div>
-        </div>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPage" aria-controls="navbarPage" aria-expanded="false" aria-label="Toggle page navigation">
-                <i class="fas fa-cog"></i>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarPage">
-
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonLevel" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Depth
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLevel">
-                            @{
-                                for (int i = 1; i <= 4; i++)
-                                {
-                                    <a asp-action="Report"
-                                       asp-route-id="@ViewData["report"]"
-                                       asp-route-month="@ViewData["month"]"
-                                       asp-route-showmonths="@ViewData["showmonths"]"
-                                       asp-route-level="@i"
-                                       class="dropdown-item">@i-Level</a>
-                                }
-                            }
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonColumns" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Show Months
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
-                            <a asp-action="Report"
-                               asp-route-id="@ViewData["report"]"
-                               asp-route-level="@ViewData["level"]"
-                               asp-route-month="@ViewData["month"]"
-                               asp-route-showmonths="true"
-                               class="dropdown-item">Show</a>
-                            <a asp-action="Report"
-                               asp-route-id="@ViewData["report"]"
-                               asp-route-level="@ViewData["level"]"
-                               asp-route-month="@ViewData["month"]"
-                               asp-route-showmonths="false"
-                               class="dropdown-item">Hide</a>
-                        </div>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonMonth" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Month
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonMonth">
-                            @{
-                                int n = 1;
-                                foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
-                                {
-                                    <a asp-action="Report"
-                                       asp-route-id="@ViewData["report"]"
-                                       asp-route-showmonths="@ViewData["showmonths"]"
-                                       asp-route-level="@ViewData["level"]"
-                                       asp-route-month="@n"
-                                       class="dropdown-item">@n @monthname</a>
-                                    n++;
-                                }
-                            }
-                        </div>
-                    </li>
-
-                    <li class="dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonYear" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Year
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonYear">
-                            @{
-                                int currentyear = DateTime.Now.Year;
-                                for (int y = 2017; y <= currentyear; ++y)
-                                {
-                                    <a asp-action="Report"
-                                       asp-route-id="@ViewData["report"]"
-                                       asp-route-level="@ViewData["level"]"
-                                       asp-route-showmonths="@ViewData["showmonths"]"
-                                       asp-route-year="@y"
-                                       class="dropdown-item">@y</a>
-                                }
-                            }
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-</nav>
-
-<h2>
-    @Model.Name
-</h2>
+<h2>@Model.Name</h2>
 
 @if (!string.IsNullOrEmpty(Model.Description))
 {
-    <h3>
-        @Model.Description
-    </h3>
+    <h3>@Model.Description</h3>
 }
 
 @await Html.PartialAsync("DisplayReport", Model)
+
 <hr />
