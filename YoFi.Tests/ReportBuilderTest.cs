@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using YoFi.Tests.Helpers;
+using System.Threading.Tasks;
 
 namespace YoFi.Tests
 {
@@ -204,6 +206,33 @@ namespace YoFi.Tests
             Assert.AreEqual(21, report.RowLabels.Count());
         }
 
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(6)]
+        [DataRow(9)]
+        [DataRow(12)]
+        [DataTestMethod]
+        public async Task AllMonthsNewData(int month)
+        {
+            // Given: The generated sample dataset
+            await SampleDataStore.LoadSingleAsync();
+            context.Transactions.RemoveRange(context.Transactions);
+            context.Transactions.AddRange(SampleDataStore.Single.Transactions);
+            context.SaveChanges();
+
+            // When: Building the 'All' report for the correct year, with level at '{level}'
+            var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "all", year = 2021, month = month });
+
+            // Then: Report has the correct total
+            var expected = SampleDataStore.Single.Transactions.Where(x => x.Timestamp.Month <= month).Sum(x => x.Amount);
+            Assert.AreEqual(expected, report[report.TotalColumn, report.TotalRow]);
+
+            // And: Report has the correct # columns (Just total)
+            Assert.AreEqual(month + 1, report.ColumnLabels.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(43, report.RowLabels.Count());
+        }
         decimal SumOfTopCategory(string category)
         {
             return

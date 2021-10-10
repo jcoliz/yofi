@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.NET.Test;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -28,6 +29,18 @@ namespace YoFi.Tests.Helpers
             Transactions = incoming.Transactions;
             Payees = incoming.Payees;
             BudgetTxs = incoming.BudgetTxs;
+        }
+
+        public static readonly string FileName = "FullSampleData.json";
+        public static SampleDataStore Single = null;
+
+        public static async Task LoadSingleAsync()
+        {
+            if (null == Single)
+            {
+                var stream = SampleData.Open(FileName);
+                Single = await JsonSerializer.DeserializeAsync<SampleDataStore>(stream);
+            }
         }
     }
 }
