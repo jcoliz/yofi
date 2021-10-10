@@ -1,10 +1,9 @@
 ﻿@using YoFi.AspNet.Controllers
+@using YoFi.AspNet.Controllers.Reports
 @{
     var icons = new[] { "&check;", "!!", "X" };
     string report = (string)ViewData["report"];
     int month = (int)ViewData["month"];
-
-    var reports = ViewData["AvailableReports"] as IEnumerable<TransactionsController.ReportLinkViewModel>;
 }
 
 <nav class="navbar navbar-expand-lg navbar-light navbar-page mb-3">
@@ -17,7 +16,8 @@
                 Choose a Report
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuReportId">
-                @foreach (var item in reports)
+                <a href="/Reports" class="dropdown-item">Summary</a>
+                @foreach (var item in ReportBuilder.Definitions)
                 {
                     <a asp-action="Report" asp-route-id="@item.id" class="dropdown-item">@item.Name</a>
                 }

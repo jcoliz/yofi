@@ -83,7 +83,7 @@ namespace YoFi.AspNet.Controllers.Reports
                 definition = Definitions.Where(x => x.id == parameters.id).SingleOrDefault();
 
             if (definition == null)
-                throw new ArgumentOutOfRangeException(nameof(parameters.id), $"Unable to find report {parameters.id}");
+                throw new KeyNotFoundException($"Unable to find report {parameters.id}");
 
             // Timeframe and description (which displays timeframe)
 

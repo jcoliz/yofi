@@ -1258,39 +1258,48 @@ namespace YoFi.AspNet.Controllers
         // GET: Transactions/Report
         public IActionResult Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
         {
-            if (string.IsNullOrEmpty(parms.id))
+            try
             {
-                parms.id = "all";
-            }
+                if (string.IsNullOrEmpty(parms.id))
+                {
+                    parms.id = "all";
+                }
 
-            if (parms.year.HasValue)
-                Year = parms.year.Value;
-            else
-                parms.year = Year;
-
-            if (!parms.month.HasValue)
-            {
-                bool iscurrentyear = (Year == Now.Year);
-
-                // By default, month is the current month when looking at the current year.
-                // When looking at previous years, default is the whole year (december)
-                if (iscurrentyear)
-                    parms.month = Now.Month;
+                if (parms.year.HasValue)
+                    Year = parms.year.Value;
                 else
-                    parms.month = 12;
+                    parms.year = Year;
+
+                if (!parms.month.HasValue)
+                {
+                    bool iscurrentyear = (Year == Now.Year);
+
+                    // By default, month is the current month when looking at the current year.
+                    // When looking at previous years, default is the whole year (december)
+                    if (iscurrentyear)
+                        parms.month = Now.Month;
+                    else
+                        parms.month = 12;
+                }
+
+                var result = new ReportBuilder(_context).BuildReport(parms);
+
+                ViewData["report"] = parms.id;
+                ViewData["month"] = parms.month;
+                ViewData["level"] = result.NumLevels;
+                ViewData["showmonths"] = result.WithMonthColumns;
+                ViewData["Title"] = result.Name;
+
+                return View(result);
             }
-
-            var result = new ReportBuilder(_context).BuildReport(parms);
-
-            ViewData["report"] = parms.id;
-            ViewData["month"] = parms.month;
-            ViewData["level"] = result.NumLevels;
-            ViewData["showmonths"] = result.WithMonthColumns;
-            ViewData["Title"] = result.Name;
-
-            ViewData["AvailableReports"] = ReportBuilder.Definitions.Select(x => new ReportLinkViewModel() { id = x.id, Name = x.Name }).ToList();
-
-            return View(result);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         #endregion

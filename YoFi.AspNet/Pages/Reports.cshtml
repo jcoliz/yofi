@@ -5,13 +5,15 @@
     ViewData["Title"] = "Home";
 }
 
+@await Html.PartialAsync("_ReportNavbarPartial")
+
 <h2>Summary</h2>
 
 @if (!string.IsNullOrEmpty(Model.Reports.First().First().Description))
 {
-<h3>
-@Model.Reports.First().First().Description
-</h3>
+    <h3>
+        @Model.Reports.First().First().Description
+    </h3>
 }
 
 @foreach (var section in Model.Reports)

@@ -69,6 +69,9 @@ namespace YoFi.AspNet.Pages
             Reports[1].Add(profit);
 
             // Budget Reports: I think I want Budget vs Expenses on the left, and perhaps managed budget on the right
+
+            ViewData["report"] = "summary";
+            ViewData["month"] = parms.month;
         }
     }
 }
