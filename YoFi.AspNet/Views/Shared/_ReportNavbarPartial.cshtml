@@ -70,7 +70,7 @@
                                class="dropdown-item">Hide</a>
                         </div>
                     </li>
-                }
+                                }
 
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonMonth" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -81,12 +81,21 @@
                             int n = 1;
                             foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
                             {
-                                <a asp-action="Report"
-                                   asp-route-id="@ViewData["report"]"
-                                   asp-route-showmonths="@ViewData["showmonths"]"
-                                   asp-route-level="@ViewData["level"]"
-                                   asp-route-month="@n"
-                                   class="dropdown-item">@n @monthname</a>
+                                @if (report == "summary")
+                                {
+                                    <a asp-page="Reports"
+                                       asp-route-month="@n"
+                                       class="dropdown-item">@n @monthname</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Report"
+                                       asp-route-id="@ViewData["report"]"
+                                       asp-route-showmonths="@ViewData["showmonths"]"
+                                       asp-route-level="@ViewData["level"]"
+                                       asp-route-month="@n"
+                                       class="dropdown-item">@n @monthname</a>
+                                }
                                 n++;
                             }
                         }
@@ -102,12 +111,21 @@
                             int currentyear = DateTime.Now.Year;
                             for (int y = 2017; y <= currentyear; ++y)
                             {
-                                <a asp-action="Report"
-                                   asp-route-id="@ViewData["report"]"
-                                   asp-route-level="@ViewData["level"]"
-                                   asp-route-showmonths="@ViewData["showmonths"]"
-                                   asp-route-year="@y"
-                                   class="dropdown-item">@y</a>
+                                @if (report == "summary")
+                                {
+                                    <a asp-page="Reports"
+                                       asp-route-year="@y"
+                                       class="dropdown-item">@y</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Report"
+                                       asp-route-id="@ViewData["report"]"
+                                       asp-route-level="@ViewData["level"]"
+                                       asp-route-showmonths="@ViewData["showmonths"]"
+                                       asp-route-year="@y"
+                                       class="dropdown-item">@y</a>
+                                }
                             }
                         }
                     </div>
