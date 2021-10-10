@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Models;
+using YoFi.Tests.Helpers;
 
 namespace YoFi.SampleGen.Tests
 {
@@ -236,13 +237,37 @@ namespace YoFi.SampleGen.Tests
             stream.CopyTo(outstream);
             TestContext.AddResultFile(filename);
 
-            // Also write it to JSON for use in tests
-            filename = "FullSampleData.json";
-            File.Delete(filename);
-            using var jsonstream = File.OpenWrite(filename);
-            await System.Text.Json.JsonSerializer.SerializeAsync<SampleDataGenerator>(jsonstream,generator);
+        }
 
+        [TestMethod]
+        public async Task GenerateJson()
+        {
+            var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
+            generator.LoadDefinitions(instream);
+            generator.GenerateTransactions(addids:false);
+            generator.GeneratePayees();
+            generator.GenerateBudget();
+
+            var store = new SampleDataStore();
+            store.Transactions = generator.Transactions;
+            store.Payees = generator.Payees;
+            store.BudgetTxs = generator.BudgetTxs;
+
+            var filename = "FullSampleData.json";
+            File.Delete(filename);
+            {
+                using var jsonstream = File.OpenWrite(filename);
+                await store.SerializeAsync(jsonstream);
+            }
             TestContext.AddResultFile(filename);
+
+            var newstore = new SampleDataStore();
+            using var newstream = File.OpenRead(filename);
+            await newstore.DeSerializeAsync(newstream);
+
+            CollectionAssert.AreEqual(store.Transactions, newstore.Transactions);
+            CollectionAssert.AreEqual(store.Payees, newstore.Payees);
+            CollectionAssert.AreEqual(store.BudgetTxs, newstore.BudgetTxs);
         }
     }
 }
