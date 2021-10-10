@@ -378,5 +378,23 @@ namespace YoFi.SampleGen.Tests
             }
         }
         #endregion
+
+        #region Others
+
+        [TestMethod]
+        public void Rounding()
+        {
+            // Given: One monthly pattern with no jitter, which will leave fractional pennies when divided
+            var amount = 100m;
+            var item = new SampleDataPattern() { DateFrequency = FrequencyEnum.Monthly, AmountYearly = amount, AmountJitter = JitterEnum.None, DateJitter = JitterEnum.None, Category = "Category", Payee = "Payee" };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions();
+
+            // Then: The resulting transactions have only two decimal places
+            Assert.AreEqual(8.33m, actual.First().Amount);
+        }
+
+        #endregion
     }
 }

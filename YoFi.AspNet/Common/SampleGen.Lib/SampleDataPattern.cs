@@ -235,8 +235,10 @@ namespace YoFi.SampleGen
         /// <param name="amount">Target amount</param>
         /// <returns>Randomized amount within the desired ditter</returns>
         private decimal MakeAmount(decimal amount) =>
-            (AmountJitter == JitterEnum.None) ? amount :
-                (decimal)((double)amount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * AmountJitterValues[AmountJitter]));
+            Math.Round(
+                (AmountJitter == JitterEnum.None) ? amount :
+                    (decimal)((double)amount * (1.0 + 2.0 * (random.NextDouble() - 0.5) * AmountJitterValues[AmountJitter]))
+                , 2);
 
         /// <summary>
         /// Create a date that fits within the frequency and date jitter parameters
