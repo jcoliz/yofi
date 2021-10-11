@@ -9,7 +9,9 @@ namespace Common.AspNet
 {
     public class PageDivider<T>
     {
-        public int PageSize { get; set; } = 25;
+        public const int DefaultPageSize = 25;
+
+        public int PageSize { get; set; } = DefaultPageSize;
 
         public async Task<IQueryable<T>> ItemsForPage(IQueryable<T> result, int? p, ViewDataDictionary ViewData)
         {

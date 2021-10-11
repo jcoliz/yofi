@@ -1,4 +1,5 @@
-﻿using Common.AspNet.Test;
+﻿using Common.AspNet;
+using Common.AspNet.Test;
 using Common.NET.Test;
 using jcoliz.OfficeOpenXml.Easy;
 using Microsoft.AspNetCore.Http;
@@ -958,8 +959,9 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task IndexPage1()
         {
-            // Given: A very long set of items 
-            var items = await GetTransactionItemsLong();
+            // Given: 3 pages of items 
+            await Helpers.SampleDataStore.LoadSingleAsync();
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider<Transaction>.DefaultPageSize * 3);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -981,8 +983,9 @@ namespace YoFi.Tests
         public async Task IndexPage2()
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
-            var itemcount = TransactionsController.PageSize + TransactionsController.PageSize / 2;
-            context.Transactions.AddRange((await GetTransactionItemsLong()).Take(itemcount));
+            await Helpers.SampleDataStore.LoadSingleAsync();
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider<Transaction>.DefaultPageSize * 3 / 2);
+            context.Transactions.AddRange(items);
             context.SaveChanges();
 
             // When: Calling Index page 2
@@ -995,8 +998,30 @@ namespace YoFi.Tests
 
             // And: Page Item values are as expected
             Assert.AreEqual(1 + TransactionsController.PageSize, viewresult.ViewData["PageFirstItem"]);
-            Assert.AreEqual(itemcount, viewresult.ViewData["PageLastItem"]);
-            Assert.AreEqual(itemcount, viewresult.ViewData["PageTotalItems"]);
+            Assert.AreEqual(items.Count(), viewresult.ViewData["PageLastItem"]);
+            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
+        }
+
+        [TestMethod]
+        public async Task IndexPage5()
+        {
+            // Given: 4 1/2 pages of items
+            await Helpers.SampleDataStore.LoadSingleAsync();
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider<Transaction>.DefaultPageSize * 9 / 2);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling Index page 5
+            var result = await controller.Index(p: 5);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
+
+            // Then: Only the remaining items are returned
+            Assert.AreEqual(items.Count() % TransactionsController.PageSize, model.Count());
+
+            // And: Page values are as expected
+            Assert.AreEqual(3, viewresult.ViewData["PreviousPreviousPage"]);
+            Assert.AreEqual(1, viewresult.ViewData["FirstPage"]);
         }
 
         [TestMethod]
