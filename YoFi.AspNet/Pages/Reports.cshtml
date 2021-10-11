@@ -20,15 +20,15 @@
 
     @foreach (var section in Model.Reports)
     {
-        <div class="col-lg-6 p-2">
+        <div class="col-lg-6 p-4">
 
             @foreach (var report in section)
             {
-                <div class="bg-light border p-2 mb-3">
+                <div class="bg-light border p-2 mb-4 row">
                     @await Html.PartialAsync("DisplayReport", report)
                     @if (!string.IsNullOrEmpty(report.Definition))
                     {
-                    <div class="text-right "><a asp-controller="Transactions" asp-action="Report" asp-route-id="@report.Definition-detail" class="btn btn-outline-secondary"><i class="fas fa-angle-double-right"></i></a></div>
+                        <a asp-controller="Transactions" asp-action="Report" asp-route-id="@report.Definition-detail" class="col-sm-1 col-2 ms-auto btn btn-outline-secondary"><i class="fas fa-angle-double-right"></i></a>
                     }
                 </div>
             }
