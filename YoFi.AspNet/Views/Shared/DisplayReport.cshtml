@@ -8,7 +8,7 @@
             <th>@Model.Name</th>
             @foreach (var column in Model.ColumnLabelsFiltered)
             {
-                <th>
+                <th class="report-col-amount">
                     @(column.IsTotal ? "$ Total" : column.Name)
                 </th>
             }

@@ -54,6 +54,10 @@
     text-align: right;
 }
 
+.report th.report-col-amount {
+    text-align: right;
+}
+
 .report td.report-col-total {
     font-weight: bold;
 }
