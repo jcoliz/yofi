@@ -1025,6 +1025,27 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public async Task IndexPage1of2()
+        {
+            // Given: 1 1/2 pages of items
+            await Helpers.SampleDataStore.LoadSingleAsync();
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider<Transaction>.DefaultPageSize * 3/2);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling Index page 1
+            var result = await controller.Index(p: 1);
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as IEnumerable<Dto>;
+
+            // Then: Only one page's worth of items are returned
+            Assert.AreEqual(TransactionsController.PageSize, model.Count());
+
+            // And: Page values are as expected
+            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
+        }
+
+        [TestMethod]
         public async Task BulkEdit()
         {
             // Given: A list of items with varying categories, and varying selection states

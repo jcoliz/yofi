@@ -17,34 +17,34 @@ namespace Common.AspNet
         {
             var count = await result.CountAsync();
 
-            if (!p.HasValue)
-                p = 1;
-            else
+            if (p.HasValue)
                 ViewData["Page"] = p;
 
-            var offset = (p.Value - 1) * PageSize;
+            int page = p ?? 1;
+
+            var offset = (page - 1) * PageSize;
             ViewData["PageFirstItem"] = offset + 1;
             ViewData["PageLastItem"] = Math.Min(count, offset + PageSize);
             ViewData["PageTotalItems"] = count;
 
             if (count > PageSize)
             {
-                if (p > 1)
-                    ViewData["PreviousPage"] = p.Value - 1;
+                if (page > 1)
+                    ViewData["PreviousPage"] = page - 1;
                 else
-                    if ((p + 1) * PageSize < count)
-                    ViewData["NextNextPage"] = p.Value + 2;
+                    if ((page + 1) * PageSize < count)
+                        ViewData["NextNextPage"] = page + 2;
 
-                if (p * PageSize < count)
-                    ViewData["NextPage"] = p.Value + 1;
+                if (page * PageSize < count)
+                    ViewData["NextPage"] = page + 1;
                 else
-                    if (p > 2)
-                    ViewData["PreviousPreviousPage"] = p.Value - 2;
+                    if (page > 2)
+                        ViewData["PreviousPreviousPage"] = page - 2;
 
-                if (p > 2)
+                if (page > 2)
                     ViewData["FirstPage"] = 1;
 
-                if ((p + 1) * PageSize < count)
+                if ((page + 1) * PageSize < count)
                     ViewData["LastPage"] = 1 + (count - 1) / PageSize;
             }
 
