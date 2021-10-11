@@ -206,13 +206,13 @@ namespace YoFi.Tests
             Assert.AreEqual(21, report.RowLabels.Count());
         }
 
+        [DataRow(0)]
         [DataRow(1)]
+        [DataRow(2)]
         [DataRow(3)]
-        [DataRow(6)]
-        [DataRow(9)]
-        [DataRow(12)]
+        [DataRow(4)]
         [DataTestMethod]
-        public async Task AllMonthsNewData(int month)
+        public async Task AllMonthsNewData(int index)
         {
             // Given: The generated sample dataset
             await SampleDataStore.LoadSingleAsync();
@@ -221,6 +221,8 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Building the 'All' report for the correct year, with level at '{level}'
+            var months = new int[] { 1, 3, 6, 9, 12 };
+            var month = months[index];
             var report = builder.BuildReport(new ReportBuilder.Parameters() { id = "all", year = 2021, month = month });
 
             // Then: Report has the correct total
@@ -231,7 +233,8 @@ namespace YoFi.Tests
             Assert.AreEqual(month + 1, report.ColumnLabels.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(43, report.RowLabels.Count());
+            var rows = new int[] { 43, 48, 49, 49, 49 };
+            Assert.AreEqual(rows[index], report.RowLabels.Count());
         }
         decimal SumOfTopCategory(string category)
         {

@@ -220,7 +220,7 @@ namespace YoFi.SampleGen.Tests
         }
 
         [TestMethod]
-        public async Task GenerateFullSampleData()
+        public void GenerateFullSampleData()
         {
             var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
