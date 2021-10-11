@@ -11,6 +11,8 @@
     <h3>@Model.Description</h3>
 }
 
-@await Html.PartialAsync("DisplayReport", Model)
+<div class="bg-light border p-2 mb-3">
+    @await Html.PartialAsync("DisplayReport", Model)
+</div>
 
 <hr />

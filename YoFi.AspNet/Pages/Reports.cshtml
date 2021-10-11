@@ -16,17 +16,22 @@
     </h3>
 }
 
-@foreach (var section in Model.Reports)
-{
-    <div class="col-lg-6">
-        @foreach (var report in section)
-        {
-            @await Html.PartialAsync("DisplayReport", report)
-            @if (!string.IsNullOrEmpty(report.Definition))
+<div class="row">
+
+    @foreach (var section in Model.Reports)
+    {
+        <div class="col-lg-6 p-2">
+
+            @foreach (var report in section)
             {
-                <a asp-controller="Transactions" asp-action="Report" asp-route-id="@report.Definition-detail" class="dropdown-item">Details &raquo;</a>
+                <div class="bg-light border p-2 mb-3">
+                    @await Html.PartialAsync("DisplayReport", report)
+                    @if (!string.IsNullOrEmpty(report.Definition))
+                    {
+                    <div class="text-right "><a asp-controller="Transactions" asp-action="Report" asp-route-id="@report.Definition-detail" class="btn btn-outline-secondary"><i class="fas fa-angle-double-right"></i></a></div>
+                    }
+                </div>
             }
-        }
-    </div>
-    <hr />
-}
+        </div>
+    }
+</div>
