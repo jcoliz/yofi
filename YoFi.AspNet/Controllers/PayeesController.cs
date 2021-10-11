@@ -59,10 +59,8 @@ namespace YoFi.AspNet.Controllers
             // Process PAGE (P) parameters
             //
 
-            var count = await result.CountAsync();
-            TransactionsController.PageDivider(count,p,PageSize,out int offset, ViewData);
-            if (count > PageSize)
-                result = result.Skip(offset).Take(PageSize);
+            var divider = new PageDivider<Payee>() { PageSize = PageSize };
+            result = await divider.ItemsForPage(result, p, ViewData);
 
             return View(await result.ToListAsync());
         }

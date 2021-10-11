@@ -195,11 +195,11 @@ namespace YoFi.Tests
             var model = viewresult.Model as List<BudgetTx>;
 
             // Then: Only one page's worth of items are returned
-            Assert.AreEqual(PayeesController.PageSize, model.Count);
+            Assert.AreEqual(BudgetTxsController.PageSize, model.Count);
 
             // And: Page Item values are as expected
             Assert.AreEqual(1, viewresult.ViewData["PageFirstItem"]);
-            Assert.AreEqual(PayeesController.PageSize, viewresult.ViewData["PageLastItem"]);
+            Assert.AreEqual(BudgetTxsController.PageSize, viewresult.ViewData["PageLastItem"]);
             Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
         }
 

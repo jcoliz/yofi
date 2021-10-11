@@ -283,46 +283,9 @@ namespace YoFi.AspNet.Controllers
         /// <returns>Resulting query refined by <paramref name="p"/></returns>
         public static async Task<IQueryable<Transaction>> TransactionsForPage(IQueryable<Transaction> result, int? p, int pagesize, ViewDataDictionary ViewData)
         {
-            var count = await result.CountAsync();
-            PageDivider(count,p,pagesize,out int offset, ViewData);
-            if (count > pagesize)
-                result = result.Skip(offset).Take(pagesize);
+            var divider = new PageDivider<Transaction>() { PageSize = pagesize };
 
-            return result;
-        }
-
-        public static void PageDivider(int count, int? p, int pagesize, out int offset, ViewDataDictionary ViewData)
-        {
-            if (!p.HasValue)
-                p = 1;
-            else
-                ViewData["Page"] = p;
-
-            offset = (p.Value - 1) * pagesize;
-            ViewData["PageFirstItem"] = offset + 1;
-            ViewData["PageLastItem"] = Math.Min(count, offset + pagesize);
-            ViewData["PageTotalItems"] = count;
-
-            if (count > PageSize)
-            {
-                if (p > 1)
-                    ViewData["PreviousPage"] = p.Value - 1;
-                else
-                    if ((p + 1) * PageSize < count)
-                    ViewData["NextNextPage"] = p.Value + 2;
-
-                if (p * PageSize < count)
-                    ViewData["NextPage"] = p.Value + 1;
-                else
-                    if (p > 2)
-                    ViewData["PreviousPreviousPage"] = p.Value - 2;
-
-                if (p > 2)
-                    ViewData["FirstPage"] = 1;
-
-                if ((p + 1) * PageSize < count)
-                    ViewData["LastPage"] = 1 + (count - 1) / pagesize;
-            }
+            return await divider.ItemsForPage(result, p, ViewData);
         }
 
         /// <summary>
@@ -373,7 +336,8 @@ namespace YoFi.AspNet.Controllers
             // Process PAGE (P) parameters
             //
 
-            result = await TransactionsForPage(result, p, PageSize, ViewData) as IQueryable<Transaction>;
+            var divider = new PageDivider<Transaction>() { PageSize = PageSize };
+            result = await divider.ItemsForPage(result, p, ViewData);
 
             // Use the Transaction object itself as a DTO, filtering out what we don't need to return
 
@@ -545,7 +509,8 @@ namespace YoFi.AspNet.Controllers
             // Process PAGE (P) parameters
             //
 
-            result = await TransactionsForPage(result, p, PageSize, ViewData);
+            var divider = new PageDivider<Transaction>() { PageSize = PageSize };
+            result = await divider.ItemsForPage(result, p, ViewData);
 
             try
             {

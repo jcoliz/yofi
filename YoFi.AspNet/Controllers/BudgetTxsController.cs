@@ -55,40 +55,8 @@ namespace YoFi.AspNet.Controllers
             // Process PAGE (P) parameters
             //
 
-            if (!p.HasValue)
-                p = 1;
-            else
-                ViewData["Page"] = p;
-
-            var count = await result.CountAsync();
-
-            int offset = (p.Value - 1) * PageSize;
-            ViewData["PageFirstItem"] = offset + 1;
-            ViewData["PageLastItem"] = Math.Min(count, offset + PageSize);
-            ViewData["PageTotalItems"] = count;
-
-            if (count > PageSize)
-            {
-                result = result.Skip(offset).Take(PageSize);
-
-                if (p > 1)
-                    ViewData["PreviousPage"] = p.Value - 1;
-                else
-                    if ((p + 1) * PageSize < count)
-                    ViewData["NextNextPage"] = p.Value + 2;
-
-                if (p * PageSize < count)
-                    ViewData["NextPage"] = p.Value + 1;
-                else
-                    if (p > 2)
-                    ViewData["PreviousPreviousPage"] = p.Value - 2;
-
-                if (p > 2)
-                    ViewData["FirstPage"] = 1;
-
-                if ((p + 1) * PageSize < count)
-                    ViewData["LastPage"] = 1 + (count - 1) / PageSize;
-            }
+            var divider = new PageDivider<BudgetTx>() { PageSize = PageSize };
+            result = await divider.ItemsForPage(result, p, ViewData);
 
             // Show the index
             return View(await result.ToListAsync());
