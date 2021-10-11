@@ -961,7 +961,7 @@ namespace YoFi.Tests
         {
             // Given: 3 pages of items 
             await Helpers.SampleDataStore.LoadSingleAsync();
-            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider<Transaction>.DefaultPageSize * 3);
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider.DefaultPageSize * 3);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -974,9 +974,10 @@ namespace YoFi.Tests
             Assert.AreEqual(TransactionsController.PageSize, model.Count());
 
             // And: Page Item values are as expected
-            Assert.AreEqual(1,viewresult.ViewData["PageFirstItem"]);
-            Assert.AreEqual(TransactionsController.PageSize, viewresult.ViewData["PageLastItem"]);
-            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
+            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            Assert.AreEqual(1,pages.PageFirstItem);
+            Assert.AreEqual(TransactionsController.PageSize, pages.PageLastItem);
+            Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
 
         [TestMethod]
@@ -984,7 +985,7 @@ namespace YoFi.Tests
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             await Helpers.SampleDataStore.LoadSingleAsync();
-            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider<Transaction>.DefaultPageSize * 3 / 2);
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider.DefaultPageSize * 3 / 2);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -997,9 +998,10 @@ namespace YoFi.Tests
             Assert.AreEqual(TransactionsController.PageSize / 2, model.Count());
 
             // And: Page Item values are as expected
-            Assert.AreEqual(1 + TransactionsController.PageSize, viewresult.ViewData["PageFirstItem"]);
-            Assert.AreEqual(items.Count(), viewresult.ViewData["PageLastItem"]);
-            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
+            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            Assert.AreEqual(1 + TransactionsController.PageSize, pages.PageFirstItem);
+            Assert.AreEqual(items.Count(), pages.PageLastItem);
+            Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
 
         [TestMethod]
@@ -1007,7 +1009,7 @@ namespace YoFi.Tests
         {
             // Given: 4 1/2 pages of items
             await Helpers.SampleDataStore.LoadSingleAsync();
-            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider<Transaction>.DefaultPageSize * 9 / 2);
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider.DefaultPageSize * 9 / 2);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -1020,8 +1022,9 @@ namespace YoFi.Tests
             Assert.AreEqual(items.Count() % TransactionsController.PageSize, model.Count());
 
             // And: Page values are as expected
-            Assert.AreEqual(3, viewresult.ViewData["PreviousPreviousPage"]);
-            Assert.AreEqual(1, viewresult.ViewData["FirstPage"]);
+            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            Assert.AreEqual(3, pages.PreviousPreviousPage);
+            Assert.AreEqual(1, pages.FirstPage);
         }
 
         [TestMethod]
@@ -1029,7 +1032,7 @@ namespace YoFi.Tests
         {
             // Given: 1 1/2 pages of items
             await Helpers.SampleDataStore.LoadSingleAsync();
-            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider<Transaction>.DefaultPageSize * 3/2);
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider.DefaultPageSize * 3/2);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -1042,7 +1045,8 @@ namespace YoFi.Tests
             Assert.AreEqual(TransactionsController.PageSize, model.Count());
 
             // And: Page values are as expected
-            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
+            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
 
         [TestMethod]

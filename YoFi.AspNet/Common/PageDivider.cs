@@ -7,45 +7,54 @@ using System.Threading.Tasks;
 
 namespace Common.AspNet
 {
-    public class PageDivider<T>
+    public class PageDivider
     {
         public const int DefaultPageSize = 25;
 
         public int PageSize { get; set; } = DefaultPageSize;
 
-        public async Task<IQueryable<T>> ItemsForPage(IQueryable<T> result, int? p, ViewDataDictionary ViewData)
+        public int Page { get; private set; }
+
+        public int PageFirstItem { get; private set; }
+        public int PageLastItem { get; private set; }
+        public int PageTotalItems { get; private set; }
+        public int? PreviousPage { get; private set; }
+        public int? NextNextPage { get; private set; }
+        public int? NextPage { get; private set; }
+        public int? PreviousPreviousPage { get; private set; }
+        public int? FirstPage { get; private set; }
+        public int? LastPage { get; private set; }
+
+        public async Task<IQueryable<T>> ItemsForPage<T>(IQueryable<T> result, int? p)
         {
             var count = await result.CountAsync();
 
-            if (p.HasValue)
-                ViewData["Page"] = p;
+            Page = p ?? 1;
 
-            int page = p ?? 1;
-
-            var offset = (page - 1) * PageSize;
-            ViewData["PageFirstItem"] = offset + 1;
-            ViewData["PageLastItem"] = Math.Min(count, offset + PageSize);
-            ViewData["PageTotalItems"] = count;
+            var offset = (Page - 1) * PageSize;
+            PageFirstItem = offset + 1;
+            PageLastItem = Math.Min(count, offset + PageSize);
+            PageTotalItems = count;
 
             if (count > PageSize)
             {
-                if (page > 1)
-                    ViewData["PreviousPage"] = page - 1;
+                if (Page > 1)
+                    PreviousPage = Page - 1;
                 else
-                    if ((page + 1) * PageSize < count)
-                        ViewData["NextNextPage"] = page + 2;
+                    if ((Page + 1) * PageSize < count)
+                        NextNextPage = Page + 2;
 
-                if (page * PageSize < count)
-                    ViewData["NextPage"] = page + 1;
+                if (Page * PageSize < count)
+                    NextPage = Page + 1;
                 else
-                    if (page > 2)
-                        ViewData["PreviousPreviousPage"] = page - 2;
+                    if (Page > 2)
+                        PreviousPreviousPage = Page - 2;
 
-                if (page > 2)
-                    ViewData["FirstPage"] = 1;
+                if (Page > 2)
+                    FirstPage = 1;
 
-                if ((page + 1) * PageSize < count)
-                    ViewData["LastPage"] = 1 + (count - 1) / PageSize;
+                if ((Page + 1) * PageSize < count)
+                    LastPage = 1 + (count - 1) / PageSize;
             }
 
             if (count > PageSize)

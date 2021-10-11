@@ -55,8 +55,9 @@ namespace YoFi.AspNet.Controllers
             // Process PAGE (P) parameters
             //
 
-            var divider = new PageDivider<BudgetTx>() { PageSize = PageSize };
-            result = await divider.ItemsForPage(result, p, ViewData);
+            var divider = new PageDivider() { PageSize = PageSize };
+            result = await divider.ItemsForPage(result, p);
+            ViewData["Pages"] = divider;
 
             // Show the index
             return View(await result.ToListAsync());

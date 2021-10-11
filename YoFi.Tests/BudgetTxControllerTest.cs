@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.AspNet;
 
 namespace YoFi.Tests
 {
@@ -198,9 +199,10 @@ namespace YoFi.Tests
             Assert.AreEqual(BudgetTxsController.PageSize, model.Count);
 
             // And: Page Item values are as expected
-            Assert.AreEqual(1, viewresult.ViewData["PageFirstItem"]);
-            Assert.AreEqual(BudgetTxsController.PageSize, viewresult.ViewData["PageLastItem"]);
-            Assert.AreEqual(items.Count(), viewresult.ViewData["PageTotalItems"]);
+            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            Assert.AreEqual(1, pages.PageFirstItem);
+            Assert.AreEqual(BudgetTxsController.PageSize, pages.PageLastItem);
+            Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
 
         [TestMethod]
@@ -220,9 +222,10 @@ namespace YoFi.Tests
             Assert.AreEqual(BudgetTxsController.PageSize / 2, model.Count);
 
             // And: Page Item values are as expected
-            Assert.AreEqual(1 + BudgetTxsController.PageSize, viewresult.ViewData["PageFirstItem"]);
-            Assert.AreEqual(itemcount, viewresult.ViewData["PageLastItem"]);
-            Assert.AreEqual(itemcount, viewresult.ViewData["PageTotalItems"]);
+            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            Assert.AreEqual(1 + BudgetTxsController.PageSize, pages.PageFirstItem);
+            Assert.AreEqual(itemcount, pages.PageLastItem);
+            Assert.AreEqual(itemcount, pages.PageTotalItems);
         }
 
         [TestMethod]
