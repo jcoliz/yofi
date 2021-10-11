@@ -61,7 +61,7 @@ namespace YoFi.AspNet.Controllers
 
             var divider = new PageDivider() { PageSize = PageSize };
             result = await divider.ItemsForPage(result, p);
-            ViewData["Pages"] = divider;
+            ViewData[nameof(PageDivider)] = divider;
 
             return View(await result.ToListAsync());
         }

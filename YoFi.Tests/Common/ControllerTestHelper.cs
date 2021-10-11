@@ -78,7 +78,7 @@ namespace Common.AspNet.Test
         public void Cleanup()
         {
             // Didn't actually solve anything. Keep it around for possible future problem
-            //DetachAllEntities();
+            DetachAllEntities();
 
             // https://stackoverflow.com/questions/33490696/how-can-i-reset-an-ef7-inmemory-provider-between-unit-tests
             context?.Database.EnsureDeleted();
@@ -88,14 +88,8 @@ namespace Common.AspNet.Test
 
         private void DetachAllEntities()
         {
-            var changedEntriesCopy = context.ChangeTracker.Entries()
-                .Where(e => e.State == EntityState.Added ||
-                            e.State == EntityState.Modified ||
-                            e.State == EntityState.Deleted)
-                .ToList();
-
-            foreach (var entry in changedEntriesCopy)
-                entry.State = EntityState.Detached;
+            foreach (var entry in context.ChangeTracker.Entries())
+                context.Entry(entry.Entity).State = EntityState.Detached;
         }
 
         public async Task AddFiveItems()

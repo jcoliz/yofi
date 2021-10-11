@@ -41,6 +41,15 @@ namespace YoFi.Tests.Helpers
                 var stream = SampleData.Open(FileName);
                 Single = await JsonSerializer.DeserializeAsync<SampleDataStore>(stream);
             }
+
+            // Otherwise problems occur in back-to-back tests with same data
+            foreach (var tx in Single.Transactions)
+            {
+                tx.ID = default;
+                if (tx.HasSplits)
+                    foreach (var s in tx.Splits)
+                        s.ID = default;
+            }
         }
     }
 }

@@ -974,7 +974,7 @@ namespace YoFi.Tests
             Assert.AreEqual(TransactionsController.PageSize, model.Count());
 
             // And: Page Item values are as expected
-            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            var pages = viewresult.ViewData[nameof(PageDivider)] as PageDivider;
             Assert.AreEqual(1,pages.PageFirstItem);
             Assert.AreEqual(TransactionsController.PageSize, pages.PageLastItem);
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
@@ -998,7 +998,7 @@ namespace YoFi.Tests
             Assert.AreEqual(TransactionsController.PageSize / 2, model.Count());
 
             // And: Page Item values are as expected
-            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            var pages = viewresult.ViewData[nameof(PageDivider)] as PageDivider;
             Assert.AreEqual(1 + TransactionsController.PageSize, pages.PageFirstItem);
             Assert.AreEqual(items.Count(), pages.PageLastItem);
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
@@ -1022,7 +1022,7 @@ namespace YoFi.Tests
             Assert.AreEqual(items.Count() % TransactionsController.PageSize, model.Count());
 
             // And: Page values are as expected
-            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            var pages = viewresult.ViewData[nameof(PageDivider)] as PageDivider;
             Assert.AreEqual(3, pages.PreviousPreviousPage);
             Assert.AreEqual(1, pages.FirstPage);
         }
@@ -1045,7 +1045,7 @@ namespace YoFi.Tests
             Assert.AreEqual(TransactionsController.PageSize, model.Count());
 
             // And: Page values are as expected
-            var pages = viewresult.ViewData["Pages"] as PageDivider;
+            var pages = viewresult.ViewData[nameof(PageDivider)] as PageDivider;
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
 

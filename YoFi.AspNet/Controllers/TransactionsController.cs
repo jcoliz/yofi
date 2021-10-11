@@ -322,7 +322,7 @@ namespace YoFi.AspNet.Controllers
 
             var divider = new PageDivider() { PageSize = PageSize };
             result = await divider.ItemsForPage(result, p);
-            ViewData["Pages"] = divider;
+            ViewData[nameof(PageDivider)] = divider;
 
             // Use the Transaction object itself as a DTO, filtering out what we don't need to return
 
@@ -496,7 +496,7 @@ namespace YoFi.AspNet.Controllers
 
             var divider = new PageDivider() { PageSize = PageSize };
             result = await divider.ItemsForPage(result, p);
-            ViewData["Pages"] = divider;
+            ViewData[nameof(PageDivider)] = divider;
 
             try
             {
