@@ -43,7 +43,7 @@
     "storage-name": "[concat('storage',uniqueString(resourceGroup().id))]",
     "sql-user": "sql-user",
     "app-sku": "F1",
-    "packageUri": "https://jcolizreleases.blob.core.windows.net/yofi-release/1222.zip"
+    "packageUri": "https://jcolizreleases.blob.core.windows.net/yofi-release/1238.zip"
   },
   "resources": [
     {
@@ -115,7 +115,7 @@
     {
       "name": "[variables('name')]",
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-12-01",
       "location": "[variables('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('appservice-name'))]",
@@ -136,36 +136,37 @@
               "type": "Custom",
               "connectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storage-name'), ';AccountKey=', listKeys(variables('storage-name'), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
             }
+          ],
+          "appSettings": [
+            {
+              "name": "ASPNETCORE_ENVIRONMENT",
+              "value": "Production"
+            },
+            {
+              "name": "ADMINUSER__EMAIL",
+              "value": "[parameters('web-user')]"
+            },
+            {
+              "name": "ADMINUSER__PASSWORD",
+              "value": "[parameters('web-pword')]"
+            },
+            {
+              "name": "API__KEY",
+              "value": "[parameters('api-key')]"
+            }
           ]
         }
-      },
-      "resources": [
-        {
-          "type": "config",
-          "name": "appsettings",
-          "apiVersion": "2018-11-01",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('name'))]"
-          ],
-          "properties": {
-            "ASPNETCORE_ENVIRONMENT": "Production",
-            "ADMINUSER__EMAIL": "[parameters('web-user')]",
-            "ADMINUSER__PASSWORD": "[parameters('web-pword')]",
-            "API__KEY": "parameters('api-key')"
-          }
-        }
-      ]
+      }
     },
     {
       "name": "[concat(variables('name'), '/ZipDeploy')]",
       "type": "Microsoft.Web/sites/extensions",
-      "apiVersion": "2015-08-01",
+      "apiVersion": "2020-12-01",
       "properties": {
         "packageUri": "[variables('packageUri')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', variables('name'))]",
-        "[resourceId('Microsoft.Web/sites/config', variables('name'), 'appsettings')]"
+        "[resourceId('Microsoft.Web/sites', variables('name'))]"
       ]
     }
   ],
