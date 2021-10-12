@@ -64,26 +64,26 @@ namespace YoFi.AspNet.Root
             //
             // WARNING: Elevation of privelage risk lives here
             //
-            // For demo mode, we want a much more open policy than in regular use
-            // Define the __DEMO_OPEN_ACCESS__ token during compilation to enable this
+            // For demo mode, we want a much more open policy than in regular use. Obviously
+            // if we have out own real data, we do NOT want this.
+            //
+            // Define the __DEMO_OPEN_ACCESS__ token during compilation to enable this.
+            // The ONLY place this is set is in the build definition file,
+            // azure-pipelines-demo.yaml.
+            //
+            // Furthermore, if you set any of the "Brand" section of configuration
+            // variables, demo open access is also disabled. You can set these in your
+            // key vault. So this should provide a second level of runtime protection
+            // against elevation of privs.
             //
             // -----------------------------------------------------------------------------
 #if __DEMO_OPEN_ACCESS__
-            // Demo mode
-            services.AddAuthorization(options =>
-            {
-                // Anonymous CanRead
-                options.AddPolicy("CanRead", policy => policy.AddRequirements(new AnonymousAuth()));
-                options.AddPolicy("CanWrite", policy => policy.RequireAuthenticatedUser());
-            });
-            services.AddScoped<IAuthorizationHandler, AnonymousAuthHandler>();
+            if (Configuration.GetSection("Brand").Exists())
+                ConfigureAuthorizationNormal(services);
+            else
+                ConfigureAuthorizationDemo(services);
 #else
-            // Branded mode
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("CanWrite", policy => policy.RequireRole("Verified"));
-                options.AddPolicy("CanRead", policy => policy.RequireRole("Verified"));
-            });
+            ConfigureAuthorizationNormal(services);
 #endif
             var storageconnection = Configuration.GetConnectionString("StorageConnection");
             if (!string.IsNullOrEmpty(storageconnection))
@@ -92,6 +92,38 @@ namespace YoFi.AspNet.Root
                 services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
             }
         }
+
+        private void ConfigureAuthorizationNormal(IServiceCollection services)
+        {
+            // Branded mode
+            services.AddAuthorization(options =>
+            {
+                // For regular usage, all access requires that a user is both authenticated 
+                // and has bnen assigned the "Verified" role.
+                options.AddPolicy("CanWrite", policy => policy.RequireRole("Verified"));
+                options.AddPolicy("CanRead", policy => policy.RequireRole("Verified"));
+            });
+        }
+
+#if __DEMO_OPEN_ACCESS__
+        private void ConfigureAuthorizationDemo(IServiceCollection services)
+        {
+            services.AddAuthorization(options =>
+            {
+                // For demo usage, anonymous users can read any data
+                options.AddPolicy("CanRead", policy => policy.AddRequirements(new AnonymousAuth()));
+
+                // For demo usage, anyone who just creats an account can write data
+                options.AddPolicy("CanWrite", policy => policy.RequireAuthenticatedUser());
+            });
+            services.AddScoped<IAuthorizationHandler, AnonymousAuthHandler>();
+
+            // Note that this configuration setting should be used only for warning the user
+            // Not for making any access decisions. All access decisions need to use auth
+            // policy.
+            Configuration["DemoOpenAccess"] = "True";
+        }
+#endif
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
