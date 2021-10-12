@@ -58,6 +58,23 @@ namespace YoFi.AspNet.Root
                 }
                 );
 
+#if true
+            // Branded mode
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("CanRead", policy => policy.RequireRole("Verified"));
+                options.AddPolicy("CanWrite", policy => policy.RequireRole("Verified"));
+            });
+#else
+            // Demo mode
+            services.AddAuthorization(options =>
+            {
+                // Anonymous CanRead
+                options.AddPolicy("CanRead", policy => { });
+                options.AddPolicy("CanWrite", policy => policy.RequireAuthenticatedUser());
+            });
+
+#endif
             var storageconnection = Configuration.GetConnectionString("StorageConnection");
             if (!string.IsNullOrEmpty(storageconnection))
             {
