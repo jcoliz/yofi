@@ -1,1 +1,1 @@
-dotnet publish -p:DefineConstants=__DEMO_OPEN_ACCESS__
+dotnet publish -p:MyDefineConstants=__DEMO_OPEN_ACCESS__
