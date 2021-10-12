@@ -183,8 +183,11 @@ namespace YoFi.AspNet.Root
 
             app.UseEndpoints(x => 
             {
-                //x.MapControllerRoute(name: "root", pattern: "/", defaults: new { controller = "Transactions", action = "Index" } );
-                x.MapControllerRoute(name: "default", pattern: "{controller=Transactions}/{action=Index}/{id?}");
+                // In branded mode, "/" goes to transactions 
+                if (Configuration.GetSection("Brand").Exists())
+                    x.MapControllerRoute(name: "root", pattern: "/", defaults: new { controller = "Transactions", action = "Index" } );
+                
+                x.MapControllerRoute(name: "default", pattern: "{controller}/{action=Index}/{id?}");
                 x.MapRazorPages();
             });
 
