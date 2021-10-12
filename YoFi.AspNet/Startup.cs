@@ -16,7 +16,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
-
+ 
 namespace YoFi.AspNet.Root
 {
     public class Startup
@@ -95,6 +95,8 @@ namespace YoFi.AspNet.Root
 
         private void ConfigureAuthorizationNormal(IServiceCollection services)
         {
+            logme.Enqueue($"*** AUTHORIZATION *** Normal ***");
+
             // Branded mode
             services.AddAuthorization(options =>
             {
@@ -108,6 +110,8 @@ namespace YoFi.AspNet.Root
 #if __DEMO_OPEN_ACCESS__
         private void ConfigureAuthorizationDemo(IServiceCollection services)
         {
+            logme.Enqueue($"*** AUTHORIZATION *** Demo Open Access ***");
+
             services.AddAuthorization(options =>
             {
                 // For demo usage, anonymous users can read any data
