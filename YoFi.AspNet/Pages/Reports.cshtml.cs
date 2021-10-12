@@ -19,6 +19,12 @@ namespace YoFi.AspNet.Pages
 
         public List<List<IDisplayReport>> Reports { get; private set; }
 
+        [ViewData]
+        public string report { get; set; }
+
+        [ViewData]
+        public int? month { get; set; }
+
         public ReportsModel(ApplicationDbContext context)
         {
             _builder = new ReportBuilder(context);
@@ -70,8 +76,8 @@ namespace YoFi.AspNet.Pages
 
             // Budget Reports: I think I want Budget vs Expenses on the left, and perhaps managed budget on the right
 
-            ViewData["report"] = "summary";
-            ViewData["month"] = parms.month;
+            report = "summary";
+            month = parms.month;
         }
     }
 }
