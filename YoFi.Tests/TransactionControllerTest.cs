@@ -1,7 +1,7 @@
 ﻿using Common.AspNet;
 using Common.AspNet.Test;
 using Common.NET.Test;
-using jcoliz.OfficeOpenXml.Easy;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -616,11 +616,11 @@ namespace YoFi.Tests
             // Build a spreadsheet with the chosen number of items
             // Note that we are not disposing the stream. User of the file will do so later.
             var stream = new MemoryStream();
-            using (var ssr = new OpenXmlSpreadsheetWriter())
+            using (var ssr = new SpreadsheetWriter())
             {
                 ssr.Open(stream);
-                ssr.Write(transactions);
-                ssr.Write(splits);
+                ssr.Serialize(transactions);
+                ssr.Serialize(splits);
             }
 
             // Create a formfile with it
@@ -675,9 +675,9 @@ namespace YoFi.Tests
 
             IEnumerable<Transaction> txitems;
             IEnumerable<string> sheetnames;
-            using var ssr = new OpenXmlSpreadsheetReader();
+            using var ssr = new SpreadsheetReader();
             ssr.Open(stream);
-            txitems = ssr.Read<Transaction>();
+            txitems = ssr.Deserialize<Transaction>();
             sheetnames = ssr.SheetNames.ToList();
 
             Assert.AreEqual(1, sheetnames.Count());

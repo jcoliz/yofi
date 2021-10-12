@@ -1,4 +1,4 @@
-﻿using jcoliz.OfficeOpenXml.Easy;
+﻿using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -104,10 +104,10 @@ namespace Common.AspNet.Test
         public HashSet<TExtract> ExtractFromSpreadsheet<TExtract>(Stream stream) where TExtract : class, new()
         {
             var incoming = new HashSet<TExtract>();
-            using (var ssr = new OpenXmlSpreadsheetReader())
+            using (var ssr = new SpreadsheetReader())
             {
                 ssr.Open(stream);
-                var items = ssr.Read<TExtract>();
+                var items = ssr.Deserialize<TExtract>();
                 incoming.UnionWith(items);
             }
 
@@ -300,10 +300,10 @@ namespace Common.AspNet.Test
             // Build a spreadsheet with the chosen number of items
             // Note that we are not disposing the stream. User of the file will do so later.
             var stream = new MemoryStream();
-            using (var ssr = new OpenXmlSpreadsheetWriter())
+            using (var ssr = new SpreadsheetWriter())
             {
                 ssr.Open(stream);
-                ssr.Write(what);
+                ssr.Serialize(what);
             }
 
             // Create a formfile with it

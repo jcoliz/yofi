@@ -1,5 +1,5 @@
 ﻿using Common.NET.Test;
-using jcoliz.OfficeOpenXml.Easy;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -88,9 +88,9 @@ namespace YoFi.SampleGen.Tests
 
             // And: Reading it back to a list
             stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new OpenXmlSpreadsheetReader();
+            using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Read<Transaction>().ToList();
+            var actual = reader.Deserialize<Transaction>().ToList();
 
             // Then: The file contains all the transactions
             Assert.AreEqual(435, actual.Count);
@@ -116,9 +116,9 @@ namespace YoFi.SampleGen.Tests
 
             // And: Reading it back to a list
             stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new OpenXmlSpreadsheetReader();
+            using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Read<Split>("Split").ToList();
+            var actual = reader.Deserialize<Split>("Split").ToList();
 
             // Then: The file contains all the splits
             Assert.AreEqual(312, actual.Count);
@@ -143,10 +143,10 @@ namespace YoFi.SampleGen.Tests
 
             // And: Reading it back to a lists
             stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new OpenXmlSpreadsheetReader();
+            using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var transactions = reader.Read<Transaction>();
-            var splits = reader.Read<Split>("Split");
+            var transactions = reader.Deserialize<Transaction>();
+            var splits = reader.Deserialize<Split>("Split");
 
             // And: Matching the spits up to their transaction
             var lookup = splits.Where(x => x.TransactionID != 0).ToLookup(x => x.TransactionID);
@@ -181,9 +181,9 @@ namespace YoFi.SampleGen.Tests
 
             // And: Reading it back to a list of Payees
             stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new OpenXmlSpreadsheetReader();
+            using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Read<AspNet.Models.Payee>().ToList();
+            var actual = reader.Deserialize<Payee>().ToList();
 
             // Then: The file contains all the transactions
             Assert.AreEqual(21, actual.Count);
@@ -211,9 +211,9 @@ namespace YoFi.SampleGen.Tests
 
             // And: Reading it back to a list of budget line items
             stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new OpenXmlSpreadsheetReader();
+            using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Read<AspNet.Models.BudgetTx>().ToList();
+            var actual = reader.Deserialize<BudgetTx>().ToList();
 
             // Then: The file contains all the budget line items
             Assert.AreEqual(32, actual.Count);

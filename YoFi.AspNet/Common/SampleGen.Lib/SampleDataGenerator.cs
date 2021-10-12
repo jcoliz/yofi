@@ -1,4 +1,4 @@
-﻿using jcoliz.OfficeOpenXml.Easy;
+﻿using jcoliz.OfficeOpenXml.Serializer;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,9 +16,9 @@ namespace YoFi.SampleGen
         /// <param name="stream"></param>
         public void LoadDefinitions(Stream stream)
         {
-            using var ssr = new OpenXmlSpreadsheetReader();
+            using var ssr = new SpreadsheetReader();
             ssr.Open(stream);
-            Definitions.AddRange(ssr.Read<SampleDataPattern>());
+            Definitions.AddRange(ssr.Deserialize<SampleDataPattern>());
         }
 
         public void GenerateTransactions(bool addids = true)
@@ -83,12 +83,12 @@ namespace YoFi.SampleGen
         /// <param name="stream"></param>
         public void Save(Stream stream)
         {
-            using var ssr = new OpenXmlSpreadsheetWriter();
+            using var ssr = new SpreadsheetWriter();
             ssr.Open(stream);
-            ssr.Write(Transactions);
-            ssr.Write(Transactions.Where(x=>x.Splits?.Count > 1).SelectMany(x => x.Splits),"Split");
-            ssr.Write(Payees);
-            ssr.Write(BudgetTxs);
+            ssr.Serialize(Transactions);
+            ssr.Serialize(Transactions.Where(x=>x.Splits?.Count > 1).SelectMany(x => x.Splits),"Split");
+            ssr.Serialize(Payees);
+            ssr.Serialize(BudgetTxs);
         }
 
         public List<SampleDataPattern> Definitions { get; } = new List<SampleDataPattern>();

@@ -1,6 +1,6 @@
 ﻿using Common.AspNet;
 using Common.NET;
-using jcoliz.OfficeOpenXml.Easy;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -899,9 +899,9 @@ namespace YoFi.AspNet.Controllers
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using var stream = file.OpenReadStream();
-                        using var ssr = new OpenXmlSpreadsheetReader();
+                        using var ssr = new SpreadsheetReader();
                         ssr.Open(stream);
-                        var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
+                        var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
                         incoming.UnionWith(items);
                     }
                 }
@@ -947,16 +947,16 @@ namespace YoFi.AspNet.Controllers
         private void LoadTransactionsFromXlsx(IFormFile file, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
         {
             using (var stream = file.OpenReadStream())
-            using (var ssr = new OpenXmlSpreadsheetReader())
+            using (var ssr = new SpreadsheetReader())
             {
                 ssr.Open(stream);
-                var items = ssr.Read<Transaction>();
+                var items = ssr.Deserialize<Transaction>();
                 transactions.AddRange(items);
 
                 // If there are also splits included here, let's grab those
                 // And transform the flat data into something easier to use.
                 if (ssr.SheetNames.Contains("Split"))
-                    splits.AddRange(ssr.Read<Split>()?.ToLookup(x => x.TransactionID));
+                    splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
             }
         }
 
@@ -1195,13 +1195,13 @@ namespace YoFi.AspNet.Controllers
                 // Create the spreadsheet result
 
                 var stream = new MemoryStream();
-                using (var ssw = new OpenXmlSpreadsheetWriter())
+                using (var ssw = new SpreadsheetWriter())
                 {
                     ssw.Open(stream);
-                    ssw.Write(transactions,sheetname:nameof(Transaction));
+                    ssw.Serialize(transactions,sheetname:nameof(Transaction));
 
                     if (splits.Any())
-                        ssw.Write(splits);
+                        ssw.Serialize(splits);
                 }
 
                 // Return it to caller

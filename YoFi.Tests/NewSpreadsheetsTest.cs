@@ -1,5 +1,5 @@
 ﻿using Common.NET.Test;
-using jcoliz.OfficeOpenXml.Easy;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -38,9 +38,9 @@ namespace YoFi.Tests
         void WhenWritingToSpreadsheet<T>(Stream stream,IEnumerable<T> items,bool writetodisk = true) where T: class
         {
             {
-                using var writer = new OpenXmlSpreadsheetWriter();
+                using var writer = new SpreadsheetWriter();
                 writer.Open(stream);
-                writer.Write(items, TestContext.TestName);
+                writer.Serialize(items, TestContext.TestName);
             }
 
             stream.Seek(0, SeekOrigin.Begin);
@@ -58,11 +58,11 @@ namespace YoFi.Tests
         private IEnumerable<T> WhenReadAsSpreadsheet<T>(MemoryStream stream, List<string> sheets) where T : class, new()
         {
             stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new OpenXmlSpreadsheetReader();
+            using var reader = new SpreadsheetReader();
             reader.Open(stream);
             sheets.AddRange(reader.SheetNames);
 
-            return reader.Read<T>(TestContext.TestName).ToList();
+            return reader.Deserialize<T>(TestContext.TestName).ToList();
         }
 
         public void WriteThenReadBack<T>(IEnumerable<T> items, bool writetodisk = true) where T : class, new()
@@ -271,11 +271,11 @@ namespace YoFi.Tests
 
             // When: Writing it to a spreadsheet using the new methods
             using var stream = new MemoryStream();
-            using (var writer = new OpenXmlSpreadsheetWriter())
+            using (var writer = new SpreadsheetWriter())
             {
                 writer.Open(stream);
-                writer.Write(TxItems);
-                writer.Write(SplitItems);
+                writer.Serialize(TxItems);
+                writer.Serialize(SplitItems);
             }
 
             stream.Seek(0, SeekOrigin.Begin);
@@ -294,7 +294,7 @@ namespace YoFi.Tests
 
             stream.Seek(0, SeekOrigin.Begin);
             ISpreadsheetReader reader;
-            reader = new OpenXmlSpreadsheetReader();
+            reader = new SpreadsheetReader();
         }
 
         [TestMethod]
@@ -305,10 +305,10 @@ namespace YoFi.Tests
 
             // When: Loading this file
             IEnumerable<Split> actual;
-            using(var reader = new OpenXmlSpreadsheetReader())
+            using(var reader = new SpreadsheetReader())
             {
                 reader.Open(instream);
-                actual = reader.Read<Split>();
+                actual = reader.Deserialize<Split>();
             }
 
             // Then: Contents are as expected
@@ -332,9 +332,9 @@ namespace YoFi.Tests
             // When: Loading the file, without specifying the sheet name
             var actual = new List<Transaction>();
             stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new OpenXmlSpreadsheetReader();
+            using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            actual.AddRange(reader.Read<Transaction>());
+            actual.AddRange(reader.Deserialize<Transaction>());
 
             // Then: Data is loaded as expected.
             Assert.IsTrue(actual.SequenceEqual(Items));
@@ -344,7 +344,7 @@ namespace YoFi.Tests
         [ExpectedException(typeof(NotImplementedException))]
         public void CustomColumnNullFails()
         {
-            var writer = new OpenXmlSpreadsheetWriter();
+            var writer = new SpreadsheetWriter();
             var sheets = writer.SheetNames;
         }
 
@@ -457,7 +457,7 @@ namespace YoFi.Tests
         [ExpectedException(typeof(NotImplementedException))]
         public void SheetNamesFails()
         {
-            var writer = new OpenXmlSpreadsheetWriter();
+            var writer = new SpreadsheetWriter();
             var sheets = writer.SheetNames;
         }
 

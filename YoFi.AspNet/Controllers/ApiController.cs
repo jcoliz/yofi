@@ -1,5 +1,5 @@
 ﻿using Common.NET;
-using jcoliz.OfficeOpenXml.Easy;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -264,9 +264,9 @@ namespace YoFi.AspNet.Controllers
                 if (file.FileName.ToLower().EndsWith(".xlsx"))
                 {
                     using var stream = file.OpenReadStream();
-                    using var ssr = new OpenXmlSpreadsheetReader();
+                    using var ssr = new SpreadsheetReader();
                     ssr.Open(stream);
-                    var items = ssr.Read<Split>(exceptproperties: new string[] { "ID" });
+                    var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
                     incoming.UnionWith(items);
                 }
 

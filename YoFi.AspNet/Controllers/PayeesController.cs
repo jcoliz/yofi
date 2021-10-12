@@ -1,5 +1,5 @@
 ﻿using Common.AspNet;
-using jcoliz.OfficeOpenXml.Easy;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -274,9 +274,9 @@ namespace YoFi.AspNet.Controllers
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using var stream = file.OpenReadStream();
-                        using var ssr = new OpenXmlSpreadsheetReader();
+                        using var ssr = new SpreadsheetReader();
                         ssr.Open(stream);
-                        var items = ssr.Read<Payee>(exceptproperties: new string[] { "ID" });
+                        var items = ssr.Deserialize<Payee>(exceptproperties: new string[] { "ID" });
                         incoming.UnionWith(items);
                     }
                 }
@@ -310,10 +310,10 @@ namespace YoFi.AspNet.Controllers
 
                 FileStreamResult result = null;
                 var stream = new MemoryStream();
-                using (var ssw = new OpenXmlSpreadsheetWriter())
+                using (var ssw = new SpreadsheetWriter())
                 {
                     ssw.Open(stream);
-                    ssw.Write(items);
+                    ssw.Serialize(items);
                 }
 
                 stream.Seek(0, SeekOrigin.Begin);
