@@ -90,10 +90,10 @@ namespace YoFi.SampleGen.Tests
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Deserialize<Transaction>().ToList();
+            var actual = reader.Deserialize<Transaction>();
 
             // Then: The file contains all the transactions
-            Assert.AreEqual(435, actual.Count);
+            Assert.AreEqual(435, actual.Count());
             Assert.AreEqual(24, actual.Count(x => x.Payee == "Big Megacorp"));
         }
 
@@ -118,10 +118,10 @@ namespace YoFi.SampleGen.Tests
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Deserialize<Split>("Split").ToList();
+            var actual = reader.Deserialize<Split>("Split");
 
             // Then: The file contains all the splits
-            Assert.AreEqual(312, actual.Count);
+            Assert.AreEqual(312, actual.Count());
         }
 
         [TestMethod]
@@ -183,10 +183,10 @@ namespace YoFi.SampleGen.Tests
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Deserialize<Payee>().ToList();
+            var actual = reader.Deserialize<Payee>();
 
             // Then: The file contains all the transactions
-            Assert.AreEqual(21, actual.Count);
+            Assert.AreEqual(21, actual.Count());
         }
 
         [TestMethod]
@@ -213,10 +213,10 @@ namespace YoFi.SampleGen.Tests
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var actual = reader.Deserialize<BudgetTx>().ToList();
+            var actual = reader.Deserialize<BudgetTx>();
 
             // Then: The file contains all the budget line items
-            Assert.AreEqual(32, actual.Count);
+            Assert.AreEqual(32, actual.Count());
         }
 
         [TestMethod]
