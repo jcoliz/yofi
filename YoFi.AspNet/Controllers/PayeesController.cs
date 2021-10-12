@@ -14,7 +14,7 @@ using YoFi.AspNet.Models;
 
 namespace YoFi.AspNet.Controllers
 {
-    [Authorize(Roles = "Verified")]
+    [Authorize(Policy = "CanRead")]
     public class PayeesController : Controller, IController<Payee>
     {
         public static int PageSize { get; } = 25;
@@ -126,6 +126,7 @@ namespace YoFi.AspNet.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Create([Bind("ID,Name,Category,SubCategory")] Payee payee)
         {
             if (ModelState.IsValid)
@@ -174,6 +175,7 @@ namespace YoFi.AspNet.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category,SubCategory")] Payee payee)
         {
             if (id != payee.ID)
@@ -207,6 +209,7 @@ namespace YoFi.AspNet.Controllers
         // POST: Payees/BulkEdit
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkEdit(string Category)
         {
             var result = from s in _context.Payees
@@ -248,6 +251,7 @@ namespace YoFi.AspNet.Controllers
         // POST: Payees/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var payee = await _context.Payees.SingleOrDefaultAsync(m => m.ID == id);
@@ -258,6 +262,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var incoming = new HashSet<Models.Payee>(new PayeeNameComparer());

@@ -24,7 +24,7 @@ using Transaction = YoFi.AspNet.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers
 {
-    [Authorize(Roles = "Verified")]
+    [Authorize(Policy = "CanRead")]
     public class TransactionsController : Controller, IController<Models.Transaction>
     {
         #region Public Properties
@@ -404,6 +404,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> CreateSplit(int id)
         {
             /*
@@ -457,6 +458,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> ProcessImported(string command)
         {
             var allimported = from s in _context.Transactions
@@ -514,6 +516,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkEdit(string Category)
         {
             foreach (var item in _context.Transactions.Where(x => x.Selected == true))
@@ -563,7 +566,6 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         public IActionResult Create()
         {
             return View();
@@ -574,6 +576,7 @@ namespace YoFi.AspNet.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
             if (ModelState.IsValid)
@@ -692,6 +695,7 @@ namespace YoFi.AspNet.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
             if (id != transaction.ID && duplicate != true)
@@ -760,6 +764,7 @@ namespace YoFi.AspNet.Controllers
         // POST: Transactions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
@@ -769,6 +774,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> UpReceipt(List<IFormFile> files, int id)
         {
             try
@@ -817,6 +823,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> ReceiptAction(int id, string action)
         {
             if (action == "delete")
@@ -881,6 +888,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> UpSplits(List<IFormFile> files, int id)
         {
             try
@@ -961,6 +969,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var highlights = new List<Models.Transaction>();

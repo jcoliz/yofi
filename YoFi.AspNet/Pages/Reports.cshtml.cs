@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using YoFi.AspNet.Controllers.Reports;
@@ -9,6 +10,7 @@ using YoFi.AspNet.Data;
 
 namespace YoFi.AspNet.Pages
 {
+    [Authorize(Policy = "CanRead")]
     public class ReportsModel : PageModel
     {
         public static List<List<string>> Definitions = new List<List<string>>()

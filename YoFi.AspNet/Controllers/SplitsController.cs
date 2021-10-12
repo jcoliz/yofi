@@ -13,7 +13,7 @@ using YoFi.AspNet.Models;
 
 namespace YoFi.AspNet.Controllers
 {
-    [Authorize(Roles = "Verified")]
+    [Authorize(Policy = "CanRead")]
     public class SplitsController : Controller, IController<Split>
     {
         private readonly ApplicationDbContext _context;
@@ -41,6 +41,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Edit([Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
         {
             if (ModelState.IsValid)
@@ -68,6 +69,7 @@ namespace YoFi.AspNet.Controllers
         // POST: Splits/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var split = await _context.Splits.SingleOrDefaultAsync(m => m.ID == id);

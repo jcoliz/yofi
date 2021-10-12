@@ -14,7 +14,7 @@ using YoFi.AspNet.Models;
 
 namespace YoFi.AspNet.Controllers
 {
-    [Authorize(Roles = "Verified")]
+    [Authorize(Policy = "CanRead")]
     public class BudgetTxsController : Controller, IController<BudgetTx>
     {
         public static int PageSize { get; } = 25;
@@ -114,6 +114,7 @@ namespace YoFi.AspNet.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Create([Bind("ID,Amount,Timestamp,Category")] BudgetTx budgetTx)
         {
             if (ModelState.IsValid)
@@ -146,6 +147,7 @@ namespace YoFi.AspNet.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Timestamp,Category")] BudgetTx budgetTx)
         {
             if (id != budgetTx.ID)
@@ -197,6 +199,7 @@ namespace YoFi.AspNet.Controllers
         // POST: BudgetTxs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var budgetTx = await _context.BudgetTxs.SingleOrDefaultAsync(m => m.ID == id);
@@ -206,6 +209,7 @@ namespace YoFi.AspNet.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
             var incoming = new HashSet<Models.BudgetTx>(new BudgetTxComparer());
@@ -242,7 +246,7 @@ namespace YoFi.AspNet.Controllers
             return View(result.OrderBy(x => x.Timestamp.Year).ThenBy(x=>x.Timestamp.Month).ThenBy(x => x.Category));
         }
 
-        // GET: Transactions/Download
+        // GET: BudgetTxs/Download
         public Task<IActionResult> Download()
         {
             try

@@ -14,6 +14,7 @@ using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace YoFi.AspNet.Root
 {
@@ -62,8 +63,8 @@ namespace YoFi.AspNet.Root
             // Branded mode
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CanRead", policy => policy.RequireRole("Verified"));
                 options.AddPolicy("CanWrite", policy => policy.RequireRole("Verified"));
+                options.AddPolicy("CanRead", policy => policy.RequireRole("Verified"));
             });
 #else
             // Demo mode
