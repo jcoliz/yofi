@@ -1789,7 +1789,17 @@ namespace YoFi.Tests
 
             // Then: The "Highlight" viewdata is set to a hashset of those numbers
             CollectionAssert.AreEqual(numbers, (viewresult.ViewData["Highlight"] as HashSet<int>).ToList());
+        }
 
+        [TestMethod]
+        public async Task ImportHighlightBogusIgnore()
+        {
+            // When: Calling Import with highlight set to letters instead of numbers (which is invalid)
+            var result = await controller.Import(highlight: "A:B:C:D");
+            var viewresult = result as ViewResult;
+
+            // Then: The "Highlight" viewdata is null, and everything else works
+            Assert.IsNull(viewresult.ViewData["Highlight"]);
         }
 
         [TestMethod]
