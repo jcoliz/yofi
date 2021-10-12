@@ -9,6 +9,8 @@
     var bodyclass = islogin ? "signin text-center" : string.Empty;
     bodyclass = ishome ? "iscarousel" : bodyclass;
 
+    var bodycontent = ishome ? string.Empty : "container body-content";
+
     var isdemo = _config["DemoOpenAccess"] == "True";
     var demotitle = isdemo ? "DEMO - " : string.Empty;
 }
@@ -67,7 +69,7 @@
             </div>
         </nav>
     }
-    <!-- <div class="container body-content" style="padding-top: 15px">-->
+    <div class="@bodycontent">
     @RenderBody()
 
     @if (isdemo)
@@ -80,7 +82,7 @@
             <strong class="ms-1">WARNING</strong> Demonstration use only. Do not enter any real data!
         </div>
     }
-    <!--    </div>-->
+    </div>
 
     @if (!islogin)
     {
