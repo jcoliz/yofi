@@ -15,6 +15,7 @@ using YoFi.AspNet.Boilerplate.Models;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
 
 namespace YoFi.AspNet.Root
 {
@@ -59,22 +60,30 @@ namespace YoFi.AspNet.Root
                 }
                 );
 
-#if true
+            // -----------------------------------------------------------------------------
+            //
+            // WARNING: Elevation of privelage risk lives here
+            //
+            // For demo mode, we want a much more open policy than in regular use
+            // Define the __DEMO_OPEN_ACCESS__ token during compilation to enable this
+            //
+            // -----------------------------------------------------------------------------
+#if __DEMO_OPEN_ACCESS__
+            // Demo mode
+            services.AddAuthorization(options =>
+            {
+                // Anonymous CanRead
+                options.AddPolicy("CanRead", policy => policy.AddRequirements(new AnonymousAuth()));
+                options.AddPolicy("CanWrite", policy => policy.RequireAuthenticatedUser());
+            });
+            services.AddScoped<IAuthorizationHandler, AnonymousAuthHandler>();
+#else
             // Branded mode
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("CanWrite", policy => policy.RequireRole("Verified"));
                 options.AddPolicy("CanRead", policy => policy.RequireRole("Verified"));
             });
-#else
-            // Demo mode
-            services.AddAuthorization(options =>
-            {
-                // Anonymous CanRead
-                options.AddPolicy("CanRead", policy => { });
-                options.AddPolicy("CanWrite", policy => policy.RequireAuthenticatedUser());
-            });
-
 #endif
             var storageconnection = Configuration.GetConnectionString("StorageConnection");
             if (!string.IsNullOrEmpty(storageconnection))
@@ -156,4 +165,21 @@ namespace YoFi.AspNet.Root
             }
         }
     }
+
+#if __DEMO_OPEN_ACCESS__
+
+    // https://stackoverflow.com/questions/60549828/how-do-i-disable-enable-authentication-at-runtime-in-asp-net-core-2-2
+    public class AnonymousAuth: IAuthorizationRequirement
+    {
+    }
+
+    public class AnonymousAuthHandler : AuthorizationHandler<AnonymousAuth>
+    {
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, AnonymousAuth requirement)
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+    }
+#endif
 }
