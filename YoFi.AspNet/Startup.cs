@@ -45,7 +45,18 @@ namespace YoFi.AspNet.Root
             // Story #1024: Moving to built-in UI. Not sure if I need this?
             //services.AddTransient<IEmailSender, EmailSender>();
 
-            services.AddRazorPages().AddRazorRuntimeCompilation();
+            // For an unbranded site, we want to go to the Home page by default
+            if (Configuration.GetSection("Brand").Exists())
+            {
+                services.AddRazorPages().AddRazorRuntimeCompilation();
+            }
+            else
+            {
+                services.AddRazorPages(options =>
+                {
+                    options.Conventions.AddPageRoute("/Home", "/");
+                }).AddRazorRuntimeCompilation();
+            }
 
             // https://andrewlock.net/an-introduction-to-session-storage-in-asp-net-core/
             services.AddDistributedMemoryCache();
@@ -58,7 +69,7 @@ namespace YoFi.AspNet.Root
                 { 
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 }
-                );
+            );
 
             // -----------------------------------------------------------------------------
             //
@@ -172,6 +183,7 @@ namespace YoFi.AspNet.Root
 
             app.UseEndpoints(x => 
             {
+                //x.MapControllerRoute(name: "root", pattern: "/", defaults: new { controller = "Transactions", action = "Index" } );
                 x.MapControllerRoute(name: "default", pattern: "{controller=Transactions}/{action=Index}/{id?}");
                 x.MapRazorPages();
             });
