@@ -454,16 +454,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                if (!id.HasValue)
-                    throw new ArgumentException();
-
-                var result = await _context.Transactions.Where(x=>x.ID == id.Value).SingleAsync();
-
-                return View(result);
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest();
+                return View(await Get(id));
             }
             catch (InvalidOperationException)
             {
@@ -648,10 +639,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                if (!id.HasValue)
-                    throw new ArgumentException();
-
-                var transaction = await _context.Transactions.Include(x => x.Splits).SingleAsync(m => m.ID == id);
+                var transaction = await GetWithSplits(id);
 
                 // Handle payee auto-assignment
 
@@ -674,10 +662,6 @@ namespace YoFi.AspNet.Controllers
 
                 return View(transaction);
             }
-            catch (ArgumentException)
-            {
-                return BadRequest();
-            }
             catch (InvalidOperationException)
             {
                 return NotFound();
@@ -694,10 +678,7 @@ namespace YoFi.AspNet.Controllers
             {
                 // TODO: Refactor to no duplicate between here and Edit
 
-                if (!id.HasValue)
-                    throw new ArgumentException();
-
-                var transaction = await _context.Transactions.Include(x => x.Splits).SingleAsync(m => m.ID == id);
+                var transaction = await GetWithSplits(id);
 
                 // Handle payee auto-assignment
 
@@ -715,10 +696,6 @@ namespace YoFi.AspNet.Controllers
 
                 return PartialView("EditPartial", transaction);
 
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest();
             }
             catch (InvalidOperationException)
             {
@@ -833,12 +810,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                if (!id.HasValue)
-                    throw new ArgumentException();
-
-                var result = await _context.Transactions.Where(x => x.ID == id.Value).SingleAsync();
-
-                return View(result);
+                return View(await Get(id));
             }
             catch (ArgumentException)
             {
@@ -862,7 +834,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var transaction = await _context.Transactions.SingleAsync(m => m.ID == id);
+                var transaction = await Get(id);
 
                 _context.Transactions.Remove(transaction);
                 await _context.SaveChangesAsync();
@@ -948,7 +920,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var transaction = await _context.Transactions.Where(x => x.ID == id).SingleAsync();
+                var transaction = await Get(id);
 
                 transaction.ReceiptUrl = null;
                 _context.Update(transaction);
@@ -974,7 +946,7 @@ namespace YoFi.AspNet.Controllers
                 if (null == _storage)
                     throw new InvalidOperationException("Unable to download receipt. Azure Blob Storage is not configured for this application.");
 
-                var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
+                var transaction = await Get(id);
 
                 if (string.IsNullOrEmpty(transaction.ReceiptUrl))
                     throw new KeyNotFoundException("Transaction has no receipt");
@@ -1017,8 +989,7 @@ namespace YoFi.AspNet.Controllers
                 if (files == null || !files.Any())
                     throw new ApplicationException("Please choose a file to upload, first.");
 
-                var transaction = await _context.Transactions.Include(x => x.Splits)
-                    .SingleAsync(m => m.ID == id);
+                var transaction = await GetWithSplits(id);
 
                 var incoming = new HashSet<Models.Split>();
                 // Extract submitted file into a list objects
@@ -1048,6 +1019,10 @@ namespace YoFi.AspNet.Controllers
                 }
 
                 return RedirectToAction("Edit", new { id = id });
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
             }
             catch (ApplicationException ex)
             {
@@ -1458,6 +1433,8 @@ namespace YoFi.AspNet.Controllers
 
         private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 
+        private async Task<Transaction> Get(int? id) => await _context.Transactions.SingleAsync(x => x.ID == id.Value);
+        private async Task<Transaction> GetWithSplits(int? id) => await _context.Transactions.Include(x => x.Splits).SingleAsync(x => x.ID == id.Value);
         #endregion
 
         #region IController
