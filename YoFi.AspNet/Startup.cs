@@ -129,7 +129,7 @@ namespace YoFi.AspNet.Root
                 options.AddPolicy("CanRead", policy => policy.AddRequirements(new AnonymousAuth()));
 
                 // For demo usage, anyone who just creats an account can write data
-                options.AddPolicy("CanWrite", policy => policy.RequireAuthenticatedUser());
+                options.AddPolicy("CanWrite", policy => policy.RequireRole("Verified"));
             });
             services.AddScoped<IAuthorizationHandler, AnonymousAuthHandler>();
 
