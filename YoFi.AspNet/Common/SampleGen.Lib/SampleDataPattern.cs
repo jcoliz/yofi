@@ -178,7 +178,7 @@ namespace YoFi.SampleGen
         /// <summary>
         /// Our own random number generator
         /// </summary>
-        private static Random random = new Random();
+        private static readonly Random random = new Random();
 
         /// <summary>
         /// For transactions generated in this pattern, what is the earliest day they can fall?
