@@ -407,53 +407,72 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> CreateSplit(int id)
         {
-            /*
-				1) ADD a split to the transaction in the full amount needed to get back to total amount.
-				2) COPY the Category Information over from the main, if exists
-                3) NULL out the Cat/SubCat from the transaction
-             */
-            var transaction = await _context.Transactions.Include("Splits")
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (transaction == null)
+            Split result = null;
+            try
+            {
+                /*
+                    1) ADD a split to the transaction in the full amount needed to get back to total amount.
+                    2) COPY the Category Information over from the main, if exists
+                    3) NULL out the Cat/SubCat from the transaction
+                 */
+                var transaction = await _context.Transactions.Include("Splits")
+                    .SingleOrDefaultAsync(m => m.ID == id);
+
+                if (transaction == null)
+                    throw new KeyNotFoundException();
+
+                result = new Split() { Category = transaction.Category };
+
+                // Calculate the amount based on how much is remaining.
+
+                var currentamount = transaction.Splits.Select(x => x.Amount).Sum();
+                var remaining = transaction.Amount - currentamount;
+                result.Amount = remaining;
+
+                transaction.Splits.Add(result);
+
+                // Remove the category information, that's now contained in the splits.
+
+                transaction.Category = null;
+
+                _context.Update(transaction);
+                await _context.SaveChangesAsync();
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
 
-            var split = new Split() { Category = transaction.Category };
-
-            // Calculate the amount based on how much is remaining.
-
-            var currentamount = transaction.Splits.Select(x => x.Amount).Sum();
-            var remaining = transaction.Amount - currentamount;
-            split.Amount = remaining;
-
-            transaction.Splits.Add(split);
-
-            // Remove the category information, that's now contained in the splits.
-
-            transaction.Category = null;
-
-            _context.Update(transaction);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Edit", "Splits", new { id = split.ID });
+            return RedirectToAction("Edit", "Splits", new { id = result.ID });
         }
 
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            try
+            {
+                if (!id.HasValue)
+                    throw new ArgumentException();
+
+                var result = await _context.Transactions.Where(x=>x.ID == id.Value).SingleAsync();
+
+                return View(result);
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
             {
                 return NotFound();
             }
-
-            var transaction = await _context.Transactions
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (transaction == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, ex.Message);
             }
-
-            return View(transaction);
         }
 
         [HttpPost]
@@ -461,109 +480,139 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> ProcessImported(string command)
         {
-            var allimported = from s in _context.Transactions
-                              where s.Imported == true
-                              orderby s.Timestamp descending, s.BankReference ascending
-                              select s;
-
-            var selected = await allimported.Where(x => true == x.Selected).ToListAsync();
-            var unselected = await allimported.Where(x => true != x.Selected).ToListAsync();
-
-            if (command == "cancel")
+            try
             {
-                _context.Transactions.RemoveRange(allimported);
-                _context.SaveChanges();
+                if (string.IsNullOrEmpty(command))
+                    throw new ArgumentException();
+
+                var allimported = from s in _context.Transactions
+                                  where s.Imported == true
+                                  orderby s.Timestamp descending, s.BankReference ascending
+                                  select s;
+
+                var selected = await allimported.Where(x => true == x.Selected).ToListAsync();
+                var unselected = await allimported.Where(x => true != x.Selected).ToListAsync();
+
+                if (command == "cancel")
+                {
+                    _context.Transactions.RemoveRange(allimported);
+                    _context.SaveChanges();
+                    return RedirectToAction(nameof(Import));
+                }
+                else if (command == "ok")
+                {
+                    foreach (var item in selected)
+                        item.Imported = item.Hidden = item.Selected = false;
+                    _context.Transactions.RemoveRange(unselected);
+                    _context.SaveChanges();
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                    throw new ArgumentException();
             }
-            else if (command == "ok")
+            catch (ArgumentException)
             {
-                foreach (var item in selected)
-                    item.Imported = item.Hidden = item.Selected = false;
-                _context.Transactions.RemoveRange(unselected);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
+                return BadRequest();
             }
-            return RedirectToAction(nameof(Import));
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         public async Task<IActionResult> Import(string highlight = null, int? p = null)
         {
-            IQueryable<Transaction> result = from s in _context.Transactions
-                              where s.Imported == true
-                              orderby s.Timestamp descending, s.BankReference ascending
-                              select s;
-
-            //
-            // Process PAGE (P) parameters
-            //
-
-            var divider = new PageDivider() { PageSize = PageSize };
-            result = await divider.ItemsForPage(result, p);
-            ViewData[nameof(PageDivider)] = divider;
-
             try
             {
-                if (!string.IsNullOrEmpty(highlight))
-                {
-                    ViewData["Highlight"] = highlight.Split(':').Select(x => Convert.ToInt32(x)).ToHashSet();
-                }
-            }
-            catch
-            {
-                // If this fails in any way, nevermind.
-            }
+                IQueryable<Transaction> result = from s in _context.Transactions
+                                                 where s.Imported == true
+                                                 orderby s.Timestamp descending, s.BankReference ascending
+                                                 select s;
 
-            return View(await result.AsNoTracking().ToListAsync());
+                //
+                // Process PAGE (P) parameters
+                //
+
+                var divider = new PageDivider() { PageSize = PageSize };
+                result = await divider.ItemsForPage(result, p);
+                ViewData[nameof(PageDivider)] = divider;
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(highlight))
+                    {
+                        ViewData["Highlight"] = highlight.Split(':').Select(x => Convert.ToInt32(x)).ToHashSet();
+                    }
+                }
+                catch
+                {
+                    // If this fails in any way, nevermind.
+                }
+
+                return View(await result.AsNoTracking().ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkEdit(string Category)
         {
-            foreach (var item in _context.Transactions.Where(x => x.Selected == true))
+            try
             {
-                item.Selected = false;
-
-                if (!string.IsNullOrEmpty(Category))
+                foreach (var item in _context.Transactions.Where(x => x.Selected == true))
                 {
-                    // This may be a pattern-matching search, treat it like one
-                    // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
-                    // matching one, it's just slower.
-                    if (Category.Contains("("))
-                    {
-                        var originals = item.Category?.Split(":") ?? default;
-                        var result = new List<string>();
-                        foreach (var component in Category.Split(":"))
-                        {
-                            if (component.StartsWith("(") && component.EndsWith("+)"))
-                            {
-                                if (Int32.TryParse(component[1..^2], out var position))
-                                    if (originals.Count() >= position)
-                                        result.AddRange(originals.Skip(position - 1));
-                            }
-                            else if (component.StartsWith("(") && component.EndsWith(")"))
-                            {
-                                if (Int32.TryParse(component[1..^1], out var position))
-                                    if (originals.Count() >= position)
-                                        result.AddRange(originals.Skip(position - 1).Take(1));
-                            }
-                            else
-                                result.Add(component);
-                        }
+                    item.Selected = false;
 
-                        if (result.Any())
-                            item.Category = string.Join(":", result);
-                    }
-                    // It's just a simple replacement
-                    else
+                    if (!string.IsNullOrEmpty(Category))
                     {
-                        item.Category = Category;
+                        // This may be a pattern-matching search, treat it like one
+                        // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
+                        // matching one, it's just slower.
+                        if (Category.Contains("("))
+                        {
+                            var originals = item.Category?.Split(":") ?? default;
+                            var result = new List<string>();
+                            foreach (var component in Category.Split(":"))
+                            {
+                                if (component.StartsWith("(") && component.EndsWith("+)"))
+                                {
+                                    if (Int32.TryParse(component[1..^2], out var position))
+                                        if (originals.Count() >= position)
+                                            result.AddRange(originals.Skip(position - 1));
+                                }
+                                else if (component.StartsWith("(") && component.EndsWith(")"))
+                                {
+                                    if (Int32.TryParse(component[1..^1], out var position))
+                                        if (originals.Count() >= position)
+                                            result.AddRange(originals.Skip(position - 1).Take(1));
+                                }
+                                else
+                                    result.Add(component);
+                            }
+
+                            if (result.Any())
+                                item.Category = string.Join(":", result);
+                        }
+                        // It's just a simple replacement
+                        else
+                        {
+                            item.Category = Category;
+                        }
                     }
                 }
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
             }
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         public IActionResult Create()
@@ -579,79 +628,106 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(transaction);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(transaction);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(transaction);
             }
-            return View(transaction);
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                if (!id.HasValue)
+                    throw new ArgumentException();
 
-            var transaction = await _context.Transactions.Include(x => x.Splits).SingleOrDefaultAsync(m => m.ID == id);
-            if (transaction == null)
-            {
-                return NotFound();
-            }
+                var transaction = await _context.Transactions.Include(x => x.Splits).SingleAsync(m => m.ID == id);
 
-            // Handle payee auto-assignment
+                // Handle payee auto-assignment
 
-            if (string.IsNullOrEmpty(transaction.Category))
-            {
-                // See if the payee exists
-                var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
-
-                if (payee != null)
+                if (string.IsNullOrEmpty(transaction.Category))
                 {
-                    transaction.Category = payee.Category;
-                    ViewData["AutoCategory"] = true;
+                    // See if the payee exists
+                    var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
+
+                    if (payee != null)
+                    {
+                        transaction.Category = payee.Category;
+                        ViewData["AutoCategory"] = true;
+                    }
                 }
+
+                // Handle error condition where splits don't add up
+
+                var splitstotal = transaction.Splits.Select(x => x.Amount).Sum();
+                ViewData["SplitsOK"] = (splitstotal == transaction.Amount);
+
+                return View(transaction);
             }
-
-            // Handle error condition where splits don't add up
-
-            var splitstotal = transaction.Splits.Select(x => x.Amount).Sum();
-            ViewData["SplitsOK"] = (splitstotal == transaction.Amount);
-
-            return View(transaction);
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         public async Task<IActionResult> EditModal(int? id)
         {
-            // TODO: Refactor to no duplicate between here and Edit
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                // TODO: Refactor to no duplicate between here and Edit
 
-            var transaction = await _context.Transactions.Include(x => x.Splits).SingleOrDefaultAsync(m => m.ID == id);
-            if (transaction == null)
-            {
-                return NotFound();
-            }
+                if (!id.HasValue)
+                    throw new ArgumentException();
 
-            // Handle payee auto-assignment
+                var transaction = await _context.Transactions.Include(x => x.Splits).SingleAsync(m => m.ID == id);
 
-            if (string.IsNullOrEmpty(transaction.Category))
-            {
-                // See if the payee exists
-                var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
+                // Handle payee auto-assignment
 
-                if (payee != null)
+                if (string.IsNullOrEmpty(transaction.Category))
                 {
-                    transaction.Category = payee.Category;
-                    ViewData["AutoCategory"] = true;
-                }
-            }
+                    // See if the payee exists
+                    var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
 
-            return PartialView("EditPartial", transaction);
+                    if (payee != null)
+                    {
+                        transaction.Category = payee.Category;
+                        ViewData["AutoCategory"] = true;
+                    }
+                }
+
+                return PartialView("EditPartial", transaction);
+
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         public IActionResult DownloadPartial()
@@ -698,71 +774,84 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
         {
-            if (id != transaction.ID && duplicate != true)
+            try
             {
-                return NotFound();
-            }
+                if (id != transaction.ID && duplicate != true)
+                    throw new ArgumentException();
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (!ModelState.IsValid)
+                    throw new InvalidOperationException();
+
+                if (duplicate == true)
                 {
-                    if (duplicate == true)
-                    {
-                        transaction.ID = 0;
-                        _context.Add(transaction);
-                        await _context.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        // Bug #846: This Edit function is not allowed to alter the
-                        // ReceiptUrl. So we much preserve whatever was there.
-
-                        var old = await _context.Transactions.Include(x => x.Splits).SingleOrDefaultAsync(m => m.ID == id);
-                        if (old == null)
-                        {
-                            return NotFound();
-                        }
-                        _context.Entry(old).State = EntityState.Detached;
-
-                        transaction.ReceiptUrl = old.ReceiptUrl;
-
-                        _context.Update(transaction);
-                        await _context.SaveChangesAsync();
-                    }
+                    transaction.ID = 0;
+                    _context.Add(transaction);
+                    await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException ex)
+                else
                 {
-                    if (!_context.Transactions.Any(e => e.ID == transaction.ID))
+                    // Bug #846: This Edit function is not allowed to alter the
+                    // ReceiptUrl. So we much preserve whatever was there.
+
+                    var old = await _context.Transactions.Include(x => x.Splits).SingleOrDefaultAsync(m => m.ID == id);
+                    if (old == null)
+                    {
                         return NotFound();
-                    else
-                        return StatusCode(500,ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, ex.Message);
+                    }
+                    _context.Entry(old).State = EntityState.Detached;
+
+                    transaction.ReceiptUrl = old.ReceiptUrl;
+
+                    _context.Update(transaction);
+                    await _context.SaveChangesAsync();
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(transaction);
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
+            {
+                return View(transaction);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (!_context.Transactions.Any(e => e.ID == transaction.ID))
+                    return NotFound();
+                else
+                    return StatusCode(500, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET: Transactions/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
+            try
+            {
+                if (!id.HasValue)
+                    throw new ArgumentException();
+
+                var result = await _context.Transactions.Where(x => x.ID == id.Value).SingleAsync();
+
+                return View(result);
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
             {
                 return NotFound();
             }
-
-            var transaction = await _context.Transactions
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (transaction == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, ex.Message);
             }
-
-            return View(transaction);
         }
 
         // POST: Transactions/Delete/5
@@ -771,10 +860,23 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Transactions.Remove(transaction);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var transaction = await _context.Transactions.SingleAsync(m => m.ID == id);
+
+                _context.Transactions.Remove(transaction);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
@@ -844,17 +946,24 @@ namespace YoFi.AspNet.Controllers
 
         private async Task<IActionResult> DeleteReceipt(int id)
         {
-            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
-            if (transaction == null)
+            try
+            {
+                var transaction = await _context.Transactions.Where(x => x.ID == id).SingleAsync();
+
+                transaction.ReceiptUrl = null;
+                _context.Update(transaction);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+            catch (InvalidOperationException)
             {
                 return NotFound();
             }
-
-            transaction.ReceiptUrl = null;
-            _context.Update(transaction);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Edit), new { id });
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet]
@@ -1349,10 +1458,6 @@ namespace YoFi.AspNet.Controllers
 
         private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 
-        private bool TransactionExists(int id)
-        {
-            return _context.Transactions.Any(e => e.ID == id);
-        }
         #endregion
 
         #region IController

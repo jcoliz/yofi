@@ -1957,19 +1957,19 @@ namespace YoFi.Tests
 
         [TestMethod]
         public async Task DetailsNullNotFound() => 
-            Assert.IsTrue(await controller.Details(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+            Assert.IsTrue(await controller.Details(null) is Microsoft.AspNetCore.Mvc.BadRequestResult);
 
         [TestMethod]
         public async Task EditNullNotFound() =>
-            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.BadRequestResult);
 
         [TestMethod]
         public async Task EditModalNullNotFound() =>
-            Assert.IsTrue(await controller.EditModal(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+            Assert.IsTrue(await controller.EditModal(null) is Microsoft.AspNetCore.Mvc.BadRequestResult);
 
         [TestMethod]
         public async Task DeleteNullNotFound() =>
-            Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+            Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.BadRequestResult);
 
         [TestMethod]
         public async Task ReceiptActionOther() =>
