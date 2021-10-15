@@ -1293,11 +1293,7 @@ namespace YoFi.AspNet.Controllers
                     }
                     else
                     {
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
-                        int y = Now.Year;
-                        int.TryParse(value, out y);
-                        _Year = y;
-#pragma warning restore IDE0059 // Unnecessary assignment of a value
+                        _Year = (int.TryParse(value, out int y)) ? y : Now.Year;
                     }
                 }
 
