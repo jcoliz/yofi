@@ -954,18 +954,16 @@ namespace YoFi.AspNet.Controllers
 
         private void LoadTransactionsFromXlsx(IFormFile file, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
         {
-            using (var stream = file.OpenReadStream())
-            using (var ssr = new SpreadsheetReader())
-            {
-                ssr.Open(stream);
-                var items = ssr.Deserialize<Transaction>();
-                transactions.AddRange(items);
+            using var stream = file.OpenReadStream();
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            var items = ssr.Deserialize<Transaction>();
+            transactions.AddRange(items);
 
-                // If there are also splits included here, let's grab those
-                // And transform the flat data into something easier to use.
-                if (ssr.SheetNames.Contains("Split"))
-                    splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
-            }
+            // If there are also splits included here, let's grab those
+            // And transform the flat data into something easier to use.
+            if (ssr.SheetNames.Contains("Split"))
+                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
         }
 
         [HttpPost]
