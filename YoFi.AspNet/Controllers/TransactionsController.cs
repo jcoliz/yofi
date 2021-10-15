@@ -257,7 +257,7 @@ namespace YoFi.AspNet.Controllers
         /// <param name="result">Initial query to further refine</param>
         /// <param name="p">Order parameter</param>
         /// <returns>Resulting query refined by <paramref name="o"/></returns>
-        public static IQueryable<Transaction> TransactionsForOrdering(IQueryable<Transaction> result, string o, ViewDataDictionary ViewData) => o switch 
+        public static IQueryable<Transaction> TransactionsForOrdering(IQueryable<Transaction> result, string o) => o switch 
         { 
             // Coverlet finds cyclomatic complexity of 42 in this function!!?? No clue why it's not just 10.
             "aa" => result.OrderBy(s => s.Amount),
@@ -314,7 +314,7 @@ namespace YoFi.AspNet.Controllers
             ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
             ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
 
-            result = TransactionsForOrdering(result, o, ViewData);
+            result = TransactionsForOrdering(result, o);
 
             //
             // Process PAGE (P) parameters
