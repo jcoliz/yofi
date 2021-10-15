@@ -1,5 +1,6 @@
 ﻿using Common.NET;
 using jcoliz.OfficeOpenXml.Serializer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -66,6 +67,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost("ApplyPayee/{id}")]
+        [Authorize(Policy = "CanWrite")]
         public async Task<ApiResult> ApplyPayee(int id)
         {
             try
@@ -172,6 +174,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<ApiResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
         {
             try
@@ -204,6 +207,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("UpReceipt/{id}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<ApiResult> UpReceipt(int id, IFormFile file)
         {
             try
@@ -252,6 +256,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("UpSplits/{id}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<ApiResult> UpSplits(int id, IFormFile file)
         {
             try
@@ -292,6 +297,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("EditPayee/{id}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<ApiResult> EditPayee(bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
         {
             try
@@ -322,6 +328,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("AddPayee")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
         public async Task<ApiResult> AddPayee([Bind("Name,Category,SubCategory")] Payee payee)
         {
             try

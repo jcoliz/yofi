@@ -70,6 +70,9 @@
                 }
                 else
                     alert(result.Error);
+            },
+            error: function (request, status, error) {
+                alert(status + ": " + error);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -92,6 +95,9 @@
                 }
                 else
                     alert(result.Error);
+            },
+            error: function (request, status, error) {
+                alert(status + ": " + error);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -112,6 +118,9 @@
                     applyPayee(tr);
                 else
                     alert(result.Error);
+            },
+            error: function (request, status, error) {
+                alert(status + ": " + error);
             }
         });
         $(this).parents('.modal').modal('hide');
@@ -199,6 +208,9 @@ function applyPayee(tr)
                 tr.find(".display-category").text(result.Item.Category);
             else
                 alert(result.Error);
+        },
+        error: function (request, status, error) {
+            alert(status + ": " + error);
         }
     });
 }
