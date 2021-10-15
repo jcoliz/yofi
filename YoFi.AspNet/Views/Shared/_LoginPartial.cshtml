@@ -13,7 +13,7 @@
                 <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
             </li>
         </ul>    
-        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm">
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Home")" method="post" id="logoutForm">
             <button type="submit" class="btn btn-secondary my-2 my-sm-0">Log out</button>
         </form>
     </div>
