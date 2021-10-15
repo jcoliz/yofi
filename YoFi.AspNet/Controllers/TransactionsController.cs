@@ -738,6 +738,10 @@ namespace YoFi.AspNet.Controllers
                     else
                         return StatusCode(500,ex.Message);
                 }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex.Message);
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(transaction);
@@ -815,9 +819,13 @@ namespace YoFi.AspNet.Controllers
 
                 return Redirect($"/Transactions/Edit/{id}");
             }
-            catch (Exception ex)
+            catch (ApplicationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -860,7 +868,7 @@ namespace YoFi.AspNet.Controllers
                 var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
 
                 if (string.IsNullOrEmpty(transaction.ReceiptUrl))
-                    throw new ApplicationException("Transaction has no receipt");
+                    throw new KeyNotFoundException("Transaction has no receipt");
 
                 var blobname = id.ToString();
 
@@ -881,9 +889,13 @@ namespace YoFi.AspNet.Controllers
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
                 return File(stream, contenttype, id.ToString());
             }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
             catch (Exception ex)
             {
-                return Problem(detail:ex.Message,type:ex.GetType().Name);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -928,9 +940,13 @@ namespace YoFi.AspNet.Controllers
 
                 return RedirectToAction("Edit", new { id = id });
             }
-            catch (Exception ex)
+            catch (ApplicationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -1069,9 +1085,13 @@ namespace YoFi.AspNet.Controllers
                 await _context.AddRangeAsync(incoming);
                 await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch (ApplicationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
             }
 
             // This is kind of a crappy way to communicate the potential false negative conflicts.
@@ -1216,9 +1236,9 @@ namespace YoFi.AspNet.Controllers
                 stream.Seek(0, SeekOrigin.Begin);
                 return File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName:"Transactions.xlsx");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, ex.Message);
             }
         }
 
