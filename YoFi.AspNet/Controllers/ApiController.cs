@@ -325,7 +325,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-
         [HttpPost("AddPayee")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -387,7 +386,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return Problem(detail: ex.Message, statusCode: 500);
             }
         }
 
@@ -452,7 +451,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return Problem(detail:ex.Message,statusCode:500);
             }
         }
 
