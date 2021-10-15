@@ -258,15 +258,8 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
-        public async Task CreateModelZero()
-        {
-            // When: Calling Create partial with zerovalue
-            var result = await controller.CreateModal(0);
-
-            // Then: It returns an empty model
-            var viewresult = result as PartialViewResult;
-            Assert.IsNull(viewresult.Model);
-        }
+        public async Task CreateModalZero() =>
+            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
         [TestMethod]
         public async Task EditNullNotFound() =>

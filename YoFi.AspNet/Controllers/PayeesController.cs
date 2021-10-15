@@ -71,54 +71,76 @@ namespace YoFi.AspNet.Controllers
         // GET: Payees/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            try
+            {
+                return View(await Get(id));
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
             {
                 return NotFound();
             }
-
-            var payee = await _context.Payees
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (payee == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, ex.Message);
             }
-
-            return View(payee);
         }
+
+        private async Task<Payee> Get(int? id) => await _context.Payees.SingleAsync(x => x.ID == id.Value);
 
         // GET: Payees/Create
         public async Task<IActionResult> Create(int? txid)
         {
-            if (txid.HasValue)
+            try
             {
-                var transaction = await _context.Transactions.Where(x => x.ID == txid.Value).SingleOrDefaultAsync();
+                // Create with no txid is valid. It means user is creating one from scratch
+                if (!txid.HasValue)
+                    return View();
 
-                if (transaction == null)
-                    return NotFound();
-
+                var transaction = await _context.Transactions.Where(x => x.ID == txid.Value).SingleAsync();
                 var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
+
                 return View(payee);
             }
-
-            return View();
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
         // GET: Payees/CreateModel/{txid}
         public async Task<IActionResult> CreateModal(int id)
         {
-            if (id > 0)
+            try
             {
+                if (id <= 0)
+                    throw new ArgumentException();
+
                 ViewData["TXID"] = id;
 
-                var transaction = await _context.Transactions.Where(x => x.ID == id).SingleOrDefaultAsync();
-
-                if (transaction == null)
-                    return NotFound();
+                var transaction = await _context.Transactions.Where(x => x.ID == id).SingleAsync();
 
                 var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
-                return PartialView("CreatePartial",payee);
+                return PartialView("CreatePartial", payee);
             }
-
-            return PartialView();
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // POST: Payees/Create
@@ -129,45 +151,48 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Create([Bind("ID,Name,Category,SubCategory")] Payee payee)
         {
-            if (ModelState.IsValid)
+            try
             {
+                if (!ModelState.IsValid)
+                    throw new InvalidOperationException();
+
                 _context.Add(payee);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(payee);
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET: Payees/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var payee = await _context.Payees.SingleOrDefaultAsync(m => m.ID == id);
-            if (payee == null)
-            {
-                return NotFound();
-            }
-            return View(payee);
-        }
+        public async Task<IActionResult> Edit(int? id) => await Details(id);
 
         // GET: Payees/EditModal/5
         public async Task<IActionResult> EditModal(int? id)
         {
-            if (id == null)
+            try
+            {
+                return PartialView("EditPartial", await Get(id));
+            }
+            catch (InvalidOperationException)
             {
                 return NotFound();
             }
-
-            var payee = await _context.Payees.SingleOrDefaultAsync(m => m.ID == id);
-            if (payee == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, ex.Message);
             }
-            return PartialView("EditPartial", payee);
         }
 
         // POST: Payees/Edit/5
@@ -190,7 +215,7 @@ namespace YoFi.AspNet.Controllers
                     _context.Update(payee);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
                     if (!PayeeExists(payee.ID))
                     {
@@ -198,7 +223,7 @@ namespace YoFi.AspNet.Controllers
                     }
                     else
                     {
-                        throw;
+                        return StatusCode(500, ex.Message);
                     }
                 }
                 return RedirectToAction(nameof(Index));
@@ -231,22 +256,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         // GET: Payees/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var payee = await _context.Payees
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (payee == null)
-            {
-                return NotFound();
-            }
-
-            return View(payee);
-        }
+        public async Task<IActionResult> Delete(int? id) => await Details(id);
 
         // POST: Payees/Delete/5
         [HttpPost, ActionName("Delete")]
