@@ -11,6 +11,8 @@
 
     var bodycontent = ishome ? string.Empty : "container body-content";
 
+    var needswarning = ViewContext.RouteData.Values.ContainsKey("controller");
+
     var isdemo = _config["DemoOpenAccess"] == "True";
     var demotitle = isdemo ? "DEMO - " : string.Empty;
 }
@@ -72,7 +74,7 @@
     <div class="@bodycontent">
     @RenderBody()
 
-    @if (isdemo && !ishome)
+    @if (isdemo && needswarning)
     {
         <div class="alert alert-danger" role="alert">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
