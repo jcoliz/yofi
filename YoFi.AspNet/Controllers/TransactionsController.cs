@@ -43,11 +43,98 @@ namespace YoFi.AspNet.Controllers
 
         #endregion
 
-        #region Action Handlers
+        #region Action Handlers: Index & Helpers
 
-        public IActionResult Error()
+        /// <summary>
+        /// Fetch list of transactions for display
+        /// </summary>
+        /// <param name="o">Order of transactions</param>
+        /// <param name="p">Page number, where 1 is first page</param>
+        /// <param name="q">Query (or filter) specifying which transactions</param>
+        /// <param name="v">View modifiers, specifying how the view should look</param>
+        /// <returns></returns>
+        public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            //
+            // Process QUERY (Q) parameters
+            //
+
+            ViewData["Query"] = q;
+
+            var result = TransactionsForQuery(_context.Transactions.Include(x => x.Splits), q);
+
+            //
+            // Process VIEW (V) parameters
+            //
+
+            ViewData["ViewP"] = v;
+
+            result = TransactionsForViewspec(result, v, ViewData, out bool showHidden, out bool showSelected);
+
+            //
+            // Process ORDER (O) parameters
+            //
+
+            const string default_order = "dd";
+            ViewData["Order"] = (o == default_order) ? null : o;
+
+            if (string.IsNullOrEmpty(o))
+                o = default_order;
+
+            ViewData["DateSortParm"] = o == "dd" ? "da" : null; /* not "dd", which is default */;
+            ViewData["PayeeSortParm"] = o == "pa" ? "pd" : "pa";
+            ViewData["CategorySortParm"] = o == "ca" ? "cd" : "ca";
+            ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
+            ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
+
+            result = TransactionsForOrdering(result, o);
+
+            //
+            // Process PAGE (P) parameters
+            //
+
+            var divider = new PageDivider() { PageSize = PageSize };
+            result = await divider.ItemsForPage(result, p);
+            ViewData[nameof(PageDivider)] = divider;
+
+            // Use the Transaction object itself as a DTO, filtering out what we don't need to return
+
+            IEnumerable<TransactionIndexDto> r;
+            if (showHidden || showSelected)
+            {
+                // Get the long form
+                r = await result.Select(t => new TransactionIndexDto()
+                {
+                    ID = t.ID,
+                    Timestamp = t.Timestamp,
+                    Payee = t.Payee,
+                    Amount = t.Amount,
+                    Category = t.Category,
+                    Memo = t.Memo,
+                    HasReceipt = t.ReceiptUrl != null,
+                    HasSplits = t.Splits.Any(),
+                    BankReference = t.BankReference,
+                    Hidden = t.Hidden ?? false,
+                    Selected = t.Selected ?? false
+                }).ToListAsync();
+            }
+            else
+            {
+                // Get the shorter form
+                r = await result.Select(t => new TransactionIndexDto()
+                {
+                    ID = t.ID,
+                    Timestamp = t.Timestamp,
+                    Payee = t.Payee,
+                    Amount = t.Amount,
+                    Category = t.Category,
+                    Memo = t.Memo,
+                    HasReceipt = t.ReceiptUrl != null,
+                    HasSplits = t.Splits.Any(),
+                }).ToListAsync();
+            }
+
+            return View(r);
         }
 
         /// <summary>
@@ -273,98 +360,6 @@ namespace YoFi.AspNet.Controllers
         };
 
         /// <summary>
-        /// Fetch list of transactions for display
-        /// </summary>
-        /// <param name="o">Order of transactions</param>
-        /// <param name="p">Page number, where 1 is first page</param>
-        /// <param name="q">Query (or filter) specifying which transactions</param>
-        /// <param name="v">View modifiers, specifying how the view should look</param>
-        /// <returns></returns>
-        public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
-        {
-            //
-            // Process QUERY (Q) parameters
-            //
-
-            ViewData["Query"] = q;
-
-            var result = TransactionsForQuery(_context.Transactions.Include(x => x.Splits),q);
-
-            //
-            // Process VIEW (V) parameters
-            //
-
-            ViewData["ViewP"] = v;
-
-            result = TransactionsForViewspec(result, v, ViewData, out bool showHidden, out bool showSelected);
-
-            //
-            // Process ORDER (O) parameters
-            //
-
-            const string default_order = "dd";
-            ViewData["Order"] = (o == default_order) ? null : o;
-
-            if (string.IsNullOrEmpty(o))
-                o = default_order;
-
-            ViewData["DateSortParm"] = o == "dd" ? "da" : null; /* not "dd", which is default */;
-            ViewData["PayeeSortParm"] = o == "pa" ? "pd" : "pa";
-            ViewData["CategorySortParm"] = o == "ca" ? "cd" : "ca";
-            ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
-            ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
-
-            result = TransactionsForOrdering(result, o);
-
-            //
-            // Process PAGE (P) parameters
-            //
-
-            var divider = new PageDivider() { PageSize = PageSize };
-            result = await divider.ItemsForPage(result, p);
-            ViewData[nameof(PageDivider)] = divider;
-
-            // Use the Transaction object itself as a DTO, filtering out what we don't need to return
-
-            IEnumerable<TransactionIndexDto> r;
-            if (showHidden || showSelected)
-            {
-                // Get the long form
-                r = await result.Select(t => new TransactionIndexDto()
-                {
-                    ID = t.ID,
-                    Timestamp = t.Timestamp,
-                    Payee = t.Payee,
-                    Amount = t.Amount,
-                    Category = t.Category,
-                    Memo = t.Memo,
-                    HasReceipt = t.ReceiptUrl != null,
-                    HasSplits = t.Splits.Any(),
-                    BankReference = t.BankReference,
-                    Hidden = t.Hidden ?? false,
-                    Selected = t.Selected ?? false
-                }).ToListAsync();
-            }
-            else
-            {
-                // Get the shorter form
-                r = await result.Select(t => new TransactionIndexDto()
-                {
-                    ID = t.ID,
-                    Timestamp = t.Timestamp,
-                    Payee = t.Payee,
-                    Amount = t.Amount,
-                    Category = t.Category,
-                    Memo = t.Memo,
-                    HasReceipt = t.ReceiptUrl != null,
-                    HasSplits = t.Splits.Any(),
-                }).ToListAsync();
-            }
-
-            return View(r);
-        }
-
-        /// <summary>
         /// The transaction data for Index page
         /// </summary>
         public class TransactionIndexDto
@@ -402,6 +397,40 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
+        #endregion
+
+        #region Action Handlers: Get Details
+
+        /// <summary>
+        /// Retrieve a single transaction
+        /// </summary>
+        /// <param name="id">ID of the desired transaction</param>
+        /// <returns></returns>
+        public async Task<IActionResult> Details(int? id)
+        {
+            try
+            {
+                return View(await Get(id));
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        #endregion
+
+        #region Action Handlers: Create
+
+        /// <summary>
+        /// Create a new split for the specified transaction <paramref name="id"/>
+        /// </summary>
+        /// <param name="id">ID of the transaction</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -450,170 +479,20 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction("Edit", "Splits", new { id = result.ID });
         }
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            try
-            {
-                return View(await Get(id));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> ProcessImported(string command)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(command))
-                    throw new ArgumentException();
-
-                var allimported = from s in _context.Transactions
-                                  where s.Imported == true
-                                  orderby s.Timestamp descending, s.BankReference ascending
-                                  select s;
-
-                var selected = await allimported.Where(x => true == x.Selected).ToListAsync();
-                var unselected = await allimported.Where(x => true != x.Selected).ToListAsync();
-
-                if (command == "cancel")
-                {
-                    _context.Transactions.RemoveRange(allimported);
-                    _context.SaveChanges();
-                    return RedirectToAction(nameof(Import));
-                }
-                else if (command == "ok")
-                {
-                    foreach (var item in selected)
-                        item.Imported = item.Hidden = item.Selected = false;
-                    _context.Transactions.RemoveRange(unselected);
-                    _context.SaveChanges();
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                    throw new ArgumentException();
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        public async Task<IActionResult> Import(string highlight = null, int? p = null)
-        {
-            try
-            {
-                IQueryable<Transaction> result = from s in _context.Transactions
-                                                 where s.Imported == true
-                                                 orderby s.Timestamp descending, s.BankReference ascending
-                                                 select s;
-
-                //
-                // Process PAGE (P) parameters
-                //
-
-                var divider = new PageDivider() { PageSize = PageSize };
-                result = await divider.ItemsForPage(result, p);
-                ViewData[nameof(PageDivider)] = divider;
-
-                try
-                {
-                    if (!string.IsNullOrEmpty(highlight))
-                    {
-                        ViewData["Highlight"] = highlight.Split(':').Select(x => Convert.ToInt32(x)).ToHashSet();
-                    }
-                }
-                catch
-                {
-                    // If this fails in any way, nevermind.
-                }
-
-                return View(await result.AsNoTracking().ToListAsync());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [HttpPost]
-        [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> BulkEdit(string Category)
-        {
-            try
-            {
-                foreach (var item in _context.Transactions.Where(x => x.Selected == true))
-                {
-                    item.Selected = false;
-
-                    if (!string.IsNullOrEmpty(Category))
-                    {
-                        // This may be a pattern-matching search, treat it like one
-                        // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
-                        // matching one, it's just slower.
-                        if (Category.Contains("("))
-                        {
-                            var originals = item.Category?.Split(":") ?? default;
-                            var result = new List<string>();
-                            foreach (var component in Category.Split(":"))
-                            {
-                                if (component.StartsWith("(") && component.EndsWith("+)"))
-                                {
-                                    if (Int32.TryParse(component[1..^2], out var position))
-                                        if (originals.Count() >= position)
-                                            result.AddRange(originals.Skip(position - 1));
-                                }
-                                else if (component.StartsWith("(") && component.EndsWith(")"))
-                                {
-                                    if (Int32.TryParse(component[1..^1], out var position))
-                                        if (originals.Count() >= position)
-                                            result.AddRange(originals.Skip(position - 1).Take(1));
-                                }
-                                else
-                                    result.Add(component);
-                            }
-
-                            if (result.Any())
-                                item.Category = string.Join(":", result);
-                        }
-                        // It's just a simple replacement
-                        else
-                        {
-                            item.Category = Category;
-                        }
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
+        /// <summary>
+        /// View for create transaction page, which is empty because we're creating a transaction from empty
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Transactions/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Actually create the given <paramref name="transaction"/>
+        /// </summary>
+        /// <param name="transaction">FUlly-formed transaction to create</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -634,6 +513,10 @@ namespace YoFi.AspNet.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        #endregion
+
+        #region Action Handlers: Edit
 
         public async Task<IActionResult> Edit(int? id)
         {
@@ -705,11 +588,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
-        }
-
-        public IActionResult DownloadPartial()
-        {
-            return PartialView();
         }
 
         // I believe this is never used. Instead, API Controller ApplyPayee is used.
@@ -805,26 +683,70 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // GET: Transactions/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpPost]
+        [Authorize(Policy = "CanWrite")]
+        public async Task<IActionResult> BulkEdit(string Category)
         {
             try
             {
-                return View(await Get(id));
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest();
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
+                foreach (var item in _context.Transactions.Where(x => x.Selected == true))
+                {
+                    item.Selected = false;
+
+                    if (!string.IsNullOrEmpty(Category))
+                    {
+                        // This may be a pattern-matching search, treat it like one
+                        // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
+                        // matching one, it's just slower.
+                        if (Category.Contains("("))
+                        {
+                            var originals = item.Category?.Split(":") ?? default;
+                            var result = new List<string>();
+                            foreach (var component in Category.Split(":"))
+                            {
+                                if (component.StartsWith("(") && component.EndsWith("+)"))
+                                {
+                                    if (Int32.TryParse(component[1..^2], out var position))
+                                        if (originals.Count() >= position)
+                                            result.AddRange(originals.Skip(position - 1));
+                                }
+                                else if (component.StartsWith("(") && component.EndsWith(")"))
+                                {
+                                    if (Int32.TryParse(component[1..^1], out var position))
+                                        if (originals.Count() >= position)
+                                            result.AddRange(originals.Skip(position - 1).Take(1));
+                                }
+                                else
+                                    result.Add(component);
+                            }
+
+                            if (result.Any())
+                                item.Category = string.Join(":", result);
+                        }
+                        // It's just a simple replacement
+                        else
+                        {
+                            item.Category = Category;
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
         }
+
+        #endregion
+
+        #region Action Handlers: Delete
+
+        // GET: Transactions/Delete/5
+        public async Task<IActionResult> Delete(int? id) => await Details(id);
 
         // POST: Transactions/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -850,6 +772,140 @@ namespace YoFi.AspNet.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        #endregion
+
+        #region Action Handlers: Download
+
+        // POST: Transactions/Download
+        //[ActionName("Download")]
+        [HttpPost]
+        public async Task<IActionResult> Download(bool allyears, string q = null)
+        {
+            try
+            {
+                // Which transactions?
+
+                var transactionsquery = TransactionsForQuery(_context.Transactions.Include(x => x.Splits), q);
+
+                transactionsquery = transactionsquery.Where(x => x.Hidden != true);
+                if (!allyears)
+                    transactionsquery = transactionsquery.Where(x => x.Timestamp.Year == Year);
+                transactionsquery = transactionsquery
+                    .OrderByDescending(x => x.Timestamp);
+
+                // Select to data transfer object
+                var transactionsdtoquery = transactionsquery
+                    .Select(x => new TransactionExportDto()
+                    {
+                        ID = x.ID,
+                        Amount = x.Amount,
+                        Timestamp = x.Timestamp,
+                        Category = x.Category,
+                        Payee = x.Payee,
+                        Memo = x.Memo,
+                        ReceiptUrl = x.ReceiptUrl,
+                        BankReference = x.BankReference
+                    }
+                    );
+
+                var transactions = await transactionsdtoquery.ToListAsync();
+
+                // Which splits?
+
+                // Product Backlog Item 870: Export & import transactions with splits
+                var splitsquery = _context.Splits.Where(x => x.Transaction.Hidden != true);
+                if (!allyears)
+                    splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
+                splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
+                var splits = await splitsquery.ToListAsync();
+
+                // Create the spreadsheet result
+
+                var stream = new MemoryStream();
+                using (var ssw = new SpreadsheetWriter())
+                {
+                    ssw.Open(stream);
+                    ssw.Serialize(transactions, sheetname: nameof(Transaction));
+
+                    if (splits.Any())
+                        ssw.Serialize(splits);
+                }
+
+                // Return it to caller
+
+                stream.Seek(0, SeekOrigin.Begin);
+                return File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "Transactions.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        public IActionResult DownloadPartial()
+        {
+            return PartialView();
+        }
+
+        #endregion
+
+        #region Action Handlers: Others (Report, Error)
+
+        // GET: Transactions/Report
+        public IActionResult Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(parms.id))
+                {
+                    parms.id = "all";
+                }
+
+                if (parms.year.HasValue)
+                    Year = parms.year.Value;
+                else
+                    parms.year = Year;
+
+                if (!parms.month.HasValue)
+                {
+                    bool iscurrentyear = (Year == Now.Year);
+
+                    // By default, month is the current month when looking at the current year.
+                    // When looking at previous years, default is the whole year (december)
+                    if (iscurrentyear)
+                        parms.month = Now.Month;
+                    else
+                        parms.month = 12;
+                }
+
+                var result = new ReportBuilder(_context).BuildReport(parms);
+
+                ViewData["report"] = parms.id;
+                ViewData["month"] = parms.month;
+                ViewData["level"] = result.NumLevels;
+                ViewData["showmonths"] = result.WithMonthColumns;
+                ViewData["Title"] = result.Name;
+
+                return View(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        #endregion
+
+        #region Action Handlers: Receipts
 
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
@@ -980,92 +1036,18 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        [HttpPost]
-        [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> UpSplits(List<IFormFile> files, int id)
-        {
-            try
-            {
-                if (files == null || !files.Any())
-                    throw new ApplicationException("Please choose a file to upload, first.");
+        #endregion
 
-                var transaction = await GetWithSplits(id);
-
-                var incoming = new HashSet<Models.Split>();
-                // Extract submitted file into a list objects
-
-                foreach (var file in files)
-                {
-                    if (file.FileName.ToLower().EndsWith(".xlsx"))
-                    {
-                        using var stream = file.OpenReadStream();
-                        using var ssr = new SpreadsheetReader();
-                        ssr.Open(stream);
-                        var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
-                        incoming.UnionWith(items);
-                    }
-                }
-
-                if (incoming.Any())
-                {
-                    // Why no has AddRange??
-                    foreach (var split in incoming)
-                    {
-                        transaction.Splits.Add(split);
-                    }
-
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
-                }
-
-                return RedirectToAction("Edit", new { id = id });
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            catch (ApplicationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        private async Task LoadTransactionsFromOfxAsync(IFormFile file, List<Models.Transaction> transactions)
-        {
-            using var stream = file.OpenReadStream();
-            OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
-
-            var created = Document.Statements.SelectMany(x=>x.Transactions).Select(
-                tx => new Models.Transaction() 
-                {
-                    Amount = tx.Amount, 
-                    Payee = tx.Memo?.Trim(), 
-                    BankReference = tx.ReferenceNumber?.Trim(), 
-                    Timestamp = tx.Date.Value.DateTime
-                }
-            );
-
-            transactions.AddRange(created);
-        }
-
-        private void LoadTransactionsFromXlsx(IFormFile file, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
-        {
-            using var stream = file.OpenReadStream();
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            var items = ssr.Deserialize<Transaction>();
-            transactions.AddRange(items);
-
-            // If there are also splits included here, let's grab those
-            // And transform the flat data into something easier to use.
-            if (ssr.SheetNames.Contains("Split"))
-                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
-        }
-
+        #region Action Handlers: Import Pipeline
+        /// <summary>
+        /// Upload a file of transactions to be imported
+        /// </summary>
+        /// <remarks>
+        /// This is the first step of the upload/import pipeline. The user is first
+        /// giving us the transactions here.
+        /// </remarks>
+        /// <param name="files">Files to import</param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Upload(List<IFormFile> files)
@@ -1184,6 +1166,195 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Import), new { highlight = string.Join(':', highlights.Select(x => x.ID)) });
         }
 
+        /// <summary>
+        /// Finally execute the import for all selected transactions
+        /// </summary>
+        /// <remarks>
+        /// This is the last step in the upload/import pipeline
+        /// </remarks>
+        /// <param name="command">'ok' to do the import, 'cancel' to cancel it</param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
+        public async Task<IActionResult> ProcessImported(string command)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(command))
+                    throw new ArgumentException();
+
+                var allimported = from s in _context.Transactions
+                                  where s.Imported == true
+                                  orderby s.Timestamp descending, s.BankReference ascending
+                                  select s;
+
+                var selected = await allimported.Where(x => true == x.Selected).ToListAsync();
+                var unselected = await allimported.Where(x => true != x.Selected).ToListAsync();
+
+                if (command == "cancel")
+                {
+                    _context.Transactions.RemoveRange(allimported);
+                    _context.SaveChanges();
+                    return RedirectToAction(nameof(Import));
+                }
+                else if (command == "ok")
+                {
+                    foreach (var item in selected)
+                        item.Imported = item.Hidden = item.Selected = false;
+                    _context.Transactions.RemoveRange(unselected);
+                    _context.SaveChanges();
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                    throw new ArgumentException();
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Display the transactions which have been imported
+        /// </summary>
+        /// <remarks>
+        /// This is the second step in the upload/import pipeline. At the point the
+        /// imported transactions are in the database, but hidden and marked as 'imported'.
+        /// Now we want to display those to the users to see if it's satisfactory
+        /// </remarks>
+        /// <param name="highlight">Colon-separated list of IDs that should get highlighted</param>
+        /// <param name="p">Page number</param>
+        /// <returns></returns>
+        public async Task<IActionResult> Import(string highlight = null, int? p = null)
+        {
+            try
+            {
+                IQueryable<Transaction> result = from s in _context.Transactions
+                                                 where s.Imported == true
+                                                 orderby s.Timestamp descending, s.BankReference ascending
+                                                 select s;
+
+                //
+                // Process PAGE (P) parameters
+                //
+
+                var divider = new PageDivider() { PageSize = PageSize };
+                result = await divider.ItemsForPage(result, p);
+                ViewData[nameof(PageDivider)] = divider;
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(highlight))
+                    {
+                        ViewData["Highlight"] = highlight.Split(':').Select(x => Convert.ToInt32(x)).ToHashSet();
+                    }
+                }
+                catch
+                {
+                    // If this fails in any way, nevermind.
+                }
+
+                return View(await result.AsNoTracking().ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "CanWrite")]
+        public async Task<IActionResult> UpSplits(List<IFormFile> files, int id)
+        {
+            try
+            {
+                if (files == null || !files.Any())
+                    throw new ApplicationException("Please choose a file to upload, first.");
+
+                var transaction = await GetWithSplits(id);
+
+                var incoming = new HashSet<Models.Split>();
+                // Extract submitted file into a list objects
+
+                foreach (var file in files)
+                {
+                    if (file.FileName.ToLower().EndsWith(".xlsx"))
+                    {
+                        using var stream = file.OpenReadStream();
+                        using var ssr = new SpreadsheetReader();
+                        ssr.Open(stream);
+                        var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
+                        incoming.UnionWith(items);
+                    }
+                }
+
+                if (incoming.Any())
+                {
+                    // Why no has AddRange??
+                    foreach (var split in incoming)
+                    {
+                        transaction.Splits.Add(split);
+                    }
+
+                    _context.Update(transaction);
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction("Edit", new { id = id });
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        #endregion
+
+        #region Internal Upload helpers
+        private async Task LoadTransactionsFromOfxAsync(IFormFile file, List<Models.Transaction> transactions)
+        {
+            using var stream = file.OpenReadStream();
+            OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
+
+            var created = Document.Statements.SelectMany(x => x.Transactions).Select(
+                tx => new Models.Transaction()
+                {
+                    Amount = tx.Amount,
+                    Payee = tx.Memo?.Trim(),
+                    BankReference = tx.ReferenceNumber?.Trim(),
+                    Timestamp = tx.Date.Value.DateTime
+                }
+            );
+
+            transactions.AddRange(created);
+        }
+
+        private void LoadTransactionsFromXlsx(IFormFile file, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
+        {
+            using var stream = file.OpenReadStream();
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            var items = ssr.Deserialize<Transaction>();
+            transactions.AddRange(items);
+
+            // If there are also splits included here, let's grab those
+            // And transform the flat data into something easier to use.
+            if (ssr.SheetNames.Contains("Split"))
+                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
+        }
+
         async Task EnsureAllTransactionsHaveBankRefs()
         {
             // To handle the case where there may be transactions already in the system before the importer
@@ -1259,120 +1430,6 @@ namespace YoFi.AspNet.Controllers
 
             return result;
         }
-
-        // POST: Transactions/Download
-        //[ActionName("Download")]
-        [HttpPost]
-        public async Task<IActionResult> Download(bool allyears, string q = null)
-        {
-            try
-            {
-                // Which transactions?
-
-                var transactionsquery = TransactionsForQuery(_context.Transactions.Include(x => x.Splits), q);
-
-                transactionsquery = transactionsquery.Where(x => x.Hidden != true);
-                if (!allyears)
-                    transactionsquery = transactionsquery.Where(x => x.Timestamp.Year == Year);
-                transactionsquery = transactionsquery
-                    .OrderByDescending(x => x.Timestamp);
-
-                // Select to data transfer object
-                var transactionsdtoquery = transactionsquery
-                    .Select(x=> new TransactionExportDto()
-                    {
-                        ID = x.ID,
-                        Amount = x.Amount,
-                        Timestamp = x.Timestamp,
-                        Category = x.Category,
-                        Payee = x.Payee,
-                        Memo = x.Memo,
-                        ReceiptUrl = x.ReceiptUrl,
-                        BankReference = x.BankReference
-                    }
-                    );
-
-                var transactions = await transactionsdtoquery.ToListAsync();
-
-                // Which splits?
-
-                // Product Backlog Item 870: Export & import transactions with splits
-                var splitsquery = _context.Splits.Where(x => x.Transaction.Hidden != true);
-                if (!allyears)
-                    splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
-                splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
-                var splits = await splitsquery.ToListAsync();
-
-                // Create the spreadsheet result
-
-                var stream = new MemoryStream();
-                using (var ssw = new SpreadsheetWriter())
-                {
-                    ssw.Open(stream);
-                    ssw.Serialize(transactions,sheetname:nameof(Transaction));
-
-                    if (splits.Any())
-                        ssw.Serialize(splits);
-                }
-
-                // Return it to caller
-
-                stream.Seek(0, SeekOrigin.Begin);
-                return File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName:"Transactions.xlsx");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        // GET: Transactions/Report
-        public IActionResult Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(parms.id))
-                {
-                    parms.id = "all";
-                }
-
-                if (parms.year.HasValue)
-                    Year = parms.year.Value;
-                else
-                    parms.year = Year;
-
-                if (!parms.month.HasValue)
-                {
-                    bool iscurrentyear = (Year == Now.Year);
-
-                    // By default, month is the current month when looking at the current year.
-                    // When looking at previous years, default is the whole year (december)
-                    if (iscurrentyear)
-                        parms.month = Now.Month;
-                    else
-                        parms.month = 12;
-                }
-
-                var result = new ReportBuilder(_context).BuildReport(parms);
-
-                ViewData["report"] = parms.id;
-                ViewData["month"] = parms.month;
-                ViewData["level"] = result.NumLevels;
-                ViewData["showmonths"] = result.WithMonthColumns;
-                ViewData["Title"] = result.Name;
-
-                return View(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
         #endregion
 
         #region Internals
