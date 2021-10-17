@@ -87,6 +87,10 @@ up {
     background-color: #b1e6fc;
 }
 
+.form-group {
+    margin-bottom: 1rem;
+}
+
 .form-signin {
     width: 100%;
     max-width: 330px;
