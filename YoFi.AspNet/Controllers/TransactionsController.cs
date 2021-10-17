@@ -160,76 +160,18 @@ namespace YoFi.AspNet.Controllers
                         var key = term.ToLowerInvariant().First();
                         var value = term[2..];
 
-                        switch (key)
+                        result = key switch
                         {
-                            // Payee
-                            case 'p':
-                                result = result.Where(x => x.Payee.Contains(value));
-                                break;
+                            'p' => TransactionsForQuery_Payee(result, value),
+                            'c' => TransactionsForQuery_Category(result, value),
+                            'y' => TransactionsForQuery_Year(result, value),
+                            'm' => TransactionsForQuery_Memo(result, value),
+                            'r' => TransactionsForQuery_HasReceipt(result, value),
+                            'a' => TransactionsForQuery_Amount(result, value),
+                            'd' => TransactionsForQuery_Date(result, value),
+                            _ => result
+                        };
 
-                            // Category
-                            case 'c':
-                                if (value.ToLowerInvariant() == "[blank]")
-                                    result = result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any());
-                                else
-                                    result = result.Where(x =>
-                                        x.Category.Contains(value)
-                                        ||
-                                        x.Splits.Any(s => s.Category.Contains(value))
-                                    );
-                                break;
-
-                            // Year
-                            case 'y':
-                                int year;
-                                if (Int32.TryParse(value, out year))
-                                    result = result.Where(x => x.Timestamp.Year == year);
-                                break;
-
-                            // Memo
-                            case 'm':
-                                result = result.Where(x => x.Memo.Contains(value));
-                                break;
-
-                            // Has Receipt
-                            case 'r':
-                                if (value == "0")
-                                    result = result.Where(x => x.ReceiptUrl == null);
-                                else if (value == "1")
-                                    result = result.Where(x => x.ReceiptUrl != null);
-                                break;
-
-                            // Amount
-                            case 'a':
-                                if (Int32.TryParse(value, out Int32 ival))
-                                {
-                                    var cents = ((decimal)ival) / 100;
-                                    result = result.Where(x => x.Amount == (decimal)ival || x.Amount == cents || x.Amount == -(decimal)ival || x.Amount == -cents);
-                                }
-                                else if (decimal.TryParse(value, out decimal dval))
-                                {
-                                    result = result.Where(x => x.Amount == dval || x.Amount == -dval);
-                                }
-                                break;
-
-                            // Date: On this day or up to a week later
-                            case 'd':
-                                DateTime? dtval = null;
-                                if (Int32.TryParse(value, out ival) && ival >= 101 && ival <= 1231)
-                                {
-                                    dtval = new DateTime(DateTime.Now.Year, ival / 100, ival % 100);
-                                }
-                                else if (DateTime.TryParse(value, out DateTime dtvalout))
-                                {
-                                    dtval = dtvalout;
-                                }
-                                if (dtval.HasValue)
-                                {
-                                    result = result.Where(x => x.Timestamp >= dtval.Value && x.Timestamp < dtval.Value.AddDays(7));
-                                }
-
-                                break;
-                        }
                     }
                     else if (Int32.TryParse(term, out Int32 intval))
                     {
@@ -308,6 +250,65 @@ namespace YoFi.AspNet.Controllers
             }
 
             return result;
+        }
+
+        private static IQueryable<Transaction> TransactionsForQuery_Payee(IQueryable<Transaction> result, string value) =>
+            result.Where(x => x.Payee.Contains(value));
+
+        private static IQueryable<Transaction> TransactionsForQuery_Category(IQueryable<Transaction> result, string value) =>
+            (value.ToLowerInvariant() == "[blank]")
+                ? result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any())
+                : result.Where(x =>
+                        x.Category.Contains(value)
+                        ||
+                        x.Splits.Any(s => s.Category.Contains(value)
+                    )
+                );
+
+        private static IQueryable<Transaction> TransactionsForQuery_Year(IQueryable<Transaction> result, string value) =>
+            (Int32.TryParse(value, out int year))
+                ? result.Where(x => x.Timestamp.Year == year)
+                : result;
+
+        private static IQueryable<Transaction> TransactionsForQuery_Memo(IQueryable<Transaction> result, string value) =>
+            result.Where(x => x.Memo.Contains(value));
+
+        private static IQueryable<Transaction> TransactionsForQuery_HasReceipt(IQueryable<Transaction> result, string value) =>
+            value switch
+            {
+                "0" => result.Where(x => x.ReceiptUrl == null),
+                "1" => result.Where(x => x.ReceiptUrl != null),
+                _ => result
+            };
+
+        private static IQueryable<Transaction> TransactionsForQuery_Amount(IQueryable<Transaction> result, string value)
+        {
+            if (Int32.TryParse(value, out Int32 ival))
+            {
+                var cents = ((decimal)ival) / 100;
+                return result.Where(x => x.Amount == (decimal)ival || x.Amount == cents || x.Amount == -(decimal)ival || x.Amount == -cents);
+            }
+            else if (decimal.TryParse(value, out decimal dval))
+            {
+                return result.Where(x => x.Amount == dval || x.Amount == -dval);
+            }
+            else
+                return result;
+        }
+
+        private static IQueryable<Transaction> TransactionsForQuery_Date(IQueryable<Transaction> result, string value)
+        {
+            DateTime? dtval = null;
+
+            if (Int32.TryParse(value, out int ival) && ival >= 101 && ival <= 1231)
+                dtval = new DateTime(DateTime.Now.Year, ival / 100, ival % 100);
+            else if (DateTime.TryParse(value, out DateTime dtvalout))
+                dtval = dtvalout;
+
+            if (dtval.HasValue)
+                return result.Where(x => x.Timestamp >= dtval.Value && x.Timestamp < dtval.Value.AddDays(7));
+            else
+                return result;
         }
 
         /// <summary>
