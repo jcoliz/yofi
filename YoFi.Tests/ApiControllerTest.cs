@@ -302,6 +302,18 @@ namespace YoFi.Tests
             Assert.AreEqual(expected, result.Item);
         }
         [TestMethod]
+        public async Task AddPayeeModelStateFails()
+        {
+            var expected = new Payee() { Category = "B", Name = "3" };
+
+            controller.ModelState.AddModelError("error", "test");
+            var result = await controller.AddPayee(expected);
+
+            Assert.IsFalse(result.Ok);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
+        }
+
+        [TestMethod]
         public async Task ApplyPayee()
         {
             await AddFivePayees();
@@ -418,6 +430,23 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public async Task EditModelStateFails()
+        {
+            await AddFiveTransactions();
+            var original = await context.Transactions.FirstAsync();
+
+            // detach the original so we have an unmodified copy around
+            context.Entry(original).State = EntityState.Detached;
+
+            var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", Timestamp = original.Timestamp, Amount = original.Amount };
+
+            controller.ModelState.AddModelError("error", "test");
+            var result = await controller.Edit(original.ID, false, newtx);
+            Assert.IsFalse(result.Ok);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
+        }
+
+        [TestMethod]
         public async Task EditDuplicate()
         {
             await AddFiveTransactions();
@@ -484,6 +513,23 @@ namespace YoFi.Tests
             var modified = await context.Payees.Where(x => x.Name == newitem.Name).SingleAsync();
             Assert.AreEqual(newitem, modified);
         }
+        [TestMethod]
+        public async Task EditPayeeModelStateFails()
+        {
+            await AddFivePayees();
+            var original = await context.Payees.FirstAsync();
+
+            // detach the original so we have an unmodified copy around
+            context.Entry(original).State = EntityState.Detached;
+
+            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
+
+            controller.ModelState.AddModelError("error", "test");
+            var result = await controller.EditPayee(false, newitem);
+            Assert.IsFalse(result.Ok);
+            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
+        }
+
         [TestMethod]
         public async Task UpReceipt()
         {
@@ -914,6 +960,35 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public void ReportV2exportEmpty()
+        {
+            var actionresult = controller.ReportV2(new ReportBuilder.Parameters() { id = "export" });
+            if (actionresult is ObjectResult or)
+                throw or.Value as Exception;
+
+            var okresult = actionresult as ContentResult;
+            var report = okresult.Content;
+
+            Console.WriteLine(report);
+
+            var doc = JsonDocument.Parse(report);
+            var root = doc.RootElement;
+
+            Assert.AreEqual(0, root.GetArrayLength());
+        }
+
+        [TestMethod]
+        public void ReportV2exportFailsNoAuth()
+        {
+            // Not having an auth header
+            controller.ControllerContext = new ControllerContext() { HttpContext = new DefaultHttpContext() };
+
+            var actionresult = controller.ReportV2(new ReportBuilder.Parameters() { id = "export" });
+
+            Assert.IsTrue(actionresult is UnauthorizedResult);
+        }
+
+        [TestMethod]
         public async Task CategoryAutocomplete()
         {
             // Given: A set of five transactions, some with {word} in their category, some not
@@ -954,6 +1029,23 @@ namespace YoFi.Tests
             // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
             Assert.AreEqual(6, model.Count());
             Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
+        }
+
+        [TestMethod]
+        public async Task GetTxQAnyFailsNoAuth()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = TransactionControllerTest.TransactionItems.Take(19);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling GetTransactions q={word}
+            // And: Not having an auth header
+            controller.ControllerContext = new ControllerContext() { HttpContext = new DefaultHttpContext() };
+            var word = "CAF";
+            var result = await controller.GetTransactions(q: word);
+
+            Assert.IsTrue(result is UnauthorizedResult);
         }
 
         [DataRow(true)]
