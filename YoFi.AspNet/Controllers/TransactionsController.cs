@@ -138,7 +138,7 @@ namespace YoFi.AspNet.Controllers
 
                 return View(r);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException)
             {
                 return BadRequest();
             }
