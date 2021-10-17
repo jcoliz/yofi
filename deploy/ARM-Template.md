@@ -5,13 +5,13 @@ quickly and easily. Find it at [yofi.azuredeploy.json](/deploy/yofi.azuredeploy.
 
 Check out the [ARM Template Docs](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/) for more details on these templates.
 
-## How do deploy it
+## How to deploy it
 
 The easiest method is to simply click the Deploy to Azure button, which launches 
 directly into the Azure Portal with the template already loaded. The [documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/)
 describes more details on how you can deploy them through the portal, or cloud shell.
 
-[![Deploy To Azure](/docs/images/deploytoazure.png)](https://portal.azure.com/#create/Microsoft.Template/)
+[![Deploy To Azure](/docs/images/deploytoazure.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3a%2f%2fraw.githubusercontent.com%2fjcoliz%2fyofi%2fmaster%2fdeploy%2fyofi.azuredeploy.json)
 
 If you're familiar with the az cli tool, you can do it there too. Of course, replace the $ items with proper values for your enviroment.
 

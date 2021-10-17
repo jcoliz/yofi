@@ -7,7 +7,7 @@ Click the Deploy button below to deploy the [Azure Resource Manager template](/d
 This creates all the needed resources in Azure, including an App Service, SQL Database, 
 Storage, etc., then deploys the most recent build. 
 
-[![Deploy To Azure](/docs/images/deploytoazure.png)](https://portal.azure.com/#create/Microsoft.Template/)
+[![Deploy To Azure](/docs/images/deploytoazure.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3a%2f%2fraw.githubusercontent.com%2fjcoliz%2fyofi%2fmaster%2fdeploy%2fyofi.azuredeploy.json)
 
 Don't have an Azure subscription? You can easily [Create a free account](https://azure.microsoft.com/en-us/free/).
 

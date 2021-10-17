@@ -52,7 +52,7 @@ Click the Deploy button below to deploy the [Azure Resource Manager template](./
 This creates all the needed resources in Azure, including an App Service, SQL Database, 
 Storage, etc., then deploys the most recent build. 
 
-[![Deploy To Azure](/docs/images/deploytoazure.png)](https://portal.azure.com/#create/Microsoft.Template/)
+[![Deploy To Azure](/docs/images/deploytoazure.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3a%2f%2fraw.githubusercontent.com%2fjcoliz%2fyofi%2fmaster%2fdeploy%2fyofi.azuredeploy.json)
 
 Don't have an Azure subscription? You can easily [Create a free account](https://azure.microsoft.com/en-us/free/).
 
@@ -74,6 +74,4 @@ Also see the full list of [Dependencies](/docs/Dependencies.md) taken by the pro
 
 ## Give feedback
 
-I'd love to hear what you think! If you'd like to see something change, please feel free to open an issue. Or just send me a mail!
-
-Updated 9/22/21
+I'd love to hear what you think! If you'd like to see something change, please feel free to [open an issue](https://github.com/jcoliz/yofi/issues/new).
