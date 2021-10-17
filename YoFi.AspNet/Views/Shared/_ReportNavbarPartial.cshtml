@@ -19,7 +19,7 @@
                 <a href="/Reports" class="dropdown-item">Summary</a>
                 @foreach (var item in ReportBuilder.Definitions)
                 {
-                    <a asp-action="Report" asp-route-id="@item.id" class="dropdown-item">@item.Name</a>
+                    <a asp-controller="Transactions" asp-action="Report" asp-route-id="@item.id" class="dropdown-item">@item.Name</a>
                 }
             </div>
         </div>
