@@ -1271,9 +1271,16 @@ namespace YoFi.Tests
         {
             var result = await controller.Index(q: q);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as IEnumerable<Dto>;
+            var model = viewresult?.Model as IEnumerable<Dto>;
 
             return model;
+        }
+
+        async Task WhenCallingIndexWithQThenBadRequest(string q)
+        {
+            var result = await controller.Index(q: q);
+
+            Assert.IsTrue(result is BadRequestResult);
         }
 
         async Task<IEnumerable<Dto>> WhenCallingIndexWithV(string v)
@@ -1531,6 +1538,18 @@ namespace YoFi.Tests
                 Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
         }
 
+        [TestMethod]
+        public async Task IndexQReceiptWrong()
+        {
+            // Given: A mix of transactions, some with receipts, some without
+            GivenItemsWithAndWithoutReceipt(context, out var items, out var moditems);
+
+            // When: Calling index with q='r=text'
+            // Then: Bad request returned
+            await WhenCallingIndexWithQThenBadRequest($"R=text");
+        }
+
+
         [DataTestMethod]
         public async Task IndexVHidden()
         {
@@ -1580,10 +1599,8 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Calling index with q='a=text'
-            var model = await WhenCallingIndexWithQ($"A=text");
-
-            // Then: All transactions are returned, because text is invalid and has no effect on search.
-            Assert.AreEqual(items.Count(), model.Count());
+            // Then: Bad request returned
+            await WhenCallingIndexWithQThenBadRequest($"A=text");
         }
 
         [TestMethod]
@@ -1664,6 +1681,19 @@ namespace YoFi.Tests
             var expected = items.Count(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7));
             Assert.AreEqual(expected, model.Count());
             Assert.IsTrue(model.All(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7)));
+        }
+
+        [TestMethod]
+        public async Task IndexQDateText()
+        {
+            // Given: A mix of transactions, with differing dates
+            var items = TransactionItems.Take(22);
+            context.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling index with q='d=text'
+            // Then: Bad request returned
+            await WhenCallingIndexWithQThenBadRequest($"D=text");
         }
 
         [TestMethod]
@@ -1754,6 +1784,15 @@ namespace YoFi.Tests
             // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are downloaded
             Assert.AreEqual(expected, model.Count());
         }
+
+        [TestMethod]
+        public async Task IndexQUnknown()
+        {
+            // When: Calling index with an unknown query key q='!=1'
+            // Then: Bad Request returned
+            await WhenCallingIndexWithQThenBadRequest($"!=1");
+        }
+
 
         [TestMethod]
         public async Task Import()

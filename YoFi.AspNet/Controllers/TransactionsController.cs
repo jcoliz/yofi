@@ -55,86 +55,97 @@ namespace YoFi.AspNet.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
         {
-            //
-            // Process QUERY (Q) parameters
-            //
-
-            ViewData["Query"] = q;
-
-            var result = TransactionsForQuery(_context.Transactions.Include(x => x.Splits), q);
-
-            //
-            // Process VIEW (V) parameters
-            //
-
-            ViewData["ViewP"] = v;
-
-            result = TransactionsForViewspec(result, v, ViewData, out bool showHidden, out bool showSelected);
-
-            //
-            // Process ORDER (O) parameters
-            //
-
-            const string default_order = "dd";
-            ViewData["Order"] = (o == default_order) ? null : o;
-
-            if (string.IsNullOrEmpty(o))
-                o = default_order;
-
-            ViewData["DateSortParm"] = o == "dd" ? "da" : null; /* not "dd", which is default */;
-            ViewData["PayeeSortParm"] = o == "pa" ? "pd" : "pa";
-            ViewData["CategorySortParm"] = o == "ca" ? "cd" : "ca";
-            ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
-            ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
-
-            result = TransactionsForOrdering(result, o);
-
-            //
-            // Process PAGE (P) parameters
-            //
-
-            var divider = new PageDivider() { PageSize = PageSize };
-            result = await divider.ItemsForPage(result, p);
-            ViewData[nameof(PageDivider)] = divider;
-
-            // Use the Transaction object itself as a DTO, filtering out what we don't need to return
-
-            IEnumerable<TransactionIndexDto> r;
-            if (showHidden || showSelected)
+            try
             {
-                // Get the long form
-                r = await result.Select(t => new TransactionIndexDto()
-                {
-                    ID = t.ID,
-                    Timestamp = t.Timestamp,
-                    Payee = t.Payee,
-                    Amount = t.Amount,
-                    Category = t.Category,
-                    Memo = t.Memo,
-                    HasReceipt = t.ReceiptUrl != null,
-                    HasSplits = t.Splits.Any(),
-                    BankReference = t.BankReference,
-                    Hidden = t.Hidden ?? false,
-                    Selected = t.Selected ?? false
-                }).ToListAsync();
-            }
-            else
-            {
-                // Get the shorter form
-                r = await result.Select(t => new TransactionIndexDto()
-                {
-                    ID = t.ID,
-                    Timestamp = t.Timestamp,
-                    Payee = t.Payee,
-                    Amount = t.Amount,
-                    Category = t.Category,
-                    Memo = t.Memo,
-                    HasReceipt = t.ReceiptUrl != null,
-                    HasSplits = t.Splits.Any(),
-                }).ToListAsync();
-            }
+                //
+                // Process QUERY (Q) parameters
+                //
 
-            return View(r);
+                ViewData["Query"] = q;
+
+                var result = TransactionsForQuery(_context.Transactions.Include(x => x.Splits), q);
+
+                //
+                // Process VIEW (V) parameters
+                //
+
+                ViewData["ViewP"] = v;
+
+                result = TransactionsForViewspec(result, v, ViewData, out bool showHidden, out bool showSelected);
+
+                //
+                // Process ORDER (O) parameters
+                //
+
+                const string default_order = "dd";
+                ViewData["Order"] = (o == default_order) ? null : o;
+
+                if (string.IsNullOrEmpty(o))
+                    o = default_order;
+
+                ViewData["DateSortParm"] = o == "dd" ? "da" : null; /* not "dd", which is default */;
+                ViewData["PayeeSortParm"] = o == "pa" ? "pd" : "pa";
+                ViewData["CategorySortParm"] = o == "ca" ? "cd" : "ca";
+                ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
+                ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
+
+                result = TransactionsForOrdering(result, o);
+
+                //
+                // Process PAGE (P) parameters
+                //
+
+                var divider = new PageDivider() { PageSize = PageSize };
+                result = await divider.ItemsForPage(result, p);
+                ViewData[nameof(PageDivider)] = divider;
+
+                // Use the Transaction object itself as a DTO, filtering out what we don't need to return
+
+                IEnumerable<TransactionIndexDto> r;
+                if (showHidden || showSelected)
+                {
+                    // Get the long form
+                    r = await result.Select(t => new TransactionIndexDto()
+                    {
+                        ID = t.ID,
+                        Timestamp = t.Timestamp,
+                        Payee = t.Payee,
+                        Amount = t.Amount,
+                        Category = t.Category,
+                        Memo = t.Memo,
+                        HasReceipt = t.ReceiptUrl != null,
+                        HasSplits = t.Splits.Any(),
+                        BankReference = t.BankReference,
+                        Hidden = t.Hidden ?? false,
+                        Selected = t.Selected ?? false
+                    }).ToListAsync();
+                }
+                else
+                {
+                    // Get the shorter form
+                    r = await result.Select(t => new TransactionIndexDto()
+                    {
+                        ID = t.ID,
+                        Timestamp = t.Timestamp,
+                        Payee = t.Payee,
+                        Amount = t.Amount,
+                        Category = t.Category,
+                        Memo = t.Memo,
+                        HasReceipt = t.ReceiptUrl != null,
+                        HasSplits = t.Splits.Any(),
+                    }).ToListAsync();
+                }
+
+                return View(r);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         /// <summary>
@@ -169,7 +180,7 @@ namespace YoFi.AspNet.Controllers
                             'r' => TransactionsForQuery_HasReceipt(result, value),
                             'a' => TransactionsForQuery_Amount(result, value),
                             'd' => TransactionsForQuery_Date(result, value),
-                            _ => result
+                            _ => throw new ArgumentException($"Unknown query parameter {key}",nameof(key))
                         };
 
                     }
@@ -278,7 +289,7 @@ namespace YoFi.AspNet.Controllers
             {
                 "0" => result.Where(x => x.ReceiptUrl == null),
                 "1" => result.Where(x => x.ReceiptUrl != null),
-                _ => result
+                _ => throw new ArgumentException($"Unexpected query parameter {value}", nameof(value))
             };
 
         private static IQueryable<Transaction> TransactionsForQuery_Amount(IQueryable<Transaction> result, string value)
@@ -293,7 +304,7 @@ namespace YoFi.AspNet.Controllers
                 return result.Where(x => x.Amount == dval || x.Amount == -dval);
             }
             else
-                return result;
+                throw new ArgumentException($"Unexpected query parameter {value}", nameof(value));
         }
 
         private static IQueryable<Transaction> TransactionsForQuery_Date(IQueryable<Transaction> result, string value)
@@ -308,7 +319,7 @@ namespace YoFi.AspNet.Controllers
             if (dtval.HasValue)
                 return result.Where(x => x.Timestamp >= dtval.Value && x.Timestamp < dtval.Value.AddDays(7));
             else
-                return result;
+                throw new ArgumentException($"Unexpected query parameter {value}", nameof(value));
         }
 
         /// <summary>
