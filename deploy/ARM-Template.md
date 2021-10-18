@@ -15,8 +15,8 @@ describes more details on how you can deploy them through the portal, or cloud s
 
 If you're familiar with the az cli tool, you can do it there too. Of course, replace the $ items with proper values for your enviroment.
 
-```
-az deployment group create -g $ResourceGroup -f .\deploy\yofi.azuredeploy.json -n Demo-1 -p "{ 'web-user': { 'value': '$AdminEmail' } }"
+```Powershell
+az deployment group create --resource-group $YoFiResourceGroup --template-file .\deploy\yofi.azuredeploy.json --name "YoFi-$(Get-Random)" --parameters web-user="$YoFiAdminEmail"
 ```
 
 ## What it needs from you
