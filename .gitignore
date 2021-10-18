@@ -263,3 +263,6 @@ __pycache__/
 
 # Properties folder are site-specific
 */Properties
+
+# Excel temp files
+~*.xlsx
