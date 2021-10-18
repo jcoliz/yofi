@@ -70,11 +70,24 @@ namespace YoFi.SampleGen
 
         public void GenerateBudget()
         {
-            BudgetTxs = Definitions
-                            .Where(x => x.Category != null)
+            // Focus down to only those with valid category
+            var hascategory = Definitions.Where(x => x.Category != null);
+
+            // Divide into dichotomy: THose with high/high jitter patterns and those without
+            var ishighjitter = hascategory.ToLookup(x => x.DateJitter == JitterEnum.High && x.AmountJitter == JitterEnum.High);
+
+            // Monthly budget for high/high jitter patterns
+            var monthly = ishighjitter[true]
                             .ToLookup(x => x.Category)
-                            .Select(x => new AspNet.Models.BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(SampleDataPattern.Year,1,1) })
-                            .ToList();
+                            .SelectMany(g => Enumerable.Range(1, 12).Select(m => new BudgetTx { Category = g.Key, Amount = g.Sum(y => y.AmountYearly) / 12, Timestamp = new DateTime(SampleDataPattern.Year, m, 1) }));
+
+            // Yearly budget for other patterns
+            var yearly = ishighjitter[false]
+                            .ToLookup(x => x.Category)
+                            .Select(x => new AspNet.Models.BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
+
+            // Combine them, that's our result
+            BudgetTxs = monthly.Concat(yearly).ToList();
         }
 
         /// <summary>

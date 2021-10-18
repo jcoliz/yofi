@@ -216,7 +216,7 @@ namespace YoFi.SampleGen.Tests
             var actual = reader.Deserialize<BudgetTx>();
 
             // Then: The file contains all the budget line items
-            Assert.AreEqual(32, actual.Count());
+            Assert.AreEqual(87, actual.Count());
         }
 
         [TestMethod]
