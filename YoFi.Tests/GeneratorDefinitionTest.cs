@@ -338,7 +338,6 @@ namespace YoFi.SampleGen.Tests
             // Given: SemiMonthly Scheme
             var periods = NumPeriodsFor(scheme);
             var periodicamount = 100m;
-            var amount = periodicamount * periods;
             var item = new SampleDataPattern() { DateFrequency = scheme, DateJitter = JitterEnum.None, Payee = "Payee" };
 
             // And: A set of "split" category/amount items

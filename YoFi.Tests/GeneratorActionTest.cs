@@ -248,10 +248,12 @@ namespace YoFi.SampleGen.Tests
             generator.GeneratePayees();
             generator.GenerateBudget();
 
-            var store = new SampleDataStore();
-            store.Transactions = generator.Transactions;
-            store.Payees = generator.Payees;
-            store.BudgetTxs = generator.BudgetTxs;
+            var store = new SampleDataStore()
+            {
+                Transactions = generator.Transactions,
+                Payees = generator.Payees,
+                BudgetTxs = generator.BudgetTxs
+            };
 
             var filename = "FullSampleData.json";
             File.Delete(filename);

@@ -1544,7 +1544,7 @@ namespace YoFi.Tests
         public async Task IndexQReceiptWrong()
         {
             // Given: A mix of transactions, some with receipts, some without
-            GivenItemsWithAndWithoutReceipt(context, out var items, out var moditems);
+            GivenItemsWithAndWithoutReceipt(context, out var _, out var _);
 
             // When: Calling index with q='r=text'
             // Then: Bad request returned
