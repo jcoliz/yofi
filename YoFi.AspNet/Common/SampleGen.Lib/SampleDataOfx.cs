@@ -11,10 +11,13 @@ namespace YoFi.SampleGen
     {
         public static void WriteToOfx(IEnumerable<Transaction> transactions, Stream stream)
         {
+            using var writer = new StreamWriter(stream);
+
             // Write header
 
             using var header = Common.NET.Data.SampleData.Open("ofx-header.txt");
-            header.CopyTo(stream);
+            using var headerreader = new StreamReader(header);
+            writer.Write(headerreader.ReadToEnd());
 
             // Write daterange
 
@@ -24,7 +27,6 @@ namespace YoFi.SampleGen
              */
             var dtstart = transactions.Min(x => x.Timestamp);
             var dtend = transactions.Max(x => x.Timestamp);
-            using var writer = new StreamWriter(stream);
             var tabs5 = "\t\t\t\t\t";
             writer.WriteLine($"{tabs5}<DTSTART>{dtstart:yyyyMMdd}");
             writer.WriteLine($"{tabs5}<DTEND>{dtend:yyyyMMdd}");
@@ -66,7 +68,8 @@ namespace YoFi.SampleGen
             // Write footer
             writer.Flush();
             using var footer = Common.NET.Data.SampleData.Open("ofx-footer.txt");
-            footer.CopyTo(stream);
+            using var footerreader = new StreamReader(footer);
+            writer.Write(footerreader.ReadToEnd());
         }
     }
 }
