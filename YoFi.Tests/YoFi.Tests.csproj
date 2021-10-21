@@ -15,10 +15,8 @@
   <ItemGroup>
     <None Remove="SampleData\BudgetTxs.json" />
     <None Remove="SampleData\BudgetTxsManaged.json" />
-    <None Remove="SampleData\ExportedTransactions.ofx" />
-    <None Remove="SampleData\First10.ofx" />
+    <None Remove="SampleData\FullSampleData-Month02.ofx" />
     <None Remove="SampleData\FullSampleData.json" />
-    <None Remove="SampleData\NoRefnums.ofx" />
     <None Remove="SampleData\Splits-Test.xlsx" />
     <None Remove="SampleData\TestData1.xlsx" />
     <None Remove="SampleData\Transactions1000.json" />
@@ -27,11 +25,8 @@
   <ItemGroup>
     <EmbeddedResource Include="SampleData\BudgetTxs.json" />
     <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
-    <EmbeddedResource Include="SampleData\ExportedTransactions.ofx" />
+    <EmbeddedResource Include="SampleData\FullSampleData-Month02.ofx" />
     <EmbeddedResource Include="SampleData\FullSampleData.json" />
-    <EmbeddedResource Include="SampleData\NoRefnums.ofx" />
-    <EmbeddedResource Include="SampleData\First10.ofx" />
-    <EmbeddedResource Include="SampleData\Second10.ofx" />
     <EmbeddedResource Include="SampleData\Splits-Test.xlsx" />
     <EmbeddedResource Include="SampleData\TestData1.xlsx" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />

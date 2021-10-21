@@ -102,9 +102,9 @@ namespace YoFi.Tests
         {
             if (null == TransactionItemsLong)
             {
-                using var stream = SampleData.Open("ExportedTransactions.ofx");
+                using var stream = SampleData.Open("FullSampleData-Month02.ofx");
                 OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
-                TransactionItemsLong = Document.Statements.SelectMany(x=>x.Transactions).Select(tx=> new Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber.Trim(), Timestamp = tx.Date.Value.DateTime });
+                TransactionItemsLong = Document.Statements.SelectMany(x=>x.Transactions).Select(tx=> new Transaction() { Amount = tx.Amount, Payee = tx.Memo.Trim(), BankReference = tx.ReferenceNumber?.Trim(), Timestamp = tx.Date.Value.DateTime });
             }
             return TransactionItemsLong;
         }
@@ -713,8 +713,8 @@ namespace YoFi.Tests
         public async Task OfxUploadNoBankRef()
         {
             // Given: An OFX file containing transactions with no bank reference
-            var filename = "NoRefnums.ofx";
-            var expected = 2;
+            var filename = "FullSampleData-Month02.ofx";
+            var expected = 74;
 
             // When: Uploading that file
             var stream = SampleData.Open(filename);
@@ -1134,8 +1134,8 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Uploading a receipt
-            var contenttype = "application/ofx";
-            var file = FormFileFromSampleData("First10.ofx", contenttype);
+            var contenttype = "application/json";
+            var file = FormFileFromSampleData("BudgetTxs.json", contenttype);
             var result = await controller.UpReceipt(new List<IFormFile>() { file },tx.ID);
             Assert.IsTrue(result is RedirectResult);
 
@@ -1173,9 +1173,9 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Uploading multiple receipt files
-            var contenttype = "application/ofx";
-            var file1 = FormFileFromSampleData("First10.ofx", contenttype);
-            var file2 = FormFileFromSampleData("NoRefnums.ofx", contenttype);
+            var contenttype = "application/json";
+            var file1 = FormFileFromSampleData("BudgetTxs.json", contenttype);
+            var file2 = FormFileFromSampleData("BudgetTxsManaged.json", contenttype);
             var result = await controller.UpReceipt(new List<IFormFile>() { file1, file2 }, tx.ID);
 
             // Then: The the operation fails
@@ -1209,12 +1209,12 @@ namespace YoFi.Tests
         {
             // Given: A transaction with a receipt
             var tx = TransactionItems.First();
-            var contenttype = "application/ofx";
+            var contenttype = "application/json";
             tx.ReceiptUrl = contenttype;
             context.Transactions.Add(tx);
             context.SaveChanges();
 
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = tx.ID.ToString(), InternalFile = "First10.ofx", ContentType = contenttype });
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = tx.ID.ToString(), InternalFile = "BudgetTxs.json", ContentType = contenttype });
 
             // When: Getting the receipt
             var result = await controller.ReceiptAction(tx.ID,"get");
