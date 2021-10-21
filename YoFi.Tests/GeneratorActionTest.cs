@@ -271,5 +271,38 @@ namespace YoFi.SampleGen.Tests
             CollectionAssert.AreEqual(store.Payees, newstore.Payees);
             CollectionAssert.AreEqual(store.BudgetTxs, newstore.BudgetTxs);
         }
+
+        [TestMethod]
+        public async Task GenerateOfx()
+        {
+            // Given: One month of generated Transactions
+            Generator();
+            var items = generator.Transactions.Where(x => x.Timestamp.Month == 12).ToList();
+
+            // When: Exporting then as OFX
+            var filename = "Generated.ofx";
+            File.Delete(filename);
+            {
+                using var writestream = File.OpenWrite(filename);
+                SampleDataOfx.WriteToOfx(items, writestream);
+            }
+            TestContext.AddResultFile(filename);
+
+            // And: Importing them through the OFX reader
+            var instream = File.OpenRead(filename);
+            var Document = await OfxSharp.OfxDocumentReader.FromSgmlFileAsync(instream);
+            var imported = Document.Statements.SelectMany(x => x.Transactions).Select(
+                tx => new Transaction()
+                {
+                    Amount = tx.Amount,
+                    Payee = tx.Memo?.Trim(),
+                    BankReference = tx.ReferenceNumber?.Trim(),
+                    Timestamp = tx.Date.Value.DateTime
+                }
+            ).ToList();
+
+            // Then: The transactions match
+            CollectionAssert.AreEqual(items, imported);
+        }
     }
 }
