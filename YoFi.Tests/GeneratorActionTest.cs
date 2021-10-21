@@ -236,7 +236,6 @@ namespace YoFi.SampleGen.Tests
             using var outstream = File.OpenWrite(filename);
             stream.CopyTo(outstream);
             TestContext.AddResultFile(filename);
-
         }
 
         [TestMethod]
@@ -303,6 +302,24 @@ namespace YoFi.SampleGen.Tests
 
             // Then: The transactions match
             CollectionAssert.AreEqual(items, imported);
+        }
+
+        [TestMethod]
+        public void GenerateFullSampleOfx()
+        {
+            var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
+            generator.LoadDefinitions(instream);
+            generator.GenerateTransactions();
+
+            foreach(var month in Enumerable.Range(1,12))
+            {
+                var items = generator.Transactions.Where(x => x.Timestamp.Month == month);
+                var filename = $"FullSampleData-Month{month:D2}.ofx";
+                File.Delete(filename);
+                using var writestream = File.OpenWrite(filename);
+                SampleDataOfx.WriteToOfx(items, writestream);
+                TestContext.AddResultFile(filename);
+            }
         }
     }
 }

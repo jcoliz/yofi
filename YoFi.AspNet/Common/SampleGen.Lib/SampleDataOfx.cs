@@ -25,8 +25,9 @@ namespace YoFi.SampleGen
             var dtstart = transactions.Min(x => x.Timestamp);
             var dtend = transactions.Max(x => x.Timestamp);
             using var writer = new StreamWriter(stream);
-            writer.WriteLine($"<DTSTART>{dtstart:yyyyMMdd}");
-            writer.WriteLine($"<DTEND>{dtend:yyyyMMdd}");
+            var tabs5 = "\t\t\t\t\t";
+            writer.WriteLine($"{tabs5}<DTSTART>{dtstart:yyyyMMdd}");
+            writer.WriteLine($"{tabs5}<DTEND>{dtend:yyyyMMdd}");
 
             // Write each transaction
 
@@ -43,21 +44,22 @@ namespace YoFi.SampleGen
              */
 
             int id = 1;
+            var tabs6 = tabs5 + "\t";
             foreach (var tx in transactions)
             {
-                writer.WriteLine("<STMTTRN>");
+                writer.WriteLine($"{tabs5}<STMTTRN>");
                 if (tx.Amount < 0)
-                    writer.WriteLine("<TRNTYPE>DEBIT");
+                    writer.WriteLine($"{tabs6}<TRNTYPE>DEBIT");
                 else
-                    writer.WriteLine("<TRNTYPE>CREDIT");
-                writer.WriteLine($"<DTPOSTED>{tx.Timestamp:yyyyMMdd000000.000}");
-                writer.WriteLine($"<FITID>{tx.Timestamp:yyyyMMdd}{id++:D8}");
-                writer.WriteLine($"<TRNAMT>{tx.Amount:F2}");
-                writer.WriteLine($"<MEMO>{tx.Payee}");
+                    writer.WriteLine($"{tabs6}<TRNTYPE>CREDIT");
+                writer.WriteLine($"{tabs6}<DTPOSTED>{tx.Timestamp:yyyyMMdd000000.000}");
+                writer.WriteLine($"{tabs6}<FITID>{tx.Timestamp:yyyyMMdd}{id++:D8}");
+                writer.WriteLine($"{tabs6}<TRNAMT>{tx.Amount:F2}");
+                writer.WriteLine($"{tabs6}<MEMO>{tx.Payee}");
                 if (!string.IsNullOrEmpty(tx.BankReference))
-                    writer.WriteLine($"<REFNUM>{tx.BankReference}");
+                    writer.WriteLine($"{tabs6}<REFNUM>{tx.BankReference}");
 
-                writer.WriteLine("</STMTTRN>");
+                writer.WriteLine($"{tabs5}</STMTTRN>");
             }
 
 
