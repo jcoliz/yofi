@@ -75,10 +75,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return View(await Get(id));
             }
-            catch (ArgumentException)
-            {
-                return BadRequest();
-            }
             catch (InvalidOperationException)
             {
                 return NotFound();
@@ -201,34 +197,40 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category,SubCategory")] Payee payee)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category,SubCategory")] Payee item)
         {
-            if (id != payee.ID)
+            try
             {
-                return NotFound();
-            }
+                if (id != item.ID)
+                    throw new ArgumentException();
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(payee);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    if (!PayeeExists(payee.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        return StatusCode(500, ex.Message);
-                    }
-                }
+                if (!ModelState.IsValid)
+                    throw new InvalidOperationException();
+
+                _context.Update(item);
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(payee);
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
+            {
+                return View(item);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (!_context.Transactions.Any(e => e.ID == item.ID))
+                    return NotFound();
+                else
+                    return StatusCode(500, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // POST: Payees/BulkEdit
@@ -237,22 +239,29 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkEdit(string Category)
         {
-            var result = from s in _context.Payees
-                         where s.Selected == true
-                         select s;
-
-            var list = await result.ToListAsync();
-
-            foreach (var item in list)
+            try
             {
-                if (!string.IsNullOrEmpty(Category))
-                    item.Category = Category;
+                var result = from s in _context.Payees
+                             where s.Selected == true
+                             select s;
 
-                item.Selected = false;
+                var list = await result.ToListAsync();
+
+                foreach (var item in list)
+                {
+                    if (!string.IsNullOrEmpty(Category))
+                        item.Category = Category;
+
+                    item.Selected = false;
+                }
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
             }
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET: Payees/Delete/5
@@ -264,10 +273,23 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var payee = await _context.Payees.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Payees.Remove(payee);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var item = await Get(id);
+
+                _context.Payees.Remove(item);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
@@ -306,13 +328,17 @@ namespace YoFi.AspNet.Controllers
                 // Add remaining transactions
                 await _context.AddRangeAsync(result);
                 await _context.SaveChangesAsync();
+
+                return View(result.OrderBy(x => x.Category));
             }
-            catch (Exception ex)
+            catch (ApplicationException ex)
             {
                 return BadRequest(ex.Message);
             }
-
-            return View(result.OrderBy(x => x.Category));
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET: Payees/Download
@@ -337,15 +363,10 @@ namespace YoFi.AspNet.Controllers
                 // Need to return a task to meet the IControllerBase interface
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, ex.Message);
             }
-        }
-
-        private bool PayeeExists(int id)
-        {
-            return _context.Payees.Any(e => e.ID == id);
         }
     }
 

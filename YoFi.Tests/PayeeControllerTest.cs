@@ -258,8 +258,16 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
+        public async Task CreateZero() =>
+            Assert.IsTrue(await controller.Create(0) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
         public async Task CreateModalZero() =>
-            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+            Assert.IsTrue(await controller.CreateModal(0) is Microsoft.AspNetCore.Mvc.BadRequestResult);
+
+        [TestMethod]
+        public async Task CreateModalNotFound() =>
+            Assert.IsTrue(await controller.CreateModal(1) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
         [TestMethod]
         public async Task EditNullNotFound() =>
@@ -272,6 +280,14 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task DeleteNullNotFound() =>
             Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task DetailsNullNotFound() =>
+            Assert.IsTrue(await controller.Details(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task DeleteConfirmedNotFound() =>
+            Assert.IsTrue(await controller.DeleteConfirmed(-1) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
         // TODO: Upload duplicate where ONLY the NAME is the same
         // TODO: Upload payee name stripping

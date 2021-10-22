@@ -63,23 +63,25 @@ namespace YoFi.AspNet.Controllers
             return View(await result.ToListAsync());
         }
 
+        private async Task<BudgetTx> Get(int? id) => await _context.BudgetTxs.SingleAsync(x => x.ID == id.Value);
+
         // GET: BudgetTxs/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            try
+            {
+                return View(await Get(id));
+            }
+            catch (InvalidOperationException)
             {
                 return NotFound();
             }
-
-            var budgetTx = await _context.BudgetTxs
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (budgetTx == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, ex.Message);
             }
-
-            return View(budgetTx);
         }
+
 #if false
         // Note that this is not currently implemented in the UI
         // Also, these days my practice is to generate all the budgettx at the beginning of the year
@@ -117,30 +119,31 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Create([Bind("ID,Amount,Timestamp,Category")] BudgetTx budgetTx)
         {
-            if (ModelState.IsValid)
+            try
             {
+                if (!ModelState.IsValid)
+                    throw new InvalidOperationException();
+
                 _context.Add(budgetTx);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(budgetTx);
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET: BudgetTxs/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var budgetTx = await _context.BudgetTxs.SingleOrDefaultAsync(m => m.ID == id);
-            if (budgetTx == null)
-            {
-                return NotFound();
-            }
-            return View(budgetTx);
-        }
+        public async Task<IActionResult> Edit(int? id) => await Details(id);
 
         // POST: BudgetTxs/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
@@ -148,53 +151,44 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Timestamp,Category")] BudgetTx budgetTx)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Timestamp,Category")] BudgetTx item)
         {
-            if (id != budgetTx.ID)
+            try
             {
-                return NotFound();
-            }
+                if (id != item.ID)
+                    throw new ArgumentException();
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(budgetTx);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BudgetTxExists(budgetTx.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                if (!ModelState.IsValid)
+                    throw new InvalidOperationException();
+
+                _context.Update(item);
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(budgetTx);
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (InvalidOperationException)
+            {
+                return View(item);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (!_context.Transactions.Any(e => e.ID == item.ID))
+                    return NotFound();
+                else
+                    return StatusCode(500, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET: BudgetTxs/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var budgetTx = await _context.BudgetTxs
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (budgetTx == null)
-            {
-                return NotFound();
-            }
-
-            return View(budgetTx);
-        }
+        public async Task<IActionResult> Delete(int? id) => await Details(id);
 
         // POST: BudgetTxs/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -202,11 +196,25 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var budgetTx = await _context.BudgetTxs.SingleOrDefaultAsync(m => m.ID == id);
-            _context.BudgetTxs.Remove(budgetTx);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var item = await Get(id);
+
+                _context.BudgetTxs.Remove(item);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -237,13 +245,17 @@ namespace YoFi.AspNet.Controllers
                 // Add remaining transactions
                 await _context.AddRangeAsync(result);
                 await _context.SaveChangesAsync();
+
+                return View(result.OrderBy(x => x.Timestamp.Year).ThenBy(x => x.Timestamp.Month).ThenBy(x => x.Category));
             }
-            catch (Exception ex)
+            catch (ApplicationException ex)
             {
                 return BadRequest(ex.Message);
             }
-
-            return View(result.OrderBy(x => x.Timestamp.Year).ThenBy(x=>x.Timestamp.Month).ThenBy(x => x.Category));
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET: BudgetTxs/Download
@@ -267,15 +279,10 @@ namespace YoFi.AspNet.Controllers
                 // Need to return a task to meet the IControllerBase interface
                 return Task.FromResult(result as IActionResult);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Task.FromResult(NotFound() as IActionResult);
+                return Task.FromResult(StatusCode(500, ex.Message) as IActionResult);
             }
-        }
-
-        private bool BudgetTxExists(int id)
-        {
-            return _context.BudgetTxs.Any(e => e.ID == id);
         }
 
         Task<IActionResult> IController<BudgetTx>.Index() => Index();

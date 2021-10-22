@@ -270,6 +270,8 @@ namespace YoFi.Tests
         public async Task DeleteNullNotFound() =>
             Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
-        // TODO: Generate next month's TXs
+        [TestMethod]
+        public async Task DeleteConfirmedNotFound() =>
+            Assert.IsTrue(await controller.DeleteConfirmed(-1) is Microsoft.AspNetCore.Mvc.NotFoundResult);
     }
 }

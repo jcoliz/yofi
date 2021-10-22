@@ -1977,7 +1977,7 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task CreateInvalidModel()
         {
-            // Given: On transaction exists already
+            // Given: One item exists already
             context.Add(Items[1]);
             await context.SaveChangesAsync();
 
@@ -2011,6 +2011,18 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task DeleteNullNotFound() =>
             Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task DeleteConfirmedNotFound() =>
+            Assert.IsTrue(await controller.DeleteConfirmed(-1) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public async Task CreateSplitNotFound() =>
+            Assert.IsTrue(await controller.CreateSplit(1) is Microsoft.AspNetCore.Mvc.NotFoundResult);
+
+        [TestMethod]
+        public void ReportNotFound() =>
+            Assert.IsTrue(controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters() { id = "notfound" }) is Microsoft.AspNetCore.Mvc.NotFoundObjectResult);
 
         [TestMethod]
         public async Task ReceiptActionOther() =>
