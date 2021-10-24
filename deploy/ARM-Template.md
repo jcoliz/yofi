@@ -95,8 +95,3 @@ Then copy the "web-user" and "web-pword" items into the site login.
 ## Configuration
 
 Read up on [How to configure](/docs/Configuration.md) the site for more details on fine-tuning the configuration.
-
-## Deploying new bits
-
-Note that this template configures the web app to run from a ZIP package. If you later decide to deploy new
-bits after building it, you'll need to remove the WEBSITE_RUN_FROM_PACKAGE environment variable and restart.
