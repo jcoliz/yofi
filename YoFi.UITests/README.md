@@ -7,6 +7,9 @@ The UI tests are just getting started!
 Currently, the UI tests are only designed to work on a local machine. In the future, I have
 ambition to run them as part of the Azure Pipelines release pipeline.
 
+This uses Chrome only, and is hard-coded to a specific version (see .csproj). In the future,
+this can be reworked to match the currently-installed version.
+
 ## First, run the code
 
 ```
