@@ -19,6 +19,7 @@ namespace YoFi.UITests
         [TestMethod]
         public void TestMethod1()
         {
+            // Needs to match launchSettings.json
             _driver.Navigate().GoToUrl("http://localhost:50419");
 
             Assert.AreEqual("Home - Development - YoFi", _driver.Title);
