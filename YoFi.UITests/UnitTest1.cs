@@ -12,7 +12,9 @@ namespace YoFi.UITests
         [TestInitialize]
         public void SetUp()
         {
-            _driver = new ChromeDriver();
+            var chromeOptions = new ChromeOptions();
+            chromeOptions.AddArguments("headless");
+            _driver = new ChromeDriver(chromeOptions);
         }
         [TestMethod]
         public void TestMethod1()
