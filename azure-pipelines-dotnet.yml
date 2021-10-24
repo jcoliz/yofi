@@ -19,10 +19,12 @@ steps:
   submodules: true
 
 - task: CmdLine@2
+  displayName: 'Create version.txt'
   inputs:
     script: 'git describe --long --always --abbrev=8 > $(application)/version.txt'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Publish web app'
   inputs:
     command: 'publish'
     publishWebProjects: true
@@ -31,17 +33,20 @@ steps:
     modifyOutputPath: false
 
 - task: DotNetCoreCLI@2
+  displayName: 'Build UI tests'
   inputs:
     command: 'build'
     projects: '$(uitests)/$(uitests).csproj'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Run unit tests'
   inputs:
     command: 'test'
     projects: '$(tests)/$(tests).csproj'
     arguments: '--collect:"XPlat Code Coverage" --settings:$(tests)/coverlet.runsettings'
 
 - task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage'
   inputs:
     codeCoverageTool: 'Cobertura'
     summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
