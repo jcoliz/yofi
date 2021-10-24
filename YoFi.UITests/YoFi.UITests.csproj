@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+    <UserSecretsId>bbebd5e7-f65d-4e71-8c79-f53e35f65080</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -17,12 +17,24 @@ namespace YoFi.UITests
             _driver = new ChromeDriver(chromeOptions);
         }
         [TestMethod]
-        public void TestMethod1()
+        public void HomePage()
         {
             // Needs to match launchSettings.json
             _driver.Navigate().GoToUrl("http://localhost:50419");
 
             Assert.AreEqual("Home - Development - YoFi", _driver.Title);
+        }
+
+        [TestMethod]
+        public void NavigateToLogin()
+        {
+            _driver.Navigate().GoToUrl("http://localhost:50419");
+
+            var login_link = _driver.FindElement(By.Id("a-login"));
+
+            login_link.Click();
+
+            Assert.AreEqual("http://localhost:50419/Identity/Account/Login", _driver.Url);
         }
 
         [TestCleanup]
