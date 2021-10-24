@@ -12,6 +12,7 @@ pool:
 variables:
   application: YoFi.AspNet
   tests: YoFi.Tests
+  uitests: YoFi.UITests
 
 steps:
 - checkout: self
@@ -28,6 +29,11 @@ steps:
     arguments: '--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release'
     zipAfterPublish: false
     modifyOutputPath: false
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '$(uitests)/$(uitests).csproj'
 
 - task: DotNetCoreCLI@2
   inputs:
