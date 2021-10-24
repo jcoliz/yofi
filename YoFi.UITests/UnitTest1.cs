@@ -34,7 +34,7 @@ namespace YoFi.UITests
 
             login_link.Click();
 
-            Assert.AreEqual("http://localhost:50419/Identity/Account/Login", _driver.Url);
+            Assert.AreEqual("Login - Development - YoFi", _driver.Title);
         }
 
         [TestCleanup]
