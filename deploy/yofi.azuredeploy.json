@@ -37,7 +37,7 @@
   "variables": {
     "name": "[concat('yofi-',uniqueString(resourceGroup().id))]",
     "location": "[resourceGroup().location]",
-    "appservice-name": "[concat('appservice-',variables('name'))]",
+    "farm-name": "[concat('farm-',variables('name'))]",
     "sqlserver-name": "[concat('sqlserver-',variables('name'))]",
     "db-name": "[concat('db-',variables('name'))]",
     "storage-name": "[concat('storage',uniqueString(resourceGroup().id))]",
@@ -98,7 +98,7 @@
       }
     },
     {
-      "name": "[variables('appservice-name')]",
+      "name": "[variables('farm-name')]",
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2018-02-01",
       "location": "[variables('location')]",
@@ -108,7 +108,7 @@
       },
       "kind": "linux",
       "properties": {
-        "name": "[variables('appservice-name')]",
+        "name": "[variables('farm-name')]",
         "reserved": true
       }
     },
@@ -118,45 +118,48 @@
       "apiVersion": "2020-12-01",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', variables('appservice-name'))]",
-        "[concat('Microsoft.Sql/servers/', variables('sqlserver-name'), '/databases/', variables('db-name'))]"
+        "[resourceId('Microsoft.Web/serverfarms', variables('farm-name'))]"
       ],
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appservice-name'))]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('farm-name'))]",
         "siteConfig": {
-          "linuxFxVersion": "DOTNETCORE|3.1",
-          "connectionStrings": [
-            {
-              "name": "DefaultConnection",
-              "type": "SQLAzure",
-              "connectionString": "[concat('Server=tcp:',reference(variables('sqlserver-name')).fullyQualifiedDomainName,',1433;Initial Catalog=',variables('db-name'),';Persist Security Info=False;User ID=',variables('sql-user'),'@',variables('sqlserver-name'),';Password=',parameters('sql-pword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
-            },
-            {
-              "name": "StorageConnection",
-              "type": "Custom",
-              "connectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storage-name'), ';AccountKey=', listKeys(variables('storage-name'), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
-            }
-          ],
-          "appSettings": [
-            {
-              "name": "ASPNETCORE_ENVIRONMENT",
-              "value": "Production"
-            },
-            {
-              "name": "ADMINUSER__EMAIL",
-              "value": "[parameters('web-user')]"
-            },
-            {
-              "name": "ADMINUSER__PASSWORD",
-              "value": "[parameters('web-pword')]"
-            },
-            {
-              "name": "API__KEY",
-              "value": "[parameters('api-key')]"
-            }
-          ]
+          "linuxFxVersion": "DOTNETCORE|3.1"
         }
       }
+    },
+    {
+      "name": "[concat(variables('name'), '/connectionstrings')]",
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2020-12-01",
+      "properties": {
+        "DefaultConnection": {
+          "value": "[concat('Server=tcp:',reference(variables('sqlserver-name')).fullyQualifiedDomainName,',1433;Initial Catalog=',variables('db-name'),';Persist Security Info=False;User ID=',variables('sql-user'),'@',variables('sqlserver-name'),';Password=',parameters('sql-pword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]",
+          "type": "SqlAzure"
+        },
+        "StorageConnection": {
+          "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storage-name'), ';AccountKey=', listKeys(variables('storage-name'), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]",
+          "type": "Custom"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('name'))]",
+        "[concat('Microsoft.Sql/servers/', variables('sqlserver-name'), '/databases/', variables('db-name'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storage-name'))]"
+      ]
+    },
+    {
+      "name": "[concat(variables('name'), '/appsettings')]",
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2020-12-01",
+      "properties": {
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "ADMINUSER__PASSWORD": "[parameters('web-pword')]",
+        "ADMINUSER__EMAIL": "[parameters('web-user')]",
+        "API__KEY": "[parameters('api-key')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('name'))]"
+      ]
     },
     {
       "name": "[concat(variables('name'), '/ZipDeploy')]",
@@ -166,7 +169,9 @@
         "packageUri": "[variables('packageUri')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', variables('name'))]"
+        "[resourceId('Microsoft.Web/sites/',variables('name'))]",
+        "[resourceId('Microsoft.Web/sites/config', variables('name'), 'connectionstrings')]",
+        "[resourceId('Microsoft.Web/sites/config', variables('name'), 'appsettings')]"
       ]
     }
   ],
