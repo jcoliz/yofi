@@ -1,7 +1,7 @@
 ﻿@model Common.AspNet.PageDivider
 <div class="mt-2 row">
     <div class="col-sm-7">
-        <p class="fs-6">Displaying @Model.PageFirstItem through @Model.PageLastItem of <span data-test-id="totalitems">@Model.PageTotalItems</span>.</p>
+        <p class="fs-6">Displaying @Model.PageFirstItem through <span data-test-id="totalpages">@Model.PageLastItem</span> of <span data-test-id="totalitems">@Model.PageTotalItems</span>.</p>
     </div>
     <nav class="col-sm-5" aria-label="Pagination control">
         <ul class="pagination pagination-sm justify-content-end">

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace YoFi.PWTests
 {
+    /// <summary>
+    /// Run through top-level golden path to make sure primary pages load
+    /// </summary>
     [TestClass]
     public class SmokeTest: PageTest
     {
@@ -65,6 +68,7 @@ namespace YoFi.PWTests
             // Given: Having logged in
             await DoLogin();
 
+            // When: Clicking "Transactions" on the navbar
             await Page.ClickAsync("text=Transactions");
 
             // Then: We land at the transactions index page
@@ -73,9 +77,66 @@ namespace YoFi.PWTests
 
             // And: There are the expected number of transactions.
             // NOTE: This will change if the sample data pattern definitions change
+            // This may be somewhat brittle. Consider changing this to a range
             var expected = "889";
             var content = await Page.TextContentAsync("data-test-id=totalitems");
             Assert.AreEqual(expected,content);
+        }
+
+        [TestMethod]
+        public async Task ClickPayees()
+        {
+            // Given: Having logged in
+            await DoLogin();
+
+            // When: Clicking "Payees" on the navbar
+            await Page.ClickAsync("text=Payees");
+
+            // Then: We land at the payees index page
+            var title = await Page.TitleAsync();
+            Assert.AreEqual("Payees - Development - YoFi", title);
+
+            // And: There are the expected number of items.
+            // NOTE: This will change if the sample data pattern definitions change
+            // This may be somewhat brittle. Consider changing this to a range
+            var expected = "40";
+            var content = await Page.TextContentAsync("data-test-id=totalitems");
+            Assert.AreEqual(expected, content);
+        }
+
+        [TestMethod]
+        public async Task ClickBudget()
+        {
+            // Given: Having logged in
+            await DoLogin();
+
+            // When: Clicking "Budget" on the navbar
+            await Page.ClickAsync("text=Budget");
+
+            // Then: We land at the budget index page
+            var title = await Page.TitleAsync();
+            Assert.AreEqual("Budget Line Items - Development - YoFi", title);
+
+            // And: There are the expected number of items.
+            // NOTE: This will change if the sample data pattern definitions change
+            // This may be somewhat brittle. Consider changing this to a range
+            var expected = "156";
+            var content = await Page.TextContentAsync("data-test-id=totalitems");
+            Assert.AreEqual(expected, content);
+        }
+
+        [TestMethod]
+        public async Task ClickImport()
+        {
+            // Given: Having logged in
+            await DoLogin();
+
+            // When: Clicking "Import" on the navbar
+            await Page.ClickAsync("text=Import");
+
+            // Then: We land at import page
+            var title = await Page.TitleAsync();
+            Assert.AreEqual("Import Transactions - Development - YoFi", title);
         }
     }
 }
