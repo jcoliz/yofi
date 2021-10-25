@@ -76,5 +76,26 @@ namespace YoFi.PWTests
                 await AAC_LoginAction();
             }
         }
+
+        [TestMethod]
+        public async Task ClickReports()
+        {
+            // Given: We are already logged in and starting at the root of the site
+            await GivenLoggedIn();
+
+            // When: Clicking "Budget" on the navbar
+            await Page.ClickAsync("text=Reports");
+
+            // Then: We land at the budget index page
+            var title = await Page.TitleAsync();
+            Assert.AreEqual("Reports - Development - YoFi", title);
+
+            // And: There are the expected number of items.
+            // NOTE: This will change if the sample data pattern definitions change
+            // This may be somewhat brittle. Consider changing this to a range
+            var expected = "Summary";
+            var content = await Page.TextContentAsync("h2");
+            Assert.AreEqual(expected, content);
+        }
     }
 }
