@@ -16,5 +16,17 @@ namespace YoFi.PWTests
 
             Assert.AreEqual("Home - Development - YoFi", title);
         }
+
+        [TestMethod]
+        public async Task LoginPage()
+        {
+            await HomePage();
+
+            await Page.ClickAsync("text=Log in");
+
+            var title = await Page.TitleAsync();
+
+            Assert.AreEqual("Login - Development - YoFi", title);
+        }
     }
 }
