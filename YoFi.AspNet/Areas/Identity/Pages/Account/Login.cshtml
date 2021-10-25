@@ -39,7 +39,7 @@
                 @Html.DisplayNameFor(m => m.Input.RememberMe)
             </label>
         </div>
-        <button class="w-100 btn btn-lg btn-primary mb-3" type="submit">Sign in</button>
+        <button class="w-100 btn btn-lg btn-primary mb-3" data-test-id="signin" type="submit">Sign in</button>
         <p>or</p>
         <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="w-100 btn btn-lg btn-secondary">Create Account</a>
         <hr />
