@@ -103,15 +103,23 @@ namespace YoFi.PWTests
             await ClickReports();
 
             // When: Selecting the "all" report from the dropdown
-            await Page.ClickAsync("text=Choose a Report");
-            await Page.ClickAsync("text=All Transactions");
-
-            // Then: The "all" report is generated
-            var title = await Page.TitleAsync();
-            Assert.AreEqual("All Transactions - Development - YoFi", title);
-
-            // And: There are the expected number of items.
             var expected = "All Transactions";
+            await Page.ClickAsync("text=Choose a Report");
+            await Page.ClickAsync($"text={expected}");
+
+            // Then: The expected report is generated
+            await ThenIsOnPage(expected);
+            await ThenH2Is(expected);
+        }
+
+        public async Task ThenIsOnPage(string expected)
+        {
+            var title = await Page.TitleAsync();
+            Assert.AreEqual($"{expected} - Development - YoFi", title);
+        }
+
+        public async Task ThenH2Is(string expected)
+        {
             var content = await Page.TextContentAsync("h2");
             Assert.AreEqual(expected, content);
         }
