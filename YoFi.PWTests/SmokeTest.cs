@@ -60,6 +60,10 @@ namespace YoFi.PWTests
             // And: The navbar has our email
             var content = await Page.TextContentAsync("data-test-id=hello-user");
             Assert.IsTrue(content.Contains(email));
+
+            // And: The login button is not visible
+            var login = await Page.QuerySelectorAsync("data-test-id=login");
+            Assert.IsNull(login);
         }
 
         [TestMethod]
@@ -137,6 +141,42 @@ namespace YoFi.PWTests
             // Then: We land at import page
             var title = await Page.TitleAsync();
             Assert.AreEqual("Import Transactions - Development - YoFi", title);
+        }
+
+        [TestMethod]
+        public async Task ClickProfile()
+        {
+            // Given: Having logged in
+            await DoLogin();
+
+            // When: Clicking my email on the navbar
+            await Page.ClickAsync("data-test-id=hello-user");
+
+            // Then: We land at profile page
+            var title = await Page.TitleAsync();
+            Assert.AreEqual("Profile - Development - YoFi", title);
+        }
+
+        [TestMethod]
+        public async Task LogOut()
+        {
+            // Given: Having logged in
+            await DoLogin();
+
+            // When: Clicking "logout" on the navbar
+            await Page.ClickAsync("data-test-id=logout");
+
+            // Then: We land at home page
+            var title = await Page.TitleAsync();
+            Assert.AreEqual("Home - Development - YoFi", title);
+
+            // And: The login button is again visible
+            //var content = await Page.TextContentAsync("data-test-id=login");
+            //Assert.AreEqual("Log in", content);
+            var login = await Page.QuerySelectorAsync("data-test-id=login");
+            Assert.IsNotNull(login);
+            var text = await login.TextContentAsync();
+            Assert.AreEqual("Log in", text);
         }
     }
 }
