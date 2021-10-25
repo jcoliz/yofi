@@ -91,9 +91,27 @@ namespace YoFi.PWTests
             Assert.AreEqual("Reports - Development - YoFi", title);
 
             // And: There are the expected number of items.
-            // NOTE: This will change if the sample data pattern definitions change
-            // This may be somewhat brittle. Consider changing this to a range
             var expected = "Summary";
+            var content = await Page.TextContentAsync("h2");
+            Assert.AreEqual(expected, content);
+        }
+
+        [TestMethod]
+        public async Task AllReport()
+        {
+            // Given: We are logged in and on the reports page
+            await ClickReports();
+
+            // When: Selecting the "all" report from the dropdown
+            await Page.ClickAsync("text=Choose a Report");
+            await Page.ClickAsync("text=All Transactions");
+
+            // Then: The "all" report is generated
+            var title = await Page.TitleAsync();
+            Assert.AreEqual("All Transactions - Development - YoFi", title);
+
+            // And: There are the expected number of items.
+            var expected = "All Transactions";
             var content = await Page.TextContentAsync("h2");
             Assert.AreEqual(expected, content);
         }
