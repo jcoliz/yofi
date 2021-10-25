@@ -12,7 +12,6 @@ pool:
 variables:
   application: YoFi.AspNet
   tests: YoFi.Tests
-  uitests: YoFi.UITests
   pwtests: YoFi.PWTests
 
 steps:
@@ -32,12 +31,6 @@ steps:
     arguments: '--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release'
     zipAfterPublish: false
     modifyOutputPath: false
-
-- task: DotNetCoreCLI@2
-  displayName: 'Build UI tests'
-  inputs:
-    command: 'build'
-    projects: '$(uitests)/$(uitests).csproj'
 
 - task: DotNetCoreCLI@2
   displayName: 'Build PlayWright UI tests'
