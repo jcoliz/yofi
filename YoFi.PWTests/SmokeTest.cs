@@ -58,5 +58,24 @@ namespace YoFi.PWTests
             var content = await Page.TextContentAsync("data-test-id=hello-user");
             Assert.IsTrue(content.Contains(email));
         }
+
+        [TestMethod]
+        public async Task ClickTransactions()
+        {
+            // Given: Having logged in
+            await DoLogin();
+
+            await Page.ClickAsync("text=Transactions");
+
+            // Then: We land at the transactions index page
+            var title = await Page.TitleAsync();
+            Assert.AreEqual("Transactions - Development - YoFi", title);
+
+            // And: There are the expected number of transactions.
+            // NOTE: This will change if the sample data pattern definitions change
+            var expected = "889";
+            var content = await Page.TextContentAsync("data-test-id=totalitems");
+            Assert.AreEqual(expected,content);
+        }
     }
 }
