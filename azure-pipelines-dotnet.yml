@@ -13,6 +13,7 @@ variables:
   application: YoFi.AspNet
   tests: YoFi.Tests
   uitests: YoFi.UITests
+  pwtests: YoFi.PWTests
 
 steps:
 - checkout: self
@@ -37,6 +38,12 @@ steps:
   inputs:
     command: 'build'
     projects: '$(uitests)/$(uitests).csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build PlayWright UI tests'
+  inputs:
+    command: 'build'
+    projects: '$(pwtests)/$(pwtests).csproj'
 
 - task: DotNetCoreCLI@2
   displayName: 'Run unit tests'
