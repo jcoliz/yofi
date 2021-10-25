@@ -139,5 +139,37 @@ namespace YoFi.PWTests
             var content = await Page.TextContentAsync("h2");
             Assert.AreEqual(expected, content);
         }
+
+        [TestMethod]
+        public async Task HideMonths()
+        {
+            // Given: We are logged in and on the All Transactions report
+            await AllReport("All Transactions");
+
+            // When: Selecting "hide months"
+            await Page.ClickAsync("id=dropdownMenuButtonColumns");
+            await Page.ClickAsync("text=Hide");
+
+            // Then: There is only the one "amount" column, which is the total
+            var amountcols = await Page.QuerySelectorAllAsync("th.report-col-amount");
+            Assert.AreEqual(1, amountcols.Count);
+        }
+        [TestMethod]
+        public async Task ShowMonthsThroughJune()
+        {
+            // Given: We are logged in and on the All Transactions report
+            await AllReport("All Transactions");
+
+            // When: Selecting "June"
+            await Page.ClickAsync("id=dropdownMenuButtonMonth");
+            await Page.ClickAsync("text=6 June");
+
+            // Then: There are 7 amount columns, one for each month plus total
+            // NOTE: This relies on the fact that the sample data generator creates data for all months
+            // in the year. If we ever change it to only doing until current month, then this test
+            // with need some change.
+            var amountcols = await Page.QuerySelectorAllAsync("th.report-col-amount");
+            Assert.AreEqual(7, amountcols.Count);
+        }
     }
 }
