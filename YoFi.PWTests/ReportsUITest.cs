@@ -87,15 +87,17 @@ namespace YoFi.PWTests
             await Page.ClickAsync("text=Reports");
 
             // Then: We land at the budget index page
-            var title = await Page.TitleAsync();
-            Assert.AreEqual("Reports - Development - YoFi", title);
+            await ThenIsOnPage("Reports");
 
-            // And: There are the expected number of items.
-            var expected = "Summary";
-            var content = await Page.TextContentAsync("h2");
-            Assert.AreEqual(expected, content);
+            // And: The summary is shown
+            await ThenH2Is("Summary");
         }
 
+        [DataRow("Income")]
+        [DataRow("Expenses")]
+        [DataRow("Taxes")]
+        [DataRow("Savings")]
+        [DataRow("Expenses Budget")]
         [DataRow("All Transactions")]
         [DataTestMethod]
         public async Task AllReport(string expected)
