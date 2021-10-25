@@ -26,6 +26,11 @@ This is built on DevTools, which seems like a more modern and stable approach th
 Playwright seems easier and more stable to set up as well.
 And there are MSTest helpers out of the box, so it's all very clean.
 
+## No dependency on code under test
+
+Unlike with unit tests or integration tests, there is a principle here that the functional test
+do not load the app code at all.
+
 ## How to use it
 
 ### First, run the code

@@ -93,12 +93,26 @@ namespace YoFi.PWTests
             await ThenH2Is("Summary");
         }
 
+        /// <summary>
+        /// Simply ensure that each report loads and thinks it loaded
+        /// </summary>
+        /// <param name="expected">Name of the report</param>
         [DataRow("Income")]
         [DataRow("Expenses")]
         [DataRow("Taxes")]
         [DataRow("Savings")]
+        [DataRow("Income Detail")]
+        [DataRow("Expenses Detail")]
+        [DataRow("Taxes Detail")]
+        [DataRow("Savings Detail")]
         [DataRow("Expenses Budget")]
         [DataRow("All Transactions")]
+        [DataRow("Full Budget")]
+        [DataRow("All vs. Budget")]
+        [DataRow("Expenses vs. Budget")]
+        [DataRow("Managed Budget")]
+        [DataRow("Transaction Export")]
+        [DataRow("Year over Year")]
         [DataTestMethod]
         public async Task AllReport(string expected)
         {
