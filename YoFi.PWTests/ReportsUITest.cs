@@ -96,14 +96,14 @@ namespace YoFi.PWTests
             Assert.AreEqual(expected, content);
         }
 
-        [TestMethod]
-        public async Task AllReport()
+        [DataRow("All Transactions")]
+        [DataTestMethod]
+        public async Task AllReport(string expected)
         {
             // Given: We are logged in and on the reports page
             await ClickReports();
 
             // When: Selecting the "all" report from the dropdown
-            var expected = "All Transactions";
             await Page.ClickAsync("text=Choose a Report");
             await Page.ClickAsync($"text={expected}");
 
