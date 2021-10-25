@@ -1,14 +1,28 @@
-# UI Tests
+# Functional UI Tests
 
-The UI tests are just getting started!
+These are browser-driving tests designed to be run against a complete environment
+with a seeded database of demo data.
 
-## Environment
+They are just getting started, so there's not a ton here yet.
 
-Currently, the UI tests are only designed to work on a local machine. In the future, I have
-ambition to run them as part of the Azure Pipelines release pipeline.
+## Local Environment
 
-This uses Chrome only, and is hard-coded to a specific version (see .csproj). In the future,
+Currently, the UI tests are only designed to work on a local machine.
+
+## Test Environment
+
+In the future, I have
+ambition to run them as part of the Azure Pipelines release pipeline. In this case, I
+will deploy a fresh environment (which will also test the ARM Template), then deploy the
+bits under test to it, and run these tests.
+
+## Dependencies
+
+Currently using Selenium. Currently uses Chrome browser only, and is hard-coded to a specific version (see .csproj). In the future,
 this can be reworked to match the currently-installed version.
+
+Considering moving to  [Playwright for .NET](https://github.com/microsoft/playwright-dotnet) as a next step, because DevTools protocol looks more
+modern and stable than WebDriver.
 
 ## First, run the code
 
