@@ -13,7 +13,11 @@ namespace YoFi.Core
         IQueryable<Payee> Payees { get; }
         IQueryable<BudgetTx> BudgetTxs { get; }
 
-        Task AddRangeAsync(IEnumerable<object> incoming);
+        Task AddAsync(object item);
+        Task AddRangeAsync(IEnumerable<object> items);
+
+        void Update(object item);
+        void Remove(object item);
         Task SaveChangesAsync();
     }
 }

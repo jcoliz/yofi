@@ -44,5 +44,11 @@ namespace YoFi.AspNet.Data
         Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
 
         Task IDataContext.AddRangeAsync(IEnumerable<object> incoming) => base.AddRangeAsync(incoming);
+
+        async Task IDataContext.AddAsync(object item) => await base.AddAsync(item);
+
+        void IDataContext.Update(object item) => base.Update(item);
+
+        void IDataContext.Remove(object item) => base.Remove(item);
     }
 }

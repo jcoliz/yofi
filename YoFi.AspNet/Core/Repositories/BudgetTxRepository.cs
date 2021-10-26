@@ -7,18 +7,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
+using YoFi.Core;
 
 namespace YoFi.AspNet.Core.Repositories
 {
     public class BudgetTxRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDataContext _context;
 
         public IQueryable<BudgetTx> OrderedQuery => _context.BudgetTxs.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).AsQueryable();
 
         public IQueryable<BudgetTx> All => _context.BudgetTxs;
 
-        public BudgetTxRepository(ApplicationDbContext context)
+        public BudgetTxRepository(IDataContext context)
         {
             _context = context;
         }
@@ -27,10 +28,10 @@ namespace YoFi.AspNet.Core.Repositories
 
         public Task<bool> TestExistsByIdAsync(int id) => _context.BudgetTxs.AnyAsync(x => x.ID == id);
 
-        public Task AddAsync(BudgetTx item)
+        public async Task AddAsync(BudgetTx item)
         {
-            _context.Add(item);
-            return _context.SaveChangesAsync();
+            await _context.AddAsync(item);
+            await _context.SaveChangesAsync();
         }
         public async Task AddRangeAsync(IEnumerable<BudgetTx> items)
         {
@@ -46,7 +47,7 @@ namespace YoFi.AspNet.Core.Repositories
 
         public Task RemoveAsync(BudgetTx item)
         {
-            _context.BudgetTxs.Remove(item);
+            _context.Remove(item);
             return _context.SaveChangesAsync();
         }
 
