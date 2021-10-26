@@ -28,7 +28,7 @@ namespace YoFi.Core.Helpers
             // Load all payees into memory. This is an optimization. Rather than run a separate payee query for every 
             // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
 
-            payees = await _mycontext.ReadPayees.ToListAsync();
+            payees = await _mycontext.Payees.ToListAsync();
             regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
         }
 

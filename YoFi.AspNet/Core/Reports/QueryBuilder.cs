@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
+using YoFi.Core;
 
 namespace YoFi.AspNet.Controllers.Reports
 {
@@ -50,7 +50,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// Constructor
         /// </summary>
         /// <param name="context">Which database context to create queries against</param>
-        public QueryBuilder(ApplicationDbContext context)
+        public QueryBuilder(IDataContext context)
         {
             _context = context;
         }
@@ -217,7 +217,7 @@ namespace YoFi.AspNet.Controllers.Reports
         #endregion
 
         #region Fields
-        private readonly ApplicationDbContext _context;
+        private readonly IDataContext _context;
         #endregion
 
         #region Internals

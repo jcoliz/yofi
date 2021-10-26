@@ -8,6 +8,9 @@ namespace YoFi.Core
 {
     public interface IDataContext
     {
-        IQueryable<Payee> ReadPayees { get; }
+        IQueryable<Transaction> Transactions { get; }
+        IQueryable<Split> Splits { get; }
+        IQueryable<Payee> Payees { get; }
+        IQueryable<BudgetTx> BudgetTxs { get; }
     }
 }

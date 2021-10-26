@@ -34,6 +34,12 @@ namespace YoFi.AspNet.Data
         public DbSet<Split> Splits { get; set; }
         public DbSet<BudgetTx> BudgetTxs { get; set; }
 
-        IQueryable<Payee> IDataContext.ReadPayees => Payees;
+        IQueryable<Payee> IDataContext.Payees => Payees;
+
+        IQueryable<Transaction> IDataContext.Transactions => Transactions;
+
+        IQueryable<Split> IDataContext.Splits => Splits;
+
+        IQueryable<BudgetTx> IDataContext.BudgetTxs => BudgetTxs;
     }
 }
