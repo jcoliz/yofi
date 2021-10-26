@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace YoFi.PWTests
 {
     /// <summary>
-    /// Test the various permutation of Reports
+    /// Test the Transactions page
     /// </summary>
     [TestClass]
     public class TransactionsUITest : PageTest
@@ -83,10 +83,10 @@ namespace YoFi.PWTests
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
-            // When: Clicking "Budget" on the navbar
+            // When: Clicking "Transactions" on the navbar
             await Page.ClickAsync("text=Transactions");
 
-            // Then: We land at the budget index page
+            // Then: We land at the transactions index page
             await ThenIsOnPage("Transactions");
         }
 
@@ -101,9 +101,7 @@ namespace YoFi.PWTests
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: Exactly 12 transactions are found, because we know this about our source data
-            var expected = "12";
-            var content = await Page.TextContentAsync("data-test-id=totalitems");
-            Assert.AreEqual(expected, content);
+            await ThenTotalItemsAreEqual(12);
         }
 
         [TestMethod]
@@ -117,15 +115,18 @@ namespace YoFi.PWTests
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: Exactly 3 transactions are found, because we know this about our source data
-            var expected = "3";
-            var content = await Page.TextContentAsync("data-test-id=totalitems");
-            Assert.AreEqual(expected, content);
+            await ThenTotalItemsAreEqual(3);
         }
 
         public async Task ThenIsOnPage(string expected)
         {
             var title = await Page.TitleAsync();
             Assert.AreEqual($"{expected} - Development - YoFi", title);
+        }
+
+        private async Task ThenTotalItemsAreEqual(int howmany)
+        {
+            Assert.AreEqual(howmany.ToString(), await Page.TextContentAsync("data-test-id=totalitems"));
         }
     }
 }

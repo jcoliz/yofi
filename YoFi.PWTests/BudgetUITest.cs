@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace YoFi.PWTests
 {
     /// <summary>
-    /// Test the various permutation of Reports
+    /// Test the Budget page
     /// </summary>
     [TestClass]
     public class BudgetUITest : PageTest
@@ -120,9 +120,7 @@ namespace YoFi.PWTests
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: Exactly 25 transactions are found, because we know this about our source data
-            var expected = "25";
-            var content = await Page.TextContentAsync("data-test-id=totalitems");
-            Assert.AreEqual(expected, content);
+            await ThenTotalItemsAreEqual(25);
         }
 
         private async Task ThenIsOnPage(string expected)
@@ -135,6 +133,11 @@ namespace YoFi.PWTests
         {
             Assert.AreEqual(from.ToString(), await Page.TextContentAsync("data-test-id=firstitem"));
             Assert.AreEqual(to.ToString(), await Page.TextContentAsync("data-test-id=lastitem"));
+        }
+
+        private async Task ThenTotalItemsAreEqual(int howmany)
+        {
+            Assert.AreEqual(howmany.ToString(), await Page.TextContentAsync("data-test-id=totalitems"));
         }
     }
 }
