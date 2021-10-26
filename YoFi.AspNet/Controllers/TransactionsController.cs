@@ -20,6 +20,7 @@ using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
+using YoFi.Core.Importers;
 using Transaction = YoFi.AspNet.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers
@@ -1064,107 +1065,38 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            var highlights = new List<Models.Transaction>();
-
-            //
-            // (1) Load file(s) into 'incoming' list
-            //
-
-            var incoming = new List<Models.Transaction>();
-            var splits = new List<IGrouping<int, Models.Split>>();
             try
             {
                 if (files == null || !files.Any())
                     throw new ApplicationException("Please choose a file to upload, first.");
 
-                // Build the submitted file into a list of transactions
+                // Open each file in turn, and send them to the importer
+
+                var importer = new TransactionImporter(_context);
 
                 foreach (var formFile in files)
                 {
                     var filetype = Path.GetExtension(formFile.FileName).ToLowerInvariant() switch
                     {
-                        ".ofx" => ImportableFileTypeEnum.Ofx,
-                        ".xlsx" => ImportableFileTypeEnum.Xlsx,
-                        _ => ImportableFileTypeEnum.Invalid
+                        ".ofx" => TransactionImporter.ImportableFileTypeEnum.Ofx,
+                        ".xlsx" => TransactionImporter.ImportableFileTypeEnum.Xlsx,
+                        _ => TransactionImporter.ImportableFileTypeEnum.Invalid
                     };
 
-                    if (filetype != ImportableFileTypeEnum.Invalid)
+                    if (filetype != TransactionImporter.ImportableFileTypeEnum.Invalid)
                     {
                         using var stream = formFile.OpenReadStream();
-                        await LoadTransactionsFromAsync(stream, filetype, incoming, splits);
+                        await importer.LoadFromAsync(stream, filetype);
                     }
                 }
 
-                // Process needed changes on each
-                foreach (var item in incoming)
-                {
-                    // Default status for imported items
-                    item.Selected = true;
-                    item.Imported = true;
-                    item.Hidden = true;
+                // Process the imported files
+                await importer.Process();
 
-                    // Generate a bank reference if doesn't already exist
-                    if (string.IsNullOrEmpty(item.BankReference))
-                        item.GenerateBankReference();
-                }
-
-                //
-                // (2) Handle duplicates
-                //
-
-                // Deselect duplicate transactions. By default, deselected transactions will not be imported. User can override.
-
-                // To handle the case where there may be transactions already in the system before the importer
-                // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
-                // transactions in the system.
-
-                await EnsureAllTransactionsHaveBankRefs();
-
-                // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
-
-                var highlightme = ManageConflictingImports(incoming);
-                highlights.AddRange(highlightme);
-
-                //
-                // (3) Final processing on each transction
-                //
-
-                var payeematcher = new PayeeMatcher(_context);
-                await payeematcher.LoadAsync();
-
-                // Process each item
-
-
-                foreach (var item in incoming)
-                {
-                    // (3A) Fixup and match payees
-
-                    payeematcher.FixAndMatch(item);
-
-                    // (3B) Import splits
-                    // Product Backlog Item 870: Export & import transactions with splits
-
-                    var mysplits = splits.Where(x=>x.Key == item.ID).SelectMany(x=>x);
-                    if (mysplits.Any())
-                    {
-                        item.Splits = mysplits.ToList();
-                        item.Category = null;
-                        foreach (var split in item.Splits)
-                        {
-                            // Clear any imported IDs
-                            split.ID = 0;
-                            split.TransactionID = 0;
-                        }
-                    }
-
-                    // (3C) Clear any imported ID
-                    item.ID = 0;
-                }
-
-                // Add resulting transactions
-
-                await _context.AddRangeAsync(incoming);
-                await _context.SaveChangesAsync();
+                // This is kind of a crappy way to communicate the potential false negative conflicts.
+                // If user returns to Import page directly, these highlights will be lost. Really probably
+                // should persist this to the database somehow. Or at least stick it in the session??
+                return RedirectToAction(nameof(Import), new { highlight = string.Join(':', importer.HighlightIDs) });
             }
             catch (ApplicationException ex)
             {
@@ -1174,11 +1106,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
-
-            // This is kind of a crappy way to communicate the potential false negative conflicts.
-            // If user returns to Import page directly, these highlights will be lost. Really probably
-            // should persist this to the database somehow. Or at least stick it in the session??
-            return RedirectToAction(nameof(Import), new { highlight = string.Join(':', highlights.Select(x => x.ID)) });
         }
 
         /// <summary>
@@ -1337,131 +1264,6 @@ namespace YoFi.AspNet.Controllers
         }
         #endregion
 
-        #region Internal Upload helpers
-        enum ImportableFileTypeEnum { Invalid = 0, Ofx, Xlsx };
-
-        private Task LoadTransactionsFromAsync(Stream stream, ImportableFileTypeEnum filetype, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
-        {
-            switch (filetype)
-            {
-                case ImportableFileTypeEnum.Ofx:
-                    return LoadTransactionsFromOfxAsync(stream, transactions);
-                case ImportableFileTypeEnum.Xlsx:
-                    return LoadTransactionsFromXlsxAsync(stream, transactions, splits);
-                default:
-                    throw new ApplicationException("Invalid file type");
-            }
-        }
-
-        private async Task LoadTransactionsFromOfxAsync(Stream stream, List<Models.Transaction> transactions)
-        {
-            OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
-
-            var created = Document.Statements.SelectMany(x => x.Transactions).Select(
-                tx => new Models.Transaction()
-                {
-                    Amount = tx.Amount,
-                    Payee = tx.Memo?.Trim(),
-                    BankReference = tx.ReferenceNumber?.Trim(),
-                    Timestamp = tx.Date.Value.DateTime
-                }
-            );
-
-            transactions.AddRange(created);
-        }
-
-        private Task LoadTransactionsFromXlsxAsync(Stream stream, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
-        {
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            var items = ssr.Deserialize<Transaction>();
-            transactions.AddRange(items);
-
-            // If there are also splits included here, let's grab those
-            // And transform the flat data into something easier to use.
-            if (ssr.SheetNames.Contains("Split"))
-                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
-
-            return Task.CompletedTask;
-        }
-
-        async Task EnsureAllTransactionsHaveBankRefs()
-        {
-            // To handle the case where there may be transactions already in the system before the importer
-            // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
-            // transactions in the system.
-
-            var needbankrefs = _context.Transactions.Where(x => null == x.BankReference);
-            if (await needbankrefs.AnyAsync())
-            {
-                foreach (var tx in needbankrefs)
-                {
-                    tx.GenerateBankReference();
-                }
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        /// <summary>
-        /// Deal with conflicting transactions
-        /// </summary>
-        /// <remarks>
-        /// For each incoming transaction, deselect it if there is already a transaction with a matching bankref in
-        /// the database. If the transaction with a matching bankref doesn't exactly equal the considered transaction,
-        /// it will be included in the returned tranasactions. These are the suspicious transactions that the user
-        /// should look at more carefully.
-        /// </remarks>
-        IEnumerable<Transaction> ManageConflictingImports(IEnumerable<Transaction> incoming)
-        {
-            var result = new List<Transaction>();
-
-            // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
-
-            // The approach is to create a lookup, from bankreference to a list of possible matching conflicts. Note that it is possible for multiple different
-            // transactions to collide on a single hash. We will have to step through all the possible conflicts to see if there is really a match.
-
-            // Note that this expression evaluates nicely into SQL. Nice job EF peeps!
-            /*
-                SELECT [x].[ID], [x].[AccountID], [x].[Amount], [x].[BankReference], [x].[Category], [x].[Hidden], [x].[Imported], [x].[Memo], [x].[Payee], [x].[ReceiptUrl], [x].[Selected], [x].[SubCategory], [x].[Timestamp]
-                FROM [Transactions] AS [x]
-                WHERE [x].[BankReference] IN (N'A1ABC7FE34871F02304982126CAF5C5C', N'EE49717DE89A3D97A9003230734A94B7')
-                */
-            //
-            var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
-            var conflicts = _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
-
-            if (conflicts.Any())
-            {
-                foreach (var tx in incoming)
-                {
-                    // If this has any bank ID conflict, we are doing to deselect it. The BY FAR most common case of a
-                    // Bankref collision is a duplicate transaction
-
-                    if (conflicts[tx.BankReference].Any())
-                    {
-                        Console.WriteLine($"{tx.Payee} ({tx.BankReference}) has a conflict");
-
-                        // Deselect the transaction. User will have a chance later to re-select it
-                        tx.Selected = false;
-
-                        // That said, there IS a chance that this is honestly a new transaction with a bankref collision.
-                        // If we can't find the obvious collision, we'll flag it for the user to sort it out. Still, the
-                        // most likely case is it's a legit duplicate but the user made slight changes to the payee or
-                        // date.
-
-                        if (!conflicts[tx.BankReference].Any(x => x.Equals(tx)))
-                        {
-                            Console.WriteLine($"Conflict may be a false positive, flagging for user.");
-                            result.Add(tx);
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-        #endregion
-
         #region Internals
 
         private readonly ApplicationDbContext _context;
@@ -1530,67 +1332,6 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
 
         Task<IActionResult> IController<Models.Transaction>.Download() => Download(false);
-        #endregion
-
-        #region Helpers
-
-        /// <summary>
-        /// Set categories for imported transactions based on payee matching rules
-        /// </summary>
-        class PayeeMatcher
-        {
-            List<Payee> payees;
-            IEnumerable<Payee> regexpayees;
-
-            readonly ApplicationDbContext _mycontext;
-
-            public PayeeMatcher(ApplicationDbContext context)
-            {
-                _mycontext = context;
-            }
-
-            public async Task LoadAsync()
-            {
-                // Load all payees into memory. This is an optimization. Rather than run a separate payee query for every 
-                // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
-
-                payees = await _mycontext.Payees.ToListAsync();
-                regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
-            }
-
-            public void FixAndMatch(Transaction item)
-            {
-                item.FixupPayee();
-
-                if (string.IsNullOrEmpty(item.Category))
-                {
-                    Payee payee = null;
-
-                    // Product Backlog Item 871: Match payee on regex, optionally
-                    foreach (var regexpayee in regexpayees)
-                    {
-                        var regex = new Regex(regexpayee.Name[1..^2]);
-                        if (regex.Match(item.Payee).Success)
-                        {
-                            payee = regexpayee;
-                            break;
-                        }
-                    }
-
-                    if (null == payee)
-                    {
-                        payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
-                    }
-
-                    if (null != payee)
-                    {
-                        item.Category = payee.Category;
-                    }
-                }
-            }
-        };
-
-
         #endregion
 
         #region Data Transfer Objects
