@@ -21,6 +21,8 @@ namespace YoFi.PWTests
 
         private readonly string Site = "http://localhost:50419/";
 
+        private readonly string ConfigFileName = "smokeuitest-loginstate.json";
+
         private async Task DoLogin()
         {
             // Given: Starting at the Login Page, not logged in
@@ -51,10 +53,10 @@ namespace YoFi.PWTests
             Assert.IsNull(login);
 
             // Save storage state into a file for later use            
-            await Context.StorageStateAsync(new BrowserContextStorageStateOptions { Path = "loginstate.json" });
+            await Context.StorageStateAsync(new BrowserContextStorageStateOptions { Path = ConfigFileName });
             
             // Set it as our new context options for later contexts
-            _ContextOptions = new BrowserNewContextOptions { StorageStatePath = "loginstate.json" };
+            _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName };
         }
 
         private async Task GivenLoggedIn()
