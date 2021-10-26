@@ -3,10 +3,12 @@ using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
+
+// Currently shaves off all of 4 seconds to run them in parallel!
+// Two or three workers seems to yield the optimum results.
+[assembly: Parallelize(Workers = 3, Scope = ExecutionScope.ClassLevel)]
 
 namespace YoFi.PWTests
 {
