@@ -16,7 +16,8 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
- 
+using YoFi.AspNet.Core.Repositories;
+
 namespace YoFi.AspNet.Root
 {
     public class Startup
