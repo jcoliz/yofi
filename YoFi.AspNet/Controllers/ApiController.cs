@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
+using YoFi.Core.Quieriers;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -441,9 +442,10 @@ namespace YoFi.AspNet.Controllers
             {
                 CheckApiAuth(Request.Headers);
 
-                var result = TransactionsController.TransactionsForQuery(_context.Transactions,q);
+                var qbuilder = new TransactionsQueryBuilder(_context.Transactions);
+                qbuilder.Build(q);
 
-                return new JsonResult(await result.ToListAsync());
+                return new JsonResult(await qbuilder.Query.ToListAsync());
             }
             catch (UnauthorizedAccessException)
             {

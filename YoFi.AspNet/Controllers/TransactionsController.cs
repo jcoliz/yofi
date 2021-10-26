@@ -7,20 +7,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using OfxSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
 using YoFi.Core.Importers;
+using YoFi.Core.Quieriers;
 using Transaction = YoFi.AspNet.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers
@@ -64,7 +63,9 @@ namespace YoFi.AspNet.Controllers
 
                 ViewData["Query"] = q;
 
-                var result = TransactionsForQuery(_context.Transactions.Include(x => x.Splits), q);
+                var qbuilder = new TransactionsQueryBuilder(_context.Transactions.Include(x => x.Splits));
+                qbuilder.Build(q);
+                var result = qbuilder.Query;
 
                 //
                 // Process VIEW (V) parameters
@@ -147,180 +148,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
-        }
-
-        /// <summary>
-        /// Interprets the "q" (Query) parameter on a transactions search
-        /// </summary>
-        /// <remarks>
-        /// Public so can be used by other controllers
-        /// </remarks>
-        /// <param name="result">Initial query to further refine</param>
-        /// <param name="q">Query parameter</param>
-        /// <returns>Resulting query refined by <paramref name="q"/></returns>
-        public static IQueryable<Transaction> TransactionsForQuery(IQueryable<Transaction> result, string q)
-        {
-            if (!string.IsNullOrEmpty(q))
-            {
-                var terms = q.Split(',');
-
-                foreach (var term in terms)
-                {
-                    // Look for "{key}={value}" terms
-                    if (term.Length > 2 && term[1] == '=')
-                    {
-                        var key = term.ToLowerInvariant().First();
-                        var value = term[2..];
-
-                        result = key switch
-                        {
-                            'p' => TransactionsForQuery_Payee(result, value),
-                            'c' => TransactionsForQuery_Category(result, value),
-                            'y' => TransactionsForQuery_Year(result, value),
-                            'm' => TransactionsForQuery_Memo(result, value),
-                            'r' => TransactionsForQuery_HasReceipt(result, value),
-                            'a' => TransactionsForQuery_Amount(result, value),
-                            'd' => TransactionsForQuery_Date(result, value),
-                            _ => throw new ArgumentException($"Unknown query parameter {key}",nameof(key))
-                        };
-
-                    }
-                    else if (Int32.TryParse(term, out Int32 intval))
-                    {
-                        // If this is an integer search term, there's a lot of places it can be. It will
-                        // the the SAME as the text search, below, plus amount or date.
-
-                        // One tricky thing is figuring out of it's a valid date
-                        DateTime? dtval = null;
-                        try
-                        {
-                            dtval = new DateTime(DateTime.Now.Year, intval / 100, intval % 100);
-                        }
-                        catch
-                        {
-                            // Any issues, we'll leave dtval as null
-                        }
-
-                        if (dtval.HasValue)
-                        {
-                            result = result.Where(x =>
-                                x.Category.Contains(term) ||
-                                x.Memo.Contains(term) ||
-                                x.Payee.Contains(term) ||
-                                x.Amount == (decimal)intval ||
-                                x.Amount == ((decimal)intval) / 100 ||
-                                x.Amount == -(decimal)intval ||
-                                x.Amount == -((decimal)intval) / 100 ||
-                                (x.Timestamp >= dtval && x.Timestamp <= dtval.Value.AddDays(7)) ||
-                                x.Splits.Any(s =>
-                                    s.Category.Contains(term) ||
-                                    s.Memo.Contains(term) ||
-                                    s.Amount == (decimal)intval ||
-                                    s.Amount == ((decimal)intval) / 100 ||
-                                    s.Amount == -(decimal)intval ||
-                                    s.Amount == -((decimal)intval) / 100
-                                )
-                            );
-                        }
-                        else
-                        {
-                            result = result.Where(x =>
-                                x.Category.Contains(term) ||
-                                x.Memo.Contains(term) ||
-                                x.Payee.Contains(term) ||
-                                x.Amount == (decimal)intval ||
-                                x.Amount == ((decimal)intval) / 100 ||
-                                x.Amount == -(decimal)intval ||
-                                x.Amount == -((decimal)intval) / 100 ||
-                                x.Splits.Any(s =>
-                                    s.Category.Contains(term) ||
-                                    s.Memo.Contains(term) ||
-                                    s.Amount == (decimal)intval ||
-                                    s.Amount == ((decimal)intval) / 100 ||
-                                    s.Amount == -(decimal)intval ||
-                                    s.Amount == -((decimal)intval) / 100
-                                )
-                            );
-                        }
-
-                    }
-                    else
-                    {
-                        // Look for term anywhere
-                        result = result.Where(x =>
-                            x.Category.Contains(term) ||
-                            x.Memo.Contains(term) ||
-                            x.Payee.Contains(term) ||
-                            x.Splits.Any(s =>
-                                s.Category.Contains(term) ||
-                                s.Memo.Contains(term)
-                            )
-                        );
-
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        private static IQueryable<Transaction> TransactionsForQuery_Payee(IQueryable<Transaction> result, string value) =>
-            result.Where(x => x.Payee.Contains(value));
-
-        private static IQueryable<Transaction> TransactionsForQuery_Category(IQueryable<Transaction> result, string value) =>
-            (value.ToLowerInvariant() == "[blank]")
-                ? result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any())
-                : result.Where(x =>
-                        x.Category.Contains(value)
-                        ||
-                        x.Splits.Any(s => s.Category.Contains(value)
-                    )
-                );
-
-        private static IQueryable<Transaction> TransactionsForQuery_Year(IQueryable<Transaction> result, string value) =>
-            (Int32.TryParse(value, out int year))
-                ? result.Where(x => x.Timestamp.Year == year)
-                : result;
-
-        private static IQueryable<Transaction> TransactionsForQuery_Memo(IQueryable<Transaction> result, string value) =>
-            result.Where(x => x.Memo.Contains(value));
-
-        private static IQueryable<Transaction> TransactionsForQuery_HasReceipt(IQueryable<Transaction> result, string value) =>
-            value switch
-            {
-                "0" => result.Where(x => x.ReceiptUrl == null),
-                "1" => result.Where(x => x.ReceiptUrl != null),
-                _ => throw new ArgumentException($"Unexpected query parameter {value}", nameof(value))
-            };
-
-        private static IQueryable<Transaction> TransactionsForQuery_Amount(IQueryable<Transaction> result, string value)
-        {
-            if (Int32.TryParse(value, out Int32 ival))
-            {
-                var cents = ((decimal)ival) / 100;
-                return result.Where(x => x.Amount == (decimal)ival || x.Amount == cents || x.Amount == -(decimal)ival || x.Amount == -cents);
-            }
-            else if (decimal.TryParse(value, out decimal dval))
-            {
-                return result.Where(x => x.Amount == dval || x.Amount == -dval);
-            }
-            else
-                throw new ArgumentException($"Unexpected query parameter {value}", nameof(value));
-        }
-
-        private static IQueryable<Transaction> TransactionsForQuery_Date(IQueryable<Transaction> result, string value)
-        {
-            DateTime? dtval = null;
-
-            if (Int32.TryParse(value, out int ival) && ival >= 101 && ival <= 1231)
-                dtval = new DateTime(DateTime.Now.Year, ival / 100, ival % 100);
-            else if (DateTime.TryParse(value, out DateTime dtvalout))
-                dtval = dtvalout;
-
-            if (dtval.HasValue)
-                return result.Where(x => x.Timestamp >= dtval.Value && x.Timestamp < dtval.Value.AddDays(7));
-            else
-                throw new ArgumentException($"Unexpected query parameter {value}", nameof(value));
         }
 
         /// <summary>
@@ -799,7 +626,10 @@ namespace YoFi.AspNet.Controllers
             {
                 // Which transactions?
 
-                var transactionsquery = TransactionsForQuery(_context.Transactions.Include(x => x.Splits), q);
+
+                var qbuilder = new TransactionsQueryBuilder(_context.Transactions.Include(x => x.Splits));
+                qbuilder.Build(q);
+                var transactionsquery = qbuilder.Query;
 
                 transactionsquery = transactionsquery.Where(x => x.Hidden != true);
                 if (!allyears)
