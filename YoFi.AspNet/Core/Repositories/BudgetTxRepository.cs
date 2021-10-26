@@ -24,6 +24,8 @@ namespace YoFi.AspNet.Core.Repositories
             _context = context;
         }
 
+        public IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q));
+
         public Task<BudgetTx> GetByIdAsync(int? id) => _context.BudgetTxs.SingleAsync(x => x.ID == id.Value);
 
         public Task<bool> TestExistsByIdAsync(int id) => _context.BudgetTxs.AnyAsync(x => x.ID == id);

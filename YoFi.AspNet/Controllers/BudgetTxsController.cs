@@ -33,7 +33,6 @@ namespace YoFi.AspNet.Controllers
         // GET: BudgetTxs
         public async Task<IActionResult> Index(string q = null, int? p = null)
         {
-            var result = _repository.OrderedQuery;
 
             //
             // Process QUERY (Q) parameters
@@ -41,13 +40,7 @@ namespace YoFi.AspNet.Controllers
 
             ViewData["Query"] = q;
 
-            if (!string.IsNullOrEmpty(q))
-            {
-                // Look for term anywhere
-                result = result.Where(x =>
-                    x.Category.Contains(q)
-                );
-            }
+            var result = _repository.ForQuery(q);
 
             //
             // Process PAGE (P) parameters
