@@ -49,8 +49,7 @@ namespace YoFi.PWTests
                 await Page.ClickAsync("data-test-id=signin");
 
                 // Then: We land back at the home page
-                var title = await Page.TitleAsync();
-                Assert.AreEqual("Home - Development - YoFi", title);
+                await ThenIsOnPage("Home");
 
                 // And: The navbar has our email
                 var content = await Page.TextContentAsync("data-test-id=hello-user");
