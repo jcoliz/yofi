@@ -34,7 +34,7 @@ namespace Common.AspNet.Test
     /// <typeparam name="C">Type of controller</typeparam>
     class ControllerTestHelper<T, C> where C : IController<T> where T : class, IID, new()
     {
-        public C controller { set; get; } = default(C);
+        public C controller { set; get; } = default;
 
         public ApplicationDbContext context = null;
 
@@ -83,7 +83,7 @@ namespace Common.AspNet.Test
             // https://stackoverflow.com/questions/33490696/how-can-i-reset-an-ef7-inmemory-provider-between-unit-tests
             context?.Database.EnsureDeleted();
             context = null;
-            controller = default(C);
+            controller = default;
         }
 
         private void DetachAllEntities()

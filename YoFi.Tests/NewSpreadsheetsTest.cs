@@ -345,7 +345,7 @@ namespace YoFi.Tests
         public void CustomColumnNullFails()
         {
             var writer = new SpreadsheetWriter();
-            var sheets = writer.SheetNames;
+            Console.WriteLine(writer.SheetNames);
         }
 
         public class ThirtyMembers
@@ -458,7 +458,7 @@ namespace YoFi.Tests
         public void SheetNamesFails()
         {
             var writer = new SpreadsheetWriter();
-            var sheets = writer.SheetNames;
+            Console.WriteLine(writer.SheetNames);
         }
 
         [TestMethod]
