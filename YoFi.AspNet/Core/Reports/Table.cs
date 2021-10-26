@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace YoFi.AspNet.Controllers.Reports
+namespace YoFi.Core.Reports
 {
     /// <summary>
     /// Dictionary of (<typeparamref name="TColumn"/>,<typeparamref name="TRow"/>)

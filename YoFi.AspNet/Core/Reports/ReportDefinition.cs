@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace YoFi.AspNet.Controllers.Reports
+﻿namespace YoFi.Core.Reports
 {
     /// <summary>
     /// Defines a single kind of report

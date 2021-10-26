@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace YoFi.AspNet.Controllers.Reports
+namespace YoFi.Core.Reports
 {
     /// <summary>
     /// The interface used by the report renderer to display a report in HTML

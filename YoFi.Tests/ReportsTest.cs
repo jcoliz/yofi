@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
@@ -7,8 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using YoFi.Tests.Helpers;
+using YoFi.Core.Reports;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Core
 {
     [TestClass]
     public class ReportsTest

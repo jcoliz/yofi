@@ -1,15 +1,14 @@
-﻿using YoFi.AspNet.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using YoFi.AspNet.Models;
 
-namespace YoFi.AspNet.Controllers.Reports
+namespace YoFi.Core.Reports
 {
     /// <summary>
     /// Table-based report: Arranges IReportable items into tables

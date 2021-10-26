@@ -11,10 +11,10 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
 using YoFi.Core.Quieriers;
+using YoFi.Core.Reports;
 
 namespace YoFi.AspNet.Controllers
 {

@@ -1,10 +1,7 @@
-﻿using YoFi.AspNet.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
+using YoFi.AspNet.Models;
 
-namespace YoFi.AspNet.Controllers.Reports
+namespace YoFi.Core.Reports
 {
     /// <summary>
     /// A query of reportable items, with an optional name

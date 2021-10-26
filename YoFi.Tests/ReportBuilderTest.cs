@@ -1,16 +1,16 @@
 ﻿using Common.NET.Test;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using YoFi.AspNet.Controllers.Reports;
-using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using YoFi.Tests.Helpers;
 using System.Threading.Tasks;
+using YoFi.AspNet.Data;
+using YoFi.AspNet.Models;
+using YoFi.Core.Reports;
+using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests
 {

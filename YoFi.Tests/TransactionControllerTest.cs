@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
+using YoFi.Core.Reports;
 using Dto = YoFi.AspNet.Controllers.TransactionsController.TransactionIndexDto;
 using Transaction = YoFi.AspNet.Models.Transaction;
 
@@ -1851,7 +1852,7 @@ namespace YoFi.Tests
             controller.Now = now;
 
             // When: Calling Report with no information
-            var result = controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters());
+            var result = controller.Report(new ReportBuilder.Parameters());
             var viewresult = result as ViewResult;
 
             // Then: Everthing is filled in while proper defaults
@@ -1868,12 +1869,12 @@ namespace YoFi.Tests
             var year = 2000;
 
             // And: First calling report with a defined year
-            controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters() { year = year });
+            controller.Report(new ReportBuilder.Parameters() { year = year });
 
             // When: Later calling report with no year
-            var result = controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters());
+            var result = controller.Report(new ReportBuilder.Parameters());
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as AspNet.Controllers.Reports.Report;
+            var model = viewresult.Model as Report;
 
             // Then: The year from the first call is used
             Assert.AreEqual(12, viewresult.ViewData["month"]);
@@ -2022,7 +2023,7 @@ namespace YoFi.Tests
 
         [TestMethod]
         public void ReportNotFound() =>
-            Assert.IsTrue(controller.Report(new AspNet.Controllers.Reports.ReportBuilder.Parameters() { id = "notfound" }) is Microsoft.AspNetCore.Mvc.NotFoundObjectResult);
+            Assert.IsTrue(controller.Report(new ReportBuilder.Parameters() { id = "notfound" }) is Microsoft.AspNetCore.Mvc.NotFoundObjectResult);
 
         [TestMethod]
         public async Task ReceiptActionOther() =>

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace YoFi.AspNet.Controllers.Reports
+namespace YoFi.Core.Reports
 {
     /// <summary>
     /// A report you create yourself by filling in the table

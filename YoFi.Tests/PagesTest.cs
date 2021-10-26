@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Pages;
+using YoFi.Core.Reports;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests
@@ -47,7 +45,7 @@ namespace YoFi.Tests
 
             // When: Getting the "Reports" Page
             var reportspage = new ReportsModel(context);
-            reportspage.OnGet(new AspNet.Controllers.Reports.ReportBuilder.Parameters() { year = 2021, month = 12 });
+            reportspage.OnGet(new ReportBuilder.Parameters() { year = 2021, month = 12 });
 
             // Then: All the totals are as expected
             var totals = reportspage.Reports.SelectMany(x => x).ToDictionary(x => x.Name, x => x.GrandTotal);

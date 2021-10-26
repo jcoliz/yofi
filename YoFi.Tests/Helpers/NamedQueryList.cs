@@ -1,7 +1,7 @@
-﻿using YoFi.AspNet.Controllers.Reports;
-using YoFi.AspNet.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using YoFi.AspNet.Models;
+using YoFi.Core.Reports;
 
 namespace YoFi.Tests.Helpers
 {

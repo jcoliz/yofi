@@ -15,11 +15,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
-using YoFi.AspNet.Controllers.Reports;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
 using YoFi.Core.Importers;
 using YoFi.Core.Quieriers;
+using YoFi.Core.Reports;
 using Transaction = YoFi.AspNet.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers
