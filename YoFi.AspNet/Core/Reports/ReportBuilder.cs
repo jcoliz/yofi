@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using YoFi.AspNet.Data;
+using YoFi.Core;
 
 namespace YoFi.AspNet.Controllers.Reports
 {
@@ -60,7 +61,7 @@ namespace YoFi.AspNet.Controllers.Reports
         /// Constructor
         /// </summary>
         /// <param name="context">Where to pull report data from</param>
-        public ReportBuilder(ApplicationDbContext context)
+        public ReportBuilder(IDataContext context)
         {
             _qbuilder = new QueryBuilder(context);
         }
