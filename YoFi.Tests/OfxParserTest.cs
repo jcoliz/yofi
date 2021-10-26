@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Core
 {
     [TestClass]
     public class OfxParserTest
