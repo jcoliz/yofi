@@ -14,61 +14,8 @@ namespace YoFi.PWTests
     /// Test the various permutation of Reports
     /// </summary>
     [TestClass]
-    public class ReportsUITest : PageTest
+    public class ReportsUITest : FunctionalUITest
     {
-        public override BrowserNewContextOptions ContextOptions => _ContextOptions;
-
-        private static BrowserNewContextOptions _ContextOptions { get; set; }
-
-        private readonly string Site = "http://localhost:50419/";
-
-        private readonly string ConfigFileName = "reportsuitest-loginstate.json";
-
-        private async Task GivenLoggedIn()
-        {
-            // Navigate to the root of the site
-            await Page.GotoAsync(Site);
-
-            // Are we already logged in?
-            var hellouser = await Page.QuerySelectorAsync("data-test-id=hello-user");
-
-            // If we're not already logged in, well we need to do that then
-            if (null == hellouser)
-            {
-                Console.WriteLine("Logging in...");
-
-                await Page.ClickAsync("data-test-id=login");
-
-                // And: User credentials as specified in user secrets
-                var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(ReportsUITest))).Build();
-                var email = config["AdminUser:Email"];
-                var password = config["AdminUser:Password"];
-
-                // When: Filling out the login form with those credentials and pressing "sign in"
-                await Page.FillAsync("id=floatingInput", email);
-                await Page.FillAsync("id=floatingPassword", password);
-                await Page.ClickAsync("data-test-id=signin");
-
-                // Then: We land back at the home page
-                var title = await Page.TitleAsync();
-                Assert.AreEqual("Home - Development - YoFi", title);
-
-                // And: The navbar has our email
-                var content = await Page.TextContentAsync("data-test-id=hello-user");
-                Assert.IsTrue(content.Contains(email));
-
-                // And: The login button is not visible
-                var login = await Page.QuerySelectorAsync("data-test-id=login");
-                Assert.IsNull(login);
-
-                // Save storage state into a file for later use            
-                await Context.StorageStateAsync(new BrowserContextStorageStateOptions { Path = ConfigFileName });
-
-                // Set it as our new context options for later contexts
-                _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName };
-            }
-        }
-
         [TestMethod]
         public async Task ClickReports()
         {
@@ -120,18 +67,6 @@ namespace YoFi.PWTests
             await ThenH2Is(expected);
         }
 
-        public async Task ThenIsOnPage(string expected)
-        {
-            var title = await Page.TitleAsync();
-            Assert.AreEqual($"{expected} - Development - YoFi", title);
-        }
-
-        public async Task ThenH2Is(string expected)
-        {
-            var content = await Page.TextContentAsync("h2");
-            Assert.AreEqual(expected, content);
-        }
-
         [TestMethod]
         public async Task HideMonths()
         {
@@ -143,8 +78,7 @@ namespace YoFi.PWTests
             await Page.ClickAsync("text=Hide");
 
             // Then: There is only the one "amount" column, which is the total
-            var amountcols = await Page.QuerySelectorAllAsync("th.report-col-amount");
-            Assert.AreEqual(1, amountcols.Count);
+            await ThenColumnCountIs(1);
         }
         [TestMethod]
         public async Task ShowMonthsThroughJune()
@@ -160,8 +94,13 @@ namespace YoFi.PWTests
             // NOTE: This relies on the fact that the sample data generator creates data for all months
             // in the year. If we ever change it to only doing until current month, then this test
             // with need some change.
+            await ThenColumnCountIs(7);
+        }
+
+        private async Task ThenColumnCountIs(int howmany)
+        {
             var amountcols = await Page.QuerySelectorAllAsync("th.report-col-amount");
-            Assert.AreEqual(7, amountcols.Count);
+            Assert.AreEqual(howmany, amountcols.Count);
         }
     }
 }
