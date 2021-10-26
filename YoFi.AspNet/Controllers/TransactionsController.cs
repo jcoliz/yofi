@@ -1081,14 +1081,17 @@ namespace YoFi.AspNet.Controllers
 
                 foreach (var formFile in files)
                 {
-                    var extension = System.IO.Path.GetExtension(formFile.FileName).ToLowerInvariant();
-                    if (extension == ".ofx")
+                    var filetype = Path.GetExtension(formFile.FileName).ToLowerInvariant() switch
                     {
-                        await LoadTransactionsFromOfxAsync(formFile,incoming);
-                    }
-                    else if (extension == ".xlsx")
+                        ".ofx" => ImportableFileTypeEnum.Ofx,
+                        ".xlsx" => ImportableFileTypeEnum.Xlsx,
+                        _ => ImportableFileTypeEnum.Invalid
+                    };
+
+                    if (filetype != ImportableFileTypeEnum.Invalid)
                     {
-                        LoadTransactionsFromXlsx(formFile,incoming,splits);
+                        using var stream = formFile.OpenReadStream();
+                        await LoadTransactionsFromAsync(stream, filetype, incoming, splits);
                     }
                 }
 
@@ -1335,9 +1338,23 @@ namespace YoFi.AspNet.Controllers
         #endregion
 
         #region Internal Upload helpers
-        private async Task LoadTransactionsFromOfxAsync(IFormFile file, List<Models.Transaction> transactions)
+        enum ImportableFileTypeEnum { Invalid = 0, Ofx, Xlsx };
+
+        private Task LoadTransactionsFromAsync(Stream stream, ImportableFileTypeEnum filetype, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
         {
-            using var stream = file.OpenReadStream();
+            switch (filetype)
+            {
+                case ImportableFileTypeEnum.Ofx:
+                    return LoadTransactionsFromOfxAsync(stream, transactions);
+                case ImportableFileTypeEnum.Xlsx:
+                    return LoadTransactionsFromXlsxAsync(stream, transactions, splits);
+                default:
+                    throw new ApplicationException("Invalid file type");
+            }
+        }
+
+        private async Task LoadTransactionsFromOfxAsync(Stream stream, List<Models.Transaction> transactions)
+        {
             OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
 
             var created = Document.Statements.SelectMany(x => x.Transactions).Select(
@@ -1353,9 +1370,8 @@ namespace YoFi.AspNet.Controllers
             transactions.AddRange(created);
         }
 
-        private void LoadTransactionsFromXlsx(IFormFile file, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
+        private Task LoadTransactionsFromXlsxAsync(Stream stream, List<Models.Transaction> transactions, List<IGrouping<int, Models.Split>> splits)
         {
-            using var stream = file.OpenReadStream();
             using var ssr = new SpreadsheetReader();
             ssr.Open(stream);
             var items = ssr.Deserialize<Transaction>();
@@ -1365,6 +1381,8 @@ namespace YoFi.AspNet.Controllers
             // And transform the flat data into something easier to use.
             if (ssr.SheetNames.Contains("Split"))
                 splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
+
+            return Task.CompletedTask;
         }
 
         async Task EnsureAllTransactionsHaveBankRefs()
