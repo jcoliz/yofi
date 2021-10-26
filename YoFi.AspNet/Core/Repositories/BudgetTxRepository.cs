@@ -1,11 +1,8 @@
 ﻿using jcoliz.OfficeOpenXml.Serializer;
-using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
 using YoFi.Core;
 
@@ -26,9 +23,10 @@ namespace YoFi.AspNet.Core.Repositories
 
         public IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q));
 
-        public Task<BudgetTx> GetByIdAsync(int? id) => _context.BudgetTxs.SingleAsync(x => x.ID == id.Value);
+        // TODO: I would like to figure out how to let EF return a SingleAsync
+        public Task<BudgetTx> GetByIdAsync(int? id) => Task.FromResult(_context.BudgetTxs.Single(x => x.ID == id.Value));
 
-        public Task<bool> TestExistsByIdAsync(int id) => _context.BudgetTxs.AnyAsync(x => x.ID == id);
+        public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.BudgetTxs.Any(x => x.ID == id));
 
         public async Task AddAsync(BudgetTx item)
         {
