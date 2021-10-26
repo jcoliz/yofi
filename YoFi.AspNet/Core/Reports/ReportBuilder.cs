@@ -149,7 +149,6 @@ namespace YoFi.Core.Reports
             // Go!
 
             report.Build();
-            report.WriteToConsole(sorted:true);
 
             return report;
         }
