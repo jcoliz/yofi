@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
+using YoFi.Core.SampleGen;
 using Common.NET.Data;
 
 namespace YoFi.AspNet.Data
@@ -75,7 +76,7 @@ namespace YoFi.AspNet.Data
                 {
                     // Load sample data
                     var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
-                    var generator = new SampleGen.SampleDataGenerator();
+                    var generator = new SampleDataGenerator();
                     generator.LoadDefinitions(instream);
                     generator.GenerateTransactions(addids: false);
                     generator.GeneratePayees();

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Models;
 
-namespace YoFi.SampleGen
+namespace YoFi.Core.SampleGen
 {
     public static class SampleDataOfx
     {

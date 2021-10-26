@@ -8,9 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Models;
+using YoFi.Core.SampleGen;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.SampleGen.Tests
+namespace YoFi.Tests.Core.SampleGen
 {
     [TestClass]
     public class GeneratorActionTest

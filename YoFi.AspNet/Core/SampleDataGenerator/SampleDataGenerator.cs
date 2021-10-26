@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using YoFi.AspNet.Models;
 
-namespace YoFi.SampleGen
+namespace YoFi.Core.SampleGen
 {
     public class SampleDataGenerator
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using YoFi.AspNet.Models;
 
-namespace YoFi.SampleGen
+namespace YoFi.Core.SampleGen
 {
     /// <summary>
     /// Defines a single pattern of yearly spending

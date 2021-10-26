@@ -6,8 +6,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
+using YoFi.Core.SampleGen;
 
-namespace YoFi.SampleGen.Tests
+namespace YoFi.Tests.Core.SampleGen
 {
     [TestClass]
     public class GeneratorDatabaseTest
