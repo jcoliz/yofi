@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 // Two or three workers seems to yield the optimum results.
 [assembly: Parallelize(Workers = 3, Scope = ExecutionScope.ClassLevel)]
 
-namespace YoFi.PWTests
+namespace YoFi.Tests.Functional
 {
     public class FunctionalUITest: PageTest
     {

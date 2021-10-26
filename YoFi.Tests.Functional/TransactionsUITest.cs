@@ -1,14 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Playwright;
-using Microsoft.Playwright.MSTest;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
-namespace YoFi.PWTests
+namespace YoFi.Tests.Functional
 {
     /// <summary>
     /// Test the Transactions page

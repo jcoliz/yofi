@@ -1,12 +1,7 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Playwright;
-using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Reflection;
 using System.Threading.Tasks;
 
-namespace YoFi.PWTests
+namespace YoFi.Tests.Functional
 {
     /// <summary>
     /// Run through top-level golden path to make sure primary pages load

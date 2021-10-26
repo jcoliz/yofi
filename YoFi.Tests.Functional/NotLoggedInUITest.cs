@@ -1,11 +1,8 @@
 ﻿using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace YoFi.PWTests
+namespace YoFi.Tests.Functional
 {
     [TestClass]
     public class NotLoggedInUITest: PageTest

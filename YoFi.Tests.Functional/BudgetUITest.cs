@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
-namespace YoFi.PWTests
+namespace YoFi.Tests.Functional
 {
     /// <summary>
     /// Test the Budget page
