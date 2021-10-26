@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using YoFi.AspNet.Data;
 using YoFi.Core;
 
 namespace YoFi.AspNet.Controllers.Reports

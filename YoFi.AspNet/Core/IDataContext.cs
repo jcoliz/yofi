@@ -12,5 +12,8 @@ namespace YoFi.Core
         IQueryable<Split> Splits { get; }
         IQueryable<Payee> Payees { get; }
         IQueryable<BudgetTx> BudgetTxs { get; }
+
+        Task AddRangeAsync(IEnumerable<object> incoming);
+        Task SaveChangesAsync();
     }
 }

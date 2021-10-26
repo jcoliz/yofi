@@ -19,9 +19,9 @@ namespace YoFi.Core.Importers
         private readonly List<IGrouping<int, AspNet.Models.Split>> splits = new List<IGrouping<int, Split>>();
         private readonly List<Transaction> highlights = new List<Transaction>();
 
-        private readonly ApplicationDbContext _context;
+        private readonly IDataContext _context;
 
-        public TransactionImporter(ApplicationDbContext context)
+        public TransactionImporter(IDataContext context)
         {
             _context = context;
         }
