@@ -12,7 +12,7 @@ pool:
 variables:
   application: YoFi.AspNet
   tests: YoFi.Tests
-  pwtests: YoFi.PWTests
+  functests: YoFi.Tests.Functional
 
 steps:
 - checkout: self
@@ -33,10 +33,10 @@ steps:
     modifyOutputPath: false
 
 - task: DotNetCoreCLI@2
-  displayName: 'Build PlayWright UI tests'
+  displayName: 'Build Functional Tests'
   inputs:
     command: 'build'
-    projects: '$(pwtests)/$(pwtests).csproj'
+    projects: '$(functests)/$(functests).csproj'
 
 - task: DotNetCoreCLI@2
   displayName: 'Run unit tests'
