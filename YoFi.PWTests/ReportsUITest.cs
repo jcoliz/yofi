@@ -24,8 +24,7 @@ namespace YoFi.PWTests
 
         private readonly string ConfigFileName = "reportsuitest-loginstate.json";
 
-        [TestMethod]
-        public async Task AAC_LoginAction()
+        public async Task DoLogin()
         {
             // Given: An empty context, where we are not logged in
             // And: Starting at the login page
@@ -73,7 +72,7 @@ namespace YoFi.PWTests
             if (null == login)
             {
                 Console.WriteLine("Logging in...");
-                await AAC_LoginAction();
+                await DoLogin();
             }
         }
 

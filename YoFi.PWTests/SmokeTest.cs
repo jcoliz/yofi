@@ -21,39 +21,12 @@ namespace YoFi.PWTests
 
         private readonly string Site = "http://localhost:50419/";
 
-        [TestMethod]
-        public async Task AAA_HomePage()
-        {
-            // Given: An empty context, where we are not logged in
-            // (This is accomplished by ordering this test before the login test)
-
-            // When: Navigating to the root of the site
-            await Page.GotoAsync(Site);
-
-            // Then: The home page loads
-            var title = await Page.TitleAsync();
-            Assert.AreEqual("Home - Development - YoFi", title);
-        }
-
-        [TestMethod]
-        public async Task AAB_LoginPage()
-        {
-            // Given: Starting at the home page, not logged in
-            await AAA_HomePage();
-
-            // When: Clicking on the login link
-            await Page.ClickAsync("data-test-id=login");
-            
-            // Then: The loging page loads
-            var title = await Page.TitleAsync();
-            Assert.AreEqual("Login - Development - YoFi", title);
-        }
-
-        [TestMethod]
-        public async Task AAC_LoginAction()
+        private async Task DoLogin()
         {
             // Given: Starting at the Login Page, not logged in
-            await AAB_LoginPage();
+            // And: Starting at the login page
+            await Page.GotoAsync(Site);
+            await Page.ClickAsync("data-test-id=login");
 
             // And: User credentials as specified in user secrets
             var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(SmokeTest))).Build();
@@ -96,7 +69,7 @@ namespace YoFi.PWTests
             if (null == login)
             {
                 Console.WriteLine("Logging in...");
-                await AAC_LoginAction();
+                await DoLogin();
             }
         }
 
@@ -192,7 +165,7 @@ namespace YoFi.PWTests
         }
 
         [TestMethod]
-        public async Task ZZZ_LogOut()
+        public async Task LogOut()
         {
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
