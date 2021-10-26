@@ -90,8 +90,7 @@ namespace YoFi.PWTests
             await ThenIsOnPage("Budget Line Items");
 
             // And: This page covers items 1-25
-            Assert.AreEqual("1", await Page.TextContentAsync("data-test-id=firstitem"));
-            Assert.AreEqual("25", await Page.TextContentAsync("data-test-id=lastitem"));
+            await ThenPageContainsItems(from: 1, to: 25);
         }
 
         [TestMethod]
@@ -107,8 +106,7 @@ namespace YoFi.PWTests
             await ThenIsOnPage("Budget Line Items");
 
             // And: This page covers items 26-50
-            Assert.AreEqual("26", await Page.TextContentAsync("data-test-id=firstitem"));
-            Assert.AreEqual("50", await Page.TextContentAsync("data-test-id=lastitem"));
+            await ThenPageContainsItems(from: 26, to: 50);
         }
 
         [TestMethod]
@@ -127,10 +125,16 @@ namespace YoFi.PWTests
             Assert.AreEqual(expected, content);
         }
 
-        public async Task ThenIsOnPage(string expected)
+        private async Task ThenIsOnPage(string expected)
         {
             var title = await Page.TitleAsync();
             Assert.AreEqual($"{expected} - Development - YoFi", title);
+        }
+
+        private async Task ThenPageContainsItems(int from, int to)
+        {
+            Assert.AreEqual(from.ToString(), await Page.TextContentAsync("data-test-id=firstitem"));
+            Assert.AreEqual(to.ToString(), await Page.TextContentAsync("data-test-id=lastitem"));
         }
     }
 }
