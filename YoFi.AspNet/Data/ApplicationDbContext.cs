@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using YoFi.AspNet.Models;
 using YoFi.AspNet.Boilerplate.Models;
+using YoFi.Core;
 
 namespace YoFi.AspNet.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -32,5 +33,7 @@ namespace YoFi.AspNet.Data
         public DbSet<Payee> Payees { get; set; }
         public DbSet<Split> Splits { get; set; }
         public DbSet<BudgetTx> BudgetTxs { get; set; }
+
+        IQueryable<Payee> IDataContext.ReadPayees => Payees;
     }
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.AspNet.Core.Helpers;
+using YoFi.Core.Helpers;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
 using Transaction = YoFi.AspNet.Models.Transaction;
