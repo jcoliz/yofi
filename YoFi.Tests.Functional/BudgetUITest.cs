@@ -51,9 +51,21 @@ namespace YoFi.Tests.Functional
             await Page.FillAsync("data-test-id=q", "Healthcare");
             await Page.ClickAsync("data-test-id=btn-search");
 
-            // Then: Exactly 25 transactions are found, because we know this about our source data
+            // Then: Exactly 25 items are found, because we know this about our source data
             await ThenTotalItemsAreEqual(25);
         }
 
+        [TestMethod]
+        public async Task IndexClear()
+        {
+            // Given: We are logged in and on the budget page, with an active search
+            await IndexQ25();
+
+            // When: Pressing clear
+            await Page.ClickAsync("data-test-id=btn-clear");
+
+            // Then: Back to all the items
+            await ThenTotalItemsAreEqual(156);
+        }
     }
 }

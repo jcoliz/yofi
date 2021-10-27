@@ -49,5 +49,18 @@ namespace YoFi.Tests.Functional
             // Then: Exactly 3 transactions are found, because we know this about our source data
             await ThenTotalItemsAreEqual(3);
         }
+
+        [TestMethod]
+        public async Task IndexClear()
+        {
+            // Given: We are logged in and on the transactions page, with an active search
+            await IndexQAny12();
+
+            // When: Pressing clear
+            await Page.ClickAsync("data-test-id=btn-clear");
+
+            // Then: Back to all the items
+            await ThenTotalItemsAreEqual(889);
+        }
     }
 }
