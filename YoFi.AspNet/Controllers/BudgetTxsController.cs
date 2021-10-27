@@ -21,13 +21,9 @@ namespace YoFi.AspNet.Controllers
 
         private readonly BudgetTxRepository _repository;
 
-        public BudgetTxsController(ApplicationDbContext _context)
+        public BudgetTxsController(BudgetTxRepository repository)
         {
-            // Baby steps toward a repository.
-            // 
-            // I still have to figure out how to get my repositories into dependency injection
-            // WITH the proper context.
-            _repository = new BudgetTxRepository(_context);
+            _repository = repository;
         }
 
         // GET: BudgetTxs

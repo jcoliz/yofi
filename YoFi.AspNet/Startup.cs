@@ -72,6 +72,8 @@ namespace YoFi.AspNet.Root
                 }
             );
 
+            services.AddScoped<BudgetTxRepository, BudgetTxRepository>();
+
             // -----------------------------------------------------------------------------
             //
             // WARNING: Elevation of privelage risk lives here
