@@ -162,7 +162,7 @@ namespace YoFi.Tests.Controllers.Slim
         {
             // Given: Respository in failure state
             repository.Ok = false;
-            
+
             // And: Five items in the respository
             repository.AddItems(5);
 
@@ -173,6 +173,77 @@ namespace YoFi.Tests.Controllers.Slim
             var nfresult = Assert.That.IsOfType<ObjectResult>(actionresult);
             Assert.AreEqual(500, nfresult.StatusCode);
         }
+
+        [TestMethod]
+        public void CreateInitial()
+        {
+            // When: Calling Create
+            var actionresult = controller.Create();
+            Assert.That.ActionResultOk(actionresult);
+            var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
+
+            // Then: It returns an empty model
+            Assert.IsNull(viewresult.Model);
+        }
+
+        [TestMethod]
+        public async Task Create()
+        {
+            // Given: Five items in the respository
+            repository.AddItems(5);
+
+            // When: Adding a new item
+            var expected = MockBudgetTxRepository.MakeItem(6);
+            var actionresult = await controller.Create(expected);
+            Assert.That.ActionResultOk(actionresult);
+
+            // Then: Returns a redirection to Index
+            var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
+            Assert.AreEqual("Index", redirresult.ActionName);
+
+            // And: There are now 6 items in the repository
+            Assert.AreEqual(6, repository.All.Count());
+
+            // And: The new item is there
+            var found = await repository.GetByIdAsync(expected.ID);
+            Assert.AreEqual(expected, found);
+        }
+
+        [TestMethod]
+        public async Task CreateInvalidModel()
+        {
+            // Given: Five items in the respository
+            repository.AddItems(5);
+
+            // And: The model is invalid
+            controller.ModelState.AddModelError("error", "test");
+
+            // When: Adding a new item
+            var expected = MockBudgetTxRepository.MakeItem(6);
+            var actionresult = await controller.Create(expected);
+
+            // Then: Returns not found result
+            var nfresult = Assert.That.IsOfType<NotFoundResult>(actionresult);
+            Assert.AreEqual(404, nfresult.StatusCode);
+
+            // And: No change to the repository
+            Assert.AreEqual(5, repository.All.Count());
+        }
+        [TestMethod]
+        public async Task CreateFailed()
+        {
+            // Given: Respository in failure state
+            repository.Ok = false;
+
+            // When: Adding a new item
+            var expected = MockBudgetTxRepository.MakeItem(6);
+            var actionresult = await controller.Create(expected);
+
+            // Then: Returns status code 500 object result
+            var nfresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            Assert.AreEqual(500, nfresult.StatusCode);
+        }
+
     }
 
     internal static class MyAssert
@@ -195,11 +266,11 @@ namespace YoFi.Tests.Controllers.Slim
 
     class MockBudgetTxRepository : IRepository<BudgetTx>
     {
-        public void AddItems(int numitems)
-        {
-            var timestamp = new DateTime(2020, 1, 1);
-            Items.AddRange(Enumerable.Range(1, numitems).Select(x => new BudgetTx() { ID = x, Amount = x, Category = x.ToString(), Timestamp = timestamp }));
-        }
+        public void AddItems(int numitems) => Items.AddRange(Enumerable.Range(1, numitems).Select(MakeItem));
+
+        static readonly DateTime defaulttimestamp = new DateTime(2020, 1, 1);
+
+        public static BudgetTx MakeItem(int x) => new BudgetTx() { ID = x, Amount = x, Category = x.ToString(), Timestamp = defaulttimestamp };
 
         public bool Ok
         {
@@ -224,7 +295,9 @@ namespace YoFi.Tests.Controllers.Slim
 
         public Task AddAsync(BudgetTx item)
         {
-            throw new System.NotImplementedException();
+            if (Ok)
+                Items.Add(item);
+            return Task.CompletedTask;
         }
 
         public Task AddRangeAsync(IEnumerable<BudgetTx> items)

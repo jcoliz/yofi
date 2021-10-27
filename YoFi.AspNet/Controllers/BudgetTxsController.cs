@@ -86,10 +86,6 @@ namespace YoFi.AspNet.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch (ArgumentException)
-            {
-                return BadRequest();
-            }
             catch (InvalidOperationException)
             {
                 return NotFound();
