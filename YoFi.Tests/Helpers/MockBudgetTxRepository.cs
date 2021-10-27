@@ -20,20 +20,7 @@ namespace YoFi.Tests.Helpers
 
         public static IEnumerable<BudgetTx> MakeItems(int numitems) => Enumerable.Range(1, numitems).Select(MakeItem);
 
-        public bool Ok
-        {
-            get
-            {
-                if (!_Ok)
-                    throw new Exception("Failed");
-                return _Ok;
-            }
-            set
-            {
-                _Ok = value;
-            }
-        }
-        public bool _Ok = true;
+        public bool Ok { get; set; } = true;
 
         public List<BudgetTx> Items { get; } = new List<BudgetTx>();
 
@@ -43,22 +30,26 @@ namespace YoFi.Tests.Helpers
 
         public Task AddAsync(BudgetTx item)
         {
-            if (Ok)
-                Items.Add(item);
+            if (!Ok)
+                throw new Exception("Failed");
+
+            Items.Add(item);
             return Task.CompletedTask;
         }
 
         public Task AddRangeAsync(IEnumerable<BudgetTx> items)
         {
-            if (Ok)
-                Items.AddRange(items);
+            if (!Ok)
+                throw new Exception("Failed");
+
+            Items.AddRange(items);
             return Task.CompletedTask;
         }
 
         public Stream AsSpreadsheet()
         {
             if (!Ok)
-                return null;
+                throw new Exception("Failed");
 
             var items = All;
 
@@ -76,7 +67,7 @@ namespace YoFi.Tests.Helpers
 
         public IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? All : All.Where(x => x.Category.Contains(q));
 
-        public Task<BudgetTx> GetByIdAsync(int? id) => Ok ? Task.FromResult(All.Single(x => x.ID == id.Value)) : Task.FromResult<BudgetTx>(null);
+        public Task<BudgetTx> GetByIdAsync(int? id) => Ok ? Task.FromResult(All.Single(x => x.ID == id.Value)) : throw new Exception("Failed");
 
         public Task RemoveAsync(BudgetTx item)
         {
