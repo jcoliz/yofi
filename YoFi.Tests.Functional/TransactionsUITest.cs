@@ -62,5 +62,36 @@ namespace YoFi.Tests.Functional
             // Then: Back to all the items
             await ThenTotalItemsAreEqual(889);
         }
+
+        /* Not sure how to assert this
+        [TestMethod]
+        public async Task HelpPopup()
+        {
+            // Given: We are logged in and on the transactions page
+            await ClickTransactions();
+
+            // When: Hitting the help button
+            await Page.ClickAsync("data-test-id=btn-help");
+
+            // Then: The help text is findable
+            var title = await Page.QuerySelectorAsync("id=searchHelpModal");
+            Assert.IsNotNull(title);
+            Assert.IsTrue(await title.IsEnabledAsync());
+        }
+
+        [TestMethod]
+        public async Task HelpPopupClose()
+        {
+            // Given: We have the help popup active
+            await HelpPopup();
+
+            // When: Hitting the close button
+            await Page.ClickAsync("text=Close");
+
+            // Then: The help text is not findable
+            var title = await Page.QuerySelectorAsync("data-test-id=help-title");
+            Assert.IsFalse(await title.IsEnabledAsync());
+        }
+        */
     }
 }
