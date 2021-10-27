@@ -14,11 +14,6 @@ namespace YoFi.AspNet.Core.Repositories
 
         public IQueryable<BudgetTx> OrderedQuery => All.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).AsQueryable();
 
-        public BudgetTxRepository(ApplicationDbContext context): base(context)
-        {
-
-        }
-
         public BudgetTxRepository(IDataContext context): base(context)
         {
         }

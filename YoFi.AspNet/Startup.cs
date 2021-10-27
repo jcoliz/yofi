@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using YoFi.AspNet.Core.Repositories;
+using YoFi.Core;
 
 namespace YoFi.AspNet.Root
 {
@@ -73,6 +74,8 @@ namespace YoFi.AspNet.Root
             );
 
             services.AddScoped<BudgetTxRepository, BudgetTxRepository>();
+
+            services.AddScoped<IDataContext, ApplicationDbContext>();
 
             // -----------------------------------------------------------------------------
             //
