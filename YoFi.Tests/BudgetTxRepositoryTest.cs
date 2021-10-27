@@ -127,7 +127,7 @@ namespace YoFi.Tests.Core
             context.AddRange(Items.Take(1));
 
             // When: Attempting to get an item using an ID that is not in the db
-            var maxid = context.BudgetTxs.Max(x => x.ID);
+            var maxid = context.All<BudgetTx>().Max(x => x.ID);
             var badid = maxid + 1;
             var model = await repository.GetByIdAsync(badid);
 
@@ -141,7 +141,7 @@ namespace YoFi.Tests.Core
             context.AddRange(Items.Take(1));
 
             // When: Testing whether an item exists using an ID that is not in the db
-            var maxid = context.BudgetTxs.Max(x => x.ID);
+            var maxid = context.All<BudgetTx>().Max(x => x.ID);
             var badid = maxid + 1;
             var exists = await repository.TestExistsByIdAsync(badid);
 
@@ -160,7 +160,7 @@ namespace YoFi.Tests.Core
             await repository.AddAsync(expected);
             
             // Then: There are two items in the data set
-            Assert.AreEqual(2, context.BudgetTxs.Count());
+            Assert.AreEqual(2, context.All<BudgetTx>().Count());
         }
 
         [TestMethod]
@@ -180,7 +180,7 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(1, context.BudgetTxs.Count());
 
             // And: it's equal to our new one
-            Assert.AreEqual(updated.Amount, context.BudgetTxs.Single().Amount);
+            Assert.AreEqual(updated.Amount, context.All<BudgetTx>().Single().Amount);
         }
 
         [TestMethod]
@@ -197,7 +197,7 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(4, context.BudgetTxs.Count());
 
             // And: Removed item is not there
-            Assert.IsFalse(context.BudgetTxData.Any(x => x.Amount == expected.Amount));
+            Assert.IsFalse(context.All<BudgetTx>().Any(x => x.Amount == expected.Amount));
         }
 
         [TestMethod]
@@ -238,7 +238,7 @@ namespace YoFi.Tests.Core
             await importer.ProcessAsync();
 
             // Then: The expected items are in the dataset
-            Assert.IsTrue(context.BudgetTxData.SequenceEqual(expected));
+            Assert.IsTrue(context.All<BudgetTx>().SequenceEqual(expected));
         }
     }
 }

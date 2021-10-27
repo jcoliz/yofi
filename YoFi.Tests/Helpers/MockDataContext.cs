@@ -22,6 +22,16 @@ namespace YoFi.Tests.Helpers
 
         public IQueryable<BudgetTx> BudgetTxs => BudgetTxData.AsQueryable();
 
+        public IQueryable<T> All<T>()
+        {
+            if (typeof(T) == typeof(BudgetTx))
+            {
+                return BudgetTxs as IQueryable<T>;
+            }
+            else
+                throw new NotImplementedException();
+        }
+
         public Task AddAsync(object item)
         {
             if (item == null)
