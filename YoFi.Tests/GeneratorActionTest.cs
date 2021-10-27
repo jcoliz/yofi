@@ -1,15 +1,13 @@
 ﻿using Common.NET.Test;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Models;
 using YoFi.Core.SampleGen;
 using YoFi.Tests.Helpers;
+using CNDSampleData = Common.NET.Data.SampleData;
 
 namespace YoFi.Tests.Core.SampleGen
 {
@@ -223,7 +221,7 @@ namespace YoFi.Tests.Core.SampleGen
         [TestMethod]
         public void GenerateFullSampleData()
         {
-            var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
+            var instream = CNDSampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions();
             generator.GeneratePayees();
@@ -242,7 +240,7 @@ namespace YoFi.Tests.Core.SampleGen
         [TestMethod]
         public async Task GenerateJson()
         {
-            var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
+            var instream = CNDSampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions(addids:false);
             generator.GeneratePayees();
@@ -308,7 +306,7 @@ namespace YoFi.Tests.Core.SampleGen
         [TestMethod]
         public void GenerateFullSampleOfx()
         {
-            var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
+            var instream = CNDSampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions();
 

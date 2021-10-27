@@ -1,12 +1,10 @@
 ﻿using Common.NET.Test;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.Core.SampleGen;
+using CNDSampleData = Common.NET.Data.SampleData;
 
 namespace YoFi.Tests.Core.SampleGen
 {
@@ -105,7 +103,7 @@ namespace YoFi.Tests.Core.SampleGen
         [TestMethod]
         public async Task GenerateAndAddFullSampleData()
         {
-            var instream = Common.NET.Data.SampleData.Open("FullSampleDataDefinition.xlsx");
+            var instream = CNDSampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions(addids:false);
             generator.GeneratePayees();
