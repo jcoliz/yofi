@@ -2,13 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Core.Repositories;
-using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
 using YoFi.Core.Importers;
 
@@ -47,7 +45,7 @@ namespace YoFi.AspNet.Controllers
             ViewData[nameof(PageDivider)] = divider;
 
             // Show the index
-            return View(await result.ToListAsync());
+            return View(result.ToList());
         }
 
         // GET: BudgetTxs/Details/5
@@ -130,15 +128,6 @@ namespace YoFi.AspNet.Controllers
             catch (InvalidOperationException)
             {
                 return View(item);
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                var exists = await _repository.TestExistsByIdAsync(item.ID);
-
-                if (exists)
-                    return NotFound();
-                else
-                    return StatusCode(500, ex.Message);
             }
             catch (Exception ex)
             {

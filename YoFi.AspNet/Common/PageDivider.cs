@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +24,9 @@ namespace Common.AspNet
         public int? FirstPage { get; private set; }
         public int? LastPage { get; private set; }
 
-        public async Task<IQueryable<T>> ItemsForPage<T>(IQueryable<T> result, int? p)
+        public Task<IQueryable<T>> ItemsForPage<T>(IQueryable<T> result, int? p)
         {
-            var count = await result.CountAsync();
+            var count = result.Count();
 
             Page = p ?? 1;
 
@@ -60,7 +59,7 @@ namespace Common.AspNet
             if (count > PageSize)
                 result = result.Skip(offset).Take(PageSize);
 
-            return result;
+            return Task.FromResult(result);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,6 +34,35 @@ namespace YoFi.Tests.Controllers.Slim
         {
             Assert.IsNotNull(controller);
         }
+
+        [TestMethod]
+        public async Task IndexEmpty()
+        {
+            // Given: Empty repository
+
+            // When: Fetching the index
+            var actionresult = await controller.Index();
+
+            // Then: View is returned
+            var viewresult = Assert.That.IsType<ViewResult>(actionresult);
+
+            // And: Correct kind of model is returned 
+            var model = Assert.That.IsType<IEnumerable<BudgetTx>>(viewresult.Model);
+
+            // And: Model is empty
+            Assert.AreEqual(0, model.Count());
+        }
+    }
+
+    internal static class MyAssert
+    {
+        public static T IsType<T>(this Assert assert, object actual) where T: class
+        {
+            if (actual is T)
+                return actual as T;
+
+            throw new AssertFailedException();
+        }
     }
 
     class MockBudgetTxRepository : IRepository<BudgetTx>
@@ -58,7 +88,7 @@ namespace YoFi.Tests.Controllers.Slim
 
         public IQueryable<BudgetTx> ForQuery(string q)
         {
-            throw new System.NotImplementedException();
+            return Enumerable.Empty<BudgetTx>().AsQueryable<BudgetTx>();
         }
 
         public Task<BudgetTx> GetByIdAsync(int? id)
