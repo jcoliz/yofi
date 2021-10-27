@@ -216,7 +216,7 @@ namespace YoFi.Tests.Core
             var actual = ssr.Deserialize<BudgetTx>();
 
             // Then: The received items match the data set (sorted)
-            Assert.IsTrue(expected.OrderBy(x=>x.Amount).SequenceEqual(actual));
+            Assert.IsTrue(expected.SequenceEqual(actual));
         }
 
         [TestMethod]
