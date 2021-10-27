@@ -12,9 +12,9 @@ namespace YoFi.Core.Importers
     public class BudgetTxImporter
     {
         private readonly HashSet<BudgetTx> incoming = new HashSet<BudgetTx>(new BudgetTxComparer());
-        private readonly BudgetTxRepository _repository;
+        private readonly IRepository<BudgetTx> _repository;
 
-        public BudgetTxImporter(BudgetTxRepository repository)
+        public BudgetTxImporter(IRepository<BudgetTx> repository)
         {
             _repository = repository;
         }

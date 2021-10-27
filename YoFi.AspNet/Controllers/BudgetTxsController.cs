@@ -19,9 +19,9 @@ namespace YoFi.AspNet.Controllers
     {
         public static int PageSize { get; } = 25;
 
-        private readonly BudgetTxRepository _repository;
+        private readonly IRepository<BudgetTx> _repository;
 
-        public BudgetTxsController(BudgetTxRepository repository)
+        public BudgetTxsController(IRepository<BudgetTx> repository)
         {
             _repository = repository;
         }

@@ -16,7 +16,7 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class BudgetTxRepositoryTest
     {
-        private BudgetTxRepository repository;
+        private IRepository<BudgetTx> repository;
         private MockDataContext context;
 
         public static List<BudgetTx> Items
