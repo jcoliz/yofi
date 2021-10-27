@@ -123,7 +123,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (InvalidOperationException)
             {
-                return View(item);
+                return NotFound();
             }
             catch (Exception ex)
             {

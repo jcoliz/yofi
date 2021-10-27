@@ -1,4 +1,6 @@
 ﻿using Common.AspNet;
+using jcoliz.OfficeOpenXml.Serializer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -124,16 +126,23 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.IsTrue(expected.SequenceEqual(model));
         }
 
-        [TestMethod]
-        public async Task DetailsFound()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task DetailsFound(bool ok)
         {
             // Given: Five items in the respository
             repository.AddItems(5);
 
+            // And: Repository in the given state
+            repository.Ok = ok;
+
             // When: Retrieving details for a selected item
             var selected = repository.All.Skip(1).First();
             var actionresult = await controller.Details(selected.ID);
-            Assert.That.ActionResultOk(actionresult);
+            ThenSucceedsOrFailsAsExpected(actionresult, ok);
+            if (!ok) return;
+
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<BudgetTx>(viewresult.Model);
 
@@ -155,23 +164,6 @@ namespace YoFi.Tests.Controllers.Slim
             // Then: Returns not found result
             var nfresult = Assert.That.IsOfType<NotFoundResult>(actionresult);
             Assert.AreEqual(404, nfresult.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task DetailsFailed()
-        {
-            // Given: Respository in failure state
-            repository.Ok = false;
-
-            // And: Five items in the respository
-            repository.AddItems(5);
-
-            // When: Retrieving details for a selected item
-            var actionresult = await controller.Details(1);
-
-            // Then: Returns status code 500 object result
-            var nfresult = Assert.That.IsOfType<ObjectResult>(actionresult);
-            Assert.AreEqual(500, nfresult.StatusCode);
         }
 
         [TestMethod]
@@ -261,18 +253,24 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(selected, model);
         }
 
-        [TestMethod]
-        public async Task EditObjectValues()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task EditObjectValues(bool ok)
         {
             // Given: Five items in the respository
             repository.AddItems(5);
+
+            // And: Repository in the given state
+            repository.Ok = ok;
 
             // When: Changing details for a selected item
             var selected = repository.All.Skip(1).First();
             var expected = MockBudgetTxRepository.MakeItem(6);
             var id = expected.ID = selected.ID;
             var actionresult = await controller.Edit(id, expected);
-            Assert.That.ActionResultOk(actionresult);
+            ThenSucceedsOrFailsAsExpected(actionresult, ok);
+            if (!ok) return;
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
@@ -281,6 +279,30 @@ namespace YoFi.Tests.Controllers.Slim
             // And: Item has been updated
             var actual = await repository.GetByIdAsync(id);
             Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task EditObjectValuesModelInvalid()
+        {
+            // Given: Five items in the respository
+            repository.AddItems(5);
+
+            // And: The model is invalid
+            controller.ModelState.AddModelError("error", "test");
+
+            // When: Changing details for a selected item
+            var selected = repository.All.Skip(1).First();
+            var expected = MockBudgetTxRepository.MakeItem(6);
+            var id = expected.ID = selected.ID;
+            var actionresult = await controller.Edit(id, expected);
+
+            // Then: Returns not found result
+            var nfresult = Assert.That.IsOfType<NotFoundResult>(actionresult);
+            Assert.AreEqual(404, nfresult.StatusCode);
+
+            // And: Item has not been updated
+            var actual = await repository.GetByIdAsync(id);
+            Assert.AreNotEqual(expected, actual);
         }
 
         [TestMethod]
@@ -298,7 +320,7 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.That.ActionResultOk(actionresult);
 
             // Then: Returns bad request
-            var redirresult = Assert.That.IsOfType<BadRequestResult>(actionresult);
+            Assert.That.IsOfType<BadRequestResult>(actionresult);
 
             // And: Item has NOT been updated
             var actual = await repository.GetByIdAsync(id);
@@ -308,6 +330,161 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreNotEqual(expected, actualbadid);
         }
 
+        [TestMethod]
+        public async Task DeleteDetailsFound()
+        {
+            // Given: Five items in the respository
+            repository.AddItems(5);
+
+            // When: Retrieving details for a selected item
+            var selected = repository.All.Skip(1).First();
+            var actionresult = await controller.Delete(selected.ID);
+            Assert.That.ActionResultOk(actionresult);
+            var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
+            var model = Assert.That.IsOfType<BudgetTx>(viewresult.Model);
+
+            // Then: The selected item is the one returned
+            Assert.AreEqual(selected, model);
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task DeleteConfirmed(bool ok)
+        {
+            // Given: Five items in the respository
+            repository.AddItems(5);
+
+            // And: Repository in the given state
+            repository.Ok = ok;
+
+            // When: Deleting a selected item
+            var selected = repository.All.Skip(1).First();
+            var actionresult = await controller.DeleteConfirmed(selected.ID);
+            ThenSucceedsOrFailsAsExpected(actionresult, ok);
+            if (!ok) return;
+
+            // Then: Returns a redirection to Index
+            var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
+            Assert.AreEqual("Index", redirresult.ActionName);
+
+            // And: There are now 4 items in the repository
+            Assert.AreEqual(4, repository.All.Count());
+
+            // And: The selected item is not in the repository
+            Assert.IsFalse(repository.All.Any(x => x.ID == selected.ID));
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task Download(bool ok)
+        {
+            // Given: 20 items in the respository
+            repository.AddItems(20);
+
+            // And: Repository in the given state
+            repository.Ok = ok;
+
+            // When: Downloading them as a spreadsheet
+            var actionresult = await controller.Download();
+            ThenSucceedsOrFailsAsExpected(actionresult, ok);
+            if (!ok) return;
+
+            // Then: Returns a filestream result
+            var fsresult = Assert.That.IsOfType<FileStreamResult>(actionresult);
+
+            // And: Items in the filesteam match the repository
+            var stream = fsresult.FileStream;
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            var actual = ssr.Deserialize<BudgetTx>();
+            Assert.IsTrue(repository.All.SequenceEqual(actual));
+        }
+
+        static public IFormFile GivenAFileOf<X>(ICollection<X> what) where X : class
+        {
+            // Build a spreadsheet with the chosen number of items
+            // Note that we are not disposing the stream. User of the file will do so later.
+            var stream = new MemoryStream();
+            using (var ssr = new SpreadsheetWriter())
+            {
+                ssr.Open(stream);
+                ssr.Serialize(what);
+            }
+
+            // Create a formfile with it
+            var filename = $"{typeof(X).Name}s";
+            stream.Seek(0, SeekOrigin.Begin);
+            IFormFile file = new FormFile(stream, 0, stream.Length, filename, $"{filename}.xlsx");
+
+            return file;
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task Upload(bool ok)
+        {
+            // Given: A file with 10 new items
+            var expected = MockBudgetTxRepository.MakeItems(10).ToList();
+            var file = GivenAFileOf(expected);
+
+            // And: Repository in the given state
+            repository.Ok = ok;
+
+            // When: Uploading that
+            var actionresult = await controller.Upload(new List<IFormFile>() { file });
+            ThenSucceedsOrFailsAsExpected(actionresult, ok);
+            if (!ok) return;
+
+            // Then: View is returned
+            var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
+
+            // And: Correct kind of model is returned 
+            var model = Assert.That.IsOfType<IEnumerable<BudgetTx>>(viewresult.Model);
+
+            // And: Model matches original items, sorted by category
+            Assert.IsTrue(expected.OrderBy(x=>x.Category).SequenceEqual(model));
+
+            // And: All the items are in the repository
+            Assert.IsTrue(expected.SequenceEqual(repository.All));
+        }
+
+        [TestMethod]
+        public async Task UploadEmptyFails()
+        {
+            // When: Uploading an empty list
+            var actionresult = await controller.Upload(new List<IFormFile>());
+
+            // Then: Returns bad request object result
+            Assert.That.IsOfType<BadRequestObjectResult>(actionresult);
+        }
+
+        [TestMethod]
+        public async Task UploadNullFails()
+        {
+            // When: Uploading null paramter
+            var actionresult = await controller.Upload(null);
+
+            // Then: Returns bad request object result
+            Assert.That.IsOfType<BadRequestObjectResult>(actionresult);
+        }
+
+        void ThenSucceedsOrFailsAsExpected(IActionResult actionresult, bool ok)
+        {
+            // Then: Fails if expected
+            if (!ok)
+            {
+                // Then: Returns status code 500 object result
+                var nfresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+                Assert.AreEqual(500, nfresult.StatusCode);
+                return;
+            }
+
+            // Otherwise: Result is OK, if expected
+            Assert.That.ActionResultOk(actionresult);
+        }
     }
 
     internal static class MyAssert
@@ -330,11 +507,13 @@ namespace YoFi.Tests.Controllers.Slim
 
     class MockBudgetTxRepository : IRepository<BudgetTx>
     {
-        public void AddItems(int numitems) => Items.AddRange(Enumerable.Range(1, numitems).Select(MakeItem));
+        public void AddItems(int numitems) => Items.AddRange(MakeItems(numitems));
 
         static readonly DateTime defaulttimestamp = new DateTime(2020, 1, 1);
 
         public static BudgetTx MakeItem(int x) => new BudgetTx() { ID = x, Amount = x, Category = x.ToString(), Timestamp = defaulttimestamp };
+
+        public static IEnumerable<BudgetTx> MakeItems(int numitems) => Enumerable.Range(1, numitems).Select(MakeItem);
 
         public bool Ok
         {
@@ -366,12 +545,28 @@ namespace YoFi.Tests.Controllers.Slim
 
         public Task AddRangeAsync(IEnumerable<BudgetTx> items)
         {
-            throw new System.NotImplementedException();
+            if (Ok)
+                Items.AddRange(items);
+            return Task.CompletedTask;
         }
 
         public Stream AsSpreadsheet()
         {
-            throw new System.NotImplementedException();
+            if (!Ok)
+                return null;
+
+            var items = All;
+
+            var stream = new MemoryStream();
+            using (var ssw = new SpreadsheetWriter())
+            {
+                ssw.Open(stream);
+                ssw.Serialize(items);
+            }
+
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return stream;
         }
 
         public IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? All : All.Where(x => x.Category.Contains(q));
@@ -380,7 +575,16 @@ namespace YoFi.Tests.Controllers.Slim
 
         public Task RemoveAsync(BudgetTx item)
         {
-            throw new System.NotImplementedException();
+            if (!Ok)
+                throw new Exception("Failed");
+
+            if (item == null)
+                throw new ArgumentException("Expected non-null item");
+
+            var index = Items.FindIndex(x => x.ID == item.ID);
+            Items.RemoveAt(index);
+
+            return Task.CompletedTask;
         }
 
         public Task<bool> TestExistsByIdAsync(int id)
@@ -390,9 +594,11 @@ namespace YoFi.Tests.Controllers.Slim
 
         public Task UpdateAsync(BudgetTx item)
         {
+            if (!Ok)
+                throw new Exception("Failed");
+
             if (item == null)
                 throw new ArgumentException("Expected non-null item");
-
 
             var index = Items.FindIndex(x => x.ID == item.ID);
             Items[index] = item;
