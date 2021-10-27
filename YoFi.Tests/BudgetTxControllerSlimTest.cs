@@ -244,6 +244,70 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(500, nfresult.StatusCode);
         }
 
+        [TestMethod]
+        public async Task EditDetailsFound()
+        {
+            // Given: Five items in the respository
+            repository.AddItems(5);
+
+            // When: Retrieving details for a selected item to edit it
+            var selected = repository.All.Skip(1).First();
+            var actionresult = await controller.Edit(selected.ID);
+            Assert.That.ActionResultOk(actionresult);
+            var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
+            var model = Assert.That.IsOfType<BudgetTx>(viewresult.Model);
+
+            // Then: The selected item is the one returned
+            Assert.AreEqual(selected, model);
+        }
+
+        [TestMethod]
+        public async Task EditObjectValues()
+        {
+            // Given: Five items in the respository
+            repository.AddItems(5);
+
+            // When: Changing details for a selected item
+            var selected = repository.All.Skip(1).First();
+            var expected = MockBudgetTxRepository.MakeItem(6);
+            var id = expected.ID = selected.ID;
+            var actionresult = await controller.Edit(id, expected);
+            Assert.That.ActionResultOk(actionresult);
+
+            // Then: Returns a redirection to Index
+            var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
+            Assert.AreEqual("Index", redirresult.ActionName);
+
+            // And: Item has been updated
+            var actual = await repository.GetByIdAsync(id);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task EditObjectValuesDontMatch()
+        {
+            // Given: Five items in the respository
+            repository.AddItems(5);
+
+            // When: Changing details for a selected item
+            var selected = repository.All.Skip(1).First();
+            var expected = MockBudgetTxRepository.MakeItem(6);
+            var id = expected.ID = selected.ID;
+            var badid = id + 1;
+            var actionresult = await controller.Edit(badid, expected);
+            Assert.That.ActionResultOk(actionresult);
+
+            // Then: Returns bad request
+            var redirresult = Assert.That.IsOfType<BadRequestResult>(actionresult);
+
+            // And: Item has NOT been updated
+            var actual = await repository.GetByIdAsync(id);
+            var actualbadid = await repository.GetByIdAsync(badid);
+            Assert.AreEqual(selected, actual);
+            Assert.AreNotEqual(expected, actual);
+            Assert.AreNotEqual(expected, actualbadid);
+        }
+
     }
 
     internal static class MyAssert
@@ -326,7 +390,14 @@ namespace YoFi.Tests.Controllers.Slim
 
         public Task UpdateAsync(BudgetTx item)
         {
-            throw new System.NotImplementedException();
+            if (item == null)
+                throw new ArgumentException("Expected non-null item");
+
+
+            var index = Items.FindIndex(x => x.ID == item.ID);
+            Items[index] = item;
+
+            return Task.CompletedTask;
         }
     }
 }
