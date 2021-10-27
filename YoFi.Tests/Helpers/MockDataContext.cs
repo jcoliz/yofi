@@ -22,7 +22,7 @@ namespace YoFi.Tests.Helpers
 
         public IQueryable<BudgetTx> BudgetTxs => BudgetTxData.AsQueryable();
 
-        public IQueryable<T> All<T>()
+        public IQueryable<T> Get<T>()
         {
             if (typeof(T) == typeof(BudgetTx))
             {

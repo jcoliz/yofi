@@ -50,5 +50,26 @@ namespace YoFi.AspNet.Data
         void IDataContext.Update(object item) => base.Update(item);
 
         void IDataContext.Remove(object item) => base.Remove(item);
+
+        IQueryable<T> IDataContext.Get<T>()
+        {
+            if (typeof(T) == typeof(Transaction))
+            {
+                return Transactions as IQueryable<T>;
+            }
+            if (typeof(T) == typeof(Payee))
+            {
+                return Payees as IQueryable<T>;
+            }
+            if (typeof(T) == typeof(Split))
+            {
+                return Splits as IQueryable<T>;
+            }
+            if (typeof(T) == typeof(BudgetTx))
+            {
+                return BudgetTxs as IQueryable<T>;
+            }
+            throw new NotImplementedException();
+        }
     }
 }

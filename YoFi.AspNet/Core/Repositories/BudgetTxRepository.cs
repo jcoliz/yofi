@@ -12,9 +12,9 @@ namespace YoFi.AspNet.Core.Repositories
     {
         private readonly IDataContext _context;
 
-        public IQueryable<BudgetTx> OrderedQuery => _context.BudgetTxs.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).AsQueryable();
+        public IQueryable<BudgetTx> OrderedQuery => All.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category).AsQueryable();
 
-        public IQueryable<BudgetTx> All => _context.BudgetTxs;
+        public IQueryable<BudgetTx> All => _context.Get<BudgetTx>();
 
         public BudgetTxRepository(IDataContext context)
         {
@@ -24,9 +24,9 @@ namespace YoFi.AspNet.Core.Repositories
         public IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q));
 
         // TODO: I would like to figure out how to let EF return a SingleAsync
-        public Task<BudgetTx> GetByIdAsync(int? id) => Task.FromResult(_context.BudgetTxs.Single(x => x.ID == id.Value));
+        public Task<BudgetTx> GetByIdAsync(int? id) => Task.FromResult(_context.Get<BudgetTx>().Single(x => x.ID == id.Value));
 
-        public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.BudgetTxs.Any(x => x.ID == id));
+        public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.Get<BudgetTx>().Any(x => x.ID == id));
 
         public async Task AddAsync(BudgetTx item)
         {
