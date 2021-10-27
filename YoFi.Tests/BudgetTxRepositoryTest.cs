@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.AspNet.Core.Repositories;
 using YoFi.AspNet.Models;
@@ -29,6 +30,8 @@ namespace YoFi.Tests.Core
                     new BudgetTx() { ID = 3, Timestamp = new System.DateTime(2020, 05, 01),  Category = "C", Amount = 500m },
                     new BudgetTx() { ID = 4, Timestamp = new System.DateTime(2020, 05, 01),  Category = "B", Amount = 400m },
                     new BudgetTx() { ID = 5, Timestamp = new System.DateTime(2020, 05, 01),  Category = "A", Amount = 300m },
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01), Category = "C", Amount = 700m },
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 07, 01), Category = "A", Amount = 800m },
                 };
             }
         }
@@ -219,26 +222,110 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(expected.SequenceEqual(actual));
         }
 
-        [TestMethod]
-        public async Task Upload()
+        private async Task<IEnumerable<BudgetTx>> WhenImportingItemsAsSpreadsheet(IEnumerable<BudgetTx> expected)
         {
-            // Given: A spreadsheet with five items
-            var expected = Items.Take(5);
+            // Given: A spreadsheet with items as given
             using var stream = new MemoryStream();
             {
                 using var ssw = new SpreadsheetWriter();
                 ssw.Open(stream);
                 ssw.Serialize(expected);
             }
-            stream.Seek(9, SeekOrigin.Begin);
+            stream.Seek(0, SeekOrigin.Begin);
 
             // When: Importing it via an importer
             var importer = new BudgetTxImporter(repository);
             importer.LoadFromXlsx(stream);
-            await importer.ProcessAsync();
+            return await importer.ProcessAsync();
+        }
+
+        [TestMethod]
+        public async Task Upload()
+        {
+            // Given: A spreadsheet with five items
+            var expected = Items.Take(5);
+
+            // When: Importing it via an importer
+            await WhenImportingItemsAsSpreadsheet(expected);
 
             // Then: The expected items are in the dataset
             Assert.IsTrue(context.Get<BudgetTx>().SequenceEqual(expected));
+        }
+        [TestMethod]
+        public async Task UploadAddNewDuplicate()
+        {
+            // Given: Five items in the data set
+            var expected = Items.Take(5).ToList();
+            context.AddRange(expected);
+
+            // When: Uploading three new items, one of which the same as an already existing item
+            // NOTE: These items are not EXACTLY duplicates, just duplicate enough to trigger the
+            // hashset equality constraint on input.
+            var upload = Items.Skip(5).Take(2).Concat(await MakeDuplicateOf(expected.Take(1)));
+            var actual = await WhenImportingItemsAsSpreadsheet(upload);
+
+            // Then: Only two items were imported, because one exists
+            Assert.AreEqual(2, actual.Count());
+
+            // And: The data set now includes seven (not eight) items
+            Assert.AreEqual(7, context.Get<BudgetTx>().Count());
+        }
+        [TestMethod]
+        public async Task UploadMinmallyDuplicate()
+        {
+            // Given: Five items in the data set
+            var expected = Items.Take(5).ToList();
+            context.AddRange(expected);
+
+            // When: Uploading three new items which are EXACTLY the same as existing items,
+            // just that the amounts vary (which still counts them as duplicates here)
+            var upload = await MakeDuplicateOf(expected.Take(3));
+            foreach (var item in upload)
+                item.Amount += 100m;
+
+            var actual = await WhenImportingItemsAsSpreadsheet(upload);
+
+            // Then: No items were uploaded
+            Assert.AreEqual(0, actual.Count());
+
+            // And: Data set still just has the five we originall uploaded
+            Assert.IsTrue(context.Get<BudgetTx>().SequenceEqual(expected));
+        }
+        [TestMethod]
+        public async Task Bug890()
+        {
+            // Bug 890: BudgetTxs upload fails to filter duplicates when source data has >2 digits
+            // Hah, this is fixed by getting UploadMinmallyDuplicate() test to properly pass.
+
+            // Given: Five items in the data set
+            var expected = Items.Take(5).ToList();
+            context.AddRange(expected);
+
+            // When: Uploading one new items which is EXACTLY the same as existing items,
+            // just that the amounts is off by $0.001
+            var upload = await MakeDuplicateOf(expected.Take(1));
+            upload.First().Amount += 0.001m;
+            var actual = await WhenImportingItemsAsSpreadsheet(upload);
+
+            // Then: No items were uploaded
+            Assert.AreEqual(0, actual.Count());
+
+            // And: Data set still just has the five we originally uploaded
+            Assert.IsTrue(context.Get<BudgetTx>().SequenceEqual(expected));
+        }
+
+        /// <summary>
+        /// Make an exact duplicate of these <paramref name="items"/>
+        /// </summary>
+        /// <param name="items">Items to copy</param>
+        /// <returns>List of cloned items</returns>
+        public async Task<List<BudgetTx>> MakeDuplicateOf(IEnumerable<BudgetTx> items)
+        {
+            var stream = new MemoryStream();
+            await JsonSerializer.SerializeAsync(stream,items);
+            stream.Seek(0, SeekOrigin.Begin);
+            var result = await JsonSerializer.DeserializeAsync<List<BudgetTx>>(stream);
+            return result;
         }
     }
 }
