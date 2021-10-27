@@ -36,6 +36,23 @@ namespace YoFi.Tests.Core
             }
         }
 
+        /// <summary>
+        /// Compares two items based on their test sort key, returning a comparison
+        ///     of their relative values.
+        /// </summary>
+        /// <remarks>
+        /// Test keys are an intern notation, a way for us to independently indicate our expectations for how
+        /// the data should be correctly sorted. This is a choice we made when creating our sample data,
+        /// so can't be inferred from the structure of the class.
+        /// </remarks>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns>
+        ///     A signed number indicating the relative values of the two items. Return
+        ///     value Meaning Less than zero <paramref name="x"/>is less than <paramref name="y"/>. 
+        ///     Zero the instances are equal.
+        private int CompareKeys(BudgetTx x, BudgetTx y) => x.Amount.CompareTo(y.Amount);
+
         [TestInitialize]
         public void SetUp()
         {
@@ -88,7 +105,8 @@ namespace YoFi.Tests.Core
             var model = repository.ForQuery(null);
 
             // Test that the resulting items are the same as expected items ordered correctly
-            Assert.IsTrue(expected.OrderBy(x=>x.Amount).SequenceEqual(model));
+            expected.Sort(CompareKeys);
+            Assert.IsTrue(expected.SequenceEqual(model));
         }
 
         [TestMethod]
@@ -183,7 +201,9 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(1, context.BudgetTxs.Count());
 
             // And: it's equal to our new one
-            Assert.AreEqual(updated.Amount, context.Get<BudgetTx>().Single().Amount);
+            var actual = context.Get<BudgetTx>().Single();
+            Assert.AreEqual(updated, actual);
+            Assert.AreEqual(0, CompareKeys(updated, actual));
         }
 
         [TestMethod]
@@ -200,7 +220,7 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(4, context.BudgetTxs.Count());
 
             // And: Removed item is not there
-            Assert.IsFalse(context.Get<BudgetTx>().Any(x => x.Amount == expected.Amount));
+            Assert.IsFalse(context.Get<BudgetTx>().Any(x => CompareKeys(x,expected) == 0));
         }
 
         [TestMethod]
