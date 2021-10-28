@@ -14,10 +14,7 @@ namespace YoFi.Core.Repositories
         {
         }
 
-        public IQueryable<Payee> ForQuery(string q)
-        {
-            throw new NotImplementedException();
-        }
+        public IQueryable<Payee> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q) || x.Name.Contains(q));
 
         public async Task BulkEdit(string category)
         {

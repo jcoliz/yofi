@@ -45,6 +45,7 @@ namespace YoFi.AspNet.Controllers
             ViewData[nameof(PageDivider)] = divider;
 
             // Show the index
+            // TODO: Would like to do ToListAsync
             return View(result.ToList());
         }
 

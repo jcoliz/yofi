@@ -35,23 +35,15 @@ namespace YoFi.AspNet.Controllers
             // Process QUERY (Q) parameters
             //
 
-            var result = _repository.OrderedQuery;
+            var result = _repository.ForQuery(q);
 
             ViewData["Query"] = q;
-
-            if (!string.IsNullOrEmpty(q))
-            {
-                // Look for term anywhere
-                result = result.Where(x =>
-                    x.Category.Contains(q) ||
-                    x.Name.Contains(q)
-                );
-            }
 
             //
             // Process VIEW (V) parameters
             //
 
+            // "v=s" means show the selection checkbox. Used in bulk edit mode
             ViewData["ViewP"] = v;
             bool showSelected = v?.ToLowerInvariant().Contains("s") == true;
             ViewData["ShowSelected"] = showSelected;
@@ -68,7 +60,7 @@ namespace YoFi.AspNet.Controllers
             return View(await result.ToListAsync());
         }
 
-        Task<IActionResult> IController<Payee>.Index() => Index(string.Empty);
+        Task<IActionResult> IController<Payee>.Index() => Index();
 
         // GET: Payees/Details/5
         public async Task<IActionResult> Details(int? id)
