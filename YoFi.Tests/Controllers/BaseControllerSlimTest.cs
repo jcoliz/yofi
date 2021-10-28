@@ -102,7 +102,7 @@ namespace YoFi.Tests.Controllers.Slim
             if (!ok) return;
 
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
-            var model = Assert.That.IsOfType<BudgetTx>(viewresult.Model);
+            var model = Assert.That.IsOfType<T>(viewresult.Model);
 
             // Then: The selected item is the one returned
             Assert.AreEqual(selected, model);
@@ -124,8 +124,10 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(404, nfresult.StatusCode);
         }
 
-        [TestMethod]
-        public async Task CreateInitial()
+        // You have to opt into this test because not all controllers implement it
+        // TODO: Should remove it from the interface
+        //[TestMethod]
+        protected async Task CreateInitial__()
         {
             // When: Calling Create
             var actionresult = await controller.Create();
@@ -206,7 +208,7 @@ namespace YoFi.Tests.Controllers.Slim
             var actionresult = await controller.Edit(selected.ID);
             Assert.That.ActionResultOk(actionresult);
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
-            var model = Assert.That.IsOfType<BudgetTx>(viewresult.Model);
+            var model = Assert.That.IsOfType<T>(viewresult.Model);
 
             // Then: The selected item is the one returned
             Assert.AreEqual(selected, model);
@@ -300,7 +302,7 @@ namespace YoFi.Tests.Controllers.Slim
             var actionresult = await controller.Delete(selected.ID);
             Assert.That.ActionResultOk(actionresult);
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
-            var model = Assert.That.IsOfType<BudgetTx>(viewresult.Model);
+            var model = Assert.That.IsOfType<T>(viewresult.Model);
 
             // Then: The selected item is the one returned
             Assert.AreEqual(selected, model);

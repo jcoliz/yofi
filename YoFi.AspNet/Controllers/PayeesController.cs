@@ -21,9 +21,9 @@ namespace YoFi.AspNet.Controllers
     {
         public static int PageSize { get; } = 25;
 
-        private readonly PayeeRepository _repository;
+        private readonly IPayeeRepository _repository;
 
-        public PayeesController(PayeeRepository repository)
+        public PayeesController(IPayeeRepository repository)
         {
             _repository = repository;
         }
@@ -57,7 +57,8 @@ namespace YoFi.AspNet.Controllers
             result = await divider.ItemsForPage(result, p);
             ViewData[nameof(PageDivider)] = divider;
 
-            return View(await result.ToListAsync());
+            // TODO: ToListAsync()
+            return View(result.ToList());
         }
 
         Task<IActionResult> IController<Payee>.Index() => Index();
@@ -203,7 +204,7 @@ namespace YoFi.AspNet.Controllers
             }
             catch (InvalidOperationException)
             {
-                return View(item);
+                return NotFound();
             }
             catch (Exception ex)
             {

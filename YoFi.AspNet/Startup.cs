@@ -74,7 +74,7 @@ namespace YoFi.AspNet.Root
             );
 
             services.AddScoped<IRepository<BudgetTx>, BudgetTxRepository>();
-            services.AddScoped<PayeeRepository, PayeeRepository>();
+            services.AddScoped<IPayeeRepository, PayeeRepository>();
 
             services.AddScoped<IDataContext, ApplicationDbContext>();
 

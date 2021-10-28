@@ -22,7 +22,7 @@ namespace YoFi.Tests.Controllers.Slim
     /// This variation of controller test mocks out the underlying repository
     /// </remarks>
     [TestClass]
-    public class BudgetTxControllerSlimTest: BaseControllerSlimTest<BudgetTx>
+    public class BudgetTxControllerSlimTest : BaseControllerSlimTest<BudgetTx>
     {
         private BudgetTxsController budgettxController => base.controller as BudgetTxsController;
 
@@ -100,6 +100,12 @@ namespace YoFi.Tests.Controllers.Slim
             // Then: Only the exoected items are returned
             var expected = repository.All.Where(x => x.Category.Contains(word));
             Assert.IsTrue(expected.SequenceEqual(model));
+        }
+
+        [TestMethod]
+        public async Task CreateInitial()
+        {
+            await base.CreateInitial__();
         }
     }
 }
