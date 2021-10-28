@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YoFi.AspNet.Core.Repositories;
+using YoFi.Core.Repositories;
 using YoFi.AspNet.Models;
 
 namespace YoFi.Tests.Helpers
@@ -101,5 +101,7 @@ namespace YoFi.Tests.Helpers
 
             return Task.CompletedTask;
         }
+
+        public IQueryable<BudgetTx> InDefaultOrder(IQueryable<BudgetTx> original) => original;
     }
 }

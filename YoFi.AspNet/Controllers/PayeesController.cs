@@ -9,8 +9,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core.Repositories;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Models;
+using YoFi.Core.Importers;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -19,11 +21,11 @@ namespace YoFi.AspNet.Controllers
     {
         public static int PageSize { get; } = 25;
 
-        private readonly ApplicationDbContext _context;
+        private readonly PayeeRepository _repository;
 
-        public PayeesController(ApplicationDbContext context)
+        public PayeesController(PayeeRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: Payees
@@ -33,7 +35,7 @@ namespace YoFi.AspNet.Controllers
             // Process QUERY (Q) parameters
             //
 
-            var result = _context.Payees.OrderBy(x => x.Category).ThenBy(x => x.Name).AsQueryable();
+            var result = _repository.OrderedQuery;
 
             ViewData["Query"] = q;
 
@@ -73,7 +75,8 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                return View(await Get(id));
+                var item = await _repository.GetByIdAsync(id);
+                return View(item);
             }
             catch (InvalidOperationException)
             {
@@ -85,8 +88,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        private async Task<Payee> Get(int? id) => await _context.Payees.SingleAsync(x => x.ID == id.Value);
-
         // GET: Payees/Create
         public async Task<IActionResult> Create(int? txid)
         {
@@ -96,10 +97,7 @@ namespace YoFi.AspNet.Controllers
                 if (!txid.HasValue)
                     return View();
 
-                var transaction = await _context.Transactions.Where(x => x.ID == txid.Value).SingleAsync();
-                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
-
-                return View(payee);
+                return View(await _repository.NewFromTransaction(txid.Value));
             }
             catch (InvalidOperationException)
             {
@@ -111,19 +109,16 @@ namespace YoFi.AspNet.Controllers
             }
         }
         // GET: Payees/CreateModel/{txid}
-        public async Task<IActionResult> CreateModal(int id)
+        public async Task<IActionResult> CreateModal(int txid)
         {
             try
             {
-                if (id <= 0)
+                if (txid <= 0)
                     throw new ArgumentException();
 
-                ViewData["TXID"] = id;
+                ViewData["TXID"] = txid;
 
-                var transaction = await _context.Transactions.Where(x => x.ID == id).SingleAsync();
-
-                var payee = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
-                return PartialView("CreatePartial", payee);
+                return PartialView("CreatePartial", await _repository.NewFromTransaction(txid));
             }
             catch (ArgumentException)
             {
@@ -152,8 +147,7 @@ namespace YoFi.AspNet.Controllers
                 if (!ModelState.IsValid)
                     throw new InvalidOperationException();
 
-                _context.Add(payee);
-                await _context.SaveChangesAsync();
+                await _repository.AddAsync(payee);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -179,7 +173,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                return PartialView("EditPartial", await Get(id));
+                return PartialView("EditPartial", await _repository.GetByIdAsync(id));
             }
             catch (InvalidOperationException)
             {
@@ -207,8 +201,7 @@ namespace YoFi.AspNet.Controllers
                 if (!ModelState.IsValid)
                     throw new InvalidOperationException();
 
-                _context.Update(item);
-                await _context.SaveChangesAsync();
+                await _repository.UpdateAsync(item);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -219,13 +212,6 @@ namespace YoFi.AspNet.Controllers
             catch (InvalidOperationException)
             {
                 return View(item);
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                if (!_context.Transactions.Any(e => e.ID == item.ID))
-                    return NotFound();
-                else
-                    return StatusCode(500, ex.Message);
             }
             catch (Exception ex)
             {
@@ -241,20 +227,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var result = from s in _context.Payees
-                             where s.Selected == true
-                             select s;
-
-                var list = await result.ToListAsync();
-
-                foreach (var item in list)
-                {
-                    if (!string.IsNullOrEmpty(Category))
-                        item.Category = Category;
-
-                    item.Selected = false;
-                }
-                await _context.SaveChangesAsync();
+                await _repository.BulkEdit(Category);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -275,10 +248,9 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var item = await Get(id);
+                var item = await _repository.GetByIdAsync(id);
 
-                _context.Payees.Remove(item);
-                await _context.SaveChangesAsync();
+                await _repository.RemoveAsync(item);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -297,39 +269,25 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            var incoming = new HashSet<Models.Payee>(new PayeeNameComparer());
-            IEnumerable<Payee> result = Enumerable.Empty<Payee>();
             try
             {
                 if (files == null || !files.Any())
                     throw new ApplicationException("Please choose a file to upload, first.");
 
-                // Extract submitted file into a list objects
+                var importer = new BaseImporter<Payee>(_repository, new PayeeImportDuplicateComparer());
 
                 foreach (var file in files)
                 {
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using var stream = file.OpenReadStream();
-                        using var ssr = new SpreadsheetReader();
-                        ssr.Open(stream);
-                        var items = ssr.Deserialize<Payee>(exceptproperties: new string[] { "ID" });
-                        incoming.UnionWith(items);
+                        importer.LoadFromXlsx(stream);
                     }
                 }
 
-                // Remove duplicate transactions.
-                result = incoming.Except(_context.Payees).ToList();
+                var imported = await importer.ProcessAsync();
 
-                // Fix up the remaining names
-                foreach (var item in result)
-                    item.RemoveWhitespaceFromName();
-
-                // Add remaining transactions
-                await _context.AddRangeAsync(result);
-                await _context.SaveChangesAsync();
-
-                return View(result.OrderBy(x => x.Category));
+                return View(imported);
             }
             catch (ApplicationException ex)
             {
@@ -343,36 +301,27 @@ namespace YoFi.AspNet.Controllers
 
         // GET: Payees/Download
         [ActionName("Download")]
-        public async Task<IActionResult> Download()
+        public Task<IActionResult> Download()
         {
             try
             {
-                var items = await _context.Payees.OrderBy(x => x.Category).ThenBy(x=>x.Name).ToListAsync();
+                var stream = _repository.AsSpreadsheet();
 
-                FileStreamResult result = null;
-                var stream = new MemoryStream();
-                using (var ssw = new SpreadsheetWriter())
-                {
-                    ssw.Open(stream);
-                    ssw.Serialize(items);
-                }
-
-                stream.Seek(0, SeekOrigin.Begin);
-                result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"Payees.xlsx");
+                var result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"Payee.xlsx");
 
                 // Need to return a task to meet the IControllerBase interface
-                return result;
+                return Task.FromResult(result as IActionResult);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return Task.FromResult(StatusCode(500, ex.Message) as IActionResult);
             }
         }
     }
 
-    class PayeeNameComparer : IEqualityComparer<Models.Payee>
+    class PayeeImportDuplicateComparer : IEqualityComparer<Payee>
     {
-        public bool Equals(Models.Payee x, Models.Payee y) => x.Name == y.Name;
-        public int GetHashCode(Models.Payee obj) => obj.Name.GetHashCode();
+        public bool Equals(Payee x, Payee y) => x.Name == y.Name;
+        public int GetHashCode(Payee obj) => obj.Name.GetHashCode();
     }
 }

@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNet;
-using YoFi.AspNet.Core.Repositories;
+using YoFi.Core.Repositories;
 
 namespace YoFi.Tests
 {

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.AspNet.Core.Repositories;
+using YoFi.Core.Repositories;
 using YoFi.AspNet.Models;
 using YoFi.Core.Importers;
 

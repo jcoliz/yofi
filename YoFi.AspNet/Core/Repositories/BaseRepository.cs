@@ -7,22 +7,27 @@ using System.Threading.Tasks;
 using YoFi.AspNet.Models;
 using YoFi.Core;
 
-namespace YoFi.AspNet.Core.Repositories
+namespace YoFi.Core.Repositories
 {
-    public class BaseRepository<T> where T: class, IID
+    public abstract class BaseRepository<T> where T: class, IID
     {
-        private readonly IDataContext _context;
+        protected readonly IDataContext _context;
 
         public IQueryable<T> All => _context.Get<T>();
+
+        public IQueryable<T> OrderedQuery => InDefaultOrder(All);
 
         public BaseRepository(IDataContext context)
         {
             _context = context;
         }
 
+        public abstract IQueryable<T> InDefaultOrder(IQueryable<T> original);
+
         // TODO: I would like to figure out how to let EF return a SingleAsync
         public Task<T> GetByIdAsync(int? id) => Task.FromResult(_context.Get<T>().Single(x => x.ID == id.Value));
 
+        // TODO: Find a way to do AnyAsync here
         public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.Get<T>().Any(x => x.ID == id));
 
         public async Task AddAsync(T item)
@@ -63,5 +68,6 @@ namespace YoFi.AspNet.Core.Repositories
 
             return stream;
         }
+
     }
 }

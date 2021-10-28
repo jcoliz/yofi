@@ -445,8 +445,8 @@ namespace YoFi.Tests.Controllers.Slim
             // And: Correct kind of model is returned 
             var model = Assert.That.IsOfType<IEnumerable<BudgetTx>>(viewresult.Model);
 
-            // And: Model matches original items, sorted by category
-            Assert.IsTrue(expected.OrderBy(x=>x.Category).SequenceEqual(model));
+            // And: Model matches original items, sorted by default
+            Assert.IsTrue(repository.InDefaultOrder(expected.AsQueryable()).SequenceEqual(model));
 
             // And: All the items are in the repository
             Assert.IsTrue(expected.SequenceEqual(repository.All));
