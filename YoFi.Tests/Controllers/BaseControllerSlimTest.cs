@@ -17,15 +17,24 @@ using YoFi.Tests.Helpers;
 namespace YoFi.Tests.Controllers.Slim
 {
     /// <summary>
-    /// Tests functionality that's common to all (or most) controllers
+    /// Tests functionality that's common to all (or most) controllers, as represented by the
+    /// IController(T) interface
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    [TestClass]
+    /// <remarks>
+    /// Functionality specific to a certain controller can be tested in the inherited class
+    /// </remarks>
+    /// <typeparam name="T">Underlying Model type</typeparam>
     public class BaseControllerSlimTest<T> where T: class, IModelItem, new()
     {
         protected IController<T> controller;
         protected IMockRepository<T> repository;
 
+        /// <summary>
+        /// Create a test file of a spreadsheet of <typeparamref name="X"/> items
+        /// </summary>
+        /// <typeparam name="X">Type of item to create</typeparam>
+        /// <param name="what">Collection of those items</param>
+        /// <returns>Form file as if used had uploaded it</returns>
         static public IFormFile GivenAFileOf<X>(ICollection<X> what) where X : class
         {
             // Build a spreadsheet with the chosen number of items
@@ -124,10 +133,8 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(404, nfresult.StatusCode);
         }
 
-        // You have to opt into this test because not all controllers implement it
-        // TODO: Should remove it from the interface
-        //[TestMethod]
-        protected async Task CreateInitial__()
+        [TestMethod]
+        public async Task CreateInitial()
         {
             // When: Calling Create
             var actionresult = await controller.Create();
@@ -197,16 +204,23 @@ namespace YoFi.Tests.Controllers.Slim
         }
 
 
-        [TestMethod]
-        public async Task EditDetailsFound()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task EditDetailsFound(bool ok)
         {
             // Given: Five items in the respository
             repository.AddItems(5);
 
+            // And: Repository in the given state
+            repository.Ok = ok;
+
             // When: Retrieving details for a selected item to edit it
             var selected = repository.All.Skip(1).First();
             var actionresult = await controller.Edit(selected.ID);
-            Assert.That.ActionResultOk(actionresult);
+            ThenSucceedsOrFailsAsExpected(actionresult, ok);
+            if (!ok) return;
+
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<T>(viewresult.Model);
 

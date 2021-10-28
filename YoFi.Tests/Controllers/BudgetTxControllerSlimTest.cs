@@ -101,11 +101,5 @@ namespace YoFi.Tests.Controllers.Slim
             var expected = repository.All.Where(x => x.Category.Contains(word));
             Assert.IsTrue(expected.SequenceEqual(model));
         }
-
-        [TestMethod]
-        public async Task CreateInitial()
-        {
-            await base.CreateInitial__();
-        }
     }
 }

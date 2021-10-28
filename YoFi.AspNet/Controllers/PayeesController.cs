@@ -144,10 +144,6 @@ namespace YoFi.AspNet.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch (ArgumentException)
-            {
-                return BadRequest();
-            }
             catch (InvalidOperationException)
             {
                 return NotFound();
@@ -310,8 +306,7 @@ namespace YoFi.AspNet.Controllers
                 return Task.FromResult(StatusCode(500, ex.Message) as IActionResult);
             }
         }
-        Task<IActionResult> IController<Payee>.Create() => throw new NotImplementedException();
-
+        Task<IActionResult> IController<Payee>.Create() => Create((int?)null);
 
         void IController<Payee>.SetErrorState() => ModelState.AddModelError("error", "test");
     }

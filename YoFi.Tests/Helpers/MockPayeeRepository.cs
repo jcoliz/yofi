@@ -15,12 +15,25 @@ namespace YoFi.Tests.Helpers
 
         public Task BulkEdit(string category)
         {
-            throw new NotImplementedException();
+            if (!Ok)
+                throw new Exception("Failed");
+
+            // We don't need to DO anything here.
+            WasBulkEditCalled = true;
+            return Task.CompletedTask;
         }
+
+        public bool WasBulkEditCalled { get; private set; } = false;
 
         public Task<Payee> NewFromTransaction(int txid)
         {
-            throw new NotImplementedException();
+            if (!Ok)
+                throw new Exception("Failed");
+
+            if (txid == 0)
+                throw new InvalidOperationException();
+
+            return Task.FromResult(new Payee() { Name = txid.ToString() });
         }
     }
 }
