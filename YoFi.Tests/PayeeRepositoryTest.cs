@@ -27,7 +27,7 @@ namespace YoFi.Tests.Core
 
         protected override int CompareKeys(Payee x, Payee y) => x.Name.CompareTo(y.Name);
 
-        protected override BaseImporter<Payee> MakeImporter() => new BaseImporter<Payee>(repository, new PayeeImportDuplicateComparer());
+        protected override BaseImporter<Payee> MakeImporter() => new BaseImporter<Payee>(repository);
 
         [TestInitialize]
         public void SetUp()

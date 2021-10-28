@@ -4,19 +4,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.AspNet.Models;
 using YoFi.Core.Repositories;
 
 namespace YoFi.Core.Importers
 {
-    public class BaseImporter<T> where T: class, new()
+    public class BaseImporter<T> where T: class, IModelItem, new()
     {
         private readonly HashSet<T> _incoming;
         private readonly IRepository<T> _repository;
 
-        public BaseImporter(IRepository<T> repository, IEqualityComparer<T> duplicatecomparer)
+        public BaseImporter(IRepository<T> repository)
         {
             _repository = repository;
-            _incoming = new HashSet<T>(duplicatecomparer);
+            _incoming = new HashSet<T>(new T().ImportDuplicateComparer);
         }
 
         public void LoadFromXlsx(Stream stream)

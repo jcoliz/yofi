@@ -169,7 +169,7 @@ namespace YoFi.AspNet.Controllers
                 if (files == null || !files.Any())
                     throw new ApplicationException("Please choose a file to upload, first.");
 
-                var importer = new BudgetTxImporter(_repository);
+                var importer = new BaseImporter<BudgetTx>(_repository);
 
                 foreach (var file in files)
                 {

@@ -266,7 +266,7 @@ namespace YoFi.AspNet.Controllers
                 if (files == null || !files.Any())
                     throw new ApplicationException("Please choose a file to upload, first.");
 
-                var importer = new BaseImporter<Payee>(_repository, new PayeeImportDuplicateComparer());
+                var importer = new BaseImporter<Payee>(_repository);
 
                 foreach (var file in files)
                 {
@@ -309,11 +309,5 @@ namespace YoFi.AspNet.Controllers
                 return Task.FromResult(StatusCode(500, ex.Message) as IActionResult);
             }
         }
-    }
-
-    public class PayeeImportDuplicateComparer : IEqualityComparer<Payee>
-    {
-        public bool Equals(Payee x, Payee y) => x.Name == y.Name;
-        public int GetHashCode(Payee obj) => obj.Name.GetHashCode();
     }
 }

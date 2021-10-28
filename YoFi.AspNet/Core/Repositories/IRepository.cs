@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.AspNet.Models;
 
 namespace YoFi.Core.Repositories
 {
-    public interface IRepository<T> where T: class
+    public interface IRepository<T> where T: class, IModelItem
     {
         IQueryable<T> All { get; }
         IQueryable<T> OrderedQuery { get; }

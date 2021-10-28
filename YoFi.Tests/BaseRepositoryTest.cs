@@ -14,16 +14,45 @@ using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
 {
+    /// <summary>
+    /// This class tests IRepository(<typeparamref name="T"/>)
+    /// </summary>
+    /// <remarks>
+    /// Most repositories will have more functionality than only what is in the general
+    /// iterface, so you'll want to cover that ground in the inherited class
+    /// </remarks>
+    /// <typeparam name="T">Model type contained in the repository under test</typeparam>
     [TestClass]
-    public abstract class BaseRepositoryTest<T> where T: class, IID, new()
+    public abstract class BaseRepositoryTest<T> where T: class, IModelItem, new()
     {
         protected IRepository<T> repository;
         protected MockDataContext context;
 
+        /// <summary>
+        /// Sample items to use in test
+        /// </summary>
+        /// <remarks>
+        /// Generally, the first 5 are the most commonly used
+        /// </remarks>
         protected abstract List<T> Items { get; }
 
+        /// <summary>
+        /// Comparison to sort keys
+        /// </summary>
+        /// <remarks>
+        /// The idea here is that we order our sample data according to the method described
+        /// here, so that if we sort it by this comparer, it equals the sort order given in
+        /// IRepository(T).InDefaultOrder()
+        /// </remarks>
+        /// <param name="x">First item</param>
+        /// <param name="y">Second item</param>
+        /// <returns>-1 if <paramref name="x"/> comes before <paramref name="y"/></returns>
         protected abstract int CompareKeys(T x, T y);
 
+        /// <summary>
+        /// Create an importer suitable for importing these items
+        /// </summary>
+        /// <returns></returns>
         protected abstract BaseImporter<T> MakeImporter();
 
         /// <summary>
