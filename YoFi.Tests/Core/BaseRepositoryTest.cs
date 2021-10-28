@@ -11,6 +11,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
+using YoFi.Tests.Common;
 
 namespace YoFi.Tests.Core
 {
@@ -54,20 +55,6 @@ namespace YoFi.Tests.Core
         /// </summary>
         /// <returns></returns>
         protected abstract BaseImporter<T> MakeImporter();
-
-        /// <summary>
-        /// Make an exact duplicate of these <paramref name="items"/>
-        /// </summary>
-        /// <param name="items">Items to copy</param>
-        /// <returns>List of cloned items</returns>
-        protected async Task<List<T>> MakeDuplicateOf(IEnumerable<T> items)
-        {
-            var stream = new MemoryStream();
-            await JsonSerializer.SerializeAsync(stream, items);
-            stream.Seek(0, SeekOrigin.Begin);
-            var result = await JsonSerializer.DeserializeAsync<List<T>>(stream);
-            return result;
-        }
 
         protected async Task<IEnumerable<T>> WhenImportingItemsAsSpreadsheet(IEnumerable<T> expected)
         {
@@ -274,7 +261,7 @@ namespace YoFi.Tests.Core
             // When: Uploading three new items, one of which the same as an already existing item
             // NOTE: These items are not EXACTLY duplicates, just duplicate enough to trigger the
             // hashset equality constraint on input.
-            var upload = Items.Skip(5).Take(2).Concat(await MakeDuplicateOf(expected.Take(1)));
+            var upload = Items.Skip(5).Take(2).Concat(await DeepCopy.MakeDuplicateOf(expected.Take(1)));
             var actual = await WhenImportingItemsAsSpreadsheet(upload);
 
             // Then: Only two items were imported, because one exists

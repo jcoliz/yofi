@@ -10,6 +10,7 @@ using YoFi.Core.Repositories;
 using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using YoFi.Tests.Helpers;
+using YoFi.Tests.Common;
 
 namespace YoFi.Tests.Core
 {
@@ -84,7 +85,7 @@ namespace YoFi.Tests.Core
 
             // When: Uploading three new items which are EXACTLY the same as existing items,
             // just that the amounts vary (which still counts them as duplicates here)
-            var upload = await MakeDuplicateOf(expected.Take(3));
+            var upload = await DeepCopy.MakeDuplicateOf(expected.Take(3));
             foreach (var item in upload)
                 item.Amount += 100m;
 
@@ -108,7 +109,7 @@ namespace YoFi.Tests.Core
 
             // When: Uploading one new items which is EXACTLY the same as existing items,
             // just that the amounts is off by $0.001
-            var upload = await MakeDuplicateOf(expected.Take(1));
+            var upload = await DeepCopy.MakeDuplicateOf(expected.Take(1));
             upload.First().Amount += 0.001m;
             var actual = await WhenImportingItemsAsSpreadsheet(upload);
 
