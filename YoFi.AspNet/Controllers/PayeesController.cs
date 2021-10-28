@@ -309,5 +309,9 @@ namespace YoFi.AspNet.Controllers
                 return Task.FromResult(StatusCode(500, ex.Message) as IActionResult);
             }
         }
+        Task<IActionResult> IController<Payee>.Create() => throw new NotImplementedException();
+
+
+        void IController<Payee>.SetErrorState() => ModelState.AddModelError("error", "test");
     }
 }

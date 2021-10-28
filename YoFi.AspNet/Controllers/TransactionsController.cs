@@ -323,9 +323,9 @@ namespace YoFi.AspNet.Controllers
         /// View for create transaction page, which is empty because we're creating a transaction from empty
         /// </summary>
         /// <returns></returns>
-        public IActionResult Create()
+        public Task<IActionResult> Create()
         {
-            return View();
+            return Task.FromResult(View() as IActionResult);
         }
 
         /// <summary>
@@ -1162,6 +1162,7 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Transaction>.Edit(int id, Transaction item) => Edit(id, false, item);
 
         Task<IActionResult> IController<Transaction>.Download() => Download(false);
+        void IController<Transaction>.SetErrorState() => ModelState.AddModelError("error", "test");
         #endregion
 
         #region Data Transfer Objects

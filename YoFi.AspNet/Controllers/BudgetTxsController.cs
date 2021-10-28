@@ -67,9 +67,9 @@ namespace YoFi.AspNet.Controllers
         }
 
         // GET: BudgetTxs/Create
-        public IActionResult Create()
+        public Task<IActionResult> Create()
         {
-            return View();
+            return Task.FromResult(View() as IActionResult);
         }
 
         // POST: BudgetTxs/Create
@@ -213,5 +213,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         Task<IActionResult> IController<BudgetTx>.Index() => Index();
+
+        void IController<BudgetTx>.SetErrorState() => ModelState.AddModelError("error", "test");
     }
 }

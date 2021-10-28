@@ -19,10 +19,12 @@ namespace Common.AspNet
         Task<IActionResult> Details(int? id);
         Task<IActionResult> Edit(int? id);
         Task<IActionResult> Edit(int id, T item);
+        Task<IActionResult> Create();
         Task<IActionResult> Create(T item);
         Task<IActionResult> Delete(int? id);
         Task<IActionResult> DeleteConfirmed(int id);
         Task<IActionResult> Download();
         Task<IActionResult> Upload(List<IFormFile> files);
+        void SetErrorState();
     }
 }

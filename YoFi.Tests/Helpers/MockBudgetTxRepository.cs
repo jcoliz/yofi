@@ -10,15 +10,26 @@ using YoFi.Core.Models;
 
 namespace YoFi.Tests.Helpers
 {
-    class MockBudgetTxRepository : IRepository<BudgetTx>
+    public interface IMockRepository<T>: IRepository<T> where T: class, IModelItem
+    {
+        public void AddItems(int numitems);
+
+        public T MakeItem(int x);
+
+        public IEnumerable<T> MakeItems(int numitems);
+
+        public bool Ok { get; set; }
+    }
+
+    public class MockBudgetTxRepository : IMockRepository<BudgetTx>
     {
         public void AddItems(int numitems) => Items.AddRange(MakeItems(numitems));
 
         static readonly DateTime defaulttimestamp = new DateTime(2020, 1, 1);
 
-        public static BudgetTx MakeItem(int x) => new BudgetTx() { ID = x, Amount = x, Category = x.ToString(), Timestamp = defaulttimestamp };
+        public BudgetTx MakeItem(int x) => new BudgetTx() { ID = x, Amount = x, Category = x.ToString(), Timestamp = defaulttimestamp };
 
-        public static IEnumerable<BudgetTx> MakeItems(int numitems) => Enumerable.Range(1, numitems).Select(MakeItem);
+        public IEnumerable<BudgetTx> MakeItems(int numitems) => Enumerable.Range(1, numitems).Select(MakeItem);
 
         public bool Ok { get; set; } = true;
 

@@ -1882,12 +1882,9 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
-        public void CreateInitial()
+        public async Task CreateInitial()
         {
-            // When: Calling Create
-            var result = controller.Create();
-
-            // Then: It returns an empty model
+            var result = await controller.Create(); 
             var viewresult = result as ViewResult;
             Assert.IsNull(viewresult.Model);
         }

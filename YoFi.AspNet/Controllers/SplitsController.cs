@@ -89,6 +89,8 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction("Edit", "Transactions", new { id = txid });
         }
 
+        void IController<Split>.SetErrorState() => ModelState.AddModelError("error", "test");
+
         Task<IActionResult> IController<Split>.Download() =>
             throw new NotImplementedException();
 
@@ -102,6 +104,9 @@ namespace YoFi.AspNet.Controllers
             throw new NotImplementedException();
 
         Task<IActionResult> IController<Split>.Create(Split item) =>
+            throw new NotImplementedException();
+
+        Task<IActionResult> IController<Split>.Create() =>
             throw new NotImplementedException();
 
         Task<IActionResult> IController<Split>.Edit(int id, Split item) =>
