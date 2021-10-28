@@ -14,11 +14,13 @@ namespace YoFi.Tests.Helpers
     {
         public List<BudgetTx> BudgetTxData { get; } = new List<BudgetTx>();
 
+        public List<Payee> PayeeData { get; } = new List<Payee>();
+
         public IQueryable<Transaction> Transactions => throw new NotImplementedException();
 
         public IQueryable<Split> Splits => throw new NotImplementedException();
 
-        public IQueryable<Payee> Payees => throw new NotImplementedException();
+        public IQueryable<Payee> Payees => PayeeData.AsQueryable();
 
         public IQueryable<BudgetTx> BudgetTxs => BudgetTxData.AsQueryable();
 
@@ -28,8 +30,11 @@ namespace YoFi.Tests.Helpers
             {
                 return BudgetTxs as IQueryable<T>;
             }
-            else
-                throw new NotImplementedException();
+            if (typeof(T) == typeof(Payee))
+            {
+                return Payees as IQueryable<T>;
+            }
+            throw new NotImplementedException();
         }
 
         public Task AddAsync(object item)
@@ -40,6 +45,10 @@ namespace YoFi.Tests.Helpers
             if (item.GetType() == typeof(BudgetTx))
             {
                 BudgetTxData.Add(item as BudgetTx);
+            }
+            else if (item.GetType() == typeof(Payee))
+            {
+                PayeeData.Add(item as Payee);
             }
             else
                 throw new NotImplementedException();
@@ -55,11 +64,17 @@ namespace YoFi.Tests.Helpers
             if (!items.Any())
                 return;
 
-            if (items.First().GetType() == typeof(BudgetTx))
+            var t = items.First().GetType();
+            if (t == typeof(BudgetTx))
             {
                 BudgetTxData.AddRange(items as IEnumerable<BudgetTx>);
             }
+            else if (t == typeof(Payee))
+            {
+                PayeeData.AddRange(items as IEnumerable<Payee>);
+            }
             else
+
                 throw new NotImplementedException();
         }
 
@@ -74,12 +89,20 @@ namespace YoFi.Tests.Helpers
             if (item == null)
                 throw new ArgumentException("Expected non-null item");
 
-            if (item.GetType() == typeof(BudgetTx))
+            var t = item.GetType();
+            if (t == typeof(BudgetTx))
             {
                 var btx = item as BudgetTx;
 
                 var index = BudgetTxData.FindIndex(x => x.ID == btx.ID);
                 BudgetTxData.RemoveAt(index);
+            }
+            else if (t == typeof(Payee))
+            {
+                var btx = item as Payee;
+
+                var index = PayeeData.FindIndex(x => x.ID == btx.ID);
+                PayeeData.RemoveAt(index);
             }
             else
                 throw new NotImplementedException();
@@ -95,12 +118,20 @@ namespace YoFi.Tests.Helpers
             if (item == null)
                 throw new ArgumentException("Expected non-null item");
 
-            if (item.GetType() == typeof(BudgetTx))
+            var t = item.GetType();
+            if (t == typeof(BudgetTx))
             {
                 var btx = item as BudgetTx;
 
                 var index = BudgetTxData.FindIndex(x => x.ID == btx.ID);
                 BudgetTxData[index] = btx;
+            }
+            else if (t == typeof(Payee))
+            {
+                var btx = item as Payee;
+
+                var index = PayeeData.FindIndex(x => x.ID == btx.ID);
+                PayeeData[index] = btx;
             }
             else
                 throw new NotImplementedException();

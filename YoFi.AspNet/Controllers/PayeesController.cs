@@ -311,7 +311,7 @@ namespace YoFi.AspNet.Controllers
         }
     }
 
-    class PayeeImportDuplicateComparer : IEqualityComparer<Payee>
+    public class PayeeImportDuplicateComparer : IEqualityComparer<Payee>
     {
         public bool Equals(Payee x, Payee y) => x.Name == y.Name;
         public int GetHashCode(Payee obj) => obj.Name.GetHashCode();
