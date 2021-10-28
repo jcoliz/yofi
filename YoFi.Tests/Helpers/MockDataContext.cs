@@ -16,7 +16,9 @@ namespace YoFi.Tests.Helpers
 
         public List<Payee> PayeeData { get; } = new List<Payee>();
 
-        public IQueryable<Transaction> Transactions => throw new NotImplementedException();
+        public List<Transaction> TransactionData { get; } = new List<Transaction>();
+
+        public IQueryable<Transaction> Transactions => TransactionData.AsQueryable();
 
         public IQueryable<Split> Splits => throw new NotImplementedException();
 
@@ -49,6 +51,10 @@ namespace YoFi.Tests.Helpers
             else if (item.GetType() == typeof(Payee))
             {
                 PayeeData.Add(item as Payee);
+            }
+            else if (item.GetType() == typeof(Transaction))
+            {
+                TransactionData.Add(item as Transaction);
             }
             else
                 throw new NotImplementedException();
