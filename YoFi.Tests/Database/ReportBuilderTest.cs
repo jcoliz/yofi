@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Tests.Helpers;
 

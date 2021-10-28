@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace YoFi.AspNet.Models
+namespace YoFi.Core.Models
 {
     /// <summary>
     /// Used to split transaction amount across multiple

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using YoFi.AspNet.Controllers;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;

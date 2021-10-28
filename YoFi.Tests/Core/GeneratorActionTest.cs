@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.SampleGen;
 using YoFi.Tests.Helpers;
 using CNDSampleData = Common.NET.Data.SampleData;

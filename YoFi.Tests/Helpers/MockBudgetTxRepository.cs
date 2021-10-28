@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Repositories;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 
 namespace YoFi.Tests.Helpers
 {

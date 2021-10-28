@@ -12,7 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.Quieriers;
 using YoFi.Core.Reports;
 
@@ -176,7 +176,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<ApiResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Models.Transaction transaction)
+        public async Task<ApiResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Transaction transaction)
         {
             try
             {
@@ -264,7 +264,7 @@ namespace YoFi.AspNet.Controllers
             {
                 var transaction = await LookupTransactionAsync(id,splits:true);
 
-                var incoming = new HashSet<Models.Split>();
+                var incoming = new HashSet<Split>();
                 // Extract submitted file into a list objects
 
                 if (file.FileName.ToLower().EndsWith(".xlsx"))
@@ -299,7 +299,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost("EditPayee/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<ApiResult> EditPayee(bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Models.Payee payee)
+        public async Task<ApiResult> EditPayee(bool? duplicate, [Bind("ID,Name,Category,SubCategory")] Payee payee)
         {
             try
             {

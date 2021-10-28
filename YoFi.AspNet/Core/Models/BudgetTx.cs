@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.AspNet.Models
+namespace YoFi.Core.Models
 {
     /// <summary>
     /// Budget Transaction (Budget line item)

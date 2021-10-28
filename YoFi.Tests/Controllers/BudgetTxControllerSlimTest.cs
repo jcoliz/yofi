@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Tests.Common;
 using YoFi.Tests.Helpers;
 

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 
 namespace YoFi.Tests.Core
 {

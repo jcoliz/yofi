@@ -16,16 +16,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using YoFi.Core.Quieriers;
 using YoFi.Core.Reports;
-using Transaction = YoFi.AspNet.Models.Transaction;
+using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers
 {
     [Authorize(Policy = "CanRead")]
-    public class TransactionsController : Controller, IController<Models.Transaction>
+    public class TransactionsController : Controller, IController<Transaction>
     {
         #region Public Properties
         public static int PageSize { get; } = 25;
@@ -336,7 +336,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
+        public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
         {
             try
             {
@@ -467,7 +467,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Models.Transaction transaction)
+        public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
         {
             try
             {
@@ -1050,7 +1050,7 @@ namespace YoFi.AspNet.Controllers
 
                 var transaction = await GetWithSplits(id);
 
-                var incoming = new HashSet<Models.Split>();
+                var incoming = new HashSet<Split>();
                 // Extract submitted file into a list objects
 
                 foreach (var file in files)
@@ -1157,11 +1157,11 @@ namespace YoFi.AspNet.Controllers
         #endregion
 
         #region IController
-        Task<IActionResult> IController<Models.Transaction>.Index() => Index();
+        Task<IActionResult> IController<Transaction>.Index() => Index();
 
-        Task<IActionResult> IController<Models.Transaction>.Edit(int id, Models.Transaction item) => Edit(id, false, item);
+        Task<IActionResult> IController<Transaction>.Edit(int id, Transaction item) => Edit(id, false, item);
 
-        Task<IActionResult> IController<Models.Transaction>.Download() => Download(false);
+        Task<IActionResult> IController<Transaction>.Download() => Download(false);
         #endregion
 
         #region Data Transfer Objects

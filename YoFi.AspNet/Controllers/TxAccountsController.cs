@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 
 // This file isn't really used yet. This was for future expansion.
 #if false

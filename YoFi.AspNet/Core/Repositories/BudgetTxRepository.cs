@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
 {

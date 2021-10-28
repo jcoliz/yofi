@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.Reports;
 
 namespace YoFi.Tests.Helpers

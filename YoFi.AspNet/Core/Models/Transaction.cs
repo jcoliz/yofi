@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace YoFi.AspNet.Models
+namespace YoFi.Core.Models
 {
     /// <summary>
     /// A single financial transaction

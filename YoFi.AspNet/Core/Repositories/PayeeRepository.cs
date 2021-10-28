@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core;
 
 namespace YoFi.Core.Repositories

@@ -15,7 +15,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.Reports;
 
 namespace YoFi.Tests

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 
 namespace YoFi.Core.Reports
 {

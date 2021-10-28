@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 
 namespace YoFi.Core.SampleGen
 {
@@ -65,7 +65,7 @@ namespace YoFi.Core.SampleGen
 
         public void GeneratePayees()
         {
-            Payees = Definitions.Where(x => x.Payee != null).ToLookup(x=>x.Payee).SelectMany(x=>x.Key.Split(',').Select(y=>new AspNet.Models.Payee() { Name = y, Category = x.First().Category })).ToList();
+            Payees = Definitions.Where(x => x.Payee != null).ToLookup(x=>x.Payee).SelectMany(x=>x.Key.Split(',').Select(y=>new Payee() { Name = y, Category = x.First().Category })).ToList();
         }
 
         public void GenerateBudget()
@@ -84,7 +84,7 @@ namespace YoFi.Core.SampleGen
             // Yearly budget for other patterns
             var yearly = ishighjitter[false]
                             .ToLookup(x => x.Category)
-                            .Select(x => new AspNet.Models.BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
+                            .Select(x => new BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
 
             // Combine them, that's our result
             BudgetTxs = monthly.Concat(yearly).ToList();

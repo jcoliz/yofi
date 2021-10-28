@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.SampleGen;
 
 namespace YoFi.Tests.Core.SampleGen

@@ -129,7 +129,7 @@ namespace YoFi.AspNet.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("YoFi.AspNet.Models.Account", b =>
+            modelBuilder.Entity("YoFi.Core.Models.Account", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
@@ -141,7 +141,7 @@ namespace YoFi.AspNet.Data.Migrations
                     b.ToTable("Accounts");
                 });
 
-            modelBuilder.Entity("YoFi.AspNet.Models.ApplicationUser", b =>
+            modelBuilder.Entity("YoFi.Core.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -192,7 +192,7 @@ namespace YoFi.AspNet.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("YoFi.AspNet.Models.Transaction", b =>
+            modelBuilder.Entity("YoFi.Core.Models.Transaction", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
@@ -228,7 +228,7 @@ namespace YoFi.AspNet.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
+                    b.HasOne("YoFi.Core.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -236,7 +236,7 @@ namespace YoFi.AspNet.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
+                    b.HasOne("YoFi.Core.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -249,7 +249,7 @@ namespace YoFi.AspNet.Data.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
+                    b.HasOne("YoFi.Core.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -257,15 +257,15 @@ namespace YoFi.AspNet.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("YoFi.AspNet.Models.ApplicationUser")
+                    b.HasOne("YoFi.Core.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("YoFi.AspNet.Models.Transaction", b =>
+            modelBuilder.Entity("YoFi.Core.Models.Transaction", b =>
                 {
-                    b.HasOne("YoFi.AspNet.Models.Account")
+                    b.HasOne("YoFi.Core.Models.Account")
                         .WithMany("Transactions")
                         .HasForeignKey("AccountID");
                 });

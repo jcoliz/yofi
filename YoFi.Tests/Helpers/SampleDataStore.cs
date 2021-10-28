@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 
 namespace YoFi.Tests.Helpers
 {

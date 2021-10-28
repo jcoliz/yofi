@@ -7,16 +7,15 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Helpers;
-using YoFi.AspNet.Data;
-using YoFi.AspNet.Models;
-using Transaction = YoFi.AspNet.Models.Transaction;
+using YoFi.Core.Models;
+using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Core.Importers
 {
     public class TransactionImporter
     {
         private readonly List<Transaction> incoming = new List<Transaction>();
-        private readonly List<IGrouping<int, AspNet.Models.Split>> splits = new List<IGrouping<int, Split>>();
+        private readonly List<IGrouping<int, Split>> splits = new List<IGrouping<int, Split>>();
         private readonly List<Transaction> highlights = new List<Transaction>();
 
         private readonly IDataContext _context;

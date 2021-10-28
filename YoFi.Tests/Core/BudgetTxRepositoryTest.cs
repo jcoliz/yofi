@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.Core.Repositories;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using YoFi.Tests.Helpers;
 

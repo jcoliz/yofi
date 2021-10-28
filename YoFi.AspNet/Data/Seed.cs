@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using YoFi.AspNet.Models;
+using YoFi.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

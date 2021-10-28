@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.AspNet.Models
+namespace YoFi.Core.Models
 {
     /// <summary>
     /// A partition of transactions owned by a specific user
