@@ -235,6 +235,7 @@ namespace YoFi.Tests.Core
             var actual = ssr.Deserialize<T>();
 
             // Then: The received items match the data set (sorted)
+            expected.Sort(CompareKeys);
             Assert.IsTrue(expected.SequenceEqual(actual));
         }
 

@@ -3,7 +3,13 @@ using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
 {
-    public class BudgetTxRepository: BaseRepository<BudgetTx>, IRepository<BudgetTx>
+    /// <summary>
+    /// Contains a set of Budget Line Item (budgettx) model items and logic needed to operate on them
+    /// </summary>
+    /// <remarks>
+    /// BudgetTx items are pretty simple. No additional logic. Just need to implement here how to sort the, and how to query them
+    /// </remarks>
+    public class BudgetTxRepository: BaseRepository<BudgetTx>
     {
         public override IQueryable<BudgetTx> InDefaultOrder(IQueryable<BudgetTx> original) => original.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category);
 
@@ -11,6 +17,6 @@ namespace YoFi.Core.Repositories
         {
         }
 
-        public IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q));
+        public override IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q));
     }
 }

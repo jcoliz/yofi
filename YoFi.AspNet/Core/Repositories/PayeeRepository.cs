@@ -6,6 +6,9 @@ using YoFi.Core;
 
 namespace YoFi.Core.Repositories
 {
+    /// <summary>
+    /// Contains a set of Payee model items and logic needed to operate on them
+    /// </summary>
     public class PayeeRepository : BaseRepository<Payee>, IPayeeRepository
     {
         public override IQueryable<Payee> InDefaultOrder(IQueryable<Payee> original) => original.OrderBy(x => x.Category).ThenBy(x => x.Name);
@@ -14,7 +17,7 @@ namespace YoFi.Core.Repositories
         {
         }
 
-        public IQueryable<Payee> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q) || x.Name.Contains(q));
+        public override IQueryable<Payee> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q) || x.Name.Contains(q));
 
         public async Task BulkEdit(string category)
         {
@@ -30,8 +33,7 @@ namespace YoFi.Core.Repositories
 
         public Task<Payee> NewFromTransaction(int txid)
         {
-            // TODO: Find a way to call SingleAsync here
-
+            // TODO: SingleAsync()
             var transaction = _context.Transactions.Where(x => x.ID == txid).Single();
             var result = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
 

@@ -30,7 +30,7 @@ namespace YoFi.Core.Importers
 
         public async Task<IEnumerable<T>> ProcessAsync()
         {
-            // Remove duplicate items.
+            // Remove duplicate items
             var result = _incoming.Except(_repository.All).ToList();
 
             // Add remaining items

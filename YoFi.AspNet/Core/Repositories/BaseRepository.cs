@@ -9,7 +9,14 @@ using YoFi.Core;
 
 namespace YoFi.Core.Repositories
 {
-    public abstract class BaseRepository<T> where T: class, IID
+    /// <summary>
+    /// Contains a set of <typeparamref name="T"/> model objects, with foundational application logic needed to work with those options
+    /// </summary>
+    /// <remarks>
+    /// This base repository class largely implements the IRepository(T) interface, with some items left abstract for the inherited class
+    /// </remarks>
+    /// <typeparam name="T"></typeparam>
+    public abstract class BaseRepository<T> : IRepository<T> where T: class, IModelItem
     {
         protected readonly IDataContext _context;
 
@@ -24,10 +31,10 @@ namespace YoFi.Core.Repositories
 
         public abstract IQueryable<T> InDefaultOrder(IQueryable<T> original);
 
-        // TODO: I would like to figure out how to let EF return a SingleAsync
+        // TODO: SingleAsync()
         public Task<T> GetByIdAsync(int? id) => Task.FromResult(_context.Get<T>().Single(x => x.ID == id.Value));
 
-        // TODO: Find a way to do AnyAsync here
+        // TODO: AnyAsync()
         public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.Get<T>().Any(x => x.ID == id));
 
         public async Task AddAsync(T item)
@@ -55,13 +62,11 @@ namespace YoFi.Core.Repositories
 
         public Stream AsSpreadsheet()
         {
-            var items = All;
-
             var stream = new MemoryStream();
             using (var ssw = new SpreadsheetWriter())
             {
                 ssw.Open(stream);
-                ssw.Serialize(items);
+                ssw.Serialize(OrderedQuery);
             }
 
             stream.Seek(0, SeekOrigin.Begin);
@@ -69,5 +74,6 @@ namespace YoFi.Core.Repositories
             return stream;
         }
 
+        public abstract IQueryable<T> ForQuery(string q);
     }
 }
