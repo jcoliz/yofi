@@ -1,6 +1,7 @@
 ﻿using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Playwright;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -45,7 +46,7 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the transactions page
             await ClickTransactions();
 
-            // When: Searching for "Farquat"
+            // When: Searching for "1230" (December 30th)
             await Page.FillAsync("data-test-id=q", "1230");
             await Page.ClickAsync("data-test-id=btn-search");
 
@@ -82,7 +83,41 @@ namespace YoFi.Tests.Functional
             });
 
             // Then: A spreadsheet containing 889 Transactions was downloaded
-            await ThenSpreadsheetWasDownloadedContaining(source: download1, name: "Transaction", count: 889);
+            await ThenSpreadsheetWasDownloadedContaining<IdOnly>(source: download1, name: "Transaction", count: 889);
+
+#if false
+            // Enable if need to inspect
+            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}.xlsx";
+            await download1.SaveAsAsync(filename);
+            TestContext.AddResultFile(filename);
+#endif
+        }
+
+        [TestMethod]
+        public async Task DownloadQ12()
+        {
+            // Given: We are logged in and on the transactions page
+            await ClickTransactions();
+
+            // When: Searching for "Farquat"
+            var searchword = "Farquat";
+            await Page.FillAsync("data-test-id=q", searchword);
+            await Page.ClickAsync("data-test-id=btn-search");
+
+            // And: Downloading transactions
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Export");
+
+            var download1 = await Page.RunAndWaitForDownloadAsync(async () =>
+            {
+                await Page.ClickAsync("[data-test-id=\"btn-dl-save\"]");
+            });
+
+            // Then: A spreadsheet containing 12 Transactions were downloaded
+            var items = await ThenSpreadsheetWasDownloadedContaining<IdAndPayee>(source: download1, name: "Transaction", count: 12);
+
+            // And: All items match the search criteria
+            Assert.IsTrue(items.All(x => x.Payee.Contains(searchword)));
 
 #if false
             // Enable if need to inspect
@@ -97,14 +132,22 @@ namespace YoFi.Tests.Functional
             public int ID { get; set; }
         }
 
-        private async Task ThenSpreadsheetWasDownloadedContaining(IDownload source, string name, int count)
+        private class IdAndPayee
+        {
+            public int ID { get; set; }
+            public string Payee { get; set; }
+        }
+
+        private async Task<IEnumerable<T>> ThenSpreadsheetWasDownloadedContaining<T>(IDownload source, string name, int count) where T: class, new()
         {
             using var stream = await source.CreateReadStreamAsync();
             using var ssr = new SpreadsheetReader();
             ssr.Open(stream);
             Assert.AreEqual(name, ssr.SheetNames.First());
-            var items = ssr.Deserialize<IdOnly>(name);
+            var items = ssr.Deserialize<T>(name);
             Assert.AreEqual(count, items.Count());
+
+            return items;
         }
 
         /* Not sure how to assert this
