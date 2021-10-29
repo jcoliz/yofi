@@ -173,6 +173,63 @@ namespace YoFi.Tests.Functional
             //
         }
 
+        [TestMethod]
+        public async Task BulkDelete()
+        {
+            /*
+            Given: On the Payees page, logged in
+            And: Three new items added with a distinctive name
+            And: Showing a search result with just those added items
+            And: In bulk edit mode
+            When: Clicking "Delete" on the bulk edit bar
+            And: Clicking "OK" on the confirmation dialog
+            Then: Still on the Payees page
+            And: Showing all items
+            And: Bulk edit toolbar is gone
+            And: Total number of items is back to the standard amount
+             */
+
+            // Given: We are logged in and on the payees page
+            await ClickPayees();
+
+            // And: Three new items added with a distinctive name
+            await AddPayee("XYZA", "X:Y:Z");
+            await AddPayee("XYZB", "X:Y:Z");
+            await AddPayee("XYZC", "X:Y:Z");
+
+            // Delete them the old way, for now.
+            await DeletePayees("XYZ");
+        }
+
+        async Task AddPayee(string name, string category)
+        {
+            // Given: We are starting at the payee index page
+            await ThenIsOnPage("Payees");
+            var originalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+
+            // When: Creating a new item
+
+            // Click #dropdownMenuButtonAction
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            // Click text=Create New
+            await Page.ClickAsync("text=Create New");
+            // Click input[name="Name"]
+            await Page.FillAsync("input[name=\"Name\"]", name);
+            // Fill input[name="Category"]
+            await Page.FillAsync("input[name=\"Category\"]", category);
+            // Click input:has-text("Create")
+            await Page.ClickAsync("input:has-text(\"Create\")");
+            // Assert.AreEqual("http://localhost:50419/Payees", page.Url);
+
+            // Then: We finish at the payee index page
+            await ThenIsOnPage("Payees");
+
+            // And: There is one more item
+            var itemsnow = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            Assert.IsTrue(itemsnow == originalitems + 1);
+
+        }
+
         async Task DeletePayees(string q)
         {
             // Delete payees matching q until down to expected TotalItemCount
