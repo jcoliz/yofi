@@ -41,6 +41,11 @@ namespace YoFi.AspNet.Data
         IQueryable<Split> IDataContext.Splits => Splits;
 
         IQueryable<BudgetTx> IDataContext.BudgetTxs => BudgetTxs;
+
+        IQueryable<Transaction> IDataContext.TransactionsWithSplits => Transactions.Include(x => x.Splits);
+
+        IQueryable<Split> IDataContext.SplitsWithTransactions => Splits.Include(x => x.Transaction);
+
         Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
 
         Task IDataContext.AddRangeAsync(IEnumerable<object> incoming) => base.AddRangeAsync(incoming);

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using YoFi.Core.Models;
@@ -21,6 +20,16 @@ namespace YoFi.Core.Reports
     /// Note that all public methods return an IEnumerable(NamedQuery) because
     /// this is what the Report class expects as a source, even if there is only
     /// a single query in it.
+    /// 
+    /// Architecturally, this class is a challenge. It absolutely represents
+    /// busines logic, and needs to know all about the conceptual structure
+    /// of our data. At the same time, it is tightly bound to the abilities
+    /// of EF Core to general MS SQL Server queries.
+    /// 
+    /// So, while this class does consume an IDataContext, and therefore has
+    /// interface separation, if we were to provide an IDataContext backed
+    /// by some other store, it's highly likely that this class would need
+    /// some work.
     /// </remarks>
     public class QueryBuilder
     {
@@ -203,8 +212,8 @@ namespace YoFi.Core.Reports
             years = _context.Transactions.Select(x => x.Timestamp.Year).Distinct().ToArray();
             foreach (var year in years)
             {
-                var txsyear = _context.Transactions.Include(x => x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
-                var splitsyear = _context.Splits.Include(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
+                var txsyear = _context.TransactionsWithSplits.Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
+                var splitsyear = _context.SplitsWithTransactions.Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
 
                 result.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear });
                 result.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear });
@@ -313,9 +322,8 @@ namespace YoFi.Core.Reports
         /// <returns>Resulting query</returns>
         private NamedQuery QuerySplits(string top = null, IEnumerable<string> excluded = null)
         {
-            var result = _context.Splits
+            var result = _context.SplitsWithTransactions
                 .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
-                .Include(x => x.Transaction)
                 .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Transaction.Timestamp, Category = x.Category })
                 .AsQueryable<IReportable>();
 

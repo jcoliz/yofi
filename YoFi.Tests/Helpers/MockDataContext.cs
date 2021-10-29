@@ -26,6 +26,10 @@ namespace YoFi.Tests.Helpers
 
         public IQueryable<BudgetTx> BudgetTxs => BudgetTxData.AsQueryable();
 
+        public IQueryable<Transaction> TransactionsWithSplits => throw new NotImplementedException();
+
+        public IQueryable<Split> SplitsWithTransactions => throw new NotImplementedException();
+
         public IQueryable<T> Get<T>()
         {
             if (typeof(T) == typeof(BudgetTx))
