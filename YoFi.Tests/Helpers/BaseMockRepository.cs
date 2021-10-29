@@ -10,7 +10,7 @@ using YoFi.Core.Repositories;
 
 namespace YoFi.Tests.Helpers
 {
-    public abstract class BaseMockRepository<T>: IMockRepository<T> where T: class, IModelItem, new()
+    public abstract class BaseMockRepository<T>: IMockRepository<T> where T: class, IModelItem<T>, new()
     {
         private readonly HashSet<T> _importing;
 
@@ -105,8 +105,6 @@ namespace YoFi.Tests.Helpers
             return Task.CompletedTask;
         }
 
-        public IQueryable<T> InDefaultOrder(IQueryable<T> original) => original;
-
         public abstract IQueryable<T> ForQuery(string q);
 
         public void QueueImportFromXlsx(Stream stream)
@@ -129,7 +127,7 @@ namespace YoFi.Tests.Helpers
             _importing.Clear();
 
             // Return those items for display
-            return InDefaultOrder(result.AsQueryable());
+            return new T().InDefaultOrder(result.AsQueryable());
         }
     }
 }

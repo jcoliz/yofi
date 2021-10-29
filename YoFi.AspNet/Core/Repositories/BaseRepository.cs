@@ -16,22 +16,20 @@ namespace YoFi.Core.Repositories
     /// This base repository class largely implements the IRepository(T) interface, with some items left abstract for the inherited class
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-    public abstract class BaseRepository<T> : IRepository<T> where T: class, IModelItem, new()
+    public abstract class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, new()
     {
         protected readonly IDataContext _context;
         private readonly HashSet<T> _importing;
 
         public IQueryable<T> All => _context.Get<T>();
 
-        public IQueryable<T> OrderedQuery => InDefaultOrder(All);
+        public IQueryable<T> OrderedQuery => new T().InDefaultOrder(All);
 
         public BaseRepository(IDataContext context)
         {
             _context = context;
             _importing = new HashSet<T>(new T().ImportDuplicateComparer);
         }
-
-        public abstract IQueryable<T> InDefaultOrder(IQueryable<T> original);
 
         // TODO: SingleAsync()
         public Task<T> GetByIdAsync(int? id) => Task.FromResult(_context.Get<T>().Single(x => x.ID == id.Value));
@@ -98,7 +96,7 @@ namespace YoFi.Core.Repositories
             _importing.Clear();
 
             // Return those items for display
-            return InDefaultOrder(result.AsQueryable());
+            return new T().InDefaultOrder(result.AsQueryable());
         }
     }
 }

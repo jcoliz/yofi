@@ -7,11 +7,10 @@ using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
 {
-    public interface IRepository<T> where T: class, IModelItem
+    public interface IRepository<T> where T: class, IModelItem<T>
     {
         IQueryable<T> All { get; }
         IQueryable<T> OrderedQuery { get; }
-        IQueryable<T> InDefaultOrder(IQueryable<T> original);
         IQueryable<T> ForQuery(string q);
         Task<T> GetByIdAsync(int? id);
         Task<bool> TestExistsByIdAsync(int id);

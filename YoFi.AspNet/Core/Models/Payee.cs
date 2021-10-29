@@ -14,7 +14,7 @@ namespace YoFi.Core.Models
     /// If a transaction's matches our Name, then it should have this
     /// Category and SubCategory
     /// </remarks>
-    public class Payee: IModelItem, ICategory
+    public class Payee: IModelItem<Payee>, ICategory
     {
         /// <summary>
         /// Object identity in Entity Framework
@@ -36,7 +36,7 @@ namespace YoFi.Core.Models
         /// </summary>
         public bool? Selected { get; set; }
 
-        IEqualityComparer<object> IModelItem.ImportDuplicateComparer => new __PayeeImportDuplicateComparer();
+        IEqualityComparer<Payee> IModelItem<Payee>.ImportDuplicateComparer => new __PayeeImportDuplicateComparer();
 
         /// <summary>
         /// Remove all characters from payee which are not whitespace or alpha-numeric
@@ -58,6 +58,11 @@ namespace YoFi.Core.Models
         {
             return HashCode.Combine(Name, Category);
         }
+
+        public IQueryable<Payee> InDefaultOrder(IQueryable<Payee> original)
+        {
+            return original.OrderBy(x => x.Name);
+        }
     }
 
     /// <summary>
@@ -66,26 +71,20 @@ namespace YoFi.Core.Models
     /// <remarks>
     /// Generally, we don't import duplicates, although some importers override this behavior
     /// </remarks>
-    class __PayeeImportDuplicateComparer : IEqualityComparer<object>
+    class __PayeeImportDuplicateComparer : IEqualityComparer<Payee>
     {
-        public new bool Equals(object x, object y)
+        public bool Equals(Payee x, Payee y)
         {
             if (x == null || y == null)
                 throw new ArgumentNullException("Only works with BudgetTx items");
-
-            if (!(x is Payee) || !(y is Payee))
-                throw new ArgumentException("Only works with BudgetTx items");
 
             var itemx = x as Payee;
             var itemy = y as Payee;
 
             return itemx.Name == itemy.Name;
         }
-        public int GetHashCode(object obj)
+        public int GetHashCode(Payee obj)
         {
-            if (!(obj is Payee))
-                throw new ArgumentException("Only works with Payee items");
-
             var item = obj as Payee;
 
             return item.Name.GetHashCode();

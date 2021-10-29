@@ -11,8 +11,6 @@ namespace YoFi.Core.Repositories
     /// </remarks>
     public class BudgetTxRepository: BaseRepository<BudgetTx>
     {
-        public override IQueryable<BudgetTx> InDefaultOrder(IQueryable<BudgetTx> original) => original.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category);
-
         public BudgetTxRepository(IDataContext context): base(context)
         {
         }

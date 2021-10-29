@@ -10,7 +10,7 @@ using YoFi.Core.Models;
 
 namespace YoFi.Tests.Helpers
 {
-    public interface IMockRepository<T>: IRepository<T> where T: class, IModelItem
+    public interface IMockRepository<T>: IRepository<T> where T: class, IModelItem<T>
     {
         public void AddItems(int numitems);
 

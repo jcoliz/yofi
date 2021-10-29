@@ -11,8 +11,6 @@ namespace YoFi.Core.Repositories
     /// </summary>
     public class PayeeRepository : BaseRepository<Payee>, IPayeeRepository
     {
-        public override IQueryable<Payee> InDefaultOrder(IQueryable<Payee> original) => original.OrderBy(x => x.Category).ThenBy(x => x.Name);
-
         public PayeeRepository(IDataContext context) : base(context)
         {
         }

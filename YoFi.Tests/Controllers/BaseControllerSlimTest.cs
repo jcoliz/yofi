@@ -24,7 +24,7 @@ namespace YoFi.Tests.Controllers.Slim
     /// Functionality specific to a certain controller can be tested in the inherited class
     /// </remarks>
     /// <typeparam name="T">Underlying Model type</typeparam>
-    public class BaseControllerSlimTest<T> where T: class, IModelItem, new()
+    public class BaseControllerSlimTest<T> where T: class, IModelItem<T>, new()
     {
         protected IController<T> controller;
         protected IMockRepository<T> repository;
@@ -401,7 +401,7 @@ namespace YoFi.Tests.Controllers.Slim
             var model = Assert.That.IsOfType<IEnumerable<T>>(viewresult.Model);
 
             // And: Model matches original items, sorted by default
-            Assert.IsTrue(repository.InDefaultOrder(expected.AsQueryable()).SequenceEqual(model));
+            Assert.IsTrue(new T().InDefaultOrder(expected.AsQueryable()).SequenceEqual(model));
 
             // And: All the items are in the repository
             Assert.IsTrue(expected.SequenceEqual(repository.All));

@@ -24,7 +24,7 @@ namespace YoFi.Tests.Core
     /// </remarks>
     /// <typeparam name="T">Model type contained in the repository under test</typeparam>
     [TestClass]
-    public abstract class BaseRepositoryTest<T> where T: class, IModelItem, new()
+    public abstract class BaseRepositoryTest<T> where T: class, IModelItem<T>, new()
     {
         protected IRepository<T> repository;
         protected MockDataContext context;
