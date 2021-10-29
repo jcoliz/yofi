@@ -197,6 +197,29 @@ namespace YoFi.Tests.Functional
             await AddPayee("XYZB", "X:Y:Z");
             await AddPayee("XYZC", "X:Y:Z");
 
+            // And: Searching for "XYZ" (which we just imported)
+            await Page.FillAsync("data-test-id=q", "XYZ");
+            await Page.ClickAsync("data-test-id=btn-search");
+
+            // Note: 3 items are found, because we just added them
+            await ThenTotalItemsAreEqual(3);
+
+            // And: In bulk edit mode
+
+            // Click #dropdownMenuButtonAction
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            // Click text=Bulk Edit
+            await Page.ClickAsync("text=Bulk Edit");
+
+            // TODO: Write the feature now!
+            // Below code unwinds the Givens until we have the real code.
+
+            // Cancel bulk edit for now
+            // Click #dropdownMenuButtonAction
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            // Click text=Bulk Edit
+            await Page.ClickAsync("text=Cancel Bulk Edit");
+
             // Delete them the old way, for now.
             await DeletePayees("XYZ");
         }
