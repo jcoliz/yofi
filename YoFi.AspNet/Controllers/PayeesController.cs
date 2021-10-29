@@ -263,18 +263,16 @@ namespace YoFi.AspNet.Controllers
                 if (files == null || !files.Any())
                     throw new ApplicationException("Please choose a file to upload, first.");
 
-                var importer = new BaseImporter<Payee>(_repository);
-
                 foreach (var file in files)
                 {
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using var stream = file.OpenReadStream();
-                        importer.LoadFromXlsx(stream);
+                        _repository.QueueImportFromXlsx(stream);
                     }
                 }
 
-                var imported = await importer.ProcessAsync();
+                var imported = await _repository.ProcessImportAsync();
 
                 return View(imported);
             }

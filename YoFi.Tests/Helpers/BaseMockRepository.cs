@@ -12,6 +12,13 @@ namespace YoFi.Tests.Helpers
 {
     public abstract class BaseMockRepository<T>: IMockRepository<T> where T: class, IModelItem, new()
     {
+        private readonly HashSet<T> _importing;
+
+        protected BaseMockRepository()
+        {
+            _importing = new HashSet<T>(new T().ImportDuplicateComparer);
+        }
+
         public void AddItems(int numitems) => Items.AddRange(MakeItems(numitems));
 
         public abstract T MakeItem(int x);
@@ -101,5 +108,28 @@ namespace YoFi.Tests.Helpers
         public IQueryable<T> InDefaultOrder(IQueryable<T> original) => original;
 
         public abstract IQueryable<T> ForQuery(string q);
+
+        public void QueueImportFromXlsx(Stream stream)
+        {
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            var items = ssr.Deserialize<T>(exceptproperties: new string[] { "ID" });
+            _importing.UnionWith(items);
+        }
+
+        public async Task<IEnumerable<T>> ProcessImportAsync()
+        {
+            // Remove duplicate items
+            var result = _importing.Except(All).ToList();
+
+            // Add remaining items
+            await AddRangeAsync(result);
+
+            // Clear import queue for next time
+            _importing.Clear();
+
+            // Return those items for display
+            return InDefaultOrder(result.AsQueryable());
+        }
     }
 }

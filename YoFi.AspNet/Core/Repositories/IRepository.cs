@@ -20,5 +20,7 @@ namespace YoFi.Core.Repositories
         Task UpdateAsync(T item);
         Task RemoveAsync(T item);
         Stream AsSpreadsheet();
+        void QueueImportFromXlsx(Stream stream);
+        Task<IEnumerable<T>> ProcessImportAsync();
     }
 }

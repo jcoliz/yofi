@@ -51,8 +51,6 @@ namespace YoFi.Tests.Core
         ///     Zero the instances are equal.
         protected override int CompareKeys(BudgetTx x, BudgetTx y) => x.Amount.CompareTo(y.Amount);
 
-        protected override BaseImporter<BudgetTx> MakeImporter() => new BaseImporter<BudgetTx>(repository);
-
         [TestInitialize]
         public void SetUp()
         {

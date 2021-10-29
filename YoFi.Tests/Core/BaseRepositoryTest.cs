@@ -50,11 +50,6 @@ namespace YoFi.Tests.Core
         /// <returns>-1 if <paramref name="x"/> comes before <paramref name="y"/></returns>
         protected abstract int CompareKeys(T x, T y);
 
-        /// <summary>
-        /// Create an importer suitable for importing these items
-        /// </summary>
-        /// <returns></returns>
-        protected abstract BaseImporter<T> MakeImporter();
 
         protected async Task<IEnumerable<T>> WhenImportingItemsAsSpreadsheet(IEnumerable<T> expected)
         {
@@ -68,9 +63,8 @@ namespace YoFi.Tests.Core
             stream.Seek(0, SeekOrigin.Begin);
 
             // When: Importing it via an importer
-            var importer = MakeImporter();
-            importer.LoadFromXlsx(stream);
-            return await importer.ProcessAsync();
+            repository.QueueImportFromXlsx(stream);
+            return await repository.ProcessImportAsync();
         }
 
         [TestMethod]
