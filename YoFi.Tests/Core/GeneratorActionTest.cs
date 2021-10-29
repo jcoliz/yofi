@@ -238,6 +238,29 @@ namespace YoFi.Tests.Core.SampleGen
         }
 
         [TestMethod]
+        public void GenerateUploadSampleData()
+        {
+            // This is a second smaller set of sample data with all new payees
+            // and categories, which could be used as a test to UPLOAD
+            // on top of our existing data.
+
+            var instream = SampleData.Open("UploadSampleDataDefinition.xlsx");
+            generator.LoadDefinitions(instream);
+            generator.GenerateTransactions();
+            generator.GeneratePayees();
+            generator.GenerateBudget();
+
+            using var stream = new MemoryStream();
+            generator.Save(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
+        }
+
+        [TestMethod]
         public async Task GenerateJson()
         {
             var instream = CNDSampleData.Open("FullSampleDataDefinition.xlsx");

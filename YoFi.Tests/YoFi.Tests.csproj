@@ -20,6 +20,7 @@
     <None Remove="SampleData\Splits-Test.xlsx" />
     <None Remove="SampleData\TestData1.xlsx" />
     <None Remove="SampleData\Transactions1000.json" />
+    <None Remove="SampleData\UploadSampleDataDefinition.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +31,7 @@
     <EmbeddedResource Include="SampleData\Splits-Test.xlsx" />
     <EmbeddedResource Include="SampleData\TestData1.xlsx" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
+    <EmbeddedResource Include="SampleData\UploadSampleDataDefinition.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
