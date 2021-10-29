@@ -95,18 +95,6 @@ namespace YoFi.AspNet.Root
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
             .UseStartup<Startup>()
-            //
-            // Don't need to log ALL the queries. Can turn this back to info if debugging is needed
-            //
-            // https://stackoverflow.com/questions/42079956/suppress-sql-queries-logging-in-entity-framework-core
-            //
-            .ConfigureLogging((context, logging) => {
-                var env = context.HostingEnvironment;
-                var config = context.Configuration.GetSection("Logging");
-                logging.AddConfiguration(config);
-                logging.AddConsole();
-                logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
-            })
             .ConfigureAppConfiguration((context, config) => 
                 {
                     try
