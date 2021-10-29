@@ -9,6 +9,8 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class BudgetUITest : FunctionalUITest
     {
+        const int TotalItemCount = 156;
+
         [TestMethod]
         public async Task ClickBudget()
         {
@@ -65,7 +67,33 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-clear");
 
             // Then: Back to all the items
-            await ThenTotalItemsAreEqual(156);
+            await ThenTotalItemsAreEqual(TotalItemCount);
         }
+
+        [TestMethod]
+        public async Task DownloadAll()
+        {
+            // Given: We are logged in and on the budget page
+            await ClickBudget();
+
+            // When: Downloading items
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+
+            var download1 = await Page.RunAndWaitForDownloadAsync(async () =>
+            {
+                await Page.ClickAsync("text=Export");
+            });
+
+            // Then: A spreadsheet containing 156 BudgetTxs was downloaded
+            await ThenSpreadsheetWasDownloadedContaining<IdOnly>(source: download1, name: "BudgetTx", count: TotalItemCount);
+
+#if false
+            // Enable if need to inspect
+            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}.xlsx";
+            await download1.SaveAsAsync(filename);
+            TestContext.AddResultFile(filename);
+#endif
+        }
+
     }
 }

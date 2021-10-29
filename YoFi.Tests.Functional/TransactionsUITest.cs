@@ -127,27 +127,10 @@ namespace YoFi.Tests.Functional
 #endif
         }
 
-        private class IdOnly
-        {
-            public int ID { get; set; }
-        }
-
         private class IdAndPayee
         {
             public int ID { get; set; }
             public string Payee { get; set; }
-        }
-
-        private async Task<IEnumerable<T>> ThenSpreadsheetWasDownloadedContaining<T>(IDownload source, string name, int count) where T: class, new()
-        {
-            using var stream = await source.CreateReadStreamAsync();
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            Assert.AreEqual(name, ssr.SheetNames.First());
-            var items = ssr.Deserialize<T>(name);
-            Assert.AreEqual(count, items.Count());
-
-            return items;
         }
 
         /* Not sure how to assert this

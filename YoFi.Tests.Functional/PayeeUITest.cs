@@ -9,6 +9,8 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class PayeeUITest : FunctionalUITest
     {
+        const int TotalItemCount = 40;
+
         [TestMethod]
         public async Task ClickPayees()
         {
@@ -38,7 +40,7 @@ namespace YoFi.Tests.Functional
             await ThenIsOnPage("Payees");
 
             // And: This page covers items 26-40
-            await ThenPageContainsItems(from: 26, to: 40);
+            await ThenPageContainsItems(from: 26, to: TotalItemCount);
         }
 
         [TestMethod]
@@ -79,7 +81,32 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-clear");
 
             // Then: Back to all the items
-            await ThenTotalItemsAreEqual(40);
+            await ThenTotalItemsAreEqual(TotalItemCount);
+        }
+
+        [TestMethod]
+        public async Task DownloadAll()
+        {
+            // Given: We are logged in and on the payees page
+            await ClickPayees();
+
+            // When: Downloading items
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+
+            var download1 = await Page.RunAndWaitForDownloadAsync(async () =>
+            {
+                await Page.ClickAsync("text=Export");
+            });
+
+            // Then: A spreadsheet containing 40 Payees was downloaded
+            await ThenSpreadsheetWasDownloadedContaining<IdOnly>(source: download1, name: "Payee", count: TotalItemCount);
+
+#if false
+            // Enable if need to inspect
+            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}.xlsx";
+            await download1.SaveAsAsync(filename);
+            TestContext.AddResultFile(filename);
+#endif
         }
     }
 }

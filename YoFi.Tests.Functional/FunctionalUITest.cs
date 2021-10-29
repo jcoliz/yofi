@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using jcoliz.OfficeOpenXml.Serializer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -90,5 +93,21 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(expected, content);
         }
 
+        protected class IdOnly
+        {
+            public int ID { get; set; }
+        }
+
+        protected async Task<IEnumerable<T>> ThenSpreadsheetWasDownloadedContaining<T>(IDownload source, string name, int count) where T : class, new()
+        {
+            using var stream = await source.CreateReadStreamAsync();
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            Assert.AreEqual(name, ssr.SheetNames.First());
+            var items = ssr.Deserialize<T>(name);
+            Assert.AreEqual(count, items.Count());
+
+            return items;
+        }
     }
 }
