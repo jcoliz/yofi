@@ -146,5 +146,7 @@ namespace YoFi.Tests.Helpers
             else
                 throw new NotImplementedException();
         }
+
+        public Task ToListAsync<T>(IQueryable<T> query) => Task.FromResult(query.ToList());
     }
 }

@@ -22,5 +22,9 @@ namespace YoFi.Core
         void Update(object item);
         void Remove(object item);
         Task SaveChangesAsync();
+
+        // Async Query methods
+
+        Task ToListAsync<T>(IQueryable<T> query);
     }
 }

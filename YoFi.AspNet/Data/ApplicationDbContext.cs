@@ -76,5 +76,7 @@ namespace YoFi.AspNet.Data
             }
             throw new NotImplementedException();
         }
+
+        Task IDataContext.ToListAsync<T>(IQueryable<T> query) => query.ToListAsync();
     }
 }
