@@ -1,4 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using jcoliz.OfficeOpenXml.Serializer;
+using Microsoft.Playwright;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional
@@ -61,6 +64,47 @@ namespace YoFi.Tests.Functional
 
             // Then: Back to all the items
             await ThenTotalItemsAreEqual(889);
+        }
+
+        [TestMethod]
+        public async Task DownloadAll()
+        {
+            // Given: We are logged in and on the transactions page
+            await ClickTransactions();
+
+            // When: Downloading transactions
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Export");
+
+            var download1 = await Page.RunAndWaitForDownloadAsync(async () =>
+            {
+                await Page.ClickAsync("[data-test-id=\"btn-dl-save\"]");
+            });
+
+            // Then: A spreadsheet containing 889 Transactions was downloaded
+            await ThenSpreadsheetWasDownloadedContaining(source: download1, name: "Transaction", count: 889);
+
+#if false
+            // Enable if need to inspect
+            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}.xlsx";
+            await download1.SaveAsAsync(filename);
+            TestContext.AddResultFile(filename);
+#endif
+        }
+
+        private class IdOnly
+        {
+            public int ID { get; set; }
+        }
+
+        private async Task ThenSpreadsheetWasDownloadedContaining(IDownload source, string name, int count)
+        {
+            using var stream = await source.CreateReadStreamAsync();
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            Assert.AreEqual(name, ssr.SheetNames.First());
+            var items = ssr.Deserialize<IdOnly>(name);
+            Assert.AreEqual(count, items.Count());
         }
 
         /* Not sure how to assert this

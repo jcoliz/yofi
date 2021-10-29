@@ -17,7 +17,7 @@ namespace YoFi.Tests.Functional
 
         public override BrowserNewContextOptions ContextOptions => _ContextOptions;
 
-        private static BrowserNewContextOptions _ContextOptions { get; set; }
+        private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions { AcceptDownloads = true };
 
         protected readonly string Site = "http://localhost:50419/";
 
@@ -64,7 +64,7 @@ namespace YoFi.Tests.Functional
                 await Context.StorageStateAsync(new BrowserContextStorageStateOptions { Path = ConfigFileName });
 
                 // Set it as our new context options for later contexts
-                _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName };
+                _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName, AcceptDownloads = true };
             }
         }
         protected async Task ThenIsOnPage(string expected)
