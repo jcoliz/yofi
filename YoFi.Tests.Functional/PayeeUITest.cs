@@ -115,17 +115,22 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task UploadAndDelete()
         {
-            // NOTE: We may need to get rid of the smoke test run on payees, which may conflict.
-
-            // The fun thing about this test is that we can run it over and over again
-            // Because of duplicate matching, if these payees already exist, we'll skip importing them
-
             //
             // Step 1: Upload payees
             //
 
-            // Given: We are logged in and on the payees page
-            await ClickPayees();
+            // Given: We are already logged in and starting at the root of the site
+            await GivenLoggedIn();
+
+            // When: Clicking "Budget" on the navbar
+            await Page.ClickAsync("text=Payees");
+
+            // Then: We land at the payee index page
+            await ThenIsOnPage("Payees");
+
+            // NOTE: It's possible that we already have the payees we're doing to import already in the
+            // database, perhaps from a failed test. So here we'll first delete them if they exist.
+            await DeletePayees("big");
 
             // Click [aria-label="Upload"]
             await Page.ClickAsync("[aria-label=\"Upload\"]");
@@ -141,8 +146,11 @@ namespace YoFi.Tests.Functional
             // Step 2: Search for the new payees
             //
 
-            // Given: We are logged in and on the payees page
-            await ClickPayees();
+            // When: Clicking "Budget" on the navbar
+            await Page.ClickAsync("text=Payees");
+
+            // Then: We land at the budget index page
+            await ThenIsOnPage("Payees");
 
             // Then: 43 items are found, because we just added 3
             await ThenTotalItemsAreEqual(TotalItemCount + 3);
@@ -158,8 +166,32 @@ namespace YoFi.Tests.Functional
             // Step 3: Delete them
             //
 
-            for (int i=1; i<=3; i++)
+            await DeletePayees("big");
+
+            //
+            // Step 4: Wish for bulk delete!!
+            //
+        }
+
+        async Task DeletePayees(string q)
+        {
+            // Delete payees matching q until down to expected TotalItemCount
+
+            // Given: We are at the payees page
+            await ThenIsOnPage("Payees");
+
+            // And: Clearing the search
+            await Page.ClickAsync("data-test-id=btn-clear");
+
+            // And: totalitems > expected TotalItemCount
+            var totalitems = Int32.Parse( await Page.TextContentAsync("data-test-id=totalitems") );
+
+            while (totalitems > TotalItemCount)
             {
+                // When: Searching for supplied search term
+                await Page.FillAsync("data-test-id=q", q);
+                await Page.ClickAsync("data-test-id=btn-search");
+
                 // When: Clicking delete on first item in list
                 await Page.ClickAsync("[aria-label=\"Delete\"]");
 
@@ -172,17 +204,9 @@ namespace YoFi.Tests.Functional
                 // Then: We land at the payees page
                 await ThenIsOnPage("Payees");
 
-                // And: 43-i items are found
-                await ThenTotalItemsAreEqual(TotalItemCount + 3 - i);
-
-                // When: Searching for "big" (which we just imported)
-                await Page.FillAsync("data-test-id=q", "big");
-                await Page.ClickAsync("data-test-id=btn-search");
+                // And: totalitems > expected TotalItemCount
+                totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
             }
-
-            //
-            // Step 4: Wish for bulk delete!!
-            //
         }
     }
 }
