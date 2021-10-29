@@ -25,8 +25,6 @@ namespace YoFi.Tests.Helpers
 
         public IEnumerable<T> MakeItems(int numitems) => Enumerable.Range(1, numitems).Select(MakeItem);
 
-        public bool Ok { get; set; } = true;
-
         public List<T> Items { get; } = new List<T>();
 
         public IQueryable<T> All => Items.AsQueryable();
@@ -35,27 +33,18 @@ namespace YoFi.Tests.Helpers
 
         public Task AddAsync(T item)
         {
-            if (!Ok)
-                throw new Exception("Failed");
-
             Items.Add(item);
             return Task.CompletedTask;
         }
 
         public Task AddRangeAsync(IEnumerable<T> items)
         {
-            if (!Ok)
-                throw new Exception("Failed");
-
             Items.AddRange(items);
             return Task.CompletedTask;
         }
 
         public Stream AsSpreadsheet()
         {
-            if (!Ok)
-                throw new Exception("Failed");
-
             var items = All;
 
             var stream = new MemoryStream();
@@ -70,13 +59,10 @@ namespace YoFi.Tests.Helpers
             return stream;
         }
 
-        public Task<T> GetByIdAsync(int? id) => Ok ? Task.FromResult(All.Single(x => x.ID == id.Value)) : throw new Exception("Failed");
+        public Task<T> GetByIdAsync(int? id) => Task.FromResult(All.Single(x => x.ID == id.Value));
 
         public Task RemoveAsync(T item)
         {
-            if (!Ok)
-                throw new Exception("Failed");
-
             if (item == null)
                 throw new ArgumentException("Expected non-null item");
 
@@ -93,9 +79,6 @@ namespace YoFi.Tests.Helpers
 
         public Task UpdateAsync(T item)
         {
-            if (!Ok)
-                throw new Exception("Failed");
-
             if (item == null)
                 throw new ArgumentException("Expected non-null item");
 

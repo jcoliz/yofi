@@ -54,21 +54,6 @@ namespace YoFi.Tests.Controllers.Slim
             return file;
         }
 
-        protected void ThenSucceedsOrFailsAsExpected(IActionResult actionresult, bool ok)
-        {
-            // Then: Fails if expected
-            if (!ok)
-            {
-                // Then: Returns status code 500 object result
-                var nfresult = Assert.That.IsOfType<ObjectResult>(actionresult);
-                Assert.AreEqual(500, nfresult.StatusCode);
-                return;
-            }
-
-            // Otherwise: Result is OK, if expected
-            Assert.That.ActionResultOk(actionresult);
-        }
-
         [TestMethod]
         public void Empty()
         {
@@ -93,27 +78,21 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(0, model.Count());
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task DetailsFound(bool ok)
+        [TestMethod]
+        public async Task DetailsFound()
         {
             // Given: Five items in the respository
             repository.AddItems(5);
 
-            // And: Repository in the given state
-            repository.Ok = ok;
-
             // When: Retrieving details for a selected item
             var selected = repository.All.Skip(1).First();
             var actionresult = await controller.Details(selected.ID);
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
+            // Then: Returns a viewmodel with an expected item
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<T>(viewresult.Model);
 
-            // Then: The selected item is the one returned
+            // And: The selected item is the one returned
             Assert.AreEqual(selected, model);
         }
 
@@ -126,7 +105,6 @@ namespace YoFi.Tests.Controllers.Slim
 
             // When: Retrieving details for an ID which does not exist
             var actionresult = await controller.Details(numitems + 1);
-            Assert.That.ActionResultOk(actionresult);
 
             // Then: Returns not found result
             var nfresult = Assert.That.IsOfType<NotFoundResult>(actionresult);
@@ -138,10 +116,11 @@ namespace YoFi.Tests.Controllers.Slim
         {
             // When: Calling Create
             var actionresult = await controller.Create();
-            Assert.That.ActionResultOk(actionresult);
+
+            // Then: Returns a viewmodel 
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
 
-            // Then: It returns an empty model
+            // And: It returns an empty model
             Assert.IsNull(viewresult.Model);
         }
 
@@ -154,7 +133,6 @@ namespace YoFi.Tests.Controllers.Slim
             // When: Adding a new item
             var expected = repository.MakeItem(6);
             var actionresult = await controller.Create(expected);
-            Assert.That.ActionResultOk(actionresult);
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
@@ -188,38 +166,16 @@ namespace YoFi.Tests.Controllers.Slim
             // And: No change to the repository
             Assert.AreEqual(5, repository.All.Count());
         }
+
         [TestMethod]
-        public async Task CreateFailed()
-        {
-            // Given: Respository in failure state
-            repository.Ok = false;
-
-            // When: Adding a new item
-            var expected = repository.MakeItem(6);
-            var actionresult = await controller.Create(expected);
-
-            // Then: Returns status code 500 object result
-            var nfresult = Assert.That.IsOfType<ObjectResult>(actionresult);
-            Assert.AreEqual(500, nfresult.StatusCode);
-        }
-
-
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task EditDetailsFound(bool ok)
+        public async Task EditDetailsFound()
         {
             // Given: Five items in the respository
             repository.AddItems(5);
 
-            // And: Repository in the given state
-            repository.Ok = ok;
-
             // When: Retrieving details for a selected item to edit it
             var selected = repository.All.Skip(1).First();
             var actionresult = await controller.Edit(selected.ID);
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<T>(viewresult.Model);
@@ -228,24 +184,17 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(selected, model);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task EditObjectValues(bool ok)
+        [TestMethod]
+        public async Task EditObjectValues()
         {
             // Given: Five items in the respository
             repository.AddItems(5);
-
-            // And: Repository in the given state
-            repository.Ok = ok;
 
             // When: Changing details for a selected item
             var selected = repository.All.Skip(1).First();
             var expected = repository.MakeItem(6);
             var id = expected.ID = selected.ID;
             var actionresult = await controller.Edit(id, expected);
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
@@ -292,7 +241,6 @@ namespace YoFi.Tests.Controllers.Slim
             var id = expected.ID = selected.ID;
             var badid = id + 1;
             var actionresult = await controller.Edit(badid, expected);
-            Assert.That.ActionResultOk(actionresult);
 
             // Then: Returns bad request
             Assert.That.IsOfType<BadRequestResult>(actionresult);
@@ -314,7 +262,7 @@ namespace YoFi.Tests.Controllers.Slim
             // When: Retrieving details for a selected item
             var selected = repository.All.Skip(1).First();
             var actionresult = await controller.Delete(selected.ID);
-            Assert.That.ActionResultOk(actionresult);
+
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<T>(viewresult.Model);
 
@@ -322,22 +270,15 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(selected, model);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task DeleteConfirmed(bool ok)
+        [TestMethod]
+        public async Task DeleteConfirmed()
         {
             // Given: Five items in the respository
             repository.AddItems(5);
 
-            // And: Repository in the given state
-            repository.Ok = ok;
-
             // When: Deleting a selected item
             var selected = repository.All.Skip(1).First();
             var actionresult = await controller.DeleteConfirmed(selected.ID);
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
@@ -350,21 +291,14 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.IsFalse(repository.All.Any(x => x.ID == selected.ID));
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task Download(bool ok)
+        [TestMethod]
+        public async Task Download()
         {
             // Given: 20 items in the respository
             repository.AddItems(20);
 
-            // And: Repository in the given state
-            repository.Ok = ok;
-
             // When: Downloading them as a spreadsheet
             var actionresult = await controller.Download();
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             // Then: Returns a filestream result
             var fsresult = Assert.That.IsOfType<FileStreamResult>(actionresult);
@@ -377,22 +311,15 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.IsTrue(repository.All.SequenceEqual(actual));
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task Upload(bool ok)
+        [TestMethod]
+        public async Task Upload()
         {
             // Given: A file with 10 new items
             var expected = repository.MakeItems(10).ToList();
             var file = GivenAFileOf(expected);
 
-            // And: Repository in the given state
-            repository.Ok = ok;
-
             // When: Uploading that
             var actionresult = await controller.Upload(new List<IFormFile>() { file });
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             // Then: View is returned
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);

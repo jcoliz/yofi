@@ -75,10 +75,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return NotFound();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // GET: Payees/Create
@@ -95,10 +91,6 @@ namespace YoFi.AspNet.Controllers
             catch (InvalidOperationException)
             {
                 return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
             }
         }
         // GET: Payees/CreateModel/{txid}
@@ -120,10 +112,6 @@ namespace YoFi.AspNet.Controllers
             catch (InvalidOperationException)
             {
                 return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
             }
         }
 
@@ -148,10 +136,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return NotFound();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // GET: Payees/Edit/5
@@ -167,10 +151,6 @@ namespace YoFi.AspNet.Controllers
             catch (InvalidOperationException)
             {
                 return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
             }
         }
 
@@ -202,10 +182,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return NotFound();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // POST: Payees/BulkEdit
@@ -214,16 +190,9 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkEdit(string Category)
         {
-            try
-            {
-                await _repository.BulkEdit(Category);
+            await _repository.BulkEdit(Category);
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Payees/Delete/5
@@ -246,10 +215,6 @@ namespace YoFi.AspNet.Controllers
             catch (InvalidOperationException)
             {
                 return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
             }
         }
 
@@ -280,29 +245,18 @@ namespace YoFi.AspNet.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // GET: Payees/Download
         [ActionName("Download")]
         public Task<IActionResult> Download()
         {
-            try
-            {
-                var stream = _repository.AsSpreadsheet();
+            var stream = _repository.AsSpreadsheet();
 
-                var result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"Payee.xlsx");
+            IActionResult result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"Payee.xlsx");
 
-                // Need to return a task to meet the IControllerBase interface
-                return Task.FromResult(result as IActionResult);
-            }
-            catch (Exception ex)
-            {
-                return Task.FromResult(StatusCode(500, ex.Message) as IActionResult);
-            }
+            // Need to return a task to meet the IControllerBase interface
+            return Task.FromResult(result);
         }
         Task<IActionResult> IController<Payee>.Create() => Create((int?)null);
 

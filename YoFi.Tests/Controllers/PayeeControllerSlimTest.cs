@@ -26,19 +26,12 @@ namespace YoFi.Tests.Controllers.Slim
             controller = new PayeesController(repository as IPayeeRepository);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task CreateFromTx(bool ok)
+        [TestMethod]
+        public async Task CreateFromTx()
         {
-            // Given: Repository in the given state
-            repository.Ok = ok;
-
             // When: Creating a payee from a given transaction id
             var txid = 1234;
             var actionresult = await payeeController.Create(txid);
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<Payee>(viewresult.Model);
@@ -47,19 +40,12 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(txid.ToString(),model.Name);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task CreateModalFromTx(bool ok)
+        [TestMethod]
+        public async Task CreateModalFromTx()
         {
-            // Given: Repository in the given state
-            repository.Ok = ok;
-
             // When: Creating a payee from a given transaction id
             var txid = 1234;
             var actionresult = await payeeController.CreateModal(txid);
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             var viewresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
             var model = Assert.That.IsOfType<Payee>(viewresult.Model);
@@ -73,28 +59,20 @@ namespace YoFi.Tests.Controllers.Slim
         {
             // When: Creating a payee from a non-existant id
             var actionresult = await payeeController.Create(0);
-            ThenSucceedsOrFailsAsExpected(actionresult, ok:true);
 
             // Then: The result is 'not found'
             Assert.That.IsOfType<NotFoundResult>(actionresult);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task EditModalDetailsFound(bool ok)
+        [TestMethod]
+        public async Task EditModalDetailsFound()
         {
             // Given: Five items in the respository
             repository.AddItems(5);
 
-            // And: Repository in the given state
-            repository.Ok = ok;
-
             // When: Retrieving details for a selected item to edit it
             var selected = repository.All.Skip(1).First();
             var actionresult = await payeeController.EditModal(selected.ID);
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             var viewresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
             var model = Assert.That.IsOfType<Payee>(viewresult.Model);
@@ -103,18 +81,11 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(selected, model);
         }
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task BulkEdit(bool ok)
+        [TestMethod]
+        public async Task BulkEdit()
         {
-            // Given: Repository in the given state
-            repository.Ok = ok;
-
             // When: Calling BukeEdit
             var actionresult = await payeeController.BulkEdit("Test");
-            ThenSucceedsOrFailsAsExpected(actionresult, ok);
-            if (!ok) return;
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);

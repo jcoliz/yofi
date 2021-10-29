@@ -15,9 +15,6 @@ namespace YoFi.Tests.Helpers
 
         public Task BulkEdit(string category)
         {
-            if (!Ok)
-                throw new Exception("Failed");
-
             // We don't need to DO anything here.
             WasBulkEditCalled = true;
             return Task.CompletedTask;
@@ -27,9 +24,6 @@ namespace YoFi.Tests.Helpers
 
         public Task<Payee> NewFromTransaction(int txid)
         {
-            if (!Ok)
-                throw new Exception("Failed");
-
             if (txid == 0)
                 throw new InvalidOperationException();
 

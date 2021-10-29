@@ -60,10 +60,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return NotFound();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // GET: BudgetTxs/Create
@@ -90,10 +86,6 @@ namespace YoFi.AspNet.Controllers
             catch (InvalidOperationException)
             {
                 return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
             }
         }
 
@@ -126,10 +118,6 @@ namespace YoFi.AspNet.Controllers
             {
                 return NotFound();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // GET: BudgetTxs/Delete/5
@@ -152,10 +140,6 @@ namespace YoFi.AspNet.Controllers
             catch (InvalidOperationException)
             {
                 return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
             }
         }
 
@@ -186,28 +170,17 @@ namespace YoFi.AspNet.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // GET: BudgetTxs/Download
         public Task<IActionResult> Download()
         {
-            try
-            {
-                var stream = _repository.AsSpreadsheet();
+            var stream = _repository.AsSpreadsheet();
 
-                var result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"BudgetTx.xlsx");
+            var result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"BudgetTx.xlsx");
 
-                // Need to return a task to meet the IControllerBase interface
-                return Task.FromResult(result as IActionResult);
-            }
-            catch (Exception ex)
-            {
-                return Task.FromResult(StatusCode(500, ex.Message) as IActionResult);
-            }
+            // Need to return a task to meet the IControllerBase interface
+            return Task.FromResult(result as IActionResult);
         }
 
         Task<IActionResult> IController<BudgetTx>.Index() => Index();

@@ -17,8 +17,6 @@ namespace YoFi.Tests.Helpers
         public T MakeItem(int x);
 
         public IEnumerable<T> MakeItems(int numitems);
-
-        public bool Ok { get; set; }
     }
 
     public class MockBudgetTxRepository : BaseMockRepository<BudgetTx>
