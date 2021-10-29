@@ -23,6 +23,9 @@ namespace YoFi.Tests.Functional
             // Then: We land at the budget index page
             await ThenIsOnPage("Budget Line Items");
 
+            // And: All expected items are here
+            await ThenTotalItemsAreEqual(TotalItemCount);
+
             // And: This page covers items 1-25
             await ThenPageContainsItems(from: 1, to: 25);
         }

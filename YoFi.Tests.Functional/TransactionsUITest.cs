@@ -13,6 +13,8 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class TransactionsUITest : FunctionalUITest
     {
+        const int TotalItemCount = 889;
+
         [TestMethod]
         public async Task ClickTransactions()
         {
@@ -24,6 +26,9 @@ namespace YoFi.Tests.Functional
 
             // Then: We land at the transactions index page
             await ThenIsOnPage("Transactions");
+
+            // And: All expected items are here
+            await ThenTotalItemsAreEqual(TotalItemCount);
         }
 
         [TestMethod]
@@ -64,7 +69,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-clear");
 
             // Then: Back to all the items
-            await ThenTotalItemsAreEqual(889);
+            await ThenTotalItemsAreEqual(TotalItemCount);
         }
 
         [TestMethod]

@@ -9,59 +9,9 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class SmokeTest: FunctionalUITest
     {
-        [TestMethod]
-        public async Task ClickTransactions()
-        {
-            // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Transactions" on the navbar
-            await Page.ClickAsync("text=Transactions");
-
-            // Then: We land at the transactions index page
-            await ThenIsOnPage("Transactions");
-
-            // And: There are the expected number of transactions.
-            // NOTE: This will change if the sample data pattern definitions change
-            // This may be somewhat brittle. Consider changing this to a range
-            await ThenTotalItemsAreEqual(889);
-        }
-
-        [TestMethod]
-        public async Task ClickPayees()
-        {
-            // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Payees" on the navbar
-            await Page.ClickAsync("text=Payees");
-
-            // Then: We land at the payees index page
-            await ThenIsOnPage("Payees");
-
-            // And: There are the expected number of items.
-            // NOTE: This will change if the sample data pattern definitions change
-            // This may be somewhat brittle. Consider changing this to a range
-            await ThenTotalItemsAreEqual(40);
-        }
-
-        [TestMethod]
-        public async Task ClickBudget()
-        {
-            // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Budget" on the navbar
-            await Page.ClickAsync("text=Budget");
-
-            // Then: We land at the budget index page
-            await ThenIsOnPage("Budget Line Items");
-
-            // And: There are the expected number of items.
-            // NOTE: This will change if the sample data pattern definitions change
-            // This may be somewhat brittle. Consider changing this to a range
-            await ThenTotalItemsAreEqual(156);
-        }
+        //
+        // NOTE: I have removed most of the smoke tests. They are just part of the individual test areas now.
+        //
 
         [TestMethod]
         public async Task ClickImport()
