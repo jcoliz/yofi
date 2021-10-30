@@ -148,5 +148,23 @@ namespace YoFi.Tests.Helpers
         }
 
         public Task ToListAsync<T>(IQueryable<T> query) => Task.FromResult(query.ToList());
+
+        public void RemoveRange(IEnumerable<object> items)
+        {
+            if (items == null)
+                throw new ArgumentException("Expected non-null items");
+
+            if (!items.Any())
+                return;
+
+            var t = items.First().GetType();
+            if (t == typeof(Payee))
+            {
+                var theseitems = items as IEnumerable<Payee>;
+                PayeeData.RemoveAll(x=>theseitems.Contains(x));
+            }
+            else
+                throw new NotImplementedException();
+        }
     }
 }

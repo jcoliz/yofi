@@ -29,6 +29,12 @@ namespace YoFi.Core.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task BulkDelete()
+        {
+            _context.RemoveRange(All.Where(x => x.Selected == true));
+            await _context.SaveChangesAsync();
+        }
+
         public Task<Payee> NewFromTransaction(int txid)
         {
             // TODO: SingleAsync()

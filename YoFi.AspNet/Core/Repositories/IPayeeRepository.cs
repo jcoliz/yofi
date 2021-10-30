@@ -9,7 +9,7 @@ namespace YoFi.Core.Repositories
     public interface IPayeeRepository: IRepository<Payee>
     {
         Task BulkEdit(string category);
-
+        Task BulkDelete();
         Task<Payee> NewFromTransaction(int txid);
     }
 }

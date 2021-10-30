@@ -91,6 +91,30 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public async Task BulkDelete()
+        {
+            // Given: Five items in the data set
+            var numtotalitems = 5;
+            var all = Items.Take(numtotalitems);
+
+            // And: A subset of the items are selected
+            var numdeleteditems = 2;
+            var subset = all.Take(numdeleteditems);
+            foreach (var item in subset)
+                item.Selected = true;
+            context.AddRange(all);
+
+            // When: Bulk deleting the selected items
+            await payeeRepository.BulkDelete();
+
+            // Then: The number of items is total minus deleted
+            Assert.AreEqual(numtotalitems-numdeleteditems,repository.All.Count());
+
+            // And: All repository items are unselected
+            Assert.IsTrue(repository.All.All(x => x.Selected != true));
+        }
+
+        [TestMethod]
         public async Task NewFromTransaction()
         {
             // Given: A transaction in the DB

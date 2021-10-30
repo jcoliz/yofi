@@ -29,5 +29,11 @@ namespace YoFi.Tests.Helpers
 
             return Task.FromResult(new Payee() { Name = txid.ToString() });
         }
+
+        public Task BulkDelete()
+        {
+            Items.RemoveAll(x => x.Selected == true);
+            return Task.CompletedTask;
+        }
     }
 }

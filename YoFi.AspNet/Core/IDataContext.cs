@@ -21,6 +21,7 @@ namespace YoFi.Core
 
         void Update(object item);
         void Remove(object item);
+        void RemoveRange(IEnumerable<object> items);
         Task SaveChangesAsync();
 
         // Async Query methods
