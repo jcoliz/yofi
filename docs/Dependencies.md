@@ -21,16 +21,26 @@ Currently the only supported database is MS SQL Server. Support for MySQL is on 
 
 For storing/retrieving receipts as blobs in Azure Storage.
 
-### Office Open XML SDK
-
-For reading/writing XLSX spreadsheet files.
-
 ## Submodules
 
+### jcoliz/OfficeOpenXMLEasy
+https://github.com/jcoliz/OfficeOpenXMLEasy
+
+For serializing/deserializing objects to/from spreadsheet files. Uses Office Open XML SDK.
+
 ### OFX Sharp
+https://github.com/jcoliz/OFXSharp
 
 For parsing OFX files. I am consuming this as a submodule because the mainline
 OFX Sharp is compiled for full .NET Framework. Current development targets .NET Standard 2.0.
+
+## Infrastructure
+
+### Playwright.NET
+
+For browser-based functional testing. Playwright is super stable and easy to use. I like having
+functional tests running against the final deployed bits to ensure there aren't any bugs
+hiding somewhere in the configuration or infrastructure.
 
 ## Client-side libraries
 
