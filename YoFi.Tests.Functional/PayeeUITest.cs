@@ -189,6 +189,11 @@ namespace YoFi.Tests.Functional
             And: Total number of items is back to the standard amount
              */
 
+            // Clean up any payees from previously failed tests
+            await GivenLoggedIn();
+            await Page.ClickAsync("text=Payees");
+            await DeletePayees("XYZ");
+
             // Given: We are logged in and on the payees page
             await ClickPayees();
 
@@ -211,14 +216,27 @@ namespace YoFi.Tests.Functional
             // Click text=Bulk Edit
             await Page.ClickAsync("text=Bulk Edit");
 
+            // When: Clicking "Delete" on the bulk edit bar
+            await Page.ClickAsync("data-test-id=btn-bulk-delete");
+
+            // And: Clicking "OK" on the confirmation dialog
+            await Page.WaitForSelectorAsync("#deleteConfirmModal");
+            await Page.ScreenshotAsync(new Microsoft.Playwright.PageScreenshotOptions() { Path = $"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.png", OmitBackground = true });
+            await Page.ClickAsync("data-test-id=btn-modal-ok");
+
+            // Then: Still on the Payees page
+            await ThenIsOnPage("Payees");
+
             // TODO: Write the feature now!
             // Below code unwinds the Givens until we have the real code.
 
+            /*
             // Cancel bulk edit for now
             // Click #dropdownMenuButtonAction
             await Page.ClickAsync("#dropdownMenuButtonAction");
             // Click text=Bulk Edit
             await Page.ClickAsync("text=Cancel Bulk Edit");
+            */
 
             // Delete them the old way, for now.
             await DeletePayees("XYZ");

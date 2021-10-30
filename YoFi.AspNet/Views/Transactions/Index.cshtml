@@ -47,7 +47,7 @@
                 <i class="fas fa-search"></i>
             </button>
             <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Help">
-                <a a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary me-1" data-test-id="btn-help"><i class="fas fa-question"></i></a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary me-1" data-test-id="btn-help"><i class="fas fa-question"></i></a>
             </span>
             <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
         </form>
@@ -236,7 +236,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <a asp-action="Edit" class="btn btn-secondary asp-route-id btnDismissEditModal" target="_blank">More</a>
+                    <a asp-action="Edit" class="btn btn-secondary asp-route-id btnDismissModal" target="_blank">More</a>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>

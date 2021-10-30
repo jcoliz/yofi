@@ -177,8 +177,8 @@
         }
     });
 
-    $('.btnDismissEditModal').click(function () {
-        $('#editModal').modal('hide');
+    $('.btnDismissModal').click(function () {
+        $(this).parentsUntil('#modal').modal('hide');
     });
 
     $('.category-autocomplete').autoComplete({

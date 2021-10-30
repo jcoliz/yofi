@@ -195,6 +195,15 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // POST: Payees/BulkDelete
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
+        public async Task<IActionResult> BulkDelete()
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: Payees/Delete/5
         public async Task<IActionResult> Delete(int? id) => await Details(id);
 
