@@ -46,17 +46,17 @@ namespace YoFi.Tests.Functional
         }
 
         [TestMethod]
-        public async Task IndexQAnyDate()
+        public async Task IndexQAnyCategory()
         {
             // Given: We are logged in and on the transactions page
             await ClickTransactions();
 
-            // When: Searching for "1230" (December 30th)
-            await Page.FillAsync("data-test-id=q", "1230");
+            // When: Searching for "Food:Away:Coffee"
+            await Page.FillAsync("data-test-id=q", "Food:Away:Coffee");
             await Page.ClickAsync("data-test-id=btn-search");
 
-            // Then: Exactly 3 transactions are found, because we know this about our source data
-            await ThenTotalItemsAreEqual(3);
+            // Then: Exactly 156 transactions are found, because we know this about our source data
+            await ThenTotalItemsAreEqual(156);
         }
 
         [TestMethod]
