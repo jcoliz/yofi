@@ -36,8 +36,6 @@ namespace YoFi.Tests.Functional
 
         protected async Task GivenLoggedIn()
         {
-            base.Context.SetDefaultTimeout(5000);
-
             // Navigate to the root of the site
             await Page.GotoAsync(Site);
 
@@ -78,6 +76,9 @@ namespace YoFi.Tests.Functional
 
                 // Set it as our new context options for later contexts
                 _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName, AcceptDownloads = true };
+
+                // Once we're logged int, the timeouts can get a lot tighter
+                base.Context.SetDefaultTimeout(5000);
             }
         }
         protected async Task ThenIsOnPage(string expected)
@@ -119,7 +120,13 @@ namespace YoFi.Tests.Functional
 
             return items;
         }
-        protected Task ScreenShotAsync() => Page.ScreenshotAsync(new Microsoft.Playwright.PageScreenshotOptions() { Path = $"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.{ScreenShotCount++}.png", OmitBackground = true });
+        protected async Task ScreenShotAsync()
+        {
+            var filename = $"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.{ScreenShotCount++}.png";
+            await Page.ScreenshotAsync(new Microsoft.Playwright.PageScreenshotOptions() { Path = filename, OmitBackground = true });
+            TestContext.AddResultFile(filename);
+        }
+
 
     }
 }
