@@ -21,6 +21,7 @@ namespace YoFi.Tests.Helpers
         }
 
         public bool WasBulkEditCalled { get; private set; } = false;
+        public bool WasBulkDeleteCalled { get; private set; } = false;
 
         public Task<Payee> NewFromTransaction(int txid)
         {
@@ -32,7 +33,8 @@ namespace YoFi.Tests.Helpers
 
         public Task BulkDelete()
         {
-            Items.RemoveAll(x => x.Selected == true);
+            // We don't need to DO anything here.
+            WasBulkDeleteCalled = true;
             return Task.CompletedTask;
         }
     }

@@ -24,10 +24,20 @@ namespace YoFi.Tests.Functional
 
         protected readonly string Site = "http://localhost:50419/";
 
+        protected int ScreenShotCount;
+
         protected FunctionalUITest() { }
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            ScreenShotCount = 1;
+        }
 
         protected async Task GivenLoggedIn()
         {
+            base.Context.SetDefaultTimeout(5000);
+
             // Navigate to the root of the site
             await Page.GotoAsync(Site);
 
@@ -109,5 +119,7 @@ namespace YoFi.Tests.Functional
 
             return items;
         }
+        protected Task ScreenShotAsync() => Page.ScreenshotAsync(new Microsoft.Playwright.PageScreenshotOptions() { Path = $"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.{ScreenShotCount++}.png", OmitBackground = true });
+
     }
 }

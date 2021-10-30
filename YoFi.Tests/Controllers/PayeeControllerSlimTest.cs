@@ -84,7 +84,7 @@ namespace YoFi.Tests.Controllers.Slim
         [TestMethod]
         public async Task BulkEdit()
         {
-            // When: Calling BukeEdit
+            // When: Calling BulkEdit
             var actionresult = await payeeController.BulkEdit("Test");
 
             // Then: Returns a redirection to Index
@@ -93,6 +93,20 @@ namespace YoFi.Tests.Controllers.Slim
 
             // And: Bulk edit operation was performed
             Assert.IsTrue(payeeRepository.WasBulkEditCalled);
+        }
+
+        [TestMethod]
+        public async Task BulkDelete()
+        {
+            // When: Calling BulkDelete
+            var actionresult = await payeeController.BulkDelete();
+
+            // Then: Returns a redirection to Index
+            var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
+            Assert.AreEqual("Index", redirresult.ActionName);
+
+            // And: Bulk edit operation was performed
+            Assert.IsTrue(payeeRepository.WasBulkDeleteCalled);
         }
 
     }

@@ -201,6 +201,8 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkDelete()
         {
+            await _repository.BulkDelete();
+
             return RedirectToAction(nameof(Index));
         }
 

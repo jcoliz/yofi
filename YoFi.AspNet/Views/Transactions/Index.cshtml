@@ -134,21 +134,24 @@
         </tr>
     </thead>
     <tbody>
+        @{
+            var line = 1;
+        }
         @foreach (var item in Model)
         {
-            <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);">
+            <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@line++">
                 @if ((bool)(ViewData["ShowHidden"]))
                 {
                     <td>
                         @{ var checkedornot = (item.Hidden == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Hide/@item.ID">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Hide/@item.ID" >
                     </td>
                 }
                 @if ((bool)(ViewData["ShowSelected"]))
                 {
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Select/@item.ID">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Select/@item.ID" data-test-id="check-select">
                     </td>
                 }
                 <td>

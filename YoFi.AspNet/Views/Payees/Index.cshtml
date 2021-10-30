@@ -76,14 +76,17 @@
         </tr>
     </thead>
     <tbody>
+        @{
+            var line = 1;
+        }
         @foreach (var item in Model)
         {
-            <tr data-id="@item.ID">
+            <tr data-id="@item.ID" data-test-id="line-@(line++)">
                 @if ((bool)(ViewData["ShowSelected"]))
                 {
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/SelectPayee/@item.ID">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/SelectPayee/@item.ID" data-test-id="check-select">
                     </td>
                 }
                 <td class="display-category">
