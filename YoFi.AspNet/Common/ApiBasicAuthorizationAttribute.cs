@@ -18,10 +18,6 @@ namespace YoFi.AspNet.Common
                 IConfiguration config = httpcontext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
                 var expectedpassword = config["Api:Key"];
 
-                var upass = $"user:{expectedpassword}";
-                var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(upass));
-                var header = $"Basic {b64}";
-
                 if (string.IsNullOrEmpty(expectedpassword))
                     throw new ApplicationException();
 

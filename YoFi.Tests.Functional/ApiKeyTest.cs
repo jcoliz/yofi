@@ -2,10 +2,12 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional
@@ -21,10 +23,13 @@ namespace YoFi.Tests.Functional
         [TestInitialize]
         public void SetUp()
         {
-            client = new HttpClient();
-
             var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(ApiKeyTest))).Build();
             apikey = config["Api:Key"];
+
+            client = new HttpClient();
+
+            var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"user:{apikey}"));
+            client.DefaultRequestHeaders.Add("Authorization", $"Basic {b64}");
         }
 
         [TestMethod]
@@ -38,8 +43,29 @@ namespace YoFi.Tests.Functional
 
             // And: Returns an empty response
             var stream = await response.Content.ReadAsStreamAsync();
-            var result = await System.Text.Json.JsonSerializer.DeserializeAsync<ApiResult>(stream);
+            var result = await JsonSerializer.DeserializeAsync<ApiResult>(stream);
             Assert.IsTrue(result.Ok);
+        }
+
+        [TestMethod]
+        public async Task GetTxi()
+        {
+            // When: Get transactions with a query parameter
+            var q = "Tim";
+            var response = await client.GetAsync(Site+$"txi/?q={q}");
+
+            // Then: Response is OK
+            Assert.IsTrue(response.IsSuccessStatusCode);
+
+            // And: Returns 58 items
+            var stream = await response.Content.ReadAsStreamAsync();
+            var doc = await JsonDocument.ParseAsync(stream);
+            var root = doc.RootElement;
+            Assert.AreEqual(58, root.GetArrayLength());
+
+            // And: All items contain the query parameter in the payee
+            var payees = root.EnumerateArray().Select(x => x.GetProperty("Payee").GetString());
+            Assert.IsTrue(payees.All(x => x.Contains(q)));
         }
 
         public class ApiResult
