@@ -264,7 +264,7 @@ namespace YoFi.Tests
 
         [TestMethod]
         public async Task CreateModalZero() =>
-            Assert.IsTrue(await controller.CreateModal(0) is Microsoft.AspNetCore.Mvc.BadRequestResult);
+            Assert.IsTrue(await controller.CreateModal(0) is Microsoft.AspNetCore.Mvc.BadRequestObjectResult);
 
         [TestMethod]
         public async Task CreateModalNotFound() =>

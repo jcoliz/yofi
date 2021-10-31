@@ -93,21 +93,21 @@ namespace YoFi.AspNet.Controllers
                 return NotFound();
             }
         }
-        // GET: Payees/CreateModel/{txid}
-        public async Task<IActionResult> CreateModal(int txid)
+        // GET: Payees/CreateModel/{id}
+        public async Task<IActionResult> CreateModal(int id)
         {
             try
             {
-                if (txid <= 0)
-                    throw new ArgumentException();
+                if (id <= 0)
+                    throw new ArgumentException("Transaction ID needed", nameof(id));
 
-                ViewData["TXID"] = txid;
+                ViewData["TXID"] = id;
 
-                return PartialView("CreatePartial", await _repository.NewFromTransaction(txid));
+                return PartialView("CreatePartial", await _repository.NewFromTransaction(id));
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
-                return BadRequest();
+                return BadRequest($"Bad Request: {ex.Message}");
             }
             catch (InvalidOperationException)
             {
