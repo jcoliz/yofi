@@ -60,6 +60,17 @@ namespace YoFi.Tests.Functional
             Assert.IsTrue(payees.All(x => x.Contains(q)));
         }
 
+        [TestMethod]
+        public async Task MaxId()
+        {
+            // When: Get max id for payees
+            var response = await WhenRequesting(Site + $"maxid/payees");
+
+            // Then: Returns 58 items
+            var maxid = response.GetProperty("Item").GetInt32();
+            Assert.IsTrue(maxid >= 40);
+        }
+
         public async Task<JsonElement> WhenRequesting(string url)
         {
             // When: Requesting {url} from server

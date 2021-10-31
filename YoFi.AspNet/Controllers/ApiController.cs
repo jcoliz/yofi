@@ -426,6 +426,36 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns the highest ID for the <paramref name="kind"/> of item supplied
+        /// </summary>
+        /// <param name="kind">Kind of item to get max is</param>
+        /// <returns></returns>
+        [ApiBasicAuthorization]
+        [HttpGet("maxid/{kind}")]
+        public async Task<ActionResult> MaxId(string kind)
+        {
+            try
+            {
+                if (kind == null)
+                    throw new ArgumentNullException(nameof(kind));
+
+                if (kind == "payees")
+                {
+                    var maxitem = await _context.Payees.OrderByDescending(x => x.ID).Take(1).FirstOrDefaultAsync();
+                    var id = maxitem?.ID ?? 0;
+                    return new JsonResult(new ApiResult(id));
+                }
+                else
+                    throw new ArgumentException($"Unknown kind {kind}", nameof(kind));
+
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new ApiResult(ex));
+            }
+        }
+
         private string BlobStoreName => _configuration["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
     }
 
