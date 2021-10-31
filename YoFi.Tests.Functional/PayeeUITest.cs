@@ -207,6 +207,49 @@ namespace YoFi.Tests.Functional
             // Then: Completes without error
         }
 
+        [TestMethod]
+        public async Task TransactionsAddPayee()
+        {
+            // This is a transactions page test but it needs to be here because it
+            // inserts into the payees, which screws up our tests here unless we wait
+            // for it. Also we will be equiped to clean it up here better.
+
+            // Given: We are logged in and on the transactions page
+            await Page.ClickAsync("text=Transactions");
+
+            // When: Clicking 'Add Payee' on the first line
+            var button = await Page.QuerySelectorAsync($"data-test-id=line-1 >> [aria-label=\"Add Payee\"]");
+            await button.ClickAsync();
+
+            // And: Adding a new Payee from the ensuing dialog
+            await Page.WaitForSelectorAsync("#addPayeeModal");
+            await ScreenShotAsync();
+            await Page.FillAsync("input[name=\"Name\"]", "AAXYZ");
+            await Page.FillAsync("input[name=\"Category\"]", "X:Y:Z:A");
+            await ScreenShotAsync();
+
+            await Page.ClickAsync("#addPayeeModal >> text=Save");
+
+            // Then: The payees page has one more item than expected
+            await Page.ClickAsync("text=Payees");
+            await ThenTotalItemsAreEqual(TotalItemCount + 1);
+
+            // And: Searching for the payee finds it
+            await Page.FillAsync("data-test-id=q", "AAXYZ");
+            await Page.ClickAsync("data-test-id=btn-search");
+            await ThenTotalItemsAreEqual(1);
+            await ScreenShotAsync();
+
+            // Clean it up!
+            await Page.ClickAsync("[aria-label=\"Delete\"]");
+            await ThenIsOnPage("Delete Payee");
+            await Page.ClickAsync("input:has-text(\"Delete\")");
+            await ThenIsOnPage("Payees");
+            await ThenTotalItemsAreEqual(TotalItemCount);
+            await ScreenShotAsync();
+        }
+
+
         async Task AddPayee(string name, string category)
         {
             // Given: We are starting at the payee index page
@@ -256,7 +299,9 @@ namespace YoFi.Tests.Functional
                 await Page.ClickAsync("data-test-id=btn-search");
 
                 // When: Clicking delete on first item in list
-                await Page.ClickAsync("[aria-label=\"Delete\"]");
+                var deletebutton = await Page.QuerySelectorAsync("[aria-label=\"Delete\"]");
+                Assert.IsNotNull(deletebutton);
+                await deletebutton.ClickAsync();
 
                 // Then: We land at the delete payee page
                 await ThenIsOnPage("Delete Payee");
