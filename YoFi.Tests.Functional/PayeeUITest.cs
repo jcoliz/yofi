@@ -21,6 +21,35 @@ namespace YoFi.Tests.Functional
 
             // When: Clicking "Budget" on the navbar
             await Page.ClickAsync("text=Payees");
+
+            // TODO: Check and store the highest current ID using the maxid api
+        }
+
+        [TestCleanup]
+        public Task Cleanup()
+        {
+            // TODO: Delete all items above the highest initial id
+
+            // But how? perhaps simple way is to accept an i parameter on index,
+            // which will return all where ids > {xxx}. Also may as well put us
+            // directly into bulkedit mode.
+
+            // Get current highest id
+
+            // If current highest id > highest id
+
+            // Call payee index with i={currentid}
+            // Note that we're now in bulk edit
+
+            // Determine how many are here
+            
+            // Select each one
+
+            // Bulk delete and accept ok
+
+            // Verify back to expect # items
+
+            return Task.CompletedTask;
         }
 
         [TestMethod]
