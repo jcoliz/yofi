@@ -36,7 +36,6 @@
 
   <ItemGroup>
     <None Include="..\.globalconfig" Link=".globalconfig" />
-    <None Include="BaseRepositoryTest.cs" />
   </ItemGroup>
 
   <ItemGroup>
