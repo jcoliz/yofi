@@ -977,7 +977,9 @@ namespace YoFi.Tests
             Assert.AreEqual(0, root.GetArrayLength());
         }
 
-        [TestMethod]
+        //[TestMethod]
+        // User Story 1169: Move API auth into AuthorizationFilterAttribute
+        // No longer can this be tested directly
         public void ReportV2exportFailsNoAuth()
         {
             // Not having an auth header
@@ -1031,7 +1033,9 @@ namespace YoFi.Tests
             Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
         }
 
-        [TestMethod]
+        //[TestMethod]
+        // User Story 1169: Move API auth into AuthorizationFilterAttribute
+        // No longer can this be tested directly
         public async Task GetTxQAnyFailsNoAuth()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using YoFi.AspNet.Common;
 using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 using YoFi.Core.Quieriers;
@@ -55,6 +56,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpGet("{id}", Name = "Get")]
+        [ApiBasicAuthorization]
         public async Task<ApiResult> Get(int id)
         {
             try
@@ -346,44 +348,16 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        private void CheckApiAuth(IHeaderDictionary Headers)
-        {
-            if (!Headers.ContainsKey("Authorization"))
-                throw new UnauthorizedAccessException();
-
-            var authorization = Headers["Authorization"].Single();
-            if (!authorization.StartsWith("Basic "))
-                throw new UnauthorizedAccessException();
-
-            var base64 = authorization[6..];
-            var credentialBytes = Convert.FromBase64String(base64);
-            var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
-            var password = credentials[1];
-
-            var expectedpassword = _configuration["Api:Key"];
-
-            if (string.IsNullOrEmpty(expectedpassword))
-                throw new ApplicationException("Application not configured for API password access.");
-
-            if (expectedpassword != password)
-                throw new ApplicationException("Invalid password");
-        }
-
         [HttpGet("ReportV2/{id}")]
+        [ApiBasicAuthorization]
         public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
         {
             try
             {
-                CheckApiAuth(Request.Headers);
-
                 var result = new ReportBuilder(_context).BuildReport(parms);
                 var json = result.ToJson();
 
                 return Content(json,"application/json");
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Unauthorized();
             }
             catch (Exception ex)
             {
@@ -435,21 +409,16 @@ namespace YoFi.AspNet.Controllers
             */
         }
 
+        [ApiBasicAuthorization]
         [HttpGet("txi")]
         public async Task<ActionResult> GetTransactions(string q = null)
         {
             try
             {
-                CheckApiAuth(Request.Headers);
-
                 var qbuilder = new TransactionsQueryBuilder(_context.Transactions);
                 qbuilder.Build(q);
 
                 return new JsonResult(await qbuilder.Query.ToListAsync());
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Unauthorized();
             }
             catch (Exception ex)
             {
