@@ -43,8 +43,10 @@ namespace YoFi.Tests.Functional
 
             // And: Returns an empty response
             var stream = await response.Content.ReadAsStreamAsync();
-            var result = await JsonSerializer.DeserializeAsync<ApiResult>(stream);
-            Assert.IsTrue(result.Ok);
+            var doc = await JsonDocument.ParseAsync(stream);
+            var root = doc.RootElement;
+            var ok = root.GetProperty("Ok").GetBoolean();
+            Assert.IsTrue(ok);
         }
 
         [TestMethod]
@@ -66,15 +68,6 @@ namespace YoFi.Tests.Functional
             // And: All items contain the query parameter in the payee
             var payees = root.EnumerateArray().Select(x => x.GetProperty("Payee").GetString());
             Assert.IsTrue(payees.All(x => x.Contains(q)));
-        }
-
-        public class ApiResult
-        {
-            public bool Ok { get; set; }
-
-            public object Item { get; private set; }
-
-            public string Error { get; private set; }
         }
     }
 }
