@@ -132,6 +132,44 @@ namespace YoFi.Tests.Functional
 #endif
         }
 
+        [TestMethod]
+        public async Task AddPayee()
+        {
+            // Given: We are logged in and on the transactions page
+            await ClickTransactions();
+
+            // When: Clicking 'Add Payee' on the first line
+            var button = await Page.QuerySelectorAsync($"data-test-id=line-1 >> [aria-label=\"Add Payee\"]");
+            await button.ClickAsync();
+
+            // And: Adding a new Payee from the ensuing dialog
+            await Page.WaitForSelectorAsync("#addPayeeModal");
+            await ScreenShotAsync();
+            await Page.FillAsync("input[name=\"Name\"]", "AAXYZ");
+            await Page.FillAsync("input[name=\"Category\"]", "X:Y:Z:A");
+            await ScreenShotAsync();
+
+            await Page.ClickAsync("#addPayeeModal >> text=Save");
+
+            // Then: The payees page has one more item than expected
+            await Page.ClickAsync("text=Payees");
+            await ThenTotalItemsAreEqual(PayeeUITest.TotalItemCount + 1);
+
+            // And: Searching for the payee finds it
+            await Page.FillAsync("data-test-id=q", "AAXYZ");
+            await Page.ClickAsync("data-test-id=btn-search");
+            await ThenTotalItemsAreEqual(1);
+            await ScreenShotAsync();
+
+            // Clean it up!
+            await Page.ClickAsync("[aria-label=\"Delete\"]");
+            await ThenIsOnPage("Delete Payee");
+            await Page.ClickAsync("input:has-text(\"Delete\")");
+            await ThenIsOnPage("Payees");
+            await ThenTotalItemsAreEqual(PayeeUITest.TotalItemCount);
+            await ScreenShotAsync();
+        }
+
         private class IdAndPayee
         {
             public int ID { get; set; }

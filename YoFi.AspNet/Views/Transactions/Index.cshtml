@@ -139,7 +139,7 @@
         }
         @foreach (var item in Model)
         {
-            <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@line++">
+            <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@(line++)">
                 @if ((bool)(ViewData["ShowHidden"]))
                 {
                     <td>

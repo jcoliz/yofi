@@ -9,7 +9,7 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class PayeeUITest : FunctionalUITest
     {
-        const int TotalItemCount = 40;
+        public const int TotalItemCount = 40;
 
         [TestMethod]
         public async Task ClickPayees()
