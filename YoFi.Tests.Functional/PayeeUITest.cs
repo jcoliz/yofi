@@ -11,15 +11,21 @@ namespace YoFi.Tests.Functional
     {
         public const int TotalItemCount = 40;
 
-        [TestMethod]
-        public async Task ClickPayees()
+        [TestInitialize]
+        public new async Task SetUp()
         {
+            base.SetUp();
+
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
             // When: Clicking "Budget" on the navbar
             await Page.ClickAsync("text=Payees");
+        }
 
+        [TestMethod]
+        public async Task Initial()
+        {
             // Then: We land at the budget index page
             await ThenIsOnPage("Payees");
 
@@ -34,7 +40,6 @@ namespace YoFi.Tests.Functional
         public async Task Page2()
         {
             // Given: We are logged in and on the payees page
-            await ClickPayees();
 
             // When: Clicking on the next page on the pagination control
             await Page.ClickAsync("data-test-id=nextpage");
@@ -50,7 +55,6 @@ namespace YoFi.Tests.Functional
         public async Task IndexQCategory()
         {
             // Given: We are logged in and on the payees page
-            await ClickPayees();
 
             // When: Searching for "Utilities" (which will match category)
             await Page.FillAsync("data-test-id=q", "Utilities");
@@ -64,7 +68,6 @@ namespace YoFi.Tests.Functional
         public async Task IndexQName()
         {
             // Given: We are logged in and on the payees page
-            await ClickPayees();
 
             // When: Searching for "am" (which will match name)
             await Page.FillAsync("data-test-id=q", "am");
@@ -91,7 +94,6 @@ namespace YoFi.Tests.Functional
         public async Task DownloadAll()
         {
             // Given: We are logged in and on the payees page
-            await ClickPayees();
 
             // When: Downloading items
             await Page.ClickAsync("#dropdownMenuButtonAction");
@@ -119,11 +121,7 @@ namespace YoFi.Tests.Functional
             // Step 1: Upload payees
             //
 
-            // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Budget" on the navbar
-            await Page.ClickAsync("text=Payees");
+            // Given: We are logged in and on the payees page
 
             // Then: We land at the payee index page
             await ThenIsOnPage("Payees");
@@ -197,7 +195,6 @@ namespace YoFi.Tests.Functional
 #endif
 
             // Given: We are logged in and on the payees page
-            await ClickPayees();
 
             // And: Three new items added with a distinctive name
             await AddPayee("XYZA", "X:Y:Z");
