@@ -61,7 +61,7 @@ namespace YoFi.Core.Models
 
         public IQueryable<Payee> InDefaultOrder(IQueryable<Payee> original)
         {
-            return original.OrderBy(x => x.Name);
+            return original.OrderBy(x => x.Category).ThenBy(x=>x.Name);
         }
     }
 
