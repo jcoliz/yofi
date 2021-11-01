@@ -157,7 +157,7 @@ namespace YoFi.Tests.Functional
 
             // NOTE: It's possible that we already have the payees we're doing to import already in the
             // database, perhaps from a failed test. So here we'll first delete them if they exist.
-            await DeletePayees("big");
+            await DeletePayees("__TEST__");
 
             // Click [aria-label="Upload"]
             await Page.ClickAsync("[aria-label=\"Upload\"]");
@@ -182,8 +182,8 @@ namespace YoFi.Tests.Functional
             // Then: 43 items are found, because we just added 3
             await ThenTotalItemsAreEqual(TotalItemCount + 3);
 
-            // When: Searching for "big" (which we just imported)
-            await Page.FillAsync("data-test-id=q", "big");
+            // When: Searching for what we just imported
+            await Page.FillAsync("data-test-id=q", "__TEST__");
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: 3 items are found, because we know this about our source data
@@ -193,7 +193,7 @@ namespace YoFi.Tests.Functional
             // Step 3: Delete them
             //
 
-            await DeletePayees("big");
+            await DeletePayees("__TEST__");
 
             // NOTE: I could use bulkdelete here, BUT this way I still get to test
             // the regular delete path
@@ -226,12 +226,12 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // And: Three new items added with a distinctive name
-            await AddPayee("XYZA", "X:Y:Z");
-            await AddPayee("XYZB", "X:Y:Z");
-            await AddPayee("XYZC", "X:Y:Z");
+            await AddPayee("AA__TEST__XYZA", "X:Y:Z");
+            await AddPayee("AA__TEST__XYZB", "X:Y:Z");
+            await AddPayee("AA__TEST__", "X:Y:Z");
 
             // When: Bulk Deleteing Payees
-            await BulkDeletePayees("XYZ");
+            await BulkDeletePayees("__TEST__");
 
             // Then: Completes without error
         }
@@ -253,7 +253,7 @@ namespace YoFi.Tests.Functional
             // And: Adding a new Payee from the ensuing dialog
             await Page.WaitForSelectorAsync("#addPayeeModal");
             await ScreenShotAsync();
-            await Page.FillAsync("input[name=\"Name\"]", "AAXYZ");
+            await Page.FillAsync("input[name=\"Name\"]", "AA__TEST__XYZ");
             await Page.FillAsync("input[name=\"Category\"]", "X:Y:Z:A");
             await ScreenShotAsync();
 
@@ -264,7 +264,7 @@ namespace YoFi.Tests.Functional
             await ThenTotalItemsAreEqual(TotalItemCount + 1);
 
             // And: Searching for the payee finds it
-            await Page.FillAsync("data-test-id=q", "AAXYZ");
+            await Page.FillAsync("data-test-id=q", "AA__TEST__XYZ");
             await Page.ClickAsync("data-test-id=btn-search");
             await ThenTotalItemsAreEqual(1);
             await ScreenShotAsync();
