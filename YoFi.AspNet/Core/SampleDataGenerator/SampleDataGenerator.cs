@@ -8,10 +8,19 @@ using YoFi.Core.Models;
 
 namespace YoFi.Core.SampleGen
 {
+    /// <summary>
+    /// Generates realistic sample data so we can test and users can explore the system
+    /// without exposing any real data
+    /// </summary>
+    /// <remarks>
+    /// The generator originally was designed to export to a file which we'd later import. It still
+    /// does that. However, I later desigend to just call it inline when starting and add the new data
+    /// directly into the database.
+    /// </remarks>
     public class SampleDataGenerator
     {
         /// <summary>
-        /// Load defintions from spreadsheet at <paramref name="stream"/>
+        /// Load pattern defintions from spreadsheet at <paramref name="stream"/>
         /// </summary>
         /// <param name="stream"></param>
         public void LoadDefinitions(Stream stream)
@@ -21,6 +30,14 @@ namespace YoFi.Core.SampleGen
             Definitions.AddRange(ssr.Deserialize<SampleDataPattern>());
         }
 
+        /// <summary>
+        /// Generate transactions using the patterns supplied earlier
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="addids"/> is needed if we're persisting it to a spreadsheet
+        /// Not needed if we'll directly inject it into the database.
+        /// </remarks>
+        /// <param name="addids">Add ids for the splits and transactions</param>
         public void GenerateTransactions(bool addids = true)
         {
             var groupings = Definitions.ToLookup(x => x.Group);
@@ -65,7 +82,7 @@ namespace YoFi.Core.SampleGen
 
         public void GeneratePayees()
         {
-            Payees = Definitions.Where(x => x.Payee != null).ToLookup(x=>x.Payee).SelectMany(x=>x.Key.Split(',').Select(y=>new Payee() { Name = y, Category = x.First().Category })).ToList();
+            Payees = Definitions.Where(def => def.Payee != null).ToLookup(def=>def.Payee).SelectMany(lookup=>lookup.Key.Split(',').Select(name => new Payee() { Name = name, Category = lookup.First().Category })).ToList();
         }
 
         public void GenerateBudget()
