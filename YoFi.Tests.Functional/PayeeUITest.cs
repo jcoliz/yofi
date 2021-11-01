@@ -183,7 +183,7 @@ namespace YoFi.Tests.Functional
             await ThenTotalItemsAreEqual(TotalItemCount + 3);
 
             // When: Searching for what we just imported
-            await Page.FillAsync("data-test-id=q", "__TEST__");
+            await Page.FillAsync("data-test-id=q", testmarker);
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: 3 items are found, because we know this about our source data
@@ -210,12 +210,12 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // And: Three new items added with a distinctive name
-            await GivenPayeeInDatabase("AA__TEST__XYZA", "AA__TEST__:Y:Z");
-            await GivenPayeeInDatabase("AA__TEST__XYZB", "AA__TEST__:Y:Z");
-            await GivenPayeeInDatabase("AA__TEST__XYZC", "AA__TEST__:Y:Z");
+            await GivenPayeeInDatabase();
+            await GivenPayeeInDatabase();
+            await GivenPayeeInDatabase();
 
             // And: Searching for the newly added items
-            await Page.FillAsync("data-test-id=q", "__TEST__");
+            await Page.FillAsync("data-test-id=q", testmarker);
             await Page.ClickAsync("data-test-id=btn-search");
 
             // And: In bulk edit mode
@@ -260,10 +260,11 @@ namespace YoFi.Tests.Functional
             await button.ClickAsync();
 
             // And: Adding a new Payee from the ensuing dialog
+            var name = NextName;
             await Page.WaitForSelectorAsync("#addPayeeModal");
             await ScreenShotAsync();
-            await Page.FillAsync("input[name=\"Name\"]", "AA__TEST__XYZ");
-            await Page.FillAsync("input[name=\"Category\"]", "AA__TEST__:Y:Z:A");
+            await Page.FillAsync("input[name=\"Name\"]", name);
+            await Page.FillAsync("input[name=\"Category\"]", NextCategory);
             await ScreenShotAsync();
 
             await Page.ClickAsync("#addPayeeModal >> text=Save");
@@ -273,14 +274,14 @@ namespace YoFi.Tests.Functional
             await ThenTotalItemsAreEqual(TotalItemCount + 1);
 
             // And: Searching for the payee finds it
-            await Page.FillAsync("data-test-id=q", "AA__TEST__XYZ");
+            await Page.FillAsync("data-test-id=q", name);
             await Page.ClickAsync("data-test-id=btn-search");
             await ThenTotalItemsAreEqual(1);
             await ScreenShotAsync();
         }
 
 
-        async Task GivenPayeeInDatabase(string name, string category)
+        async Task GivenPayeeInDatabase()
         {
             // Given: We are starting at the payee index page
             await ThenIsOnPage("Payees");
@@ -293,9 +294,9 @@ namespace YoFi.Tests.Functional
             // Click text=Create New
             await Page.ClickAsync("text=Create New");
             // Click input[name="Name"]
-            await Page.FillAsync("input[name=\"Name\"]", name);
+            await Page.FillAsync("input[name=\"Name\"]", NextName);
             // Fill input[name="Category"]
-            await Page.FillAsync("input[name=\"Category\"]", category);
+            await Page.FillAsync("input[name=\"Category\"]", NextCategory);
             // Click input:has-text("Create")
             await Page.ClickAsync("input:has-text(\"Create\")");
             // Assert.AreEqual("http://localhost:50419/Payees", page.Url);
@@ -315,7 +316,7 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // And: There is one extra payee in the database
-            await GivenPayeeInDatabase(NextName, NextCategory);
+            await GivenPayeeInDatabase();
 
             // And: Searched for the new payee
             await Page.FillAsync("data-test-id=q", testmarker);
