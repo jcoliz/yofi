@@ -210,9 +210,9 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // And: Three new items added with a distinctive name
-            await AddPayee("AA__TEST__XYZA", "AA__TEST__:Y:Z");
-            await AddPayee("AA__TEST__XYZB", "AA__TEST__:Y:Z");
-            await AddPayee("AA__TEST__XYZC", "AA__TEST__:Y:Z");
+            await GivenPayeeInDatabase("AA__TEST__XYZA", "AA__TEST__:Y:Z");
+            await GivenPayeeInDatabase("AA__TEST__XYZB", "AA__TEST__:Y:Z");
+            await GivenPayeeInDatabase("AA__TEST__XYZC", "AA__TEST__:Y:Z");
 
             // And: Searching for the newly added items
             await Page.FillAsync("data-test-id=q", "__TEST__");
@@ -280,7 +280,7 @@ namespace YoFi.Tests.Functional
         }
 
 
-        async Task AddPayee(string name, string category)
+        async Task GivenPayeeInDatabase(string name, string category)
         {
             // Given: We are starting at the payee index page
             await ThenIsOnPage("Payees");
@@ -309,42 +309,37 @@ namespace YoFi.Tests.Functional
 
         }
 
-        async Task DeletePayees(string q)
+        [TestMethod]
+        public async Task DeletePayee()
         {
-            // Delete payees matching q until down to expected TotalItemCount
+            // Given: We are logged in and on the payees page
 
-            // Given: We are at the payees page
+            // And: There is one extra payee in the database
+            await GivenPayeeInDatabase("AA__TEST__XYZA", $"AA__TEST__:{TestContext.TestName}");
+
+            // And: Searched for the new payee
+            await Page.FillAsync("data-test-id=q", "__TEST__");
+            await Page.ClickAsync("data-test-id=btn-search");
+            await ScreenShotAsync();
+
+            // When: Clicking delete on first item in list
+            var deletebutton = await Page.QuerySelectorAsync("[aria-label=\"Delete\"]");
+            Assert.IsNotNull(deletebutton);
+            await deletebutton.ClickAsync();
+
+            // Then: We land at the delete payee page
+            await ThenIsOnPage("Delete Payee");
+            await ScreenShotAsync();
+
+            // When: Clicking the Delete button to execute the delete
+            await Page.ClickAsync("input:has-text(\"Delete\")");
+
+            // Then: We land at the payees page
             await ThenIsOnPage("Payees");
+            await ScreenShotAsync();
 
-            // And: Clearing the search
-            await Page.ClickAsync("data-test-id=btn-clear");
-
-            // And: totalitems > expected TotalItemCount
-            var totalitems = Int32.Parse( await Page.TextContentAsync("data-test-id=totalitems") );
-
-            while (totalitems > TotalItemCount)
-            {
-                // When: Searching for supplied search term
-                await Page.FillAsync("data-test-id=q", q);
-                await Page.ClickAsync("data-test-id=btn-search");
-
-                // When: Clicking delete on first item in list
-                var deletebutton = await Page.QuerySelectorAsync("[aria-label=\"Delete\"]");
-                Assert.IsNotNull(deletebutton);
-                await deletebutton.ClickAsync();
-
-                // Then: We land at the delete payee page
-                await ThenIsOnPage("Delete Payee");
-
-                // When: Clicking the Delete button to execute the delete
-                await Page.ClickAsync("input:has-text(\"Delete\")");
-
-                // Then: We land at the payees page
-                await ThenIsOnPage("Payees");
-
-                // And: totalitems > expected TotalItemCount
-                totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
-            }
+            // And: Total number of items is back to the standard amount
+            await ThenTotalItemsAreEqual(TotalItemCount);
         }
     }
 }
