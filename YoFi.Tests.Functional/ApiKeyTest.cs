@@ -18,7 +18,7 @@ namespace YoFi.Tests.Functional
         HttpClient client;
         string apikey;
 
-        protected readonly string Site = "http://localhost:50419/api/";
+        protected readonly string Site = "http://localhost:50419/api/"; //50419
 
         [TestInitialize]
         public void SetUp()
@@ -85,6 +85,33 @@ namespace YoFi.Tests.Functional
             var root = doc.RootElement;
 
             return root;
+        }
+
+        public async Task<JsonElement> WhenPosting(string url, HttpContent content)
+        {
+            // When: Requesting {url} from server
+            var response = await client.PostAsync(url,content);
+
+            // Then: Response is OK
+            Assert.IsTrue(response.IsSuccessStatusCode);
+
+            // And: Returns a json document for further inspection
+            var stream = await response.Content.ReadAsStreamAsync();
+            var doc = await JsonDocument.ParseAsync(stream);
+            var root = doc.RootElement;
+
+            return root;
+        }
+
+        [DataRow("payee")]
+        [DataTestMethod]
+        public async Task ClearTestData(string what)
+        {
+            var response = await WhenPosting(Site + "ClearTestData/" + what, null);
+
+            // Then: Returns an OK response
+            var ok = response.GetProperty("Ok").GetBoolean();
+            Assert.IsTrue(ok);
         }
     }
 }

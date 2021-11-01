@@ -19,37 +19,35 @@ namespace YoFi.Tests.Functional
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
-            // When: Clicking "Budget" on the navbar
+            // When: Clicking "Payee" on the navbar
             await Page.ClickAsync("text=Payees");
 
             // TODO: Check and store the highest current ID using the maxid api
         }
 
         [TestCleanup]
-        public Task Cleanup()
+        public async Task Cleanup()
         {
-            // TODO: Delete all items above the highest initial id
+            //
+            // Delete all test items
+            //
 
-            // But how? perhaps simple way is to accept an i parameter on index,
-            // which will return all where ids > {xxx}. Also may as well put us
-            // directly into bulkedit mode.
+            // When: Clicking "Payee" on the navbar
+            await Page.ClickAsync("text=Payees");
 
-            // Get current highest id
+            // And: totalitems > expected TotalItemCount
+            var totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
 
-            // If current highest id > highest id
+            if (totalitems > TotalItemCount)
+            {
+                var api = new ApiKeyTest();
+                api.SetUp();
+                await api.ClearTestData("payee");
+            }
 
-            // Call payee index with i={currentid}
-            // Note that we're now in bulk edit
+            await Page.ReloadAsync();
 
-            // Determine how many are here
-            
-            // Select each one
-
-            // Bulk delete and accept ok
-
-            // Verify back to expect # items
-
-            return Task.CompletedTask;
+            await ThenTotalItemsAreEqual(TotalItemCount);
         }
 
         [TestMethod]
@@ -155,9 +153,11 @@ namespace YoFi.Tests.Functional
             // Then: We land at the payee index page
             await ThenIsOnPage("Payees");
 
+            /*
             // NOTE: It's possible that we already have the payees we're doing to import already in the
             // database, perhaps from a failed test. So here we'll first delete them if they exist.
             await DeletePayees("__TEST__");
+            */
 
             // Click [aria-label="Upload"]
             await Page.ClickAsync("[aria-label=\"Upload\"]");
@@ -193,7 +193,9 @@ namespace YoFi.Tests.Functional
             // Step 3: Delete them
             //
 
+            /*
             await DeletePayees("__TEST__");
+            */
 
             // NOTE: I could use bulkdelete here, BUT this way I still get to test
             // the regular delete path
@@ -226,9 +228,9 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // And: Three new items added with a distinctive name
-            await AddPayee("AA__TEST__XYZA", "X:Y:Z");
-            await AddPayee("AA__TEST__XYZB", "X:Y:Z");
-            await AddPayee("AA__TEST__", "X:Y:Z");
+            await AddPayee("AA__TEST__XYZA", "AA__TEST__:Y:Z");
+            await AddPayee("AA__TEST__XYZB", "AA__TEST__:Y:Z");
+            await AddPayee("AA__TEST__XYZC", "AA__TEST__:Y:Z");
 
             // When: Bulk Deleteing Payees
             await BulkDeletePayees("__TEST__");
@@ -254,7 +256,7 @@ namespace YoFi.Tests.Functional
             await Page.WaitForSelectorAsync("#addPayeeModal");
             await ScreenShotAsync();
             await Page.FillAsync("input[name=\"Name\"]", "AA__TEST__XYZ");
-            await Page.FillAsync("input[name=\"Category\"]", "X:Y:Z:A");
+            await Page.FillAsync("input[name=\"Category\"]", "AA__TEST__:Y:Z:A");
             await ScreenShotAsync();
 
             await Page.ClickAsync("#addPayeeModal >> text=Save");
@@ -269,6 +271,7 @@ namespace YoFi.Tests.Functional
             await ThenTotalItemsAreEqual(1);
             await ScreenShotAsync();
 
+            /*
             // Clean it up!
             await Page.ClickAsync("[aria-label=\"Delete\"]");
             await ThenIsOnPage("Delete Payee");
@@ -276,6 +279,7 @@ namespace YoFi.Tests.Functional
             await ThenIsOnPage("Payees");
             await ThenTotalItemsAreEqual(TotalItemCount);
             await ScreenShotAsync();
+            */
         }
 
 

@@ -456,6 +456,41 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
+        /// <summary>
+        /// Remove all test data from the system
+        /// </summary>
+        /// <remarks>
+        /// Deletes all objects of all types with __TEST__ in their category.
+        /// Used by funtional tests to clean themselves up
+        /// </remarks>
+        /// <returns></returns>
+        [ApiBasicAuthorization]
+        [HttpPost("ClearTestData/{id}")]
+        public async Task<ActionResult> ClearTestData(string id)
+        {
+            const string testmarker = "__test__";
+
+            try
+            {
+                if (id.Contains("payee"))
+                    _context.Payees.RemoveRange(_context.Payees.Where(x => x.Category.Contains(testmarker)));
+
+                /*
+                _context.Transactions.RemoveRange(_context.Transactions.Where(x => x.Category.Contains(testmarker)));
+                _context.Splits.RemoveRange(_context.Splits.Where(x => x.Category.Contains(testmarker)));
+                _context.BudgetTxs.RemoveRange(_context.BudgetTxs.Where(x => x.Category.Contains(testmarker)));
+                */
+
+                await _context.SaveChangesAsync();
+
+                return new JsonResult(new ApiResult());
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new ApiResult(ex));
+            }
+        }
+
         private string BlobStoreName => _configuration["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
     }
 
