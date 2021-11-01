@@ -142,7 +142,7 @@ namespace YoFi.Tests.Functional
         }
 
         [TestMethod]
-        public async Task UploadAndDelete()
+        public async Task Upload()
         {
             //
             // Step 1: Upload payees
@@ -188,17 +188,6 @@ namespace YoFi.Tests.Functional
 
             // Then: 3 items are found, because we know this about our source data
             await ThenTotalItemsAreEqual(3);
-
-            //
-            // Step 3: Delete them
-            //
-
-            /*
-            await DeletePayees("__TEST__");
-            */
-
-            // NOTE: I could use bulkdelete here, BUT this way I still get to test
-            // the regular delete path
         }
 
         [TestMethod]
@@ -218,13 +207,6 @@ namespace YoFi.Tests.Functional
             And: Total number of items is back to the standard amount
              */
 
-#if false
-            // Clean up any payees from previously failed tests
-            await GivenLoggedIn();
-            await Page.ClickAsync("text=Payees");
-            await DeletePayees("XYZ");
-#endif
-
             // Given: We are logged in and on the payees page
 
             // And: Three new items added with a distinctive name
@@ -232,10 +214,35 @@ namespace YoFi.Tests.Functional
             await AddPayee("AA__TEST__XYZB", "AA__TEST__:Y:Z");
             await AddPayee("AA__TEST__XYZC", "AA__TEST__:Y:Z");
 
-            // When: Bulk Deleteing Payees
-            await BulkDeletePayees("__TEST__");
+            // And: Searching for the newly added items
+            await Page.FillAsync("data-test-id=q", "__TEST__");
+            await Page.ClickAsync("data-test-id=btn-search");
 
-            // Then: Completes without error
+            // And: In bulk edit mode
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Bulk Edit");
+            await ScreenShotAsync();
+
+            // And: Clicking select on each item
+            var numdelete = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            for (int i = 1; i <= numdelete; i++)
+                await Page.ClickAsync($"data-test-id=line-{i} >> data-test-id=check-select");
+            await ScreenShotAsync();
+
+            // When: Clicking "Delete" on the bulk edit bar
+            await Page.ClickAsync("data-test-id=btn-bulk-delete");
+
+            // And: Clicking "OK" on the confirmation dialog
+            await Page.WaitForSelectorAsync("#deleteConfirmModal");
+            await ScreenShotAsync();
+            await Page.ClickAsync("data-test-id=btn-modal-ok");
+
+            // Then: Still on the Payees page
+            await ThenIsOnPage("Payees");
+            await ScreenShotAsync();
+
+            // And: Total number of items is back to the standard amount
+            await ThenTotalItemsAreEqual(TotalItemCount);
         }
 
         [TestMethod]
@@ -270,16 +277,6 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-search");
             await ThenTotalItemsAreEqual(1);
             await ScreenShotAsync();
-
-            /*
-            // Clean it up!
-            await Page.ClickAsync("[aria-label=\"Delete\"]");
-            await ThenIsOnPage("Delete Payee");
-            await Page.ClickAsync("input:has-text(\"Delete\")");
-            await ThenIsOnPage("Payees");
-            await ThenTotalItemsAreEqual(TotalItemCount);
-            await ScreenShotAsync();
-            */
         }
 
 
@@ -348,46 +345,6 @@ namespace YoFi.Tests.Functional
                 // And: totalitems > expected TotalItemCount
                 totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
             }
-        }
-        async Task BulkDeletePayees(string q)
-        {
-            // Delete payees matching q
-
-            // Given: We are at the payees page
-            await ThenIsOnPage("Payees");
-
-            // And: Clearing the search
-            await Page.ClickAsync("data-test-id=btn-clear");
-
-            // And: Searching for {q} 
-            await Page.FillAsync("data-test-id=q", q);
-            await Page.ClickAsync("data-test-id=btn-search");
-
-            // And: In bulk edit mode
-            await Page.ClickAsync("#dropdownMenuButtonAction");
-            await Page.ClickAsync("text=Bulk Edit");
-            await ScreenShotAsync();
-
-            // When: Clicking select on each item
-            var numdelete = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
-            for(int i = 1; i <= numdelete; i++)
-                await Page.ClickAsync($"data-test-id=line-{i} >> data-test-id=check-select");
-            await ScreenShotAsync();
-
-            // When: Clicking "Delete" on the bulk edit bar
-            await Page.ClickAsync("data-test-id=btn-bulk-delete");
-
-            // And: Clicking "OK" on the confirmation dialog
-            await Page.WaitForSelectorAsync("#deleteConfirmModal");
-            await ScreenShotAsync();
-            await Page.ClickAsync("data-test-id=btn-modal-ok");
-
-            // Then: Still on the Payees page
-            await ThenIsOnPage("Payees");
-            await ScreenShotAsync();
-
-            // And: All expected items are here
-            await ThenTotalItemsAreEqual(TotalItemCount);
         }
     }
 }
