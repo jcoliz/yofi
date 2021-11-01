@@ -18,24 +18,31 @@ namespace YoFi.Core.Repositories
     /// <typeparam name="T"></typeparam>
     public abstract class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, new()
     {
+        #region Fields
         protected readonly IDataContext _context;
         private readonly HashSet<T> _importing;
+        #endregion
 
-        public IQueryable<T> All => _context.Get<T>();
-
-        public IQueryable<T> OrderedQuery => new T().InDefaultOrder(All);
-
+        #region Constructor
         public BaseRepository(IDataContext context)
         {
             _context = context;
             _importing = new HashSet<T>(new T().ImportDuplicateComparer);
         }
+        #endregion
+
+        #region CRUD Operations
+        public IQueryable<T> All => _context.Get<T>();
+
+        public IQueryable<T> OrderedQuery => new T().InDefaultOrder(All);
 
         // TODO: SingleAsync()
         public Task<T> GetByIdAsync(int? id) => Task.FromResult(_context.Get<T>().Single(x => x.ID == id.Value));
 
         // TODO: AnyAsync()
         public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.Get<T>().Any(x => x.ID == id));
+
+        public abstract IQueryable<T> ForQuery(string q);
 
         public async Task AddAsync(T item)
         {
@@ -59,7 +66,9 @@ namespace YoFi.Core.Repositories
             _context.Remove(item);
             return _context.SaveChangesAsync();
         }
+        #endregion
 
+        #region Importer/Exporters
         public Stream AsSpreadsheet()
         {
             var stream = new MemoryStream();
@@ -73,8 +82,6 @@ namespace YoFi.Core.Repositories
 
             return stream;
         }
-
-        public abstract IQueryable<T> ForQuery(string q);
 
         public void QueueImportFromXlsx(Stream stream)
         {
@@ -98,5 +105,7 @@ namespace YoFi.Core.Repositories
             // Return those items for display
             return new T().InDefaultOrder(result.AsQueryable());
         }
+
+        #endregion
     }
 }
