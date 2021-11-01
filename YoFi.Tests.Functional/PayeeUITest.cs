@@ -315,10 +315,10 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // And: There is one extra payee in the database
-            await GivenPayeeInDatabase("AA__TEST__XYZA", $"AA__TEST__:{TestContext.TestName}");
+            await GivenPayeeInDatabase(NextName, NextCategory);
 
             // And: Searched for the new payee
-            await Page.FillAsync("data-test-id=q", "__TEST__");
+            await Page.FillAsync("data-test-id=q", testmarker);
             await Page.ClickAsync("data-test-id=btn-search");
             await ScreenShotAsync();
 
@@ -341,5 +341,10 @@ namespace YoFi.Tests.Functional
             // And: Total number of items is back to the standard amount
             await ThenTotalItemsAreEqual(TotalItemCount);
         }
+
+        private const string testmarker = "__TEST__";
+        private int nextid = 1;
+        private string NextName => $"AA{testmarker}{TestContext.TestName}_{nextid++}";
+        private string NextCategory => $"AA{testmarker}:{TestContext.TestName}:{nextid++}";
     }
 }
