@@ -405,6 +405,7 @@ namespace YoFi.Core.Reports
                 groups = source.Query.GroupBy(x => new CellGroupDto() { Row = x.Category });
 
             //  1. Group. Group source transactions by name/month and calculate totals
+            // TODO: SumAsync
             var selected = groups.Select(g => new CellTotalDto() { Location = g.Key, Value = g.Sum(y => y.Amount) });
 
             //  2. Place. Place each incoming data point into a report cell.

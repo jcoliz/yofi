@@ -12,6 +12,7 @@ namespace YoFi.Core.Reports
         /// Query of reportable items
         /// </summary>
         public IQueryable<IReportable> Query { get; set; }
+
         /// <summary>
         /// Optional name for the query
         /// </summary>

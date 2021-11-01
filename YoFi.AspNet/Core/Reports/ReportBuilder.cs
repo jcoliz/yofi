@@ -8,11 +8,13 @@ namespace YoFi.Core.Reports
     /// Build application-specific reports
     /// </summary>
     /// <remarks>
-    /// This is where the app logic lives to arrange the data we have in our
+    /// This is the top-level entry point for building reports
+    /// 
+    /// It is where the app logic lives to arrange the data we have in our
     /// database into reports that will be interesting for the user.
     /// 
-    /// It would be possible to make this more data driven so that fully
-    /// custom reports could be created.
+    /// Ultimately, I'd like to move the ReportDefinition objects into
+    /// the database.
     /// </remarks>
     public class ReportBuilder
     {
