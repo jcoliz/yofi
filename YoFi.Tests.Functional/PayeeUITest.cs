@@ -22,7 +22,8 @@ namespace YoFi.Tests.Functional
             // When: Clicking "Payee" on the navbar
             await Page.ClickAsync("text=Payees");
 
-            // TODO: Check and store the highest current ID using the maxid api
+            // Then: We are on the Payees page
+            await ThenIsOnPage("Payees");
         }
 
         [TestCleanup]
@@ -307,7 +308,6 @@ namespace YoFi.Tests.Functional
             // And: There is one more item
             var itemsnow = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
             Assert.IsTrue(itemsnow == originalitems + 1);
-
         }
 
         [TestMethod]
@@ -342,10 +342,5 @@ namespace YoFi.Tests.Functional
             // And: Total number of items is back to the standard amount
             await ThenTotalItemsAreEqual(TotalItemCount);
         }
-
-        private const string testmarker = "__TEST__";
-        private int nextid = 1;
-        private string NextName => $"AA{testmarker}{TestContext.TestName}_{nextid++}";
-        private string NextCategory => $"AA{testmarker}:{TestContext.TestName}:{nextid++}";
     }
 }

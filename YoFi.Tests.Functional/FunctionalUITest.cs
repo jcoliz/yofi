@@ -26,6 +26,11 @@ namespace YoFi.Tests.Functional
 
         protected int ScreenShotCount;
 
+        protected const string testmarker = "__TEST__";
+        private int nextid = 1;
+        protected string NextName => $"AA{testmarker}{TestContext.TestName}_{nextid++}";
+        protected string NextCategory => $"AA{testmarker}:{TestContext.TestName}:{nextid++}";
+
         protected FunctionalUITest() { }
 
         [TestInitialize]

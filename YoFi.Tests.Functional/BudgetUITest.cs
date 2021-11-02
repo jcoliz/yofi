@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional
@@ -11,17 +12,50 @@ namespace YoFi.Tests.Functional
     {
         const int TotalItemCount = 156;
 
-        [TestMethod]
-        public async Task ClickBudget()
+        [TestInitialize]
+        public new async Task SetUp()
         {
+            base.SetUp();
+
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
             // When: Clicking "Budget" on the navbar
             await Page.ClickAsync("text=Budget");
 
-            // Then: We land at the budget index page
+            // Then: We are on the Payees page
             await ThenIsOnPage("Budget Line Items");
+        }
+
+        [TestCleanup]
+        public async Task Cleanup()
+        {
+            //
+            // Delete all test items
+            //
+
+            // When: Clicking "Budget" on the navbar
+            await Page.ClickAsync("text=Budget");
+
+            // And: totalitems > expected TotalItemCount
+            var totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+
+            if (totalitems > TotalItemCount)
+            {
+                var api = new ApiKeyTest();
+                api.SetUp();
+                await api.ClearTestData("budgettx");
+            }
+
+            await Page.ReloadAsync();
+
+            await ThenTotalItemsAreEqual(TotalItemCount);
+        }
+
+        [TestMethod]
+        public async Task ClickBudget()
+        {
+            // Given: We are already logged in and on the budget page
 
             // And: All expected items are here
             await ThenTotalItemsAreEqual(TotalItemCount);
@@ -33,8 +67,7 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task Page2()
         {
-            // Given: We are logged in and on the budget page
-            await ClickBudget();
+            // Given: We are already logged in and on the budget page
 
             // When: Clicking on the next page on the pagination control
             await Page.ClickAsync("data-test-id=nextpage");
@@ -49,8 +82,7 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task IndexQ25()
         {
-            // Given: We are logged in and on the budget page
-            await ClickBudget();
+            // Given: We are already logged in and on the budget page
 
             // When: Searching for "Farquat"
             await Page.FillAsync("data-test-id=q", "Healthcare");
@@ -76,8 +108,7 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task DownloadAll()
         {
-            // Given: We are logged in and on the budget page
-            await ClickBudget();
+            // Given: We are already logged in and on the budget page
 
             // When: Downloading items
             await Page.ClickAsync("#dropdownMenuButtonAction");
@@ -98,5 +129,55 @@ namespace YoFi.Tests.Functional
 #endif
         }
 
+        [TestMethod]
+        public async Task Create()
+        {
+            // Given: We are already logged in and on the budget page
+
+            // When: Creating a new item
+            var originalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+
+            // Click #dropdownMenuButtonAction
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            // Click text=Create New
+            await Page.ClickAsync("text=Create New");
+            // Fill input[name="Category"]
+            await Page.FillAsync("input[name=\"Category\"]", NextCategory);
+            // Fill input[name="Timestamp"]
+            await Page.FillAsync("input[name=\"Timestamp\"]", "2021-12-31");
+            // Fill input[name="Amount"]
+            await Page.FillAsync("input[name=\"Amount\"]", "100");
+            await ScreenShotAsync();
+
+            // Click input:has-text("Create")
+            await Page.ClickAsync("input:has-text(\"Create\")");
+
+            // Then: We finish at the payee index page
+            await ThenIsOnPage("Budget Line Items");
+
+            // And: There is one more item
+            var itemsnow = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            Assert.IsTrue(itemsnow == originalitems + 1);
+
+            await ScreenShotAsync();
+        }
+
+        [TestMethod]
+        public async Task Read()
+        {
+
+        }
+
+        [TestMethod]
+        public async Task Update()
+        {
+
+        }
+
+        [TestMethod]
+        public async Task Delete()
+        {
+
+        }
     }
 }

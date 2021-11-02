@@ -475,10 +475,12 @@ namespace YoFi.AspNet.Controllers
                 if (id.Contains("payee"))
                     _context.Payees.RemoveRange(_context.Payees.Where(x => x.Category.Contains(testmarker)));
 
+                if (id.Contains("budgettx"))
+                    _context.BudgetTxs.RemoveRange(_context.BudgetTxs.Where(x => x.Category.Contains(testmarker)));
+
                 /*
                 _context.Transactions.RemoveRange(_context.Transactions.Where(x => x.Category.Contains(testmarker)));
                 _context.Splits.RemoveRange(_context.Splits.Where(x => x.Category.Contains(testmarker)));
-                _context.BudgetTxs.RemoveRange(_context.BudgetTxs.Where(x => x.Category.Contains(testmarker)));
                 */
 
                 await _context.SaveChangesAsync();
