@@ -65,17 +65,11 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Payee>.Index() => Index();
 
         // GET: Payees/Details/5
+        [ValidatePayeeExists]
         public async Task<IActionResult> Details(int? id)
         {
-            try
-            {
-                var item = await _repository.GetByIdAsync(id);
-                return View(item);
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+            var item = await _repository.GetByIdAsync(id);
+            return View(item);
         }
 
         // GET: Payees/Create
@@ -131,19 +125,14 @@ namespace YoFi.AspNet.Controllers
         }
 
         // GET: Payees/Edit/5
+        [ValidatePayeeExists]
         public async Task<IActionResult> Edit(int? id) => await Details(id);
 
         // GET: Payees/EditModal/5
+        [ValidatePayeeExists]
         public async Task<IActionResult> EditModal(int? id)
         {
-            try
-            {
-                return PartialView("EditPartial", await _repository.GetByIdAsync(id));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+            return PartialView("EditPartial", await _repository.GetByIdAsync(id));
         }
 
         // POST: Payees/Edit/5
@@ -193,26 +182,20 @@ namespace YoFi.AspNet.Controllers
         }
 
         // GET: Payees/Delete/5
+        [ValidatePayeeExists]
         public async Task<IActionResult> Delete(int? id) => await Details(id);
 
         // POST: Payees/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidatePayeeExists]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
-            {
-                var item = await _repository.GetByIdAsync(id);
+            var item = await _repository.GetByIdAsync(id);
+            await _repository.RemoveAsync(item);
 
-                await _repository.RemoveAsync(item);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
