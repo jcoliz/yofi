@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 
@@ -27,6 +23,8 @@ namespace YoFi.AspNet.Controllers
         }
     }
 
+    // https://docs.microsoft.com/en-us/archive/msdn-magazine/2016/august/asp-net-core-real-world-asp-net-core-mvc-filters
+
     internal class ValidateAuthorExistsFilterImpl<T> : IAsyncActionFilter where T : class, IModelItem<T>
     {
         private readonly IRepository<T> _datacontext;
@@ -48,6 +46,16 @@ namespace YoFi.AspNet.Controllers
                         return;
                     }
                 }
+                else
+                {
+                    context.Result = new BadRequestResult();
+                    return;
+                }
+            }
+            else
+            {
+                context.Result = new BadRequestResult();
+                return;
             }
             await next();
         }

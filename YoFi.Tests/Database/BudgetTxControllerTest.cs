@@ -83,11 +83,7 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task DetailsFound() => await helper.DetailsFound();
         [TestMethod]
-        public async Task DetailsNotFound() => await helper.DetailsNotFound();
-        [TestMethod]
         public async Task EditFound() => await helper.EditFound();
-        [TestMethod]
-        public async Task EditNotFound() => await helper.EditNotFound();
         [TestMethod]
         public async Task Create() => await helper.Create();
         [TestMethod]
@@ -259,20 +255,5 @@ namespace YoFi.Tests
             Assert.IsNull(viewresult.Model);
         }
 
-        [TestMethod]
-        public async Task DetailsNullNotFound() =>
-            Assert.IsTrue(await controller.Details(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
-
-        [TestMethod]
-        public async Task EditNullNotFound() =>
-            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
-
-        [TestMethod]
-        public async Task DeleteNullNotFound() =>
-            Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
-
-        [TestMethod]
-        public async Task DeleteConfirmedNotFound() =>
-            Assert.IsTrue(await controller.DeleteConfirmed(-1) is Microsoft.AspNetCore.Mvc.NotFoundResult);
     }
 }

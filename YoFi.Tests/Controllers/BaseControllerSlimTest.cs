@@ -97,21 +97,6 @@ namespace YoFi.Tests.Controllers.Slim
         }
 
         [TestMethod]
-        public async Task DetailsNotFound()
-        {
-            // Given: Five items in the respository
-            int numitems = 5;
-            repository.AddItems(numitems);
-
-            // When: Retrieving details for an ID which does not exist
-            var actionresult = await controller.Details(numitems + 1);
-
-            // Then: Returns not found result
-            var nfresult = Assert.That.IsOfType<NotFoundResult>(actionresult);
-            Assert.AreEqual(404, nfresult.StatusCode);
-        }
-
-        [TestMethod]
         public async Task CreateInitial()
         {
             // When: Calling Create

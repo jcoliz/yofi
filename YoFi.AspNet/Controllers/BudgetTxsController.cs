@@ -46,21 +46,15 @@ namespace YoFi.AspNet.Controllers
             ViewData[nameof(PageDivider)] = divider;
 
             // Show the index
-            // TODO: Would like to do ToListAsync
+            // TODO: ToListAsync()
             return View(result.ToList());
         }
 
         // GET: BudgetTxs/Details/5
+        [ValidateBudgetTxExists]
         public async Task<IActionResult> Details(int? id)
         {
-            try
-            {
-                return View(await _repository.GetByIdAsync(id));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+            return View(await _repository.GetByIdAsync(id));
         }
 
         // GET: BudgetTxs/Create
@@ -82,6 +76,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         // GET: BudgetTxs/Edit/5
+        [ValidateBudgetTxExists]
         public async Task<IActionResult> Edit(int? id) => await Details(id);
 
         // POST: BudgetTxs/Edit/5
@@ -89,6 +84,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
+        [ValidateBudgetTxExists]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Timestamp,Category")] BudgetTx item)
         {
             try
@@ -113,20 +109,12 @@ namespace YoFi.AspNet.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateBudgetTxExists]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
-            {
-                var item = await _repository.GetByIdAsync(id);
+            await _repository.RemoveAsync(await _repository.GetByIdAsync(id));
 
-                await _repository.RemoveAsync(item);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

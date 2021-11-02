@@ -62,14 +62,11 @@ namespace YoFi.AspNet.Controllers
             return View(result.ToList());
         }
 
-        Task<IActionResult> IController<Payee>.Index() => Index();
-
         // GET: Payees/Details/5
         [ValidatePayeeExists]
         public async Task<IActionResult> Details(int? id)
         {
-            var item = await _repository.GetByIdAsync(id);
-            return View(item);
+            return View(await _repository.GetByIdAsync(id));
         }
 
         // GET: Payees/Create
@@ -85,6 +82,8 @@ namespace YoFi.AspNet.Controllers
             }
             catch (InvalidOperationException)
             {
+                // NewFromTransaction will throw this if txid no exists
+                // Once I have a transactions repository, I can use ValidateTransactionExists here
                 return NotFound();
             }
         }
@@ -142,6 +141,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
+        [ValidatePayeeExists]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category,SubCategory")] Payee item)
         {
             try
@@ -192,8 +192,7 @@ namespace YoFi.AspNet.Controllers
         [ValidatePayeeExists]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var item = await _repository.GetByIdAsync(id);
-            await _repository.RemoveAsync(item);
+            await _repository.RemoveAsync(await _repository.GetByIdAsync(id));
 
             return RedirectToAction(nameof(Index));
         }
@@ -239,5 +238,8 @@ namespace YoFi.AspNet.Controllers
             return Task.FromResult(result);
         }
         Task<IActionResult> IController<Payee>.Create() => Create((int?)null);
+
+        Task<IActionResult> IController<Payee>.Index() => Index();
+
     }
 }
