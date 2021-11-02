@@ -21,6 +21,7 @@ using YoFi.Core.Importers;
 using YoFi.Core.Quieriers;
 using YoFi.Core.Reports;
 using Transaction = YoFi.Core.Models.Transaction;
+using Ardalis.Filters;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -336,17 +337,14 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateModel]
         public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    _context.Add(transaction);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(transaction);
+                _context.Add(transaction);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
@@ -461,21 +459,16 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Index));
         }
 #endif
-        // POST: Transactions/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateModel]
         public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
         {
             try
             {
                 if (id != transaction.ID && duplicate != true)
                     throw new ArgumentException();
-
-                if (!ModelState.IsValid)
-                    throw new InvalidOperationException();
 
                 if (duplicate == true)
                 {
@@ -505,10 +498,6 @@ namespace YoFi.AspNet.Controllers
             catch (ArgumentException)
             {
                 return BadRequest();
-            }
-            catch (InvalidOperationException)
-            {
-                return View(transaction);
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -696,6 +685,7 @@ namespace YoFi.AspNet.Controllers
         #region Action Handlers: Others (Report, Error)
 
         // GET: Transactions/Report
+        [ValidateModel]
         public IActionResult Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
         {
             try
@@ -1162,7 +1152,6 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Transaction>.Edit(int id, Transaction item) => Edit(id, false, item);
 
         Task<IActionResult> IController<Transaction>.Download() => Download(false);
-        void IController<Transaction>.SetErrorState() => ModelState.AddModelError("error", "test");
         #endregion
 
         #region Data Transfer Objects

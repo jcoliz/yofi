@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Repositories;
 using YoFi.Core.Models;
 using YoFi.Core.Importers;
+using Ardalis.Filters;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -72,21 +73,12 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateModel]
         public async Task<IActionResult> Create([Bind("ID,Amount,Timestamp,Category")] BudgetTx item)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    throw new InvalidOperationException();
+            await _repository.AddAsync(item);
 
-                await _repository.AddAsync(item);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: BudgetTxs/Edit/5
@@ -96,15 +88,13 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateModel]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Timestamp,Category")] BudgetTx item)
         {
             try
             {
                 if (id != item.ID)
                     throw new ArgumentException();
-
-                if (!ModelState.IsValid)
-                    throw new InvalidOperationException();
 
                 await _repository.UpdateAsync(item);
 
@@ -113,10 +103,6 @@ namespace YoFi.AspNet.Controllers
             catch (ArgumentException)
             {
                 return BadRequest();
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
             }
         }
 
@@ -184,7 +170,5 @@ namespace YoFi.AspNet.Controllers
         }
 
         Task<IActionResult> IController<BudgetTx>.Index() => Index();
-
-        void IController<BudgetTx>.SetErrorState() => ModelState.AddModelError("error", "test");
     }
 }

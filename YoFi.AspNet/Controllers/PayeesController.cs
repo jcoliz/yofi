@@ -13,6 +13,7 @@ using YoFi.Core.Repositories;
 using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 using YoFi.Core.Importers;
+using Ardalis.Filters;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -121,21 +122,12 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateModel]
         public async Task<IActionResult> Create([Bind("ID,Name,Category,SubCategory")] Payee payee)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    throw new InvalidOperationException();
+            await _repository.AddAsync(payee);
 
-                await _repository.AddAsync(payee);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Payees/Edit/5
@@ -160,15 +152,13 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateModel]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category,SubCategory")] Payee item)
         {
             try
             {
                 if (id != item.ID)
                     throw new ArgumentException();
-
-                if (!ModelState.IsValid)
-                    throw new InvalidOperationException();
 
                 await _repository.UpdateAsync(item);
 
@@ -177,10 +167,6 @@ namespace YoFi.AspNet.Controllers
             catch (ArgumentException)
             {
                 return BadRequest();
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
             }
         }
 
@@ -270,7 +256,5 @@ namespace YoFi.AspNet.Controllers
             return Task.FromResult(result);
         }
         Task<IActionResult> IController<Payee>.Create() => Create((int?)null);
-
-        void IController<Payee>.SetErrorState() => ModelState.AddModelError("error", "test");
     }
 }

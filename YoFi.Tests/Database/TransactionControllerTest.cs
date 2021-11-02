@@ -1973,28 +1973,6 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
-        public async Task CreateInvalidModel()
-        {
-            // Given: One item exists already
-            context.Add(Items[1]);
-            await context.SaveChangesAsync();
-
-            // And: The model is invalid
-            controller.ModelState.AddModelError("error", "test");
-
-            // When: Calling Create to add a second transaction
-            var expected = Items[2];
-            var result = await controller.Create(expected);
-
-            // Then: No change to the database
-            Assert.AreEqual(1, context.Transactions.Count());
-
-            // And: Returned a view with the item we sent in.
-            var viewresult = result as ViewResult;
-            Assert.AreEqual(expected, viewresult.Model);
-        }
-
-        [TestMethod]
         public async Task DetailsNullNotFound() => 
             Assert.IsTrue(await controller.Details(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 

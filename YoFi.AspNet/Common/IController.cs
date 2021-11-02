@@ -25,6 +25,5 @@ namespace Common.AspNet
         Task<IActionResult> DeleteConfirmed(int id);
         Task<IActionResult> Download();
         Task<IActionResult> Upload(List<IFormFile> files);
-        void SetErrorState();
     }
 }

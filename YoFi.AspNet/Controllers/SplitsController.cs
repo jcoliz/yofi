@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Ardalis.Filters;
 using Common.AspNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -42,6 +43,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateModel]
         public async Task<IActionResult> Edit([Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
         {
             if (ModelState.IsValid)
@@ -88,8 +90,6 @@ namespace YoFi.AspNet.Controllers
 
             return RedirectToAction("Edit", "Transactions", new { id = txid });
         }
-
-        void IController<Split>.SetErrorState() => ModelState.AddModelError("error", "test");
 
         Task<IActionResult> IController<Split>.Download() =>
             throw new NotImplementedException();

@@ -147,27 +147,6 @@ namespace YoFi.Tests.Controllers.Slim
         }
 
         [TestMethod]
-        public async Task CreateInvalidModel()
-        {
-            // Given: Five items in the respository
-            repository.AddItems(5);
-
-            // And: The model is invalid
-            controller.SetErrorState();
-
-            // When: Adding a new item
-            var expected = repository.MakeItem(6);
-            var actionresult = await controller.Create(expected);
-
-            // Then: Returns not found result
-            var nfresult = Assert.That.IsOfType<NotFoundResult>(actionresult);
-            Assert.AreEqual(404, nfresult.StatusCode);
-
-            // And: No change to the repository
-            Assert.AreEqual(5, repository.All.Count());
-        }
-
-        [TestMethod]
         public async Task EditDetailsFound()
         {
             // Given: Five items in the respository
@@ -205,29 +184,6 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(expected, actual);
         }
 
-        [TestMethod]
-        public async Task EditObjectValuesModelInvalid()
-        {
-            // Given: Five items in the respository
-            repository.AddItems(5);
-
-            // And: The model is invalid
-            controller.SetErrorState();
-
-            // When: Changing details for a selected item
-            var selected = repository.All.Skip(1).First();
-            var expected = repository.MakeItem(6);
-            var id = expected.ID = selected.ID;
-            var actionresult = await controller.Edit(id, expected);
-
-            // Then: Returns not found result
-            var nfresult = Assert.That.IsOfType<NotFoundResult>(actionresult);
-            Assert.AreEqual(404, nfresult.StatusCode);
-
-            // And: Item has not been updated
-            var actual = await repository.GetByIdAsync(id);
-            Assert.AreNotEqual(expected, actual);
-        }
 
         [TestMethod]
         public async Task EditObjectValuesDontMatch()
