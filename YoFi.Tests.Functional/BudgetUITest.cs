@@ -152,7 +152,7 @@ namespace YoFi.Tests.Functional
             // Click input:has-text("Create")
             await Page.ClickAsync("input:has-text(\"Create\")");
 
-            // Then: We finish at the payee index page
+            // Then: We finish at the budget index page
             await ThenIsOnPage("Budget Line Items");
 
             // And: There is one more item
@@ -165,19 +165,79 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task Read()
         {
+            // Given: One item created
+            await Create();
 
+            // When: Searching for the new item
+            await Page.FillAsync("data-test-id=q", testmarker);
+            await Page.ClickAsync("data-test-id=btn-search");
+            await ScreenShotAsync();
+
+            // Then: It's found
+            await ThenTotalItemsAreEqual(1);
         }
 
         [TestMethod]
         public async Task Update()
         {
+            // Given: One item created
+            // And: It's the one item in search results
+            await Read();
 
+            // When: Editing it
+            var newcategory = NextCategory;
+
+            // Click [aria-label="Edit"]
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs/Edit/161", page.Url);
+            // Fill input[name="Category"]
+            await Page.FillAsync("input[name=\"Category\"]", newcategory);
+            // Fill input[name="Amount"]
+            await Page.FillAsync("input[name=\"Amount\"]", "200");
+            await ScreenShotAsync();
+            // Click text=Save
+            await Page.ClickAsync("text=Save");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs", page.Url);
+
+            // Then: We're back on the main page
+            await ThenIsOnPage("Budget Line Items");
+
+            // And: Searching for the new item...
+            await Page.FillAsync("data-test-id=q", newcategory);
+            await Page.ClickAsync("data-test-id=btn-search");
+            await ScreenShotAsync();
+
+            // Then: It's found
+            await ThenTotalItemsAreEqual(1);
+
+            // TODO: Also check that the amount is correct
         }
 
         [TestMethod]
         public async Task Delete()
         {
+            // Given: One item created
+            // And: It's the one item in search results
+            await Read();
 
+            // When: Clicking delete on first item in list
+            var deletebutton = await Page.QuerySelectorAsync("[aria-label=\"Delete\"]");
+            Assert.IsNotNull(deletebutton);
+            await deletebutton.ClickAsync();
+
+            // Then: We land at the delete page
+            await ThenIsOnPage("Delete Budget Line Item");
+            await ScreenShotAsync();
+
+            // When: Clicking the Delete button to execute the delete
+            await Page.ClickAsync("input:has-text(\"Delete\")");
+
+            // Then: We finish at the budget index page
+            await ThenIsOnPage("Budget Line Items");
+            await ScreenShotAsync();
+
+            // And: Total number of items is back to the standard amount
+            await ThenTotalItemsAreEqual(TotalItemCount);
         }
     }
 }
