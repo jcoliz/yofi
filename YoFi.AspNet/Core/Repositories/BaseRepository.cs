@@ -19,11 +19,26 @@ namespace YoFi.Core.Repositories
     public abstract class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, new()
     {
         #region Fields
+        /// <summary>
+        /// Data context where our data is to be found
+        /// </summary>
         protected readonly IDataContext _context;
+
+        /// <summary>
+        /// Current queue of items to be imported
+        /// </summary>
         private readonly HashSet<T> _importing;
         #endregion
 
         #region Constructor
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <remarks>
+        /// Typically filled in by the frameworks' dependency injection
+        /// </remarks>
+        /// <param name="context">Data conext whe4re our data is to be found</param>
         public BaseRepository(IDataContext context)
         {
             _context = context;
