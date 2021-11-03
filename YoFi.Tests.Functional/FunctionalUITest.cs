@@ -167,7 +167,7 @@ namespace YoFi.Tests.Functional
 
         public static async Task SaveScreenshotToAsync(this IPage page, TestContext testContext)
         {
-            var filename = $"Screen {ScreenShotCount++:D4} {testContext.FullyQualifiedTestClassName}.{testContext.TestName}.png";
+            var filename = $"Screenshot {testContext.FullyQualifiedTestClassName} {ScreenShotCount++:D4} {testContext.TestName}.png";
             await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true });
             testContext.AddResultFile(filename);
         }

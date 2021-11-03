@@ -10,6 +10,7 @@ namespace YoFi.Tests.Functional
     public class PayeeUITest : FunctionalUITest
     {
         public const int TotalItemCount = 40;
+        const string MainPageName = "Payees";
 
         [TestInitialize]
         public new async Task SetUp()
@@ -22,8 +23,8 @@ namespace YoFi.Tests.Functional
             // When: Clicking "Payee" on the navbar
             await Page.ClickAsync("text=Payees");
 
-            // Then: We are on the Payees page
-            await ThenIsOnPage("Payees");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
         }
 
         [TestCleanup]
@@ -37,7 +38,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("text=Payees");
 
             // And: totalitems > expected TotalItemCount
-            var totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            var totalitems = await Page.GetTotalItemsAsync();
 
             if (totalitems > TotalItemCount)
             {
@@ -48,20 +49,20 @@ namespace YoFi.Tests.Functional
 
             await Page.ReloadAsync();
 
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
         public async Task Initial()
         {
-            // Then: We land at the budget index page
-            await ThenIsOnPage("Payees");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
             // And: All expected items are here
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
 
             // And: This page covers items 1-25
-            await ThenPageContainsItems(from: 1, to: 25);
+            await Page.ThenContainsItemsAsync(from: 1, to: 25);
         }
 
         [TestMethod]
@@ -72,11 +73,11 @@ namespace YoFi.Tests.Functional
             // When: Clicking on the next page on the pagination control
             await Page.ClickAsync("data-test-id=nextpage");
 
-            // Then: We are still on the payees index page
-            await ThenIsOnPage("Payees");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
             // And: This page covers items 26-40
-            await ThenPageContainsItems(from: 26, to: TotalItemCount);
+            await Page.ThenContainsItemsAsync(from: 26, to: TotalItemCount);
         }
 
         [TestMethod]
@@ -88,8 +89,8 @@ namespace YoFi.Tests.Functional
             await Page.FillAsync("data-test-id=q", "Utilities");
             await Page.ClickAsync("data-test-id=btn-search");
 
-            // Then: Exactly 25 items are found, because we know this about our source data
-            await ThenTotalItemsAreEqual(5);
+            // Then: Exactly 5 items are found, because we know this about our source data
+            Assert.AreEqual(5, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -101,8 +102,8 @@ namespace YoFi.Tests.Functional
             await Page.FillAsync("data-test-id=q", "am");
             await Page.ClickAsync("data-test-id=btn-search");
 
-            // Then: Exactly 25 items are found, because we know this about our source data
-            await ThenTotalItemsAreEqual(2);
+            // Then: Exactly 2 items are found, because we know this about our source data
+            Assert.AreEqual(2, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -115,7 +116,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-clear");
 
             // Then: Back to all the items
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -132,14 +133,7 @@ namespace YoFi.Tests.Functional
             });
 
             // Then: A spreadsheet containing 40 Payees was downloaded
-            await ThenSpreadsheetWasDownloadedContaining<IdOnly>(source: download1, name: "Payee", count: TotalItemCount);
-
-#if false
-            // Enable if need to inspect
-            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}.xlsx";
-            await download1.SaveAsAsync(filename);
-            TestContext.AddResultFile(filename);
-#endif
+            await download1.ThenIsSpreadsheetContainingAsync<IdOnly>(name: "Payee", count: TotalItemCount);
         }
 
         [TestMethod]
@@ -151,44 +145,35 @@ namespace YoFi.Tests.Functional
 
             // Given: We are logged in and on the payees page
 
-            // Then: We land at the payee index page
-            await ThenIsOnPage("Payees");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
-            /*
-            // NOTE: It's possible that we already have the payees we're doing to import already in the
-            // database, perhaps from a failed test. So here we'll first delete them if they exist.
-            await DeletePayees("__TEST__");
-            */
-
-            // Click [aria-label="Upload"]
             await Page.ClickAsync("[aria-label=\"Upload\"]");
-            // Upload Test-Generator-GenerateUploadSampleData.xlsx
             await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
-            // Click text=Upload
             await Page.ClickAsync("text=Upload");
 
             // Then: We land at the budget index page
-            await ThenIsOnPage("Uploaded Payees");
+            await Page.ThenIsOnPageAsync("Uploaded Payees");
 
             //
             // Step 2: Search for the new payees
             //
 
-            // When: Clicking "Budget" on the navbar
+            // When: Clicking "Payees" on the navbar
             await Page.ClickAsync("text=Payees");
 
-            // Then: We land at the budget index page
-            await ThenIsOnPage("Payees");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
             // Then: 43 items are found, because we just added 3
-            await ThenTotalItemsAreEqual(TotalItemCount + 3);
+            Assert.AreEqual(TotalItemCount + 3, await Page.GetTotalItemsAsync());
 
             // When: Searching for what we just imported
             await Page.FillAsync("data-test-id=q", testmarker);
             await Page.ClickAsync("data-test-id=btn-search");
 
-            // Then: 3 items are found, because we know this about our source data
-            await ThenTotalItemsAreEqual(3);
+            // Then: 3 items are found, because we know this about our imported data
+            Assert.AreEqual(3, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -222,28 +207,28 @@ namespace YoFi.Tests.Functional
             // And: In bulk edit mode
             await Page.ClickAsync("#dropdownMenuButtonAction");
             await Page.ClickAsync("text=Bulk Edit");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Clicking select on each item
             var numdelete = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
             for (int i = 1; i <= numdelete; i++)
                 await Page.ClickAsync($"data-test-id=line-{i} >> data-test-id=check-select");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking "Delete" on the bulk edit bar
             await Page.ClickAsync("data-test-id=btn-bulk-delete");
 
             // And: Clicking "OK" on the confirmation dialog
             await Page.WaitForSelectorAsync("#deleteConfirmModal");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("data-test-id=btn-modal-ok");
 
-            // Then: Still on the Payees page
-            await ThenIsOnPage("Payees");
-            await ScreenShotAsync();
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Total number of items is back to the standard amount
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -263,24 +248,23 @@ namespace YoFi.Tests.Functional
             // And: Adding a new Payee from the ensuing dialog
             var name = NextName;
             await Page.WaitForSelectorAsync("#addPayeeModal");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
             await Page.FillAsync("input[name=\"Name\"]", name);
             await Page.FillAsync("input[name=\"Category\"]", NextCategory);
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             await Page.ClickAsync("#addPayeeModal >> text=Save");
 
             // Then: The payees page has one more item than expected
             await Page.ClickAsync("text=Payees");
-            await ThenTotalItemsAreEqual(TotalItemCount + 1);
+            Assert.AreEqual(TotalItemCount + 1, await Page.GetTotalItemsAsync());
 
             // And: Searching for the payee finds it
             await Page.FillAsync("data-test-id=q", name);
             await Page.ClickAsync("data-test-id=btn-search");
-            await ThenTotalItemsAreEqual(1);
-            await ScreenShotAsync();
+            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
+            await Page.SaveScreenshotToAsync(TestContext);
         }
-
 
         async Task GivenPayeeInDatabase()
         {
@@ -302,12 +286,12 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("input:has-text(\"Create\")");
             // Assert.AreEqual("http://localhost:50419/Payees", page.Url);
 
-            // Then: We finish at the payee index page
-            await ThenIsOnPage("Payees");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
             // And: There is one more item
-            var itemsnow = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
-            Assert.IsTrue(itemsnow == originalitems + 1);
+            var itemsnow = await Page.GetTotalItemsAsync();
+            Assert.AreEqual(originalitems + 1, itemsnow);
         }
 
         [TestMethod]
@@ -321,7 +305,7 @@ namespace YoFi.Tests.Functional
             // And: Searched for the new payee
             await Page.FillAsync("data-test-id=q", testmarker);
             await Page.ClickAsync("data-test-id=btn-search");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking delete on first item in list
             var deletebutton = await Page.QuerySelectorAsync("[aria-label=\"Delete\"]");
@@ -329,18 +313,18 @@ namespace YoFi.Tests.Functional
             await deletebutton.ClickAsync();
 
             // Then: We land at the delete payee page
-            await ThenIsOnPage("Delete Payee");
-            await ScreenShotAsync();
+            await Page.ThenIsOnPageAsync("Delete Payee");
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking the Delete button to execute the delete
             await Page.ClickAsync("input:has-text(\"Delete\")");
 
-            // Then: We land at the payees page
-            await ThenIsOnPage("Payees");
-            await ScreenShotAsync();
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Total number of items is back to the standard amount
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
     }
 }

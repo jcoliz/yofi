@@ -103,7 +103,7 @@ namespace YoFi.Tests.Functional
             // When: Pressing clear
             await Page.ClickAsync("data-test-id=btn-clear");
 
-            // Then: Back to all the items
+            // Then: Total expected items are showing
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
