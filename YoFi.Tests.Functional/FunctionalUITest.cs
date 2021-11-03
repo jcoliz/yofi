@@ -133,6 +133,7 @@ namespace YoFi.Tests.Functional
 
             return items;
         }
+
         protected async Task ScreenShotAsync(IPage inpage = null)
         {
             IPage page = inpage ?? Page;
@@ -142,6 +143,65 @@ namespace YoFi.Tests.Functional
             TestContext.AddResultFile(filename);
         }
 
+    }
+
+    public static class PageExtensions
+    {
+        public static async Task FillFormAsync(this IPage page, Dictionary<string, string> entries)
+        {
+            foreach (var kvp in entries)
+                await page.FillAsync($"input[name=\"{kvp.Key}\"]", kvp.Value);
+        }
+
+        public static async Task<int> GetTotalItemsAsync(this IPage page)
+        {
+            var totalitems = await page.TextContentAsync("data-test-id=totalitems");
+
+            if (!Int32.TryParse(totalitems, out int result))
+                result = 0;
+
+            return result;
+        }
+
+        private static int ScreenShotCount = 1;
+
+        public static async Task SaveScreenshotToAsync(this IPage page, TestContext testContext)
+        {
+            var filename = $"Screen {ScreenShotCount++:D4} {testContext.FullyQualifiedTestClassName}.{testContext.TestName}.png";
+            await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true });
+            testContext.AddResultFile(filename);
+        }
+
+        public static async Task ThenIsOnPageAsync(this IPage page, string expected)
+        {
+            var title = await page.TitleAsync();
+            Assert.AreEqual($"{expected} - Development - YoFi", title);
+        }
+
+        public static async Task ThenContainsItemsAsync(this IPage page, int from, int to)
+        {
+            Assert.AreEqual(from.ToString(), await page.TextContentAsync("data-test-id=firstitem"));
+            Assert.AreEqual(to.ToString(), await page.TextContentAsync("data-test-id=lastitem"));
+        }
+
+        public static async Task<IEnumerable<T>> ThenIsSpreadsheetContainingAsync<T>(this IDownload source, string name, int count, TestContext savetocontext = null) where T : class, new()
+        {
+            using var stream = await source.CreateReadStreamAsync();
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            Assert.AreEqual(name, ssr.SheetNames.First());
+            var items = ssr.Deserialize<T>(name);
+            Assert.AreEqual(count, items.Count());
+
+            if (savetocontext != null)
+            {
+                var filename = $"{savetocontext.FullyQualifiedTestClassName}-{savetocontext.TestName}.xlsx";
+                await source.SaveAsAsync(filename);
+                savetocontext.AddResultFile(filename);
+            }
+
+            return items;
+        }
 
     }
 }

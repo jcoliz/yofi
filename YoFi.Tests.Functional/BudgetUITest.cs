@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional
@@ -11,6 +12,7 @@ namespace YoFi.Tests.Functional
     public class BudgetUITest : FunctionalUITest
     {
         const int TotalItemCount = 156;
+        const string MainPageName = "Budget Line Items";
 
         [TestInitialize]
         public new async Task SetUp()
@@ -23,8 +25,8 @@ namespace YoFi.Tests.Functional
             // When: Clicking "Budget" on the navbar
             await Page.ClickAsync("text=Budget");
 
-            // Then: We are on the Payees page
-            await ThenIsOnPage("Budget Line Items");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
         }
 
         [TestCleanup]
@@ -49,7 +51,7 @@ namespace YoFi.Tests.Functional
 
             await Page.ReloadAsync();
 
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -58,10 +60,10 @@ namespace YoFi.Tests.Functional
             // Given: We are already logged in and on the budget page
 
             // And: All expected items are here
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
 
             // And: This page covers items 1-25
-            await ThenPageContainsItems(from: 1, to: 25);
+            await Page.ThenContainsItemsAsync(from: 1, to: 25);
         }
 
         [TestMethod]
@@ -72,11 +74,11 @@ namespace YoFi.Tests.Functional
             // When: Clicking on the next page on the pagination control
             await Page.ClickAsync("data-test-id=nextpage");
 
-            // Then: We are still on the budget index page
-            await ThenIsOnPage("Budget Line Items");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
             // And: This page covers items 26-50
-            await ThenPageContainsItems(from: 26, to: 50);
+            await Page.ThenContainsItemsAsync(from: 26, to: 50);
         }
 
         [TestMethod]
@@ -89,7 +91,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: Exactly 25 items are found, because we know this about our source data
-            await ThenTotalItemsAreEqual(25);
+            Assert.AreEqual(25, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -102,7 +104,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-clear");
 
             // Then: Back to all the items
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -119,47 +121,35 @@ namespace YoFi.Tests.Functional
             });
 
             // Then: A spreadsheet containing 156 BudgetTxs was downloaded
-            await ThenSpreadsheetWasDownloadedContaining<IdOnly>(source: download1, name: "BudgetTx", count: TotalItemCount);
-
-#if false
-            // Enable if need to inspect
-            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}.xlsx";
-            await download1.SaveAsAsync(filename);
-            TestContext.AddResultFile(filename);
-#endif
+            await download1.ThenIsSpreadsheetContainingAsync<IdOnly>(name: "BudgetTx", count: TotalItemCount);
         }
 
         [TestMethod]
         public async Task Create()
         {
             // Given: We are already logged in and on the budget page
+            var originalitems = await Page.GetTotalItemsAsync();
 
             // When: Creating a new item
-            var originalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
-
-            // Click #dropdownMenuButtonAction
             await Page.ClickAsync("#dropdownMenuButtonAction");
-            // Click text=Create New
             await Page.ClickAsync("text=Create New");
-            // Fill input[name="Category"]
-            await Page.FillAsync("input[name=\"Category\"]", NextCategory);
-            // Fill input[name="Timestamp"]
-            await Page.FillAsync("input[name=\"Timestamp\"]", "2021-12-31");
-            // Fill input[name="Amount"]
-            await Page.FillAsync("input[name=\"Amount\"]", "100");
-            await ScreenShotAsync();
-
-            // Click input:has-text("Create")
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", NextCategory },
+                { "Timestamp", "2021-12-31" },
+                { "Amount", "100" },
+            });
+            await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("input:has-text(\"Create\")");
 
-            // Then: We finish at the budget index page
-            await ThenIsOnPage("Budget Line Items");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
             // And: There is one more item
-            var itemsnow = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
-            Assert.IsTrue(itemsnow == originalitems + 1);
+            var itemsnow = await Page.GetTotalItemsAsync();
+            Assert.AreEqual(originalitems + 1,itemsnow);
 
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
         }
 
         [TestMethod]
@@ -171,10 +161,10 @@ namespace YoFi.Tests.Functional
             // When: Searching for the new item
             await Page.FillAsync("data-test-id=q", testmarker);
             await Page.ClickAsync("data-test-id=btn-search");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found
-            await ThenTotalItemsAreEqual(1);
+            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -184,31 +174,28 @@ namespace YoFi.Tests.Functional
             // And: It's the one item in search results
             await Read();
 
-            // When: Editing it
+            // When: Editing the category to {newcategory}
             var newcategory = NextCategory;
-
-            // Click [aria-label="Edit"]
             await Page.ClickAsync("[aria-label=\"Edit\"]");
-            // Assert.AreEqual("http://localhost:50419/BudgetTxs/Edit/161", page.Url);
-            // Fill input[name="Category"]
-            await Page.FillAsync("input[name=\"Category\"]", newcategory);
-            // Fill input[name="Amount"]
-            await Page.FillAsync("input[name=\"Amount\"]", "200");
-            await ScreenShotAsync();
-            // Click text=Save
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", newcategory },
+                { "Amount", "100" },
+            });
+
+            await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("text=Save");
-            // Assert.AreEqual("http://localhost:50419/BudgetTxs", page.Url);
 
-            // Then: We're back on the main page
-            await ThenIsOnPage("Budget Line Items");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
-            // And: Searching for the new item...
+            // And: Searching for q={newcategory}
             await Page.FillAsync("data-test-id=q", newcategory);
             await Page.ClickAsync("data-test-id=btn-search");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found
-            await ThenTotalItemsAreEqual(1);
+            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
 
             // TODO: Also check that the amount is correct
         }
@@ -226,18 +213,18 @@ namespace YoFi.Tests.Functional
             await deletebutton.ClickAsync();
 
             // Then: We land at the delete page
-            await ThenIsOnPage("Delete Budget Line Item");
-            await ScreenShotAsync();
+            await Page.ThenIsOnPageAsync("Delete Budget Line Item");
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking the Delete button to execute the delete
             await Page.ClickAsync("input:has-text(\"Delete\")");
 
-            // Then: We finish at the budget index page
-            await ThenIsOnPage("Budget Line Items");
-            await ScreenShotAsync();
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Total number of items is back to the standard amount
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
     }
 }
