@@ -234,7 +234,7 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
-        public async Task Upload()
+        public virtual async Task Upload()
         {
             // Given: A spreadsheet with five items
             var expected = Items.Take(5);
@@ -247,7 +247,7 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
-        public async Task UploadAddNewDuplicate()
+        public virtual async Task UploadAddNewDuplicate()
         {
             // Given: Five items in the data set
             var expected = Items.Take(5).ToList();

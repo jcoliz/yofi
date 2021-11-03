@@ -15,7 +15,7 @@ namespace YoFi.Core.Models
     /// <remarks>
     /// The basic building blocks!
     /// </remarks>
-    public class Transaction : ICategory, IID, IReportable
+    public class Transaction : ICategory, IModelItem<Transaction>, IReportable
     {
         /// <summary>
         /// Object identity in Entity Framework
@@ -106,6 +106,10 @@ namespace YoFi.Core.Models
         /// </summary>
         public bool IsSplitsOK => !HasSplits || ( Splits.Select(x=>x.Amount).Sum() == Amount );
 
+        // TODO: This is a bug that we even need to do this. Transactions don't use the default import pipeline
+        // so shouldn't need to implement ImportDuplicateComparer.
+        IEqualityComparer<Transaction> IModelItem<Transaction>.ImportDuplicateComparer => new __TransactionImportDuplicateComparer();
+
         /// <summary>
         /// Remove all characters from payee which are not whitespace or alpha-numeric
         /// </summary>
@@ -157,6 +161,23 @@ namespace YoFi.Core.Models
         public override int GetHashCode()
         {
             return HashCode.Combine(Payee, Amount, Timestamp.Date);
+        }
+
+        IQueryable<Transaction> IModelItem<Transaction>.InDefaultOrder(IQueryable<Transaction> original)
+        {
+            return original.OrderByDescending(x => x.Timestamp).ThenBy(x => x.Payee);
+        }
+
+        /// <summary>
+        /// Tells us whether two items are duplicates for the purposes of importing
+        /// </summary>
+        /// <remarks>
+        /// Generally, we don't import duplicates, although some importers override this behavior
+        /// </remarks>
+        class __TransactionImportDuplicateComparer : IEqualityComparer<Transaction>
+        {
+            public bool Equals(Transaction x, Transaction y) => throw new NotImplementedException();
+            public int GetHashCode(Transaction obj) => throw new NotImplementedException();
         }
     }
 }

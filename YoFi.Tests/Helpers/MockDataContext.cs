@@ -40,6 +40,10 @@ namespace YoFi.Tests.Helpers
             {
                 return Payees as IQueryable<T>;
             }
+            if (typeof(T) == typeof(Transaction))
+            {
+                return Transactions as IQueryable<T>;
+            }
             throw new NotImplementedException();
         }
 
@@ -83,6 +87,10 @@ namespace YoFi.Tests.Helpers
             {
                 PayeeData.AddRange(items as IEnumerable<Payee>);
             }
+            else if (t == typeof(Transaction))
+            {
+                TransactionData.AddRange(items as IEnumerable<Transaction>);
+            }
             else
 
                 throw new NotImplementedException();
@@ -114,6 +122,13 @@ namespace YoFi.Tests.Helpers
                 var index = PayeeData.FindIndex(x => x.ID == btx.ID);
                 PayeeData.RemoveAt(index);
             }
+            else if (t == typeof(Transaction))
+            {
+                var btx = item as Transaction;
+
+                var index = TransactionData.FindIndex(x => x.ID == btx.ID);
+                TransactionData.RemoveAt(index);
+            }
             else
                 throw new NotImplementedException();
         }
@@ -142,6 +157,13 @@ namespace YoFi.Tests.Helpers
 
                 var index = PayeeData.FindIndex(x => x.ID == btx.ID);
                 PayeeData[index] = btx;
+            }
+            else if (t == typeof(Transaction))
+            {
+                var btx = item as Transaction;
+
+                var index = TransactionData.FindIndex(x => x.ID == btx.ID);
+                TransactionData[index] = btx;
             }
             else
                 throw new NotImplementedException();
