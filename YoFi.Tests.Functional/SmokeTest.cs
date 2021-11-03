@@ -23,7 +23,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("text=Import");
 
             // Then: We land at import page
-            await ThenIsOnPage("Import Transactions");
+            await Page.ThenIsOnPageAsync("Import Transactions");
         }
 
         [TestMethod]
@@ -36,7 +36,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=hello-user");
 
             // Then: We land at profile page
-            await ThenIsOnPage("Profile");
+            await Page.ThenIsOnPageAsync("Profile");
         }
 
         [TestMethod]
@@ -49,7 +49,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=logout");
 
             // Then: We land at home page
-            await ThenIsOnPage("Home");
+            await Page.ThenIsOnPageAsync("Home");
 
             // And: The login button is again visible
             var login = await Page.QuerySelectorAsync("data-test-id=login");

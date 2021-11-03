@@ -24,20 +24,12 @@ namespace YoFi.Tests.Functional
 
         protected readonly string Site = "http://localhost:50419/";
 
-        protected int ScreenShotCount;
-
         protected const string testmarker = "__TEST__";
         private int nextid = 1;
         protected string NextName => $"AA{testmarker}{TestContext.TestName}_{nextid++}";
         protected string NextCategory => $"AA{testmarker}:{TestContext.TestName}:{nextid++}";
 
         protected FunctionalUITest() { }
-
-        [TestInitialize]
-        public void SetUp()
-        {
-            ScreenShotCount = 1;
-        }
 
         protected async Task GivenLoggedIn()
         {
@@ -65,7 +57,7 @@ namespace YoFi.Tests.Functional
                 await Page.ClickAsync("data-test-id=signin");
 
                 // Then: We land back at the home page
-                await ThenIsOnPage("Home");
+                await Page.ThenIsOnPageAsync("Home");
 
                 // And: The navbar has our email
                 var content = await Page.TextContentAsync("data-test-id=hello-user");
@@ -86,30 +78,6 @@ namespace YoFi.Tests.Functional
                 base.Context.SetDefaultTimeout(5000);
             }
         }
-        protected Task ThenIsOnPage(string expected) => ThenIsOnPage(Page, expected);
-
-        protected async Task ThenIsOnPage(IPage page,string expected)
-        {
-            var title = await page.TitleAsync();
-            Assert.AreEqual($"{expected} - Development - YoFi", title);
-        }
-
-        protected async Task ThenPageContainsItems(int from, int to)
-        {
-            Assert.AreEqual(from.ToString(), await Page.TextContentAsync("data-test-id=firstitem"));
-            Assert.AreEqual(to.ToString(), await Page.TextContentAsync("data-test-id=lastitem"));
-        }
-
-        protected async Task ThenTotalItemsAreEqual(int howmany, IPage onpage = null)
-        {
-            var page = onpage ?? Page;
-            Assert.AreEqual(howmany.ToString(), await page.TextContentAsync("data-test-id=totalitems"));
-        }
-
-        protected async Task ThenTotalItemsAreEqual(int howmany)
-        {
-            Assert.AreEqual(howmany.ToString(), await Page.TextContentAsync("data-test-id=totalitems"));
-        }
 
         protected async Task ThenH2Is(string expected)
         {
@@ -121,28 +89,6 @@ namespace YoFi.Tests.Functional
         {
             public int ID { get; set; }
         }
-
-        protected async Task<IEnumerable<T>> ThenSpreadsheetWasDownloadedContaining<T>(IDownload source, string name, int count) where T : class, new()
-        {
-            using var stream = await source.CreateReadStreamAsync();
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            Assert.AreEqual(name, ssr.SheetNames.First());
-            var items = ssr.Deserialize<T>(name);
-            Assert.AreEqual(count, items.Count());
-
-            return items;
-        }
-
-        protected async Task ScreenShotAsync(IPage inpage = null)
-        {
-            IPage page = inpage ?? Page;
-
-            var filename = $"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.{ScreenShotCount++}.png";
-            await page.ScreenshotAsync(new Microsoft.Playwright.PageScreenshotOptions() { Path = filename, OmitBackground = true });
-            TestContext.AddResultFile(filename);
-        }
-
     }
 
     public static class PageExtensions

@@ -15,20 +15,19 @@ namespace YoFi.Tests.Functional
     public class TransactionsUITest : FunctionalUITest
     {
         const int TotalItemCount = 889;
+        const string MainPageName = "Transactions";
 
         [TestInitialize]
         public new async Task SetUp()
         {
-            base.SetUp();
-
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
             // When: Clicking "Transactions" on the navbar
             await Page.ClickAsync("text=Transactions");
 
-            // Then: We land at the transactions index page
-            await ThenIsOnPage("Transactions");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
         }
 
         [TestCleanup]
@@ -42,7 +41,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("text=Transactions");
 
             // If: totalitems > expected TotalItemCount
-            var totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            var totalitems = await Page.GetTotalItemsAsync();
             if (totalitems > TotalItemCount)
             {
                 // When: Asking server to clear this test data
@@ -55,7 +54,7 @@ namespace YoFi.Tests.Functional
             await Page.ReloadAsync();
 
             // Then: Total items are back to normal
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
 
@@ -65,7 +64,7 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the transactions page
 
             // Then: All expected items are here
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -78,7 +77,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: Exactly 12 transactions are found, because we know this about our source data
-            await ThenTotalItemsAreEqual(12);
+            Assert.AreEqual(12, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -91,7 +90,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: Exactly 156 transactions are found, because we know this about our source data
-            await ThenTotalItemsAreEqual(156);
+            Assert.AreEqual(156, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -104,7 +103,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=btn-clear");
 
             // Then: Back to all the items
-            await ThenTotalItemsAreEqual(TotalItemCount);
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -122,14 +121,7 @@ namespace YoFi.Tests.Functional
             });
 
             // Then: A spreadsheet containing 889 Transactions was downloaded
-            await ThenSpreadsheetWasDownloadedContaining<IdOnly>(source: download1, name: "Transaction", count: 889);
-
-#if false
-            // Enable if need to inspect
-            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}.xlsx";
-            await download1.SaveAsAsync(filename);
-            TestContext.AddResultFile(filename);
-#endif
+            await download1.ThenIsSpreadsheetContainingAsync<IdOnly>(name: "Transaction", count: 889);
         }
 
         [TestMethod]
@@ -152,17 +144,10 @@ namespace YoFi.Tests.Functional
             });
 
             // Then: A spreadsheet containing 12 Transactions were downloaded
-            var items = await ThenSpreadsheetWasDownloadedContaining<IdAndPayee>(source: download1, name: "Transaction", count: 12);
+            var items = await download1.ThenIsSpreadsheetContainingAsync<IdAndPayee>(name: "Transaction", count: 12);
 
             // And: All items match the search criteria
             Assert.IsTrue(items.All(x => x.Payee.Contains(searchword)));
-
-#if false
-            // Enable if need to inspect
-            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}.xlsx";
-            await download1.SaveAsAsync(filename);
-            TestContext.AddResultFile(filename);
-#endif
         }
 
         private class IdAndPayee
@@ -208,34 +193,29 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the transactions page
 
             // When: Creating a new item
-            var originalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            var originalitems = await Page.GetTotalItemsAsync();
 
-            // Click #dropdownMenuButtonAction
             await Page.ClickAsync("#dropdownMenuButtonAction");
-            // Click text=Create New
             await Page.ClickAsync("text=Create New");
-            // Fill input[name="Payee"]
-            await Page.FillAsync("input[name=\"Payee\"]", NextName);
-            // Fill input[name="Category"]
-            await Page.FillAsync("input[name=\"Category\"]", NextCategory);
-            // Fill input[name="Memo"]
-            await Page.FillAsync("input[name=\"Memo\"]", testmarker);
-            // Fill input[name="Timestamp"]
-            await Page.FillAsync("input[name=\"Timestamp\"]", "2021-12-31");
-            // Fill input[name="Amount"]
-            await Page.FillAsync("input[name=\"Amount\"]", "100");
-            await ScreenShotAsync();
-            // Click input:has-text("Create")
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", NextCategory },
+                { "Payee", NextName },
+                { "Timestamp", "2021-12-31" },
+                { "Amount", "100" },
+                { "Memo", testmarker },
+            });
+            await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("input:has-text(\"Create\")");
 
-            // Then: We land at the transactions index page
-            await ThenIsOnPage("Transactions");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
             // And: There is one more item
-            var itemsnow = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
-            Assert.IsTrue(itemsnow == originalitems + 1);
+            var itemsnow = await Page.GetTotalItemsAsync();
+            Assert.AreEqual(originalitems + 1,itemsnow);
 
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
         }
 
         [DataRow(1)]
@@ -251,10 +231,10 @@ namespace YoFi.Tests.Functional
             // When: Searching for the new item
             await Page.FillAsync("data-test-id=q", testmarker);
             await Page.ClickAsync("data-test-id=btn-search");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found
-            await ThenTotalItemsAreEqual(count);
+            Assert.AreEqual(count, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
@@ -268,26 +248,25 @@ namespace YoFi.Tests.Functional
             var newcategory = NextCategory;
             var newpayee = NextName;
 
-            // Click [aria-label="Edit"]
             await Page.ClickAsync("[aria-label=\"Edit\"]");
-            // Fill input[name="Category"]
-            await Page.FillAsync("input[name=\"Category\"]", newcategory);
-            // Fill input[name="Name"]
-            await Page.FillAsync("input[name=\"Payee\"]", newpayee);
-            await ScreenShotAsync();
-            // Click text=Save
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", newcategory },
+                { "Payee", newpayee },
+            });
+            await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("text=Save");
 
-            // Then: We land at the transactions index page
-            await ThenIsOnPage("Transactions");
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
 
             // And: Searching for the new item...
             await Page.FillAsync("data-test-id=q", newcategory);
             await Page.ClickAsync("data-test-id=btn-search");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found
-            await ThenTotalItemsAreEqual(1);
+            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
 
             // TODO: Also check that the amount is correct
         }
@@ -303,41 +282,37 @@ namespace YoFi.Tests.Functional
             var newcategory = NextCategory;
             var newpayee = NextName;
 
-            // Click [aria-label="Edit"]
             await Page.ClickAsync("[aria-label=\"Edit\"]");
-
-            // Click "text=more"
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.WaitForSelectorAsync("input[name=\"Category\"]");
-                await ScreenShotAsync();
+                await Page.SaveScreenshotToAsync(TestContext);
                 await Page.ClickAsync("text=More");
             });
 
-            // Fill input[name="Category"]
-            await NextPage.FillAsync("input[name=\"Category\"]", newcategory);
-            // NextPage input[name="Name"]
-            await NextPage.FillAsync("input[name=\"Payee\"]", newpayee);
-            // NextPage input[name="Name"]
-            await NextPage.FillAsync("input[name=\"Amount\"]", "200");
-            await ScreenShotAsync(NextPage);
-            // Click text=Save
+            await NextPage.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", newcategory },
+                { "Payee", newpayee },
+                { "Amount", "200" },
+            });
+
+            await NextPage.SaveScreenshotToAsync(TestContext);
             await NextPage.ClickAsync("text=Save");
 
-            // Then: We land at the transactions index page
-            await ThenIsOnPage(NextPage,"Transactions");
+            // Then: We are on the main page for this section
+            await NextPage.ThenIsOnPageAsync(MainPageName);
 
             // And: Searching for the new item...
             await Page.FillAsync("data-test-id=q", newcategory);
             await Page.ClickAsync("data-test-id=btn-search");
-            await ScreenShotAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found
-            await ThenTotalItemsAreEqual(1);
+            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
 
             // TODO: Also check that the amount is correct
         }
-
 
         [TestMethod]
         public async Task Delete()
@@ -348,121 +323,28 @@ namespace YoFi.Tests.Functional
 
             // When: Deleting first item in list
 
-            // Click [aria-label="Edit"]
             await Page.ClickAsync("[aria-label=\"Edit\"]");
-
-            // Click "text=more"
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.ClickAsync("text=More");
-                await ScreenShotAsync();
+                await Page.SaveScreenshotToAsync(TestContext);
             });
-
-            // Click text=Save
             await NextPage.ClickAsync("text=Delete");
 
             // Then: We land at the delete page
-            await ThenIsOnPage(NextPage,"Delete Transaction");
-            await ScreenShotAsync(NextPage);
+            await NextPage.ThenIsOnPageAsync("Delete Transaction");
+            await NextPage.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking the Delete button to execute the delete
             await NextPage.ClickAsync("input:has-text(\"Delete\")");
 
             // Then: We land at the transactions index page
-            await ThenIsOnPage(NextPage,"Transactions");
-            await ScreenShotAsync(NextPage);
+            await NextPage.ThenIsOnPageAsync(MainPageName);
+            await NextPage.SaveScreenshotToAsync(TestContext);
 
             // And: Total number of items is back to the standard amount
-            await ThenTotalItemsAreEqual(TotalItemCount,onpage:NextPage);
+            Assert.AreEqual(TotalItemCount, await NextPage.GetTotalItemsAsync());
         }
 
-        public async Task CRUD()
-        {
-            var page = Page;
-
-            // Open new page
-            // Click #dropdownMenuButtonAction
-            await page.ClickAsync("#dropdownMenuButtonAction");
-            // Click text=Create New
-            await page.ClickAsync("text=Create New");
-            // Assert.AreEqual("http://localhost:50419/Transactions/Create", page.Url);
-            // Click input[name="Payee"]
-            await page.ClickAsync("input[name=\"Payee\"]");
-            // Fill input[name="Payee"]
-            await page.FillAsync("input[name=\"Payee\"]", "Payee");
-            // Click input[name="Amount"]
-            await page.ClickAsync("input[name=\"Amount\"]");
-            // Fill input[name="Amount"]
-            await page.FillAsync("input[name=\"Amount\"]", "Amount");
-            // Fill input[name="Timestamp"]
-            await page.FillAsync("input[name=\"Timestamp\"]", "2021-12-31");
-            // Click input[name="Category"]
-            await page.ClickAsync("input[name=\"Category\"]");
-            // Fill input[name="Category"]
-            await page.FillAsync("input[name=\"Category\"]", "Cetegory");
-            // Press ArrowLeft
-            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
-            // Press ArrowLeft
-            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
-            // Press ArrowLeft
-            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
-            // Press ArrowLeft
-            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
-            // Press ArrowLeft
-            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
-            // Press ArrowLeft
-            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
-            // Fill input[name="Category"]
-            await page.FillAsync("input[name=\"Category\"]", "Category");
-            // Click text=Payee Amount Date Category No results Memo BankReference Create Cancel
-            await page.ClickAsync("text=Payee Amount Date Category No results Memo BankReference Create Cancel");
-            // Click input[name="Memo"]
-            await page.ClickAsync("input[name=\"Memo\"]");
-            // Fill input[name="Memo"]
-            await page.FillAsync("input[name=\"Memo\"]", "Memo");
-            // Click input:has-text("Create")
-            await page.ClickAsync("input:has-text(\"Create\")");
-            // Assert.AreEqual("http://localhost:50419/Transactions/Create", page.Url);
-            // Go to http://localhost:50419/Transactions/Create
-            await page.GotoAsync("http://localhost:50419/Transactions/Create");
-            // Click input[name="Amount"]
-            await page.ClickAsync("input[name=\"Amount\"]");
-            // Click html
-            await page.ClickAsync("html");
-            // Click input[name="Amount"]
-            await page.ClickAsync("input[name=\"Amount\"]");
-            // Press a with modifiers
-            await page.PressAsync("input[name=\"Amount\"]", "Control+a");
-            // Fill input[name="Amount"]
-            await page.FillAsync("input[name=\"Amount\"]", "100");
-            // Press Tab
-            await page.PressAsync("input[name=\"Amount\"]", "Tab");
-            // Click input[name="Category"]
-            await page.ClickAsync("input[name=\"Category\"]");
-            // Fill input[name="Category"]
-            await page.FillAsync("input[name=\"Category\"]", "__TEST__");
-            // Click input[name="Payee"]
-            await page.ClickAsync("input[name=\"Payee\"]");
-            // Press ArrowLeft with modifiers
-            await page.PressAsync("input[name=\"Payee\"]", "Control+ArrowLeft");
-            // Fill input[name="Payee"]
-            await page.FillAsync("input[name=\"Payee\"]", "__TEST__Payee");
-            // Click input:has-text("Create")
-            await page.ClickAsync("input:has-text(\"Create\")");
-            // Assert.AreEqual("http://localhost:50419/Transactions", page.Url);
-            // Click [data-test-id="q"]
-            await page.ClickAsync("[data-test-id=\"q\"]");
-            // Fill [data-test-id="q"]
-            await page.FillAsync("[data-test-id=\"q\"]", "__TEST__");
-            // Press Enter
-            await page.PressAsync("[data-test-id=\"q\"]", "Enter");
-            // Assert.AreEqual("http://localhost:50419/Transactions", page.Url);
-            // Click text=Delete
-            await page.ClickAsync("text=Delete");
-            // Assert.AreEqual("http://localhost:50419/Transactions/Delete/890", page1.Url);
-            // Click input:has-text("Delete")
-            await page.ClickAsync("input:has-text(\"Delete\")");
-            // Assert.AreEqual("http://localhost:50419/Transactions", page1.Url);
-        }
     }
 }

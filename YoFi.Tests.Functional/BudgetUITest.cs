@@ -17,8 +17,6 @@ namespace YoFi.Tests.Functional
         [TestInitialize]
         public new async Task SetUp()
         {
-            base.SetUp();
-
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 

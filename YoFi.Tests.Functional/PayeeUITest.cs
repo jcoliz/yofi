@@ -15,8 +15,6 @@ namespace YoFi.Tests.Functional
         [TestInitialize]
         public new async Task SetUp()
         {
-            base.SetUp();
-
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
@@ -249,8 +247,11 @@ namespace YoFi.Tests.Functional
             var name = NextName;
             await Page.WaitForSelectorAsync("#addPayeeModal");
             await Page.SaveScreenshotToAsync(TestContext);
-            await Page.FillAsync("input[name=\"Name\"]", name);
-            await Page.FillAsync("input[name=\"Category\"]", NextCategory);
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", NextCategory },
+                { "Name", name },
+            });
             await Page.SaveScreenshotToAsync(TestContext);
 
             await Page.ClickAsync("#addPayeeModal >> text=Save");
@@ -269,22 +270,19 @@ namespace YoFi.Tests.Functional
         async Task GivenPayeeInDatabase()
         {
             // Given: We are starting at the payee index page
-            await ThenIsOnPage("Payees");
-            var originalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            await Page.ThenIsOnPageAsync(MainPageName);
+            var originalitems = await Page.GetTotalItemsAsync();
 
             // When: Creating a new item
 
-            // Click #dropdownMenuButtonAction
             await Page.ClickAsync("#dropdownMenuButtonAction");
-            // Click text=Create New
             await Page.ClickAsync("text=Create New");
-            // Click input[name="Name"]
-            await Page.FillAsync("input[name=\"Name\"]", NextName);
-            // Fill input[name="Category"]
-            await Page.FillAsync("input[name=\"Category\"]", NextCategory);
-            // Click input:has-text("Create")
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", NextCategory },
+                { "Name", NextName },
+            });
             await Page.ClickAsync("input:has-text(\"Create\")");
-            // Assert.AreEqual("http://localhost:50419/Payees", page.Url);
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);

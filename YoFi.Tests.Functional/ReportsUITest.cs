@@ -19,7 +19,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("text=Reports");
 
             // Then: We land at the budget index page
-            await ThenIsOnPage("Reports");
+            await Page.ThenIsOnPageAsync("Reports");
 
             // And: The summary is shown
             await ThenH2Is("Summary");
@@ -56,7 +56,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync($"text={expected}");
 
             // Then: The expected report is generated
-            await ThenIsOnPage(expected);
+            await Page.ThenIsOnPageAsync(expected);
             await ThenH2Is(expected);
         }
 
