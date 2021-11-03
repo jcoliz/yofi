@@ -1,6 +1,7 @@
 ﻿using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Playwright;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +30,34 @@ namespace YoFi.Tests.Functional
             // Then: We land at the transactions index page
             await ThenIsOnPage("Transactions");
         }
+
+        [TestCleanup]
+        public async Task Cleanup()
+        {
+            //
+            // Delete all test items
+            //
+
+            // Given: Clicking "Transactions" on the navbar
+            await Page.ClickAsync("text=Transactions");
+
+            // If: totalitems > expected TotalItemCount
+            var totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            if (totalitems > TotalItemCount)
+            {
+                // When: Asking server to clear this test data
+                var api = new ApiKeyTest();
+                api.SetUp();
+                await api.ClearTestData("trx");
+            }
+
+            // And: Releaging the page
+            await Page.ReloadAsync();
+
+            // Then: Total items are back to normal
+            await ThenTotalItemsAreEqual(TotalItemCount);
+        }
+
 
         [TestMethod]
         public async Task ClickTransactions()
@@ -172,6 +201,42 @@ namespace YoFi.Tests.Functional
             Assert.IsFalse(await title.IsEnabledAsync());
         }
         */
+
+        [TestMethod]
+        public async Task Create()
+        {
+            // Given: We are logged in and on the transactions page
+
+            // When: Creating a new item
+            var originalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+
+            // Click #dropdownMenuButtonAction
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            // Click text=Create New
+            await Page.ClickAsync("text=Create New");
+            // Fill input[name="Payee"]
+            await Page.FillAsync("input[name=\"Payee\"]", NextName);
+            // Fill input[name="Category"]
+            await Page.FillAsync("input[name=\"Category\"]", NextCategory);
+            // Fill input[name="Memo"]
+            await Page.FillAsync("input[name=\"Memo\"]", testmarker);
+            // Fill input[name="Timestamp"]
+            await Page.FillAsync("input[name=\"Timestamp\"]", "2021-12-31");
+            // Fill input[name="Amount"]
+            await Page.FillAsync("input[name=\"Amount\"]", "100");
+            await ScreenShotAsync();
+            // Click input:has-text("Create")
+            await Page.ClickAsync("input:has-text(\"Create\")");
+
+            // Then: We land at the transactions index page
+            await ThenIsOnPage("Transactions");
+
+            // And: There is one more item
+            var itemsnow = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            Assert.IsTrue(itemsnow == originalitems + 1);
+
+            await ScreenShotAsync();
+        }
 
         public async Task CRUD()
         {
