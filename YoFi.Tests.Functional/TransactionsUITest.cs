@@ -292,6 +292,49 @@ namespace YoFi.Tests.Functional
             // TODO: Also check that the amount is correct
         }
 
+        [TestMethod]
+        public async Task UpdatePage()
+        {
+            // Given: One item created
+            // And: It's the one item in search results
+            await Read(1);
+
+            // When: Editing it
+            var newcategory = NextCategory;
+            var newpayee = NextName;
+
+            // Click [aria-label="Edit"]
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.ClickAsync("text=More");
+            });
+
+
+            // Fill input[name="Category"]
+            await NextPage.FillAsync("input[name=\"Category\"]", newcategory);
+            // NextPage input[name="Name"]
+            await NextPage.FillAsync("input[name=\"Payee\"]", newpayee);
+            // NextPage input[name="Name"]
+            await NextPage.FillAsync("input[name=\"Amount\"]", "200");
+            await ScreenShotAsync(NextPage);
+            // Click text=Save
+            await NextPage.ClickAsync("text=Save");
+
+            // Then: We land at the transactions index page
+            await ThenIsOnPage(NextPage,"Transactions");
+
+            // And: Searching for the new item...
+            await Page.FillAsync("data-test-id=q", newcategory);
+            await Page.ClickAsync("data-test-id=btn-search");
+            await ScreenShotAsync();
+
+            // Then: It's found
+            await ThenTotalItemsAreEqual(1);
+
+            // TODO: Also check that the amount is correct
+        }
 
         public async Task CRUD()
         {

@@ -86,9 +86,11 @@ namespace YoFi.Tests.Functional
                 base.Context.SetDefaultTimeout(5000);
             }
         }
-        protected async Task ThenIsOnPage(string expected)
+        protected Task ThenIsOnPage(string expected) => ThenIsOnPage(Page, expected);
+
+        protected async Task ThenIsOnPage(IPage page,string expected)
         {
-            var title = await Page.TitleAsync();
+            var title = await page.TitleAsync();
             Assert.AreEqual($"{expected} - Development - YoFi", title);
         }
 
@@ -125,10 +127,12 @@ namespace YoFi.Tests.Functional
 
             return items;
         }
-        protected async Task ScreenShotAsync()
+        protected async Task ScreenShotAsync(IPage inpage = null)
         {
+            IPage page = inpage ?? Page;
+
             var filename = $"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.{ScreenShotCount++}.png";
-            await Page.ScreenshotAsync(new Microsoft.Playwright.PageScreenshotOptions() { Path = filename, OmitBackground = true });
+            await page.ScreenshotAsync(new Microsoft.Playwright.PageScreenshotOptions() { Path = filename, OmitBackground = true });
             TestContext.AddResultFile(filename);
         }
 
