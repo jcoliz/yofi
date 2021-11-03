@@ -306,11 +306,13 @@ namespace YoFi.Tests.Functional
             // Click [aria-label="Edit"]
             await Page.ClickAsync("[aria-label=\"Edit\"]");
 
+            // Click "text=more"
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
+                await Page.WaitForSelectorAsync("input[name=\"Category\"]");
+                await ScreenShotAsync();
                 await Page.ClickAsync("text=More");
             });
-
 
             // Fill input[name="Category"]
             await NextPage.FillAsync("input[name=\"Category\"]", newcategory);
@@ -334,6 +336,44 @@ namespace YoFi.Tests.Functional
             await ThenTotalItemsAreEqual(1);
 
             // TODO: Also check that the amount is correct
+        }
+
+
+        [TestMethod]
+        public async Task Delete()
+        {
+            // Given: One item created
+            // And: It's the one item in search results
+            await Read(1);
+
+            // When: Deleting first item in list
+
+            // Click [aria-label="Edit"]
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+
+            // Click "text=more"
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.ClickAsync("text=More");
+                await ScreenShotAsync();
+            });
+
+            // Click text=Save
+            await NextPage.ClickAsync("text=Delete");
+
+            // Then: We land at the delete page
+            await ThenIsOnPage(NextPage,"Delete Transaction");
+            await ScreenShotAsync(NextPage);
+
+            // When: Clicking the Delete button to execute the delete
+            await NextPage.ClickAsync("input:has-text(\"Delete\")");
+
+            // Then: We land at the transactions index page
+            await ThenIsOnPage(NextPage,"Transactions");
+            await ScreenShotAsync(NextPage);
+
+            // And: Total number of items is back to the standard amount
+            await ThenTotalItemsAreEqual(TotalItemCount,onpage:NextPage);
         }
 
         public async Task CRUD()

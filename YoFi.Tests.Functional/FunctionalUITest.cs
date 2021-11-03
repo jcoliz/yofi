@@ -100,6 +100,12 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(to.ToString(), await Page.TextContentAsync("data-test-id=lastitem"));
         }
 
+        protected async Task ThenTotalItemsAreEqual(int howmany, IPage onpage = null)
+        {
+            var page = onpage ?? Page;
+            Assert.AreEqual(howmany.ToString(), await page.TextContentAsync("data-test-id=totalitems"));
+        }
+
         protected async Task ThenTotalItemsAreEqual(int howmany)
         {
             Assert.AreEqual(howmany.ToString(), await Page.TextContentAsync("data-test-id=totalitems"));
