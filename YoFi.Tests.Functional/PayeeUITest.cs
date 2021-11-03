@@ -84,8 +84,7 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // When: Searching for "Utilities" (which will match category)
-            await Page.FillAsync("data-test-id=q", "Utilities");
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor("Utilities");
 
             // Then: Exactly 5 items are found, because we know this about our source data
             Assert.AreEqual(5, await Page.GetTotalItemsAsync());
@@ -97,7 +96,7 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // When: Searching for "am" (which will match name)
-            await Page.FillAsync("data-test-id=q", "am");
+            await Page.SearchFor("am");
             await Page.ClickAsync("data-test-id=btn-search");
 
             // Then: Exactly 2 items are found, because we know this about our source data
@@ -167,8 +166,7 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount + 3, await Page.GetTotalItemsAsync());
 
             // When: Searching for what we just imported
-            await Page.FillAsync("data-test-id=q", testmarker);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(testmarker);
 
             // Then: 3 items are found, because we know this about our imported data
             Assert.AreEqual(3, await Page.GetTotalItemsAsync());
@@ -199,8 +197,7 @@ namespace YoFi.Tests.Functional
             await GivenPayeeInDatabase();
 
             // And: Searching for the newly added items
-            await Page.FillAsync("data-test-id=q", testmarker);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(testmarker);
 
             // And: In bulk edit mode
             await Page.ClickAsync("#dropdownMenuButtonAction");
@@ -261,8 +258,7 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount + 1, await Page.GetTotalItemsAsync());
 
             // And: Searching for the payee finds it
-            await Page.FillAsync("data-test-id=q", name);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(name);
             Assert.AreEqual(1, await Page.GetTotalItemsAsync());
             await Page.SaveScreenshotToAsync(TestContext);
         }
@@ -301,8 +297,7 @@ namespace YoFi.Tests.Functional
             await GivenPayeeInDatabase();
 
             // And: Searched for the new payee
-            await Page.FillAsync("data-test-id=q", testmarker);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(testmarker);
             await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking delete on first item in list

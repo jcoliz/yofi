@@ -73,8 +73,7 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the transactions page
 
             // When: Searching for "Farquat"
-            await Page.FillAsync("data-test-id=q", "Farquat");
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor("Farquat");
 
             // Then: Exactly 12 transactions are found, because we know this about our source data
             Assert.AreEqual(12, await Page.GetTotalItemsAsync());
@@ -86,8 +85,7 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the transactions page
 
             // When: Searching for "Food:Away:Coffee"
-            await Page.FillAsync("data-test-id=q", "Food:Away:Coffee");
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor("Food:Away:Coffee");
 
             // Then: Exactly 156 transactions are found, because we know this about our source data
             Assert.AreEqual(156, await Page.GetTotalItemsAsync());
@@ -131,8 +129,7 @@ namespace YoFi.Tests.Functional
 
             // When: Searching for "Farquat"
             var searchword = "Farquat";
-            await Page.FillAsync("data-test-id=q", searchword);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(searchword);
 
             // And: Downloading transactions
             await Page.ClickAsync("#dropdownMenuButtonAction");
@@ -229,8 +226,7 @@ namespace YoFi.Tests.Functional
                 await Create();
 
             // When: Searching for the new item
-            await Page.FillAsync("data-test-id=q", testmarker);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(testmarker);
             await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found
@@ -261,8 +257,7 @@ namespace YoFi.Tests.Functional
             await Page.ThenIsOnPageAsync(MainPageName);
 
             // And: Searching for the new item...
-            await Page.FillAsync("data-test-id=q", newcategory);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(newcategory);
             await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found
@@ -304,8 +299,7 @@ namespace YoFi.Tests.Functional
             await NextPage.ThenIsOnPageAsync(MainPageName);
 
             // And: Searching for the new item...
-            await Page.FillAsync("data-test-id=q", newcategory);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(newcategory);
             await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found

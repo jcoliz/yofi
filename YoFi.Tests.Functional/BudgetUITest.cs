@@ -84,9 +84,8 @@ namespace YoFi.Tests.Functional
         {
             // Given: We are already logged in and on the budget page
 
-            // When: Searching for "Farquat"
-            await Page.FillAsync("data-test-id=q", "Healthcare");
-            await Page.ClickAsync("data-test-id=btn-search");
+            // When: Searching for "Healthcare"
+            await Page.SearchFor("Healthcare");
 
             // Then: Exactly 25 items are found, because we know this about our source data
             Assert.AreEqual(25, await Page.GetTotalItemsAsync());
@@ -157,8 +156,7 @@ namespace YoFi.Tests.Functional
             await Create();
 
             // When: Searching for the new item
-            await Page.FillAsync("data-test-id=q", testmarker);
-            await Page.ClickAsync("data-test-id=btn-search");
+            await Page.SearchFor(testmarker);
             await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found
@@ -187,9 +185,8 @@ namespace YoFi.Tests.Functional
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
 
-            // And: Searching for q={newcategory}
-            await Page.FillAsync("data-test-id=q", newcategory);
-            await Page.ClickAsync("data-test-id=btn-search");
+            // And: Searching for {newcategory}
+            await Page.SearchFor(newcategory);
             await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: It's found

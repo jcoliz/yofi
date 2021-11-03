@@ -149,5 +149,10 @@ namespace YoFi.Tests.Functional
             return items;
         }
 
+        public static async Task SearchFor(this IPage page, string q)
+        {
+            await page.FillAsync("data-test-id=q", q);
+            await page.ClickAsync("data-test-id=btn-search");
+        }
     }
 }
