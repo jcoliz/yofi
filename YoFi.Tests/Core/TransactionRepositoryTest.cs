@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using YoFi.AspNet.Core.Repositories;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core

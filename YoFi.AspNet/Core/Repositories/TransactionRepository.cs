@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core;
 using YoFi.Core.Models;
-using YoFi.Core.Repositories;
 
-namespace YoFi.AspNet.Core.Repositories
+namespace YoFi.Core.Repositories
 {
     public class TransactionRepository : BaseRepository<Transaction>, ITransactionRepository
     {

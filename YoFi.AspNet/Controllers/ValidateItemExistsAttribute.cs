@@ -6,6 +6,13 @@ using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
 {
+    public class ValidateTransactionExistsAttribute : TypeFilterAttribute
+    {
+        public ValidateTransactionExistsAttribute() : base(typeof
+          (ValidateAuthorExistsFilterImpl<Transaction>))
+        {
+        }
+    }
 
     public class ValidatePayeeExistsAttribute : TypeFilterAttribute
     {

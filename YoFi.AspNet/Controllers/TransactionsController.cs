@@ -22,6 +22,7 @@ using YoFi.Core.Quieriers;
 using YoFi.Core.Reports;
 using Transaction = YoFi.Core.Models.Transaction;
 using Ardalis.Filters;
+using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -35,9 +36,10 @@ namespace YoFi.AspNet.Controllers
 
         #region Constructor
 
-        public TransactionsController(ApplicationDbContext context, IConfiguration config, IPlatformAzureStorage storage = null)
+        public TransactionsController(ITransactionRepository repository, ApplicationDbContext context, IConfiguration config, IPlatformAzureStorage storage = null)
         {
             _context = context;
+            _repository = repository;
             _storage = storage;
             _config = config;
         }
@@ -247,20 +249,10 @@ namespace YoFi.AspNet.Controllers
         /// </summary>
         /// <param name="id">ID of the desired transaction</param>
         /// <returns></returns>
+        [ValidateTransactionExists]
         public async Task<IActionResult> Details(int? id)
         {
-            try
-            {
-                return View(await Get(id));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return View(await _repository.GetByIdAsync(id));
         }
 
         #endregion
@@ -275,6 +267,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateTransactionExists]
         public async Task<IActionResult> CreateSplit(int id)
         {
             Split result = null;
@@ -311,10 +304,6 @@ namespace YoFi.AspNet.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
             }
 
             return RedirectToAction("Edit", "Splits", new { id = result.ID });
@@ -1087,6 +1076,8 @@ namespace YoFi.AspNet.Controllers
         #region Internals
 
         private readonly ApplicationDbContext _context;
+
+        private readonly ITransactionRepository _repository;
 
         private readonly IPlatformAzureStorage _storage;
 

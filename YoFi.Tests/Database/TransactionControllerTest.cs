@@ -17,6 +17,7 @@ using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 using YoFi.Core.Reports;
+using YoFi.Core.Repositories;
 using Dto = YoFi.AspNet.Controllers.TransactionsController.TransactionIndexDto;
 using Transaction = YoFi.Core.Models.Transaction;
 
@@ -126,7 +127,7 @@ namespace YoFi.Tests
                 .AddInMemoryCollection(strings)
                 .Build();
 
-            helper.controller = new TransactionsController(helper.context,storage:storage, config:configuration);
+            helper.controller = new TransactionsController(new TransactionRepository(helper.context), helper.context,storage:storage, config:configuration);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 
@@ -157,8 +158,6 @@ namespace YoFi.Tests
         }
         [TestMethod]
         public async Task DetailsFound() => await helper.DetailsFound();
-        [TestMethod]
-        public async Task DetailsNotFound() => await helper.DetailsNotFound();
         [TestMethod]
         public async Task EditFound() => await helper.EditFound();
         [TestMethod]
@@ -1973,20 +1972,12 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
-        public async Task DetailsNullNotFound() => 
-            Assert.IsTrue(await controller.Details(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
-
-        [TestMethod]
         public async Task EditNullNotFound() =>
             Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
         [TestMethod]
         public async Task EditModalNullNotFound() =>
             Assert.IsTrue(await controller.EditModal(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
-
-        [TestMethod]
-        public async Task DeleteNullNotFound() =>
-            Assert.IsTrue(await controller.Delete(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
         [TestMethod]
         public async Task DeleteConfirmedNotFound() =>
