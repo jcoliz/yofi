@@ -15,9 +15,11 @@ namespace YoFi.Tests.Functional
     {
         const int TotalItemCount = 889;
 
-        [TestMethod]
-        public async Task ClickTransactions()
+        [TestInitialize]
+        public new async Task SetUp()
         {
+            base.SetUp();
+
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
@@ -26,8 +28,14 @@ namespace YoFi.Tests.Functional
 
             // Then: We land at the transactions index page
             await ThenIsOnPage("Transactions");
+        }
 
-            // And: All expected items are here
+        [TestMethod]
+        public async Task ClickTransactions()
+        {
+            // Given: We are logged in and on the transactions page
+
+            // Then: All expected items are here
             await ThenTotalItemsAreEqual(TotalItemCount);
         }
 
@@ -35,7 +43,6 @@ namespace YoFi.Tests.Functional
         public async Task IndexQAny12()
         {
             // Given: We are logged in and on the transactions page
-            await ClickTransactions();
 
             // When: Searching for "Farquat"
             await Page.FillAsync("data-test-id=q", "Farquat");
@@ -49,7 +56,6 @@ namespace YoFi.Tests.Functional
         public async Task IndexQAnyCategory()
         {
             // Given: We are logged in and on the transactions page
-            await ClickTransactions();
 
             // When: Searching for "Food:Away:Coffee"
             await Page.FillAsync("data-test-id=q", "Food:Away:Coffee");
@@ -76,7 +82,6 @@ namespace YoFi.Tests.Functional
         public async Task DownloadAll()
         {
             // Given: We are logged in and on the transactions page
-            await ClickTransactions();
 
             // When: Downloading transactions
             await Page.ClickAsync("#dropdownMenuButtonAction");
@@ -102,7 +107,6 @@ namespace YoFi.Tests.Functional
         public async Task DownloadQ12()
         {
             // Given: We are logged in and on the transactions page
-            await ClickTransactions();
 
             // When: Searching for "Farquat"
             var searchword = "Farquat";
@@ -168,5 +172,94 @@ namespace YoFi.Tests.Functional
             Assert.IsFalse(await title.IsEnabledAsync());
         }
         */
+
+        public async Task CRUD()
+        {
+            var page = Page;
+
+            // Open new page
+            // Click #dropdownMenuButtonAction
+            await page.ClickAsync("#dropdownMenuButtonAction");
+            // Click text=Create New
+            await page.ClickAsync("text=Create New");
+            // Assert.AreEqual("http://localhost:50419/Transactions/Create", page.Url);
+            // Click input[name="Payee"]
+            await page.ClickAsync("input[name=\"Payee\"]");
+            // Fill input[name="Payee"]
+            await page.FillAsync("input[name=\"Payee\"]", "Payee");
+            // Click input[name="Amount"]
+            await page.ClickAsync("input[name=\"Amount\"]");
+            // Fill input[name="Amount"]
+            await page.FillAsync("input[name=\"Amount\"]", "Amount");
+            // Fill input[name="Timestamp"]
+            await page.FillAsync("input[name=\"Timestamp\"]", "2021-12-31");
+            // Click input[name="Category"]
+            await page.ClickAsync("input[name=\"Category\"]");
+            // Fill input[name="Category"]
+            await page.FillAsync("input[name=\"Category\"]", "Cetegory");
+            // Press ArrowLeft
+            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
+            // Press ArrowLeft
+            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
+            // Press ArrowLeft
+            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
+            // Press ArrowLeft
+            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
+            // Press ArrowLeft
+            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
+            // Press ArrowLeft
+            await page.PressAsync("input[name=\"Category\"]", "ArrowLeft");
+            // Fill input[name="Category"]
+            await page.FillAsync("input[name=\"Category\"]", "Category");
+            // Click text=Payee Amount Date Category No results Memo BankReference Create Cancel
+            await page.ClickAsync("text=Payee Amount Date Category No results Memo BankReference Create Cancel");
+            // Click input[name="Memo"]
+            await page.ClickAsync("input[name=\"Memo\"]");
+            // Fill input[name="Memo"]
+            await page.FillAsync("input[name=\"Memo\"]", "Memo");
+            // Click input:has-text("Create")
+            await page.ClickAsync("input:has-text(\"Create\")");
+            // Assert.AreEqual("http://localhost:50419/Transactions/Create", page.Url);
+            // Go to http://localhost:50419/Transactions/Create
+            await page.GotoAsync("http://localhost:50419/Transactions/Create");
+            // Click input[name="Amount"]
+            await page.ClickAsync("input[name=\"Amount\"]");
+            // Click html
+            await page.ClickAsync("html");
+            // Click input[name="Amount"]
+            await page.ClickAsync("input[name=\"Amount\"]");
+            // Press a with modifiers
+            await page.PressAsync("input[name=\"Amount\"]", "Control+a");
+            // Fill input[name="Amount"]
+            await page.FillAsync("input[name=\"Amount\"]", "100");
+            // Press Tab
+            await page.PressAsync("input[name=\"Amount\"]", "Tab");
+            // Click input[name="Category"]
+            await page.ClickAsync("input[name=\"Category\"]");
+            // Fill input[name="Category"]
+            await page.FillAsync("input[name=\"Category\"]", "__TEST__");
+            // Click input[name="Payee"]
+            await page.ClickAsync("input[name=\"Payee\"]");
+            // Press ArrowLeft with modifiers
+            await page.PressAsync("input[name=\"Payee\"]", "Control+ArrowLeft");
+            // Fill input[name="Payee"]
+            await page.FillAsync("input[name=\"Payee\"]", "__TEST__Payee");
+            // Click input:has-text("Create")
+            await page.ClickAsync("input:has-text(\"Create\")");
+            // Assert.AreEqual("http://localhost:50419/Transactions", page.Url);
+            // Click [data-test-id="q"]
+            await page.ClickAsync("[data-test-id=\"q\"]");
+            // Fill [data-test-id="q"]
+            await page.FillAsync("[data-test-id=\"q\"]", "__TEST__");
+            // Press Enter
+            await page.PressAsync("[data-test-id=\"q\"]", "Enter");
+            // Assert.AreEqual("http://localhost:50419/Transactions", page.Url);
+            // Click text=Delete
+            await page.ClickAsync("text=Delete");
+            // Assert.AreEqual("http://localhost:50419/Transactions/Delete/890", page1.Url);
+            // Click input:has-text("Delete")
+            await page.ClickAsync("input:has-text(\"Delete\")");
+            // Assert.AreEqual("http://localhost:50419/Transactions", page1.Url);
+        }
     }
 }
