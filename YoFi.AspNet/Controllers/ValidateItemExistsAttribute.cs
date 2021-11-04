@@ -9,7 +9,7 @@ namespace YoFi.AspNet.Controllers
     public class ValidateTransactionExistsAttribute : TypeFilterAttribute
     {
         public ValidateTransactionExistsAttribute() : base(typeof
-          (ValidateAuthorExistsFilterImpl<Transaction>))
+          (ValidateItemExists<Transaction>))
         {
         }
     }
@@ -17,7 +17,7 @@ namespace YoFi.AspNet.Controllers
     public class ValidatePayeeExistsAttribute : TypeFilterAttribute
     {
         public ValidatePayeeExistsAttribute() : base(typeof
-          (ValidateAuthorExistsFilterImpl<Payee>))
+          (ValidateItemExists<Payee>))
         {
         }
     }
@@ -25,17 +25,17 @@ namespace YoFi.AspNet.Controllers
     public class ValidateBudgetTxExistsAttribute : TypeFilterAttribute
     {
         public ValidateBudgetTxExistsAttribute() : base(typeof
-          (ValidateAuthorExistsFilterImpl<BudgetTx>))
+          (ValidateItemExists<BudgetTx>))
         {
         }
     }
 
     // https://docs.microsoft.com/en-us/archive/msdn-magazine/2016/august/asp-net-core-real-world-asp-net-core-mvc-filters
 
-    internal class ValidateAuthorExistsFilterImpl<T> : IAsyncActionFilter where T : class, IModelItem<T>
+    internal class ValidateItemExists<T> : IAsyncActionFilter where T : class, IModelItem<T>
     {
         private readonly IRepository<T> _datacontext;
-        public ValidateAuthorExistsFilterImpl(IRepository<T> repository)
+        public ValidateItemExists(IRepository<T> repository)
         {
             _datacontext = repository;
         }

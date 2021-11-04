@@ -544,54 +544,37 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
+        [ValidateTransactionExists]
+        [ValidateFilesProvided(multiplefilesok:false)]
         public async Task<IActionResult> UpReceipt(List<IFormFile> files, int id)
         {
-            try
+            if (null == _storage)
+                throw new InvalidOperationException("Unable to upload receipt. Azure Blob Storage is not configured for this application.");
+
+            var transaction = await _repository.GetByIdAsync(id);
+
+            //
+            // Save the file to blob storage
+            //
+            // TODO: Consolodate this with the exact same copy which is in ApiController
+            //
+
+            _storage.Initialize();
+
+            string blobname = id.ToString();
+            var formFile = files.Single();
+            using (var stream = formFile.OpenReadStream())
             {
-                if (files == null || !files.Any())
-                    throw new ApplicationException("Must choose a receipt file before uploading.");
-
-                if (files.Skip(1).Any())
-                    throw new ApplicationException("Must choose a only single receipt file. Uploading multiple receipts for a single transaction is not supported.");
-
-                if (null == _storage)
-                    throw new InvalidOperationException("Unable to upload receipt. Azure Blob Storage is not configured for this application.");
-
-                var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
-
-                //
-                // Save the file to blob storage
-                //
-                // TODO: Consolodate this with the exact same copy which is in ApiController
-                //
-
-                _storage.Initialize();
-
-                string blobname = id.ToString();
-
-                var formFile = files.Single();
-                using (var stream = formFile.OpenReadStream())
-                {
-                    await _storage.UploadToBlob(BlobStoreName, blobname, stream, formFile.ContentType);
-                }
-
-                // Save it in the Transaction
-                // If there was a problem, UploadToBlob will throw an exception.
-
-                transaction.ReceiptUrl = blobname;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-
-                return Redirect($"/Transactions/Edit/{id}");
+                await _storage.UploadToBlob(BlobStoreName, blobname, stream, formFile.ContentType);
             }
-            catch (ApplicationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+
+            // Save it in the Transaction
+            // If there was a problem, UploadToBlob will throw an exception.
+
+            transaction.ReceiptUrl = blobname;
+            await _repository.UpdateAsync(transaction);
+
+            return Redirect($"/Transactions/Edit/{id}");
         }
 
         [HttpPost]
@@ -685,49 +668,36 @@ namespace YoFi.AspNet.Controllers
         /// <returns></returns>
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
+        [ValidateFilesProvided(multiplefilesok: true)]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            try
+            // Open each file in turn, and send them to the importer
+
+            var importer = new TransactionImporter(_context);
+
+            foreach (var formFile in files)
             {
-                if (files == null || !files.Any())
-                    throw new ApplicationException("Please choose a file to upload, first.");
-
-                // Open each file in turn, and send them to the importer
-
-                var importer = new TransactionImporter(_context);
-
-                foreach (var formFile in files)
+                var filetype = Path.GetExtension(formFile.FileName).ToLowerInvariant() switch
                 {
-                    var filetype = Path.GetExtension(formFile.FileName).ToLowerInvariant() switch
-                    {
-                        ".ofx" => TransactionImporter.ImportableFileTypeEnum.Ofx,
-                        ".xlsx" => TransactionImporter.ImportableFileTypeEnum.Xlsx,
-                        _ => TransactionImporter.ImportableFileTypeEnum.Invalid
-                    };
+                    ".ofx" => TransactionImporter.ImportableFileTypeEnum.Ofx,
+                    ".xlsx" => TransactionImporter.ImportableFileTypeEnum.Xlsx,
+                    _ => TransactionImporter.ImportableFileTypeEnum.Invalid
+                };
 
-                    if (filetype != TransactionImporter.ImportableFileTypeEnum.Invalid)
-                    {
-                        using var stream = formFile.OpenReadStream();
-                        await importer.LoadFromAsync(stream, filetype);
-                    }
+                if (filetype != TransactionImporter.ImportableFileTypeEnum.Invalid)
+                {
+                    using var stream = formFile.OpenReadStream();
+                    await importer.LoadFromAsync(stream, filetype);
                 }
+            }
 
-                // Process the imported files
-                await importer.Process();
+            // Process the imported files
+            await importer.Process();
 
-                // This is kind of a crappy way to communicate the potential false negative conflicts.
-                // If user returns to Import page directly, these highlights will be lost. Really probably
-                // should persist this to the database somehow. Or at least stick it in the session??
-                return RedirectToAction(nameof(Import), new { highlight = string.Join(':', importer.HighlightIDs) });
-            }
-            catch (ApplicationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            // This is kind of a crappy way to communicate the potential false negative conflicts.
+            // If user returns to Import page directly, these highlights will be lost. Really probably
+            // should persist this to the database somehow. Or at least stick it in the session??
+            return RedirectToAction(nameof(Import), new { highlight = string.Join(':', importer.HighlightIDs) });
         }
 
         /// <summary>
@@ -796,93 +766,70 @@ namespace YoFi.AspNet.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Import(string highlight = null, int? p = null)
         {
+            // TODO: Should add a DTO here
+            IQueryable<Transaction> result = _repository.OrderedQuery.Where(x => x.Imported == true);
+
+            //
+            // Process PAGE (P) parameters
+            //
+
+            var divider = new PageDivider() { PageSize = PageSize };
+            result = await divider.ItemsForPage(result, p);
+            ViewData[nameof(PageDivider)] = divider;
+
             try
             {
-                IQueryable<Transaction> result = from s in _context.Transactions
-                                                 where s.Imported == true
-                                                 orderby s.Timestamp descending, s.BankReference ascending
-                                                 select s;
-
-                //
-                // Process PAGE (P) parameters
-                //
-
-                var divider = new PageDivider() { PageSize = PageSize };
-                result = await divider.ItemsForPage(result, p);
-                ViewData[nameof(PageDivider)] = divider;
-
-                try
+                if (!string.IsNullOrEmpty(highlight))
                 {
-                    if (!string.IsNullOrEmpty(highlight))
-                    {
-                        ViewData["Highlight"] = highlight.Split(':').Select(x => Convert.ToInt32(x)).ToHashSet();
-                    }
+                    ViewData["Highlight"] = highlight.Split(':').Select(x => Convert.ToInt32(x)).ToHashSet();
                 }
-                catch
-                {
-                    // If this fails in any way, nevermind.
-                }
-
-                return View(await result.AsNoTracking().ToListAsync());
             }
-            catch (Exception ex)
+            catch
             {
-                return StatusCode(500, ex.Message);
+                // If this fails in any way, nevermind.
             }
+
+            // TODO: ToListAsync()
+            // TODO: AsNoTracking()
+            return View(result.ToList());
         }
 
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
+        [ValidateFilesProvided(multiplefilesok: true)]
+        [ValidateTransactionExists]
         public async Task<IActionResult> UpSplits(List<IFormFile> files, int id)
         {
-            try
+            var transaction = await _repository.GetWithSplitsByIdAsync(id);
+
+            var incoming = new HashSet<Split>();
+            // Extract submitted file into a list objects
+
+            foreach (var file in files)
             {
-                if (files == null || !files.Any())
-                    throw new ApplicationException("Please choose a file to upload, first.");
-
-                var transaction = await GetWithSplits(id);
-
-                var incoming = new HashSet<Split>();
-                // Extract submitted file into a list objects
-
-                foreach (var file in files)
+                if (file.FileName.ToLower().EndsWith(".xlsx"))
                 {
-                    if (file.FileName.ToLower().EndsWith(".xlsx"))
-                    {
-                        using var stream = file.OpenReadStream();
-                        using var ssr = new SpreadsheetReader();
-                        ssr.Open(stream);
-                        var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
-                        incoming.UnionWith(items);
-                    }
+                    using var stream = file.OpenReadStream();
+                    using var ssr = new SpreadsheetReader();
+                    ssr.Open(stream);
+                    var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
+                    incoming.UnionWith(items);
+                }
+            }
+
+            if (incoming.Any())
+            {
+                // Why no has AddRange??
+                foreach (var split in incoming)
+                {
+                    transaction.Splits.Add(split);
                 }
 
-                if (incoming.Any())
-                {
-                    // Why no has AddRange??
-                    foreach (var split in incoming)
-                    {
-                        transaction.Splits.Add(split);
-                    }
+                _context.Update(transaction);
+                await _context.SaveChangesAsync();
+            }
 
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
-                }
-
-                return RedirectToAction("Edit", new { id = id });
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            catch (ApplicationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return RedirectToAction("Edit", new { id = id });
         }
         #endregion
 
