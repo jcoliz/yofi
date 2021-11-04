@@ -86,7 +86,7 @@
     <form asp-action="CreateSplit" asp-route-id="@Model.ID">
         <div class="alert alert-danger" role="alert">
             <strong>Incomplete Splits Balance</strong> Please add another split to contain the remaining balance.
-            <button type="submit" class="btn btn-danger ms-2">Add</button>
+            <button type="submit" class="btn btn-danger ms-2" data-test-id="btn-fix-split">Add</button>
         </div>
     </form>
 }
@@ -140,7 +140,7 @@
 </div>
 
 <form asp-action="CreateSplit" asp-route-id="@Model.ID">
-    <button type="submit" class="btn btn-primary mb-3">Add</button>
+    <button type="submit" class="btn btn-primary mb-3" data-test-id="btn-add-split">Add</button>
 </form>
 
 <br />

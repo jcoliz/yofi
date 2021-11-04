@@ -460,5 +460,41 @@ namespace YoFi.Tests.Functional
 
             Assert.IsNotNull(button);
         }
+
+        [TestMethod]
+        public async Task CreateSplit()
+        {
+            // Given: One item created
+            // And: It's the one item in search results
+            await Read(1);
+
+            // And: Editing it
+            await Page.ClickAsync("[aria-label=Edit]");
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.WaitForSelectorAsync("input[name=Category]");
+                await Page.SaveScreenshotToAsync(TestContext);
+                await Page.ClickAsync("text=More");
+            });
+
+            // When: Adding a single off-balance split
+
+            await NextPage.ClickAsync("data-test-id=btn-add-split");
+            await NextPage.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Amount", "50" },
+            });
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            await NextPage.ClickAsync("text=Save");
+
+            var add = await NextPage.QuerySelectorAsync("data-test-id=btn-add-split");
+            await add.ScrollIntoViewIfNeededAsync();
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            // Then: The fix split button is visible
+            var fix = await NextPage.QuerySelectorAsync("data-test-id=btn-add-split");
+            Assert.IsNotNull(fix);
+        }
     }
 }

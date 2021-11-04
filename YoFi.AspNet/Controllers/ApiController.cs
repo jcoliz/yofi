@@ -480,7 +480,7 @@ namespace YoFi.AspNet.Controllers
 
                 if (id.Contains("trx"))
                 {
-                    _context.Transactions.RemoveRange(_context.Transactions.Where(x => x.Category.Contains(testmarker)));
+                    _context.Transactions.RemoveRange(_context.Transactions.Where(x => x.Category.Contains(testmarker) || x.Memo.Contains(testmarker)));
                     _context.Splits.RemoveRange(_context.Splits.Where(x => x.Category.Contains(testmarker)));
                 }
 
