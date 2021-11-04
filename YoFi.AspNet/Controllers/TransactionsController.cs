@@ -490,7 +490,7 @@ namespace YoFi.AspNet.Controllers
 
         #endregion
 
-        #region Action Handlers: Receipts
+        #region Action Handlers: Receipts (done)
 
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
@@ -537,33 +537,12 @@ namespace YoFi.AspNet.Controllers
         [ValidateStorageAvailable]
         public async Task<IActionResult> GetReceipt(int id)
         {
-
             var transaction = await _repository.GetByIdAsync(id);
-
-            if (string.IsNullOrEmpty(transaction.ReceiptUrl))
-                return new NotFoundObjectResult("Transaction has no receipt");
-
-            var blobname = id.ToString();
-
-            // See Bug #991: Production bug: Receipts before 5/20/2021 don't download
-            // If the ReceiptUrl contains an int value, use THAT for the blobname instead.
-
-            if (Int32.TryParse(transaction.ReceiptUrl,out _))
-                blobname = transaction.ReceiptUrl;
-
-            _storage.Initialize();
-            var stream = new MemoryStream();
-            var contenttype = await _storage.DownloadBlob(BlobStoreName, blobname, stream);
-
-            // Work around previous versions which did NOT store content type in blob store.
-            if ("application/octet-stream" == contenttype)
-                contenttype = "application/pdf";
-
-            stream.Seek(0, SeekOrigin.Begin);
-            return File(stream, contenttype, id.ToString());
+            var result = await _repository.GetReceiptAsync(transaction);
+            return File(result.stream, result.contenttype, result.name);
         }
 
-        #endregion
+        #endregion 
 
         #region Action Handlers: Import Pipeline
         /// <summary>

@@ -191,6 +191,38 @@ namespace YoFi.Core.Repositories
             await UpdateAsync(transaction);
         }
 
+        public (Stream stream, string contenttype, string name) Foo()
+        {
+            return (null, null, null);
+
+        }
+
+        public async Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction)
+        {
+            if (string.IsNullOrEmpty(transaction.ReceiptUrl))
+                return (null,null,null);
+
+            var name = transaction.ID.ToString();
+
+            // See Bug #991: Production bug: Receipts before 5/20/2021 don't download
+            // If the ReceiptUrl contains an int value, use THAT for the blobname instead.
+
+            if (Int32.TryParse(transaction.ReceiptUrl, out _))
+                name = transaction.ReceiptUrl;
+
+            _storage.Initialize();
+            var stream = new MemoryStream();
+            var contenttype = await _storage.DownloadBlob(BlobStoreName, name, stream);
+
+            // Work around previous versions which did NOT store content type in blob store.
+            if ("application/octet-stream" == contenttype)
+                contenttype = "application/pdf";
+
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return (stream,contenttype,name);
+        }
+
         private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 
         #region Data Transfer Objects
