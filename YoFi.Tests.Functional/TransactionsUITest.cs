@@ -380,10 +380,48 @@ namespace YoFi.Tests.Functional
             // And: Back on the main page
             await Page.ClickAsync("text=Transactions");
 
+            // And: Searching for the new item
+            await Page.SearchFor(testmarker);
+
             // When: Clicking on the get-receipt icon
             var download1 = await Page.RunAndWaitForDownloadAsync(async () =>
             {
                 await Page.ClickAsync("[aria-label=\"Get Receipt\"]");
+            });
+
+            // Then: Image loads successfully
+            var stream = await download1.CreateReadStreamAsync();
+            var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
+
+            Assert.AreEqual(100, image.Width);
+            Assert.AreEqual(100, image.Height);
+        }
+
+        [TestMethod]
+        public async Task DownloadReceiptFromEditPage()
+        {
+            // Given: A transaction created and a receipte uploaded
+            await CreateReceipt();
+
+            // And: Back on the main page
+            await Page.ClickAsync("text=Transactions");
+
+            // And: Searching for the new item
+            await Page.SearchFor(testmarker);
+
+            // And: On the edit page
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.WaitForSelectorAsync("input[name=\"Category\"]");
+                await Page.SaveScreenshotToAsync(TestContext);
+                await Page.ClickAsync("text=More");
+            });
+
+            // When: Clicking on the get-receipt button
+            var download1 = await NextPage.RunAndWaitForDownloadAsync(async () =>
+            {
+                await NextPage.ClickAsync("[data-test-id=btn-get-receipt]");
             });
 
             // Then: Image loads successfully
