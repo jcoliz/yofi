@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -16,20 +15,18 @@ namespace YoFi.Tests.Functional
     public class ApiKeyTest
     {
         HttpClient client;
-        string apikey;
 
         protected readonly string Site = "http://localhost:50419/api/"; //50419
 
         [TestInitialize]
         public void SetUp()
         {
-            var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(ApiKeyTest))).Build();
-            apikey = config["Api:Key"];
-
             client = new HttpClient() { BaseAddress = new Uri(Site) };
 
-            var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"user:{apikey}"));
-            client.DefaultRequestHeaders.Add("Authorization", $"Basic {b64}");
+            var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(ApiKeyTest))).Build();
+            var apikey = config["Api:Key"];
+            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"user:{apikey}"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",base64);
         }
 
         [TestMethod]
