@@ -482,7 +482,7 @@ namespace YoFi.Tests.Functional
             await NextPage.ClickAsync("data-test-id=btn-add-split");
             await NextPage.FillFormAsync(new Dictionary<string, string>()
             {
-                { "Amount", "50" },
+                { "Amount", "25" },
             });
             await NextPage.SaveScreenshotToAsync(TestContext);
 
@@ -495,6 +495,52 @@ namespace YoFi.Tests.Functional
             // Then: The fix split button is visible
             var fix = await NextPage.QuerySelectorAsync("data-test-id=btn-add-split");
             Assert.IsNotNull(fix);
+        }
+
+        [TestMethod]
+        public async Task BalanceSplits()
+        {
+            // Given: One item created with an imbalanced split
+            await CreateSplit();
+
+            // And: Starting at the top
+            await Page.ClickAsync("text=Transactions");
+
+            // And: Searching for this item
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: On the edit page for it
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.ClickAsync("[data-test-id=edit-splits] i");
+            });
+
+            var fix = await NextPage.QuerySelectorAsync("data-test-id=btn-fix-split");
+            await fix.ScrollIntoViewIfNeededAsync();
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            // When: Clicking the "fix split" button
+            await fix.ClickAsync();
+
+            // Adding: Adding the remaining split (but not changing the amount)
+
+            await NextPage.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", NextCategory },
+                { "Memo", testmarker },
+            });
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            await NextPage.ClickAsync("text=Save");
+
+            var add = await NextPage.QuerySelectorAsync("data-test-id=btn-add-split");
+            await add.ScrollIntoViewIfNeededAsync();
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            // Then: The fix split button is NOT visible
+            fix = await NextPage.QuerySelectorAsync("data-test-id=btn-fix-split");
+            Assert.IsNull(fix);
         }
     }
 }
