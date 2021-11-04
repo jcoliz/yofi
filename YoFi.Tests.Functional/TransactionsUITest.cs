@@ -390,8 +390,7 @@ namespace YoFi.Tests.Functional
             });
 
             // Then: Image loads successfully
-            var stream = await download1.CreateReadStreamAsync();
-            var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
+            var image = await download1.DownloadImageAsync();
 
             Assert.AreEqual(100, image.Width);
             Assert.AreEqual(100, image.Height);
@@ -425,8 +424,7 @@ namespace YoFi.Tests.Functional
             });
 
             // Then: Image loads successfully
-            var stream = await download1.CreateReadStreamAsync();
-            var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
+            var image = await download1.DownloadImageAsync();
 
             Assert.AreEqual(100, image.Width);
             Assert.AreEqual(100, image.Height);
@@ -461,34 +459,6 @@ namespace YoFi.Tests.Functional
             await NextPage.SaveScreenshotToAsync(TestContext);
 
             Assert.IsNotNull(button);
-        }
-
-        private async Task recording()
-        {
-            var page = Page;
-
-            // Click [aria-label="Edit"]
-            await page.ClickAsync("[aria-label=\"Edit\"]");
-            // Click text=More
-            var page1 = await page.RunAndWaitForPopupAsync(async () =>
-            {
-                await page.ClickAsync("text=More");
-            });
-            // Click [aria-label="UploadReceipt"]
-            await page1.ClickAsync("[aria-label=\"UploadReceipt\"]");
-            // Upload budget-white-60x.png
-            await page1.SetInputFilesAsync("[aria-label=\"UploadReceipt\"]", new[] { "budget-white-60x.png" });
-            // Click :nth-match(:text("Upload"), 2)
-            await page1.ClickAsync(":nth-match(:text(\"Upload\"), 2)");
-            // Assert.AreEqual("http://localhost:50419/Transactions/Edit/234", page1.Url);
-            // Click text=Download
-            var download1 = await page1.RunAndWaitForDownloadAsync(async () =>
-            {
-                await page1.ClickAsync("text=Download");
-            });
-            // Click button:has-text("Delete")
-            await page1.ClickAsync("button:has-text(\"Delete\")");
-            // Assert.AreEqual("http://localhost:50419/Transactions/Edit/234", page1.Url);
         }
     }
 }

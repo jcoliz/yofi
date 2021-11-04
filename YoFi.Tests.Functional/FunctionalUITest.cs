@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -146,6 +147,14 @@ namespace YoFi.Tests.Functional
             }
 
             return items;
+        }
+
+        public static async Task<Image> DownloadImageAsync(this IDownload source)
+        {
+            var stream = await source.CreateReadStreamAsync();
+            var image = await Image.LoadAsync(stream);
+
+            return image;
         }
 
         public static async Task SearchFor(this IPage page, string q)
