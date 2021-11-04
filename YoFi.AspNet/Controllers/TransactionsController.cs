@@ -358,23 +358,9 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> EditModal(int? id)
         {
-            // TODO: Refactor to no duplicate between here and Edit
-
-            var transaction = await GetWithSplits(id);
-
-            // Handle payee auto-assignment
-
-            if (string.IsNullOrEmpty(transaction.Category))
-            {
-                // See if the payee exists
-                var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
-
-                if (payee != null)
-                {
-                    transaction.Category = payee.Category;
-                    ViewData["AutoCategory"] = true;
-                }
-            }
+            var transaction = await _repository.GetWithSplitsByIdAsync(id);
+            var didassign = await _repository.AssignPayeeAsync(transaction);
+            ViewData["AutoCategory"] = didassign;
 
             return PartialView("EditPartial", transaction);
 
@@ -415,6 +401,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
+        [ValidateTransactionExists]
         public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
         {
             try
@@ -425,25 +412,19 @@ namespace YoFi.AspNet.Controllers
                 if (duplicate == true)
                 {
                     transaction.ID = 0;
-                    _context.Add(transaction);
-                    await _context.SaveChangesAsync();
+                    await _repository.AddAsync(transaction);
                 }
                 else
                 {
                     // Bug #846: This Edit function is not allowed to alter the
-                    // ReceiptUrl. So we much preserve whatever was there.
+                    // ReceiptUrl. So we must preserve whatever was there.
 
-                    var old = await _context.Transactions.Include(x => x.Splits).SingleOrDefaultAsync(m => m.ID == id);
-                    if (old == null)
-                    {
-                        return NotFound();
-                    }
-                    _context.Entry(old).State = EntityState.Detached;
+                    // TODO: FirstOrDefaultAsync()
+                    var oldreceipturl = _repository.All.Where(x => x.ID == id).Select(x => x.ReceiptUrl).FirstOrDefault();
+                    
+                    transaction.ReceiptUrl = oldreceipturl;
 
-                    transaction.ReceiptUrl = old.ReceiptUrl;
-
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
+                    await _repository.UpdateAsync(transaction);
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -451,75 +432,15 @@ namespace YoFi.AspNet.Controllers
             {
                 return BadRequest();
             }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                if (!_context.Transactions.Any(e => e.ID == transaction.ID))
-                    return NotFound();
-                else
-                    return StatusCode(500, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkEdit(string Category)
         {
-            try
-            {
-                foreach (var item in _context.Transactions.Where(x => x.Selected == true))
-                {
-                    item.Selected = false;
+            await _repository.BulkEdit(Category);
 
-                    if (!string.IsNullOrEmpty(Category))
-                    {
-                        // This may be a pattern-matching search, treat it like one
-                        // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
-                        // matching one, it's just slower.
-                        if (Category.Contains("("))
-                        {
-                            var originals = item.Category?.Split(":") ?? default;
-                            var result = new List<string>();
-                            foreach (var component in Category.Split(":"))
-                            {
-                                if (component.StartsWith("(") && component.EndsWith("+)"))
-                                {
-                                    if (Int32.TryParse(component[1..^2], out var position))
-                                        if (originals.Count() >= position)
-                                            result.AddRange(originals.Skip(position - 1));
-                                }
-                                else if (component.StartsWith("(") && component.EndsWith(")"))
-                                {
-                                    if (Int32.TryParse(component[1..^1], out var position))
-                                        if (originals.Count() >= position)
-                                            result.AddRange(originals.Skip(position - 1).Take(1));
-                                }
-                                else
-                                    result.Add(component);
-                            }
-
-                            if (result.Any())
-                                item.Category = string.Join(":", result);
-                        }
-                        // It's just a simple replacement
-                        else
-                        {
-                            item.Category = Category;
-                        }
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return RedirectToAction(nameof(Index));
         }
 
         #endregion
@@ -546,73 +467,14 @@ namespace YoFi.AspNet.Controllers
 
         #region Action Handlers: Download
 
-        // POST: Transactions/Download
-        //[ActionName("Download")]
         [HttpPost]
         public async Task<IActionResult> Download(bool allyears, string q = null)
         {
-            try
-            {
-                // Which transactions?
+            Stream stream = await _repository.AsSpreadsheet(Year,allyears,q);
 
+            IActionResult result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "Transactions.xlsx");
 
-                var qbuilder = new TransactionsQueryBuilder(_context.Transactions.Include(x => x.Splits));
-                qbuilder.Build(q);
-                var transactionsquery = qbuilder.Query;
-
-                transactionsquery = transactionsquery.Where(x => x.Hidden != true);
-                if (!allyears)
-                    transactionsquery = transactionsquery.Where(x => x.Timestamp.Year == Year);
-                transactionsquery = transactionsquery
-                    .OrderByDescending(x => x.Timestamp);
-
-                // Select to data transfer object
-                var transactionsdtoquery = transactionsquery
-                    .Select(x => new TransactionExportDto()
-                    {
-                        ID = x.ID,
-                        Amount = x.Amount,
-                        Timestamp = x.Timestamp,
-                        Category = x.Category,
-                        Payee = x.Payee,
-                        Memo = x.Memo,
-                        ReceiptUrl = x.ReceiptUrl,
-                        BankReference = x.BankReference
-                    }
-                    );
-
-                var transactions = await transactionsdtoquery.ToListAsync();
-
-                // Which splits?
-
-                // Product Backlog Item 870: Export & import transactions with splits
-                var splitsquery = _context.Splits.Where(x => x.Transaction.Hidden != true);
-                if (!allyears)
-                    splitsquery = splitsquery.Where(x => x.Transaction.Timestamp.Year == Year);
-                splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
-                var splits = await splitsquery.ToListAsync();
-
-                // Create the spreadsheet result
-
-                var stream = new MemoryStream();
-                using (var ssw = new SpreadsheetWriter())
-                {
-                    ssw.Open(stream);
-                    ssw.Serialize(transactions, sheetname: nameof(Transaction));
-
-                    if (splits.Any())
-                        ssw.Serialize(splits);
-                }
-
-                // Return it to caller
-
-                stream.Seek(0, SeekOrigin.Begin);
-                return File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "Transactions.xlsx");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return result;
         }
 
         public IActionResult DownloadPartial()
@@ -1096,24 +958,7 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Transaction>.Download() => Download(false);
         #endregion
 
-        #region Data Transfer Objects
 
-        /// <summary>
-        /// The transaction data for export
-        /// </summary>
-        class TransactionExportDto: ICategory
-        {
-            public int ID { get; set; }
-            public DateTime Timestamp { get; set; }
-            public string Payee { get; set; }
-            public decimal Amount { get; set; }
-            public string Category { get; set; }
-            public string Memo { get; set; }
-            public string BankReference { get; set; }
-            public string ReceiptUrl { get; set; }
-        }
-
-        #endregion
 
         #region ViewModels
 

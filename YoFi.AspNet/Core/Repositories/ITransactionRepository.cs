@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
@@ -7,5 +8,12 @@ namespace YoFi.Core.Repositories
     {
         public Task<Transaction> GetWithSplitsByIdAsync(int? id);
         Task<bool> AssignPayeeAsync(Transaction transaction);
+
+        /// <summary>
+        /// Change category of all selected items to <paramref name="category"/>
+        /// </summary>
+        /// <param name="category">Next category</param>
+        Task BulkEdit(string category);
+        Task<Stream> AsSpreadsheet(int year, bool allyears, string q);
     }
 }
