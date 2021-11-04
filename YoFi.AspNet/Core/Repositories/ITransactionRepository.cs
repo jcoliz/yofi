@@ -16,6 +16,6 @@ namespace YoFi.Core.Repositories
         Task BulkEdit(string category);
         Task<Stream> AsSpreadsheet(int year, bool allyears, string q);
 
-        Split AddSplitTo(Transaction transaction);
+        Task<int> AddSplitToAsync(int id);
     }
 }

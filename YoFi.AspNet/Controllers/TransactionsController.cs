@@ -270,11 +270,9 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> CreateSplit(int id)
         {
-            var transaction = await _repository.GetWithSplitsByIdAsync(id);
-            var result = _repository.AddSplitTo(transaction);
-            await _repository.UpdateAsync(transaction);
+            var result = await _repository.AddSplitToAsync(id);
 
-            return RedirectToAction("Edit", "Splits", new { id = result.ID });
+            return RedirectToAction("Edit", "Splits", new { id = result });
         }
 
         /// <summary>

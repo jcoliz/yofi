@@ -142,8 +142,9 @@ namespace YoFi.Core.Repositories
             return Task.FromResult(stream as Stream);
         }
 
-        public Split AddSplitTo(Transaction transaction)
+        public async Task<int> AddSplitToAsync(int id)
         {
+            var transaction = await GetWithSplitsByIdAsync(id);
             var result = new Split() { Category = transaction.Category };
 
             // Calculate the amount based on how much is remaining.
@@ -158,7 +159,9 @@ namespace YoFi.Core.Repositories
 
             transaction.Category = null;
 
-            return result;
+            await UpdateAsync(transaction);
+
+            return result.ID;
         }
 
         #region Data Transfer Objects
