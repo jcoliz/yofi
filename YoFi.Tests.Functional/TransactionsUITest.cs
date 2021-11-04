@@ -362,11 +362,11 @@ namespace YoFi.Tests.Functional
             await NextPage.SaveScreenshotToAsync(TestContext);
             await NextPage.ClickAsync("data-test-id=btn-create-receipt");
 
-            // Then: Get Receipt button is visible
-            var delete = await NextPage.QuerySelectorAsync("data-test-id=btn-delete-receipt");
+            // Then: Delete Receipt button is visible
+            var button = await NextPage.QuerySelectorAsync("data-test-id=btn-delete-receipt");
             await NextPage.SaveScreenshotToAsync(TestContext);
 
-            Assert.IsNotNull(delete);
+            Assert.IsNotNull(button);
 
             // TODO: Clean up the storage, else this is going to leave a lot of extra crap lying around there
         }
@@ -430,6 +430,37 @@ namespace YoFi.Tests.Functional
 
             Assert.AreEqual(100, image.Width);
             Assert.AreEqual(100, image.Height);
+        }
+
+        [TestMethod]
+        public async Task DeleteReceiptFromEditPage()
+        {
+            // Given: A transaction created and a receipte uploaded
+            await CreateReceipt();
+
+            // And: Back on the main page
+            await Page.ClickAsync("text=Transactions");
+
+            // And: Searching for the new item
+            await Page.SearchFor(testmarker);
+
+            // And: On the edit page
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.WaitForSelectorAsync("input[name=\"Category\"]");
+                await Page.SaveScreenshotToAsync(TestContext);
+                await Page.ClickAsync("text=More");
+            });
+
+            // When: Clicking on the delete-receipt button
+            await NextPage.ClickAsync("[data-test-id=btn-delete-receipt]");
+
+            // Then: The upload receipt button is visible again
+            var button = await NextPage.QuerySelectorAsync("data-test-id=btn-create-receipt");
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            Assert.IsNotNull(button);
         }
 
         private async Task recording()
