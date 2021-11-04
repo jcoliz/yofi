@@ -1,4 +1,6 @@
-﻿using jcoliz.OfficeOpenXml.Serializer;
+﻿using Common.NET;
+using jcoliz.OfficeOpenXml.Serializer;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,12 +15,17 @@ namespace YoFi.Core.Repositories
 {
     public class TransactionRepository : BaseRepository<Transaction>, ITransactionRepository
     {
+        private readonly IPlatformAzureStorage _storage;
+        private readonly IConfiguration _config;
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="context">Where to find the data we actually contain</param>
-        public TransactionRepository(IDataContext context) : base(context)
+        public TransactionRepository(IDataContext context, IPlatformAzureStorage storage, IConfiguration config) : base(context)
         {
+            _storage = storage;
+            _config = config;
         }
 
         public async Task<bool> AssignPayeeAsync(Transaction transaction) => await new PayeeMatcher(_context).SetCategoryBasedOnMatchingPayeeAsync(transaction);
@@ -163,6 +170,28 @@ namespace YoFi.Core.Repositories
 
             return result.ID;
         }
+
+        public async Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype)
+        {
+            //
+            // Save the file to blob storage
+            //
+            // TODO: Consolodate this with the exact same copy which is in ApiController
+            //
+
+            string blobname = transaction.ID.ToString();
+
+            _storage.Initialize();
+            await _storage.UploadToBlob(BlobStoreName, blobname, stream, contenttype);
+
+            // Save it in the Transaction
+            // If there was a problem, UploadToBlob will throw an exception.
+
+            transaction.ReceiptUrl = blobname;
+            await UpdateAsync(transaction);
+        }
+
+        private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 
         #region Data Transfer Objects
 

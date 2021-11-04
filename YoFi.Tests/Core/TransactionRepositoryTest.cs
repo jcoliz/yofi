@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Common.NET.Test;
+using Microsoft.Extensions.Configuration;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -52,8 +54,18 @@ namespace YoFi.Tests.Core
         [TestInitialize]
         public void SetUp()
         {
+            // https://stackoverflow.com/questions/55497800/populate-iconfiguration-for-unit-tests
+            var strings = new Dictionary<string, string>
+            {
+                { "Storage:BlobContainerName", "Testing" }
+            };
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(strings)
+                .Build();
+
             context = new MockDataContext();
-            repository = new TransactionRepository(context);
+            var storage = new TestAzureStorage();
+            repository = new TransactionRepository(context,storage,configuration);
         }
 
         [TestMethod]

@@ -127,7 +127,7 @@ namespace YoFi.Tests
                 .AddInMemoryCollection(strings)
                 .Build();
 
-            helper.controller = new TransactionsController(new TransactionRepository(helper.context), helper.context,storage:storage, config:configuration);
+            helper.controller = new TransactionsController(new TransactionRepository(helper.context, storage: storage, config: configuration), helper.context,storage:storage, config:configuration);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 
@@ -1114,7 +1114,7 @@ namespace YoFi.Tests
             var contenttype = "application/json";
             var file = FormFileFromSampleData("BudgetTxs.json", contenttype);
             var result = await controller.UpReceipt(new List<IFormFile>() { file },tx.ID);
-            Assert.IsTrue(result is RedirectResult);
+            Assert.IsTrue(result is RedirectToActionResult);
 
             // Then: The transaction displays as having a receipt
             Assert.IsFalse(string.IsNullOrEmpty(tx.ReceiptUrl));

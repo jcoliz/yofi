@@ -257,7 +257,7 @@ namespace YoFi.AspNet.Controllers
 
         #endregion
 
-        #region Action Handlers: Create
+        #region Action Handlers: Create (Done)
 
         /// <summary>
         /// Create a new split for the specified transaction <paramref name="id"/>
@@ -301,7 +301,7 @@ namespace YoFi.AspNet.Controllers
 
         #endregion
 
-        #region Action Handlers: Edit
+        #region Action Handlers: Edit (Done)
 
         [ValidateTransactionExists]
         public async Task<IActionResult> Edit(int? id)
@@ -362,34 +362,26 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
         {
-            try
-            {
-                if (id != transaction.ID && duplicate != true)
-                    throw new ArgumentException();
-
-                if (duplicate == true)
-                {
-                    transaction.ID = 0;
-                    await _repository.AddAsync(transaction);
-                }
-                else
-                {
-                    // Bug #846: This Edit function is not allowed to alter the
-                    // ReceiptUrl. So we must preserve whatever was there.
-
-                    // TODO: FirstOrDefaultAsync()
-                    var oldreceipturl = _repository.All.Where(x => x.ID == id).Select(x => x.ReceiptUrl).FirstOrDefault();
-                    
-                    transaction.ReceiptUrl = oldreceipturl;
-
-                    await _repository.UpdateAsync(transaction);
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            catch (ArgumentException)
-            {
+            if (id != transaction.ID && duplicate != true)
                 return BadRequest();
+
+            if (duplicate == true)
+            {
+                transaction.ID = 0;
+                await _repository.AddAsync(transaction);
             }
+            else
+            {
+                // Bug #846: This Edit function is not allowed to alter the
+                // ReceiptUrl. So we must preserve whatever was there.
+
+                // TODO: FirstOrDefaultAsync()
+                var oldreceipturl = _repository.All.Where(x => x.ID == id).Select(x => x.ReceiptUrl).FirstOrDefault();                    
+                transaction.ReceiptUrl = oldreceipturl;
+
+                await _repository.UpdateAsync(transaction);
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -403,7 +395,7 @@ namespace YoFi.AspNet.Controllers
 
         #endregion
 
-        #region Action Handlers: Delete
+        #region Action Handlers: Delete (Done)
 
         // GET: Transactions/Delete/5
         [ValidateTransactionExists]
@@ -423,7 +415,7 @@ namespace YoFi.AspNet.Controllers
 
         #endregion
 
-        #region Action Handlers: Download
+        #region Action Handlers: Download (Done)
 
         [HttpPost]
         public async Task<IActionResult> Download(bool allyears, string q = null)
@@ -507,33 +499,13 @@ namespace YoFi.AspNet.Controllers
         [ValidateStorageAvailable]
         public async Task<IActionResult> UpReceipt(List<IFormFile> files, int id)
         {
-            if (null == _storage)
-                throw new InvalidOperationException("Unable to upload receipt. Azure Blob Storage is not configured for this application.");
-
             var transaction = await _repository.GetByIdAsync(id);
 
-            //
-            // Save the file to blob storage
-            //
-            // TODO: Consolodate this with the exact same copy which is in ApiController
-            //
-
-            _storage.Initialize();
-
-            string blobname = id.ToString();
             var formFile = files.Single();
-            using (var stream = formFile.OpenReadStream())
-            {
-                await _storage.UploadToBlob(BlobStoreName, blobname, stream, formFile.ContentType);
-            }
+            using var stream = formFile.OpenReadStream();
+            await _repository.UploadReceiptAsync(transaction,stream, formFile.ContentType);
 
-            // Save it in the Transaction
-            // If there was a problem, UploadToBlob will throw an exception.
-
-            transaction.ReceiptUrl = blobname;
-            await _repository.UpdateAsync(transaction);
-
-            return Redirect($"/Transactions/Edit/{id}");
+            return RedirectToAction(nameof(Edit), new { id });
         }
 
         [HttpPost]

@@ -17,5 +17,6 @@ namespace YoFi.Core.Repositories
         Task<Stream> AsSpreadsheet(int year, bool allyears, string q);
 
         Task<int> AddSplitToAsync(int id);
+        Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype);
     }
 }
