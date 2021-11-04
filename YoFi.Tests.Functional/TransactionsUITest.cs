@@ -340,5 +340,63 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await NextPage.GetTotalItemsAsync());
         }
 
+        [TestMethod]
+        public async Task CreateReceipt()
+        {
+            // Given: One item created
+            // And: It's the one item in search results
+            await Read(1);
+
+            // And: Editing it
+            await Page.ClickAsync("[aria-label=Edit]");
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.WaitForSelectorAsync("input[name=Category]");
+                await Page.SaveScreenshotToAsync(TestContext);
+                await Page.ClickAsync("text=More");
+            });
+
+            // When: Uploading a receipt
+            await NextPage.ClickAsync("[aria-label=UploadReceipt]");
+            await NextPage.SetInputFilesAsync("[aria-label=UploadReceipt]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            await NextPage.SaveScreenshotToAsync(TestContext);
+            await NextPage.ClickAsync("data-test-id=btn-create-receipt");
+
+            // Then: Get Receipt button is visible
+            var delete = await NextPage.QuerySelectorAsync("data-test-id=btn-delete-receipt");
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            Assert.IsNotNull(delete);
+
+            // TODO: Clean up the storage, else this is going to leave a lot of extra crap lying around there
+        }
+
+        private async Task recording()
+        {
+            var page = Page;
+
+            // Click [aria-label="Edit"]
+            await page.ClickAsync("[aria-label=\"Edit\"]");
+            // Click text=More
+            var page1 = await page.RunAndWaitForPopupAsync(async () =>
+            {
+                await page.ClickAsync("text=More");
+            });
+            // Click [aria-label="UploadReceipt"]
+            await page1.ClickAsync("[aria-label=\"UploadReceipt\"]");
+            // Upload budget-white-60x.png
+            await page1.SetInputFilesAsync("[aria-label=\"UploadReceipt\"]", new[] { "budget-white-60x.png" });
+            // Click :nth-match(:text("Upload"), 2)
+            await page1.ClickAsync(":nth-match(:text(\"Upload\"), 2)");
+            // Assert.AreEqual("http://localhost:50419/Transactions/Edit/234", page1.Url);
+            // Click text=Download
+            var download1 = await page1.RunAndWaitForDownloadAsync(async () =>
+            {
+                await page1.ClickAsync("text=Download");
+            });
+            // Click button:has-text("Delete")
+            await page1.ClickAsync("button:has-text(\"Delete\")");
+            // Assert.AreEqual("http://localhost:50419/Transactions/Edit/234", page1.Url);
+        }
     }
 }

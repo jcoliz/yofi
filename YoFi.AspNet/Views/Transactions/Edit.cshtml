@@ -75,7 +75,7 @@
     <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpSplits">
         <div class="input-group mb-3">
             <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
-            <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files">
+            <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="UploadSplits" name="files">
             <input type="hidden" asp-for="ID" />
         </div>
     </form>
@@ -152,8 +152,8 @@
 {
     <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
         <div class="input-group mb-3">
-            <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
-            <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files">
+            <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03" data-test-id="btn-create-receipt" disabled>Upload</button>
+            <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="UploadReceipt" name="files">
             <input type="hidden" asp-for="ID" />
         </div>
     </form>
@@ -161,8 +161,8 @@
 else
 {
     <form asp-action="ReceiptAction" asp-route-id="@Model.ID">
-        <button type="submit" name="action" value="get" class="btn btn-primary mb-3">Download</button>
-        <button type="submit" name="action" value="delete" class="btn btn-outline-secondary mb-3">Delete</button>
+        <button type="submit" name="action" value="get" class="btn btn-primary mb-3" data-test-id="btn-get-receipt">Download</button>
+        <button type="submit" name="action" value="delete" class="btn btn-outline-secondary mb-3" data-test-id="btn-delete-receipt">Delete</button>
     </form>
 }
 
