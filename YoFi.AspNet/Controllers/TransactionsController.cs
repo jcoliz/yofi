@@ -331,8 +331,8 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                _context.Add(transaction);
-                await _context.SaveChangesAsync();
+                await _repository.AddAsync(transaction);
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -345,76 +345,39 @@ namespace YoFi.AspNet.Controllers
 
         #region Action Handlers: Edit
 
+        [ValidateTransactionExists]
         public async Task<IActionResult> Edit(int? id)
         {
-            try
-            {
-                var transaction = await GetWithSplits(id);
+            var transaction = await _repository.GetWithSplitsByIdAsync(id);
+            var didassign = await _repository.AssignPayeeAsync(transaction);
+            ViewData["AutoCategory"] = didassign;
 
-                // Handle payee auto-assignment
-
-                if (string.IsNullOrEmpty(transaction.Category))
-                {
-                    // See if the payee exists
-                    var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
-
-                    if (payee != null)
-                    {
-                        transaction.Category = payee.Category;
-                        ViewData["AutoCategory"] = true;
-                    }
-                }
-
-                // Handle error condition where splits don't add up
-
-                var splitstotal = transaction.Splits.Select(x => x.Amount).Sum();
-                ViewData["SplitsOK"] = (splitstotal == transaction.Amount);
-
-                return View(transaction);
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return View(transaction);
         }
 
+        [ValidateTransactionExists]
         public async Task<IActionResult> EditModal(int? id)
         {
-            try
+            // TODO: Refactor to no duplicate between here and Edit
+
+            var transaction = await GetWithSplits(id);
+
+            // Handle payee auto-assignment
+
+            if (string.IsNullOrEmpty(transaction.Category))
             {
-                // TODO: Refactor to no duplicate between here and Edit
+                // See if the payee exists
+                var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
 
-                var transaction = await GetWithSplits(id);
-
-                // Handle payee auto-assignment
-
-                if (string.IsNullOrEmpty(transaction.Category))
+                if (payee != null)
                 {
-                    // See if the payee exists
-                    var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
-
-                    if (payee != null)
-                    {
-                        transaction.Category = payee.Category;
-                        ViewData["AutoCategory"] = true;
-                    }
+                    transaction.Category = payee.Category;
+                    ViewData["AutoCategory"] = true;
                 }
+            }
 
-                return PartialView("EditPartial", transaction);
+            return PartialView("EditPartial", transaction);
 
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // I believe this is never used. Instead, API Controller ApplyPayee is used.
@@ -564,31 +527,19 @@ namespace YoFi.AspNet.Controllers
         #region Action Handlers: Delete
 
         // GET: Transactions/Delete/5
+        [ValidateTransactionExists]
         public async Task<IActionResult> Delete(int? id) => await Details(id);
 
         // POST: Transactions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateTransactionExists]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
-            {
-                var transaction = await Get(id);
+            await _repository.RemoveAsync(await _repository.GetByIdAsync(id));
 
-                _context.Transactions.Remove(transaction);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return RedirectToAction(nameof(Index));
         }
 
         #endregion

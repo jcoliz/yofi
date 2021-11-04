@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core;
+using YoFi.Core.Helpers;
 using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
@@ -17,6 +18,11 @@ namespace YoFi.Core.Repositories
         {
         }
 
+        public async Task<bool> AssignPayeeAsync(Transaction transaction) => await new PayeeMatcher(_context).SetCategoryBasedOnMatchingPayeeAsync(transaction);
+
         public override IQueryable<Transaction> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q) || x.Payee.Contains(q));
+
+        // TODO: SingleAsync()
+        public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.TransactionsWithSplits.Single(x => x.ID == id.Value));
     }
 }

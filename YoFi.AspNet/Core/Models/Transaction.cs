@@ -111,13 +111,9 @@ namespace YoFi.Core.Models
         IEqualityComparer<Transaction> IModelItem<Transaction>.ImportDuplicateComparer => new __TransactionImportDuplicateComparer();
 
         /// <summary>
-        /// Remove all characters from payee which are not whitespace or alpha-numeric
+        /// Return a fixed payee with all characters removed which are not whitespace or alpha-numeric
         /// </summary>
-        public void FixupPayee()
-        {
-            Regex rx = new Regex(@"[^\s\w\d]+");
-            Payee = rx.Replace(Payee, new MatchEvaluator(x => string.Empty));
-        }
+        public string StrippedPayee => (Payee != null) ? new Regex(@"[^\s\w\d]+").Replace(Payee, new MatchEvaluator(x => string.Empty)) : null;
 
         //
         // Feature #814: Remove duplicate transactions on import

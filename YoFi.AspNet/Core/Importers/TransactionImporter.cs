@@ -89,7 +89,8 @@ namespace YoFi.Core.Importers
             {
                 // (3A) Fixup and match payees
 
-                payeematcher.FixAndMatch(item);
+                item.Payee = item.StrippedPayee;
+                payeematcher.SetCategoryBasedOnMatchingPayeeAsync(item);
 
                 // (3B) Import splits
                 // Product Backlog Item 870: Export & import transactions with splits

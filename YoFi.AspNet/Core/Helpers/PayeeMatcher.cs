@@ -32,19 +32,23 @@ namespace YoFi.Core.Helpers
             regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
         }
 
-        public void FixAndMatch(Transaction item)
+        public async Task<bool> SetCategoryBasedOnMatchingPayeeAsync(Transaction item)
         {
-            item.FixupPayee();
+            var result = false;
 
             if (string.IsNullOrEmpty(item.Category))
             {
                 Payee payee = null;
+                string strippedpayee = item.StrippedPayee;
+
+                if (payees == null)
+                    await LoadAsync();
 
                 // Product Backlog Item 871: Match payee on regex, optionally
                 foreach (var regexpayee in regexpayees)
                 {
                     var regex = new Regex(regexpayee.Name[1..^2]);
-                    if (regex.Match(item.Payee).Success)
+                    if (regex.Match(strippedpayee).Success)
                     {
                         payee = regexpayee;
                         break;
@@ -53,14 +57,18 @@ namespace YoFi.Core.Helpers
 
                 if (null == payee)
                 {
-                    payee = payees.FirstOrDefault(x => item.Payee.Contains(x.Name));
+                    //TODO: FirstOrDefaultAsync()
+                    payee = payees.FirstOrDefault(x => strippedpayee.Contains(x.Name));
                 }
 
                 if (null != payee)
                 {
                     item.Category = payee.Category;
+                    result = true;
                 }
             }
+
+            return result;
         }
     };
 }

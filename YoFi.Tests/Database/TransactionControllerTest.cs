@@ -161,8 +161,6 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task EditFound() => await helper.EditFound();
         [TestMethod]
-        public async Task EditNotFound() => await helper.EditNotFound();
-        [TestMethod]
         public async Task Create() => await helper.Create();
         [TestMethod]
         public async Task EditObjectValues() => await helper.EditObjectValues();
@@ -434,7 +432,7 @@ namespace YoFi.Tests
 
             Assert.AreEqual(2, model.Splits.Count);
             Assert.AreEqual(75m, model.Splits.Where(x => x.Category == "C").Single().Amount);
-            Assert.AreEqual(true, viewresult.ViewData["SplitsOK"]);
+            Assert.IsTrue(model.IsSplitsOK);
         }
 
         [TestMethod]
@@ -534,7 +532,6 @@ namespace YoFi.Tests
             var viewresult = result as ViewResult;
             var model = viewresult.Model as Transaction;
 
-            Assert.AreEqual(false, viewresult.ViewData["SplitsOK"]);
             Assert.IsFalse(model.IsSplitsOK);
         }
 
@@ -1970,18 +1967,6 @@ namespace YoFi.Tests
             // And: The transaction gets the matching payee category
             Assert.AreEqual(payee.Category, actual.Category);
         }
-
-        [TestMethod]
-        public async Task EditNullNotFound() =>
-            Assert.IsTrue(await controller.Edit(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
-
-        [TestMethod]
-        public async Task EditModalNullNotFound() =>
-            Assert.IsTrue(await controller.EditModal(null) is Microsoft.AspNetCore.Mvc.NotFoundResult);
-
-        [TestMethod]
-        public async Task DeleteConfirmedNotFound() =>
-            Assert.IsTrue(await controller.DeleteConfirmed(-1) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
         [TestMethod]
         public async Task CreateSplitNotFound() =>
