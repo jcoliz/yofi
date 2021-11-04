@@ -46,7 +46,7 @@ namespace YoFi.Tests.Functional
             {
                 // When: Asking server to clear this test data
                 var api = new ApiKeyTest();
-                api.SetUp();
+                api.SetUp(TestContext);
                 await api.ClearTestData("trx");
             }
 

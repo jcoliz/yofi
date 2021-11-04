@@ -16,17 +16,20 @@ namespace YoFi.Tests.Functional
     {
         HttpClient client;
 
-        protected readonly string Site = "http://localhost:50419/api/"; //50419
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
-        public void SetUp()
+        public void SetUp() => SetUp(TestContext);
+
+        public void SetUp(TestContext context)
         {
-            client = new HttpClient() { BaseAddress = new Uri(Site) };
+            var site = context.Properties["webAppUrl"];
+            client = new HttpClient() { BaseAddress = new Uri(site + "api/") };
 
             var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(ApiKeyTest))).Build();
             var apikey = config["Api:Key"];
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"user:{apikey}"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",base64);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64);
         }
 
         [TestMethod]

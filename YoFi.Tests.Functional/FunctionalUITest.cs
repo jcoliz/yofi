@@ -22,9 +22,6 @@ namespace YoFi.Tests.Functional
 
         private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions { AcceptDownloads = true };
 
-        protected readonly string Site = "http://localhost:50419/";
-        //protected readonly string Site = "https://localhost:44364/";
-
         protected const string testmarker = "__TEST__";
         private int nextid = 1;
         protected string NextName => $"AA{testmarker}{TestContext.TestName}_{nextid++}";
@@ -35,7 +32,8 @@ namespace YoFi.Tests.Functional
         protected async Task GivenLoggedIn()
         {
             // Navigate to the root of the site
-            await Page.GotoAsync(Site);
+            var site = TestContext.Properties["webAppUrl"] as string;
+            await Page.GotoAsync(site);
 
             // Are we already logged in?
             var hellouser = await Page.QuerySelectorAsync("data-test-id=hello-user");

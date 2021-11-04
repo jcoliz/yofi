@@ -43,7 +43,7 @@ namespace YoFi.Tests.Functional
             if (totalitems > TotalItemCount)
             {
                 var api = new ApiKeyTest();
-                api.SetUp();
+                api.SetUp(TestContext);
                 await api.ClearTestData("budgettx");
             }
 
