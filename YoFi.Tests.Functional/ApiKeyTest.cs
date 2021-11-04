@@ -26,7 +26,7 @@ namespace YoFi.Tests.Functional
             var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(ApiKeyTest))).Build();
             apikey = config["Api:Key"];
 
-            client = new HttpClient();
+            client = new HttpClient() { BaseAddress = new Uri(Site) };
 
             var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"user:{apikey}"));
             client.DefaultRequestHeaders.Add("Authorization", $"Basic {b64}");
@@ -36,7 +36,7 @@ namespace YoFi.Tests.Functional
         public async Task Get()
         {
             // When: Calling API with no parameters
-            var response = await WhenRequesting(Site);
+            var response = await WhenRequesting(string.Empty);
 
             // Then: Returns an OK response
             var ok = response.GetProperty("Ok").GetBoolean();
@@ -50,7 +50,7 @@ namespace YoFi.Tests.Functional
             // Note: Be careful not to include a term that will also show up in categories, or 
             // will have to refactor this test
             var q = "Tim";
-            var response = await WhenRequesting(Site+$"txi/?q={q}");
+            var response = await WhenRequesting($"txi/?q={q}");
 
             // Then: Returns 58 items
             Assert.AreEqual(58, response.GetArrayLength());
@@ -64,7 +64,7 @@ namespace YoFi.Tests.Functional
         public async Task MaxId()
         {
             // When: Get max id for payees
-            var response = await WhenRequesting(Site + $"maxid/payees");
+            var response = await WhenRequesting($"maxid/payees");
 
             // Then: Returns 58 items
             var maxid = response.GetProperty("Item").GetInt32();
@@ -107,7 +107,7 @@ namespace YoFi.Tests.Functional
         [DataTestMethod]
         public async Task ClearTestData(string what)
         {
-            var response = await WhenPosting(Site + "ClearTestData/" + what, null);
+            var response = await WhenPosting("ClearTestData/" + what, null);
 
             // Then: Returns an OK response
             var ok = response.GetProperty("Ok").GetBoolean();

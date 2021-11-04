@@ -23,6 +23,7 @@ namespace YoFi.Tests.Functional
         private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions { AcceptDownloads = true };
 
         protected readonly string Site = "http://localhost:50419/";
+        //protected readonly string Site = "https://localhost:44364/";
 
         protected const string testmarker = "__TEST__";
         private int nextid = 1;
