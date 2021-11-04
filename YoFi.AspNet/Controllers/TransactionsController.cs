@@ -546,6 +546,7 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         [ValidateTransactionExists]
         [ValidateFilesProvided(multiplefilesok:false)]
+        [ValidateStorageAvailable]
         public async Task<IActionResult> UpReceipt(List<IFormFile> files, int id)
         {
             if (null == _storage)
@@ -580,6 +581,8 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateStorageAvailable]
+        [ValidateTransactionExists]
         public async Task<IActionResult> ReceiptAction(int id, string action)
         {
             if (action == "delete")
@@ -592,66 +595,42 @@ namespace YoFi.AspNet.Controllers
 
         private async Task<IActionResult> DeleteReceipt(int id)
         {
-            try
-            {
-                var transaction = await Get(id);
+            var transaction = await _repository.GetByIdAsync(id);
+            transaction.ReceiptUrl = null;
+            await _repository.UpdateAsync(transaction);
 
-                transaction.ReceiptUrl = null;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Edit), new { id });
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return RedirectToAction(nameof(Edit), new { id });
         }
 
         [HttpGet]
+        [ValidateTransactionExists]
+        [ValidateStorageAvailable]
         public async Task<IActionResult> GetReceipt(int id)
         {
-            try
-            {
-                if (null == _storage)
-                    throw new InvalidOperationException("Unable to download receipt. Azure Blob Storage is not configured for this application.");
 
-                var transaction = await Get(id);
+            var transaction = await _repository.GetByIdAsync(id);
 
-                if (string.IsNullOrEmpty(transaction.ReceiptUrl))
-                    throw new KeyNotFoundException("Transaction has no receipt");
+            if (string.IsNullOrEmpty(transaction.ReceiptUrl))
+                return new NotFoundObjectResult("Transaction has no receipt");
 
-                var blobname = id.ToString();
+            var blobname = id.ToString();
 
-                // See Bug #991: Production bug: Receipts before 5/20/2021 don't download
-                // If the ReceiptUrl contains an int value, use THAT for the blobname instead.
+            // See Bug #991: Production bug: Receipts before 5/20/2021 don't download
+            // If the ReceiptUrl contains an int value, use THAT for the blobname instead.
 
-                if (Int32.TryParse(transaction.ReceiptUrl,out _))
-                    blobname = transaction.ReceiptUrl;
+            if (Int32.TryParse(transaction.ReceiptUrl,out _))
+                blobname = transaction.ReceiptUrl;
 
-                _storage.Initialize();
-                var stream = new System.IO.MemoryStream();
-                var contenttype = await _storage.DownloadBlob(BlobStoreName, blobname, stream);
+            _storage.Initialize();
+            var stream = new MemoryStream();
+            var contenttype = await _storage.DownloadBlob(BlobStoreName, blobname, stream);
 
-                // Work around previous versions which did NOT store content type in blob store.
-                if ("application/octet-stream" == contenttype)
-                    contenttype = "application/pdf";
+            // Work around previous versions which did NOT store content type in blob store.
+            if ("application/octet-stream" == contenttype)
+                contenttype = "application/pdf";
 
-                stream.Seek(0, System.IO.SeekOrigin.Begin);
-                return File(stream, contenttype, id.ToString());
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            stream.Seek(0, SeekOrigin.Begin);
+            return File(stream, contenttype, id.ToString());
         }
 
         #endregion
