@@ -242,7 +242,7 @@ namespace YoFi.AspNet.Controllers
 
         #endregion
 
-        #region Action Handlers: Get Details
+        #region Action Handlers: Get Details (Done)
 
         /// <summary>
         /// Retrieve a single transaction
@@ -270,41 +270,9 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> CreateSplit(int id)
         {
-            Split result = null;
-            try
-            {
-                /*
-                    1) ADD a split to the transaction in the full amount needed to get back to total amount.
-                    2) COPY the Category Information over from the main, if exists
-                    3) NULL out the Cat/SubCat from the transaction
-                 */
-                var transaction = await _context.Transactions.Include("Splits")
-                    .SingleOrDefaultAsync(m => m.ID == id);
-
-                if (transaction == null)
-                    throw new KeyNotFoundException();
-
-                result = new Split() { Category = transaction.Category };
-
-                // Calculate the amount based on how much is remaining.
-
-                var currentamount = transaction.Splits.Select(x => x.Amount).Sum();
-                var remaining = transaction.Amount - currentamount;
-                result.Amount = remaining;
-
-                transaction.Splits.Add(result);
-
-                // Remove the category information, that's now contained in the splits.
-
-                transaction.Category = null;
-
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
+            var transaction = await _repository.GetWithSplitsByIdAsync(id);
+            var result = _repository.AddSplitTo(transaction);
+            await _repository.UpdateAsync(transaction);
 
             return RedirectToAction("Edit", "Splits", new { id = result.ID });
         }
@@ -329,16 +297,8 @@ namespace YoFi.AspNet.Controllers
         [ValidateModel]
         public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
         {
-            try
-            {
-                await _repository.AddAsync(transaction);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            await _repository.AddAsync(transaction);
+            return RedirectToAction(nameof(Index));
         }
 
         #endregion

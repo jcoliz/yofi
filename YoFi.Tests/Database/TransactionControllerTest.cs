@@ -282,9 +282,6 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
-        public async Task UploadEmpty() => await helper.UploadEmpty();
-
-        [TestMethod]
         public async Task Bug883()
         {
             // Bug 883: Apparantly duplicate transactions in import are coalesced to single transaction for input
@@ -554,23 +551,6 @@ namespace YoFi.Tests
             Assert.IsNotNull(redir);
             Assert.IsTrue(item.HasSplits);
             Assert.IsTrue(item.IsSplitsOK);
-        }
-
-        [TestMethod]
-        public async Task UploadSplitsEmpty()
-        {
-            // Given: One transaction in the database
-            // Don't add the splits here, we'll upload them
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-
-            context.Transactions.Add(item);
-            context.SaveChanges();
-
-            // When: Uploading an empty set for splits transactions for that transaction
-            var result = await controller.UpSplits(new List<IFormFile>(), item.ID);
-
-            // Then: The the operation fails
-            Assert.IsTrue(result is BadRequestObjectResult);
         }
 
         [TestMethod]
@@ -1141,45 +1121,6 @@ namespace YoFi.Tests
 
             // And: The receipt is contained in storage
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
-        }
-
-        [TestMethod]
-        public async Task UpReceiptEmpty()
-        {
-            // Given: A transaction with no receipt
-            var tx = TransactionItems.First();
-            context.Transactions.Add(tx);
-            context.SaveChanges();
-
-            // When: Uploading an empty set for the receipt
-            var result = await controller.UpReceipt(new List<IFormFile>(), tx.ID);
-
-            // Then: The the operation fails
-            Assert.IsTrue(result is BadRequestObjectResult);
-
-            // And: Storage is unmodified
-            Assert.AreEqual(0, storage.BlobItems.Count);
-        }
-
-        [TestMethod]
-        public async Task UpReceiptTooMany()
-        {
-            // Given: A transaction with no receipt
-            var tx = TransactionItems.First();
-            context.Transactions.Add(tx);
-            context.SaveChanges();
-
-            // When: Uploading multiple receipt files
-            var contenttype = "application/json";
-            var file1 = FormFileFromSampleData("BudgetTxs.json", contenttype);
-            var file2 = FormFileFromSampleData("BudgetTxsManaged.json", contenttype);
-            var result = await controller.UpReceipt(new List<IFormFile>() { file1, file2 }, tx.ID);
-
-            // Then: The the operation fails
-            Assert.IsTrue(result is BadRequestObjectResult);
-
-            // And: Storage is unmodified
-            Assert.AreEqual(0, storage.BlobItems.Count);
         }
 
         [TestMethod]
@@ -1967,10 +1908,6 @@ namespace YoFi.Tests
             // And: The transaction gets the matching payee category
             Assert.AreEqual(payee.Category, actual.Category);
         }
-
-        [TestMethod]
-        public async Task CreateSplitNotFound() =>
-            Assert.IsTrue(await controller.CreateSplit(1) is Microsoft.AspNetCore.Mvc.NotFoundResult);
 
         [TestMethod]
         public void ReportNotFound() =>

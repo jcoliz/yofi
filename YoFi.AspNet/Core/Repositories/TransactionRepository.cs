@@ -142,6 +142,25 @@ namespace YoFi.Core.Repositories
             return Task.FromResult(stream as Stream);
         }
 
+        public Split AddSplitTo(Transaction transaction)
+        {
+            var result = new Split() { Category = transaction.Category };
+
+            // Calculate the amount based on how much is remaining.
+
+            var currentamount = transaction.Splits.Select(x => x.Amount).Sum();
+            var remaining = transaction.Amount - currentamount;
+            result.Amount = remaining;
+
+            transaction.Splits.Add(result);
+
+            // Remove the category information, that's now contained in the splits.
+
+            transaction.Category = null;
+
+            return result;
+        }
+
         #region Data Transfer Objects
 
         /// <summary>
