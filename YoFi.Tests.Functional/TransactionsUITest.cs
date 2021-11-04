@@ -358,7 +358,7 @@ namespace YoFi.Tests.Functional
 
             // When: Uploading a receipt
             await NextPage.ClickAsync("[aria-label=UploadReceipt]");
-            await NextPage.SetInputFilesAsync("[aria-label=UploadReceipt]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            await NextPage.SetInputFilesAsync("[aria-label=UploadReceipt]", new[] { "SampleData/budget-white-60x.png" });
             await NextPage.SaveScreenshotToAsync(TestContext);
             await NextPage.ClickAsync("data-test-id=btn-create-receipt");
 
@@ -369,6 +369,29 @@ namespace YoFi.Tests.Functional
             Assert.IsNotNull(delete);
 
             // TODO: Clean up the storage, else this is going to leave a lot of extra crap lying around there
+        }
+
+        [TestMethod]
+        public async Task DownloadReceiptFromIndex()
+        {
+            // Given: A transaction created and a receipte uploaded
+            await CreateReceipt();
+
+            // And: Back on the main page
+            await Page.ClickAsync("text=Transactions");
+
+            // When: Clicking on the get-receipt icon
+            var download1 = await Page.RunAndWaitForDownloadAsync(async () =>
+            {
+                await Page.ClickAsync("[aria-label=\"Get Receipt\"]");
+            });
+
+            // Then: Image loads successfully
+            var stream = await download1.CreateReadStreamAsync();
+            var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
+
+            Assert.AreEqual(100, image.Width);
+            Assert.AreEqual(100, image.Height);
         }
 
         private async Task recording()
