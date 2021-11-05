@@ -10,7 +10,7 @@ namespace YoFi.AspNet.Controllers
 {
     public class ValidateFilesProvidedAttribute : Attribute, IAsyncActionFilter
     {
-        bool _muiltiplefilesok;
+        private readonly bool _muiltiplefilesok;
 
         public ValidateFilesProvidedAttribute(bool multiplefilesok = true)
         {

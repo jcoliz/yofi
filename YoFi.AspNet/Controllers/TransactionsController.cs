@@ -504,8 +504,8 @@ namespace YoFi.AspNet.Controllers
         public async Task<IActionResult> GetReceipt(int id)
         {
             var transaction = await _repository.GetByIdAsync(id);
-            var result = await _repository.GetReceiptAsync(transaction);
-            return File(result.stream, result.contenttype, result.name);
+            var (stream, contenttype, name) = await _repository.GetReceiptAsync(transaction);
+            return File(stream, contenttype, name);
         }
 
         #endregion 

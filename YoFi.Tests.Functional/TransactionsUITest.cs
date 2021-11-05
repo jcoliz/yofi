@@ -18,7 +18,7 @@ namespace YoFi.Tests.Functional
         const string MainPageName = "Transactions";
 
         [TestInitialize]
-        public new async Task SetUp()
+        public async Task SetUp()
         {
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
