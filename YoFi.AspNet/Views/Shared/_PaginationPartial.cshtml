@@ -8,9 +8,9 @@
             @if (Model.FirstPage.HasValue)
             {
                 <li class="page-item">
-                    <a asp-route-o="@ViewData["Order"]"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
+                    <a asp-route-o="@Model.ViewParameters?.OrderParameter"
+                       asp-route-q="@Model.ViewParameters?.QueryParameter"
+                       asp-route-v="@Model.ViewParameters?.ViewParameter"
                        aria-label="First Page"
                        class="page-link">&laquo;</a>
                 </li>
@@ -18,20 +18,20 @@
             @if (Model.PreviousPreviousPage.HasValue)
             {
                 <li class="page-item">
-                    <a asp-route-o="@ViewData["Order"]"
+                    <a asp-route-o="@Model.ViewParameters?.OrderParameter"
                        asp-route-p="@Model.PreviousPreviousPage"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
+                       asp-route-q="@Model.ViewParameters?.QueryParameter"
+                       asp-route-v="@Model.ViewParameters?.ViewParameter"
                        class="page-link">@Model.PreviousPreviousPage</a>
                 </li>
             }
             @if (Model.PreviousPage.HasValue)
             {
                 <li class="page-item">
-                    <a asp-route-o="@ViewData["Order"]"
+                    <a asp-route-o="@Model.ViewParameters?.OrderParameter"
                        asp-route-p="@Model.PreviousPage"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
+                       asp-route-q="@Model.ViewParameters?.QueryParameter"
+                       asp-route-v="@Model.ViewParameters?.ViewParameter"
                        class="page-link">@Model.PreviousPage</a>
                 </li>
             }
@@ -41,30 +41,30 @@
             @if (Model.NextPage.HasValue)
             {
                 <li class="page-item">
-                    <a asp-route-o="@ViewData["Order"]"
+                    <a asp-route-o="@Model.ViewParameters?.OrderParameter"
                        asp-route-p="@Model.NextPage"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
+                       asp-route-q="@Model.ViewParameters?.QueryParameter"
+                       asp-route-v="@Model.ViewParameters?.ViewParameter"
                        class="page-link" data-test-id="nextpage">@Model.NextPage</a>
                 </li>
             }
             @if (Model.NextNextPage.HasValue)
             {
                 <li class="page-item">
-                    <a asp-route-o="@ViewData["Order"]"
+                    <a asp-route-o="@Model.ViewParameters?.OrderParameter"
                        asp-route-p="@Model.NextNextPage"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
+                       asp-route-q="@Model.ViewParameters?.QueryParameter"
+                       asp-route-v="@Model.ViewParameters?.ViewParameter"
                        class="page-link">@Model.NextNextPage</a>
                 </li>
             }
             @if (Model.LastPage.HasValue)
             {
                 <li class="page-item">
-                    <a asp-route-o="@ViewData["Order"]"
+                    <a asp-route-o="@Model.ViewParameters?.OrderParameter"
                        asp-route-p="@Model.LastPage"
-                       asp-route-q="@ViewData["Query"]"
-                       asp-route-v="@ViewData["ViewP"]"
+                       asp-route-q="@Model.ViewParameters?.QueryParameter"
+                       asp-route-v="@Model.ViewParameters?.ViewParameter"
                        aria-label="Last Page"
                        class="page-link">&raquo;</a>
                 </li>

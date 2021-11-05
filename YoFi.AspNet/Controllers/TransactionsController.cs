@@ -1,10 +1,8 @@
 ﻿using Ardalis.Filters;
 using Common.AspNet;
-using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -16,8 +14,6 @@ using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Data;
 using YoFi.Core.Importers;
-using YoFi.Core.Models;
-using YoFi.Core.Quieriers;
 using YoFi.Core.Repositories;
 using Transaction = YoFi.Core.Models.Transaction;
 
@@ -43,69 +39,109 @@ namespace YoFi.AspNet.Controllers
 
         #region Action Handlers: Index & Helpers
 
-        /// <summary>
-        /// Fetch list of transactions for display
-        /// </summary>
-        /// <param name="o">Order of transactions</param>
-        /// <param name="p">Page number, where 1 is first page</param>
-        /// <param name="q">Query (or filter) specifying which transactions</param>
-        /// <param name="v">View modifiers, specifying how the view should look</param>
-        /// <returns></returns>
-        public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
+        public class IndexViewModel: IViewParameters
         {
-            try
+            #region Public Properties -- Used by View to display
+            public IEnumerable<TransactionIndexDto> Items { get; set; }
+            public PageDivider Divider { get; set; }
+            public string QueryParameter { get; set; }
+            public string ViewParameter
             {
-                //
-                // Process QUERY (Q) parameters
-                //
+                get
+                {
+                    return _View;
+                }
+                set
+                {
+                    _View = value;
+                    ShowHidden = ViewParameter?.ToLowerInvariant().Contains("h") == true;
+                    ShowSelected = ViewParameter?.ToLowerInvariant().Contains("s") == true;
+                }
+            }
+            private string _View;
 
-                ViewData["Query"] = q;
+            public string OrderParameter
+            {
+                get
+                {
+                    return (_Order == default_order) ? null : _Order;
+                }
+                set
+                {
+                    _Order = string.IsNullOrEmpty(value) ? default_order : value;
+                }
+            }
+            private string _Order;
+            const string default_order = "dd";
 
-                var qbuilder = new TransactionsQueryBuilder(_context.Transactions.Include(x => x.Splits));
-                qbuilder.Build(q);
-                var result = qbuilder.Query;
+            public int? PageParameter
+            {
+                get
+                {
+                    return (_PageParameter == default_page) ? null : (int?)_PageParameter;
+                }
+                set
+                {
+                    _PageParameter = value ?? default_page;
+                }
+            }
+            private int _PageParameter = default_page;
+            const int default_page = 1;
 
-                //
-                // Process VIEW (V) parameters
-                //
+            public bool ShowHidden { get; set; }
+            public bool ShowSelected { get; set; }
 
-                ViewData["ViewP"] = v;
+            public string DateSortParm => (_Order == "dd") ? "da" : null; /* not "dd", which is default */
+            public string PayeeSortParm => (_Order == "pa") ? "pd" : "pa";
+            public string CategorySortParm => (_Order == "ca") ? "cd" : "ca";
+            public string AmountSortParm => (_Order == "aa") ? "as" : "aa";
+            public string BankReferenceSortParm => (_Order == "ra") ? "rd" : "ra";
+            public string ToggleHidden => (ShowHidden ? string.Empty : "h") + (ShowSelected ? "s" : string.Empty);
+            public string ToggleSelected => (ShowHidden ? "h" : string.Empty) + (ShowSelected ? string.Empty : "s");
+            #endregion
 
-                result = TransactionsForViewspec(result, v, ViewData, out bool showHidden, out bool showSelected);
+            internal IQueryable<Transaction> Query { get; set; }
 
-                //
-                // Process ORDER (O) parameters
-                //
+            /// <summary>
+            /// Interprets the "o" (Order) parameter on a transactions search
+            /// </summary>
+            /// <remarks>
+            /// Public so can be used by other controllers.
+            /// </remarks>
+            /// <param name="result">Initial query to further refine</param>
+            /// <param name="p">Order parameter</param>
+            /// <returns>Resulting query refined by <paramref name="o"/></returns>
+            internal void ApplyOrderParameter()
+            {
+                Query = _Order switch
+                {
+                    // Coverlet finds cyclomatic complexity of 42 in this function!!?? No clue why it's not just 10.
+                    "aa" => Query.OrderBy(s => s.Amount),
+                    "ad" => Query.OrderByDescending(s => s.Amount),
+                    "ra" => Query.OrderBy(s => s.BankReference),
+                    "rd" => Query.OrderByDescending(s => s.BankReference),
+                    "pa" => Query.OrderBy(s => s.Payee),
+                    "pd" => Query.OrderByDescending(s => s.Payee),
+                    "ca" => Query.OrderBy(s => s.Category),
+                    "cd" => Query.OrderByDescending(s => s.Category),
+                    "da" => Query.OrderBy(s => s.Timestamp).ThenBy(s => s.Payee),
+                    "dd" => Query.OrderByDescending(s => s.Timestamp).ThenBy(s => s.Payee),
+                    _ => Query
+                };
+            }
 
-                const string default_order = "dd";
-                ViewData["Order"] = (o == default_order) ? null : o;
+            internal async Task ApplyPageParameterAsync()
+            {
+                Query = await Divider.ItemsForPage(Query, _PageParameter);
+                Divider.ViewParameters = this;
+            }
 
-                if (string.IsNullOrEmpty(o))
-                    o = default_order;
-
-                ViewData["DateSortParm"] = o == "dd" ? "da" : null; /* not "dd", which is default */;
-                ViewData["PayeeSortParm"] = o == "pa" ? "pd" : "pa";
-                ViewData["CategorySortParm"] = o == "ca" ? "cd" : "ca";
-                ViewData["AmountSortParm"] = o == "aa" ? "as" : "aa";
-                ViewData["BankReferenceSortParm"] = o == "ra" ? "rd" : "ra";
-
-                result = TransactionsForOrdering(result, o);
-
-                //
-                // Process PAGE (P) parameters
-                //
-
-                var divider = new PageDivider() { PageSize = PageSize };
-                result = await divider.ItemsForPage(result, p);
-                ViewData[nameof(PageDivider)] = divider;
-
-                // Use the Transaction object itself as a DTO, filtering out what we don't need to return
-
-                IEnumerable<TransactionIndexDto> r;
-                if (showHidden || showSelected)
+            internal async Task ExecuteQueryAsync()
+            {
+                if (ShowHidden || ShowSelected)
                 {
                     // Get the long form
-                    r = await result.Select(t => new TransactionIndexDto()
+                    Items = await Query.Select(t => new TransactionIndexDto()
                     {
                         ID = t.ID,
                         Timestamp = t.Timestamp,
@@ -123,7 +159,7 @@ namespace YoFi.AspNet.Controllers
                 else
                 {
                     // Get the shorter form
-                    r = await result.Select(t => new TransactionIndexDto()
+                    Items = await Query.Select(t => new TransactionIndexDto()
                     {
                         ID = t.ID,
                         Timestamp = t.Timestamp,
@@ -135,103 +171,109 @@ namespace YoFi.AspNet.Controllers
                         HasSplits = t.Splits.Any(),
                     }).ToListAsync();
                 }
+            }
 
-                return View(r);
-            }
-            catch (ArgumentException)
+            /// <summary>
+            /// The transaction data for Index page
+            /// </summary>
+            public class TransactionIndexDto
             {
-                return BadRequest();
+                public int ID { get; set; }
+                [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
+                [Display(Name = "Date")]
+                public DateTime Timestamp { get; set; }
+                public string Payee { get; set; }
+                [DisplayFormat(DataFormatString = "{0:C2}")]
+                public decimal Amount { get; set; }
+                public string Category { get; set; }
+                public string Memo { get; set; }
+                public bool HasReceipt { get; set; }
+                public bool HasSplits { get; set; }
+
+                // Only needed in some cases
+
+                public string BankReference { get; set; }
+                public bool Hidden { get; set; }
+                public bool Selected { get; set; }
+
+                // This is just for test cases, so it's a limited transaltion, just what we need for
+                // certain cases.
+                public static explicit operator Transaction(TransactionIndexDto o) => new Transaction()
+                {
+                    Category = o.Category,
+                    Memo = o.Memo,
+                    Payee = o.Payee
+                };
+
+                public bool Equals(Transaction other)
+                {
+                    return string.Equals(Payee, other.Payee) && Amount == other.Amount && Timestamp.Date == other.Timestamp.Date;
+                }
             }
-            catch (Exception ex)
+
+            internal void ApplyViewParameter()
             {
-                return StatusCode(500, ex.Message);
+                if (!ShowHidden)
+                    Query = Query.Where(x => x.Hidden != true);
             }
         }
 
         /// <summary>
-        /// Interprets the "v" (View) parameter on a transactions search
+        /// Fetch list of transactions for display
         /// </summary>
-        /// <remarks>
-        /// Public so can be used by other controllers.
-        /// </remarks>
-        /// <param name="result">Initial query to further refine</param>
-        /// <param name="p">View parameter</param>
-        /// <returns>Resulting query refined by <paramref name="v"/></returns>
-        public static IQueryable<Transaction> TransactionsForViewspec(IQueryable<Transaction> result, string v, ViewDataDictionary ViewData, out bool showHidden, out bool showSelected)
+        /// <param name="o">Order of transactions</param>
+        /// <param name="p">Page number, where 1 is first page</param>
+        /// <param name="q">Query (or filter) specifying which transactions</param>
+        /// <param name="v">View modifiers, specifying how the view should look</param>
+        /// <returns></returns>
+        public async Task<IActionResult> Index(string o = null, int? p = null, string q = null, string v = null)
         {
-            showHidden = v?.ToLowerInvariant().Contains("h") == true;
-            showSelected = v?.ToLowerInvariant().Contains("s") == true;
-
-            ViewData["ShowHidden"] = showHidden;
-            ViewData["ShowSelected"] = showSelected;
-            ViewData["ToggleHidden"] = (showHidden ? string.Empty : "h") + (showSelected ? "s" : string.Empty);
-            ViewData["ToggleSelected"] = (showHidden ? "h" : string.Empty) + (showSelected ? string.Empty : "s");
-
-            if (!showHidden)
-                return result.Where(x => x.Hidden != true);
-            else
-                return result;
-        } 
-
-        /// <summary>
-        /// Interprets the "o" (Order) parameter on a transactions search
-        /// </summary>
-        /// <remarks>
-        /// Public so can be used by other controllers.
-        /// </remarks>
-        /// <param name="result">Initial query to further refine</param>
-        /// <param name="p">Order parameter</param>
-        /// <returns>Resulting query refined by <paramref name="o"/></returns>
-        public static IQueryable<Transaction> TransactionsForOrdering(IQueryable<Transaction> result, string o) => o switch 
-        { 
-            // Coverlet finds cyclomatic complexity of 42 in this function!!?? No clue why it's not just 10.
-            "aa" => result.OrderBy(s => s.Amount),
-            "ad" => result.OrderByDescending(s => s.Amount),
-            "ra" => result.OrderBy(s => s.BankReference), 
-            "rd" => result.OrderByDescending(s => s.BankReference), 
-            "pa" => result.OrderBy(s => s.Payee), 
-            "pd" => result.OrderByDescending(s => s.Payee), 
-            "ca" => result.OrderBy(s => s.Category),
-            "cd" => result.OrderByDescending(s => s.Category),
-            "da" => result.OrderBy(s => s.Timestamp).ThenBy(s => s.BankReference), 
-                _ => result.OrderByDescending(s => s.Timestamp).ThenByDescending(s => s.BankReference)
-        };
-
-        /// <summary>
-        /// The transaction data for Index page
-        /// </summary>
-        public class TransactionIndexDto
-        {
-            public int ID { get; set; }
-            [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
-            [Display(Name = "Date")]
-            public DateTime Timestamp { get; set; }
-            public string Payee { get; set; }
-            [DisplayFormat(DataFormatString = "{0:C2}")]
-            public decimal Amount { get; set; }
-            public string Category { get; set; }
-            public string Memo { get; set; }
-            public bool HasReceipt { get; set; }
-            public bool HasSplits { get; set; }
-
-            // Only needed in some cases
-
-            public string BankReference { get; set; }
-            public bool Hidden { get; set; }
-            public bool Selected { get; set; }
-
-            // This is just for test cases, so it's a limited transaltion, just what we need for
-            // certain cases.
-            public static explicit operator Transaction (TransactionIndexDto o) => new Transaction()
+            try
             {
-                Category = o.Category,
-                Memo = o.Memo,
-                Payee = o.Payee
-            };
+                var viewmodel = new IndexViewModel()
+                {
+                    Divider = new PageDivider() { PageSize = PageSize },
+                    Query = _repository.ForQuery(q)
+                };
 
-            public bool Equals(Transaction other)
+                //
+                // Process QUERY (Q) parameter
+                //
+
+                viewmodel.QueryParameter = q;
+
+                //
+                // Process VIEW (V) parameter
+                //
+
+                viewmodel.ViewParameter = v;
+                viewmodel.ApplyViewParameter();
+
+                //
+                // Process ORDER (O) parameter
+                //
+
+                viewmodel.OrderParameter = o;
+                viewmodel.ApplyOrderParameter();
+
+                //
+                // Process PAGE (P) parameter
+                //
+
+                viewmodel.PageParameter = p;
+                await viewmodel.ApplyPageParameterAsync();
+
+                //
+                // Execute Query
+                //
+
+                await viewmodel.ExecuteQueryAsync();
+
+                return View(viewmodel);
+            }
+            catch (ArgumentException)
             {
-                return string.Equals(Payee, other.Payee) && Amount == other.Amount && Timestamp.Date == other.Timestamp.Date;
+                return BadRequest();
             }
         }
 
@@ -506,7 +548,7 @@ namespace YoFi.AspNet.Controllers
 
         #endregion 
 
-        #region Action Handlers: Import Pipeline
+        #region Action Handlers: Import Pipeline (done)
         /// <summary>
         /// Upload a file of transactions to be imported
         /// </summary>

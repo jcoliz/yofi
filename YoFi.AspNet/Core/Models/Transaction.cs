@@ -159,10 +159,12 @@ namespace YoFi.Core.Models
             return HashCode.Combine(Payee, Amount, Timestamp.Date);
         }
 
-        IQueryable<Transaction> IModelItem<Transaction>.InDefaultOrder(IQueryable<Transaction> original)
+        public static IQueryable<Transaction> InDefaultOrder(IQueryable<Transaction> original)
         {
             return original.OrderByDescending(x => x.Timestamp).ThenBy(x => x.Payee);
         }
+
+        IQueryable<Transaction> IModelItem<Transaction>.InDefaultOrder(IQueryable<Transaction> original) => InDefaultOrder(original);
 
         /// <summary>
         /// Tells us whether two items are duplicates for the purposes of importing

@@ -26,7 +26,7 @@ namespace YoFi.Tests.Helpers
 
         public IQueryable<BudgetTx> BudgetTxs => BudgetTxData.AsQueryable();
 
-        public IQueryable<Transaction> TransactionsWithSplits => throw new NotImplementedException();
+        public IQueryable<Transaction> TransactionsWithSplits => TransactionData.AsQueryable();
 
         public IQueryable<Split> SplitsWithTransactions => throw new NotImplementedException();
 

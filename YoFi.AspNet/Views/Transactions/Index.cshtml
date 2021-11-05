@@ -1,14 +1,10 @@
-﻿@model IEnumerable<YoFi.AspNet.Controllers.TransactionsController.TransactionIndexDto>
+﻿@model YoFi.AspNet.Controllers.TransactionsController.IndexViewModel
 
 @{
     ViewData["Title"] = "Transactions";
 
-    int pagenum = 1;
-    if (ViewData["Page"] != null)
-        pagenum = Convert.ToInt32(ViewData["Page"]);
-
-    var prevDisabled = ViewData["PreviousPage"] == null ? "disabled" : "";
-    var nextDisabled = ViewData["NextPage"] == null ? "disabled" : "";
+    var prevDisabled = Model.Divider.PreviousPage == null ? "disabled" : "";
+    var nextDisabled = Model.Divider.NextPage == null ? "disabled" : "";
 
 }
 
@@ -41,15 +37,15 @@
 <nav class="navbar navbar-light navbar-page mb-3">
     <div class="container">
         <span class="navbar-brand">Transactions</span>
-        <form class="d-flex" asp-action="Index" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["Order"]" method="post">
-            <input class="form-control me-2 category-autocomplete input-lg" type="search" data-test-id="q" placeholder="Search" aria-label="Search" name="q" value="@ViewData["Query"]" autocomplete="off">
+        <form class="d-flex" asp-action="Index" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.OrderParameter" method="post">
+            <input class="form-control me-2 category-autocomplete input-lg" type="search" data-test-id="q" placeholder="Search" aria-label="Search" name="q" value="@Model.QueryParameter" autocomplete="off">
             <button type="submit" class="btn btn-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Search" data-test-id="btn-search">
                 <i class="fas fa-search"></i>
             </button>
             <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Help">
                 <a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary me-1" data-test-id="btn-help"><i class="fas fa-question"></i></a>
             </span>
-            <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-v="@ViewData["ViewP"]" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
+            <a asp-action="Index" asp-route-o="@Model.OrderParameter" asp-route-v="@Model.ViewParameter" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
         </form>
         <div class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -58,18 +54,18 @@
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
                 <a asp-action="Create" class="btn">Create New</a>
                 <a asp-action="Index" class="btn"
-                   asp-route-o="@ViewData["Order"]"
-                   asp-route-p="@ViewData["Page"]"
-                   asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@ViewData["ToggleHidden"]">
-                    @((bool)(ViewData["ShowHidden"])?"Hide Hidden":"Show Hidden")
+                   asp-route-o="@Model.OrderParameter"
+                   asp-route-p="@Model.PageParameter"
+                   asp-route-q="@Model.QueryParameter"
+                   asp-route-v="@Model.ToggleHidden">
+                    @(Model.ShowHidden?"Hide Hidden":"Show Hidden")
                 </a>
                 <a asp-action="Index" class="btn"
-                   asp-route-o="@ViewData["Order"]"
-                   asp-route-p="@ViewData["Page"]"
-                   asp-route-q="@ViewData["Query"]"
-                   asp-route-v="@ViewData["ToggleSelected"]">
-                    @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
+                   asp-route-o="@Model.OrderParameter"
+                   asp-route-p="@Model.PageParameter"
+                   asp-route-q="@Model.QueryParameter"
+                   asp-route-v="@Model.ToggleSelected">
+                    @(Model.ShowSelected?"Cancel Bulk Edit":"Bulk Edit")
                 </a>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#exportHowModal" class="btn">Export</a>
             </div>
@@ -78,15 +74,15 @@
 </nav>
 
 
-@if ((bool)(ViewData["ShowSelected"]))
+@if (Model.ShowSelected)
 {
     <div class="mt-2">
-        <form asp-action="BulkEdit" asp-route-o="@ViewData["Order"]" method="post">
+        <form asp-action="BulkEdit" asp-route-o="@Model.OrderParameter"  method="post">
             <div class="form-actions">
                 <p>
                     Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
                     <input type="submit" value="OK" class="btn btn-primary" data-bs-toggle="tooltip" title="Submit" />
-                    <a asp-action="Index" asp-route-o="@ViewData["Order"]" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ToggleSelected"]" class="btn btn-outline-secondary">Cancel</a>
+                    <a asp-action="Index" asp-route-o="@Model.OrderParameter" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ToggleSelected" class="btn btn-outline-secondary">Cancel</a>
                 </p>
             </div>
         </form>
@@ -96,37 +92,37 @@
 <table class="table">
     <thead>
         <tr>
-            @if ((bool)(ViewData["ShowHidden"]))
+            @if (Model.ShowHidden)
             {
                 <th>
                     Hidden
                 </th>
             }
-            @if ((bool)(ViewData["ShowSelected"]))
+            @if (Model.ShowSelected)
             {
                 <th>
                     Edit
                 </th>
             }
             <th class="col-1">
-                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["DateSortParm"]">Date</a>
+                <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.DateSortParm">Date</a>
             </th>
             <th class="col-5">
-                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["PayeeSortParm"]">@Html.DisplayNameFor(model => model.Payee)</a>
+                <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.PayeeSortParm">@nameof(Transaction.Payee)</a>
             </th>
             <th class="col-1" style="text-align:right">
-                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["AmountSortParm"]">@Html.DisplayNameFor(model => model.Amount)</a>
+                <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.AmountSortParm">@nameof(Transaction.Amount)</a>
             </th>
             <th class="col-2">
-                <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
+                <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.CategorySortParm">@nameof(Transaction.Category)</a>
             </th>
             <th class="col-2">
-                @Html.DisplayNameFor(model => model.Memo)
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Memo)
             </th>
-            @if ((bool)(ViewData["ShowHidden"]))
+            @if (Model.ShowHidden)
             {
                 <th>
-                    <a asp-action="Index" asp-route-q="@ViewData["Query"]" asp-route-v="@ViewData["ViewP"]" asp-route-o="@ViewData["BankReferenceSortParm"]">@Html.DisplayNameFor(model => model.BankReference)</a>
+                    <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.BankReferenceSortParm">@nameof(Transaction.BankReference)</a>
                 </th>
             }
             <th colspan="5" class="col-1">
@@ -137,17 +133,17 @@
         @{
             var line = 1;
         }
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@(line++)">
-                @if ((bool)(ViewData["ShowHidden"]))
+                @if (Model.ShowHidden)
                 {
                     <td>
                         @{ var checkedornot = (item.Hidden == true) ? "checked" : string.Empty; }
                         <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Hide/@item.ID" >
                     </td>
                 }
-                @if ((bool)(ViewData["ShowSelected"]))
+                @if (Model.ShowSelected)
                 {
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
@@ -176,7 +172,7 @@
                 <td class="display-memo">
                     @Html.DisplayFor(modelItem => item.Memo)
                 </td>
-                @if ((bool)(ViewData["ShowHidden"]))
+                @if (Model.ShowHidden)
                 {
                     <td>
                         @Html.DisplayFor(modelItem => item.BankReference)
@@ -199,8 +195,8 @@
                 </td>
                 <td style="padding-left:0; padding-right:5px">
                     <a asp-action="Index"
-                       asp-route-o="@ViewData["Order"]"
-                       asp-route-v="@ViewData["ViewP"]"
+                       asp-route-o="@Model.OrderParameter"
+                       asp-route-v="@Model.ViewParameter"
                        asp-route-q="p=@item.Payee?.Trim()">
                         <i class="fa fa-search" data-bs-toggle="tooltip" title="Search Payee"></i>
                     </a>
@@ -228,7 +224,7 @@
     </tbody>
 </table>
 
-@await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", ViewData[nameof(Common.AspNet.PageDivider)])
+@await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", Model.Divider)
 
 <div class="actiondialog modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-endpoint="/Transactions/EditModal/">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -267,7 +263,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <form method="post" action="/Transactions/Download">
-                <input type="hidden" name="q" value="@ViewData["Query"]">
+                <input type="hidden" name="q" value="@Model.QueryParameter">
                 <div class="modal-body">
                     ...
                 </div>

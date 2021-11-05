@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.AspNet.Common;
 
 namespace Common.AspNet
 {
@@ -11,9 +12,7 @@ namespace Common.AspNet
         public const int DefaultPageSize = 25;
 
         public int PageSize { get; set; } = DefaultPageSize;
-
         public int Page { get; private set; }
-
         public int PageFirstItem { get; private set; }
         public int PageLastItem { get; private set; }
         public int PageTotalItems { get; private set; }
@@ -23,6 +22,7 @@ namespace Common.AspNet
         public int? PreviousPreviousPage { get; private set; }
         public int? FirstPage { get; private set; }
         public int? LastPage { get; private set; }
+        public IViewParameters ViewParameters { get; set; }
 
         public Task<IQueryable<T>> ItemsForPage<T>(IQueryable<T> result, int? p)
         {
@@ -61,6 +61,15 @@ namespace Common.AspNet
                 result = result.Skip(offset).Take(PageSize);
 
             return Task.FromResult(result);
+        }
+
+        public class DefaultViewParameters : IViewParameters
+        {
+            public string QueryParameter { get; set; }
+
+            public string ViewParameter { get; set; }
+
+            public string OrderParameter { get; set; }
         }
     }
 }

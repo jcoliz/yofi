@@ -83,7 +83,12 @@ namespace YoFi.Core.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public override IQueryable<Transaction> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q) || x.Payee.Contains(q));
+        public override IQueryable<Transaction> ForQuery(string q)
+        {
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits));
+            qbuilder.Build(q);
+            return qbuilder.Query;
+        }
 
         // TODO: SingleAsync()
         public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.TransactionsWithSplits.Single(x => x.ID == id.Value));
