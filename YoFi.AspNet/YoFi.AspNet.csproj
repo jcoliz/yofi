@@ -74,6 +74,10 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Core\Helpers\" />
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="git describe --long --always --abbrev=8 &gt; &quot;$(ProjectDir)\version.txt&quot;" />
   </Target>

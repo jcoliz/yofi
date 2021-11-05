@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.Core;
-using YoFi.Core.Helpers;
 using YoFi.Core.Models;
 using YoFi.Core.Quieriers;
 using Transaction = YoFi.Core.Models.Transaction;
@@ -262,9 +260,9 @@ namespace YoFi.Core.Repositories
             incoming.AddRange(created);
         }
 
-        public new async Task<IEnumerable<Transaction>> ProcessImportAsync()
+        public new Task<IEnumerable<Transaction>> ProcessImportAsync()
         {
-            return Enumerable.Empty<Transaction>();
+            return Task.FromResult(Enumerable.Empty<Transaction>());
         }
 
         public Task FinalizeImportAsync()

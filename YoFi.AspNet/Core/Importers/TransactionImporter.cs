@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.Core.Helpers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using Transaction = YoFi.Core.Models.Transaction;
@@ -28,25 +27,9 @@ namespace YoFi.Core.Importers
             _payees = payees;
         }
 
-        public enum ImportableFileTypeEnum { Invalid = 0, Ofx, Xlsx };
-
         public IEnumerable<string> HighlightIDs => highlights.Select(x => x.ID.ToString());
 
-        public Task LoadFromAsync(Stream stream, ImportableFileTypeEnum filetype)
-        {
-            switch (filetype)
-            {
-                case ImportableFileTypeEnum.Ofx:
-                    return LoadTransactionsFromOfxAsync(stream);
-                case ImportableFileTypeEnum.Xlsx:
-                    LoadTransactionsFromXlsx(stream);
-                    return Task.CompletedTask;
-                default:
-                    throw new ApplicationException("Invalid file type");
-            }
-        }
-
-        public async Task Process()
+        public async Task ProcessImportAsync()
         {
 
             // Process needed changes on each
@@ -119,7 +102,7 @@ namespace YoFi.Core.Importers
             await _repository.AddRangeAsync(incoming);
         }
 
-        public async Task LoadTransactionsFromOfxAsync(Stream stream)
+        public async Task QueueImportFromOfxAsync(Stream stream)
         {
             OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
 
@@ -136,7 +119,7 @@ namespace YoFi.Core.Importers
             incoming.AddRange(created);
         }
 
-        public void LoadTransactionsFromXlsx(Stream stream)
+        public void QueueImportFromXlsx(Stream stream)
         {
             using var ssr = new SpreadsheetReader();
             ssr.Open(stream);

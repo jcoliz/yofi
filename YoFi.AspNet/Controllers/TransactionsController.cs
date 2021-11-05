@@ -517,22 +517,18 @@ namespace YoFi.AspNet.Controllers
 
             foreach (var formFile in files)
             {
-                var filetype = Path.GetExtension(formFile.FileName).ToLowerInvariant() switch
-                {
-                    ".ofx" => TransactionImporter.ImportableFileTypeEnum.Ofx,
-                    ".xlsx" => TransactionImporter.ImportableFileTypeEnum.Xlsx,
-                    _ => TransactionImporter.ImportableFileTypeEnum.Invalid
-                };
+                using var stream = formFile.OpenReadStream();
 
-                if (filetype != TransactionImporter.ImportableFileTypeEnum.Invalid)
-                {
-                    using var stream = formFile.OpenReadStream();
-                    await importer.LoadFromAsync(stream, filetype);
-                }
+                var filetype = Path.GetExtension(formFile.FileName).ToLowerInvariant();
+
+                if (filetype == ".ofx")
+                    await importer.QueueImportFromOfxAsync(stream);
+                else if (filetype == ".xlsx")
+                    importer.QueueImportFromXlsx(stream);
             }
 
             // Process the imported files
-            await importer.Process();
+            await importer.ProcessImportAsync();
 
             // This is kind of a crappy way to communicate the potential false negative conflicts.
             // If user returns to Import page directly, these highlights will be lost. Really probably
