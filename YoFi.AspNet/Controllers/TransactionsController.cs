@@ -540,59 +540,6 @@ namespace YoFi.AspNet.Controllers
         }
 
         /// <summary>
-        /// Finally execute the import for all selected transactions
-        /// </summary>
-        /// <remarks>
-        /// This is the last step in the upload/import pipeline
-        /// </remarks>
-        /// <param name="command">'ok' to do the import, 'cancel' to cancel it</param>
-        /// <returns></returns>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> ProcessImported(string command)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(command))
-                    throw new ArgumentException();
-
-                var allimported = from s in _context.Transactions
-                                  where s.Imported == true
-                                  orderby s.Timestamp descending, s.BankReference ascending
-                                  select s;
-
-                var selected = await allimported.Where(x => true == x.Selected).ToListAsync();
-                var unselected = await allimported.Where(x => true != x.Selected).ToListAsync();
-
-                if (command == "cancel")
-                {
-                    _context.Transactions.RemoveRange(allimported);
-                    _context.SaveChanges();
-                    return RedirectToAction(nameof(Import));
-                }
-                else if (command == "ok")
-                {
-                    foreach (var item in selected)
-                        item.Imported = item.Hidden = item.Selected = false;
-                    _context.Transactions.RemoveRange(unselected);
-                    _context.SaveChanges();
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                    throw new ArgumentException();
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        /// <summary>
         /// Display the transactions which have been imported
         /// </summary>
         /// <remarks>
@@ -631,6 +578,51 @@ namespace YoFi.AspNet.Controllers
             // TODO: ToListAsync()
             // TODO: AsNoTracking()
             return View(result.ToList());
+        }
+
+        /// <summary>
+        /// Finally execute the import for all selected transactions
+        /// </summary>
+        /// <remarks>
+        /// This is the last step in the upload/import pipeline
+        /// </remarks>
+        /// <param name="command">'ok' to do the import, 'cancel' to cancel it</param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
+        public async Task<IActionResult> ProcessImported(string command)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(command))
+                    throw new ArgumentException();
+
+                IQueryable<Transaction> allimported = _repository.OrderedQuery.Where(x => x.Imported == true);
+
+                if (command == "cancel")
+                {
+                    await _repository.RemoveRangeAsync(allimported);
+                    return RedirectToAction(nameof(Import));
+                }
+                else if (command == "ok")
+                {
+                    var selected = allimported.ToLookup(x => x.Selected == true);
+                    foreach (var item in selected[true])
+                        item.Imported = item.Hidden = item.Selected = false;
+
+                    // This will implicitly save the changes from the previous line
+                    await _repository.RemoveRangeAsync(selected[false]);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                    throw new ArgumentException();
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpPost]

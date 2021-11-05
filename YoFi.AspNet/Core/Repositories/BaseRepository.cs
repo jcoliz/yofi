@@ -121,6 +121,12 @@ namespace YoFi.Core.Repositories
             return new T().InDefaultOrder(result.AsQueryable());
         }
 
+        public async Task RemoveRangeAsync(IEnumerable<T> items)
+        {
+            _context.RemoveRange(items);
+            await _context.SaveChangesAsync();
+        }
+
         #endregion
     }
 }

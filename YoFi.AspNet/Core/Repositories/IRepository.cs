@@ -79,6 +79,12 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <param name="item">Item to remove</param>
         Task RemoveAsync(T item);
+
+        /// <summary>
+        /// Remove <paramref name="items"/> from the repository
+        /// </summary>
+        /// <param name="items">Items to remove</param>
+        Task RemoveRangeAsync(IEnumerable<T> items);
         #endregion
 
         #region Spreadsheet import/export

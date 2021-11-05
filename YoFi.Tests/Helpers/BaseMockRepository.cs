@@ -112,5 +112,10 @@ namespace YoFi.Tests.Helpers
             // Return those items for display
             return new T().InDefaultOrder(result.AsQueryable());
         }
+
+        public Task RemoveRangeAsync(IEnumerable<T> items)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
