@@ -17,9 +17,8 @@ using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
-using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
-using Dto = YoFi.AspNet.Controllers.TransactionsController.IndexViewModel.TransactionIndexDto;
+using Dto = YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
 using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Tests
@@ -142,7 +141,7 @@ namespace YoFi.Tests
                 .Build();
 
             _repository = new TransactionRepository(helper.context, storage: storage, config: configuration);
-            helper.controller = new TransactionsController(_repository, helper.context);
+            helper.controller = new TransactionsController(_repository);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 
@@ -168,7 +167,7 @@ namespace YoFi.Tests
 
             var result = await controller.Index();
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             Assert.AreEqual(1, model.Items.Count());
             Assert.IsTrue(model.Items.Single().Equals(expected));
@@ -461,7 +460,7 @@ namespace YoFi.Tests
 
             var result = await controller.Index();
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             Assert.AreEqual(1, model.Items.Count());
             var actual = model.Items.Single();
@@ -476,7 +475,7 @@ namespace YoFi.Tests
 
             var result = await controller.Index(q:"c=A");
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             Assert.AreEqual(1, model.Items.Count());
             var actual = model.Items.Single();
@@ -809,7 +808,7 @@ namespace YoFi.Tests
             // When: Calling Index with a defined sort order
             var result = await controller.Index(o:item.Key);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: The items are returned sorted in that order
             var predicate = item.Predicate as Func<Dto, string>;
@@ -833,7 +832,7 @@ namespace YoFi.Tests
             IActionResult result;
             result = await controller.Index(q:"p=4");
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only the items with a matching payee are returned
             Assert.AreEqual(3, model.Items.Count());
@@ -850,7 +849,7 @@ namespace YoFi.Tests
             IActionResult result;
             result = await controller.Index(q:"C=C");
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only the items with a matching category are returned
             Assert.AreEqual(4, model.Items.Count());
@@ -868,7 +867,7 @@ namespace YoFi.Tests
             var searchterm = ishidden ? "H" : null;
             var result = await controller.Index(v:searchterm);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only the items with a matching hidden state are returned
             if (ishidden)
@@ -886,7 +885,7 @@ namespace YoFi.Tests
             var searchterm = isselected ? "S" : null;
             var result = await controller.Index(v:searchterm);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: The "show selected" state is transmitted through to the view
             Assert.AreEqual(isselected, model.ShowSelected);
@@ -907,7 +906,7 @@ namespace YoFi.Tests
                 searchterm = hasreceipt.Value ? "R=1" : "R=0";
             var result = await controller.Index(q:searchterm);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only the items with a matching receipt state are returned
             if (hasreceipt.HasValue)
@@ -942,7 +941,7 @@ namespace YoFi.Tests
                 search = hasreceipt.Value ? $"P={payee},R=1" : $"P={payee},R=0";
             var result = await controller.Index(q:search);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only the items with a matching payee AND receipt state are returned
             if (hasreceipt.HasValue)
@@ -968,7 +967,7 @@ namespace YoFi.Tests
             // When: Calling Index page 1
             var result = await controller.Index(p:1);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only one page's worth of items are returned
             Assert.AreEqual(TransactionsController.PageSize, model.Items.Count());
@@ -992,7 +991,7 @@ namespace YoFi.Tests
             // When: Calling Index page 2
             var result = await controller.Index(p:2);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only items after one page's worth of items are returned
             Assert.AreEqual(TransactionsController.PageSize / 2, model.Items.Count());
@@ -1016,7 +1015,7 @@ namespace YoFi.Tests
             // When: Calling Index page 5
             var result = await controller.Index(p: 5);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only the remaining items are returned
             Assert.AreEqual(items.Count() % TransactionsController.PageSize, model.Items.Count());
@@ -1039,7 +1038,7 @@ namespace YoFi.Tests
             // When: Calling Index page 1
             var result = await controller.Index(p: 1);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             // Then: Only one page's worth of items are returned
             Assert.AreEqual(TransactionsController.PageSize, model.Items.Count());
@@ -1223,7 +1222,7 @@ namespace YoFi.Tests
         {
             var result = await controller.Index();
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             return model.Items;
         }
@@ -1232,7 +1231,7 @@ namespace YoFi.Tests
         {
             var result = await controller.Index(q: q);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             return model.Items;
         }
@@ -1248,7 +1247,7 @@ namespace YoFi.Tests
         {
             var result = await controller.Index(v: v);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsController.IndexViewModel;
+            var model = viewresult.Model as TransactionsIndexPresenter;
 
             return model.Items;
         }
