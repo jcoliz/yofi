@@ -656,8 +656,11 @@ namespace YoFi.AspNet.Controllers
         /// <remarks>
         /// If you set this in the reports, it applies throughout the app,
         /// defaulting to that year.
+        /// 
+        /// Note this is public so that tests could set it if needed. Currently, unit tests rely on
+        /// DateTime.Now for test data, so this is probably OK.
         /// </remarks>
-        private int Year
+        public int Year
         {
             get
             {
@@ -666,11 +669,11 @@ namespace YoFi.AspNet.Controllers
                     var value = this.HttpContext?.Session.GetString(nameof(Year));
                     if (string.IsNullOrEmpty(value))
                     {
-                        Year = Now.Year;
+                        Year = DateTime.Now.Year;
                     }
                     else
                     {
-                        _Year = (int.TryParse(value, out int y)) ? y : Now.Year;
+                        _Year = (int.TryParse(value, out int y)) ? y : DateTime.Now.Year;
                     }
                 }
 
@@ -685,25 +688,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
         private int? _Year = null;
-
-        /// <summary>
-        /// Current datetime
-        /// </summary>
-        /// <remarks>
-        /// Which may be overridden by tests
-        /// </remarks>
-        public DateTime Now
-        {
-            get
-            {
-                return _Now ?? DateTime.Now;
-            }
-            set
-            {
-                _Now = value;
-            }
-        }
-        private DateTime? _Now;
 
         #endregion
 
