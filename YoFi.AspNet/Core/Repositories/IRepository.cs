@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core.Importers;
 using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
@@ -15,7 +16,7 @@ namespace YoFi.Core.Repositories
     /// interface
     /// </remarks>
     /// <typeparam name="T">Type of model item we contain</typeparam>
-    public interface IRepository<T> where T: class, IModelItem<T>
+    public interface IRepository<T> : IImporter<T> where T: class, IModelItem<T>
     {
         #region CRUD operations
         /// <summary>
@@ -97,22 +98,6 @@ namespace YoFi.Core.Repositories
         /// <returns></returns>
         Stream AsSpreadsheet();
 
-        /// <summary>
-        /// Declare that items from the spreadsheet in the given <paramref name="stream"/> should be
-        /// imported.
-        /// </summary>
-        /// <remarks>
-        /// Call this as many times as needed, then call ProcessImportAsync when ready to do the import.
-        /// Note that the importer first looks for a tab named nameof(T), then if it can't find it,
-        /// the importer will process the first tab in the spreadsheet
-        /// </remarks>
-        /// <param name="stream">Where to find the spreadsheet to import</param>
-        void QueueImportFromXlsx(Stream stream);
-
-        /// <summary>
-        /// Import previously queued files
-        /// </summary>
-        Task<IEnumerable<T>> ProcessImportAsync();
         #endregion
     }
 }

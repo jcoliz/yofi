@@ -80,6 +80,7 @@ namespace YoFi.AspNet.Root
             services.AddScoped<IRepository<Transaction>, TransactionRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<TransactionImporter>();
+            services.AddScoped<SplitImporter>();
 
             services.AddScoped<IDataContext, ApplicationDbContext>();
 

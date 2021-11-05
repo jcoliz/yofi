@@ -562,7 +562,7 @@ namespace YoFi.Tests
             var file = ControllerTestHelper<Split, SplitsController>.PrepareUpload(SplitItems.Take(2).ToList());
 
             // Upload that
-            var result = await controller.UpSplits(new List<IFormFile>() { file }, item.ID);
+            var result = await controller.UpSplits(new List<IFormFile>() { file }, item.ID, new SplitImporter(_repository));
             var redir = result as RedirectToActionResult;
 
             Assert.IsNotNull(redir);

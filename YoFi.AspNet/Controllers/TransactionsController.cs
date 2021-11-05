@@ -626,36 +626,19 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         [ValidateFilesProvided(multiplefilesok: true)]
         [ValidateTransactionExists]
-        public async Task<IActionResult> UpSplits(List<IFormFile> files, int id)
+        public async Task<IActionResult> UpSplits(List<IFormFile> files, int id, [FromServices] SplitImporter importer)
         {
             var transaction = await _repository.GetWithSplitsByIdAsync(id);
 
-            var incoming = new HashSet<Split>();
-            // Extract submitted file into a list objects
+            importer.Target = transaction;
 
-            foreach (var file in files)
+            foreach (var file in files.Where(x => Path.GetExtension(x.FileName).ToLowerInvariant() == ".xlsx"))
             {
-                if (file.FileName.ToLower().EndsWith(".xlsx"))
-                {
-                    using var stream = file.OpenReadStream();
-                    using var ssr = new SpreadsheetReader();
-                    ssr.Open(stream);
-                    var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
-                    incoming.UnionWith(items);
-                }
+                using var stream = file.OpenReadStream();
+                importer.QueueImportFromXlsx(stream);
             }
 
-            if (incoming.Any())
-            {
-                // Why no has AddRange??
-                foreach (var split in incoming)
-                {
-                    transaction.Splits.Add(split);
-                }
-
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-            }
+            await importer.ProcessImportAsync();
 
             return RedirectToAction("Edit", new { id = id });
         }
@@ -680,7 +663,7 @@ namespace YoFi.AspNet.Controllers
             {
                 if (!_Year.HasValue)
                 {
-                    var value = HttpContext?.Session.GetString(nameof(Year));
+                    var value = this.HttpContext?.Session.GetString(nameof(Year));
                     if (string.IsNullOrEmpty(value))
                     {
                         Year = Now.Year;
@@ -698,7 +681,7 @@ namespace YoFi.AspNet.Controllers
                 _Year = value;
 
                 var serialisedDate = _Year.ToString();
-                HttpContext?.Session.SetString(nameof(Year), serialisedDate);
+                this.HttpContext?.Session.SetString(nameof(Year), serialisedDate);
             }
         }
         private int? _Year = null;
