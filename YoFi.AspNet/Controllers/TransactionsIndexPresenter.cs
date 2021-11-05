@@ -12,6 +12,11 @@ namespace YoFi.AspNet.Controllers
     /// Everything the Transactions Index view needs to display the index page
     /// </summary>
     /// <remarks>
+    /// Given that this page is the main page of the application, it makes sense
+    /// for it to have the most UI complexity, and ergo the most need for a
+    /// dedicated presenter to build the arrange the data nicely for the view
+    /// 
+    /// 
     /// This also could be thought of as a viewmodel.
     /// </remarks>
     public class TransactionsIndexPresenter : IViewParameters
