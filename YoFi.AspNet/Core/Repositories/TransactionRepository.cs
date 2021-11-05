@@ -191,12 +191,6 @@ namespace YoFi.Core.Repositories
             await UpdateAsync(transaction);
         }
 
-        public (Stream stream, string contenttype, string name) Foo()
-        {
-            return (null, null, null);
-
-        }
-
         public async Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction)
         {
             if (string.IsNullOrEmpty(transaction.ReceiptUrl))
@@ -221,6 +215,28 @@ namespace YoFi.Core.Repositories
             stream.Seek(0, SeekOrigin.Begin);
 
             return (stream,contenttype,name);
+        }
+
+
+        public new async Task<IEnumerable<Transaction>> ProcessImportAsync()
+        {
+            IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
+
+            var selected = allimported.ToLookup(x => x.Selected == true);
+            foreach (var item in selected[true])
+                item.Imported = item.Hidden = item.Selected = false;
+
+            // This will implicitly save the changes from the previous line
+            await RemoveRangeAsync(selected[false]);
+
+            // TODO: ToListAsync()?
+            return selected[true].ToList();
+        }
+
+        public Task CancelImportAsync()
+        {
+            IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
+            return RemoveRangeAsync(allimported);
         }
 
         private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");

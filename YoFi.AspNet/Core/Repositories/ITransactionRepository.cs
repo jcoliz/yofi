@@ -19,5 +19,7 @@ namespace YoFi.Core.Repositories
         Task<int> AddSplitToAsync(int id);
         Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype);
         Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction);
+
+        Task CancelImportAsync();
     }
 }

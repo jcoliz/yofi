@@ -598,22 +598,14 @@ namespace YoFi.AspNet.Controllers
                 if (string.IsNullOrEmpty(command))
                     throw new ArgumentException();
 
-                IQueryable<Transaction> allimported = _repository.OrderedQuery.Where(x => x.Imported == true);
-
                 if (command == "cancel")
                 {
-                    await _repository.RemoveRangeAsync(allimported);
+                    await _repository.CancelImportAsync();
                     return RedirectToAction(nameof(Import));
                 }
                 else if (command == "ok")
                 {
-                    var selected = allimported.ToLookup(x => x.Selected == true);
-                    foreach (var item in selected[true])
-                        item.Imported = item.Hidden = item.Selected = false;
-
-                    // This will implicitly save the changes from the previous line
-                    await _repository.RemoveRangeAsync(selected[false]);
-
+                    await _repository.ProcessImportAsync();
                     return RedirectToAction(nameof(Index));
                 }
                 else
