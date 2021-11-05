@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using YoFi.Core.Repositories;
 using YoFi.Core;
+using YoFi.Core.Importers;
 
 namespace YoFi.AspNet.Root
 {
@@ -78,6 +79,7 @@ namespace YoFi.AspNet.Root
             services.AddScoped<IRepository<Payee>, PayeeRepository>();
             services.AddScoped<IRepository<Transaction>, TransactionRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<TransactionImporter>();
 
             services.AddScoped<IDataContext, ApplicationDbContext>();
 

@@ -1,12 +1,11 @@
-﻿using Common.AspNet;
-using Common.NET;
+﻿using Ardalis.Filters;
+using Common.AspNet;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,13 +15,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Data;
-using YoFi.Core.Models;
 using YoFi.Core.Importers;
+using YoFi.Core.Models;
 using YoFi.Core.Quieriers;
-using YoFi.Core.Reports;
-using Transaction = YoFi.Core.Models.Transaction;
-using Ardalis.Filters;
 using YoFi.Core.Repositories;
+using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -36,11 +33,10 @@ namespace YoFi.AspNet.Controllers
 
         #region Constructor
 
-        public TransactionsController(ITransactionRepository repository, ApplicationDbContext context, IPayeeRepository payeeRepository)
+        public TransactionsController(ITransactionRepository repository, ApplicationDbContext context)
         {
             _context = context;
             _repository = repository;
-            _payeeRepository = payeeRepository;
         }
 
         #endregion
@@ -303,12 +299,12 @@ namespace YoFi.AspNet.Controllers
         #region Action Handlers: Edit (Done)
 
         [ValidateTransactionExists]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, [FromServices] IPayeeRepository payeeRepository)
         {
             var transaction = await _repository.GetWithSplitsByIdAsync(id);
             if (string.IsNullOrEmpty(transaction.Category))
             {
-                var category = await _payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
+                var category = await payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
                 if (category != null)
                 {
                     transaction.Category = category;
@@ -320,12 +316,12 @@ namespace YoFi.AspNet.Controllers
         }
 
         [ValidateTransactionExists]
-        public async Task<IActionResult> EditModal(int? id)
+        public async Task<IActionResult> EditModal(int? id, [FromServices] IPayeeRepository payeeRepository)
         {
             var transaction = await _repository.GetWithSplitsByIdAsync(id);
             if (string.IsNullOrEmpty(transaction.Category))
             {
-                var category = await _payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
+                var category = await payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
                 if (category != null)
                 {
                     transaction.Category = category;
@@ -523,11 +519,9 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [Authorize(Policy = "CanWrite")]
         [ValidateFilesProvided(multiplefilesok: true)]
-        public async Task<IActionResult> Upload(List<IFormFile> files)
+        public async Task<IActionResult> Upload(List<IFormFile> files, [FromServices] TransactionImporter importer)
         {
             // Open each file in turn, and send them to the importer
-
-            var importer = new TransactionImporter(_repository,_payeeRepository);
 
             foreach (var formFile in files)
             {
@@ -672,7 +666,6 @@ namespace YoFi.AspNet.Controllers
         private readonly ApplicationDbContext _context;
 
         private readonly ITransactionRepository _repository;
-        private readonly IPayeeRepository _payeeRepository;
 
         /// <summary>
         /// Current default year
@@ -737,6 +730,13 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Transaction>.Edit(int id, Transaction item) => Edit(id, false, item);
 
         Task<IActionResult> IController<Transaction>.Download() => Download(false);
+
+        Task<IActionResult> IController<Transaction>.Upload(List<IFormFile> files) => throw new NotImplementedException();
+
+        Task<IActionResult> IController<Transaction>.Edit(int? id)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
 
 
