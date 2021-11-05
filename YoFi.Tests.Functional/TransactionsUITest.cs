@@ -542,5 +542,48 @@ namespace YoFi.Tests.Functional
             fix = await NextPage.QuerySelectorAsync("data-test-id=btn-fix-split");
             Assert.IsNull(fix);
         }
+
+        // TODO
+        public void ImportOfx()
+        {
+            // Given: On import page
+
+            // When: Importing an OFX file, where all the payees are already known
+
+            // Then: Expected number of items present in importer
+
+            // And: All categories are set
+        }
+
+        public void ImportOfxDelete()
+        {
+            // Given: Imported an OFX file
+
+            // When: Deleting them
+
+            // Then: No items present in importer
+        }
+
+        public void EditModalNotMatching()
+        {
+            // Given: One item added, in search results
+
+            // When: Editing to change the category
+
+            // And: Editing it again
+
+            // Then: The new category is there
+        }
+
+        public void EditModalMatching()
+        {
+            // Given: One item added, in search results
+
+            // When: Editing to clear the category
+
+            // And: Editing it again
+
+            // Then: A matched category is there automatically
+        }
     }
 }
