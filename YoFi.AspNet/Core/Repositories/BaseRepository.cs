@@ -75,10 +75,20 @@ namespace YoFi.Core.Repositories
             _context.Update(item);
             return _context.SaveChangesAsync();
         }
+        public Task UpdateRangeAsync(IEnumerable<T> items)
+        {
+            _context.UpdateRange(items);
+            return _context.SaveChangesAsync();
+        }
 
         public Task RemoveAsync(T item)
         {
             _context.Remove(item);
+            return _context.SaveChangesAsync();
+        }
+        public Task RemoveRangeAsync(IEnumerable<T> items)
+        {
+            _context.RemoveRange(items);
             return _context.SaveChangesAsync();
         }
         #endregion
@@ -120,13 +130,6 @@ namespace YoFi.Core.Repositories
             // Return those items for display
             return new T().InDefaultOrder(result.AsQueryable());
         }
-
-        public async Task RemoveRangeAsync(IEnumerable<T> items)
-        {
-            _context.RemoveRange(items);
-            await _context.SaveChangesAsync();
-        }
-
         #endregion
     }
 }

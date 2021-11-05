@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace YoFi.Core.Repositories
 {
@@ -13,6 +15,9 @@ namespace YoFi.Core.Repositories
 
     public class PayeeRepository : BaseRepository<Payee>, IPayeeRepository
     {
+        List<Payee> payeecache;
+        IEnumerable<Payee> regexpayees;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -69,6 +74,56 @@ namespace YoFi.Core.Repositories
             // TODO: SingleAsync()
             var transaction = _context.Transactions.Where(x => x.ID == txid).Single();
             var result = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
+
+            return Task.FromResult(result);
+        }
+
+        public Task PrepareToMatchAsync()
+        {
+            // Load all payees into memory. This is an optimization. Rather than run a separate payee query for every 
+            // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
+
+            // TODO: TOListAsync();
+            payeecache = All.ToList();
+
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> SetCategoryBasedOnMatchingPayeeAsync(Transaction item)
+        {
+            var result = false;
+
+            if (string.IsNullOrEmpty(item.Category))
+            {
+                Payee payee = null;
+                string strippedpayee = item.StrippedPayee;
+
+                IQueryable<Payee> payees = payeecache?.AsQueryable<Payee>() ?? All;
+                regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
+
+                // Product Backlog Item 871: Match payee on regex, optionally
+                foreach (var regexpayee in regexpayees)
+                {
+                    var regex = new Regex(regexpayee.Name[1..^2]);
+                    if (regex.Match(strippedpayee).Success)
+                    {
+                        payee = regexpayee;
+                        break;
+                    }
+                }
+
+                if (null == payee)
+                {
+                    //TODO: FirstOrDefaultAsync()
+                    payee = payees.FirstOrDefault(x => strippedpayee.Contains(x.Name));
+                }
+
+                if (null != payee)
+                {
+                    item.Category = payee.Category;
+                    result = true;
+                }
+            }
 
             return Task.FromResult(result);
         }

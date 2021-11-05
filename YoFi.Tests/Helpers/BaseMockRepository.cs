@@ -117,5 +117,10 @@ namespace YoFi.Tests.Helpers
         {
             throw new NotImplementedException();
         }
+
+        public Task UpdateRangeAsync(IEnumerable<T> items)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

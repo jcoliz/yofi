@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Helpers;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Core.Importers
@@ -18,11 +19,13 @@ namespace YoFi.Core.Importers
         private readonly List<IGrouping<int, Split>> splits = new List<IGrouping<int, Split>>();
         private readonly List<Transaction> highlights = new List<Transaction>();
 
-        private readonly IDataContext _context;
+        private readonly ITransactionRepository _repository;
+        private readonly IPayeeRepository _payees;
 
-        public TransactionImporter(IDataContext context)
+        public TransactionImporter(ITransactionRepository repository, IPayeeRepository payees)
         {
-            _context = context;
+            _repository = repository;
+            _payees = payees;
         }
 
         public enum ImportableFileTypeEnum { Invalid = 0, Ofx, Xlsx };
@@ -36,7 +39,8 @@ namespace YoFi.Core.Importers
                 case ImportableFileTypeEnum.Ofx:
                     return LoadTransactionsFromOfxAsync(stream);
                 case ImportableFileTypeEnum.Xlsx:
-                    return LoadTransactionsFromXlsxAsync(stream);
+                    LoadTransactionsFromXlsx(stream);
+                    return Task.CompletedTask;
                 default:
                     throw new ApplicationException("Invalid file type");
             }
@@ -79,18 +83,16 @@ namespace YoFi.Core.Importers
             // (3) Final processing on each transction
             //
 
-            var payeematcher = new PayeeMatcher(_context);
-            await payeematcher.LoadAsync();
+            await _payees.PrepareToMatchAsync();
 
             // Process each item
-
 
             foreach (var item in incoming)
             {
                 // (3A) Fixup and match payees
 
                 item.Payee = item.StrippedPayee;
-                payeematcher.SetCategoryBasedOnMatchingPayeeAsync(item);
+                await _payees.SetCategoryBasedOnMatchingPayeeAsync(item);
 
                 // (3B) Import splits
                 // Product Backlog Item 870: Export & import transactions with splits
@@ -114,11 +116,10 @@ namespace YoFi.Core.Importers
 
             // Add resulting transactions
 
-            await _context.AddRangeAsync(incoming);
-            await _context.SaveChangesAsync();
+            await _repository.AddRangeAsync(incoming);
         }
 
-        private async Task LoadTransactionsFromOfxAsync(Stream stream)
+        public async Task LoadTransactionsFromOfxAsync(Stream stream)
         {
             OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
 
@@ -135,7 +136,7 @@ namespace YoFi.Core.Importers
             incoming.AddRange(created);
         }
 
-        private Task LoadTransactionsFromXlsxAsync(Stream stream)
+        public void LoadTransactionsFromXlsx(Stream stream)
         {
             using var ssr = new SpreadsheetReader();
             ssr.Open(stream);
@@ -146,10 +147,7 @@ namespace YoFi.Core.Importers
             // And transform the flat data into something easier to use.
             if (ssr.SheetNames.Contains("Split"))
                 splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
-
-            return Task.CompletedTask;
         }
-
 
         private async Task EnsureAllTransactionsHaveBankRefs()
         {
@@ -157,14 +155,14 @@ namespace YoFi.Core.Importers
             // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
             // transactions in the system.
 
-            var needbankrefs = _context.Transactions.Where(x => null == x.BankReference);
+            var needbankrefs = _repository.All.Where(x => null == x.BankReference);
             if (await needbankrefs.AnyAsync())
             {
                 foreach (var tx in needbankrefs)
                 {
                     tx.GenerateBankReference();
                 }
-                await _context.SaveChangesAsync();
+                await _repository.UpdateRangeAsync(needbankrefs);
             }
         }
 
@@ -194,7 +192,7 @@ namespace YoFi.Core.Importers
                 */
             //
             var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
-            var conflicts = _context.Transactions.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
+            var conflicts = _repository.All.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
 
             if (conflicts.Any())
             {

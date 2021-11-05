@@ -1,6 +1,7 @@
 ﻿using Common.NET;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Extensions.Configuration;
+using OfxSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +11,7 @@ using YoFi.Core;
 using YoFi.Core.Helpers;
 using YoFi.Core.Models;
 using YoFi.Core.Quieriers;
+using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Core.Repositories
 {
@@ -17,6 +19,10 @@ namespace YoFi.Core.Repositories
     {
         private readonly IPlatformAzureStorage _storage;
         private readonly IConfiguration _config;
+
+        private readonly List<Transaction> incoming = new List<Transaction>();
+        private readonly List<IGrouping<int, Split>> splits = new List<IGrouping<int, Split>>();
+        private readonly List<Transaction> highlights = new List<Transaction>();
 
         /// <summary>
         /// Constructor
@@ -28,7 +34,11 @@ namespace YoFi.Core.Repositories
             _config = config;
         }
 
-        public async Task<bool> AssignPayeeAsync(Transaction transaction) => await new PayeeMatcher(_context).SetCategoryBasedOnMatchingPayeeAsync(transaction);
+        public async Task<bool> AssignPayeeAsync(Transaction transaction)
+        {
+            var payees = new PayeeRepository(_context);
+            return await payees.SetCategoryBasedOnMatchingPayeeAsync(transaction);
+        }
 
         /// <summary>
         /// Change category of all selected items to <paramref name="category"/>
@@ -80,7 +90,6 @@ namespace YoFi.Core.Repositories
 
             await _context.SaveChangesAsync();
         }
-
 
         public override IQueryable<Transaction> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q) || x.Payee.Contains(q));
 
@@ -171,6 +180,8 @@ namespace YoFi.Core.Repositories
             return result.ID;
         }
 
+        #region Receipts
+
         public async Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype)
         {
             //
@@ -217,8 +228,46 @@ namespace YoFi.Core.Repositories
             return (stream,contenttype,name);
         }
 
+        #endregion
+
+        #region Importer
+
+        public new void QueueImportFromXlsx(Stream stream)
+        {
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            var items = ssr.Deserialize<Transaction>();
+            incoming.AddRange(items);
+
+            // If there are also splits included here, let's grab those
+            // And transform the flat data into something easier to use.
+            if (ssr.SheetNames.Contains("Split"))
+                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
+        }
+
+        public async Task QueueImportFromOfxAsync(Stream stream)
+        {
+            OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
+
+            var created = Document.Statements.SelectMany(x => x.Transactions).Select(
+                tx => new Transaction()
+                {
+                    Amount = tx.Amount,
+                    Payee = tx.Memo?.Trim(),
+                    BankReference = tx.ReferenceNumber?.Trim(),
+                    Timestamp = tx.Date.Value.DateTime
+                }
+            );
+
+            incoming.AddRange(created);
+        }
 
         public new async Task<IEnumerable<Transaction>> ProcessImportAsync()
+        {
+            return Enumerable.Empty<Transaction>();
+        }
+
+        public Task FinalizeImportAsync()
         {
             IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
 
@@ -227,10 +276,7 @@ namespace YoFi.Core.Repositories
                 item.Imported = item.Hidden = item.Selected = false;
 
             // This will implicitly save the changes from the previous line
-            await RemoveRangeAsync(selected[false]);
-
-            // TODO: ToListAsync()?
-            return selected[true].ToList();
+            return RemoveRangeAsync(selected[false]);
         }
 
         public Task CancelImportAsync()
@@ -238,6 +284,8 @@ namespace YoFi.Core.Repositories
             IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
             return RemoveRangeAsync(allimported);
         }
+
+        #endregion
 
         private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 

@@ -16,10 +16,12 @@ namespace YoFi.Core
         IQueryable<Split> SplitsWithTransactions { get; }
         IQueryable<T> Get<T>();
 
+        // TODO: These actually should not be async
         Task AddAsync(object item);
         Task AddRangeAsync(IEnumerable<object> items);
 
         void Update(object item);
+        void UpdateRange(IEnumerable<object> items);
         void Remove(object item);
         void RemoveRange(IEnumerable<object> items);
         Task SaveChangesAsync();

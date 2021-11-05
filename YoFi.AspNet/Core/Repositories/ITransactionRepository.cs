@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using YoFi.Core.Helpers;
 using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
@@ -20,6 +21,7 @@ namespace YoFi.Core.Repositories
         Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype);
         Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction);
 
+        Task FinalizeImportAsync();
         Task CancelImportAsync();
     }
 }

@@ -74,6 +74,8 @@ namespace YoFi.Core.Repositories
         /// <param name="item">New details</param>
         Task UpdateAsync(T item);
 
+        Task UpdateRangeAsync(IEnumerable<T> items);
+
         /// <summary>
         /// Remove <paramref name="item"/> from the repository
         /// </summary>

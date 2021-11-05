@@ -37,5 +37,15 @@ namespace YoFi.Tests.Helpers
             WasBulkDeleteCalled = true;
             return Task.CompletedTask;
         }
+
+        public Task PrepareToMatchAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> SetCategoryBasedOnMatchingPayeeAsync(Transaction item)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

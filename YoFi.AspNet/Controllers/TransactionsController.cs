@@ -36,10 +36,11 @@ namespace YoFi.AspNet.Controllers
 
         #region Constructor
 
-        public TransactionsController(ITransactionRepository repository, ApplicationDbContext context)
+        public TransactionsController(ITransactionRepository repository, ApplicationDbContext context, IPayeeRepository payeeRepository)
         {
             _context = context;
             _repository = repository;
+            _payeeRepository = payeeRepository;
         }
 
         #endregion
@@ -512,7 +513,7 @@ namespace YoFi.AspNet.Controllers
         {
             // Open each file in turn, and send them to the importer
 
-            var importer = new TransactionImporter(_context);
+            var importer = new TransactionImporter(_repository,_payeeRepository);
 
             foreach (var formFile in files)
             {
@@ -605,7 +606,7 @@ namespace YoFi.AspNet.Controllers
                 }
                 else if (command == "ok")
                 {
-                    await _repository.ProcessImportAsync();
+                    await _repository.FinalizeImportAsync();
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -661,6 +662,7 @@ namespace YoFi.AspNet.Controllers
         private readonly ApplicationDbContext _context;
 
         private readonly ITransactionRepository _repository;
+        private readonly IPayeeRepository _payeeRepository;
 
         /// <summary>
         /// Current default year

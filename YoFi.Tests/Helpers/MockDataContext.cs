@@ -188,5 +188,11 @@ namespace YoFi.Tests.Helpers
             else
                 throw new NotImplementedException();
         }
+
+        public void UpdateRange(IEnumerable<object> items)
+        {
+            foreach (var item in items)
+                Update(item);
+        }
     }
 }
