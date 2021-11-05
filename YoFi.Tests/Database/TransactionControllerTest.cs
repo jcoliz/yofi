@@ -127,7 +127,7 @@ namespace YoFi.Tests
                 .AddInMemoryCollection(strings)
                 .Build();
 
-            helper.controller = new TransactionsController(new TransactionRepository(helper.context, storage: storage, config: configuration), helper.context,storage:storage, config:configuration);
+            helper.controller = new TransactionsController(new TransactionRepository(helper.context, storage: storage, config: configuration), helper.context);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 
@@ -1780,7 +1780,8 @@ namespace YoFi.Tests
             // Then: The "Highlight" viewdata is null, and everything else works
             Assert.IsNull(viewresult.ViewData["Highlight"]);
         }
-
+#if false
+        // TODO: Move these to report page tests
         [TestMethod]
         public void Report()
         {
@@ -1817,7 +1818,10 @@ namespace YoFi.Tests
             Assert.AreEqual(12, viewresult.ViewData["month"]);
             Assert.IsTrue(model.Description.Contains(year.ToString()));
         }
-
+        [TestMethod]
+        public void ReportNotFound() =>
+            Assert.IsTrue(controller.Report(new ReportBuilder.Parameters() { id = "notfound" }) is Microsoft.AspNetCore.Mvc.NotFoundObjectResult);
+#endif
         [TestMethod]
         public async Task CreateInitial()
         {
@@ -1908,10 +1912,6 @@ namespace YoFi.Tests
             // And: The transaction gets the matching payee category
             Assert.AreEqual(payee.Category, actual.Category);
         }
-
-        [TestMethod]
-        public void ReportNotFound() =>
-            Assert.IsTrue(controller.Report(new ReportBuilder.Parameters() { id = "notfound" }) is Microsoft.AspNetCore.Mvc.NotFoundObjectResult);
 
         [TestMethod]
         public async Task ReceiptActionOther() =>

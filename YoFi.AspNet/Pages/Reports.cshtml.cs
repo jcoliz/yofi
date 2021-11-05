@@ -19,12 +19,7 @@ namespace YoFi.AspNet.Pages
         };
 
         public List<List<IDisplayReport>> Reports { get; private set; }
-
-        [ViewData]
-        public string report { get; set; }
-
-        [ViewData]
-        public int? month { get; set; }
+        public ReportBuilder.Parameters Parameters { get; set; }
 
         public ReportsModel(ApplicationDbContext context)
         {
@@ -35,12 +30,15 @@ namespace YoFi.AspNet.Pages
 
         public void OnGet([Bind("year,month")] ReportBuilder.Parameters parms)
         {
+            Parameters = parms;
+            Parameters.id = "summary";
+
             // Fixup parameter
-            if (!parms.month.HasValue)
-                parms.month = DateTime.Now.Month;
+            if (!Parameters.month.HasValue)
+                Parameters.month = DateTime.Now.Month;
 
             // Build the reports
-            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportBuilder.Parameters() { id = y, month = parms.month })).ToList<IDisplayReport>()).ToList();
+            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportBuilder.Parameters() { id = y, month = Parameters.month })).ToList<IDisplayReport>()).ToList();
 
             // Calculate the summary
 
@@ -76,9 +74,6 @@ namespace YoFi.AspNet.Pages
             Reports[1].Add(profit);
 
             // Budget Reports: I think I want Budget vs Expenses on the left, and perhaps managed budget on the right
-
-            report = "summary";
-            month = parms.month;
         }
     }
 }

@@ -1,0 +1,21 @@
+﻿@page "{id}"
+@model YoFi.AspNet.Pages.ReportModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = Model.Report.Name;
+}
+
+@await Html.PartialAsync("_ReportNavbarPartial", Model.Parameters)
+
+<h2>@Model.Report.Name</h2>
+
+@if (!string.IsNullOrEmpty(Model.Report.Description))
+{
+    <h3>@Model.Report.Description</h3>
+}
+
+<div class="bg-light border p-2 mb-3">
+    @await Html.PartialAsync("DisplayReport", Model.Report)
+</div>
+
+<hr />

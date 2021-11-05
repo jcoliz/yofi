@@ -36,12 +36,10 @@ namespace YoFi.AspNet.Controllers
 
         #region Constructor
 
-        public TransactionsController(ITransactionRepository repository, ApplicationDbContext context, IConfiguration config, IPlatformAzureStorage storage = null)
+        public TransactionsController(ITransactionRepository repository, ApplicationDbContext context)
         {
             _context = context;
             _repository = repository;
-            _storage = storage;
-            _config = config;
         }
 
         #endregion
@@ -434,55 +432,8 @@ namespace YoFi.AspNet.Controllers
 
         #endregion
 
-        #region Action Handlers: Others (Report, Error)
+        #region Action Handlers: Others (Error) (Done)
 
-        // GET: Transactions/Report
-        [ValidateModel]
-        public IActionResult Report([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(parms.id))
-                {
-                    parms.id = "all";
-                }
-
-                if (parms.year.HasValue)
-                    Year = parms.year.Value;
-                else
-                    parms.year = Year;
-
-                if (!parms.month.HasValue)
-                {
-                    bool iscurrentyear = (Year == Now.Year);
-
-                    // By default, month is the current month when looking at the current year.
-                    // When looking at previous years, default is the whole year (december)
-                    if (iscurrentyear)
-                        parms.month = Now.Month;
-                    else
-                        parms.month = 12;
-                }
-
-                var result = new ReportBuilder(_context).BuildReport(parms);
-
-                ViewData["report"] = parms.id;
-                ViewData["month"] = parms.month;
-                ViewData["level"] = result.NumLevels;
-                ViewData["showmonths"] = result.WithMonthColumns;
-                ViewData["Title"] = result.Name;
-
-                return View(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
@@ -727,11 +678,13 @@ namespace YoFi.AspNet.Controllers
 
         private readonly ITransactionRepository _repository;
 
-        private readonly IPlatformAzureStorage _storage;
-
-        private readonly IConfiguration _config;
-
-        private int? _Year = null;
+        /// <summary>
+        /// Current default year
+        /// </summary>
+        /// <remarks>
+        /// If you set this in the reports, it applies throughout the app,
+        /// defaulting to that year.
+        /// </remarks>
         private int Year
         {
             get
@@ -759,6 +712,7 @@ namespace YoFi.AspNet.Controllers
                 HttpContext?.Session.SetString(nameof(Year), serialisedDate);
             }
         }
+        private int? _Year = null;
 
         /// <summary>
         /// Current datetime
@@ -779,10 +733,6 @@ namespace YoFi.AspNet.Controllers
         }
         private DateTime? _Now;
 
-        private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
-
-        private async Task<Transaction> Get(int? id) => await _context.Transactions.SingleAsync(x => x.ID == id.Value);
-        private async Task<Transaction> GetWithSplits(int? id) => await _context.Transactions.Include(x => x.Splits).SingleAsync(x => x.ID == id.Value);
         #endregion
 
         #region IController
