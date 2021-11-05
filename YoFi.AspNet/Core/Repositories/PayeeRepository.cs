@@ -78,7 +78,9 @@ namespace YoFi.Core.Repositories
             return Task.FromResult(result);
         }
 
-        public Task PrepareToMatchAsync()
+        // QUESTION: Is it right to have payee matching as part of the repository? It seems that way.
+
+        public Task LoadCacheAsync()
         {
             // Load all payees into memory. This is an optimization. Rather than run a separate payee query for every 
             // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
@@ -123,6 +125,35 @@ namespace YoFi.Core.Repositories
                     item.Category = payee.Category;
                     result = true;
                 }
+            }
+
+            return Task.FromResult(result);
+        }
+
+        public Task<string> GetCategoryMatchingPayeeAsync(string Name)
+        {
+            string result = null;
+
+            if (!string.IsNullOrEmpty(Name))
+            {
+                IQueryable<Payee> payees = payeecache?.AsQueryable<Payee>() ?? All;
+                regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
+
+                // Product Backlog Item 871: Match payee on regex, optionally
+                Payee payee = null;
+                foreach (var regexpayee in regexpayees)
+                    if (new Regex(regexpayee.Name[1..^2]).Match(Name).Success)
+                    {
+                        payee = regexpayee;
+                        break;
+                    }
+
+                //TODO: FirstOrDefaultAsync()
+                if (null == payee)
+                    payee = payees.FirstOrDefault(x => Name.Contains(x.Name));
+
+                if (null != payee)
+                    result = payee.Category;
             }
 
             return Task.FromResult(result);

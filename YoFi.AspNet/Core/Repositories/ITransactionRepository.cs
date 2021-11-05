@@ -7,7 +7,6 @@ namespace YoFi.Core.Repositories
     public interface ITransactionRepository: IRepository<Transaction>
     {
         public Task<Transaction> GetWithSplitsByIdAsync(int? id);
-        Task<bool> AssignPayeeAsync(Transaction transaction);
 
         /// <summary>
         /// Change category of all selected items to <paramref name="category"/>

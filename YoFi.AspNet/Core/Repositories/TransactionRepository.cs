@@ -32,12 +32,6 @@ namespace YoFi.Core.Repositories
             _config = config;
         }
 
-        public async Task<bool> AssignPayeeAsync(Transaction transaction)
-        {
-            var payees = new PayeeRepository(_context);
-            return await payees.SetCategoryBasedOnMatchingPayeeAsync(transaction);
-        }
-
         /// <summary>
         /// Change category of all selected items to <paramref name="category"/>
         /// </summary>
@@ -228,8 +222,9 @@ namespace YoFi.Core.Repositories
 
         #endregion
 
-        #region Importer
+#region Importer
 
+#if false
         public new void QueueImportFromXlsx(Stream stream)
         {
             using var ssr = new SpreadsheetReader();
@@ -259,12 +254,7 @@ namespace YoFi.Core.Repositories
 
             incoming.AddRange(created);
         }
-
-        public new Task<IEnumerable<Transaction>> ProcessImportAsync()
-        {
-            return Task.FromResult(Enumerable.Empty<Transaction>());
-        }
-
+#endif
         public Task FinalizeImportAsync()
         {
             IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
@@ -283,11 +273,11 @@ namespace YoFi.Core.Repositories
             return RemoveRangeAsync(allimported);
         }
 
-        #endregion
+#endregion
 
         private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 
-        #region Data Transfer Objects
+#region Data Transfer Objects
 
         /// <summary>
         /// The transaction data for export
@@ -304,6 +294,6 @@ namespace YoFi.Core.Repositories
             public string ReceiptUrl { get; set; }
         }
 
-        #endregion
+#endregion
     }
 }

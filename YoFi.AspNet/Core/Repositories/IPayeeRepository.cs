@@ -33,8 +33,13 @@ namespace YoFi.Core.Repositories
         /// <param name="txid">Id of existing transaction</param>
         Task<Payee> NewFromTransaction(int txid);
 
-        Task PrepareToMatchAsync();
+        Task LoadCacheAsync();
 
-        Task<bool> SetCategoryBasedOnMatchingPayeeAsync(Transaction item);
+        /// <summary>
+        /// Find the category which is the best match for the payee <paramref name="Name"/>
+        /// </summary>
+        /// <param name="Name">Name of payee to search for a match</param>
+        /// <returns>Matching category or null if no match</returns>
+        Task<string> GetCategoryMatchingPayeeAsync(string Name);
     }
 }

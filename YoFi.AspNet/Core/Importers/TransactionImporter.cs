@@ -12,6 +12,8 @@ using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Core.Importers
 {
+    // QUESTION: Is it right for this to be separate from the transactions repository?
+    // If so, is it right for the others to be PART of their repository?
     public class TransactionImporter
     {
         private readonly List<Transaction> incoming = new List<Transaction>();
@@ -66,7 +68,7 @@ namespace YoFi.Core.Importers
             // (3) Final processing on each transction
             //
 
-            await _payees.PrepareToMatchAsync();
+            await _payees.LoadCacheAsync();
 
             // Process each item
 
@@ -75,7 +77,8 @@ namespace YoFi.Core.Importers
                 // (3A) Fixup and match payees
 
                 item.Payee = item.StrippedPayee;
-                await _payees.SetCategoryBasedOnMatchingPayeeAsync(item);
+                if (string.IsNullOrEmpty(item.Category))
+                    item.Category = await _payees.GetCategoryMatchingPayeeAsync(item.Payee);
 
                 // (3B) Import splits
                 // Product Backlog Item 870: Export & import transactions with splits

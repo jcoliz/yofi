@@ -306,8 +306,15 @@ namespace YoFi.AspNet.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             var transaction = await _repository.GetWithSplitsByIdAsync(id);
-            var didassign = await _repository.AssignPayeeAsync(transaction);
-            ViewData["AutoCategory"] = didassign;
+            if (string.IsNullOrEmpty(transaction.Category))
+            {
+                var category = await _payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
+                if (category != null)
+                {
+                    transaction.Category = category;
+                    ViewData["AutoCategory"] = true;
+                }
+            }
 
             return View(transaction);
         }
@@ -316,8 +323,15 @@ namespace YoFi.AspNet.Controllers
         public async Task<IActionResult> EditModal(int? id)
         {
             var transaction = await _repository.GetWithSplitsByIdAsync(id);
-            var didassign = await _repository.AssignPayeeAsync(transaction);
-            ViewData["AutoCategory"] = didassign;
+            if (string.IsNullOrEmpty(transaction.Category))
+            {
+                var category = await _payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
+                if (category != null)
+                {
+                    transaction.Category = category;
+                    ViewData["AutoCategory"] = true;
+                }
+            }
 
             return PartialView("EditPartial", transaction);
 

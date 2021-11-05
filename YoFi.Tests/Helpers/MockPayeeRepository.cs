@@ -38,12 +38,12 @@ namespace YoFi.Tests.Helpers
             return Task.CompletedTask;
         }
 
-        public Task PrepareToMatchAsync()
+        public Task LoadCacheAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> SetCategoryBasedOnMatchingPayeeAsync(Transaction item)
+        public Task<string> GetCategoryMatchingPayeeAsync(string Name)
         {
             throw new NotImplementedException();
         }
