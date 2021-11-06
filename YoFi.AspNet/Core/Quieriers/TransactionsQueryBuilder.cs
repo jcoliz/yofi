@@ -6,14 +6,40 @@ using YoFi.Core.Models;
 
 namespace YoFi.Core.Quieriers
 {
+    /// <summary>
+    /// Build transactions query from textual 'q' parameter
+    /// </summary>
+    /// <remarks>
+    /// This is complex enough that I thought it deserved it own class.
+    /// </remarks>
     public class TransactionsQueryBuilder
     {
+        #region Properties
+
+        /// <summary>
+        /// The resulting query
+        /// </summary>
+        /// <remarks>
+        /// This is what we build over time
+        /// </remarks>
         public IQueryable<Transaction> Query { get; private set; }
 
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="initial">The starting large set of items which we will further winnow down </param>
         public TransactionsQueryBuilder(IQueryable<Transaction> initial)
         {
             Query = initial;
         }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Interprets the "q" (Query) parameter on a transactions search
@@ -127,10 +153,19 @@ namespace YoFi.Core.Quieriers
             }
         }
 
+        #endregion
 
+        #region Internals
+
+        /// <summary>
+        /// Transalte query on payee
+        /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_Payee(IQueryable<Transaction> result, string value) =>
             result.Where(x => x.Payee.Contains(value));
 
+        /// <summary>
+        /// Translate query on category, including splits
+        /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_Category(IQueryable<Transaction> result, string value) =>
             (value.ToLowerInvariant() == "[blank]")
                 ? result.Where(x => string.IsNullOrEmpty(x.Category) && !x.Splits.Any())
@@ -141,14 +176,23 @@ namespace YoFi.Core.Quieriers
                     )
                 );
 
+        /// <summary>
+        /// Transalte query on year
+        /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_Year(IQueryable<Transaction> result, string value) =>
             (Int32.TryParse(value, out int year))
                 ? result.Where(x => x.Timestamp.Year == year)
                 : result;
 
+        /// <summary>
+        /// Translate query on memo
+        /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_Memo(IQueryable<Transaction> result, string value) =>
             result.Where(x => x.Memo.Contains(value));
 
+        /// <summary>
+        /// Transalte query on having receipt
+        /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_HasReceipt(IQueryable<Transaction> result, string value) =>
             value switch
             {
@@ -157,6 +201,9 @@ namespace YoFi.Core.Quieriers
                 _ => throw new ArgumentException($"Unexpected query parameter {value}", nameof(value))
             };
 
+        /// <summary>
+        /// Translate query on amount
+        /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_Amount(IQueryable<Transaction> result, string value)
         {
             if (Int32.TryParse(value, out Int32 ival))
@@ -172,6 +219,9 @@ namespace YoFi.Core.Quieriers
                 throw new ArgumentException($"Unexpected query parameter {value}", nameof(value));
         }
 
+        /// <summary>
+        /// Translate query on date
+        /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_Date(IQueryable<Transaction> result, string value)
         {
             DateTime? dtval = null;
@@ -186,6 +236,8 @@ namespace YoFi.Core.Quieriers
             else
                 throw new ArgumentException($"Unexpected query parameter {value}", nameof(value));
         }
+
+        #endregion
 
     }
 }

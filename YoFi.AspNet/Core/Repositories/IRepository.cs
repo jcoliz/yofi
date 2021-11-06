@@ -95,7 +95,7 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// Export all items to a spreadsheet, in default order
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Stream containing the spreadsheet file</returns>
         Stream AsSpreadsheet();
 
         #endregion

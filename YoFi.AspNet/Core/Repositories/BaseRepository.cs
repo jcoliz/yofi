@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Core;
 
 namespace YoFi.Core.Repositories
 {
@@ -18,18 +17,6 @@ namespace YoFi.Core.Repositories
     /// <typeparam name="T"></typeparam>
     public abstract class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, new()
     {
-        #region Fields
-        /// <summary>
-        /// Data context where our data is to be found
-        /// </summary>
-        protected readonly IDataContext _context;
-
-        /// <summary>
-        /// Current queue of items to be imported
-        /// </summary>
-        private readonly HashSet<T> _importing;
-        #endregion
-
         #region Constructor
 
         /// <summary>
@@ -131,5 +118,18 @@ namespace YoFi.Core.Repositories
             return new T().InDefaultOrder(result.AsQueryable());
         }
         #endregion
+
+        #region Fields
+        /// <summary>
+        /// Data context where our data is to be found
+        /// </summary>
+        protected readonly IDataContext _context;
+
+        /// <summary>
+        /// Current queue of items to be imported
+        /// </summary>
+        private readonly HashSet<T> _importing;
+        #endregion
+
     }
 }

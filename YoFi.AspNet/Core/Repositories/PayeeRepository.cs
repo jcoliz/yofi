@@ -15,9 +15,6 @@ namespace YoFi.Core.Repositories
 
     public class PayeeRepository : BaseRepository<Payee>, IPayeeRepository
     {
-        List<Payee> payeecache;
-        IEnumerable<Payee> regexpayees;
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -78,8 +75,13 @@ namespace YoFi.Core.Repositories
             return Task.FromResult(result);
         }
 
-        // QUESTION: Is it right to have payee matching as part of the repository? It seems that way.
-
+        /// <summary>
+        /// Load payees into memory to optimize later operations which use the entire list of payees
+        /// </summary>
+        /// <remarks>
+        /// I am wondering if it's really worth it to keep this
+        /// </remarks>
+        /// <returns></returns>
         public Task LoadCacheAsync()
         {
             // Load all payees into memory. This is an optimization. Rather than run a separate payee query for every 
@@ -91,45 +93,11 @@ namespace YoFi.Core.Repositories
             return Task.CompletedTask;
         }
 
-        public Task<bool> SetCategoryBasedOnMatchingPayeeAsync(Transaction item)
-        {
-            var result = false;
-
-            if (string.IsNullOrEmpty(item.Category))
-            {
-                Payee payee = null;
-                string strippedpayee = item.StrippedPayee;
-
-                IQueryable<Payee> payees = payeecache?.AsQueryable<Payee>() ?? All;
-                regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
-
-                // Product Backlog Item 871: Match payee on regex, optionally
-                foreach (var regexpayee in regexpayees)
-                {
-                    var regex = new Regex(regexpayee.Name[1..^2]);
-                    if (regex.Match(strippedpayee).Success)
-                    {
-                        payee = regexpayee;
-                        break;
-                    }
-                }
-
-                if (null == payee)
-                {
-                    //TODO: FirstOrDefaultAsync()
-                    payee = payees.FirstOrDefault(x => strippedpayee.Contains(x.Name));
-                }
-
-                if (null != payee)
-                {
-                    item.Category = payee.Category;
-                    result = true;
-                }
-            }
-
-            return Task.FromResult(result);
-        }
-
+        /// <summary>
+        /// Find the category which matches the given payee <paramref name="Name"/>
+        /// </summary>
+        /// <param name="Name">Payee name to search for</param>
+        /// <returns>Matching category or null for no match</returns>
         public Task<string> GetCategoryMatchingPayeeAsync(string Name)
         {
             string result = null;
@@ -158,5 +126,15 @@ namespace YoFi.Core.Repositories
 
             return Task.FromResult(result);
         }
+
+        /// <summary>
+        /// Internal cache of payees for operations that work across the whole dataset
+        /// </summary>
+        List<Payee> payeecache;
+
+        /// <summary>
+        /// Internal cache of payees with regexes
+        /// </summary>
+        IEnumerable<Payee> regexpayees;
     }
 }

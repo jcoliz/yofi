@@ -13,24 +13,56 @@ using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Core.Repositories
 {
+    /// <summary>
+    /// Provides access to Transaction items, along with 
+    /// domain-specific business logic specific to Transactions
+    /// </summary>
     public class TransactionRepository : BaseRepository<Transaction>, ITransactionRepository
     {
-        private readonly IPlatformAzureStorage _storage;
-        private readonly IConfiguration _config;
-
-        private readonly List<Transaction> incoming = new List<Transaction>();
-        private readonly List<IGrouping<int, Split>> splits = new List<IGrouping<int, Split>>();
-        private readonly List<Transaction> highlights = new List<Transaction>();
-
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="context">Where to find the data we actually contain</param>
+        /// <param name="storage">Where to store receipts</param>
+        /// <param name="config">Where to get configuration information</param>
         public TransactionRepository(IDataContext context, IPlatformAzureStorage storage, IConfiguration config) : base(context)
         {
             _storage = storage;
             _config = config;
         }
+
+        #region Read
+
+        /// <summary>
+        /// Subset of all known items reduced by the specified query parameter
+        /// </summary>
+        /// <remarks>
+        /// For tranactions, this is a lot of work. Ergo, I made an entirely separate class, TransactionsQueryBuilder
+        /// to handle this.
+        /// </remarks>
+        /// <param name="q">Query describing the desired subset</param>
+        /// <returns>Query of requested items</returns>
+        public override IQueryable<Transaction> ForQuery(string q)
+        {
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits));
+            qbuilder.Build(q);
+            return qbuilder.Query;
+        }
+
+        /// <summary>
+        /// Retrieve a single item by <paramref name="id"/>, including children splits
+        /// </summary>
+        /// <remarks>
+        /// Will throw an exception if not found
+        /// </remarks>
+        /// <param name="id">Identifier of desired item</param>
+        /// <returns>Desired item</returns>
+        public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.TransactionsWithSplits.Single(x => x.ID == id.Value));
+        // TODO: SingleAsync()
+
+        #endregion
+
+        #region Update
 
         /// <summary>
         /// Change category of all selected items to <paramref name="category"/>
@@ -83,23 +115,44 @@ namespace YoFi.Core.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public override IQueryable<Transaction> ForQuery(string q)
+        /// <summary>
+        /// Create a new split and add it to transaction #<paramref name="id"/>
+        /// </summary>
+        /// <param name="id">ID of target transaction</param>
+        /// <returns>ID of resulting split</returns>
+        public async Task<int> AddSplitToAsync(int id)
         {
-            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits));
-            qbuilder.Build(q);
-            return qbuilder.Query;
+            var transaction = await GetWithSplitsByIdAsync(id);
+            var result = new Split() { Category = transaction.Category };
+
+            // Calculate the amount based on how much is remaining.
+
+            var currentamount = transaction.Splits.Select(x => x.Amount).Sum();
+            var remaining = transaction.Amount - currentamount;
+            result.Amount = remaining;
+
+            transaction.Splits.Add(result);
+
+            // Remove the category information, that's now contained in the splits.
+
+            transaction.Category = null;
+
+            await UpdateAsync(transaction);
+
+            return result.ID;
         }
 
-        // TODO: SingleAsync()
-        public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.TransactionsWithSplits.Single(x => x.ID == id.Value));
+        #endregion
 
+        #region Export
+
+        /// <summary>
+        /// Export all items to a spreadsheet, in default order
+        /// </summary>
+        /// <returns>Stream containing the spreadsheet file</returns>
         public Task<Stream> AsSpreadsheet(int Year, bool allyears, string q)
         {
-            // Which transactions?
-
-            var qbuilder = new TransactionsQueryBuilder(_context.TransactionsWithSplits);
-            qbuilder.Build(q);
-            var transactionsquery = qbuilder.Query;
+            var transactionsquery = ForQuery(q);
 
             transactionsquery = transactionsquery.Where(x => x.Hidden != true);
             if (!allyears)
@@ -155,30 +208,16 @@ namespace YoFi.Core.Repositories
             return Task.FromResult(stream as Stream);
         }
 
-        public async Task<int> AddSplitToAsync(int id)
-        {
-            var transaction = await GetWithSplitsByIdAsync(id);
-            var result = new Split() { Category = transaction.Category };
-
-            // Calculate the amount based on how much is remaining.
-
-            var currentamount = transaction.Splits.Select(x => x.Amount).Sum();
-            var remaining = transaction.Amount - currentamount;
-            result.Amount = remaining;
-
-            transaction.Splits.Add(result);
-
-            // Remove the category information, that's now contained in the splits.
-
-            transaction.Category = null;
-
-            await UpdateAsync(transaction);
-
-            return result.ID;
-        }
+        #endregion
 
         #region Receipts
 
+        /// <summary>
+        /// Upload a receipt to blob storage and save the location to this <paramref name="transaction"/>
+        /// </summary>
+        /// <param name="transaction">Which transaction this is for</param>
+        /// <param name="stream">Source location of receipt file</param>
+        /// <param name="contenttype">Content type of this file</param>
         public async Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype)
         {
             //
@@ -199,6 +238,11 @@ namespace YoFi.Core.Repositories
             await UpdateAsync(transaction);
         }
 
+        /// <summary>
+        /// Get a receipt from storage
+        /// </summary>
+        /// <param name="transaction">Which transaction this is for</param>
+        /// <returns>Tuple containing: 'stream' where to find the file, 'contenttype' the type of the data, and 'name' the suggested filename</returns>
         public async Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction)
         {
             if (string.IsNullOrEmpty(transaction.ReceiptUrl))
@@ -227,39 +271,11 @@ namespace YoFi.Core.Repositories
 
         #endregion
 
-#region Importer
+        #region Import
 
-#if false
-        public new void QueueImportFromXlsx(Stream stream)
-        {
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            var items = ssr.Deserialize<Transaction>();
-            incoming.AddRange(items);
-
-            // If there are also splits included here, let's grab those
-            // And transform the flat data into something easier to use.
-            if (ssr.SheetNames.Contains("Split"))
-                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
-        }
-
-        public async Task QueueImportFromOfxAsync(Stream stream)
-        {
-            OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
-
-            var created = Document.Statements.SelectMany(x => x.Transactions).Select(
-                tx => new Transaction()
-                {
-                    Amount = tx.Amount,
-                    Payee = tx.Memo?.Trim(),
-                    BankReference = tx.ReferenceNumber?.Trim(),
-                    Timestamp = tx.Date.Value.DateTime
-                }
-            );
-
-            incoming.AddRange(created);
-        }
-#endif
+        /// <summary>
+        /// Finally merge in all selected imported items into the live data set
+        /// </summary>
         public Task FinalizeImportAsync()
         {
             IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
@@ -272,20 +288,31 @@ namespace YoFi.Core.Repositories
             return RemoveRangeAsync(selected[false]);
         }
 
+        /// <summary>
+        /// Remove all imported items without touching the live data set
+        /// </summary>
         public Task CancelImportAsync()
         {
             IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
             return RemoveRangeAsync(allimported);
         }
 
-#endregion
+        #endregion
 
+        #region internals
+
+        private readonly IPlatformAzureStorage _storage;
+        private readonly IConfiguration _config;
+
+        // TODO: This is dumb. _storage should know its own blobcontainer name
         private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
 
-#region Data Transfer Objects
+        #endregion
+
+        #region Data Transfer Objects
 
         /// <summary>
-        /// The transaction data for export
+        /// The shape of transactions when excported to spreadsheet
         /// </summary>
         class TransactionExportDto : ICategory
         {
@@ -299,6 +326,6 @@ namespace YoFi.Core.Repositories
             public string ReceiptUrl { get; set; }
         }
 
-#endregion
+        #endregion
     }
 }

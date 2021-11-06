@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace YoFi.Core.Importers
 {
+    /// <summary>
+    /// Imports objects of <typeparamref name="T"/> into the database in a standard way
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IImporter<T>
     {
         /// <summary>

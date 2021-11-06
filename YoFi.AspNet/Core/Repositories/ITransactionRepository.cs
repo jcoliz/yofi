@@ -4,22 +4,64 @@ using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
 {
+    /// <summary>
+    /// Provides access to Transaction items, along with 
+    /// domain-specific business logic specific to Transactions
+    /// </summary>
     public interface ITransactionRepository: IRepository<Transaction>
     {
-        public Task<Transaction> GetWithSplitsByIdAsync(int? id);
+        /// <summary>
+        /// Retrieve a single item by <paramref name="id"/>, including children splits
+        /// </summary>
+        /// <remarks>
+        /// Will throw an exception if not found
+        /// </remarks>
+        /// <param name="id">Identifier of desired item</param>
+        /// <returns>Desired item</returns>
+        Task<Transaction> GetWithSplitsByIdAsync(int? id);
+
+        /// <summary>
+        /// Create a new split and add it to transaction #<paramref name="id"/>
+        /// </summary>
+        /// <param name="id">ID of target transaction</param>
+        /// <returns>ID of resulting split</returns>
+        Task<int> AddSplitToAsync(int id);
 
         /// <summary>
         /// Change category of all selected items to <paramref name="category"/>
         /// </summary>
         /// <param name="category">Next category</param>
         Task BulkEdit(string category);
+
+        /// <summary>
+        /// Export all items to a spreadsheet, in default order
+        /// </summary>
+        /// <returns>Stream containing the spreadsheet file</returns>
         Task<Stream> AsSpreadsheet(int year, bool allyears, string q);
 
-        Task<int> AddSplitToAsync(int id);
+        /// <summary>
+        /// Upload a receipt to blob storage and save the location to this <paramref name="transaction"/>
+        /// </summary>
+        /// <param name="transaction">Which transaction this is for</param>
+        /// <param name="stream">Source location of receipt file</param>
+        /// <param name="contenttype">Content type of this file</param>
         Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype);
+
+        /// <summary>
+        /// Get a receipt from storage
+        /// </summary>
+        /// <param name="transaction">Which transaction this is for</param>
+        /// <returns>Tuple containing: 'stream' where to find the file, 'contenttype' the type of the data, and 'name' the suggested filename</returns>
         Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction);
 
+        /// <summary>
+        /// Finally merge in all selected imported items into the live data set
+        /// </summary>
         Task FinalizeImportAsync();
+
+        /// <summary>
+        /// Remove all imported items without touching the live data set
+        /// </summary>
         Task CancelImportAsync();
     }
 }
