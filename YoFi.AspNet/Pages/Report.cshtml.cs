@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,6 +11,7 @@ using YoFi.Core.Reports;
 
 namespace YoFi.AspNet.Pages
 {
+    [Authorize(Policy = "CanRead")]
     public class ReportModel : PageModel
     {
         private readonly IDataContext _context;
