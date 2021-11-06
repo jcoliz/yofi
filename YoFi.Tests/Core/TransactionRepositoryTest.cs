@@ -1,8 +1,11 @@
 ﻿using Common.NET.Test;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -51,6 +54,8 @@ namespace YoFi.Tests.Core
 
         protected override int CompareKeys(Transaction x, Transaction y) => x.Payee.CompareTo(y.Payee);
 
+        private ITransactionRepository txrepository => repository as ITransactionRepository;
+
         [TestInitialize]
         public void SetUp()
         {
@@ -65,7 +70,7 @@ namespace YoFi.Tests.Core
 
             context = new MockDataContext();
             var storage = new TestAzureStorage();
-            repository = new TransactionRepository(context,storage,configuration);
+            repository = new TransactionRepository(context,storage,configuration);            
         }
 
         [TestMethod]
@@ -80,5 +85,8 @@ namespace YoFi.Tests.Core
             // TODO: Transactions will need a custom upload test, thanks very much
             return Task.CompletedTask;
         }
+
+
+
     }
 }
