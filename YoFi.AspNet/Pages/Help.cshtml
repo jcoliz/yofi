@@ -2,9 +2,9 @@
 @model YoFi.AspNet.Pages.HelpModel
 @{
 }
-<h2>@Model.Title</h2>
+<h2>@Model.Topic.Title</h2>
 
-@foreach (var line in Model.Contents)
+@foreach (var line in Model.Topic.Contents)
 {
     <p>@line</p>
 }
