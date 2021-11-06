@@ -200,7 +200,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> Upload(List<IFormFile> files)
+        public async Task<IActionResult> Upload(List<IFormFile> files, [FromServices] IImporter<Payee> importer)
         {
             try
             {
@@ -212,11 +212,11 @@ namespace YoFi.AspNet.Controllers
                     if (file.FileName.ToLower().EndsWith(".xlsx"))
                     {
                         using var stream = file.OpenReadStream();
-                        _repository.QueueImportFromXlsx(stream);
+                        importer.QueueImportFromXlsx(stream);
                     }
                 }
 
-                var imported = await _repository.ProcessImportAsync();
+                var imported = await importer.ProcessImportAsync();
 
                 return View(imported);
             }
@@ -241,5 +241,6 @@ namespace YoFi.AspNet.Controllers
 
         Task<IActionResult> IController<Payee>.Index() => Index();
 
+        Task<IActionResult> IController<Payee>.Upload(List<IFormFile> files) => Upload(files, new BaseImporter<Payee>(_repository));
     }
 }

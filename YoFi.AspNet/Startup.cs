@@ -81,6 +81,8 @@ namespace YoFi.AspNet.Root
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<TransactionImporter>();
             services.AddScoped<SplitImporter>();
+            services.AddScoped<IImporter<Payee>, BaseImporter<Payee>>();
+            services.AddScoped<IImporter<BudgetTx>, BaseImporter<BudgetTx>>();
 
             services.AddScoped<IDataContext, ApplicationDbContext>();
 

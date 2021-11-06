@@ -16,7 +16,7 @@ namespace YoFi.Core.Repositories
     /// interface
     /// </remarks>
     /// <typeparam name="T">Type of model item we contain</typeparam>
-    public interface IRepository<T> : IImporter<T> where T: class, IModelItem<T>
+    public interface IRepository<T> where T: class //, IModelItem<T>
     {
         #region CRUD operations
         /// <summary>

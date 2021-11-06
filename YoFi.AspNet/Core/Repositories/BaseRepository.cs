@@ -29,7 +29,6 @@ namespace YoFi.Core.Repositories
         public BaseRepository(IDataContext context)
         {
             _context = context;
-            _importing = new HashSet<T>(new T().ImportDuplicateComparer);
         }
         #endregion
 
@@ -80,7 +79,7 @@ namespace YoFi.Core.Repositories
         }
         #endregion
 
-        #region Importer/Exporters
+        #region Exporter
         public Stream AsSpreadsheet()
         {
             var stream = new MemoryStream();
@@ -94,29 +93,6 @@ namespace YoFi.Core.Repositories
 
             return stream;
         }
-
-        public void QueueImportFromXlsx(Stream stream)
-        {
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            var items = ssr.Deserialize<T>(exceptproperties: new string[] { "ID" });
-            _importing.UnionWith(items);
-        }
-
-        public async Task<IEnumerable<T>> ProcessImportAsync()
-        {
-            // Remove duplicate items
-            var result = _importing.Except(All).ToList();
-
-            // Add remaining items
-            await AddRangeAsync(result);
-
-            // Clear import queue for next time
-            _importing.Clear();
-
-            // Return those items for display
-            return new T().InDefaultOrder(result.AsQueryable());
-        }
         #endregion
 
         #region Fields
@@ -125,10 +101,6 @@ namespace YoFi.Core.Repositories
         /// </summary>
         protected readonly IDataContext _context;
 
-        /// <summary>
-        /// Current queue of items to be imported
-        /// </summary>
-        private readonly HashSet<T> _importing;
         #endregion
 
     }

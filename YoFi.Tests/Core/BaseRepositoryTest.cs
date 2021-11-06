@@ -63,8 +63,9 @@ namespace YoFi.Tests.Core
             stream.Seek(0, SeekOrigin.Begin);
 
             // When: Importing it via an importer
-            repository.QueueImportFromXlsx(stream);
-            return await repository.ProcessImportAsync();
+            var importer = new BaseImporter<T>(repository);
+            importer.QueueImportFromXlsx(stream);
+            return await importer.ProcessImportAsync();
         }
 
         [TestMethod]
