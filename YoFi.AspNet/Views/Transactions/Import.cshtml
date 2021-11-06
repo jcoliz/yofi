@@ -105,17 +105,4 @@ else
 
 }
 
-<div class="partialdialog modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModalLabel" aria-hidden="true" data-endpoint="/Help?id=import">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <form method="post" action="/Help">
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-test-id="btn-help-close">Close</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+@await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "import")

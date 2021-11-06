@@ -47,68 +47,68 @@
 {
     <form asp-action="BulkEdit" method="post">
         <div class="form-actions d-flex">
-                <p class="me-2 fs-6 mt-2">Set Category To:</p>
-                <input type="text" name="Category" class="col-md-4 category-autocomplete me-3 fs-6 mt-1 mb-1" autocomplete="off" />
-                <input type="submit" value="OK" class="btn btn-primary me-3 mt-1 mb-1" />
-                <a asp-action="Index" class="btn btn-outline-secondary me-auto mt-1 mb-1">Cancel</a>
-                <a href="#" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" class="btn btn-outline-secondary ms-auto mt-1 mb-1" data-test-id="btn-bulk-delete">Delete</a>
+            <p class="me-2 fs-6 mt-2">Set Category To:</p>
+            <input type="text" name="Category" class="col-md-4 category-autocomplete me-3 fs-6 mt-1 mb-1" autocomplete="off" />
+            <input type="submit" value="OK" class="btn btn-primary me-3 mt-1 mb-1" />
+            <a asp-action="Index" class="btn btn-outline-secondary me-auto mt-1 mb-1">Cancel</a>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" class="btn btn-outline-secondary ms-auto mt-1 mb-1" data-test-id="btn-bulk-delete">Delete</a>
         </div>
     </form>
 }
 
 @if ((ViewData[nameof(Common.AspNet.PageDivider)] as Common.AspNet.PageDivider).PageTotalItems > 0)
 {
-<table class="table">
-    <thead>
-        <tr>
-            @if ((bool)(ViewData["ShowSelected"]))
-            {
-                <th>
-                    Edit
-                </th>
-            }
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var line = 1;
-        }
-        @foreach (var item in Model)
-        {
-            <tr data-id="@item.ID" data-test-id="line-@(line++)">
+    <table class="table">
+        <thead>
+            <tr>
                 @if ((bool)(ViewData["ShowSelected"]))
                 {
-                    <td>
-                        @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/SelectPayee/@item.ID" data-test-id="check-select">
-                    </td>
+                    <th>
+                        Edit
+                    </th>
                 }
-                <td class="display-category">
-                    @Html.DisplayFor(modelItem => item.Category)
-                </td>
-                <td class="display-payee">
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    <span data-bs-toggle="tooltip" title="Edit">
-                        <button class="btn btn-outline-secondary btn-sm" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editPayeeModal"><i class="fa fa-edit"></i></button>
-                    </span>
-                    <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
-                </td>
+                <th>
+                    @Html.DisplayNameFor(model => model.Category)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @{
+                var line = 1;
+            }
+            @foreach (var item in Model)
+            {
+                <tr data-id="@item.ID" data-test-id="line-@(line++)">
+                    @if ((bool)(ViewData["ShowSelected"]))
+                    {
+                        <td>
+                            @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
+                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/SelectPayee/@item.ID" data-test-id="check-select">
+                        </td>
+                    }
+                    <td class="display-category">
+                        @Html.DisplayFor(modelItem => item.Category)
+                    </td>
+                    <td class="display-payee">
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        <span data-bs-toggle="tooltip" title="Edit">
+                            <button class="btn btn-outline-secondary btn-sm" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editPayeeModal"><i class="fa fa-edit"></i></button>
+                        </span>
+                        <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-@await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", ViewData[nameof(Common.AspNet.PageDivider)])
-                            }
+    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", ViewData[nameof(Common.AspNet.PageDivider)])
+}
 <form method="post" enctype="multipart/form-data" asp-controller="Payees" asp-action="Upload">
     <div class="input-group mb-3 mt-3">
         <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
@@ -153,17 +153,4 @@
     </div>
 </div>
 
-<div class="partialdialog modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModalLabel" aria-hidden="true" data-endpoint="/Help?id=payees">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <form method="post" action="/Help">
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-test-id="btn-help-close">Close</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+@await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "payees")
