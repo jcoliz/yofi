@@ -106,10 +106,6 @@ namespace YoFi.Core.Models
         /// </summary>
         public bool IsSplitsOK => !HasSplits || ( Splits.Select(x=>x.Amount).Sum() == Amount );
 
-        // TODO: This is a bug that we even need to do this. Transactions don't use the default import pipeline
-        // so shouldn't need to implement ImportDuplicateComparer.
-        IEqualityComparer<Transaction> IModelItem<Transaction>.ImportDuplicateComparer => new __TransactionImportDuplicateComparer();
-
         /// <summary>
         /// Return a fixed payee with all characters removed which are not whitespace or alpha-numeric
         /// </summary>
@@ -167,15 +163,22 @@ namespace YoFi.Core.Models
         IQueryable<Transaction> IModelItem<Transaction>.InDefaultOrder(IQueryable<Transaction> original) => InDefaultOrder(original);
 
         /// <summary>
-        /// Tells us whether two items are duplicates for the purposes of importing
+        /// Not implemented. Transactions use their own import duplicate logic
         /// </summary>
         /// <remarks>
-        /// Generally, we don't import duplicates, although some importers override this behavior
+        /// TODO: I could move these import duplicate items to their own interface
         /// </remarks>
-        class __TransactionImportDuplicateComparer : IEqualityComparer<Transaction>
+        int IModelItem<Transaction>.GetImportHashCode()
         {
-            public bool Equals(Transaction x, Transaction y) => throw new NotImplementedException();
-            public int GetHashCode(Transaction obj) => throw new NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Not implemented. Transactions use their own import duplicate logic
+        /// </summary>
+        bool IModelItem<Transaction>.ImportEquals(Transaction other)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -46,8 +46,6 @@ namespace YoFi.Core.Models
         /// </summary>
         public string Category { get; set; }
 
-        IEqualityComparer<BudgetTx> IModelItem<BudgetTx>.ImportDuplicateComparer => new __BudgetTxImportDuplicateComparer();
-
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -65,6 +63,8 @@ namespace YoFi.Core.Models
             Timestamp = date;
         }
 
+        // TODO: This can be combined with ImportEquals. ImportEquals is actually a better equality comparer
+
         public override bool Equals(object obj)
         {
             return obj is BudgetTx tx &&
@@ -80,6 +80,17 @@ namespace YoFi.Core.Models
         public IQueryable<BudgetTx> InDefaultOrder(IQueryable<BudgetTx> original)
         {
             return original.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category);
+        }
+
+        int IModelItem<BudgetTx>.GetImportHashCode() =>
+            HashCode.Combine(Timestamp.Year, Timestamp.Month, Category);
+
+        bool IModelItem<BudgetTx>.ImportEquals(BudgetTx other)
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+
+            return Timestamp.Year == other.Timestamp.Year && Timestamp.Month == other.Timestamp.Month && Category == other.Category;
         }
     }
 

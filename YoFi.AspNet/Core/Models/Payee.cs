@@ -36,8 +36,6 @@ namespace YoFi.Core.Models
         /// </summary>
         public bool? Selected { get; set; }
 
-        IEqualityComparer<Payee> IModelItem<Payee>.ImportDuplicateComparer => new __PayeeImportDuplicateComparer();
-
         /// <summary>
         /// Remove all characters from payee which are not whitespace or alpha-numeric
         /// </summary>
@@ -63,31 +61,9 @@ namespace YoFi.Core.Models
         {
             return original.OrderBy(x => x.Category).ThenBy(x=>x.Name);
         }
-    }
 
-    /// <summary>
-    /// Tells us whether two items are duplicates for the purposes of importing
-    /// </summary>
-    /// <remarks>
-    /// Generally, we don't import duplicates, although some importers override this behavior
-    /// </remarks>
-    class __PayeeImportDuplicateComparer : IEqualityComparer<Payee>
-    {
-        public bool Equals(Payee x, Payee y)
-        {
-            if (x == null || y == null)
-                throw new ArgumentNullException("Only works with BudgetTx items");
+        int IModelItem<Payee>.GetImportHashCode() => Name?.GetHashCode() ?? 0;
 
-            var itemx = x as Payee;
-            var itemy = y as Payee;
-
-            return itemx.Name == itemy.Name;
-        }
-        public int GetHashCode(Payee obj)
-        {
-            var item = obj as Payee;
-
-            return item.Name.GetHashCode();
-        }
+        bool IModelItem<Payee>.ImportEquals(Payee other) => Name == other?.Name;
     }
 }

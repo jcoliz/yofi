@@ -13,7 +13,7 @@ namespace YoFi.Core.Importers
     /// Generic importer for all types which follow the simple import logic
     /// </summary>
     /// <typeparam name="T">Type to import</typeparam>
-    public class BaseImporter<T> : IImporter<T> where T : class, IModelItem<T>, new()
+    public class BaseImporter<T> : IImporter<T>, IEqualityComparer<T> where T : class, IModelItem<T>, new()
     {
         /// <summary>
         /// Constructor
@@ -22,7 +22,7 @@ namespace YoFi.Core.Importers
         public BaseImporter(IRepository<T> repository)
         {
             _repository = repository;
-            _importing = new HashSet<T>(new T().ImportDuplicateComparer);
+            _importing = new HashSet<T>(this);
         }
 
         /// <summary>
@@ -59,6 +59,19 @@ namespace YoFi.Core.Importers
 
             // Return those items for display
             return new T().InDefaultOrder(result.AsQueryable());
+        }
+
+        bool IEqualityComparer<T>.Equals(T x, T y)
+        {
+            if (x == null)
+                throw new ArgumentNullException(nameof(x));
+
+            return x.ImportEquals(y);
+        }
+
+        int IEqualityComparer<T>.GetHashCode(T obj)
+        {
+            return obj.GetImportHashCode();
         }
 
         /// <summary>
