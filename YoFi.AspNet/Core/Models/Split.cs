@@ -12,7 +12,7 @@ namespace YoFi.Core.Models
     /// Used to split transaction amount across multiple
     /// different categories
     /// </summary>
-    public class Split: IID, ICategory, IReportable
+    public class Split: IID, IReportable
     {
         /// <summary>
         /// Object identity in Entity Framework

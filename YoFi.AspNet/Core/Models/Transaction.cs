@@ -15,7 +15,7 @@ namespace YoFi.Core.Models
     /// <remarks>
     /// The basic building blocks!
     /// </remarks>
-    public class Transaction : ICategory, IModelItem<Transaction>, IReportable
+    public class Transaction : IModelItem<Transaction>, IReportable
     {
         /// <summary>
         /// Object identity in Entity Framework

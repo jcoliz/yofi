@@ -14,7 +14,7 @@ namespace YoFi.Core.Models
     /// If a transaction's matches our Name, then it should have this
     /// Category and SubCategory
     /// </remarks>
-    public class Payee: IModelItem<Payee>, ICategory
+    public class Payee: IModelItem<Payee>
     {
         /// <summary>
         /// Object identity in Entity Framework

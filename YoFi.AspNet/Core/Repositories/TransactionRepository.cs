@@ -314,7 +314,7 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// The shape of transactions when excported to spreadsheet
         /// </summary>
-        class TransactionExportDto : ICategory
+        class TransactionExportDto 
         {
             public int ID { get; set; }
             public DateTime Timestamp { get; set; }
