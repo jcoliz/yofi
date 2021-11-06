@@ -52,6 +52,22 @@
         });
     })
 
+    $('.partialdialog').on('show.bs.modal', function (event) {
+        var modal = $(this);
+        var endpoint = modal.data('endpoint')
+
+        $.ajax({
+            url: endpoint,
+            success: function (htmlresult) {
+                modal.find('.modal-body').html(htmlresult);
+            },
+            error: function (result) {
+                alert(result.responseText);
+                modal.find('.modal-body').text(result.responseText);
+            }
+        });
+    })
+
     $('#editModal form').submit( function (event)
     {
         event.preventDefault();

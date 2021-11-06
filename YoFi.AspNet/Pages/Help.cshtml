@@ -1,0 +1,10 @@
+﻿@page
+@model YoFi.AspNet.Pages.HelpModel
+@{
+}
+<h2>@Model.Title</h2>
+
+@foreach (var line in Model.Contents)
+{
+    <p>@line</p>
+}

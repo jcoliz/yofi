@@ -37,6 +37,7 @@
                     @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
                 </a>
                 <a asp-action="Download" class="btn">Export</a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
             </div>
         </div>
     </div>
@@ -146,6 +147,21 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" data-test-id="btn-modal-ok">OK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="partialdialog modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModalLabel" aria-hidden="true" data-endpoint="/Help?id=Payees">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form method="post" action="/Help">
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-test-id="btn-help-close">Close</button>
                 </div>
             </form>
         </div>
