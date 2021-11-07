@@ -23,7 +23,7 @@ namespace YoFi.Tests.Controllers.Slim
         public void SetUp()
         {
             repository = new MockPayeeRepository();
-            controller = new PayeesController(repository as IPayeeRepository);
+            controller = new PayeesController(repository as IPayeeRepository, new MockQueryExecution());
         }
 
         [TestMethod]

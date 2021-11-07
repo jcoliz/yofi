@@ -14,6 +14,7 @@ using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using Ardalis.Filters;
+using YoFi.AspNet.Core;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -23,10 +24,12 @@ namespace YoFi.AspNet.Controllers
         public static int PageSize { get; } = 25;
 
         private readonly IPayeeRepository _repository;
+        private readonly IAsyncQueryExecution _queryExecution;
 
-        public PayeesController(IPayeeRepository repository)
+        public PayeesController(IPayeeRepository repository, IAsyncQueryExecution queryExecution)
         {
             _repository = repository;
+            _queryExecution = queryExecution;
         }
 
         // GET: Payees
@@ -58,8 +61,7 @@ namespace YoFi.AspNet.Controllers
             result = await divider.ItemsForPage(result, p);
             ViewData[nameof(PageDivider)] = divider;
 
-            // TODO: ToListAsync()
-            return View(result.ToList());
+            return View(await _queryExecution.ToListNoTrackingAsync(result));
         }
 
         // GET: Payees/Details/5

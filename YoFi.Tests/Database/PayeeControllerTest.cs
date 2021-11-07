@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNet;
 using YoFi.Core.Repositories;
+using Common.AspNet.Data;
 
 namespace YoFi.Tests
 {
@@ -58,7 +59,7 @@ namespace YoFi.Tests
         {
             helper = new ControllerTestHelper<Payee, PayeesController>();
             helper.SetUp();
-            helper.controller = new PayeesController(new PayeeRepository(helper.context));
+            helper.controller = new PayeesController(new PayeeRepository(helper.context), new EFCoreAsyncQueryExecution());
             helper.Items.AddRange(PayeeItems.Take(5));
             helper.dbset = helper.context.Payees;
             helper.KeyFor = (x => x.Name);
