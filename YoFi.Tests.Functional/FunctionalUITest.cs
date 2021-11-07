@@ -30,21 +30,23 @@ namespace YoFi.Tests.Functional
 
         protected FunctionalUITest() { }
 
-        protected async Task GivenLoggedIn()
+        protected async Task GivenLoggedIn(IPage where = null)
         {
+            var page = where ?? Page;
+
             // Navigate to the root of the site
             var site = TestContext.Properties["webAppUrl"] as string;
-            await Page.GotoAsync(site);
+            await page.GotoAsync(site);
 
             // Are we already logged in?
-            var hellouser = await Page.QuerySelectorAsync("data-test-id=hello-user");
+            var hellouser = await page.QuerySelectorAsync("data-test-id=hello-user");
 
             // If we're not already logged in, well we need to do that then
             if (null == hellouser)
             {
                 Console.WriteLine("Logging in...");
 
-                await Page.ClickAsync("data-test-id=login");
+                await page.ClickAsync("data-test-id=login");
 
                 // And: User credentials as specified in user secrets
                 var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(FunctionalUITest))).Build();
@@ -52,19 +54,19 @@ namespace YoFi.Tests.Functional
                 var password = config["AdminUser:Password"];
 
                 // When: Filling out the login form with those credentials and pressing "sign in"
-                await Page.FillAsync("id=floatingInput", email);
-                await Page.FillAsync("id=floatingPassword", password);
-                await Page.ClickAsync("data-test-id=signin");
+                await page.FillAsync("id=floatingInput", email);
+                await page.FillAsync("id=floatingPassword", password);
+                await page.ClickAsync("data-test-id=signin");
 
                 // Then: We land back at the home page
-                await Page.ThenIsOnPageAsync("Home");
+                await page.ThenIsOnPageAsync("Home");
 
                 // And: The navbar has our email
-                var content = await Page.TextContentAsync("data-test-id=hello-user");
+                var content = await page.TextContentAsync("data-test-id=hello-user");
                 Assert.IsTrue(content.Contains(email));
 
                 // And: The login button is not visible
-                var login = await Page.QuerySelectorAsync("data-test-id=login");
+                var login = await page.QuerySelectorAsync("data-test-id=login");
                 Assert.IsNull(login);
 
                 // Save storage state into a file for later use            

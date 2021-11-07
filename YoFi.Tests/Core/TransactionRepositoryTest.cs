@@ -54,8 +54,6 @@ namespace YoFi.Tests.Core
 
         protected override int CompareKeys(Transaction x, Transaction y) => x.Payee.CompareTo(y.Payee);
 
-        private ITransactionRepository txrepository => repository as ITransactionRepository;
-
         [TestInitialize]
         public void SetUp()
         {
@@ -85,8 +83,5 @@ namespace YoFi.Tests.Core
             // TODO: Transactions will need a custom upload test, thanks very much
             return Task.CompletedTask;
         }
-
-
-
     }
 }

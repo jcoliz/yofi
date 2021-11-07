@@ -31,7 +31,7 @@ namespace YoFi.AspNet.Pages
 
         }
 
-        private Dictionary<string, HelpTopic> Topics = new Dictionary<string, HelpTopic>()
+        private readonly Dictionary<string, HelpTopic> Topics = new Dictionary<string, HelpTopic>()
         {
             { 
                 "payees", new HelpTopic()
