@@ -366,6 +366,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpGet("cat-ac")]
+        [Authorize(Policy = "CanRead")]
         public List<string> CategoryAutocomplete(string q)
         {
             const int numresults = 10;
