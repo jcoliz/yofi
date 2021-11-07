@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace YoFi.Tests.Common
+namespace Common.DotNet.Test
 {
     internal static class AssertExtensions
     {

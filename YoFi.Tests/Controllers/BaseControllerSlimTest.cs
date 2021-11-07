@@ -1,4 +1,5 @@
 ﻿using Common.AspNet;
+using Common.DotNet.Test;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,11 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Core.Repositories;
-using YoFi.Tests.Common;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Controllers.Slim

@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.Tests.Helpers;
 using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 

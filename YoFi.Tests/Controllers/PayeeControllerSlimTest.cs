@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common.DotNet.Test;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
-using YoFi.Tests.Common;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Controllers.Slim

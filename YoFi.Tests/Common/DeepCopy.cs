@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests.Common
+namespace Common.DotNet.Test
 {
     public static class DeepCopy
     {

@@ -1,15 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Common.DotNet.Test;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using YoFi.AspNet.Controllers;
+using System.Linq;
+using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Core.Importers;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
-using System.Threading.Tasks;
-using System.Linq;
-using YoFi.Tests.Common;
 
 namespace YoFi.Tests.Core
 {
