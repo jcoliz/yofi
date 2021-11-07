@@ -1,26 +1,24 @@
-﻿using Common.NET;
+﻿using Common.EFCore;
+using Common.NET;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using YoFi.AspNet.Data;
-using YoFi.Core.Models;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
-using System.Globalization;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
-using YoFi.Core.Repositories;
+using YoFi.AspNet.Core;
+using YoFi.AspNet.Data;
 using YoFi.Core;
 using YoFi.Core.Importers;
-using YoFi.AspNet.Core;
-using Common.AspNet.Data;
+using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Root
 {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Core;
 
-namespace Common.AspNet.Data
+namespace Common.EFCore
 {
     public class EFCoreAsyncQueryExecution : IAsyncQueryExecution
     {
