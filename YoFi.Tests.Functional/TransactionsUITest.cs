@@ -544,6 +544,10 @@ namespace YoFi.Tests.Functional
         }
 
         // TODO
+
+        /// <summary>
+        /// [User Can] Import transactions from an OFX file 
+        /// </summary>
         public void ImportOfx()
         {
             // Given: On import page
@@ -555,6 +559,10 @@ namespace YoFi.Tests.Functional
             // And: All categories are set
         }
 
+        /// <summary>
+        /// [User Can] Preview transactions before commiting to import them,
+        /// and choose to discard them all in one operation.
+        /// </summary>
         public void ImportOfxDelete()
         {
             // Given: Imported an OFX file
@@ -564,6 +572,10 @@ namespace YoFi.Tests.Functional
             // Then: No items present in importer
         }
 
+        /// <summary>
+        /// [User Can] Edit a transaction's category quickly without having to load
+        /// a new page
+        /// </summary>
         public void EditModalNotMatching()
         {
             // Given: One item added, in search results
@@ -575,6 +587,11 @@ namespace YoFi.Tests.Functional
             // Then: The new category is there
         }
 
+        /// <summary>
+        /// [User Can] See that a transaction's category is automatically assigned if it
+        /// doesn't already have one, when editing a transaction quickly without having to
+        /// load a new page.
+        /// </summary>
         public void EditModalMatching()
         {
             // Given: One item added, in search results

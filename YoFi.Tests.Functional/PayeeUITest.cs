@@ -50,6 +50,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
+        /// <summary>
+        /// [User Can] View the current list of active payee matching rules
+        /// </summary>
         [TestMethod]
         public async Task Initial()
         {
@@ -63,6 +66,10 @@ namespace YoFi.Tests.Functional
             await Page.ThenContainsItemsAsync(from: 1, to: 25);
         }
 
+        /// <summary>
+        /// [User Can] Page through the current list of active payee matching rules, without
+        /// having to wait the entire list to load.
+        /// </summary>
         [TestMethod]
         public async Task Page2()
         {
@@ -78,6 +85,9 @@ namespace YoFi.Tests.Functional
             await Page.ThenContainsItemsAsync(from: 26, to: TotalItemCount);
         }
 
+        /// <summary>
+        /// [User Can] Search for payees using some part of the desired category
+        /// </summary>
         [TestMethod]
         public async Task IndexQCategory()
         {
@@ -90,6 +100,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(5, await Page.GetTotalItemsAsync());
         }
 
+        /// <summary>
+        /// [User Can] Search for payees using some part of the desired payee name
+        /// </summary>
         [TestMethod]
         public async Task IndexQName()
         {
@@ -103,6 +116,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(2, await Page.GetTotalItemsAsync());
         }
 
+        /// <summary>
+        /// [User Can] Abort a search, and instead return to the full list of items
+        /// </summary>
         [TestMethod]
         public async Task IndexClear()
         {
@@ -116,6 +132,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
+        /// <summary>
+        /// [User can] Export all payees to a spreadsheet for later viewing/editing in Excel
+        /// </summary>
         [TestMethod]
         public async Task DownloadAll()
         {
@@ -133,6 +152,9 @@ namespace YoFi.Tests.Functional
             await download1.ThenIsSpreadsheetContainingAsync<IdOnly>(name: "Payee", count: TotalItemCount);
         }
 
+        /// <summary>
+        /// [User can] Upload new payees to a spreadsheet which was created in Excel
+        /// </summary>
         [TestMethod]
         public async Task Upload()
         {
@@ -172,6 +194,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(3, await Page.GetTotalItemsAsync());
         }
 
+        /// <summary>
+        /// [User can] Delete multiple payees in a single operation
+        /// </summary>
         [TestMethod]
         public async Task BulkDelete()
         {
@@ -226,6 +251,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
+        /// <summary>
+        /// [User can] Add a new payee matching rule based on a selected transaction from the list of transactions
+        /// </summary>
         [TestMethod]
         public async Task TransactionsAddPayee()
         {
@@ -288,6 +316,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(originalitems + 1, itemsnow);
         }
 
+        /// <summary>
+        /// [User can] Delete a single payee
+        /// </summary>
         [TestMethod]
         public async Task DeletePayee()
         {
