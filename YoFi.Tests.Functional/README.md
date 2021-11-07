@@ -3,9 +3,12 @@
 These are browser-driving tests designed to be run against a complete environment
 with a seeded database of demo data.
 
-## Current test coverage
+## Test coverage
 
-Currently, there is a "Smoke test" which makes sure the home page loads, user can log in, and click on all the nav bar items.
+My vision is that there is exactly a 1:1 correspondence between User Stories and individual functional test.
+That is, for everything we promise the user they can do, we have a test to prove it can be done.
+
+Lately I have taken to marking such user-facing User Stories as [User Can] stories in Azure Dev Ops.
 
 ## Local Environment
 
@@ -26,14 +29,80 @@ This is built on DevTools, which seems like a more modern and stable approach th
 Playwright seems easier and more stable to set up as well.
 And there are MSTest helpers out of the box, so it's all very clean.
 
-## No dependency on code under test
+## Principles
+
+### Click path only
+
+We never ever navigate to a specific URL in the tests, except the top of the site. Absolutely every test
+represents a click path from the top of the site. The reason for this is that users typically don\'t interact 
+with their address bar other than to enter the top of the site. Users navigate by clicking around, so should
+the test.
+
+### No dependency on code under test
 
 Unlike with unit tests or integration tests, there is a principle here that the functional test
 do not load the app code at all.
 
 ## How to use it
 
-### First, run the code
+### Use the runtests.ps1 script
+
+This test builds the app code, runs it in the background, then builds and runs the functional tests
+
+```
+PS .\YoFi.Tests.Functional> .\runtests.ps1
+Microsoft (R) Build Engine version 16.11.0+0538acc04 for .NET
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  OfficeOpenXmlEasy -> .\submodules\OfficeOpenXMLEasy\src\bin\Debug\netstandard2.1\OfficeOpenXmlEasy.dll
+  YoFi.Tests.Functional -> .\YoFi.Tests.Functional\bin\Debug\netcoreapp3.1\YoFi.Tests.Functional.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.12
+Microsoft (R) Build Engine version 16.11.0+0538acc04 for .NET
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  OfficeOpenXmlEasy -> .\submodules\OfficeOpenXMLEasy\src\bin\Debug\netstandard2.1\OfficeOpenXmlEasy.dll
+  OfxSharp -> .\submodules\OFXSharp\source\OfxSharp\bin\Debug\netstandard2.0\OfxSharp.dll
+
+  Bundler: Begin processing bundleconfig.json
+  Bundler: Done processing bundleconfig.json
+  YoFi.AspNet -> .\YoFi.AspNet\bin\Debug\netcoreapp3.1\YoFi.AspNet.dll
+  YoFi.AspNet -> .\YoFi.AspNet\bin\Debug\netcoreapp3.1\YoFi.AspNet.Views.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.17
+
+Id     Name            PSJobTypeName   State         HasMoreData     Location             Command
+--     ----            -------------   -----         -----------     --------             -------
+7      uitests         BackgroundJob   Running       True            localhost             dotnet run
+
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  OfficeOpenXmlEasy -> .\submodules\OfficeOpenXMLEasy\src\bin\Debug\netstandard2.1\OfficeOpenXmlEasy.dll
+  YoFi.Tests.Functional -> .\YoFi.Tests.Functional\bin\Debug\netcoreapp3.1\YoFi.Tests.Functional.dll
+
+Test run for C:\Source\jcoliz\Ofx\YoFi.Tests.Functional\bin\Debug\netcoreapp3.1\YoFi.Tests.Functional.dll (.NETCoreApp,Version=v3.1)
+Microsoft (R) Test Execution Command Line Tool Version 16.11.0
+Copyright (c) Microsoft Corporation.  All rights reserved.
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    69, Skipped:     0, Total:    69, Duration: 1 m - YoFi.Tests.Functional.dll (netcoreapp3.1)
+```
+
+### Or, run the code first
 
 ```
 PS> dotnet run
@@ -49,7 +118,7 @@ Now listening on: http://localhost:50419
 Application started. Press Ctrl+C to shut down.
 ```
 
-### Second, run the tests
+### Then run the tests
 
 Either run them in Visual Studio, or in another command line window
 
