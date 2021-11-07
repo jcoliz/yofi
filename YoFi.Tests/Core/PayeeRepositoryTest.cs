@@ -121,7 +121,7 @@ namespace YoFi.Tests.Core
             const string payee = "Payee";
             const string category = "Category";
             var transaction = new Transaction() { ID = 1, Payee = payee, Category = category };
-            await context.AddAsync(transaction);
+            context.Add(transaction);
 
             // When: Creating a new payee from that transaction
             var actual = await payeeRepository.NewFromTransaction(transaction.ID);

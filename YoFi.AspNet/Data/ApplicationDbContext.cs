@@ -46,16 +46,6 @@ namespace YoFi.AspNet.Data
 
         IQueryable<Split> IDataContext.SplitsWithTransactions => Splits.Include(x => x.Transaction);
 
-        Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
-
-        Task IDataContext.AddRangeAsync(IEnumerable<object> incoming) => base.AddRangeAsync(incoming);
-
-        async Task IDataContext.AddAsync(object item) => await base.AddAsync(item);
-
-        void IDataContext.Update(object item) => base.Update(item);
-
-        void IDataContext.Remove(object item) => base.Remove(item);
-
         IQueryable<T> IDataContext.Get<T>()
         {
             if (typeof(T) == typeof(Transaction))
@@ -76,6 +66,14 @@ namespace YoFi.AspNet.Data
             }
             throw new NotImplementedException();
         }
+       
+        void IDataContext.Add(object item) => base.Add(item);
+
+        void IDataContext.Update(object item) => base.Update(item);
+
+        void IDataContext.Remove(object item) => base.Remove(item);
+
+        Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
 
         Task IDataContext.ToListAsync<T>(IQueryable<T> query) => query.ToListAsync();
     }

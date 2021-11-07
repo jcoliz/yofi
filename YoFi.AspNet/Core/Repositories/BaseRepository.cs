@@ -47,12 +47,12 @@ namespace YoFi.Core.Repositories
 
         public async Task AddAsync(T item)
         {
-            await _context.AddAsync(item);
+            _context.Add(item);
             await _context.SaveChangesAsync();
         }
         public async Task AddRangeAsync(IEnumerable<T> items)
         {
-            await _context.AddRangeAsync(items);
+            _context.AddRange(items);
             await _context.SaveChangesAsync();
         }
 

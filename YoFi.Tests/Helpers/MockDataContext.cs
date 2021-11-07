@@ -47,7 +47,7 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
-        public Task AddAsync(object item)
+        public void Add(object item)
         {
             if (item == null)
                 throw new ArgumentException("Expected non-null item");
@@ -66,8 +66,6 @@ namespace YoFi.Tests.Helpers
             }
             else
                 throw new NotImplementedException();
-
-            return Task.CompletedTask;
         }
 
         public void AddRange(IEnumerable<object> items)
@@ -92,7 +90,6 @@ namespace YoFi.Tests.Helpers
                 TransactionData.AddRange(items as IEnumerable<Transaction>);
             }
             else
-
                 throw new NotImplementedException();
         }
 

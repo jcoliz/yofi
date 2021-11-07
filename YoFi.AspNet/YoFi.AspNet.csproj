@@ -14,6 +14,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Core\Helpers\**" />
+    <Content Remove="Core\Helpers\**" />
+    <EmbeddedResource Remove="Core\Helpers\**" />
+    <None Remove="Core\Helpers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Data\FullSampleDataDefinition.xlsx" />
     <None Remove="Data\ofx-footer.txt" />
     <None Remove="Data\ofx-header.txt" />
@@ -72,10 +79,6 @@
     <Content Update="Views\Payees\EditPartial.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Core\Helpers\" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
