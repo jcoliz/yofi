@@ -48,17 +48,55 @@ namespace YoFi.Core
         IQueryable<T> Get<T>();
         #endregion
 
-
+        /// <summary>
+        /// Add an item
+        /// </summary>
+        /// <param name="item">Item to add</param>
         void Add(object item);
+        /// <summary>
+        /// Add a range of items
+        /// </summary>
+        /// <param name="items">Items to add</param>
         void AddRange(IEnumerable<object> items);
+        /// <summary>
+        /// Update an item
+        /// </summary>
+        /// <param name="item">Item to update</param>
         void Update(object item);
+        /// <summary>
+        /// Update a range of items
+        /// </summary>
+        /// <param name="items">Items to update</param>
         void UpdateRange(IEnumerable<object> items);
+        /// <summary>
+        /// Remove an item
+        /// </summary>
+        /// <param name="item">Item to remove</param>
         void Remove(object item);
+        /// <summary>
+        /// Remove items
+        /// </summary>
+        /// <param name="items">Items to remove</param>
         void RemoveRange(IEnumerable<object> items);
+        /// <summary>
+        /// Save changes previously made
+        /// </summary>
+        /// <remarks>
+        /// This is only needed in the case where we made changes to tracked objects and
+        /// did NOT call update on them. Should be rare.
+        /// </remarks>
         Task SaveChangesAsync();
 
-        // Async Query methods
-
+        /// <summary>
+        /// Execute ToList query asynchronously
+        /// </summary>
+        /// <remarks>
+        /// Needed to be here because EF Core provides the ToAsync extenseion, but if we're not running
+        /// EF COre we won't have it.
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="query"></param>
+        /// <returns></returns>
         Task ToListAsync<T>(IQueryable<T> query);
     }
 }
