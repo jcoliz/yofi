@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 using YoFi.Core.Repositories;
 using YoFi.Core;
 using YoFi.Core.Importers;
+using YoFi.AspNet.Core;
+using Common.AspNet.Data;
 
 namespace YoFi.AspNet.Root
 {
@@ -85,6 +87,8 @@ namespace YoFi.AspNet.Root
             services.AddScoped<IImporter<BudgetTx>, BaseImporter<BudgetTx>>();
 
             services.AddScoped<IDataContext, ApplicationDbContext>();
+            services.AddScoped<IAsyncQueryExecution, EFCoreAsyncQueryExecution>();
+
 
             // -----------------------------------------------------------------------------
             //

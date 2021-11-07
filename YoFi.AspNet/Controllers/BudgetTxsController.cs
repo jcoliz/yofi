@@ -10,6 +10,7 @@ using YoFi.Core.Repositories;
 using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using Ardalis.Filters;
+using YoFi.AspNet.Core;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -19,10 +20,12 @@ namespace YoFi.AspNet.Controllers
         public static int PageSize { get; } = 25;
 
         private readonly IRepository<BudgetTx> _repository;
+        private readonly IAsyncQueryExecution _queryExecution;
 
-        public BudgetTxsController(IRepository<BudgetTx> repository)
+        public BudgetTxsController(IRepository<BudgetTx> repository, IAsyncQueryExecution queryExecution)
         {
             _repository = repository;
+            _queryExecution = queryExecution;
         }
 
         // GET: BudgetTxs
@@ -46,8 +49,7 @@ namespace YoFi.AspNet.Controllers
             ViewData[nameof(PageDivider)] = divider;
 
             // Show the index
-            // TODO: ToListAsync()
-            return View(result.ToList());
+            return View(await _queryExecution.ToListNoTrackingAsync(result));
         }
 
         // GET: BudgetTxs/Details/5

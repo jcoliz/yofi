@@ -86,17 +86,5 @@ namespace YoFi.Core
         /// did NOT call update on them. Should be rare.
         /// </remarks>
         Task SaveChangesAsync();
-
-        /// <summary>
-        /// Execute ToList query asynchronously
-        /// </summary>
-        /// <remarks>
-        /// Needed to be here because EF Core provides the ToAsync extenseion, but if we're not running
-        /// EF COre we won't have it.
-        /// </remarks>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        Task ToListAsync<T>(IQueryable<T> query);
     }
 }

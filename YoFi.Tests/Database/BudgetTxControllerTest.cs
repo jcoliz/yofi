@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNet;
 using YoFi.Core.Repositories;
+using Common.AspNet.Data;
 
 namespace YoFi.Tests
 {
@@ -61,7 +62,7 @@ namespace YoFi.Tests
         {
             helper = new ControllerTestHelper<BudgetTx, BudgetTxsController>();
             helper.SetUp();
-            helper.controller = new BudgetTxsController(new BudgetTxRepository(helper.context));
+            helper.controller = new BudgetTxsController(new BudgetTxRepository(helper.context),new EFCoreAsyncQueryExecution());
             helper.Items.AddRange(BudgetTxItems.Take(5));
 
             helper.dbset = helper.context.BudgetTxs;
