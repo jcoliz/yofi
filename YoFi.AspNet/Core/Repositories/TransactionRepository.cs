@@ -1,14 +1,12 @@
 ﻿using Common.NET;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Extensions.Configuration;
-using OfxSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Core.Quieriers;
 using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Core.Repositories

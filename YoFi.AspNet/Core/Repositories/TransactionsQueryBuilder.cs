@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using YoFi.Core.Models;
 
-namespace YoFi.Core.Quieriers
+namespace YoFi.Core.Repositories
 {
     /// <summary>
     /// Build transactions query from textual 'q' parameter

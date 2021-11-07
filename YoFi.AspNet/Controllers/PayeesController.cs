@@ -1,20 +1,16 @@
-﻿using Common.AspNet;
-using jcoliz.OfficeOpenXml.Serializer;
+﻿using Ardalis.Filters;
+using Common.AspNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.Core.Repositories;
-using YoFi.AspNet.Data;
-using YoFi.Core.Models;
-using YoFi.Core.Importers;
-using Ardalis.Filters;
 using YoFi.AspNet.Core;
+using YoFi.Core.Importers;
+using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
 {

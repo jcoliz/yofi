@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.Core.Models;
-using YoFi.Core.Quieriers;
+using YoFi.Core.Repositories;
 using YoFi.Core.Reports;
 
 namespace YoFi.AspNet.Controllers
