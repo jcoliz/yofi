@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 
-namespace YoFi.AspNet.Common
+namespace Common.AspNet
 {
     public class ApiBasicAuthorizationAttribute: ActionFilterAttribute, IAsyncAuthorizationFilter
     {

@@ -1,4 +1,5 @@
-﻿using Common.NET;
+﻿using Common.AspNet;
+using Common.NET;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -8,10 +9,8 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using YoFi.AspNet.Common;
 using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 using YoFi.Core.Quieriers;

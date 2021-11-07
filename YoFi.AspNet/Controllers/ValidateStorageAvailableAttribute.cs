@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.AspNet.Controllers
+namespace Common.AspNet
 {
     public class ValidateStorageAvailableAttribute: ActionFilterAttribute
     {
