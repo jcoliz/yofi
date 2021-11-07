@@ -45,7 +45,9 @@ namespace YoFi.Tests.Functional
                 await api.ClearTestData("payee");
             }
 
-            await Page.ReloadAsync();
+            // Getting timeouts on this?!
+            //await Page.ReloadAsync();
+            await Page.ClickAsync("text=Payees");
 
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
