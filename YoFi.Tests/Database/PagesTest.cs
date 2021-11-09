@@ -44,7 +44,7 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Getting the "Reports" Page
-            var reportspage = new ReportsModel(context);
+            var reportspage = new ReportsModel(new ReportBuilder(context));
             reportspage.OnGet(new ReportParameters() { year = 2021, month = 12 });
 
             // Then: All the totals are as expected

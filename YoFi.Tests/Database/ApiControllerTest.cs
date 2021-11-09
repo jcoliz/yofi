@@ -801,7 +801,7 @@ namespace YoFi.Tests
             await AddFiveTransactions();
             await context.SaveChangesAsync();
 
-            var actionresult = controller.ReportV2( new ReportParameters() { id = "all" } );
+            var actionresult = controller.ReportV2( new ReportParameters() { id = "all" }, new ReportBuilder(context) );
             if (actionresult is ObjectResult or)
                 throw or.Value as Exception;
 
@@ -934,7 +934,7 @@ namespace YoFi.Tests
             await AddFiveBudgetTxs();
             await AddFiveTransactions();
 
-            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" });
+            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
             if (actionresult is ObjectResult or)
                 throw or.Value as Exception;
 
@@ -962,7 +962,7 @@ namespace YoFi.Tests
         [TestMethod]
         public void ReportV2exportEmpty()
         {
-            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" });
+            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
             if (actionresult is ObjectResult or)
                 throw or.Value as Exception;
 
@@ -985,7 +985,7 @@ namespace YoFi.Tests
             // Not having an auth header
             controller.ControllerContext = new ControllerContext() { HttpContext = new DefaultHttpContext() };
 
-            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" });
+            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
 
             Assert.IsTrue(actionresult is UnauthorizedResult);
         }

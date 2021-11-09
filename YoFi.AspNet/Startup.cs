@@ -18,6 +18,7 @@ using YoFi.AspNet.Data;
 using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
+using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
 
 #if __DEMO_OPEN_ACCESS__
@@ -88,6 +89,8 @@ namespace YoFi.AspNet.Root
             services.AddScoped<SplitImporter>();
             services.AddScoped<IImporter<Payee>, BaseImporter<Payee>>();
             services.AddScoped<IImporter<BudgetTx>, BaseImporter<BudgetTx>>();
+
+            services.AddScoped<IReportEngine, ReportBuilder>();
 
             services.AddScoped<IDataContext, ApplicationDbContext>();
             services.AddScoped<IAsyncQueryExecution, EFCoreAsyncQueryExecution>();

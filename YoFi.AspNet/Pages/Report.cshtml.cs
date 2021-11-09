@@ -14,14 +14,14 @@ namespace YoFi.AspNet.Pages
     [Authorize(Policy = "CanRead")]
     public class ReportModel : PageModel
     {
-        private readonly IDataContext _context;
-
-        public ReportModel(IDataContext context)
+        public ReportModel(IReportEngine _reports)
         {
-            _context = context;
+            reports = _reports;
         }
 
         public ReportParameters Parameters { get; set; }
+
+        public ReportNavbarViewModel NavbarViewModel => new ReportNavbarViewModel() { Parameters = Parameters, Definitions = reports.Definitions };
 
         public Report Report { get; set; }
 
@@ -54,7 +54,7 @@ namespace YoFi.AspNet.Pages
                 }
 
                 // TODO: Make this Async()
-                Report = new ReportBuilder(_context).BuildReport(Parameters);
+                Report = reports.Build(Parameters);
 
                 /*
                 ViewData["report"] = parms.id;
@@ -126,6 +126,6 @@ namespace YoFi.AspNet.Pages
             }
         }
         private DateTime? _Now;
-
+        private readonly IReportEngine reports;
     }
 }

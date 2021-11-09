@@ -1,8 +1,9 @@
-﻿@using YoFi.AspNet.Controllers
+﻿@using YoFi.AspNet.Pages
 @using YoFi.Core.Reports
-@model ReportParameters
+@model ReportNavbarViewModel
 @{
     var icons = new[] { "&check;", "!!", "X" };
+    var Parameters = Model.Parameters;
 }
 
 <nav class="navbar navbar-expand-lg navbar-light navbar-page mb-3">
@@ -16,7 +17,7 @@
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuReportId">
                 <a href="/Reports" class="dropdown-item">Summary</a>
-                @foreach (var item in ReportBuilder.Definitions)
+                @foreach (var item in Model.Definitions)
                 {
                     <a asp-page="Report" asp-route-id="@item.id" class="dropdown-item">@item.Name</a>
                 }
@@ -30,7 +31,7 @@
         <div class="collapse navbar-collapse" id="navbarPage">
 
             <ul class="navbar-nav ms-auto">
-                @if (Model.id != "summary")
+                @if (Parameters.id != "summary")
                 {
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonLevel" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -41,9 +42,9 @@
                                 for (int i = 1; i <= 4; i++)
                                 {
                                     <a asp-page="Report"
-                                       asp-route-id="@Model.id"
-                                       asp-route-month="@Model.month"
-                                       asp-route-showmonths="@Model.showmonths"
+                                       asp-route-id="@Parameters.id"
+                                       asp-route-month="@Parameters.month"
+                                       asp-route-showmonths="@Parameters.showmonths"
                                        asp-route-level="@i"
                                        class="dropdown-item">@i-Level</a>
                                 }
@@ -56,15 +57,15 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
                             <a asp-page="Report"
-                                asp-route-id="@Model.id"
-                                asp-route-level="@Model.level"
-                                asp-route-month="@Model.month"
+                                asp-route-id="@Parameters.id"
+                                asp-route-level="@Parameters.level"
+                                asp-route-month="@Parameters.month"
                                asp-route-showmonths="true"
                                class="dropdown-item">Show</a>
                             <a asp-page="Report"
-                                asp-route-id="@Model.id"
-                                asp-route-level="@Model.level"
-                                asp-route-month="@Model.month"
+                                asp-route-id="@Parameters.id"
+                                asp-route-level="@Parameters.level"
+                                asp-route-month="@Parameters.month"
                                asp-route-showmonths="false"
                                class="dropdown-item">Hide</a>
                         </div>
@@ -80,7 +81,7 @@
                             int n = 1;
                             foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
                             {
-                                @if (Model.id == "summary")
+                                @if (Parameters.id == "summary")
                                 {
                                     <a asp-page="Reports"
                                        asp-route-month="@n"
@@ -89,9 +90,9 @@
                                 else
                                 {
                                     <a asp-page="Report"
-                                        asp-route-id="@Model.id"
-                                        asp-route-showmonths="@Model.showmonths"
-                                        asp-route-level="@Model.level"
+                                        asp-route-id="@Parameters.id"
+                                        asp-route-showmonths="@Parameters.showmonths"
+                                        asp-route-level="@Parameters.level"
                                        asp-route-month="@n"
                                        class="dropdown-item">@n @monthname</a>
                                 }
@@ -110,7 +111,7 @@
                             int currentyear = DateTime.Now.Year;
                             for (int y = 2017; y <= currentyear; ++y)
                             {
-                                @if (Model.id == "summary")
+                                @if (Parameters.id == "summary")
                                 {
                                     <a asp-page="Reports"
                                        asp-route-year="@y"
@@ -119,9 +120,9 @@
                                 else
                                 {
                                     <a asp-page="Report"
-                                        asp-route-id="@Model.id"
-                                        asp-route-showmonths="@Model.showmonths"
-                                        asp-route-level="@Model.level"
+                                        asp-route-id="@Parameters.id"
+                                        asp-route-showmonths="@Parameters.showmonths"
+                                        asp-route-level="@Parameters.level"
                                        asp-route-year="@y"
                                        class="dropdown-item">@y</a>
                                 }

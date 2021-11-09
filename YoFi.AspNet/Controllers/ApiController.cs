@@ -349,11 +349,11 @@ namespace YoFi.AspNet.Controllers
 
         [HttpGet("ReportV2/{id}")]
         [ApiBasicAuthorization]
-        public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms)
+        public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
         {
             try
             {
-                var result = new ReportBuilder(_context).BuildReport(parms);
+                var result = reports.Build(parms);
                 var json = result.ToJson();
 
                 return Content(json,"application/json");

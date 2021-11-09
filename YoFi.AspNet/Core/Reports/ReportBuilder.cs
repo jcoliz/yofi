@@ -16,7 +16,7 @@ namespace YoFi.Core.Reports
     /// Ultimately, I'd like to move the ReportDefinition objects into
     /// the database.
     /// </remarks>
-    public class ReportBuilder
+    public class ReportBuilder: IReportEngine
     {
         /// <summary>
         /// Constructor
@@ -34,18 +34,17 @@ namespace YoFi.Core.Reports
         /// </summary>
         /// <param name="parameters">Parameters describing the report to be built</param>
         /// <returns>The report we built</returns>
-        public Report BuildReport(ReportParameters parameters,ReportDefinition definition = null)
+        public Report BuildReport(ReportParameters parameters)
         {
             var report = new Report();
 
             int Month = _qbuilder.Month = parameters.month ?? 12;
             int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
 
-            if (null == definition)
-                definition = Definitions.Where(x => x.id == parameters.id).SingleOrDefault();
-
-            if (definition == null)
+            if (!Definitions.Any(x => x.id == parameters.id))
                 throw new KeyNotFoundException($"Unable to find report {parameters.id}");
+
+            var definition = Definitions.Where(x => x.id == parameters.id).SingleOrDefault();
 
             // Timeframe and description (which displays timeframe)
 
@@ -148,6 +147,11 @@ namespace YoFi.Core.Reports
             else 
                 return null;
         }
+
+        #region IReportEngine
+        IEnumerable<ReportDefinition> IReportEngine.Definitions => Definitions;
+        Report IReportEngine.Build(ReportParameters parameters) => BuildReport(parameters);
+        #endregion
 
         public static List<ReportDefinition> Definitions = new List<ReportDefinition>()
         {
@@ -318,5 +322,5 @@ namespace YoFi.Core.Reports
                 NumLevels = 2,
             }
         };
-   }
+    }
 }
