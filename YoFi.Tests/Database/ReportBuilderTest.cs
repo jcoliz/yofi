@@ -139,7 +139,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the 'All' report for the correct year
-            var report = builder.BuildReport(new ReportParameters() { id = "all", year = 2020, showmonths = showmonths });
+            var report = builder.Build(new ReportParameters() { id = "all", year = 2020, showmonths = showmonths });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount);
@@ -163,7 +163,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the 'All' report for the correct year, with level at '{level}'
-            var report = builder.BuildReport(new ReportParameters() { id = "all", year = 2020, level = level });
+            var report = builder.Build(new ReportParameters() { id = "all", year = 2020, level = level });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount);
@@ -192,7 +192,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the 'All' report for the correct year, with level at '{level}'
-            var report = builder.BuildReport(new ReportParameters() { id = "all", year = 2020, month = month });
+            var report = builder.Build(new ReportParameters() { id = "all", year = 2020, month = month });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Where(x=>x.Timestamp.Month <= month).Sum(x => x.Amount);
@@ -223,7 +223,7 @@ namespace YoFi.Tests
             // When: Building the 'All' report for the correct year, with level at '{level}'
             var months = new int[] { 1, 3, 6, 9, 12 };
             var month = months[index];
-            var report = builder.BuildReport(new ReportParameters() { id = "all", year = 2021, month = month });
+            var report = builder.Build(new ReportParameters() { id = "all", year = 2021, month = month });
 
             // Then: Report has the correct total
             var expected = SampleDataStore.Single.Transactions.Where(x => x.Timestamp.Month <= month).Sum(x => x.Amount);
@@ -265,7 +265,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the '{Category}' report for the correct year
-            var report = builder.BuildReport(new ReportParameters() { id = category.ToLowerInvariant(), year = 2020 });
+            var report = builder.Build(new ReportParameters() { id = category.ToLowerInvariant(), year = 2020 });
 
             // Then: Report has the correct total
             var expected = SumOfTopCategory(category);
@@ -287,7 +287,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the '{Category}' report for the correct year
-            var report = builder.BuildReport(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths});
+            var report = builder.Build(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths});
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
@@ -307,7 +307,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the 'budget' report for the correct year
-            var report = builder.BuildReport(new ReportParameters() { id = "budget", year = 2020 });
+            var report = builder.Build(new ReportParameters() { id = "budget", year = 2020 });
 
             // Then: Report has the correct total
             var expected = BudgetTxs.Sum(x => x.Amount);
@@ -327,7 +327,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the 'expenses-budget' report for the correct year
-            var report = builder.BuildReport(new ReportParameters() { id = "expenses-budget", year = 2020 });
+            var report = builder.Build(new ReportParameters() { id = "expenses-budget", year = 2020 });
 
             // Then: Report has the correct total
             var expected = BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
@@ -348,7 +348,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the 'expenses-v-budget' report for the correct year
-            var report = builder.BuildReport(new ReportParameters() { id = "expenses-v-budget", year = 2020 });
+            var report = builder.Build(new ReportParameters() { id = "expenses-v-budget", year = 2020 });
 
             // Then: Report has the correct total budget
             var BudgetCol = GetColumn(report,x=>x.Name == "Budget");
@@ -374,7 +374,7 @@ namespace YoFi.Tests
             // (Assembled on Initialize)
 
             // When: Building the 'all-v-budget' report for the correct year
-            var report = builder.BuildReport(new ReportParameters() { id = "all-v-budget", year = 2020 });
+            var report = builder.Build(new ReportParameters() { id = "all-v-budget", year = 2020 });
 
             // Then: Report has the correct total budget
             var BudgetCol = GetColumn(report, x => x.Name == "Budget");
@@ -417,7 +417,7 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Building the 'yoy' report 
-            var report = builder.BuildReport(new ReportParameters() { id = "yoy", level = level });
+            var report = builder.Build(new ReportParameters() { id = "yoy", level = level });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount);
@@ -443,7 +443,7 @@ namespace YoFi.Tests
             context.SaveChanges();
 
             // When: Building the 'managed-budget' report for the correct year
-            var report = builder.BuildReport(new ReportParameters() { id = "managed-budget", year = 2020 });
+            var report = builder.Build(new ReportParameters() { id = "managed-budget", year = 2020 });
 
             // Then: Report has the correct values 
             var BudgetCol = GetColumn(report, x => x.Name == "Budget");

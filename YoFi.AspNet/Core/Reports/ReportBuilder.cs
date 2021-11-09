@@ -34,7 +34,7 @@ namespace YoFi.Core.Reports
         /// </summary>
         /// <param name="parameters">Parameters describing the report to be built</param>
         /// <returns>The report we built</returns>
-        public Report BuildReport(ReportParameters parameters)
+        public Report Build(ReportParameters parameters)
         {
             var report = new Report();
 
@@ -150,7 +150,6 @@ namespace YoFi.Core.Reports
 
         #region IReportEngine
         IEnumerable<ReportDefinition> IReportEngine.Definitions => Definitions;
-        Report IReportEngine.Build(ReportParameters parameters) => BuildReport(parameters);
         #endregion
 
         public static List<ReportDefinition> Definitions = new List<ReportDefinition>()
