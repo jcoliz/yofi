@@ -68,7 +68,7 @@ namespace YoFi.Tests.Core
 
             context = new MockDataContext();
             var storage = new TestAzureStorage();
-            repository = new TransactionRepository(context,storage,configuration);            
+            repository = new TransactionRepository(context,storage:storage,config:configuration);            
         }
 
         [TestMethod]
