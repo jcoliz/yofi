@@ -19,7 +19,7 @@ namespace YoFi.AspNet.Pages
         };
 
         public List<List<IDisplayReport>> Reports { get; private set; }
-        public ReportBuilder.Parameters Parameters { get; set; }
+        public ReportParameters Parameters { get; set; }
 
         public ReportsModel(ApplicationDbContext context)
         {
@@ -28,7 +28,7 @@ namespace YoFi.AspNet.Pages
 
         private readonly ReportBuilder _builder;
 
-        public void OnGet([Bind("year,month")] ReportBuilder.Parameters parms)
+        public void OnGet([Bind("year,month")] ReportParameters parms)
         {
             Parameters = parms;
             Parameters.id = "summary";
@@ -38,7 +38,7 @@ namespace YoFi.AspNet.Pages
                 Parameters.month = DateTime.Now.Month;
 
             // Build the reports
-            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportBuilder.Parameters() { id = y, month = Parameters.month })).ToList<IDisplayReport>()).ToList();
+            Reports = Definitions.Select(x => x.Select(y => _builder.BuildReport(new ReportParameters() { id = y, month = Parameters.month })).ToList<IDisplayReport>()).ToList();
 
             // Calculate the summary
 

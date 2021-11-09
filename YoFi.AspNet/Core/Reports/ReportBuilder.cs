@@ -19,45 +19,6 @@ namespace YoFi.Core.Reports
     public class ReportBuilder
     {
         /// <summary>
-        /// Parameters used to build a report
-        /// </summary>
-        /// <remarks>
-        /// Moved these into a class so I can make a single change in calling convention here
-        /// and have it propagate out to the controller endpoints automatically
-        /// </remarks>
-        public class Parameters
-        {
-            /// <summary>
-            /// The identifier, or name, of the report we want
-            /// </summary>
-            public string id { get; set; } 
-
-            /// <summary>
-            /// Optionally set the constraint year, else will use current year
-            /// </summary>
-            public int? year { get; set; } 
-
-            /// <summary>
-            /// Optionally set the ending month, else will report on data from
-            /// current year through current month for this year, or if a 
-            /// previous year, then through the end of that year
-            /// </summary>
-            public int? month { get; set; } 
-
-            /// <summary>
-            /// Optionally whether to show month columns, else will use the default for
-            /// the given report id.
-            /// </summary>
-            public bool? showmonths { get; set; } 
-
-            /// <summary>
-            /// Optionally how many levels deep to show, else will use the dafault for
-            /// the given report id
-            /// </summary>
-            public int? level { get; set; }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="context">Where to pull report data from</param>
@@ -73,7 +34,7 @@ namespace YoFi.Core.Reports
         /// </summary>
         /// <param name="parameters">Parameters describing the report to be built</param>
         /// <returns>The report we built</returns>
-        public Report BuildReport(Parameters parameters,ReportDefinition definition = null)
+        public Report BuildReport(ReportParameters parameters,ReportDefinition definition = null)
         {
             var report = new Report();
 

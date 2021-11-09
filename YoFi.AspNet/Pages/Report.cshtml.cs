@@ -21,11 +21,11 @@ namespace YoFi.AspNet.Pages
             _context = context;
         }
 
-        public ReportBuilder.Parameters Parameters { get; set; }
+        public ReportParameters Parameters { get; set; }
 
         public Report Report { get; set; }
 
-        public Task<IActionResult> OnGetAsync([Bind] ReportBuilder.Parameters parms)
+        public Task<IActionResult> OnGetAsync([Bind] ReportParameters parms)
         {
             try
             {

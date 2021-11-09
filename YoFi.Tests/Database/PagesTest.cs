@@ -45,7 +45,7 @@ namespace YoFi.Tests
 
             // When: Getting the "Reports" Page
             var reportspage = new ReportsModel(context);
-            reportspage.OnGet(new ReportBuilder.Parameters() { year = 2021, month = 12 });
+            reportspage.OnGet(new ReportParameters() { year = 2021, month = 12 });
 
             // Then: All the totals are as expected
             var totals = reportspage.Reports.SelectMany(x => x).ToDictionary(x => x.Name, x => x.GrandTotal);

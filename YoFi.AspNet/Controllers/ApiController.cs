@@ -349,7 +349,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpGet("ReportV2/{id}")]
         [ApiBasicAuthorization]
-        public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportBuilder.Parameters parms)
+        public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms)
         {
             try
             {
