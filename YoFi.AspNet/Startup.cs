@@ -20,6 +20,11 @@ using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 
+#if __DEMO_OPEN_ACCESS__
+using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
+#endif
+
 namespace YoFi.AspNet.Root
 {
     public class Startup

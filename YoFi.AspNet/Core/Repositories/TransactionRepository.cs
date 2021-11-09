@@ -23,7 +23,7 @@ namespace YoFi.Core.Repositories
         /// <param name="context">Where to find the data we actually contain</param>
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
-        public TransactionRepository(IDataContext context, IPlatformAzureStorage storage, IConfiguration config) : base(context)
+        public TransactionRepository(IDataContext context, IConfiguration config,IPlatformAzureStorage storage = null) : base(context)
         {
             _storage = storage;
             _config = config;
@@ -222,6 +222,11 @@ namespace YoFi.Core.Repositories
             // TODO: Consolodate this with the exact same copy which is in ApiController
             //
 
+            // Note that the view should not ever get this far. It's the view's reposibility to check first if
+            // there is storage defined. Ergo, if we get this far, it's a legit 500 error.
+            if (null == _storage)
+                throw new ApplicationException("Storage is not defined");
+
             string blobname = transaction.ID.ToString();
 
             _storage.Initialize();
@@ -243,6 +248,11 @@ namespace YoFi.Core.Repositories
         {
             if (string.IsNullOrEmpty(transaction.ReceiptUrl))
                 return (null,null,null);
+
+            // Note that the view should not ever get this far. It's the view's reposibility to check first if
+            // there is storage defined. Ergo, if we get this far, it's a legit 500 error.
+            if (null == _storage)
+                throw new ApplicationException("Storage is not defined");
 
             var name = transaction.ID.ToString();
 
