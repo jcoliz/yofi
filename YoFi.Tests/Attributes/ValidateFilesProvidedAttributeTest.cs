@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Common.DotNet.Test;
 using System.IO;
 using System.Threading;
+using Moq;
 
 namespace YoFi.Tests.Attributers
 {
@@ -19,9 +20,42 @@ namespace YoFi.Tests.Attributers
     {
         ValidateFilesProvidedAttribute attribute;
 
+        private ActionExecutionDelegate Next => NextHandler;
+
+        private int next_called;
+
+        private Task<ActionExecutedContext> NextHandler()
+        {
+            ++next_called;
+
+            return Task.FromResult<ActionExecutedContext>(null);
+        }
+
+        private void ThenOk(ActionExecutingContext context)
+        {
+            // Then: Context result is not set
+            Assert.IsNull(context.Result);
+
+            // And: Next was called
+            Assert.AreEqual(1, next_called);
+        }
+
+        private void ThenBadRequest(ActionExecutingContext context)
+        {
+            // Then: Bad request or bad request object result
+            Assert.IsNotNull(context);
+
+            if (!(context.Result is BadRequestObjectResult))
+                Assert.That.IsOfType<BadRequestResult>(context.Result);
+
+            // And: Next never called
+            Assert.AreEqual(0, next_called);
+        }
+
         [TestInitialize]
         public void SetUp()
-        {   
+        {
+            next_called = 0;
             attribute = new ValidateFilesProvidedAttribute();
         }
 
@@ -65,14 +99,11 @@ namespace YoFi.Tests.Attributers
             var resultExecutingContext = GivenExecutingContextWithActionArguments(new Dictionary<string, object>());
 
             // When: Executing the filter
-            int next_called = 0;
-            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next:() => { ++next_called; return null; } ) ;
+            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: Next);
 
             // Then: Bad request result
-            Assert.That.IsOfType<BadRequestResult>(resultExecutingContext.Result);
-
             // And: Next never called
-            Assert.AreEqual(0, next_called);
+            ThenBadRequest(resultExecutingContext);
         }
 
         [TestMethod]
@@ -82,14 +113,11 @@ namespace YoFi.Tests.Attributers
             var resultExecutingContext = GivenExecutingContextWithActionArguments(new Dictionary<string, object>() { { "files",null } });
 
             // When: Executing the filter
-            int next_called = 0;
-            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: () => { ++next_called; return null; });
+            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: Next);
 
             // Then: Bad request result
-            Assert.That.IsOfType<BadRequestResult>(resultExecutingContext.Result);
-
             // And: Next never called
-            Assert.AreEqual(0, next_called);
+            ThenBadRequest(resultExecutingContext);
         }
 
         [TestMethod]
@@ -99,14 +127,11 @@ namespace YoFi.Tests.Attributers
             var resultExecutingContext = GivenExecutingContextWithActionArguments(new Dictionary<string, object>() { { "files", "string" } });
 
             // When: Executing the filter
-            int next_called = 0;
-            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: () => { ++next_called; return null; });
+            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: Next);
 
             // Then: Bad request result
-            Assert.That.IsOfType<BadRequestResult>(resultExecutingContext.Result);
-
             // And: Next never called
-            Assert.AreEqual(0, next_called);
+            ThenBadRequest(resultExecutingContext);
         }
         [TestMethod]
         public async Task FilesKeyEmptyList()
@@ -115,44 +140,59 @@ namespace YoFi.Tests.Attributers
             var resultExecutingContext = GivenExecutingContextWithActionArguments(new Dictionary<string, object>() { { "files", new List<IFormFile>() } });
 
             // When: Executing the filter
-            int next_called = 0;
-            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: () => { ++next_called; return null; });
+            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: Next);
 
             // Then: Bad request result
-            Assert.That.IsOfType<BadRequestObjectResult>(resultExecutingContext.Result);
-
             // And: Next never called
-            Assert.AreEqual(0, next_called);
+            ThenBadRequest(resultExecutingContext);
         }
 
-        public class MockFile : IFormFile
+        [TestMethod]
+        public async Task FilesSingleOK()
         {
-            string IFormFile.ContentDisposition => throw new System.NotImplementedException();
+            // Given: A result executing context with action arguments: files = {one file}
+            var file = new Mock<IFormFile>();
+            var resultExecutingContext = GivenExecutingContextWithActionArguments(new Dictionary<string, object>() { { "files", new List<IFormFile>() { file.Object } } });
 
-            string IFormFile.ContentType => throw new System.NotImplementedException();
+            // When: Executing the filter
+            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: Next);
 
-            string IFormFile.FileName => throw new System.NotImplementedException();
+            // Then: Context result is not set
+            // And: Next was called
+            ThenOk(resultExecutingContext);
+        }
 
-            IHeaderDictionary IFormFile.Headers => throw new System.NotImplementedException();
+        [TestMethod]
+        public async Task FilesMultipleOK()
+        {
+            // Given: A result executing context with action arguments: files = {two files}
+            var file = new Mock<IFormFile>();
+            var resultExecutingContext = GivenExecutingContextWithActionArguments(new Dictionary<string, object>() { { "files", new List<IFormFile>() { file.Object, file.Object } } });
 
-            long IFormFile.Length => throw new System.NotImplementedException();
+            // When: Executing the filter
+            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: Next);
 
-            string IFormFile.Name => throw new System.NotImplementedException();
+            // Then: Context result is not set
+            // And: Next was called
+            ThenOk(resultExecutingContext);
+        }
 
-            void IFormFile.CopyTo(Stream target)
-            {
-                throw new System.NotImplementedException();
-            }
+        [TestMethod]
+        public async Task FilesMultipleNotOK()
+        {
+            // Given: Object under test does not allow multiple files
+            attribute = new ValidateFilesProvidedAttribute(multiplefilesok:false);
 
-            Task IFormFile.CopyToAsync(Stream target, CancellationToken cancellationToken)
-            {
-                throw new System.NotImplementedException();
-            }
+            // And: A result executing context with action arguments: files = {two files}
+            var file = new Mock<IFormFile>();
+            var resultExecutingContext = GivenExecutingContextWithActionArguments(new Dictionary<string, object>() { { "files", new List<IFormFile>() { file.Object, file.Object } } });
 
-            Stream IFormFile.OpenReadStream()
-            {
-                throw new System.NotImplementedException();
-            }
+            // When: Executing the filter
+            await attribute.OnActionExecutionAsync(context: resultExecutingContext, next: Next);
+
+            // Then: Bad request result
+            // And: Next never called
+            ThenBadRequest(resultExecutingContext);
         }
 
     }
