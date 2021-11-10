@@ -24,23 +24,28 @@ namespace Common.AspNet
                 var Headers = context.HttpContext.Request.Headers;
 
                 if (!Headers.ContainsKey("Authorization"))
-                    throw new UnauthorizedAccessException("Authorization header required");
+                    throw new UnauthorizedAccessException("Authorization header required [E2]");
 
                 var authorization = Headers["Authorization"].Single();
                 if (!authorization.StartsWith("Basic "))
-                    throw new UnauthorizedAccessException("Authorization supports basic authentication only");
+                    throw new UnauthorizedAccessException("Authorization supports basic authentication only [E3]");
 
                 var base64 = authorization[6..];
-                var credentialBytes = Convert.FromBase64String(base64);
-                var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
+                var credentialBytes = new Span<byte>(new byte[32+expectedpassword.Length]);
+                var ok = Convert.TryFromBase64String(base64, credentialBytes,out int length);
+
+                if (!ok)
+                    throw new UnauthorizedAccessException("Credentials mis-coded [E5]");
+
+                var credentials = Encoding.UTF8.GetString(credentialBytes[..length] ).Split(':', 2);
                 var password = credentials[1];
 
                 if (expectedpassword != password)
-                    throw new UnauthorizedAccessException("Credentials invalid");
+                    throw new UnauthorizedAccessException("Credentials invalid [E4]");
             }
             catch (ApplicationException)
             {
-                context.Result = new BadRequestObjectResult("Application not configured for API password access.");
+                context.Result = new BadRequestObjectResult("Application not configured for API password access. [E1]");
             }
             catch (UnauthorizedAccessException ex)
             {
