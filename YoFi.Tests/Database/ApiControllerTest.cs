@@ -53,17 +53,7 @@ namespace YoFi.Tests
             // NOTE: This is a unit test password only, not a real credential!!
             var password = "Password1234";
 
-            // https://stackoverflow.com/questions/55497800/populate-iconfiguration-for-unit-tests
-            var strings = new Dictionary<string, string>
-            {
-                { "Api:Key", password },
-                { "Storage:BlobContainerName", "Testing" }
-            };
-            var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(strings)
-                .Build();
-
-            controller = new ApiController(context,configuration,storage);
+            controller = new ApiController(context,storage);
 
             // Need to inject the Auth header into the context.
             // https://stackoverflow.com/questions/41400030/mock-httpcontext-for-unit-testing-a-net-core-mvc-controller
@@ -560,7 +550,7 @@ namespace YoFi.Tests
             var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
 
             // Make a new controller with no storage
-            controller = new ApiController(context, null, null);
+            controller = new ApiController(context);
 
             var result = await controller.UpReceipt(original.ID, file);
 

@@ -1,11 +1,8 @@
-﻿using Common.NET;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core;
 
 namespace Common.AspNet
 {
@@ -14,7 +11,7 @@ namespace Common.AspNet
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var httpcontext = context.HttpContext;
-            var storage = httpcontext.RequestServices.GetService(typeof(IPlatformAzureStorage));
+            var storage = httpcontext.RequestServices.GetService(typeof(IStorageService));
             var config = httpcontext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
 
             if (storage == null)

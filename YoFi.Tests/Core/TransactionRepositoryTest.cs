@@ -57,18 +57,9 @@ namespace YoFi.Tests.Core
         [TestInitialize]
         public void SetUp()
         {
-            // https://stackoverflow.com/questions/55497800/populate-iconfiguration-for-unit-tests
-            var strings = new Dictionary<string, string>
-            {
-                { "Storage:BlobContainerName", "Testing" }
-            };
-            var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(strings)
-                .Build();
-
             context = new MockDataContext();
             var storage = new TestAzureStorage();
-            repository = new TransactionRepository(context,storage:storage,config:configuration);            
+            repository = new TransactionRepository(context,storage:storage);            
         }
 
         [TestMethod]

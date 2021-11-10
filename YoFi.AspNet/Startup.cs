@@ -1,5 +1,4 @@
 ﻿using Common.EFCore;
-using Common.NET;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -125,7 +124,7 @@ namespace YoFi.AspNet.Root
             if (!string.IsNullOrEmpty(storageconnection))
             {
                 logme.Enqueue($"*** AZURESTORAGE *** Found Storage Connection String");
-                services.AddSingleton<IPlatformAzureStorage>(new DotNetAzureStorage(storageconnection));
+                services.AddSingleton<IStorageService>(new Services.AzureStorageService(storageconnection));
             }
         }
 
@@ -166,7 +165,7 @@ namespace YoFi.AspNet.Root
 #endif
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IStorageService storage)
         {
             while (logme.Any())
                 logger.LogInformation(logme.Dequeue());
@@ -216,10 +215,10 @@ namespace YoFi.AspNet.Root
                 x.MapRazorPages();
             });
 
-            SetupBlobContainerName(env.IsDevelopment());
+            storage.ContainerName = SetupBlobContainerName(env.IsDevelopment());
         }
 
-        private void SetupBlobContainerName(bool isdevelopment)
+        private string SetupBlobContainerName(bool isdevelopment)
         {
             // If blob container name is already set, we're good
             var key = "Storage:BlobContainerName";
@@ -236,9 +235,9 @@ namespace YoFi.AspNet.Root
 
                 if (isdevelopment)
                     value += "-development";
-
-                Configuration[key] = value.ToLowerInvariant();
             }
+
+            return value.ToLowerInvariant();
         }
     }
 

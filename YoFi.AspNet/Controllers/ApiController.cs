@@ -1,20 +1,19 @@
 ﻿using Common.AspNet;
-using Common.NET;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
+using YoFi.Core;
 using YoFi.Core.Models;
-using YoFi.Core.Repositories;
 using YoFi.Core.Reports;
+using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -23,14 +22,12 @@ namespace YoFi.AspNet.Controllers
     public class ApiController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IPlatformAzureStorage _storage;
-        private readonly IConfiguration _configuration;
+        private readonly IStorageService _storage;
 
-        public ApiController(ApplicationDbContext context, IConfiguration configuration, IPlatformAzureStorage storage = null)
+        public ApiController(ApplicationDbContext context, IStorageService storage = null)
         {
             _context = context;
             _storage = storage;
-            _configuration = configuration;
         }
 
         [HttpGet]
@@ -228,14 +225,12 @@ namespace YoFi.AspNet.Controllers
                 if (null == _storage)
                     throw new InvalidOperationException("Unable to upload receipt. Azure Blob Storage is not configured for this application.");
 
-                _storage.Initialize();
-
                 string blobname = id.ToString();
 
                 using (var stream = file.OpenReadStream())
                 {
                     // Upload the file
-                    await _storage.UploadToBlob(BlobStoreName, blobname, stream, file.ContentType);
+                    await _storage.UploadBlobAsync(blobname, stream, file.ContentType);
                 }
 
                 // Save it in the Transaction
@@ -493,8 +488,6 @@ namespace YoFi.AspNet.Controllers
                 return new JsonResult(new ApiResult(ex));
             }
         }
-
-        private string BlobStoreName => _configuration["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
     }
 
     public class ApiResult

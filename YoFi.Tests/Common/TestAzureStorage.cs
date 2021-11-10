@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core;
 
 namespace Common.NET.Test
 {
-    public class TestAzureStorage : IPlatformAzureStorage
+    public class TestAzureStorage : IStorageService
     {
         public Dictionary<string, Table> TableStorage = new Dictionary<string, Table>();
 
         public List<BlobItem> BlobItems = new List<BlobItem>();
+
+        string IStorageService.ContainerName { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public Task<bool> DoesBlobExist(string ContainerName, string FileName)
         {
@@ -38,7 +41,7 @@ namespace Common.NET.Test
             throw new NotImplementedException();
         }
 
-        public Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
+        public Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream _, string ContentType)
         {
             // Note that in real-life this is always an async method. Here in test code, we aren't
             // doing anything async. But the signature remains for the interface.
@@ -50,7 +53,7 @@ namespace Common.NET.Test
             return Task.FromResult<Uri>(new Uri("http://www.nytimes.com/"));
         }
 
-        public Task<string> DownloadBlob(string ContainerName, string FileName, Stream stream)
+        public Task<string> DownloadBlob(string _, string FileName, Stream stream)
         {
             var blobitem = BlobItems.Where(x => x.FileName == FileName).SingleOrDefault();
 
@@ -58,7 +61,7 @@ namespace Common.NET.Test
                 throw new ApplicationException("Blob not found");
 
             if (string.IsNullOrEmpty(blobitem.InternalFile))
-                throw new ApplicationException("No intenal file for this blob");
+                throw new ApplicationException("No internal file for this blob");
 
             var filestream = SampleData.Open(blobitem.InternalFile);
 
@@ -66,6 +69,10 @@ namespace Common.NET.Test
 
             return Task.FromResult<string>(blobitem.ContentType);
         }
+
+        Task<Uri> IStorageService.UploadBlobAsync(string filename, Stream stream, string contenttype) => UploadToBlob("Default", filename, stream, contenttype);
+
+        Task<string> IStorageService.DownloadBlobAsync(string filename, Stream stream) => DownloadBlob("Default", filename, stream);
 
         public class Table: List<IReadOnlyDictionary<string, string>>
         {

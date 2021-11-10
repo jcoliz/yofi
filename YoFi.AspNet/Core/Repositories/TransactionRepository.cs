@@ -23,10 +23,9 @@ namespace YoFi.Core.Repositories
         /// <param name="context">Where to find the data we actually contain</param>
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
-        public TransactionRepository(IDataContext context, IConfiguration config,IPlatformAzureStorage storage = null) : base(context)
+        public TransactionRepository(IDataContext context, IStorageService storage = null) : base(context)
         {
             _storage = storage;
-            _config = config;
         }
 
         #region Read
@@ -229,8 +228,7 @@ namespace YoFi.Core.Repositories
 
             string blobname = transaction.ID.ToString();
 
-            _storage.Initialize();
-            await _storage.UploadToBlob(BlobStoreName, blobname, stream, contenttype);
+            await _storage.UploadBlobAsync(blobname, stream, contenttype);
 
             // Save it in the Transaction
             // If there was a problem, UploadToBlob will throw an exception.
@@ -262,9 +260,8 @@ namespace YoFi.Core.Repositories
             if (Int32.TryParse(transaction.ReceiptUrl, out _))
                 name = transaction.ReceiptUrl;
 
-            _storage.Initialize();
             var stream = new MemoryStream();
-            var contenttype = await _storage.DownloadBlob(BlobStoreName, name, stream);
+            var contenttype = await _storage.DownloadBlobAsync(name, stream);
 
             // Work around previous versions which did NOT store content type in blob store.
             if ("application/octet-stream" == contenttype)
@@ -307,11 +304,7 @@ namespace YoFi.Core.Repositories
 
         #region internals
 
-        private readonly IPlatformAzureStorage _storage;
-        private readonly IConfiguration _config;
-
-        // TODO: This is dumb. _storage should know its own blobcontainer name
-        private string BlobStoreName => _config["Storage:BlobContainerName"] ?? throw new ApplicationException("Must define a blob container name");
+        private readonly IStorageService _storage;
 
         #endregion
 
