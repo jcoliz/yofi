@@ -13,7 +13,7 @@ using System.IO;
 using System.Threading;
 using Moq;
 
-namespace YoFi.Tests.Attributers
+namespace YoFi.Tests.Attributes
 {
     [TestClass]
     public class ValidateFilesProvidedAttributeTest
