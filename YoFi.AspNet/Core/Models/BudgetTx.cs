@@ -93,36 +93,4 @@ namespace YoFi.Core.Models
             return Timestamp.Year == other.Timestamp.Year && Timestamp.Month == other.Timestamp.Month && Category == other.Category;
         }
     }
-
-    /// <summary>
-    /// Tells us whether two items are duplicates for the purposes of importing
-    /// </summary>
-    /// <remarks>
-    /// Generally, we don't import duplicates, although some importers override this behavior
-    /// </remarks>
-    class __BudgetTxImportDuplicateComparer : IEqualityComparer<object>
-    {
-        public new bool Equals(object x, object y)
-        {
-            if (x == null || y == null)
-                throw new ArgumentNullException("Only works with BudgetTx items");
-
-            if (!(x is BudgetTx) || !(y is BudgetTx))
-                throw new ArgumentException("Only works with BudgetTx items");
-
-            var itemx = x as BudgetTx;
-            var itemy = y as BudgetTx;
-
-            return itemx.Timestamp.Year == itemy.Timestamp.Year && itemx.Timestamp.Month == itemy.Timestamp.Month && itemx.Category == itemy.Category;
-        }
-        public int GetHashCode(object obj)
-        {
-            if (!(obj is BudgetTx))
-                throw new ArgumentException("Only works with BudgetTx items");
-
-            var item = obj as BudgetTx;
-
-            return HashCode.Combine(item.Timestamp.Year,item.Timestamp.Month,item.Category);
-        }
-    }
 }
