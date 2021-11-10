@@ -1,5 +1,9 @@
 # Reports Architecture
 
+## IReportEngine
+
+The interface defining what the UI will know about reports.
+
 ## ReportBuilder
 
 Builds application-specific reports. This is the top-level entry point for building reports.
@@ -9,10 +13,17 @@ database into reports that will be interesting for the user.
 Mainly ReportBuilder is concerned with creating a Report based on what's specified
 in the ReportDefintion, using QueryBuilder to do the heavy lifting.
 
+- Implements IReportEngine
 - Contains a QueryBuilder
 - Contains ReportDefinitions
 - Produces a Report
 - Consumes an IDataContext (passes it immediately to QueryBuilder)
+
+## ReportParameters
+
+Parameters used to build a report at one moment in time. Data only class
+
+- Refers to ReportDefinition by ID
 
 ## ReportDefinition
 
@@ -39,7 +50,7 @@ a single query in it.
 Architecturally, this class is a challenge. It absolutely represents
 busines logic, and needs to know all about the conceptual structure
 of our data. At the same time, it is tightly bound to the abilities
-of EF Core to general MS SQL Server queries.
+of EF Core to generate MS SQL Server queries.
  
 So, while this class does consume an IDataContext, and therefore has
 interface separation, if we were to provide an IDataContext backed
@@ -108,4 +119,4 @@ Displays an IDisplayReport nicely on an HTML page.
 Contains the data for the application using EF Core
 
 - Implements IDataContext
-- Contains model items which imeplement IReportable
+- Stores model items which implement IReportable
