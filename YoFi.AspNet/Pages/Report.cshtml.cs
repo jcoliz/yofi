@@ -12,7 +12,7 @@ using YoFi.Core.Reports;
 namespace YoFi.AspNet.Pages
 {
     [Authorize(Policy = "CanRead")]
-    public class ReportModel : PageModel
+    public class ReportModel : PageModel, IReportNavbarViewModel
     {
         public ReportModel(IReportEngine _reports)
         {
@@ -21,7 +21,7 @@ namespace YoFi.AspNet.Pages
 
         public ReportParameters Parameters { get; set; }
 
-        public ReportNavbarViewModel NavbarViewModel => new ReportNavbarViewModel() { Parameters = Parameters, Definitions = reports.Definitions };
+        IEnumerable<ReportDefinition> IReportNavbarViewModel.Definitions => reports.Definitions;
 
         public Report Report { get; set; }
 
@@ -125,6 +125,7 @@ namespace YoFi.AspNet.Pages
                 _Now = value;
             }
         }
+
         private DateTime? _Now;
         private readonly IReportEngine reports;
     }

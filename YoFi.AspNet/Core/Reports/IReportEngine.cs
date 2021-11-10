@@ -21,5 +21,12 @@ namespace YoFi.Core.Reports
         /// <param name="parameters">The parameters describing which report and how to build it</param>
         /// <returns>The build report</returns>
         Report Build(ReportParameters parameters);
+
+        /// <summary>
+        /// Build a summary of all report data on one page
+        /// </summary>
+        /// <param name="parameters">The parameters describing how to build it</param>
+        /// <returns>The reports which together form the summary</returns>
+        IEnumerable<IEnumerable<IDisplayReport>> BuildSummary(ReportParameters parameters);
     }
 }

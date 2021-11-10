@@ -10,18 +10,13 @@ using YoFi.Core.Reports;
 namespace YoFi.AspNet.Pages
 {
     [Authorize(Policy = "CanRead")]
-    public class ReportsModel : PageModel
+    public class ReportsModel : PageModel, IReportNavbarViewModel
     {
-        public static List<List<string>> Definitions = new List<List<string>>()
-        {
-            new List<string>() { "income","taxes" },
-            new List<string>() { "expenses", "savings"}
-        };
+        public List<IEnumerable<IDisplayReport>> Reports { get; private set; }
 
-        public List<List<IDisplayReport>> Reports { get; private set; }
-        public ReportParameters Parameters { get; set; }
+        public ReportParameters Parameters { get; private set; }
 
-        public ReportNavbarViewModel NavbarViewModel => new ReportNavbarViewModel() { Parameters = Parameters, Definitions = _reports.Definitions };
+        IEnumerable<ReportDefinition> IReportNavbarViewModel.Definitions => _reports.Definitions;
 
         public ReportsModel(IReportEngine reports)
         {
@@ -34,48 +29,10 @@ namespace YoFi.AspNet.Pages
         {
             Parameters = parms;
             Parameters.id = "summary";
-
-            // Fixup parameter
             if (!Parameters.month.HasValue)
                 Parameters.month = DateTime.Now.Month;
 
-            // Build the reports
-            Reports = Definitions.Select(x => x.Select(y => _reports.Build(new ReportParameters() { id = y, month = Parameters.month })).ToList<IDisplayReport>()).ToList();
-
-            // Calculate the summary
-
-            decimal TotalForReport(string name) => 
-                Reports.SelectMany(x => x).Where(x => x.Name == name).First().GrandTotal;
-
-            // Net Income: Income + Taxes
-
-            var netincome = new ManualReport() { Name = "Net Income", Description = "--" };
-            var incomerow = new RowLabel() { Name = "Income" };
-            var taxesrow = new RowLabel() { Name = "Taxes" };
-            var pctcol = new ColumnLabel() { Name = "% of Income", IsSortingAfterTotal = true, DisplayAsPercent = true };
-            netincome[netincome.TotalColumn, incomerow] = TotalForReport("Income");
-            netincome[pctcol, incomerow] = 1m;
-            netincome[netincome.TotalColumn, taxesrow] = TotalForReport("Taxes");
-            netincome[pctcol, taxesrow] = -TotalForReport("Taxes") / TotalForReport("Income");
-            netincome[netincome.TotalColumn, netincome.TotalRow] = TotalForReport("Income") + TotalForReport("Taxes");
-            netincome[pctcol, netincome.TotalRow] = netincome.GrandTotal / TotalForReport("Income");
-            Reports[0].Add(netincome);
-
-            // Profit: Income + Taxes + Expenses
-
-            var profit = new ManualReport() { Name = "Profit" };
-            var netincomerow = new RowLabel() { Name = "Net Income" };
-            var expensesrow = new RowLabel() { Name = "Expenses" };
-            pctcol = new ColumnLabel() { Name = "% of Net Income", IsSortingAfterTotal = true, DisplayAsPercent = true };
-            profit[profit.TotalColumn, netincomerow] = netincome.GrandTotal;
-            profit[pctcol, netincomerow] = 1m;
-            profit[profit.TotalColumn, expensesrow] = TotalForReport("Expenses");
-            profit[pctcol, expensesrow] = - TotalForReport("Expenses") / netincome.GrandTotal;
-            profit[profit.TotalColumn, profit.TotalRow] = netincome.GrandTotal + TotalForReport("Expenses");
-            profit[pctcol, profit.TotalRow] = (netincome.GrandTotal + TotalForReport("Expenses")) / netincome.GrandTotal;
-            Reports[1].Add(profit);
-
-            // Budget Reports: I think I want Budget vs Expenses on the left, and perhaps managed budget on the right
+            Reports = new List<IEnumerable<IDisplayReport>>(_reports.BuildSummary(Parameters));
         }
     }
 }

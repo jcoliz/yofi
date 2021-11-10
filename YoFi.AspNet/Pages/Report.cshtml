@@ -5,7 +5,7 @@
     ViewData["Title"] = Model.Report.Name;
 }
 
-@await Html.PartialAsync("_ReportNavbarPartial", Model.NavbarViewModel)
+@await Html.PartialAsync("_ReportNavbarPartial", Model)
 
 <h2>@Model.Report.Name</h2>
 
