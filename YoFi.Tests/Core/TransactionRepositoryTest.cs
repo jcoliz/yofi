@@ -61,18 +61,5 @@ namespace YoFi.Tests.Core
             var storage = new TestAzureStorage();
             repository = new TransactionRepository(context,storage:storage);            
         }
-
-        [TestMethod]
-        public override Task Upload()
-        {
-            // TODO: Transactions will need a custom upload test, thanks very much
-            return Task.CompletedTask;
-        }
-        [TestMethod]
-        public override Task UploadAddNewDuplicate()
-        {
-            // TODO: Transactions will need a custom upload test, thanks very much
-            return Task.CompletedTask;
-        }
     }
 }

@@ -14,7 +14,7 @@ namespace YoFi.Core.Models
     /// If a transaction's matches our Name, then it should have this
     /// Category and SubCategory
     /// </remarks>
-    public class Payee: IModelItem<Payee>
+    public class Payee: IModelItem<Payee>, IImportDuplicateComparable
     {
         /// <summary>
         /// Object identity in Entity Framework
@@ -62,8 +62,8 @@ namespace YoFi.Core.Models
             return original.OrderBy(x => x.Category).ThenBy(x=>x.Name);
         }
 
-        int IModelItem<Payee>.GetImportHashCode() => Name?.GetHashCode() ?? 0;
+        int IImportDuplicateComparable.GetImportHashCode() => Name?.GetHashCode() ?? 0;
 
-        bool IModelItem<Payee>.ImportEquals(Payee other) => Name == other?.Name;
+        bool IImportDuplicateComparable.ImportEquals(object other) => other is Payee && Name == (other as Payee).Name;
     }
 }

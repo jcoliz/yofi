@@ -161,24 +161,5 @@ namespace YoFi.Core.Models
         }
 
         IQueryable<Transaction> IModelItem<Transaction>.InDefaultOrder(IQueryable<Transaction> original) => InDefaultOrder(original);
-
-        /// <summary>
-        /// Not implemented. Transactions use their own import duplicate logic
-        /// </summary>
-        /// <remarks>
-        /// TODO: I could move these import duplicate items to their own interface
-        /// </remarks>
-        int IModelItem<Transaction>.GetImportHashCode()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Not implemented. Transactions use their own import duplicate logic
-        /// </summary>
-        bool IModelItem<Transaction>.ImportEquals(Transaction other)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -13,7 +13,7 @@ namespace YoFi.Core.Importers
     /// Generic importer for all types which follow the simple import logic
     /// </summary>
     /// <typeparam name="T">Type to import</typeparam>
-    public class BaseImporter<T> : IImporter<T>, IEqualityComparer<T> where T : class, IModelItem<T>, new()
+    public class BaseImporter<T> : IImporter<T>, IEqualityComparer<T> where T : class, IModelItem<T>, IImportDuplicateComparable, new()
     {
         /// <summary>
         /// Constructor

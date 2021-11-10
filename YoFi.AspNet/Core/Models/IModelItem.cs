@@ -16,19 +16,5 @@ namespace YoFi.Core.Models
         /// </summary>
         /// <param name="original"></param>
         IQueryable<T> InDefaultOrder(IQueryable<T> original);
-
-        /// <summary>
-        /// Get a hash code base on the uniqueness defined in ImportEquals
-        /// </summary>
-        /// <returns>The hash code</returns>
-        int GetImportHashCode();
-
-        /// <summary>
-        /// Whether this object is equal to <paramref name="other"/> for the purposes
-        /// of import. That is, whether the other object is a duplicate during import
-        /// </summary>
-        /// <param name="other"></param>
-        /// <returns>'true' if is an import duplicate of <paramref name="other"/></returns>
-        bool ImportEquals(T other);
     }
 }

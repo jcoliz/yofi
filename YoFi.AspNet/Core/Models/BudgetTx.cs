@@ -14,7 +14,7 @@ namespace YoFi.Core.Models
     /// Represents a single expected outlay of money into a specific account
     /// in a specific timeframe.
     /// </remarks>
-    public class BudgetTx: IReportable, IModelItem<BudgetTx>
+    public class BudgetTx: IReportable, IModelItem<BudgetTx>, IImportDuplicateComparable
     {
         /// <summary>
         /// Object identity in Entity Framework
@@ -82,15 +82,20 @@ namespace YoFi.Core.Models
             return original.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category);
         }
 
-        int IModelItem<BudgetTx>.GetImportHashCode() =>
+        int IImportDuplicateComparable.GetImportHashCode() =>
             HashCode.Combine(Timestamp.Year, Timestamp.Month, Category);
 
-        bool IModelItem<BudgetTx>.ImportEquals(BudgetTx other)
+        bool IImportDuplicateComparable.ImportEquals(object other)
         {
             if (other == null)
                 throw new ArgumentNullException(nameof(other));
 
-            return Timestamp.Year == other.Timestamp.Year && Timestamp.Month == other.Timestamp.Month && Category == other.Category;
+            if (! (other is BudgetTx))
+                throw new ArgumentException(nameof(other),"Expected BudgetTx");
+
+            var item = other as BudgetTx;
+
+            return Timestamp.Year == item.Timestamp.Year && Timestamp.Month == item.Timestamp.Month && Category == item.Category;
         }
     }
 }

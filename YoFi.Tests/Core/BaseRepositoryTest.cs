@@ -48,24 +48,6 @@ namespace YoFi.Tests.Core
         /// <returns>-1 if <paramref name="x"/> comes before <paramref name="y"/></returns>
         protected abstract int CompareKeys(T x, T y);
 
-
-        protected async Task<IEnumerable<T>> WhenImportingItemsAsSpreadsheet(IEnumerable<T> expected)
-        {
-            // Given: A spreadsheet with items as given
-            using var stream = new MemoryStream();
-            {
-                using var ssw = new SpreadsheetWriter();
-                ssw.Open(stream);
-                ssw.Serialize(expected);
-            }
-            stream.Seek(0, SeekOrigin.Begin);
-
-            // When: Importing it via an importer
-            var importer = new BaseImporter<T>(repository);
-            importer.QueueImportFromXlsx(stream);
-            return await importer.ProcessImportAsync();
-        }
-
         [TestMethod]
         public void Empty()
         {
@@ -232,37 +214,6 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(expected.SequenceEqual(actual));
         }
 
-        [TestMethod]
-        public virtual async Task Upload()
-        {
-            // Given: A spreadsheet with five items
-            var expected = Items.Take(5);
 
-            // When: Importing it via an importer
-            await WhenImportingItemsAsSpreadsheet(expected);
-
-            // Then: The expected items are in the dataset
-            Assert.IsTrue(context.Get<T>().SequenceEqual(expected));
-        }
-
-        [TestMethod]
-        public virtual async Task UploadAddNewDuplicate()
-        {
-            // Given: Five items in the data set
-            var expected = Items.Take(5).ToList();
-            context.AddRange(expected);
-
-            // When: Uploading three new items, one of which the same as an already existing item
-            // NOTE: These items are not EXACTLY duplicates, just duplicate enough to trigger the
-            // hashset equality constraint on input.
-            var upload = Items.Skip(5).Take(2).Concat(await DeepCopy.MakeDuplicateOf(expected.Take(1)));
-            var actual = await WhenImportingItemsAsSpreadsheet(upload);
-
-            // Then: Only two items were imported, because one exists
-            Assert.AreEqual(2, actual.Count());
-
-            // And: The data set now includes seven (not eight) items
-            Assert.AreEqual(7, context.Get<T>().Count());
-        }
     }
 }
