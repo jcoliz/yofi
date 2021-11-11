@@ -1,9 +1,6 @@
 ﻿using Ardalis.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
@@ -44,7 +41,7 @@ namespace YoFi.AspNet.Controllers
         public async Task<IActionResult> Add([Bind("Name,Category")] Payee payee)
         {
             await _repository.AddAsync(payee);
-            return new ObjectResult(new ApiResult(payee));
+            return new ObjectResult(payee);
         }
 
         [HttpPost("edit/{id}")]
@@ -55,7 +52,7 @@ namespace YoFi.AspNet.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category")] Payee payee)
         {
             await _repository.UpdateAsync(payee);
-            return new ObjectResult(new ApiResult(payee));
+            return new ObjectResult(payee);
         }
     }
 }

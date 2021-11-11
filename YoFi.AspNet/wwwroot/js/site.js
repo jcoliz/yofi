@@ -109,12 +109,8 @@
             beforeSend: xsrf,
             data: $(this).serialize(),
             success: function (result) {
-                if (result.Ok) {
-                    tr.find('.display-payee').text(result.Item.Name);
-                    tr.find(".display-category").text(result.Item.Category);
-                }
-                else
-                    alert(result.Error);
+                tr.find('.display-payee').text(result.Name);
+                tr.find(".display-category").text(result.Category);
             },
             error: function (request, status, error) {
                 alert(status + ": " + error);
@@ -134,10 +130,7 @@
             beforeSend: xsrf,
             data: $(this).serialize(),
             success: function (result) {
-                if (result.Ok)
-                    applyPayee(tr);
-                else
-                    alert(result.Error);
+                applyPayee(tr);
             },
             error: function (request, status, error) {
                 alert(status + ": " + error);
