@@ -144,52 +144,6 @@ namespace YoFi.Tests
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
         [TestMethod]
-        public async Task HideId()
-        {
-            await AddFiveTransactions();
-            var expected = await context.Transactions.FirstAsync();
-
-            var result = await controller.HideTransaction(expected.ID,true);
-
-            Assert.IsTrue(result.Ok);
-            Assert.IsTrue(true == expected.Hidden);
-        }
-        [TestMethod]
-        public async Task HideIdFails()
-        {
-            await AddFiveTransactions();
-            var maxid = await context.Transactions.MaxAsync(x => x.ID);
-
-            var result = await controller.HideTransaction(maxid + 1,true);
-
-            Assert.IsFalse(result.Ok);
-            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
-        }
-        [TestMethod]
-        public async Task ShowId()
-        {
-            await AddFiveTransactions();
-            var expected = await context.Transactions.FirstAsync();
-            expected.Hidden = true;
-            await context.SaveChangesAsync();
-
-            var result = await controller.HideTransaction(expected.ID,false);
-
-            Assert.IsTrue(result.Ok);
-            Assert.IsTrue(false == expected.Hidden);
-        }
-        [TestMethod]
-        public async Task ShowIdFails()
-        {
-            await AddFiveTransactions();
-            var maxid = await context.Transactions.MaxAsync(x => x.ID);
-
-            var result = await controller.HideTransaction(maxid + 1,false);
-
-            Assert.IsFalse(result.Ok);
-            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
-        }
-        [TestMethod]
         public async Task ApplyPayee()
         {
             await AddFivePayees();

@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
@@ -87,8 +86,32 @@ namespace YoFi.Tests.Database
             var actionresult = await controller.Select(expected.ID, false);
 
             Assert.That.IsOfType<OkResult>(actionresult);
-
             Assert.IsTrue(false == expected.Selected);
+        }
+        [TestMethod]
+        public async Task Hide()
+        {
+            await AddFive();
+            var expected = repository.All.First();
+            await repository.UpdateAsync(expected);
+
+            var actionresult = await controller.Hide(expected.ID, true);
+
+            Assert.That.IsOfType<OkResult>(actionresult);
+            Assert.IsTrue(true == expected.Hidden);
+        }
+        [TestMethod]
+        public async Task Show()
+        {
+            await AddFive();
+            var expected = repository.All.First();
+            expected.Hidden = true;
+            await repository.UpdateAsync(expected);
+
+            var actionresult = await controller.Hide(expected.ID, false);
+
+            Assert.That.IsOfType<OkResult>(actionresult);
+            Assert.IsTrue(false == expected.Hidden);
         }
     }
 }
