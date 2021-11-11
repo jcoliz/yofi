@@ -43,7 +43,7 @@ namespace YoFi.Tests.Attributes
         private void ThenBadRequest(ActionExecutingContext context)
         {
             // Then: Bad request or bad request object result
-            Assert.IsNotNull(context);
+            Assert.IsNotNull(context.Result);
 
             if (!(context.Result is BadRequestObjectResult))
                 Assert.That.IsOfType<BadRequestResult>(context.Result);

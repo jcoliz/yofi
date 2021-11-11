@@ -34,10 +34,10 @@ namespace YoFi.AspNet.Controllers
 
     internal class ValidateItemExists<T> : IAsyncActionFilter where T : class, IModelItem<T>
     {
-        private readonly IRepository<T> _datacontext;
+        private readonly IRepository<T> _repository;
         public ValidateItemExists(IRepository<T> repository)
         {
-            _datacontext = repository;
+            _repository = repository;
         }
         public async Task OnActionExecutionAsync(ActionExecutingContext context,
           ActionExecutionDelegate next)
@@ -47,7 +47,7 @@ namespace YoFi.AspNet.Controllers
                 var id = context.ActionArguments["id"] as int?;
                 if (id.HasValue)
                 {
-                    if (!await _datacontext.TestExistsByIdAsync(id.Value))
+                    if (!await _repository.TestExistsByIdAsync(id.Value))
                     {
                         context.Result = new NotFoundResult();
                         return;
