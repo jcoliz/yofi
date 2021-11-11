@@ -11,16 +11,12 @@ namespace YoFi.AspNet.Controllers
     [Route("ajax/payee")]
     public class AjaxPayeeController: Controller
     {
-        #region Fields
         private readonly IPayeeRepository _repository;
-        #endregion
 
-        #region Constructor
         public AjaxPayeeController(IPayeeRepository repository) 
         {
             _repository = repository;
         }
-        #endregion
 
         [HttpPost("select/{id}")]
         [ValidateAntiForgeryToken]
