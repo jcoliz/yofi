@@ -140,14 +140,14 @@
                 {
                     <td>
                         @{ var checkedornot = (item.Hidden == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Hide/@item.ID" >
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID" >
                     </td>
                 }
                 @if (Model.ShowSelected)
                 {
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Select/@item.ID" data-test-id="check-select">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select">
                     </td>
                 }
                 <td>
