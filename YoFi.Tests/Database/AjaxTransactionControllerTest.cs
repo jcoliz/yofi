@@ -140,6 +140,23 @@ namespace YoFi.Tests.Database
         [TestMethod]
         public async Task ApplyPayee()
         {
+            await repository.AddAsync
+            (
+                new Transaction() { Category = "BB:AA", Payee = "notfound", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m }
+            );
+
+            var payeeRepository = new PayeeRepository(context);
+            await AjaxPayeeControllerTest.AddFive(payeeRepository);
+            var expected = repository.All.Last();
+
+            var actionresult = await controller.ApplyPayee(expected.ID, payeeRepository);
+
+            Assert.That.IsOfType<NotFoundObjectResult>(actionresult);
+        }
+
+        [TestMethod]
+        public async Task ApplyPayeeNotFound()
+        {
             await AddFive();
             var payeeRepository = new PayeeRepository(context);
             await AjaxPayeeControllerTest.AddFive(payeeRepository);
@@ -178,5 +195,24 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(expectedpayee.Category, itemresult);
             Assert.AreEqual(expectedpayee.Category, expected.Category);
         }
+
+        [TestMethod]
+        public async Task CategoryAutocomplete()
+        {
+            // Given: A set of five transactions, some with {word} in their category, some not
+            await AddFive();
+
+            // When: Calling CategoryAutocomplete with '{word}'
+            var word = "BB";
+            var actionresult = controller.CategoryAutocomplete(word);
+
+            // Then: All of the categories from given items which contain '{word}' are returned
+            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            var itemresult = Assert.That.IsOfType<IEnumerable<string>>(objresult.Value);
+            var expected = repository.All.Select(x => x.Category).Distinct().Where(c => c.Contains(word)).ToList();
+
+            Assert.IsTrue(itemresult.SequenceEqual(expected));
+        }
+
     }
 }

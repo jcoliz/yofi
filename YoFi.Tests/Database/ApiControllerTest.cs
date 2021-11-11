@@ -86,17 +86,6 @@ namespace YoFi.Tests
             await context.SaveChangesAsync();
         }
 
-        async Task AddFivePayees()
-        {
-            context.Payees.Add(new Payee() { Category = "Y", Name = "3" });
-            context.Payees.Add(new Payee() { Category = "X", Name = "2" });
-            context.Payees.Add(new Payee() { Category = "Z", Name = "5" });
-            context.Payees.Add(new Payee() { Category = "X", Name = "1" });
-            context.Payees.Add(new Payee() { Category = "Y", Name = "4" });
-
-            await context.SaveChangesAsync();
-        }
-
         async Task AddFiveBudgetTxs()
         {
             context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 06, 01), Category = "BB:BB", Amount = 100m });
@@ -602,21 +591,6 @@ namespace YoFi.Tests
             var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
 
             Assert.IsTrue(actionresult is UnauthorizedResult);
-        }
-
-        [TestMethod]
-        public async Task CategoryAutocomplete()
-        {
-            // Given: A set of five transactions, some with {word} in their category, some not
-            await AddFiveTransactions();
-
-            // When: Calling CategoryAutocomplete with '{word}'
-            var word = "BB";
-            var result = controller.CategoryAutocomplete(word);
-
-            // Then: All of the categories from given items which contain '{word}' are returned
-            var expected = await context.Transactions.Select(x=>x.Category).Distinct().Where(c => c.Contains(word)).ToListAsync();
-            CollectionAssert.AreEqual(expected, result);
         }
 
         async Task<IEnumerable<Transaction>> WhenCallingGetTxWithQ(string q)
