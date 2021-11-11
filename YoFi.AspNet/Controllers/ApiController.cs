@@ -54,51 +54,6 @@ namespace YoFi.AspNet.Controllers
 
         #region Ajax Handlers
 
-        [HttpPost("ApplyPayee/{id}")]
-        [Authorize(Policy = "CanWrite")]
-        public async Task<ApiResult> ApplyPayee(int id)
-        {
-            try
-            {
-                var transaction = await LookupTransactionAsync(id);
-
-                // Handle payee auto-assignment
-
-                Payee payee = null;
-
-                // Product Backlog Item 871: Match payee on regex, optionally
-                var regexpayees = _context.Payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
-                foreach (var regexpayee in regexpayees)
-                {
-                    var regex = new Regex(regexpayee.Name[1..^2]);
-                    if (regex.Match(transaction.Payee).Success)
-                    {
-                        payee = regexpayee;
-                        break;
-                    }
-                }
-
-                // See if the payee exists outright
-                if (payee == null)
-                {
-                    payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
-                }
-
-                if (payee == null)
-                    throw new KeyNotFoundException("Payee unknown");
-
-                transaction.Category = payee.Category;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-
-                return new ApiResult(payee);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
         [HttpPost("UpReceipt/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]

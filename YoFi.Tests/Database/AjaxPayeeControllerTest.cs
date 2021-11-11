@@ -19,9 +19,11 @@ namespace YoFi.Tests.Database
         private IPayeeRepository repository;
         private ApplicationDbContext context;
 
-        async Task AddFive()
+        Task AddFive() => AddFive(repository);
+
+        public static async Task AddFive(IRepository<Payee> __repository)
         {
-            await repository.AddRangeAsync
+            await __repository.AddRangeAsync
             (
                 new List<Payee>()
                 {

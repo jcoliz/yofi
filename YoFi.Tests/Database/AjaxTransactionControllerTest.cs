@@ -136,5 +136,47 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(newitem.Payee, actual.Payee);
             Assert.AreNotEqual(original.Payee, actual.Payee);
         }
+
+        [TestMethod]
+        public async Task ApplyPayee()
+        {
+            await AddFive();
+            var payeeRepository = new PayeeRepository(context);
+            await AjaxPayeeControllerTest.AddFive(payeeRepository);
+            var expected = repository.All.Last();
+            var expectedpayee = payeeRepository.All.Where(x => x.Name == expected.Payee).Single();
+
+            var actionresult = await controller.ApplyPayee(expected.ID, payeeRepository);
+
+            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            var itemresult = Assert.That.IsOfType<string>(objresult.Value);
+
+            Assert.AreEqual(expectedpayee.Category, itemresult);
+            Assert.AreEqual(expectedpayee.Category, expected.Category);
+        }
+
+        [DataTestMethod]
+        [DataRow("1234567 Bobby XN April 2021 5 wks")]
+        [DataRow("1234567 Bobby MAR XN")]
+        [DataRow("1234567 Jan XN ")]
+        public async Task ApplyPayeeRegex_Pbi871(string name)
+        {
+            // Product Backlog Item 871: Match payee on regex, optionally
+
+            var expected = new Transaction() { Payee = name, Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+            await repository.AddAsync(expected);
+
+            var payeeRepository = new PayeeRepository(context);
+            var expectedpayee = new Payee() { Category = "Y", Name = "/1234567.*XN/" };
+            await payeeRepository.AddAsync(expectedpayee);
+
+            var actionresult = await controller.ApplyPayee(expected.ID,payeeRepository);
+
+            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            var itemresult = Assert.That.IsOfType<string>(objresult.Value);
+
+            Assert.AreEqual(expectedpayee.Category, itemresult);
+            Assert.AreEqual(expectedpayee.Category, expected.Category);
+        }
     }
 }
