@@ -119,26 +119,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        [HttpPost("Select/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<ApiResult> SelectTransaction(int id, bool value)
-        {
-            try
-            {
-                var transaction = await LookupTransactionAsync(id);
-
-                transaction.Selected = value;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-
-                return new ApiResult();
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
