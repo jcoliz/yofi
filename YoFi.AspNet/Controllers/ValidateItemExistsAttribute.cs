@@ -47,7 +47,7 @@ namespace YoFi.AspNet.Controllers
                 var id = context.ActionArguments["id"] as int?;
                 if (id.HasValue)
                 {
-                    if (!await _repository.TestExistsByIdAsync(id.Value))
+                    if (! (await _repository.TestExistsByIdAsync(id.Value)))
                     {
                         context.Result = new NotFoundResult();
                         return;

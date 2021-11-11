@@ -10,7 +10,10 @@
             url: this.dataset.endpoint,
             data: { value: $(this).is(":checked") },
             beforeSend: xsrf,
-            type: "POST"
+            type: "POST",
+            error: function (request, status, error) {
+                alert(status + ": " + error);
+            }
         });
     });
 
@@ -98,9 +101,10 @@
     {
         event.preventDefault();
         var tr = $(this).data('tr');
+        var id = tr.data('id');
 
         $.ajax({
-            url: "/ajax/payee/edit/5",
+            url: "/ajax/payee/edit/"+id,
             type: "POST",
             beforeSend: xsrf,
             data: $(this).serialize(),
@@ -220,8 +224,9 @@ function applyPayee(tr)
         url: "/api/ApplyPayee/" + id,
         type: "POST",
         success: function (result) {
-            if (result.Ok)
+            if (result.Ok) {
                 tr.find(".display-category").text(result.Item.Category);
+            }
             else
                 alert(result.Error);
         },
