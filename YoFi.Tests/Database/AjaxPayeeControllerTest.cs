@@ -19,7 +19,7 @@ namespace YoFi.Tests.Database
         private IPayeeRepository repository;
         private ApplicationDbContext context;
 
-        async Task AddFivePayees()
+        async Task AddFive()
         {
             await repository.AddRangeAsync
             (
@@ -61,9 +61,9 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task SelectPayeeId()
+        public async Task Select()
         {
-            await AddFivePayees();
+            await AddFive();
             var expected = repository.All.First();
 
             var actionresult = await controller.Select(expected.ID, true);
@@ -74,9 +74,9 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task DeselectPayeeId()
+        public async Task Deselect()
         {
-            await AddFivePayees();
+            await AddFive();
             var expected = repository.All.First();
             expected.Selected = true;
             await repository.UpdateAsync(expected);
@@ -89,7 +89,7 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task AddPayee()
+        public async Task Add()
         {
             var expected = new Payee() { Category = "B", Name = "3" };
 
@@ -101,9 +101,9 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task EditPayee()
+        public async Task Edit()
         {
-            await AddFivePayees();
+            await AddFive();
             var take1 = repository.All.Take(1);
             var original = take1.First();
             var id = original.ID;
