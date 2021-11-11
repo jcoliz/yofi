@@ -211,14 +211,10 @@ function applyPayee(tr)
     var id = tr.data('id');
 
     $.ajax({
-        url: "/api/ApplyPayee/" + id,
+        url: "/ajax/tx/applypayee/" + id,
         type: "POST",
         success: function (result) {
-            if (result.Ok) {
-                tr.find(".display-category").text(result.Item.Category);
-            }
-            else
-                alert(result.Error);
+            tr.find(".display-category").text(result);
         },
         error: function (request, status, error) {
             alert(status + ": " + error);

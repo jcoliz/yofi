@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -58,6 +57,24 @@ namespace YoFi.AspNet.Controllers
             item.Category = edited.Category;
             await _repository.UpdateAsync(item);
             return new ObjectResult(item);
+        }
+
+        [HttpPost("applypayee/{id}")]
+        [Authorize(Policy = "CanWrite")]
+        [ValidateTransactionExists]
+        public async Task<IActionResult> ApplyPayee(int id, [FromServices] IPayeeRepository payeeRepository)
+        {
+            var item = await _repository.GetByIdAsync(id);
+
+            var category = await payeeRepository.GetCategoryMatchingPayeeAsync(item.StrippedPayee);
+            if (category != null)
+            {
+                item.Category = category;
+                await _repository.UpdateAsync(item);
+                return new OkObjectResult(category);
+            }
+            else
+                return new NotFoundObjectResult($"Payee {item.StrippedPayee} not found");
         }
 
         [HttpGet("cat-ac")]
