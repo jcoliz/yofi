@@ -18,3 +18,13 @@ is not as much of a big deal.
 
 It's possible that this directory could go away in the future once I have proper integration tests that run
 through the request/response pipeline, through application logic, all the way into the database.
+
+## Common
+
+Common Test Components. Application-independent componenets which may be useful in other similiar projects
+as well.
+
+## Helpers
+
+Application dependent helper classes which provide functionality that can be use across many tests. 
+Anything that takes a dependency on a YoFi namespace is a helper, as opposed to "Common" items which take no YoFi dependency.

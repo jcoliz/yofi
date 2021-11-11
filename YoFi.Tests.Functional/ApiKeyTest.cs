@@ -49,11 +49,14 @@ namespace YoFi.Tests.Functional
             // When: Get transactions with a query parameter, which will be found only in payees
             // Note: Be careful not to include a term that will also show up in categories, or 
             // will have to refactor this test
-            var q = "Tim";
+            var q = "Ralphs";
             var response = await WhenRequesting($"txi/?q={q}");
 
-            // Then: Returns 58 items
-            Assert.AreEqual(58, response.GetArrayLength());
+            // NOTE: This needs to be something that's stable across database resets. Which means
+            // it needs to be something that's NOT a payee in a multi-payee sample data pattern.
+
+            // Then: Returns 52 items
+            Assert.AreEqual(52, response.GetArrayLength());
 
             // And: All items contain the query parameter in the payee
             var payees = response.EnumerateArray().Select(x => x.GetProperty("Payee").GetString());
