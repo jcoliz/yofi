@@ -100,7 +100,7 @@
         var tr = $(this).data('tr');
 
         $.ajax({
-            url: "/api/EditPayee/5",
+            url: "/ajax/payee/edit/5",
             type: "POST",
             beforeSend: xsrf,
             data: $(this).serialize(),
@@ -125,7 +125,7 @@
         var tr = $(this).data('tr');
 
         $.ajax({
-            url: "/api/AddPayee/",
+            url: "/ajax/payee/add/",
             type: "POST",
             beforeSend: xsrf,
             data: $(this).serialize(),
