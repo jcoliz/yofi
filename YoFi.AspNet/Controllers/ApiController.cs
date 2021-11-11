@@ -99,59 +99,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        [HttpPost("Hide/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<ApiResult> HideTransaction(int id, bool value)
-        {
-            try
-            {
-                var transaction = await LookupTransactionAsync(id);
-
-                transaction.Hidden = value;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-
-                return new ApiResult();
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
-        [HttpPost("Edit/{id}")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Policy = "CanWrite")]
-        public async Task<ApiResult> EditTransaction(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Transaction transaction)
-        {
-            try
-            {
-                if (id != transaction.ID && duplicate != true)
-                    throw new Exception("not found");
-
-                if (!ModelState.IsValid)
-                    throw new Exception("invalid");
-
-                if (duplicate == true)
-                {
-                    transaction.ID = 0;
-                    _context.Add(transaction);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
-                }
-
-                return new ApiResult(transaction);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
         [HttpPost("UpReceipt/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]

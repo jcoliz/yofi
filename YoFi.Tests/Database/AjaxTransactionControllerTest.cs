@@ -113,5 +113,28 @@ namespace YoFi.Tests.Database
             Assert.That.IsOfType<OkResult>(actionresult);
             Assert.IsTrue(false == expected.Hidden);
         }
+
+        [TestMethod]
+        public async Task Edit()
+        {
+            await AddFive();
+            var original = repository.All.First();
+
+            // detach the original so we have an unmodified copy around
+            context.Entry(original).State = EntityState.Detached;
+
+            var newitem = new Transaction() { ID = original.ID, Payee = "I have edited you!", Category = original.Category, Memo = original.Memo };
+
+            var actionresult = await controller.Edit(original.ID, newitem);
+
+            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            var itemresult = Assert.That.IsOfType<Transaction>(objresult.Value);
+            Assert.AreEqual(newitem.Payee, itemresult.Payee);
+            Assert.AreNotEqual(original, itemresult);
+
+            var actual = await repository.All.Where(x => x.ID == original.ID).SingleAsync();
+            Assert.AreEqual(newitem.Payee, actual.Payee);
+            Assert.AreNotEqual(original.Payee, actual.Payee);
+        }
     }
 }

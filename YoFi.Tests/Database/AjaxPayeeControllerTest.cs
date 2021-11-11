@@ -122,7 +122,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(newitem, objresult.Value);
             Assert.AreNotEqual(original, objresult.Value);
 
-            var actual = await context.Payees.Where(x => x.ID == id).SingleAsync();
+            var actual = await repository.All.Where(x => x.ID == id).SingleAsync();
             Assert.AreEqual(newitem, actual);
             Assert.AreNotEqual(copy, actual);
         }
