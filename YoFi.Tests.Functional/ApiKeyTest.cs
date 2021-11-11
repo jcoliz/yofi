@@ -32,16 +32,6 @@ namespace YoFi.Tests.Functional
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64);
         }
 
-        [TestMethod]
-        public async Task Get()
-        {
-            // When: Calling API with no parameters
-            var response = await WhenRequesting(string.Empty);
-
-            // Then: Returns an OK response
-            var ok = response.GetProperty("Ok").GetBoolean();
-            Assert.IsTrue(ok);
-        }
 
         [TestMethod]
         public async Task GetTxi()
@@ -79,31 +69,23 @@ namespace YoFi.Tests.Functional
             return root;
         }
 
-        public async Task<JsonElement> WhenPosting(string url, HttpContent content)
+        public async Task WhenPosting(string url, HttpContent content)
         {
             // When: Requesting {url} from server
             var response = await client.PostAsync(url,content);
 
             // Then: Response is OK
             Assert.IsTrue(response.IsSuccessStatusCode);
-
-            // And: Returns a json document for further inspection
-            var stream = await response.Content.ReadAsStreamAsync();
-            var doc = await JsonDocument.ParseAsync(stream);
-            var root = doc.RootElement;
-
-            return root;
         }
 
         [DataRow("payee")]
         [DataTestMethod]
         public async Task ClearTestData(string what)
         {
-            var response = await WhenPosting("ClearTestData/" + what, null);
+            // When: Requesting to clear test data
+            await WhenPosting("ClearTestData/" + what, null);
 
-            // Then: Returns an OK response
-            var ok = response.GetProperty("Ok").GetBoolean();
-            Assert.IsTrue(ok);
+            // Then: Response is OK
         }
     }
 }

@@ -1,17 +1,9 @@
 ﻿using Common.AspNet;
-using jcoliz.OfficeOpenXml.Serializer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using YoFi.AspNet.Data;
 using YoFi.Core;
-using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
 
@@ -21,78 +13,28 @@ namespace YoFi.AspNet.Controllers
     [Route("api")]
     public class ApiController : Controller
     {
-        #region Fields
-        private readonly ApplicationDbContext _context;
-        #endregion
-
-        #region Constructor
-        public ApiController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-        #endregion
-
-        #region Internals
-        private async Task<Transaction> LookupTransactionAsync(int id,bool splits = false)
-        {
-            IQueryable<Transaction> transactions;
-            transactions = _context.Transactions.Where(m => m.ID == id);
-            if (splits)
-                transactions = transactions.Include(x => x.Splits);
-
-            var any = await transactions.AnyAsync();
-            if (!any)
-                throw new KeyNotFoundException("Item not found");
-
-            var single = await transactions.SingleAsync();
-            return single;
-        }
-
-        #endregion
-
-        #region External API
-
-        [HttpGet]
-        [ApiBasicAuthorization]
-        public ApiResult Get()
-        {
-            return new ApiResult();
-        }
-
         [HttpGet("{id}", Name = "Get")]
         [ApiBasicAuthorization]
-        public async Task<ApiResult> Get(int id)
+        [ValidateTransactionExists]
+        public async Task<IActionResult> Get(int id, [FromServices] ITransactionRepository repository)
         {
-            try
-            {
-                return new ApiResult(await LookupTransactionAsync(id));
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
+            return new OkObjectResult(await repository.GetByIdAsync(id));
         }
 
         [HttpGet("ReportV2/{id}")]
         [ApiBasicAuthorization]
         public IActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
         {
-            var result = reports.Build(parms);
-            var json = result.ToJson();
-
+            var json = reports.Build(parms).ToJson();
             return Content(json,"application/json");
         }
 
         [HttpGet("txi")]
         [ApiBasicAuthorization]
-        public async Task<IActionResult> GetTransactions(string q = null)
+        public async Task<IActionResult> GetTransactions([FromServices] ITransactionRepository repository, string q = null)
         {
-            var qbuilder = new TransactionsQueryBuilder(_context.Transactions);
-            qbuilder.Build(q);
-
-            return new JsonResult(await qbuilder.Query.ToListAsync());
+            return new OkObjectResult(await repository.ForQuery(q).ToListAsync());
         }
-
 
         /// <summary>
         /// Remove all test data from the system
@@ -104,76 +46,25 @@ namespace YoFi.AspNet.Controllers
         /// <returns></returns>
         [HttpPost("ClearTestData/{id}")]
         [ApiBasicAuthorization]
-        public async Task<IActionResult> ClearTestData(string id)
+        public async Task<IActionResult> ClearTestData(string id, [FromServices] IDataContext context)
         {
             const string testmarker = "__test__";
 
-            try
+            if (id.Contains("payee"))
+                context.RemoveRange(context.Payees.Where(x => x.Category.Contains(testmarker)));
+
+            if (id.Contains("budgettx"))
+                context.RemoveRange(context.BudgetTxs.Where(x => x.Category.Contains(testmarker)));
+
+            if (id.Contains("trx"))
             {
-                if (id.Contains("payee"))
-                    _context.Payees.RemoveRange(_context.Payees.Where(x => x.Category.Contains(testmarker)));
-
-                if (id.Contains("budgettx"))
-                    _context.BudgetTxs.RemoveRange(_context.BudgetTxs.Where(x => x.Category.Contains(testmarker)));
-
-                if (id.Contains("trx"))
-                {
-                    _context.Transactions.RemoveRange(_context.Transactions.Where(x => x.Category.Contains(testmarker) || x.Memo.Contains(testmarker)));
-                    _context.Splits.RemoveRange(_context.Splits.Where(x => x.Category.Contains(testmarker)));
-                }
-
-                await _context.SaveChangesAsync();
-
-                return new JsonResult(new ApiResult());
+                context.RemoveRange(context.Transactions.Where(x => x.Category.Contains(testmarker) || x.Memo.Contains(testmarker)));
+                context.RemoveRange(context.Splits.Where(x => x.Category.Contains(testmarker)));
             }
-            catch (Exception ex)
-            {
-                return new JsonResult(new ApiResult(ex));
-            }
-        }
 
-        #endregion
-    }
+            await context.SaveChangesAsync();
 
-    /// <summary>
-    /// The standard result type we return from these APIs
-    /// </summary>
-    public class ApiResult
-    {
-        /// <summary>
-        /// Whether the request was successful
-        /// </summary>
-        public bool Ok { get; set; } = true;
-
-        /// <summary>
-        /// Item returned in the request
-        /// </summary>
-        public object Item { get; private set; } = null;
-
-        /// <summary>
-        /// Error encountered, only set if OK == false
-        /// </summary>
-        public string Error { get; private set; } = null;
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public ApiResult() { }
-
-        /// <summary>
-        /// Typical constructor
-        /// </summary>
-        /// <param name="o">Object result</param>
-        public ApiResult(object o)
-        {
-            if (o is Exception)
-            {
-                var ex = o as Exception;
-                Error = $"{ex.GetType().Name}: {ex.Message}";
-                Ok = false;
-            }
-            else
-                Item = o;
+            return new OkResult();
         }
     }
 }

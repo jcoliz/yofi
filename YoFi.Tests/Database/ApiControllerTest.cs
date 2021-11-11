@@ -1,4 +1,5 @@
 ﻿using Common.AspNet.Test;
+using Common.DotNet.Test;
 using Common.NET.Test;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +18,9 @@ using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 using YoFi.Core.Reports;
+using YoFi.Core.Repositories;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Database
 {
     [TestClass]
     public class ApiControllerTest
@@ -47,20 +49,8 @@ namespace YoFi.Tests
                 .Options;
 
             context = new ApplicationDbContext(options);
-
             storage = new TestAzureStorage();
-
-            // NOTE: This is a unit test password only, not a real credential!!
-            var password = "Password1234";
-
-            controller = new ApiController(context);
-
-            // Need to inject the Auth header into the context.
-            // https://stackoverflow.com/questions/41400030/mock-httpcontext-for-unit-testing-a-net-core-mvc-controller
-            var http = new DefaultHttpContext();
-            var userpass = $"user:{password}";
-            http.Request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(userpass)));
-            controller.ControllerContext = new ControllerContext() { HttpContext = http };
+            controller = new ApiController();
         }
 
         [TestCleanup]
@@ -104,35 +94,255 @@ namespace YoFi.Tests
         }
 
         [TestMethod]
-        public void Get()
-        {
-            var result = controller.Get();
-
-            Assert.IsTrue(result.Ok);
-        }
-        [TestMethod]
         public async Task GetId()
         {
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var result = await controller.Get(expected.ID);
+            var actionresult = await controller.Get(expected.ID, new TransactionRepository(context));
 
-            Assert.IsTrue(result.Ok);
-            Assert.AreEqual(expected, result.Item);
+            var okresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
+            var actual = Assert.That.IsOfType<Transaction>(okresult.Value);
+            Assert.AreEqual(expected, actual);
+        }
+
+
+
+        [TestMethod]
+        public async Task ReportV2()
+        {
+            int year = DateTime.Now.Year;
+
+            await AddFiveTransactions();
+            await context.SaveChangesAsync();
+
+            var actionresult = controller.ReportV2( new ReportParameters() { id = "all" }, new ReportBuilder(context) );
+            if (actionresult is ObjectResult or)
+                throw or.Value as Exception;
+
+            var okresult = Assert.That.IsOfType<ContentResult>(actionresult);
+            var report = okresult.Content;
+
+            Console.WriteLine(report);
+
+            var doc = JsonDocument.Parse(report);
+            var root = doc.RootElement;
+
+            var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA").Single();
+            var BB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "BB").Single();
+            var CC = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC").Single();
+            var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
+
+            Assert.AreEqual(7, root.GetArrayLength());
+            Assert.AreEqual(6, Total.EnumerateObject().Count());
+            Assert.AreEqual(200m, AAAA.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(1000m, BB.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(300m, CC.GetProperty("TOTAL").GetDecimal());
+            Assert.AreEqual(1500m, Total.GetProperty("TOTAL").GetDecimal());
+        }
+
+
+
+        [TestMethod]
+        public async Task ReportV2export()
+        {
+            int year = DateTime.Now.Year;
+
+            await AddFiveBudgetTxs();
+            await AddFiveTransactions();
+
+            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
+            if (actionresult is ObjectResult or)
+                throw or.Value as Exception;
+
+            var okresult = actionresult as ContentResult;
+            var report = okresult.Content;
+
+            Console.WriteLine(report);
+
+            var doc = JsonDocument.Parse(report);
+            var root = doc.RootElement;
+
+            var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA").Single();
+            var AABB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:BB").Single();
+            var CCAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC:AA").Single();
+
+            Assert.AreEqual(5, root.GetArrayLength());
+            Assert.AreEqual(200m, AAAA.GetProperty("ID:Actual").GetDecimal());
+            Assert.AreEqual(0m, AABB.GetProperty("ID:Actual").GetDecimal());
+            Assert.AreEqual(300m, CCAA.GetProperty("ID:Actual").GetDecimal());
+            Assert.AreEqual(400m, AAAA.GetProperty("ID:Budget").GetDecimal());
+            Assert.AreEqual(500m, AABB.GetProperty("ID:Budget").GetDecimal());
+            Assert.AreEqual(300m, CCAA.GetProperty("ID:Budget").GetDecimal());
+        }
+
+        [TestMethod]
+        public void ReportV2exportEmpty()
+        {
+            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
+            if (actionresult is ObjectResult or)
+                throw or.Value as Exception;
+
+            var okresult = actionresult as ContentResult;
+            var report = okresult.Content;
+
+            Console.WriteLine(report);
+
+            var doc = JsonDocument.Parse(report);
+            var root = doc.RootElement;
+
+            Assert.AreEqual(0, root.GetArrayLength());
+        }
+
+
+        async Task<IEnumerable<Transaction>> WhenCallingGetTxWithQ(string q)
+        {
+            var result = await controller.GetTransactions(new TransactionRepository(context), q: q);
+            var jsonresult = Assert.That.IsOfType<OkObjectResult>(result);
+            var model = Assert.That.IsOfType<IEnumerable<Transaction>>(jsonresult.Value);
+
+            return model;
+        }
+
+        // Note that I have stolen these tests directly from TransactionControllerTest.
+
+        [TestMethod]
+        public async Task GetTxQAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var items = TransactionControllerTest.TransactionItems.Take(19);
+            context.Transactions.AddRange(items);
+            context.SaveChanges();
+
+            // When: Calling GetTransactions q={word}
+            var word = "CAF";
+            var model = await WhenCallingGetTxWithQ(word);
+
+            // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
+            Assert.AreEqual(6, model.Count());
+            Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task GetTxQReceipt(bool with)
+        {
+            // Given: A mix of transactions, some with receipts, some without
+           TransactionControllerTest.GivenItemsWithAndWithoutReceipt(context, out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems);
+
+            // When: Calling GetTransactions q='r=1' (or r=0)
+            var model = await WhenCallingGetTxWithQ($"R={(with ? '1' : '0')}");
+
+            // Then: Only the transactions with (or without) receipts are returned
+            if (with)
+                Assert.AreEqual(moditems.Count(), model.Count());
+            else
+                Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
+        }
+
+#if EFCORE_TESTS
+        [TestMethod]
+        public async Task EFGroupByBugBudgetTx()
+        {
+            await AddFiveBudgetTxs();
+
+            // An expression tree may not contain a reference to a local function.
+            // SO this code analysis rule is incorrectly applied in this case.
+#pragma warning disable IDE0039 // Use local function
+            Func<IReportable, bool> inscope_t = x => true;
+#pragma warning restore IDE0039 // Use local function
+
+            var budgettxs = context.BudgetTxs.Where(inscope_t);
+
+            var budgetgroups = budgettxs.GroupBy(x => x.Category);
+
+            foreach (var group in budgetgroups)
+            {
+                Console.WriteLine(group.Key);
+                Console.WriteLine(group.Count());
+
+                foreach(var item in group.AsEnumerable())
+                {
+                    Console.WriteLine(item.Category);
+                }
+            }
+
         }
         [TestMethod]
-        public async Task GetIdFails()
+        public async Task EFGroupByBugTransactionSplits()
         {
             await AddFiveTransactions();
-            var maxid = await context.Transactions.MaxAsync(x=>x.ID);
 
-            var result = await controller.Get(maxid + 1);
+            // An expression tree may not contain a reference to a local function.
+            // SO this code analysis rule is incorrectly applied in this case.
+#pragma warning disable IDE0039 // Use local function
+            Func<IReportable, bool> inscope_t = x => true;
+#pragma warning restore IDE0039 // Use local function
 
-            Assert.IsFalse(result.Ok);
-            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
+            var txs = context.Transactions.Where(inscope_t);
+
+            var groups = txs.GroupBy(x => x.Category);
+
+            foreach (var group in groups)
+            {
+                Console.WriteLine(group.Key);
+                Console.WriteLine(group.Count());
+
+                foreach (var item in group.AsEnumerable())
+                {
+                    Console.WriteLine(item.Category);
+                }
+            }
+
         }
+        [TestMethod]
+        public async Task EFGroupByBugTransactionV3()
+        {
+            await AddFiveTransactions();
 
+            var groups = context.Transactions.GroupBy(x => x.Category).Select(g => new { key = g.Key, sum = g.Sum(y => y.Amount) });
+
+            foreach (var group in groups)
+            {
+                Console.WriteLine(group.key);
+                Console.WriteLine(group.sum);
+            }
+
+        }
+        [TestMethod]
+        public async Task EFMultiGroupByBugTransactionV3()
+        {
+            // I think this will be the new lingua-franca of V3 reports.
+            // Server will group by category or category+month.
+            // Client will split into levels and filter as needed.
+
+            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
+            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
+            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 02, 03), Amount = 100m });
+            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 02, 04), Amount = 200m });
+            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
+            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
+            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 04, 05), Amount = 400m });
+            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 04, 03), Amount = 500m });
+
+            await context.SaveChangesAsync();
+
+            var source1 = context.Transactions.Where(x=>x.Category == "AA").AsQueryable<IReportable>();
+            var source2 = context.Transactions.Where(x => x.Category == "BB").AsQueryable<IReportable>();
+            var source = source1.Concat(source2);
+            var groups = source.GroupBy(x => new { cat = x.Category, month = x.Timestamp.Month }).Select(g => new { key = g.Key, sum = g.Sum(y => y.Amount) });
+
+            foreach (var group in groups)
+            {
+                Console.WriteLine($"{group.key.cat} {group.key.month} {group.sum,6:C0}");
+            }
+        }
+#endif
 #if false
         // TODO: Wrtire for V3 reports
         [DataTestMethod]
@@ -289,268 +499,5 @@ namespace YoFi.Tests
             }
         }
 #endif
-
-        [TestMethod]
-        public async Task ReportV2()
-        {
-            int year = DateTime.Now.Year;
-
-            await AddFiveTransactions();
-            await context.SaveChangesAsync();
-
-            var actionresult = controller.ReportV2( new ReportParameters() { id = "all" }, new ReportBuilder(context) );
-            if (actionresult is ObjectResult or)
-                throw or.Value as Exception;
-
-            var okresult = actionresult as ContentResult;
-            var report = okresult.Content;
-
-            Console.WriteLine(report);
-
-            var doc = JsonDocument.Parse(report);
-            var root = doc.RootElement;
-
-            var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA").Single();
-            var BB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "BB").Single();
-            var CC = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC").Single();
-            var Total = root.EnumerateArray().Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
-
-            Assert.AreEqual(7, root.GetArrayLength());
-            Assert.AreEqual(6, Total.EnumerateObject().Count());
-            Assert.AreEqual(200m, AAAA.GetProperty("TOTAL").GetDecimal());
-            Assert.AreEqual(1000m, BB.GetProperty("TOTAL").GetDecimal());
-            Assert.AreEqual(300m, CC.GetProperty("TOTAL").GetDecimal());
-            Assert.AreEqual(1500m, Total.GetProperty("TOTAL").GetDecimal());
-        }
-        [TestMethod]
-        public async Task EFGroupByBugBudgetTx()
-        {
-            await AddFiveBudgetTxs();
-
-            // An expression tree may not contain a reference to a local function.
-            // SO this code analysis rule is incorrectly applied in this case.
-#pragma warning disable IDE0039 // Use local function
-            Func<IReportable, bool> inscope_t = x => true;
-#pragma warning restore IDE0039 // Use local function
-
-            var budgettxs = context.BudgetTxs.Where(inscope_t);
-
-            var budgetgroups = budgettxs.GroupBy(x => x.Category);
-
-            foreach (var group in budgetgroups)
-            {
-                Console.WriteLine(group.Key);
-                Console.WriteLine(group.Count());
-
-                foreach(var item in group.AsEnumerable())
-                {
-                    Console.WriteLine(item.Category);
-                }
-            }
-
-        }
-        [TestMethod]
-        public async Task EFGroupByBugTransactionSplits()
-        {
-            await AddFiveTransactions();
-
-            // An expression tree may not contain a reference to a local function.
-            // SO this code analysis rule is incorrectly applied in this case.
-#pragma warning disable IDE0039 // Use local function
-            Func<IReportable, bool> inscope_t = x => true;
-#pragma warning restore IDE0039 // Use local function
-
-            var txs = context.Transactions.Where(inscope_t);
-
-            var groups = txs.GroupBy(x => x.Category);
-
-            foreach (var group in groups)
-            {
-                Console.WriteLine(group.Key);
-                Console.WriteLine(group.Count());
-
-                foreach (var item in group.AsEnumerable())
-                {
-                    Console.WriteLine(item.Category);
-                }
-            }
-
-        }
-        [TestMethod]
-        public async Task EFGroupByBugTransactionV3()
-        {
-            await AddFiveTransactions();
-
-            var groups = context.Transactions.GroupBy(x => x.Category).Select(g => new { key = g.Key, sum = g.Sum(y => y.Amount) });
-
-            foreach (var group in groups)
-            {
-                Console.WriteLine(group.key);
-                Console.WriteLine(group.sum);
-            }
-
-        }
-        [TestMethod]
-        public async Task EFMultiGroupByBugTransactionV3()
-        {
-            // I think this will be the new lingua-franca of V3 reports.
-            // Server will group by category or category+month.
-            // Client will split into levels and filter as needed.
-
-            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
-            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
-            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 02, 03), Amount = 100m });
-            context.Transactions.Add(new Transaction() { Category = "AA", Timestamp = new DateTime(DateTime.Now.Year, 02, 04), Amount = 200m });
-            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { Category = "CC", Timestamp = new DateTime(DateTime.Now.Year, 03, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
-            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
-            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 04, 05), Amount = 400m });
-            context.Transactions.Add(new Transaction() { Category = "BB", Timestamp = new DateTime(DateTime.Now.Year, 04, 03), Amount = 500m });
-
-            await context.SaveChangesAsync();
-
-            var source1 = context.Transactions.Where(x=>x.Category == "AA").AsQueryable<IReportable>();
-            var source2 = context.Transactions.Where(x => x.Category == "BB").AsQueryable<IReportable>();
-            var source = source1.Concat(source2);
-            var groups = source.GroupBy(x => new { cat = x.Category, month = x.Timestamp.Month }).Select(g => new { key = g.Key, sum = g.Sum(y => y.Amount) });
-
-            foreach (var group in groups)
-            {
-                Console.WriteLine($"{group.key.cat} {group.key.month} {group.sum,6:C0}");
-            }
-        }
-
-        [TestMethod]
-        public async Task ReportV2export()
-        {
-            int year = DateTime.Now.Year;
-
-            await AddFiveBudgetTxs();
-            await AddFiveTransactions();
-
-            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
-            if (actionresult is ObjectResult or)
-                throw or.Value as Exception;
-
-            var okresult = actionresult as ContentResult;
-            var report = okresult.Content;
-
-            Console.WriteLine(report);
-
-            var doc = JsonDocument.Parse(report);
-            var root = doc.RootElement;
-
-            var AAAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:AA").Single();
-            var AABB = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "AA:BB").Single();
-            var CCAA = root.EnumerateArray().Where(x => x.GetProperty("ID").GetString() == "CC:AA").Single();
-
-            Assert.AreEqual(5, root.GetArrayLength());
-            Assert.AreEqual(200m, AAAA.GetProperty("ID:Actual").GetDecimal());
-            Assert.AreEqual(0m, AABB.GetProperty("ID:Actual").GetDecimal());
-            Assert.AreEqual(300m, CCAA.GetProperty("ID:Actual").GetDecimal());
-            Assert.AreEqual(400m, AAAA.GetProperty("ID:Budget").GetDecimal());
-            Assert.AreEqual(500m, AABB.GetProperty("ID:Budget").GetDecimal());
-            Assert.AreEqual(300m, CCAA.GetProperty("ID:Budget").GetDecimal());
-        }
-
-        [TestMethod]
-        public void ReportV2exportEmpty()
-        {
-            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
-            if (actionresult is ObjectResult or)
-                throw or.Value as Exception;
-
-            var okresult = actionresult as ContentResult;
-            var report = okresult.Content;
-
-            Console.WriteLine(report);
-
-            var doc = JsonDocument.Parse(report);
-            var root = doc.RootElement;
-
-            Assert.AreEqual(0, root.GetArrayLength());
-        }
-
-        //[TestMethod]
-        // User Story 1169: Move API auth into AuthorizationFilterAttribute
-        // No longer can this be tested directly
-        public void ReportV2exportFailsNoAuth()
-        {
-            // Not having an auth header
-            controller.ControllerContext = new ControllerContext() { HttpContext = new DefaultHttpContext() };
-
-            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
-
-            Assert.IsTrue(actionresult is UnauthorizedResult);
-        }
-
-        async Task<IEnumerable<Transaction>> WhenCallingGetTxWithQ(string q)
-        {
-            var result = await controller.GetTransactions(q: q);
-            var jsonresult = result as JsonResult;
-            var model = jsonresult.Value as IEnumerable<Transaction>;
-
-            return model;
-        }
-
-        // Note that I have stolen these tests directly from TransactionControllerTest.
-
-        [TestMethod]
-        public async Task GetTxQAny()
-        {
-            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
-            var items = TransactionControllerTest.TransactionItems.Take(19);
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling GetTransactions q={word}
-            var word = "CAF";
-            var model = await WhenCallingGetTxWithQ(word);
-
-            // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
-            Assert.AreEqual(6, model.Count());
-            Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
-        }
-
-        //[TestMethod]
-        // User Story 1169: Move API auth into AuthorizationFilterAttribute
-        // No longer can this be tested directly
-        public async Task GetTxQAnyFailsNoAuth()
-        {
-            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
-            var items = TransactionControllerTest.TransactionItems.Take(19);
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling GetTransactions q={word}
-            // And: Not having an auth header
-            controller.ControllerContext = new ControllerContext() { HttpContext = new DefaultHttpContext() };
-            var word = "CAF";
-            var result = await controller.GetTransactions(q: word);
-
-            Assert.IsTrue(result is UnauthorizedResult);
-        }
-
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task GetTxQReceipt(bool with)
-        {
-            // Given: A mix of transactions, some with receipts, some without
-           TransactionControllerTest.GivenItemsWithAndWithoutReceipt(context, out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems);
-
-            // When: Calling GetTransactions q='r=1' (or r=0)
-            var model = await WhenCallingGetTxWithQ($"R={(with ? '1' : '0')}");
-
-            // Then: Only the transactions with (or without) receipts are returned
-            if (with)
-                Assert.AreEqual(moditems.Count(), model.Count());
-            else
-                Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
-        }
-
     }
 }
