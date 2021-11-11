@@ -235,28 +235,7 @@ namespace YoFi.Tests
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
-        [TestMethod]
-        public async Task SelectPayeeId()
-        {
-            await AddFivePayees();
-            var expected = await context.Payees.FirstAsync();
-
-            var result = await controller.SelectPayee(expected.ID,true);
-
-            Assert.IsTrue(result.Ok);
-            Assert.IsTrue(true == expected.Selected);
-        }
-        [TestMethod]
-        public async Task SelectPayeeIdFails()
-        {
-            await AddFivePayees();
-            var maxid = await context.Payees.MaxAsync(x => x.ID);
-
-            var result = await controller.SelectPayee(maxid + 1,true);
-
-            Assert.IsFalse(result.Ok);
-            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
-        }
+#if PAYEES_API
         [TestMethod]
         public async Task DeselectPayeeId()
         {
@@ -302,7 +281,28 @@ namespace YoFi.Tests
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
+        [TestMethod]
+        public async Task EditPayee()
+        {
+            await AddFivePayees();
+            var original = await context.Payees.FirstAsync();
 
+            // detach the original so we have an unmodified copy around
+            context.Entry(original).State = EntityState.Detached;
+
+            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
+
+            var result = await controller.EditPayee(false, newitem);
+
+            Assert.IsTrue(result.Ok);
+            Assert.AreEqual(newitem, result.Item);
+            Assert.AreNotEqual(original, result.Item);
+
+            var actual = await context.Payees.Where(x => x.ID == original.ID).SingleAsync();
+            Assert.AreEqual(newitem, actual);
+            Assert.AreNotEqual(original, actual);
+        }
+#endif
         [TestMethod]
         public async Task ApplyPayee()
         {
@@ -458,66 +458,6 @@ namespace YoFi.Tests
 
             var modified = await context.Transactions.Where(x => x.Payee == newtx.Payee).SingleAsync();
             Assert.AreEqual(newtx, modified);
-        }
-        [TestMethod]
-        public async Task EditPayee()
-        {
-            await AddFivePayees();
-            var original = await context.Payees.FirstAsync();
-
-            // detach the original so we have an unmodified copy around
-            context.Entry(original).State = EntityState.Detached;
-
-            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
-
-            var result = await controller.EditPayee(false, newitem);
-
-            Assert.IsTrue(result.Ok);
-            Assert.AreEqual(newitem, result.Item);
-            Assert.AreNotEqual(original, result.Item);
-
-            var actual = await context.Payees.Where(x => x.ID == original.ID).SingleAsync();
-            Assert.AreEqual(newitem, actual);
-            Assert.AreNotEqual(original, actual);
-        }
-        [TestMethod]
-        public async Task EditPayeeDuplicate()
-        {
-            await AddFivePayees();
-            var original = await context.Payees.FirstAsync();
-
-            // detach the original so we have an unmodified copy around
-            context.Entry(original).State = EntityState.Detached;
-
-            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
-
-            var result = await controller.EditPayee(true, newitem);
-
-            Assert.IsTrue(result.Ok);
-            Assert.AreEqual(newitem, result.Item);
-            Assert.AreNotEqual(original, result.Item);
-
-            var unmodified = await context.Payees.Where(x => x.ID == original.ID).SingleAsync();
-            Assert.AreEqual(original, unmodified);
-
-            var modified = await context.Payees.Where(x => x.Name == newitem.Name).SingleAsync();
-            Assert.AreEqual(newitem, modified);
-        }
-        [TestMethod]
-        public async Task EditPayeeModelStateFails()
-        {
-            await AddFivePayees();
-            var original = await context.Payees.FirstAsync();
-
-            // detach the original so we have an unmodified copy around
-            context.Entry(original).State = EntityState.Detached;
-
-            var newitem = new Payee() { ID = original.ID, Name = "I have edited you!", Category = original.Category };
-
-            controller.ModelState.AddModelError("error", "test");
-            var result = await controller.EditPayee(false, newitem);
-            Assert.IsFalse(result.Ok);
-            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
 
         [TestMethod]
