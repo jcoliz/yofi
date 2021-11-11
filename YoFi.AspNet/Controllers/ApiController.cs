@@ -97,51 +97,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // TODO: I don't think this is actually used anywhere. Perhaps the original
-        // idea was that I could drag/drop an XLS file onto a transaction, and
-        // it would UpSplits that??
-
-        [HttpPost("UpSplits/{id}")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Policy = "CanWrite")]
-        public async Task<ApiResult> UpSplits(int id, IFormFile file)
-        {
-            try
-            {
-                var transaction = await LookupTransactionAsync(id,splits:true);
-
-                var incoming = new HashSet<Split>();
-                // Extract submitted file into a list objects
-
-                if (file.FileName.ToLower().EndsWith(".xlsx"))
-                {
-                    using var stream = file.OpenReadStream();
-                    using var ssr = new SpreadsheetReader();
-                    ssr.Open(stream);
-                    var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
-                    incoming.UnionWith(items);
-                }
-
-                if (incoming.Any())
-                {
-                    // Why no has AddRange??
-                    foreach (var split in incoming)
-                    {
-                        transaction.Splits.Add(split);
-                    }
-
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
-                }
-
-                return new ApiResult(transaction);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
         #endregion
 
         #region External API
@@ -169,67 +124,24 @@ namespace YoFi.AspNet.Controllers
 
         [HttpGet("ReportV2/{id}")]
         [ApiBasicAuthorization]
-        public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
+        public IActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
         {
-            try
-            {
-                var result = reports.Build(parms);
-                var json = result.ToJson();
+            var result = reports.Build(parms);
+            var json = result.ToJson();
 
-                return Content(json,"application/json");
-            }
-            catch (Exception ex)
-            {
-                return Problem(detail: ex.Message, statusCode: 500);
-            }
+            return Content(json,"application/json");
         }
 
         [HttpGet("txi")]
         [ApiBasicAuthorization]
-        public async Task<ActionResult> GetTransactions(string q = null)
+        public async Task<IActionResult> GetTransactions(string q = null)
         {
-            try
-            {
-                var qbuilder = new TransactionsQueryBuilder(_context.Transactions);
-                qbuilder.Build(q);
+            var qbuilder = new TransactionsQueryBuilder(_context.Transactions);
+            qbuilder.Build(q);
 
-                return new JsonResult(await qbuilder.Query.ToListAsync());
-            }
-            catch (Exception ex)
-            {
-                return Problem(detail:ex.Message,statusCode:500);
-            }
+            return new JsonResult(await qbuilder.Query.ToListAsync());
         }
 
-        /// <summary>
-        /// Returns the highest ID for the <paramref name="kind"/> of item supplied
-        /// </summary>
-        /// <param name="kind">Kind of item to get max is</param>
-        /// <returns></returns>
-        [HttpGet("maxid/{kind}")]
-        [ApiBasicAuthorization]
-        public async Task<ActionResult> MaxId(string kind)
-        {
-            try
-            {
-                if (kind == null)
-                    throw new ArgumentNullException(nameof(kind));
-
-                if (kind == "payees")
-                {
-                    var maxitem = await _context.Payees.OrderByDescending(x => x.ID).Take(1).FirstOrDefaultAsync();
-                    var id = maxitem?.ID ?? 0;
-                    return new JsonResult(new ApiResult(id));
-                }
-                else
-                    throw new ArgumentException($"Unknown kind {kind}", nameof(kind));
-
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new ApiResult(ex));
-            }
-        }
 
         /// <summary>
         /// Remove all test data from the system
@@ -241,7 +153,7 @@ namespace YoFi.AspNet.Controllers
         /// <returns></returns>
         [HttpPost("ClearTestData/{id}")]
         [ApiBasicAuthorization]
-        public async Task<ActionResult> ClearTestData(string id)
+        public async Task<IActionResult> ClearTestData(string id)
         {
             const string testmarker = "__test__";
 

@@ -187,58 +187,6 @@ namespace YoFi.Tests
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
 
-        [TestMethod]
-        public async Task UploadSplitsForTransaction()
-        {
-            // Don't add the splits here, we'll upload them
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-
-            context.Transactions.Add(item);
-            context.SaveChanges();
-
-            var splits = new List<Split>()
-            {
-                new Split() { Amount = 25m, Category = "A" },
-                new Split() { Amount = 75m, Category = "C" }
-            };
-
-            // Make an HTML Form file containg a spreadsheet containing those splits
-            var file = ControllerTestHelper<Split,SplitsController>.PrepareUpload(splits);
-
-            // Upload that
-            var result = await controller.UpSplits(item.ID, file);
-
-            Assert.IsTrue(result.Ok);
-            Assert.IsTrue(item.HasSplits);
-            Assert.IsTrue(item.IsSplitsOK);
-        }
-
-        [TestMethod]
-        public async Task UploadSplitsNotFound()
-        {
-            // Don't add the splits here, we'll upload them
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-
-            context.Transactions.Add(item);
-            context.SaveChanges();
-
-            var splits = new List<Split>()
-            {
-                new Split() { Amount = 25m, Category = "A" },
-                new Split() { Amount = 75m, Category = "C" }
-            };
-
-            // Make an HTML Form file containg a spreadsheet containing those splits
-            var file = ControllerTestHelper<Split,SplitsController>.PrepareUpload(splits);
-
-            var maxid = context.Transactions.Max(x => x.ID);
-            var badid = maxid + 1;
-            var result = await controller.UpSplits(badid, file);
-
-            Assert.IsFalse(result.Ok);
-            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
-        }
-
 #if false
         // TODO: Wrtire for V3 reports
         [DataTestMethod]
