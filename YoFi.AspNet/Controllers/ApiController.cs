@@ -21,21 +21,20 @@ namespace YoFi.AspNet.Controllers
     [Route("api")]
     public class ApiController : Controller
     {
+        #region Fields
         private readonly ApplicationDbContext _context;
         private readonly IStorageService _storage;
+        #endregion
 
+        #region Constructor
         public ApiController(ApplicationDbContext context, IStorageService storage = null)
         {
             _context = context;
             _storage = storage;
         }
+        #endregion
 
-        [HttpGet]
-        public ApiResult Get()
-        {
-            return new ApiResult();
-        }
-
+        #region Internals
         private async Task<Transaction> LookupTransactionAsync(int id,bool splits = false)
         {
             IQueryable<Transaction> transactions;
@@ -51,19 +50,9 @@ namespace YoFi.AspNet.Controllers
             return single;
         }
 
-        [HttpGet("{id}", Name = "Get")]
-        [ApiBasicAuthorization]
-        public async Task<ApiResult> Get(int id)
-        {
-            try
-            {
-                return new ApiResult(await LookupTransactionAsync(id));
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
+        #endregion
+
+        #region Ajax Handlers
 
         [HttpPost("ApplyPayee/{id}")]
         [Authorize(Policy = "CanWrite")]
@@ -112,7 +101,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("Hide/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<ApiResult> Hide(int id, bool value)
+        public async Task<ApiResult> HideTransaction(int id, bool value)
         {
             try
             {
@@ -132,7 +121,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("Select/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<ApiResult> Select(int id, bool value)
+        public async Task<ApiResult> SelectTransaction(int id, bool value)
         {
             try
             {
@@ -150,31 +139,10 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        [HttpPost("SelectPayee/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<ApiResult> SelectPayee(int id, bool value)
-        {
-            try
-            {
-                var payee = await _context.Payees
-                    .SingleAsync(m => m.ID == id);
-
-                payee.Selected = value;
-                _context.Update(payee);
-                await _context.SaveChangesAsync();
-
-                return new ApiResult();
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
-        }
-
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<ApiResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Transaction transaction)
+        public async Task<ApiResult> EditTransaction(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference,ReceiptUrl")] Transaction transaction)
         {
             try
             {
@@ -292,6 +260,27 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
+        [HttpPost("SelectPayee/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<ApiResult> SelectPayee(int id, bool value)
+        {
+            try
+            {
+                var payee = await _context.Payees
+                    .SingleAsync(m => m.ID == id);
+
+                payee.Selected = value;
+                _context.Update(payee);
+                await _context.SaveChangesAsync();
+
+                return new ApiResult();
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult(ex);
+            }
+        }
+
         [HttpPost("EditPayee/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -342,23 +331,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        [HttpGet("ReportV2/{id}")]
-        [ApiBasicAuthorization]
-        public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
-        {
-            try
-            {
-                var result = reports.Build(parms);
-                var json = result.ToJson();
-
-                return Content(json,"application/json");
-            }
-            catch (Exception ex)
-            {
-                return Problem(detail: ex.Message, statusCode: 500);
-            }
-        }
-
         [HttpGet("cat-ac")]
         [Authorize(Policy = "CanRead")]
         public List<string> CategoryAutocomplete(string q)
@@ -404,8 +376,50 @@ namespace YoFi.AspNet.Controllers
             */
         }
 
+        #endregion
+
+        #region External API
+
+        [HttpGet]
         [ApiBasicAuthorization]
+        public ApiResult Get()
+        {
+            return new ApiResult();
+        }
+
+        [HttpGet("{id}", Name = "Get")]
+        [ApiBasicAuthorization]
+        public async Task<ApiResult> Get(int id)
+        {
+            try
+            {
+                return new ApiResult(await LookupTransactionAsync(id));
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult(ex);
+            }
+        }
+
+        [HttpGet("ReportV2/{id}")]
+        [ApiBasicAuthorization]
+        public ActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
+        {
+            try
+            {
+                var result = reports.Build(parms);
+                var json = result.ToJson();
+
+                return Content(json,"application/json");
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, statusCode: 500);
+            }
+        }
+
         [HttpGet("txi")]
+        [ApiBasicAuthorization]
         public async Task<ActionResult> GetTransactions(string q = null)
         {
             try
@@ -426,8 +440,8 @@ namespace YoFi.AspNet.Controllers
         /// </summary>
         /// <param name="kind">Kind of item to get max is</param>
         /// <returns></returns>
-        [ApiBasicAuthorization]
         [HttpGet("maxid/{kind}")]
+        [ApiBasicAuthorization]
         public async Task<ActionResult> MaxId(string kind)
         {
             try
@@ -459,8 +473,8 @@ namespace YoFi.AspNet.Controllers
         /// Used by funtional tests to clean themselves up
         /// </remarks>
         /// <returns></returns>
-        [ApiBasicAuthorization]
         [HttpPost("ClearTestData/{id}")]
+        [ApiBasicAuthorization]
         public async Task<ActionResult> ClearTestData(string id)
         {
             const string testmarker = "__test__";
@@ -488,18 +502,39 @@ namespace YoFi.AspNet.Controllers
                 return new JsonResult(new ApiResult(ex));
             }
         }
+
+        #endregion
     }
 
+    /// <summary>
+    /// The standard result type we return from these APIs
+    /// </summary>
     public class ApiResult
     {
+        /// <summary>
+        /// Whether the request was successful
+        /// </summary>
         public bool Ok { get; set; } = true;
 
+        /// <summary>
+        /// Item returned in the request
+        /// </summary>
         public object Item { get; private set; } = null;
 
+        /// <summary>
+        /// Error encountered, only set if OK == false
+        /// </summary>
         public string Error { get; private set; } = null;
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public ApiResult() { }
 
+        /// <summary>
+        /// Typical constructor
+        /// </summary>
+        /// <param name="o">Object result</param>
         public ApiResult(object o)
         {
             if (o is Exception)

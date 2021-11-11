@@ -149,7 +149,7 @@ namespace YoFi.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var result = await controller.Hide(expected.ID,true);
+            var result = await controller.HideTransaction(expected.ID,true);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Hidden);
@@ -160,7 +160,7 @@ namespace YoFi.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.Hide(maxid + 1,true);
+            var result = await controller.HideTransaction(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
@@ -173,7 +173,7 @@ namespace YoFi.Tests
             expected.Hidden = true;
             await context.SaveChangesAsync();
 
-            var result = await controller.Hide(expected.ID,false);
+            var result = await controller.HideTransaction(expected.ID,false);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Hidden);
@@ -184,7 +184,7 @@ namespace YoFi.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.Hide(maxid + 1,false);
+            var result = await controller.HideTransaction(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
@@ -195,7 +195,7 @@ namespace YoFi.Tests
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var result = await controller.Select(expected.ID,true);
+            var result = await controller.SelectTransaction(expected.ID,true);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(true == expected.Selected);
@@ -206,7 +206,7 @@ namespace YoFi.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.Select(maxid + 1,true);
+            var result = await controller.SelectTransaction(maxid + 1,true);
 
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
@@ -219,7 +219,7 @@ namespace YoFi.Tests
             expected.Selected = true;
             await context.SaveChangesAsync();
 
-            var result = await controller.Select(expected.ID,false);
+            var result = await controller.SelectTransaction(expected.ID,false);
 
             Assert.IsTrue(result.Ok);
             Assert.IsTrue(false == expected.Selected);
@@ -230,7 +230,7 @@ namespace YoFi.Tests
             await AddFiveTransactions();
             var maxid = await context.Transactions.MaxAsync(x => x.ID);
 
-            var result = await controller.Select(maxid + 1,false);
+            var result = await controller.SelectTransaction(maxid + 1,false);
 
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
@@ -392,7 +392,7 @@ namespace YoFi.Tests
 
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", Timestamp = original.Timestamp, Amount = original.Amount };
 
-            var result = await controller.Edit(original.ID, false, newtx);
+            var result = await controller.EditTransaction(original.ID, false, newtx);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newtx, result.Item);
@@ -414,7 +414,7 @@ namespace YoFi.Tests
             var maxid = context.Transactions.Max(x => x.ID);
             var badid = maxid + 1;
 
-            var result = await controller.Edit(badid,false,newtx);
+            var result = await controller.EditTransaction(badid,false,newtx);
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
@@ -431,7 +431,7 @@ namespace YoFi.Tests
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", Timestamp = original.Timestamp, Amount = original.Amount };
 
             controller.ModelState.AddModelError("error", "test");
-            var result = await controller.Edit(original.ID, false, newtx);
+            var result = await controller.EditTransaction(original.ID, false, newtx);
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }
@@ -447,7 +447,7 @@ namespace YoFi.Tests
 
             var newtx = new Transaction() { ID = original.ID, Payee = "I have edited you!", Timestamp = original.Timestamp, Amount = original.Amount };
 
-            var result = await controller.Edit(original.ID, true, newtx);
+            var result = await controller.EditTransaction(original.ID, true, newtx);
 
             Assert.IsTrue(result.Ok);
             Assert.AreEqual(newtx, result.Item);
