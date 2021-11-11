@@ -75,20 +75,17 @@
     {
         event.preventDefault();
         var tr = $(this).data('tr');
+        var id = tr.data('id');
 
         $.ajax({
-            url: "/api/Edit/5",
+            url: "/ajax/tx/edit/"+id,
             type: "POST",
             beforeSend: xsrf,
             data: $(this).serialize(),
             success: function (result) {
-                if (result.Ok) {
-                    tr.find('.display-payee').text(result.Item.Payee);
-                    tr.find('.display-memo').text(result.Item.Memo);
-                    tr.find(".display-category").text(result.Item.Category);
-                }
-                else
-                    alert(result.Error);
+                tr.find('.display-payee').text(result.Payee);
+                tr.find('.display-memo').text(result.Memo);
+                tr.find(".display-category").text(result.Category);
             },
             error: function (request, status, error) {
                 alert(status + ": " + error);

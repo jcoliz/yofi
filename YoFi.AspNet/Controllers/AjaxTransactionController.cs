@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Ardalis.Filters;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
@@ -40,6 +43,21 @@ namespace YoFi.AspNet.Controllers
             await _repository.UpdateAsync(item);
 
             return new OkResult();
+        }
+
+        [HttpPost("edit/{id}")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
+        [ValidateModel]
+        [ValidateTransactionExists]
+        public async Task<IActionResult> Edit(int id, [Bind("Memo,Payee,Category")] Transaction edited)
+        {
+            var item = await _repository.GetByIdAsync(id);
+            item.Memo = edited.Memo;
+            item.Payee = edited.Payee;
+            item.Category = edited.Category;
+            await _repository.UpdateAsync(item);
+            return new ObjectResult(item);
         }
     }
 }
