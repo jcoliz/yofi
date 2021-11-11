@@ -20,20 +20,7 @@ namespace YoFi.Tests.Database
     {
         private AjaxPayeeController controller;
         private IPayeeRepository repository;
-        private IDataContext context;
-
-        [TestInitialize]
-        public void SetUp()
-        {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                //.UseLoggerFactory(logfact)
-                .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
-                .Options;
-
-            context = new ApplicationDbContext(options);
-            repository = new PayeeRepository(context);
-            controller = new AjaxPayeeController(repository);
-        }
+        private ApplicationDbContext context;
 
         async Task AddFivePayees()
         {
@@ -50,6 +37,32 @@ namespace YoFi.Tests.Database
             );
         }
 
+        [TestInitialize]
+        public void SetUp()
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                //.UseLoggerFactory(logfact)
+                .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
+                .Options;
+
+            context = new ApplicationDbContext(options);
+            repository = new PayeeRepository(context);
+            controller = new AjaxPayeeController(repository);
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            // Didn't actually solve anything. Keep it around for possible future problem
+            //DetachAllEntities();
+
+            // https://stackoverflow.com/questions/33490696/how-can-i-reset-an-ef7-inmemory-provider-between-unit-tests
+            context?.Database.EnsureDeleted();
+            context = default;
+            controller = default;
+            repository = default;
+        }
+
         [TestMethod]
         public async Task SelectPayeeId()
         {
@@ -63,5 +76,58 @@ namespace YoFi.Tests.Database
             Assert.IsTrue(true == expected.Selected);
         }
 
+        [TestMethod]
+        public async Task DeselectPayeeId()
+        {
+            await AddFivePayees();
+            var expected = repository.All.First();
+            expected.Selected = true;
+            await repository.UpdateAsync(expected);
+
+            var actionresult = await controller.Select(expected.ID, false);
+
+            Assert.That.IsOfType<OkResult>(actionresult);
+
+            Assert.IsTrue(false == expected.Selected);
+        }
+
+        [TestMethod]
+        public async Task AddPayee()
+        {
+            var expected = new Payee() { Category = "B", Name = "3" };
+
+            var actionresult = await controller.Add(expected);
+
+            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            Assert.AreEqual(expected, objresult.Value);
+            Assert.AreEqual(1, repository.All.Count());
+        }
+
+        [TestMethod]
+        public async Task EditPayee()
+        {
+            await AddFivePayees();
+            var take1 = repository.All.Take(1);
+            var original = take1.First();
+            var id = original.ID;
+
+            // Keep a deep copy for later comparison
+            var copy = (await DeepCopy.MakeDuplicateOf(take1)).First();
+
+            // detach the original. in real life we won't have another tracked object hanging around like this
+            context.Entry(original).State = EntityState.Detached;
+
+            var newitem = new Payee() { ID = id, Name = "I have edited you!", Category = original.Category };
+
+            var actionresult = await controller.Edit(id, newitem);
+
+            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            Assert.AreEqual(newitem, objresult.Value);
+            Assert.AreNotEqual(original, objresult.Value);
+
+            var actual = await context.Payees.Where(x => x.ID == id).SingleAsync();
+            Assert.AreEqual(newitem, actual);
+            Assert.AreNotEqual(copy, actual);
+        }
     }
 }
