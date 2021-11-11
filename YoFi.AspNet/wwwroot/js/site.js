@@ -44,7 +44,7 @@
 
                 $('.category-autocomplete').autoComplete({
                     resolverSettings: {
-                        url: '/api/cat-ac'
+                        url: '/ajax/tx/cat-ac'
                     }
                 });
             },
@@ -193,7 +193,7 @@
 
     $('.category-autocomplete').autoComplete({
         resolverSettings: {
-            url: '/api/cat-ac'
+            url: '/ajax/tx/cat-ac'
         }
     });
 

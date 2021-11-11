@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 
@@ -19,6 +20,11 @@ namespace YoFi.Core.Repositories
         /// <param name="id">Identifier of desired item</param>
         /// <returns>Desired item</returns>
         Task<Transaction> GetWithSplitsByIdAsync(int? id);
+
+        /// <summary>
+        /// All splits including transactions
+        /// </summary>
+        IQueryable<Split> Splits { get; }
 
         /// <summary>
         /// Create a new split and add it to transaction #<paramref name="id"/>

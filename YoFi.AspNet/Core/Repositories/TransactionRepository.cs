@@ -57,6 +57,11 @@ namespace YoFi.Core.Repositories
         public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.TransactionsWithSplits.Single(x => x.ID == id.Value));
         // TODO: SingleAsync()
 
+        /// <summary>
+        /// All splits including transactions
+        /// </summary>
+        public IQueryable<Split> Splits => _context.SplitsWithTransactions;
+
         #endregion
 
         #region Update
