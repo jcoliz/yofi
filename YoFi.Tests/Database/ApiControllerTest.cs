@@ -53,7 +53,7 @@ namespace YoFi.Tests
             // NOTE: This is a unit test password only, not a real credential!!
             var password = "Password1234";
 
-            controller = new ApiController(context,storage);
+            controller = new ApiController(context);
 
             // Need to inject the Auth header into the context.
             // https://stackoverflow.com/questions/41400030/mock-httpcontext-for-unit-testing-a-net-core-mvc-controller
@@ -129,60 +129,6 @@ namespace YoFi.Tests
 
             var result = await controller.Get(maxid + 1);
 
-            Assert.IsFalse(result.Ok);
-            Assert.IsFalse(string.IsNullOrEmpty(result.Error));
-        }
-
-        [TestMethod]
-        public async Task UpReceipt()
-        {
-            await AddFiveTransactions();
-            var original = await context.Transactions.LastAsync();
-
-            // Create a formfile with it
-            var contenttype = "text/html";
-            var count = 10;
-            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
-            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
-            
-            var result = await controller.UpReceipt(original.ID,file);
-
-            Assert.IsTrue(result.Ok);
-            Assert.AreEqual(original.ID.ToString(), original.ReceiptUrl);
-        }
-        [TestMethod]
-        public async Task UpReceiptNoStorage()
-        {
-            await AddFiveTransactions();
-            var original = await context.Transactions.LastAsync();
-
-            // Create a formfile with it
-            var contenttype = "text/html";
-            var count = 10;
-            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
-            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
-
-            // Make a new controller with no storage
-            controller = new ApiController(context);
-
-            var result = await controller.UpReceipt(original.ID, file);
-
-            Assert.IsFalse(result.Ok);
-        }
-
-        [TestMethod]
-        public async Task UpReceiptAgainFails()
-        {
-            await UpReceipt();
-            var original = await context.Transactions.LastAsync();
-
-            // Create a formfile with it
-            var contenttype = "text/html";
-            var count = 10;
-            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
-            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
-            
-            var result = await controller.UpReceipt(original.ID,file);
             Assert.IsFalse(result.Ok);
             Assert.IsFalse(string.IsNullOrEmpty(result.Error));
         }

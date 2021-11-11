@@ -23,14 +23,12 @@ namespace YoFi.AspNet.Controllers
     {
         #region Fields
         private readonly ApplicationDbContext _context;
-        private readonly IStorageService _storage;
         #endregion
 
         #region Constructor
-        public ApiController(ApplicationDbContext context, IStorageService storage = null)
+        public ApiController(ApplicationDbContext context)
         {
             _context = context;
-            _storage = storage;
         }
         #endregion
 
@@ -48,53 +46,6 @@ namespace YoFi.AspNet.Controllers
 
             var single = await transactions.SingleAsync();
             return single;
-        }
-
-        #endregion
-
-        #region Ajax Handlers
-
-        [HttpPost("UpReceipt/{id}")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Policy = "CanWrite")]
-        public async Task<ApiResult> UpReceipt(int id, IFormFile file)
-        {
-            try
-            {
-                var transaction = await LookupTransactionAsync(id);
-
-                if (! string.IsNullOrEmpty(transaction.ReceiptUrl))
-                    throw new ApplicationException($"This transaction already has a receipt. Delete the current receipt before uploading a new one.");
-
-                //
-                // Save the file to blob storage
-                //
-                // TODO: Consolodate this with the exact same copy which is in TransactionsController
-                //
-
-                if (null == _storage)
-                    throw new InvalidOperationException("Unable to upload receipt. Azure Blob Storage is not configured for this application.");
-
-                string blobname = id.ToString();
-
-                using (var stream = file.OpenReadStream())
-                {
-                    // Upload the file
-                    await _storage.UploadBlobAsync(blobname, stream, file.ContentType);
-                }
-
-                // Save it in the Transaction
-
-                transaction.ReceiptUrl = blobname;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-
-                return new ApiResult();
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult(ex);
-            }
         }
 
         #endregion

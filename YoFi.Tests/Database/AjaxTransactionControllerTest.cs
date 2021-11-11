@@ -1,9 +1,12 @@
 ﻿using Common.DotNet.Test;
+using Common.NET.Test;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
@@ -45,7 +48,8 @@ namespace YoFi.Tests.Database
                 .Options;
 
             context = new ApplicationDbContext(options);
-            repository = new TransactionRepository(context);
+            var storage = new TestAzureStorage();
+            repository = new TransactionRepository(context,storage);
             controller = new AjaxTransactionController(repository);
         }
 
@@ -165,7 +169,7 @@ namespace YoFi.Tests.Database
 
             var actionresult = await controller.ApplyPayee(expected.ID, payeeRepository);
 
-            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            var objresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
             var itemresult = Assert.That.IsOfType<string>(objresult.Value);
 
             Assert.AreEqual(expectedpayee.Category, itemresult);
@@ -189,11 +193,47 @@ namespace YoFi.Tests.Database
 
             var actionresult = await controller.ApplyPayee(expected.ID,payeeRepository);
 
-            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            var objresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
             var itemresult = Assert.That.IsOfType<string>(objresult.Value);
 
             Assert.AreEqual(expectedpayee.Category, itemresult);
             Assert.AreEqual(expectedpayee.Category, expected.Category);
+        }
+
+        [TestMethod]
+        public async Task UpReceipt()
+        {
+            await AddFive();
+            var original = repository.All.Last();
+
+            // Create a formfile with it
+            var contenttype = "text/html";
+            var count = 10;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
+            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
+
+            var actionresult = await controller.UpReceipt(original.ID, file);
+
+            Assert.That.IsOfType<OkResult>(actionresult);
+            Assert.AreEqual(original.ID.ToString(), original.ReceiptUrl);
+        }
+
+        [TestMethod]
+        public async Task UpReceiptAgainFails()
+        {
+            await AddFive();
+            var original = repository.All.Last();
+
+            // Create a formfile with it
+            var contenttype = "text/html";
+            var count = 10;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
+            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
+
+            await controller.UpReceipt(original.ID, file);
+            var actionresult = await controller.UpReceipt(original.ID, file);
+            var notfoundresult = Assert.That.IsOfType<BadRequestObjectResult>(actionresult);
+            Assert.That.IsOfType<string>(notfoundresult.Value);
         }
 
         [TestMethod]
@@ -207,7 +247,7 @@ namespace YoFi.Tests.Database
             var actionresult = controller.CategoryAutocomplete(word);
 
             // Then: All of the categories from given items which contain '{word}' are returned
-            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
+            var objresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
             var itemresult = Assert.That.IsOfType<IEnumerable<string>>(objresult.Value);
             var expected = repository.All.Select(x => x.Category).Distinct().Where(c => c.Contains(word)).ToList();
 

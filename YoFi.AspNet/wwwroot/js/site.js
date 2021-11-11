@@ -158,22 +158,18 @@
                     formData.append('id', id)
 
                     $.ajax({
-                        url: "/api/UpReceipt/5",
+                        url: "/ajax/tx/uprcpt/"+id,
                         type: "POST",
                         beforeSend: xsrf,
                         data: formData,
                         processData: false,
                         contentType: false,
-                        error: function (result) {
-                            alert(result.responseText);
+                        error: function (jqxhr) {
+                            alert(jqxhr.responseText);
                         },
                         success: function (result) {
-                            if (result.Ok) {
-                                tr.find('.display-receipt').children().show();
-                                alert('Ok');
-                            }
-                            else
-                                alert(result.Error);
+                            tr.find('.display-receipt').children().show();
+                            alert('Uploaded successfully.');
                         }
                     });
 
