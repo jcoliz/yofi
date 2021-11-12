@@ -2027,8 +2027,7 @@ namespace YoFi.Tests.Database
         public void Error()
         {         
             var expected = "Bah, humbug!";
-            var httpcontext = new DefaultHttpContext();
-            httpcontext.TraceIdentifier = expected;
+            var httpcontext = new DefaultHttpContext() { TraceIdentifier = expected };
             controller.ControllerContext.HttpContext = httpcontext;
             var actionresult = controller.Error();
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);

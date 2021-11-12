@@ -9,6 +9,17 @@ using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Database
 {
+    /// <summary>
+    /// Test the "Reports" page
+    /// </summary>
+    /// <remarks>
+    /// Theoretically it should be possible to rewrite this test without the database layer.
+    /// The problem lies in QueryBuilder, which has a pretty explicit tie to a relational
+    /// database structure, in the interaction between Splits and Transactions.
+    /// 
+    /// This might be a good case for refactoring the model so that there is always one split
+    /// per transaction. Maybe. That would take out some of the variability.
+    /// </remarks>
     [TestClass]
     public class ReportSummaryPageTest
     {
