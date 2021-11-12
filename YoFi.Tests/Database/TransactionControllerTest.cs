@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
 using YoFi.Core.Importers;
@@ -2022,5 +2023,18 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task ReceiptActionOther() =>
             Assert.IsTrue(await controller.ReceiptAction(1,string.Empty) is RedirectToActionResult);
+
+        [TestMethod]
+        public void Error()
+        {         
+            var expected = "Bah, humbug!";
+            var httpcontext = new DefaultHttpContext();
+            httpcontext.TraceIdentifier = expected;
+            controller.ControllerContext.HttpContext = httpcontext;
+            var actionresult = controller.Error();
+            var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
+            var model = Assert.That.IsOfType<ErrorViewModel>(viewresult.Model);
+            Assert.AreEqual(expected, model.RequestId);
+        }
     }
 }
