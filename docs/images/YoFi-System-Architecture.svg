@@ -27,15 +27,15 @@
      inkscape:pagecheckerboard="1"
      inkscape:document-units="in"
      showgrid="true"
-     inkscape:zoom="2"
-     inkscape:cx="60.25"
-     inkscape:cy="923.25001"
-     inkscape:window-width="2435"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="438.40621"
+     inkscape:cy="559.8518"
+     inkscape:window-width="2804"
      inkscape:window-height="2054"
      inkscape:window-x="-10"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
-     inkscape:current-layer="g7789"
+     inkscape:current-layer="layer1"
      showguides="true"
      inkscape:guide-bbox="true">
     <inkscape:grid
@@ -365,8 +365,7 @@
        id="a4199"
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Core/Reports"
        target="_blank"
-       xlink:title="Reports"
-       transform="translate(0,36)">
+       xlink:title="Reports">
       <g
          id="g41311"
          transform="translate(-132,432)">
@@ -1125,7 +1124,7 @@
          id="tspan30322">Account</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker1448)"
-       d="m 204,658.5 76.03249,28.51218"
+       d="M 204,633.75 293.33333,684"
        id="path1566"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1133,7 +1132,7 @@
        inkscape:connection-end="#rect33513" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1448)"
-       d="m 243.54738,516 -59.72843,72"
+       d="m 236.91089,516 -40.6668,36.76653"
        id="path2011"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1147,14 +1146,6 @@
        inkscape:connector-curvature="0"
        inkscape:connection-start="#g38456"
        inkscape:connection-end="#rect33513" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1448)"
-       d="M 544,516 488,684"
-       id="path4787"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-start="#a4402"
-       inkscape:connection-end="#a3801" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1448)"
        d="m 565.33333,516 93.33334,168"
@@ -1313,5 +1304,13 @@
         </g>
       </g>
     </g>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1448)"
+       d="M 528,516 360,684"
+       id="path10499"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#a4402"
+       inkscape:connection-end="#a3603" />
   </g>
 </svg>
