@@ -46,23 +46,6 @@ namespace YoFi.Core.Models
         /// </summary>
         public string Category { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public BudgetTx() { }
-
-        /// <summary>
-        /// Copy constructor, but use a new <paramref name="date"/>
-        /// </summary>
-        /// <param name="source">Item to copy from</param>
-        /// <param name="date">New date to use instead of the one in <paramref name="source"/></param>
-        public BudgetTx(BudgetTx source,DateTime date)
-        {
-            Amount = source.Amount;
-            Category = source.Category;
-            Timestamp = date;
-        }
-
         // TODO: This can be combined with ImportEquals. ImportEquals is actually a better equality comparer
 
         public override bool Equals(object obj)
