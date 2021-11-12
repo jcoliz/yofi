@@ -27,15 +27,15 @@
      inkscape:pagecheckerboard="1"
      inkscape:document-units="in"
      showgrid="true"
-     inkscape:zoom="5.6568542"
-     inkscape:cx="698.26795"
-     inkscape:cy="964.22849"
-     inkscape:window-width="3240"
+     inkscape:zoom="2"
+     inkscape:cx="60.25"
+     inkscape:cy="923.25001"
+     inkscape:window-width="2435"
      inkscape:window-height="2054"
-     inkscape:window-x="0"
+     inkscape:window-x="-10"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g7789"
      showguides="true"
      inkscape:guide-bbox="true">
     <inkscape:grid
@@ -365,7 +365,8 @@
        id="a4199"
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Core/Reports"
        target="_blank"
-       xlink:title="Reports">
+       xlink:title="Reports"
+       transform="translate(0,36)">
       <g
          id="g41311"
          transform="translate(-132,432)">
@@ -495,65 +496,77 @@
         </g>
       </g>
     </a>
-    <g
-       id="g38456"
-       transform="translate(0,228)">
-      <rect
-         style="fill:#c4d6a0;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
-         id="rect38448"
-         width="120"
-         height="48"
-         x="348"
-         y="240"
-         ry="12" />
+    <a
+       id="a1737"
+       xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Core/Importers"
+       target="_blank"
+       xlink:title="Importers">
       <g
-         id="g38454"
-         transform="translate(0.296875,0.04296875)">
-        <text
-           xml:space="preserve"
-           style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
-           x="407.30469"
-           y="267.96484"
-           id="text38452"><tspan
-             sodipodi:role="line"
-             id="tspan38450"
+         id="g38456"
+         transform="translate(0,228)">
+        <rect
+           style="fill:#c4d6a0;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
+           id="rect38448"
+           width="120"
+           height="48"
+           x="348"
+           y="240"
+           ry="12" />
+        <g
+           id="g38454"
+           transform="translate(0.296875,0.04296875)">
+          <text
+             xml:space="preserve"
+             style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
              x="407.30469"
              y="267.96484"
-             style="font-size:16px;text-align:center;text-anchor:middle">Importers</tspan></text>
+             id="text38452"><tspan
+               sodipodi:role="line"
+               id="tspan38450"
+               x="407.30469"
+               y="267.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle">Importers</tspan></text>
+        </g>
       </g>
-    </g>
-    <g
-       id="g46826"
-       transform="translate(-0.54314,516)">
-      <rect
-         style="fill:#c4d6a0;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
-         id="rect38458"
-         width="120"
-         height="48"
-         x="204"
-         y="-48"
-         ry="12" />
+    </a>
+    <a
+       id="a2160"
+       xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/Reports/ReportBuilder.cs"
+       target="_blank"
+       xlink:title="ReportBuilder">
       <g
-         id="g38464"
-         transform="translate(-143.99219,-296.45703)">
-        <text
-           xml:space="preserve"
-           style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
-           x="407.30469"
-           y="267.96484"
-           id="text38462"><tspan
-             sodipodi:role="line"
-             id="tspan38460"
+         id="g46826"
+         transform="translate(-0.54314,516)">
+        <rect
+           style="fill:#c4d6a0;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
+           id="rect38458"
+           width="120"
+           height="48"
+           x="204"
+           y="-48"
+           ry="12" />
+        <g
+           id="g38464"
+           transform="translate(-143.99219,-296.45703)">
+          <text
+             xml:space="preserve"
+             style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
              x="407.30469"
              y="267.96484"
-             style="font-size:16px;text-align:center;text-anchor:middle">Report</tspan><tspan
-             sodipodi:role="line"
-             x="407.30469"
-             y="287.96484"
-             style="font-size:16px;text-align:center;text-anchor:middle"
-             id="tspan38598">Builder</tspan></text>
+             id="text38462"><tspan
+               sodipodi:role="line"
+               id="tspan38460"
+               x="407.30469"
+               y="267.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle">Report</tspan><tspan
+               sodipodi:role="line"
+               x="407.30469"
+               y="287.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle"
+               id="tspan38598">Builder</tspan></text>
+        </g>
       </g>
-    </g>
+    </a>
     <rect
        style="fill:none;fill-opacity:1;stroke:#50632a;stroke-width:2.112;stroke-linecap:butt;stroke-miterlimit:3;stroke-dasharray:6.336, 2.112;stroke-dashoffset:0;stroke-opacity:1"
        id="rect42243"
@@ -562,39 +575,45 @@
        x="180"
        y="348"
        ry="12" />
-    <g
-       id="g62308"
-       transform="translate(-34.385958,-46.385925)">
-      <rect
-         style="fill:#c8bdd7;fill-opacity:1;stroke:#48395b;stroke-width:1.96319;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
-         id="rect44378"
-         height="94.036812"
-         x="312.34915"
-         y="852.34912"
-         width="118.03681"
-         ry="23.509203" />
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
-         x="370.64099"
-         y="885.92145"
-         id="text44382"><tspan
-           sodipodi:role="line"
-           id="tspan44380"
+    <a
+       id="a3671"
+       xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Data/ApplicationDbContext.cs"
+       target="_blank"
+       xlink:title="ApplicationDBContext">
+      <g
+         id="g62308"
+         transform="translate(-34.385958,-46.385925)">
+        <rect
+           style="fill:#c8bdd7;fill-opacity:1;stroke:#48395b;stroke-width:1.96319;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
+           id="rect44378"
+           height="94.036812"
+           x="312.34915"
+           y="852.34912"
+           width="118.03681"
+           ry="23.509203" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
            x="370.64099"
            y="885.92145"
-           style="text-align:center;text-anchor:middle">Entity</tspan><tspan
-           sodipodi:role="line"
-           x="370.64099"
-           y="905.12146"
-           id="tspan59261"
-           style="text-align:center;text-anchor:middle">Framework</tspan><tspan
-           sodipodi:role="line"
-           x="370.64099"
-           y="924.32147"
-           id="tspan59263"
-           style="text-align:center;text-anchor:middle">Core</tspan></text>
-    </g>
+           id="text44382"><tspan
+             sodipodi:role="line"
+             id="tspan44380"
+             x="370.64099"
+             y="885.92145"
+             style="text-align:center;text-anchor:middle">Entity</tspan><tspan
+             sodipodi:role="line"
+             x="370.64099"
+             y="905.12146"
+             id="tspan59261"
+             style="text-align:center;text-anchor:middle">Framework</tspan><tspan
+             sodipodi:role="line"
+             x="370.64099"
+             y="924.32147"
+             id="tspan59263"
+             style="text-align:center;text-anchor:middle">Core</tspan></text>
+      </g>
+    </a>
     <g
        id="g2004"
        transform="matrix(4.9122808,0,0,4.9295775,292.52546,935.43674)">
@@ -672,63 +691,71 @@
          x="793.60443"
          y="47.609375"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:32px;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI Bold';text-align:end;text-anchor:end">YoFi</tspan></text>
-    <g
-       id="g36626"
-       transform="translate(5e-6,-12)">
-      <rect
-         style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
-         id="rect21314"
-         height="48"
-         x="504"
-         y="168"
-         width="96"
-         ry="12" />
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
-         x="531.03516"
-         y="195.71875"
-         id="text21265-6"><tspan
-           sodipodi:role="line"
-           id="tspan21263-7"
-           x="531.03516"
-           y="195.71875">Pages</tspan></text>
-    </g>
     <a
-       id="a4002"
+       id="a2803"
+       xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Pages"
+       target="_blank"
+       xlink:title="Pages">
+      <g
+         id="g36626"
+         transform="translate(5e-6,-12)">
+        <rect
+           style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
+           id="rect21314"
+           height="48"
+           x="504"
+           y="168"
+           width="96"
+           ry="12" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+           x="531.03516"
+           y="195.71875"
+           id="text21265-6"><tspan
+             sodipodi:role="line"
+             id="tspan21263-7"
+             x="531.03516"
+             y="195.71875">Pages</tspan></text>
+      </g>
+    </a>
+    <a
+       id="a1526"
        xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/IStorageService.cs"
        target="_blank"
-       xlink:show=""
        xlink:title="IStorageService">
-      <rect
-         style="fill:#dee8ca;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
-         id="rect49832"
-         width="120"
-         height="48"
-         x="612"
-         y="684"
-         ry="12" />
+      <g
+         id="g1115">
+        <rect
+           style="fill:#dee8ca;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
+           id="rect49832"
+           width="120"
+           height="48"
+           x="612"
+           y="684"
+           ry="12" />
+        <g
+           id="g49840"
+           transform="translate(264.00781,435.54297)">
+          <text
+             xml:space="preserve"
+             style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
+             x="407.30469"
+             y="267.96484"
+             id="text49838"><tspan
+               sodipodi:role="line"
+               x="407.30469"
+               y="267.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle"
+               id="tspan49836">IStorage</tspan><tspan
+               sodipodi:role="line"
+               x="407.30469"
+               y="287.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle"
+               id="tspan56932">Service</tspan></text>
+        </g>
+      </g>
     </a>
-    <g
-       id="g49840"
-       transform="translate(264.00781,435.54297)">
-      <text
-         xml:space="preserve"
-         style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
-         x="407.30469"
-         y="267.96484"
-         id="text49838"><tspan
-           sodipodi:role="line"
-           x="407.30469"
-           y="267.96484"
-           style="font-size:16px;text-align:center;text-anchor:middle"
-           id="tspan49836">IStorage</tspan><tspan
-           sodipodi:role="line"
-           x="407.30469"
-           y="287.96484"
-           style="font-size:16px;text-align:center;text-anchor:middle"
-           id="tspan56932">Service</tspan></text>
-    </g>
     <g
        id="g2141"
        transform="matrix(4.9411765,0,0,6.1448427,434.54782,924.51792)">
@@ -754,84 +781,102 @@
          fill="#258277"
          id="path2127" />
     </g>
-    <g
-       id="g62320"
-       transform="translate(107.65085,-46.385925)">
+    <a
+       id="a3451"
+       xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Services/AzureStorageService.cs"
+       target="_blank"
+       xlink:title="AzureStorageService">
       <g
-         id="g65519">
-        <rect
-           style="fill:#c8bdd7;fill-opacity:1;stroke:#48395b;stroke-width:1.96319;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
-           id="rect62310"
-           height="94.036812"
-           x="312.34915"
-           y="852.34912"
-           width="118.03681"
-           ry="23.509203" />
-        <text
-           xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
-           x="371.60193"
-           y="895.36908"
-           id="text62318"><tspan
-             sodipodi:role="line"
+         id="g62320"
+         transform="translate(107.65085,-46.385925)">
+        <g
+           id="g65519">
+          <rect
+             style="fill:#c8bdd7;fill-opacity:1;stroke:#48395b;stroke-width:1.96319;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
+             id="rect62310"
+             height="94.036812"
+             x="312.34915"
+             y="852.34912"
+             width="118.03681"
+             ry="23.509203" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
              x="371.60193"
              y="895.36908"
-             id="tspan62316"
-             style="text-align:center;text-anchor:middle">Azure Storage</tspan><tspan
-             sodipodi:role="line"
-             x="371.60193"
-             y="914.56909"
-             style="text-align:center;text-anchor:middle"
-             id="tspan63213">Service</tspan></text>
+             id="text62318"><tspan
+               sodipodi:role="line"
+               x="371.60193"
+               y="895.36908"
+               id="tspan62316"
+               style="text-align:center;text-anchor:middle">Azure Storage</tspan><tspan
+               sodipodi:role="line"
+               x="371.60193"
+               y="914.56909"
+               style="text-align:center;text-anchor:middle"
+               id="tspan63213">Service</tspan></text>
+        </g>
       </g>
-    </g>
+    </a>
     <g
        id="g97786"
        transform="translate(-12,-48)">
-      <g
-         id="g36631"
-         transform="translate(12,36)">
-        <rect
-           style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
-           id="rect21261"
-           height="48"
-           x="216"
-           y="168"
-           width="96"
-           ry="12" />
-        <text
-           xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
-           x="244"
-           y="197.75391"
-           id="text21265"><tspan
-             sodipodi:role="line"
-             id="tspan21263"
+      <a
+         id="a3234"
+         xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Views"
+         target="_blank"
+         xlink:title="Views">
+        <g
+           id="g36631"
+           transform="translate(12,36)">
+          <rect
+             style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
+             id="rect21261"
+             height="48"
+             x="216"
+             y="168"
+             width="96"
+             ry="12" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
              x="244"
-             y="197.75391">Views</tspan></text>
-      </g>
-      <g
-         id="g36636"
-         transform="translate(12,36)">
-        <rect
-           style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
-           id="rect21308"
-           height="48"
-           x="216"
-           y="240"
-           width="96"
-           ry="12" />
-        <text
-           xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
-           x="225.38672"
-           y="269.82812"
-           id="text21312"><tspan
-             sodipodi:role="line"
-             id="tspan21310"
+             y="197.75391"
+             id="text21265"><tspan
+               sodipodi:role="line"
+               id="tspan21263"
+               x="244"
+               y="197.75391">Views</tspan></text>
+        </g>
+      </a>
+      <a
+         id="a3018"
+         xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Controllers"
+         target="_blank"
+         xlink:title="Controllers">
+        <g
+           id="g36636"
+           transform="translate(12,36)">
+          <rect
+             style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
+             id="rect21308"
+             height="48"
+             x="216"
+             y="240"
+             width="96"
+             ry="12" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
              x="225.38672"
-             y="269.82812">Controllers</tspan></text>
-      </g>
+             y="269.82812"
+             id="text21312"><tspan
+               sodipodi:role="line"
+               id="tspan21310"
+               x="225.38672"
+               y="269.82812">Controllers</tspan></text>
+        </g>
+      </a>
       <rect
          style="fill:none;fill-opacity:1;stroke:#7f6000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:4, 2;stroke-dashoffset:0;stroke-opacity:1;image-rendering:auto"
          id="rect21308-1"
@@ -950,84 +995,102 @@
          y="1028.1807"
          style="text-align:start;text-anchor:start"
          id="tspan16170">www.github.com/jcoliz/yofi</tspan></text>
-    <g
-       id="g5962">
-      <rect
-         style="fill:#dee8ca;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
-         id="rect3067"
-         width="120"
-         height="48"
-         x="204"
-         y="372"
-         ry="12" />
+    <a
+       id="a1948"
+       xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/Reports/IReportEngine.cs"
+       target="_blank"
+       xlink:title="IReportEngine">
       <g
-         id="g3075"
-         transform="translate(-143.71875,132)">
-        <text
-           xml:space="preserve"
-           style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
-           x="407.30469"
-           y="267.96484"
-           id="text3073"><tspan
-             sodipodi:role="line"
+         id="g5962">
+        <rect
+           style="fill:#dee8ca;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
+           id="rect3067"
+           width="120"
+           height="48"
+           x="204"
+           y="372"
+           ry="12" />
+        <g
+           id="g3075"
+           transform="translate(-143.71875,132)">
+          <text
+             xml:space="preserve"
+             style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
              x="407.30469"
              y="267.96484"
-             style="font-size:16px;text-align:center;text-anchor:middle"
-             id="tspan3071">IReportEngine</tspan></text>
+             id="text3073"><tspan
+               sodipodi:role="line"
+               x="407.30469"
+               y="267.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle"
+               id="tspan3071">IReportEngine</tspan></text>
+        </g>
       </g>
-    </g>
-    <g
-       id="g5453">
-      <rect
-         style="fill:#dee9c9;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
-         id="rect3561"
-         width="120"
-         height="48"
-         x="492"
-         y="372"
-         ry="12" />
+    </a>
+    <a
+       id="a2588"
+       xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/Repositories/IRepository.cs"
+       target="_blank"
+       xlink:title="IRepository(T)">
       <g
-         id="g3567"
-         transform="translate(145.01172,132)">
-        <text
-           xml:space="preserve"
-           style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
-           x="407.30469"
-           y="267.96484"
-           id="text3565"><tspan
-             sodipodi:role="line"
+         id="g5453">
+        <rect
+           style="fill:#dee9c9;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
+           id="rect3561"
+           width="120"
+           height="48"
+           x="492"
+           y="372"
+           ry="12" />
+        <g
+           id="g3567"
+           transform="translate(145.01172,132)">
+          <text
+             xml:space="preserve"
+             style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
              x="407.30469"
              y="267.96484"
-             style="font-size:16px;text-align:center;text-anchor:middle"
-             id="tspan3563">IRepository&lt;T&gt;</tspan></text>
+             id="text3565"><tspan
+               sodipodi:role="line"
+               x="407.30469"
+               y="267.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle"
+               id="tspan3563">IRepository&lt;T&gt;</tspan></text>
+        </g>
       </g>
-    </g>
-    <g
-       id="g5956">
-      <rect
-         style="fill:#dee9c9;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
-         id="rect7439"
-         width="120"
-         height="48"
-         x="348"
-         y="372"
-         ry="12" />
+    </a>
+    <a
+       id="a2374"
+       xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/Importers/IImporter.cs"
+       target="_blank"
+       xlink:title="IImporter(T)">
       <g
-         id="g7445"
-         transform="translate(1.0117187,132)">
-        <text
-           xml:space="preserve"
-           style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
-           x="407.30469"
-           y="267.96484"
-           id="text7443"><tspan
-             sodipodi:role="line"
+         id="g5956">
+        <rect
+           style="fill:#dee9c9;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
+           id="rect7439"
+           width="120"
+           height="48"
+           x="348"
+           y="372"
+           ry="12" />
+        <g
+           id="g7445"
+           transform="translate(1.0117187,132)">
+          <text
+             xml:space="preserve"
+             style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
              x="407.30469"
              y="267.96484"
-             style="font-size:16px;text-align:center;text-anchor:middle"
-             id="tspan7441">IImporter&lt;T&gt;</tspan></text>
+             id="text7443"><tspan
+               sodipodi:role="line"
+               x="407.30469"
+               y="267.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle"
+               id="tspan7441">IImporter&lt;T&gt;</tspan></text>
+        </g>
       </g>
-    </g>
+    </a>
     <text
        xml:space="preserve"
        style="font-size:13.3333px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;text-align:end;text-anchor:end"
@@ -1062,7 +1125,7 @@
          id="tspan30322">Account</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker1448)"
-       d="M 204,633.75 293.33333,684"
+       d="m 204,658.5 76.03249,28.51218"
        id="path1566"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1070,7 +1133,7 @@
        inkscape:connection-end="#rect33513" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1448)"
-       d="m 236.91089,516 -40.6668,36.76653"
+       d="m 243.54738,516 -59.72843,72"
        id="path2011"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1098,8 +1161,7 @@
        id="path4789"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
-       inkscape:connection-start="#a4402"
-       inkscape:connection-end="#a4002" />
+       inkscape:connection-start="#a4402" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker40625)"
        d="M 552,468 V 420"
@@ -1162,8 +1224,7 @@
        id="path7791"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
-       inkscape:connection-start="#g62320"
-       inkscape:connection-end="#a4002" />
+       inkscape:connection-start="#g62320" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1448)"
        d="m 479.01841,900.00001 0,37.85222"
@@ -1180,5 +1241,77 @@
        inkscape:connector-curvature="0"
        inkscape:connection-start="#g62308"
        inkscape:connection-end="#g2004" />
+    <g
+       id="g7789"
+       transform="translate(-8.0557402)">
+      <text
+         xml:space="preserve"
+         style="font-size:13.3333px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;text-align:end;text-anchor:end"
+         x="68.576118"
+         y="996.90399"
+         id="text11956-2"><tspan
+           sodipodi:role="line"
+           x="68.576118"
+           y="996.90399"
+           style="text-align:start;text-anchor:start"
+           id="tspan4942">click a</tspan><tspan
+           sodipodi:role="line"
+           x="68.576118"
+           y="1012.9039"
+           style="text-align:start;text-anchor:start"
+           id="tspan6200">box for</tspan><tspan
+           sodipodi:role="line"
+           x="68.576118"
+           y="1028.9039"
+           style="text-align:start;text-anchor:start"
+           id="tspan6202">details</tspan></text>
+      <g
+         id="g4159"
+         transform="translate(-111.10281,717.10808)">
+        <g
+           id="g4131"
+           transform="matrix(1.5411034,0,0,1.5411034,138.53524,272.44588)">
+          <path
+             d="m 20.854,17.147 -10,-10 C 10.71,7.004 10.496,6.961 10.309,7.039 10.122,7.116 10,7.299 10,7.501 v 13.846 c 0,0.191 0.109,0.366 0.281,0.449 0.172,0.084 0.377,0.063 0.526,-0.055 l 2.539,-1.985 2.216,3.988 c 0.092,0.164 0.262,0.257 0.438,0.257 0.075,0 0.152,-0.017 0.224,-0.053 l 3,-1.5 c 0.122,-0.061 0.214,-0.169 0.254,-0.299 0.04,-0.13 0.025,-0.271 -0.04,-0.391 L 17.35,18.001 h 3.15 c 0.202,0 0.385,-0.122 0.462,-0.309 0.077,-0.187 0.034,-0.401 -0.108,-0.545 z"
+             id="path4105" />
+          <g
+             id="g4109">
+            <path
+               d="m 10.5,3.999 c -0.276,0 -0.5,-0.224 -0.5,-0.5 v -3 c 0,-0.276 0.224,-0.5 0.5,-0.5 0.276,0 0.5,0.224 0.5,0.5 v 3 c 0,0.276 -0.224,0.5 -0.5,0.5 z"
+               id="path4107" />
+          </g>
+          <g
+             id="g4113">
+            <path
+               d="m 6.5,7.999 h -3 C 3.224,7.999 3,7.775 3,7.499 3,7.223 3.224,6.999 3.5,6.999 h 3 c 0.276,0 0.5,0.224 0.5,0.5 0,0.276 -0.224,0.5 -0.5,0.5 z"
+               id="path4111" />
+          </g>
+          <g
+             id="g4117">
+            <path
+               d="m 17.5,7.999 h -3 c -0.276,0 -0.5,-0.224 -0.5,-0.5 0,-0.276 0.224,-0.5 0.5,-0.5 h 3 c 0.276,0 0.5,0.224 0.5,0.5 0,0.276 -0.224,0.5 -0.5,0.5 z"
+               id="path4115" />
+          </g>
+          <g
+             id="g4121">
+            <path
+               d="M 7.672,5.17 C 7.544,5.17 7.416,5.121 7.318,5.024 L 5.196,2.903 c -0.195,-0.195 -0.195,-0.512 0,-0.707 0.195,-0.195 0.512,-0.195 0.707,0 L 8.025,4.317 C 8.22,4.512 8.22,4.829 8.025,5.024 7.928,5.122 7.8,5.17 7.672,5.17 Z"
+               id="path4119" />
+          </g>
+          <g
+             id="g4125">
+            <path
+               d="m 5.55,12.949 c -0.128,0 -0.256,-0.049 -0.354,-0.146 -0.195,-0.195 -0.195,-0.512 0,-0.707 L 7.318,9.975 c 0.195,-0.195 0.512,-0.195 0.707,0 0.195,0.195 0.195,0.512 0,0.707 L 5.903,12.803 C 5.806,12.9 5.678,12.949 5.55,12.949 Z"
+               id="path4123" />
+          </g>
+          <g
+             id="g4129">
+            <path
+               d="m 13.328,5.17 c -0.128,0 -0.256,-0.049 -0.354,-0.146 -0.195,-0.195 -0.195,-0.512 0,-0.707 L 15.096,2.196 C 15.292,2 15.609,2 15.804,2.196 c 0.195,0.196 0.195,0.512 0,0.707 L 13.682,5.024 C 13.584,5.122 13.456,5.17 13.328,5.17 Z"
+               id="path4127" />
+          </g>
+        </g>
+      </g>
+    </g>
   </g>
 </svg>
