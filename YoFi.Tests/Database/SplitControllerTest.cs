@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core.Repositories;
 
 namespace YoFi.Tests.Database
 {
@@ -46,7 +47,9 @@ namespace YoFi.Tests.Database
         {
             helper = new ControllerTestHelper<Split, SplitsController>();
             helper.SetUp();
-            helper.controller = new SplitsController(helper.context);
+
+            var repository = new BaseRepository<Split>(helper.context);
+            helper.controller = new SplitsController(repository);
 
             helper.Items.AddRange(SplitItems);
 
@@ -75,10 +78,6 @@ namespace YoFi.Tests.Database
         [ExpectedException(typeof(NotImplementedException))]
         public async Task DetailsNotFound() => await helper.DetailsNotFound();
         [TestMethod]
-        public async Task EditFound() => await helper.EditFound();
-        [TestMethod]
-        public async Task EditNotFound() => await helper.EditNotFound();
-        [TestMethod]
         [ExpectedException(typeof(NotImplementedException))]
         public async Task Create() => await helper.Create();
         //[TestMethod]
@@ -86,7 +85,20 @@ namespace YoFi.Tests.Database
         [TestMethod]
         public async Task DeleteFound() => await helper.DeleteFound();
         [TestMethod]
-        public async Task DeleteConfirmed() => await helper.DeleteConfirmed("Edit");
+        public async Task DeleteConfirmed()
+        {
+            string actionname = "Edit";
+            await helper.AddFiveItems();
+            var expected = helper.Items[3];
+            var result = await controller.DeleteConfirmed(expected.ID,new TransactionRepository(context));
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual(actionname, actual.ActionName);
+
+            var count = await context.Splits.CountAsync();
+
+            Assert.AreEqual(4, count);
+        }
         [TestMethod]
         [ExpectedException(typeof(NotImplementedException))]
         public async Task Download() => await helper.Download();
@@ -120,7 +132,7 @@ namespace YoFi.Tests.Database
 
             var updated = new Split() { ID = id, TransactionID = item.ID, Amount = 75m, Category = "C" };
 
-            var result = await controller.Edit(updated);
+            var result = await controller.Edit(updated.ID,updated);
             var redirresult = result as RedirectToActionResult;
 
             Assert.AreEqual("Edit", redirresult.ActionName);
@@ -149,7 +161,7 @@ namespace YoFi.Tests.Database
             context.SaveChanges();
 
             // When: Deleting that split
-            await controller.DeleteConfirmed(initial.ID);
+            await controller.DeleteConfirmed(initial.ID, new TransactionRepository(context));
 
             // Then: The transaction now has the category from the split
             var actual = context.Transactions.Single();
@@ -171,15 +183,11 @@ namespace YoFi.Tests.Database
             context.SaveChanges();
 
             // When: Deleting one split
-            await controller.DeleteConfirmed(initial.ID);
+            await controller.DeleteConfirmed(initial.ID, new TransactionRepository(context));
 
             // Then: The transaction still has null category
             var actual = context.Transactions.Single();
             Assert.IsNull(actual.Category);
         }
-
-        [TestMethod]
-        public async Task EditNullNotFound() =>
-            Assert.IsTrue(await controller.Edit(null as int?) is Microsoft.AspNetCore.Mvc.NotFoundResult);
     }
 }

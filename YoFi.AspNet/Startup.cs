@@ -83,6 +83,7 @@ namespace YoFi.AspNet.Root
             services.AddScoped<IPayeeRepository, PayeeRepository>();
             services.AddScoped<IRepository<Payee>, PayeeRepository>();
             services.AddScoped<IRepository<Transaction>, TransactionRepository>();
+            services.AddScoped<IRepository<Split>, BaseRepository<Split>>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<TransactionImporter>();
             services.AddScoped<SplitImporter>();

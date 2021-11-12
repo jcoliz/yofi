@@ -15,7 +15,7 @@ namespace YoFi.Core.Repositories
     /// This base repository class largely implements the IRepository(T) interface, with some items left abstract for the inherited class
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-    public abstract class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, new()
+    public class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, new()
     {
         #region Constructor
 
@@ -43,7 +43,7 @@ namespace YoFi.Core.Repositories
         // TODO: AnyAsync()
         public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.Get<T>().Any(x => x.ID == id));
 
-        public abstract IQueryable<T> ForQuery(string q);
+        public virtual IQueryable<T> ForQuery(string q) => All;
 
         public async Task AddAsync(T item)
         {

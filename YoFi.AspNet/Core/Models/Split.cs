@@ -12,7 +12,7 @@ namespace YoFi.Core.Models
     /// Used to split transaction amount across multiple
     /// different categories
     /// </summary>
-    public class Split: IID, IReportable
+    public class Split: IModelItem<Split>, IReportable
     {
         /// <summary>
         /// Object identity in Entity Framework
@@ -73,6 +73,11 @@ namespace YoFi.Core.Models
         public override int GetHashCode()
         {
             return HashCode.Combine(Amount, Category, Memo);
+        }
+
+        IQueryable<Split> IModelItem<Split>.InDefaultOrder(IQueryable<Split> original)
+        {
+            throw new NotImplementedException();
         }
     }
 }

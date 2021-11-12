@@ -1,92 +1,69 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Ardalis.Filters;
+﻿using Ardalis.Filters;
 using Common.AspNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using YoFi.AspNet.Data;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
 {
     [Authorize(Policy = "CanRead")]
     public class SplitsController : Controller, IController<Split>
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRepository<Split> _repository;
 
-        public SplitsController(ApplicationDbContext context)
+        public SplitsController(IRepository<Split> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
-        // GET: Splits/Edit/5
+        [ValidateSplitExists]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var split = await _context.Splits.SingleOrDefaultAsync(m => m.ID == id);
-            if (split == null)
-            {
-                return NotFound();
-            }
+            var split = await _repository.GetByIdAsync(id);
             return View(split);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateAntiForgeryToken]
         [ValidateModel]
-        public async Task<IActionResult> Edit([Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
+        [ValidateSplitExists]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
         {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(split);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    if (!_context.Splits.Any(e => e.ID == split.ID))
-                        return NotFound();
-                    else
-                        return StatusCode(500,ex.Message);
-                }
-                return RedirectToAction("Edit","Transactions", new { id = split.TransactionID });
-            }
-            return View(split);
+            await _repository.UpdateAsync(split);
+            return RedirectToAction("Edit","Transactions", new { id = split.TransactionID });
         }
 
-        // GET: Splits/Delete/5
         public async Task<IActionResult> Delete(int? id) => await Edit(id);
 
-        // POST: Splits/Delete/5
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [ValidateAntiForgeryToken]
+        [ValidateSplitExists]
+        public async Task<IActionResult> DeleteConfirmed(int id, [FromServices] IRepository<Transaction> transactionRepository)
         {
-            var split = await _context.Splits.SingleOrDefaultAsync(m => m.ID == id);
+            var split = await _repository.GetByIdAsync(id);
             var category = split.Category;
             var txid = split.TransactionID;
 
-            _context.Splits.Remove(split);
-            await _context.SaveChangesAsync();
+            await _repository.RemoveAsync(split);
 
-            var tx = _context.Transactions.Where(x => x.ID == txid).FirstOrDefault();
-            if (tx?.HasSplits == false)
+            if (await transactionRepository.TestExistsByIdAsync(txid))
             {
-                tx.Category = category;
-                await _context.SaveChangesAsync();
+                var tx = await transactionRepository.GetByIdAsync(txid);
+                if ( !tx.HasSplits )
+                {
+                    tx.Category = category;
+                    await transactionRepository.UpdateAsync(tx);
+                }
             }
+            // else if dones't exist, something bizarre happened, but we'll not take any action 
 
             return RedirectToAction("Edit", "Transactions", new { id = txid });
         }
@@ -109,7 +86,7 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Split>.Create() =>
             throw new NotImplementedException();
 
-        Task<IActionResult> IController<Split>.Edit(int id, Split item) =>
-            Edit(item);
+        Task<IActionResult> IController<Split>.DeleteConfirmed(int id) =>
+            throw new NotImplementedException();
     }
 }

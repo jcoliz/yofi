@@ -30,6 +30,14 @@ namespace YoFi.AspNet.Controllers
         }
     }
 
+    public class ValidateSplitExistsAttribute : TypeFilterAttribute
+    {
+        public ValidateSplitExistsAttribute() : base(typeof
+          (ValidateItemExists<Split>))
+        {
+        }
+    }
+
     // https://docs.microsoft.com/en-us/archive/msdn-magazine/2016/august/asp-net-core-real-world-asp-net-core-mvc-filters
 
     internal class ValidateItemExists<T> : IAsyncActionFilter where T : class, IModelItem<T>
