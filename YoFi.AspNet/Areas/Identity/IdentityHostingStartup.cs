@@ -1,12 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using YoFi.AspNet.Boilerplate.Models;
-using YoFi.AspNet.Data;
+﻿using Microsoft.AspNetCore.Hosting;
 
 [assembly: HostingStartup(typeof(YoFi.AspNet.Areas.Identity.IdentityHostingStartup))]
 namespace YoFi.AspNet.Areas.Identity
