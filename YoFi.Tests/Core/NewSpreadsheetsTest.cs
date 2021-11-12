@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Tests.Database;
 
 namespace YoFi.Tests.Core
 {

@@ -6,7 +6,6 @@ using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxSharp;
 using System;
@@ -23,7 +22,7 @@ using YoFi.Core.Repositories;
 using Dto = YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
 using Transaction = YoFi.Core.Models.Transaction;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Database
 {
     [TestClass]
     public class TransactionControllerTest

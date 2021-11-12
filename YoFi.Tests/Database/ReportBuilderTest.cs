@@ -12,7 +12,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Database
 {
     [TestClass]
     public class ReportBuilderTest

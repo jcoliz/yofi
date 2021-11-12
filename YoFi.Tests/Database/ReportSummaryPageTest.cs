@@ -7,10 +7,10 @@ using YoFi.AspNet.Pages;
 using YoFi.Core.Reports;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests.Pages
+namespace YoFi.Tests.Database
 {
     [TestClass]
-    public class PagesTest
+    public class ReportSummaryPageTest
     {
         private ApplicationDbContext context;
 

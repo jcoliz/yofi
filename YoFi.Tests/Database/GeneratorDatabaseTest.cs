@@ -6,7 +6,7 @@ using YoFi.AspNet.Data;
 using YoFi.Core.SampleGen;
 using CNDSampleData = Common.NET.Data.SampleData;
 
-namespace YoFi.Tests.Core.SampleGen
+namespace YoFi.Tests.Database
 {
     [TestClass]
     public class GeneratorDatabaseTest

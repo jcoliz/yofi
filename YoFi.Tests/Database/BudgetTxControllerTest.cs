@@ -13,7 +13,7 @@ using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Database
 {
     [TestClass]
 

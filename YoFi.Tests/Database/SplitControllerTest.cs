@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Database
 {
     [TestClass]
     public class SplitControllerTest

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using YoFi.AspNet.Data;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Database
 {
     [TestClass]
     public class MigrationsTest
