@@ -48,23 +48,24 @@ namespace YoFi.AspNet.Controllers
         [ApiBasicAuthorization]
         public async Task<IActionResult> ClearTestData(string id, [FromServices] IDataContext context)
         {
-            const string testmarker = "__test__";
-
             if (id.Contains("payee"))
-                context.RemoveRange(context.Payees.Where(x => x.Category.Contains(testmarker)));
+                context.RemoveRange(context.Payees.Where(x => x.Category.Contains(TestMarker)));
 
             if (id.Contains("budgettx"))
-                context.RemoveRange(context.BudgetTxs.Where(x => x.Category.Contains(testmarker)));
+                context.RemoveRange(context.BudgetTxs.Where(x => x.Category.Contains(TestMarker)));
 
             if (id.Contains("trx"))
             {
-                context.RemoveRange(context.Transactions.Where(x => x.Category.Contains(testmarker) || x.Memo.Contains(testmarker)));
-                context.RemoveRange(context.Splits.Where(x => x.Category.Contains(testmarker)));
+                context.RemoveRange(context.Transactions.Where(x => x.Category.Contains(TestMarker) || x.Memo.Contains(TestMarker)));
+                context.RemoveRange(context.Splits.Where(x => x.Category.Contains(TestMarker)));
             }
 
             await context.SaveChangesAsync();
 
             return new OkResult();
         }
+
+        public const string TestMarker = "__test__";
+
     }
 }

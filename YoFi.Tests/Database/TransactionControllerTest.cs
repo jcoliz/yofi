@@ -1238,6 +1238,14 @@ namespace YoFi.Tests
             _context.SaveChanges();
         }
 
+        public static void GivenItems(int numitems, int nummoditems, Action<Transaction> action, out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
+        {
+            items = TransactionItems.Take(numitems);
+            moditems = items.Take(nummoditems);
+            foreach (var i in moditems)
+                action(i);
+        }
+
         void GivenItemsHiddenAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
         {
             items = TransactionItems.Take(10);

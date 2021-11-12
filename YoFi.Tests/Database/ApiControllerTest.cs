@@ -197,8 +197,8 @@ namespace YoFi.Tests.Database
 
         async Task<IEnumerable<Transaction>> WhenCallingGetTxWithQ(string q)
         {
-            var result = await controller.GetTransactions(new TransactionRepository(context), q: q);
-            var jsonresult = Assert.That.IsOfType<OkObjectResult>(result);
+            var actionresult = await controller.GetTransactions(new TransactionRepository(context), q: q);
+            var jsonresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
             var model = Assert.That.IsOfType<IEnumerable<Transaction>>(jsonresult.Value);
 
             return model;
@@ -239,6 +239,24 @@ namespace YoFi.Tests.Database
                 Assert.AreEqual(moditems.Count(), model.Count());
             else
                 Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
+        }
+
+        [TestMethod]
+        public async Task ClearTestTransactions()
+        {
+            // Given: A mix of transactions, some with __test__ marker, some without
+            TransactionControllerTest.GivenItems(10, 3, x => x.Category += ApiController.TestMarker, out IEnumerable<Transaction> items, out _);
+            context.AddRange(items);
+            await context.SaveChangesAsync();
+
+            // When: Calling ClearTestData with id="trx"
+            var actionresult = await controller.ClearTestData("trx", context);
+
+            // Then: Result is OK
+            Assert.That.IsOfType<OkResult>(actionresult);
+
+            // ANd: Only the transactions without __test__ remain
+            Assert.AreEqual(7, context.Transactions.Count());
         }
 
 #if EFCORE_TESTS
