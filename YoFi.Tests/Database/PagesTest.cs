@@ -7,7 +7,7 @@ using YoFi.AspNet.Pages;
 using YoFi.Core.Reports;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests
+namespace YoFi.Tests.Pages
 {
     [TestClass]
     public class PagesTest
