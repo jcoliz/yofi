@@ -12,28 +12,74 @@ using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Core.Importers
 {
-    // QUESTION: Is it right for this to be separate from the transactions repository?
-    // If so, is it right for the others to be PART of their repository?
+    /// <summary>
+    /// Import transactions into a repository
+    /// </summary>
+    /// <remarks>
+    /// Transactions get special handling, especially special duplicate handling. Also they can import OFX files
+    /// </remarks>
     public class TransactionImporter
     {
-        private readonly List<Transaction> incoming = new List<Transaction>();
-        private readonly List<IGrouping<int, Split>> splits = new List<IGrouping<int, Split>>();
-        private readonly List<Transaction> highlights = new List<Transaction>();
-
-        private readonly ITransactionRepository _repository;
-        private readonly IPayeeRepository _payees;
-
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="repository">Where to store transactions</param>
+        /// <param name="payees">Where to find payees for matching</param>
         public TransactionImporter(ITransactionRepository repository, IPayeeRepository payees)
         {
             _repository = repository;
             _payees = payees;
         }
 
-        public IEnumerable<string> HighlightIDs => highlights.Select(x => x.ID.ToString());
+        /// <summary>
+        /// All the ids of transactions which should be highlighted to the user for further
+        /// consideration
+        /// </summary>
+        public IEnumerable<int> HighlightIDs => highlights.Select(x => x.ID);
 
+        /// <summary>
+        /// Load transactions from an OFX file, and hold them in a queue for furhter processing
+        /// </summary>
+        /// <param name="stream">Source of data</param>
+        public async Task QueueImportFromOfxAsync(Stream stream)
+        {
+            OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
+
+            var created = Document.Statements.SelectMany(x => x.Transactions).Select(
+                tx => new Transaction()
+                {
+                    Amount = tx.Amount,
+                    Payee = tx.Memo?.Trim(),
+                    BankReference = tx.ReferenceNumber?.Trim(),
+                    Timestamp = tx.Date.Value.DateTime
+                }
+            );
+
+            incoming.AddRange(created);
+        }
+
+        /// <summary>
+        /// Load transactions from an XLSX file, and hold them in a queue for further processing
+        /// </summary>
+        /// <param name="stream">Source of data</param>
+        public void QueueImportFromXlsx(Stream stream)
+        {
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            var items = ssr.Deserialize<Transaction>();
+            incoming.AddRange(items);
+
+            // If there are also splits included here, let's grab those
+            // And transform the flat data into something easier to use.
+            if (ssr.SheetNames.Contains("Split"))
+                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
+        }
+
+        /// <summary>
+        /// Add the previously queued transactions to the database, in an 'imported' state
+        /// </summary>
         public async Task ProcessImportAsync()
         {
-
             // Process needed changes on each
             foreach (var item in incoming)
             {
@@ -105,36 +151,11 @@ namespace YoFi.Core.Importers
             await _repository.AddRangeAsync(incoming);
         }
 
-        public async Task QueueImportFromOfxAsync(Stream stream)
-        {
-            OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
+        #region Internals
 
-            var created = Document.Statements.SelectMany(x => x.Transactions).Select(
-                tx => new Transaction()
-                {
-                    Amount = tx.Amount,
-                    Payee = tx.Memo?.Trim(),
-                    BankReference = tx.ReferenceNumber?.Trim(),
-                    Timestamp = tx.Date.Value.DateTime
-                }
-            );
-
-            incoming.AddRange(created);
-        }
-
-        public void QueueImportFromXlsx(Stream stream)
-        {
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            var items = ssr.Deserialize<Transaction>();
-            incoming.AddRange(items);
-
-            // If there are also splits included here, let's grab those
-            // And transform the flat data into something easier to use.
-            if (ssr.SheetNames.Contains("Split"))
-                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
-        }
-
+        /// <summary>
+        /// Retroactively assign bankrefs to any transactions which don't already have them
+        /// </summary>
         private async Task EnsureAllTransactionsHaveBankRefs()
         {
             // To handle the case where there may be transactions already in the system before the importer
@@ -161,7 +182,7 @@ namespace YoFi.Core.Importers
         /// it will be included in the returned tranasactions. These are the suspicious transactions that the user
         /// should look at more carefully.
         /// </remarks>
-        IEnumerable<Transaction> ManageConflictingImports(IEnumerable<Transaction> incoming)
+        private IEnumerable<Transaction> ManageConflictingImports(IEnumerable<Transaction> incoming)
         {
             var result = new List<Transaction>();
 
@@ -210,6 +231,37 @@ namespace YoFi.Core.Importers
 
             return result;
         }
+
+        #endregion
+
+        #region Fields
+
+        /// <summary>
+        /// Pending queue of transactions to import
+        /// </summary>
+        private readonly List<Transaction> incoming = new List<Transaction>();
+
+        /// <summary>
+        /// Pending queue of splits to import
+        /// </summary>
+        private readonly List<IGrouping<int, Split>> splits = new List<IGrouping<int, Split>>();
+
+        /// <summary>
+        /// Probably duplicate items, but the user should check to be sure.
+        /// </summary>
+        private readonly List<Transaction> highlights = new List<Transaction>();
+
+        /// <summary>
+        /// Target repository for storing the imported results
+        /// </summary>
+        private readonly ITransactionRepository _repository;
+
+        /// <summary>
+        /// Repository to use for payee matching
+        /// </summary>
+        private readonly IPayeeRepository _payees;
+
+        #endregion
 
     }
 }
