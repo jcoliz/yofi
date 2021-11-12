@@ -106,8 +106,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(expected, actual);
         }
 
-
-
         [TestMethod]
         public async Task ReportV2()
         {
@@ -117,9 +115,6 @@ namespace YoFi.Tests.Database
             await context.SaveChangesAsync();
 
             var actionresult = controller.ReportV2( new ReportParameters() { id = "all" }, new ReportBuilder(context) );
-            if (actionresult is ObjectResult or)
-                throw or.Value as Exception;
-
             var okresult = Assert.That.IsOfType<ContentResult>(actionresult);
             var report = okresult.Content;
 
@@ -141,8 +136,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(1500m, Total.GetProperty("TOTAL").GetDecimal());
         }
 
-
-
         [TestMethod]
         public async Task ReportV2export()
         {
@@ -152,10 +145,7 @@ namespace YoFi.Tests.Database
             await AddFiveTransactions();
 
             var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
-            if (actionresult is ObjectResult or)
-                throw or.Value as Exception;
-
-            var okresult = actionresult as ContentResult;
+            var okresult = Assert.That.IsOfType<ContentResult>(actionresult);
             var report = okresult.Content;
 
             Console.WriteLine(report);
@@ -180,10 +170,7 @@ namespace YoFi.Tests.Database
         public void ReportV2exportEmpty()
         {
             var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
-            if (actionresult is ObjectResult or)
-                throw or.Value as Exception;
-
-            var okresult = actionresult as ContentResult;
+            var okresult = Assert.That.IsOfType<ContentResult>(actionresult);
             var report = okresult.Content;
 
             Console.WriteLine(report);
@@ -229,7 +216,9 @@ namespace YoFi.Tests.Database
         public async Task GetTxQReceipt(bool with)
         {
             // Given: A mix of transactions, some with receipts, some without
-           TransactionControllerTest.GivenItemsWithAndWithoutReceipt(context, out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems);
+            (var items, var moditems) = TransactionControllerTest.GivenItems(10, 3, x => x.ReceiptUrl = "Has receipt");
+            context.AddRange(items);
+            await context.SaveChangesAsync();
 
             // When: Calling GetTransactions q='r=1' (or r=0)
             var model = await WhenCallingGetTxWithQ($"R={(with ? '1' : '0')}");
@@ -245,7 +234,10 @@ namespace YoFi.Tests.Database
         public async Task ClearTestTransactions()
         {
             // Given: A mix of transactions, some with __test__ marker, some without
-            TransactionControllerTest.GivenItems(10, 3, x => x.Category += ApiController.TestMarker, out IEnumerable<Transaction> items, out _);
+            var items = TransactionControllerTest.TransactionItems.Take(10);
+            foreach (var moditem in items.Take(3))
+                moditem.Category += ApiController.TestMarker;
+
             context.AddRange(items);
             await context.SaveChangesAsync();
 
