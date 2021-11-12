@@ -230,9 +230,6 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
         {
-            if (id != transaction.ID && duplicate != true)
-                return BadRequest();
-
             if (duplicate == true)
             {
                 transaction.ID = 0;

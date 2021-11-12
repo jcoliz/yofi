@@ -1,5 +1,6 @@
 ﻿using Common.AspNet;
 using Common.AspNet.Test;
+using Common.DotNet.Test;
 using Common.NET.Test;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Http;
@@ -793,11 +794,35 @@ namespace YoFi.Tests
 
             // When: Approving the import
             var result = await controller.ProcessImported("ok");
+            Assert.That.IsOfType<RedirectToActionResult> (result);
 
             // Then: All items remain, none have imported flag
             Assert.AreEqual(5, dbset.Count());
             Assert.AreEqual(0, dbset.Where(x => x.Imported == true).Count());
         }
+
+        [DataRow(null)]
+        [DataRow("Bogus")]
+        [DataTestMethod]
+        public async Task ImportWrong(string command)
+        {
+            // Given: As set of items, some with imported & selected flags, some with not
+            var notimported = 1; // How many should remain?
+            foreach (var item in Items.Skip(notimported))
+                item.Imported = item.Selected = true;
+            await helper.AddFiveItems();
+
+            // When: Sending the import an empty command
+            var result = await controller.ProcessImported(command);
+
+            // Then: Bad request
+            Assert.That.IsOfType<BadRequestResult>(result);
+
+            // Then: No change to db
+            Assert.AreEqual(5, dbset.Count());
+            Assert.AreEqual(4, dbset.Where(x => x.Imported == true).Count());
+        }
+
 
         [TestMethod]
         public async Task ImportOkSelected()
