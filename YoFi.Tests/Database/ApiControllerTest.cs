@@ -234,8 +234,10 @@ namespace YoFi.Tests.Database
         public async Task ClearTestTransactions()
         {
             // Given: A mix of transactions, some with __test__ marker, some without
-            var items = TransactionControllerTest.TransactionItems.Take(10);
-            foreach (var moditem in items.Take(3))
+            int numitems = 10;
+            int nummoditems = 3;
+            var items = TransactionControllerTest.TransactionItems.Take(numitems);
+            foreach (var moditem in items.Take(nummoditems))
                 moditem.Category += ApiController.TestMarker;
 
             context.AddRange(items);
@@ -248,8 +250,54 @@ namespace YoFi.Tests.Database
             Assert.That.IsOfType<OkResult>(actionresult);
 
             // ANd: Only the transactions without __test__ remain
-            Assert.AreEqual(7, context.Transactions.Count());
+            Assert.AreEqual(numitems-nummoditems, context.Transactions.Count());
         }
+
+        [TestMethod]
+        public async Task ClearTestBudgetTx()
+        {
+            // Given: A mix of budget transactions, some with __test__ marker, some without
+            await AddFiveBudgetTxs();
+            int numitems = 5;
+            int nummoditems = numitems / 2;
+            foreach (var moditem in context.BudgetTxs.Take(nummoditems))
+                moditem.Category += ApiController.TestMarker;
+
+            await context.SaveChangesAsync();
+
+            // When: Calling ClearTestData with id="budgettx"
+            var actionresult = await controller.ClearTestData("budgettx", context);
+
+            // Then: Result is OK
+            Assert.That.IsOfType<OkResult>(actionresult);
+
+            // ANd: Only the transactions without __test__ remain
+            Assert.AreEqual(numitems - nummoditems, context.BudgetTxs.Count());
+        }
+
+        [TestMethod]
+        public async Task ClearTestPayees()
+        {
+            // Given: A mix of budget transactions, some with __test__ marker, some without
+            int numitems = 5;
+            var items = TransactionControllerTest.PayeeItems.Take(numitems);
+            int nummoditems = numitems / 2;
+            foreach (var moditem in items.Take(nummoditems))
+                moditem.Category += ApiController.TestMarker;
+
+            context.AddRange(items);
+            await context.SaveChangesAsync();
+
+            // When: Calling ClearTestData with id="payee"
+            var actionresult = await controller.ClearTestData("payee", context);
+
+            // Then: Result is OK
+            Assert.That.IsOfType<OkResult>(actionresult);
+
+            // ANd: Only the transactions without __test__ remain
+            Assert.AreEqual(numitems - nummoditems, context.Payees.Count());
+        }
+
 
 #if EFCORE_TESTS
         [TestMethod]

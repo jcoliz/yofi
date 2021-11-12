@@ -88,7 +88,7 @@ namespace YoFi.Tests
             new Split() { Amount = 75m, Category = "C", Memo = "WHOCAFD" }
         };
 
-        readonly List<Payee> PayeeItems = new List<Payee>()
+        public static List<Payee> PayeeItems => new List<Payee>()
         {
             new Payee() { Category = "Y", Name = "3" },
             new Payee() { Category = "X", Name = "2" },
@@ -1470,11 +1470,20 @@ namespace YoFi.Tests
         [TestMethod]
         public async Task IndexQCategorySplits()
         {
+            // Somehow this test starts with an extra item in the DB. Not sure how!!
+            if (context.Transactions.Any())
+            {
+                context.RemoveRange(context.Transactions);
+                await context.SaveChangesAsync();
+            }
+
+            Assert.AreEqual(0, context.Transactions.Count());
+
             // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
             var items = TransactionItems.Take(20);
             items.First().Splits = SplitItems.Take(2).ToList();
             context.Transactions.AddRange(items);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             // When: Calling index q='c={word}'
             var word = "A";
