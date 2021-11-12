@@ -16,13 +16,13 @@ namespace Common.AspNet
 
             if (storage == null)
             {
-                context.Result = new BadRequestObjectResult("Unable to process request. Azure Blob Storage is not configured for this application.") { StatusCode = 410 };
+                context.Result = new BadRequestObjectResult("Unable to process request. Azure Blob Storage is not configured for this application. [E1]") { StatusCode = 410 };
                 return;
             }
 
             if (config["Storage:BlobContainerName"] == null)
             {
-                context.Result = new BadRequestObjectResult("Unable to process request. No Azure Blob Storage container is not configured for this application.") { StatusCode = 410 };
+                context.Result = new BadRequestObjectResult("Unable to process request. No Azure Blob Storage container is not configured for this application. [E2]") { StatusCode = 410 };
                 return;
             }
 
