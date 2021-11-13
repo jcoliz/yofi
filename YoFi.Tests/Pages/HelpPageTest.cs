@@ -39,7 +39,7 @@ namespace YoFi.Tests.Pages
 
             // And: The properties are all non-null
             Assert.IsTrue(pagemodel.Topic.Contents.Any());
-            Assert.IsTrue(pagemodel.Topic.Full.Any());
+            Assert.IsTrue(pagemodel.Topic.Extended.Any());
 
         }
 

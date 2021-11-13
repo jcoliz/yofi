@@ -2,9 +2,37 @@
 @model YoFi.AspNet.Pages.HelpModel
 @{
 }
-<h2 data-test-id="help-topic-title" >@Model.Topic.Title</h2>
-
-@foreach (var line in Model.Topic.Contents)
+@if (null != Model.Topic)
 {
-    <p>@line</p>
+    <h2 data-test-id="help-topic-title">@Model.Topic.Title</h2>
+
+    @foreach (var line in Model.Topic.Contents)
+    {
+        <p>@line</p>
+    }
+
+}
+else
+{
+    Layout = "_Layout";
+    ViewData["Title"] = "Help";
+
+    @foreach (var topic in Model.Topics)
+    {
+        <h2 id="@topic.Key" data-test-id="help-topic-title">@topic.Title</h2>
+
+        @foreach (var line in topic.Contents.Concat(topic.Extended))
+        {
+            <p>@line</p>
+        }
+
+        @if (null != topic.Button)
+        {
+            <div class="d-flex w-100">
+                <a class="btn btn-primary ms-auto" href="@topic.Href">@topic.Button &raquo;</a>
+            </div>
+        }
+    }
+
+
 }
