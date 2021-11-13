@@ -11,8 +11,12 @@ namespace YoFi.AspNet.Pages
     {
         public HelpTopic Topic { get; set; }
 
-        public void OnGet(string id)
+        public string Highlight { get; set; }
+
+        public void OnGet(string id, string from)
         {
+            Highlight = from;
+
             if (!string.IsNullOrEmpty(id))
             {
                 Topic = Topics.FirstOrDefault(x => x.Key == id);

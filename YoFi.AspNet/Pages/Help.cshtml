@@ -1,6 +1,7 @@
 ﻿@page
 @model YoFi.AspNet.Pages.HelpModel
 @{
+    string alert = string.Empty;
 }
 @if (null != Model.Topic)
 {
@@ -19,37 +20,38 @@ else
 
     @foreach (var topic in Model.Topics)
     {
-        <h2 id="@topic.Key" data-test-id="help-topic-title">@topic.Title</h2>
+        alert = (topic.Key == Model.Highlight) ? "alert-primary p-2 mb-3 mt-3" : string.Empty;
 
+        <div class="@alert">
+            <h2 id="@topic.Key" data-test-id="help-topic-title">@topic.Title</h2>
 
-        @if (topic.ExtendedIsList)
-        {
-            @foreach (var line in topic.Contents)
+            @if (topic.ExtendedIsList)
             {
-                <p>@Html.Raw(line)</p>
-            }
-            <ul>
-                @foreach (var line in topic.Extended)
+                @foreach (var line in topic.Contents)
                 {
-                    <li>@Html.Raw(line)</li>
+                    <p>@Html.Raw(line)</p>
                 }
-            </ul>
-        }
-        else
-        {
-            @foreach (var line in topic.Contents.Concat(topic.Extended))
-            {
-                <p>@Html.Raw(line)</p>
+                <ul>
+                    @foreach (var line in topic.Extended)
+                    {
+                        <li>@Html.Raw(line)</li>
+                    }
+                </ul>
             }
-        }
+            else
+            {
+                @foreach (var line in topic.Contents.Concat(topic.Extended))
+                {
+                    <p>@Html.Raw(line)</p>
+                }
+            }
 
-        @if (null != topic.Button)
-        {
-            <div class="d-flex w-100">
-                <a class="btn btn-primary ms-auto" href="@topic.Href">@topic.Button &raquo;</a>
-            </div>
-        }
+            @if (null != topic.Button)
+            {
+                <div class="d-flex w-100">
+                    <a class="btn btn-primary ms-auto" href="@topic.Href">@topic.Button &raquo;</a>
+                </div>
+            }
+        </div>
     }
-
-
 }
