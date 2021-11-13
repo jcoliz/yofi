@@ -47,7 +47,7 @@ namespace YoFi.AspNet.Pages
                 Contents = new string[]
                 {
                     "You can set up payee matching rules so that new transactions are automatically assigned a category when imported. YoFi compares the payee of transactions against all the payee matching rules during import, looking for a substring match.",
-                    "The easiest way to add a new rule is the 'Add Payee' button next to each item on the Transactions page. ",
+                    "The easiest way to add a new rule is the 'Add Payee' button next to each item on the <a href=\"/Transactions/\">Transactions</a> page. ",
                 },
 
                 Extended = new string[]
@@ -74,7 +74,7 @@ namespace YoFi.AspNet.Pages
 
                 Extended = new string[]
                 {
-                    "To see an example of the expected format for an Excel spreadsheet, download an example from https://www.try-yofi.com/Transactions. Note that most columns of the spreadsheet are optional."
+                    "To see an example of the expected format for an Excel spreadsheet, download an example from <a href=\"https://www.try-yofi.com/Transactions\">https://www.try-yofi.com/Transactions</a>. Note that most columns of the spreadsheet are optional."
                 },
 
                 Button = "Import",
@@ -90,7 +90,7 @@ namespace YoFi.AspNet.Pages
                 Contents = new string[]
                 {
                     "To track your spending against a budget, you'll create individual Budget Line Items. Create one budget line item for each category you care about, setting the date to anything in the appropriate year (e.g. Jan 1st). The budget reports will interpret that as a budget for the whole year",
-                    "The simplest way to enter this is to create the budget first in Excel, then import it on the Budget page. To see an example of how the spreadsheet should be laid out, download an example from https://www.try-yofi.com/BudgetTxs."
+                    "The simplest way to enter this is to create the budget first in Excel, then import it on the Budget page. To see an example of how the spreadsheet should be laid out, download an example from <a href=\"https://www.try-yofi.com/BudgetTxs\">https://www.try-yofi.com/BudgetTxs</a>."
                 },
 
                 Extended = new string[]

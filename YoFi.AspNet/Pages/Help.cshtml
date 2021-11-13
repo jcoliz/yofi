@@ -8,7 +8,7 @@
 
     @foreach (var line in Model.Topic.Contents)
     {
-        <p>@line</p>
+        <p>@Html.Raw(line)</p>
     }
 
 }
@@ -23,7 +23,7 @@ else
 
         @foreach (var line in topic.Contents.Concat(topic.Extended))
         {
-            <p>@line</p>
+            <p>@Html.Raw(line)</p>
         }
 
         @if (null != topic.Button)
