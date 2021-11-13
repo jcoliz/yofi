@@ -21,9 +21,26 @@ else
     {
         <h2 id="@topic.Key" data-test-id="help-topic-title">@topic.Title</h2>
 
-        @foreach (var line in topic.Contents.Concat(topic.Extended))
+
+        @if (topic.ExtendedIsList)
         {
-            <p>@Html.Raw(line)</p>
+            @foreach (var line in topic.Contents)
+            {
+                <p>@Html.Raw(line)</p>
+            }
+            <ul>
+                @foreach (var line in topic.Extended)
+                {
+                    <li>@Html.Raw(line)</li>
+                }
+            </ul>
+        }
+        else
+        {
+            @foreach (var line in topic.Contents.Concat(topic.Extended))
+            {
+                <p>@Html.Raw(line)</p>
+            }
         }
 
         @if (null != topic.Button)
