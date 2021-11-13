@@ -166,7 +166,7 @@ namespace YoFi.AspNet.Root
 #endif
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IStorageService storage)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IEnumerable<IStorageService> storages)
         {
             while (logme.Any())
                 logger.LogInformation(logme.Dequeue());
@@ -216,7 +216,9 @@ namespace YoFi.AspNet.Root
                 x.MapRazorPages();
             });
 
-            storage.ContainerName = SetupBlobContainerName(env.IsDevelopment());
+            // https://newbedev.com/dependency-injection-optional-parameters
+            foreach(var storage in storages)
+                storage.ContainerName = SetupBlobContainerName(env.IsDevelopment());
         }
 
         private string SetupBlobContainerName(bool isdevelopment)
