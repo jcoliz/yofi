@@ -332,7 +332,7 @@ namespace YoFi.Core.Repositories
                             // var pvif = Math.pow(1 + rate, nper);
                             // var pmt = rate / (pvif - 1) * -(pv * pvif + fv);
                             var pvif = Math.Pow(1 + loan.RatePctPerMo, loan.Term);
-                            var pmt = -loan.RatePctPerMo / (pvif - 1) * (double)loan.Amount * pvif;
+                            var pmt = -loan.RatePctPerMo / (pvif - 1) * loan.Amount * pvif;
 
                             // TMP = POWER(1+InterestRate/PaymentsPerYear,PaymentSchedule[@[PMT NO]]-1)
                             var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
@@ -340,7 +340,7 @@ namespace YoFi.Core.Repositories
 
                             // IPMT = PaymentSchedule[@[TOTAL PAYMENT]]*(M86-1)-LoanAmount*M86*(InterestRate/PaymentsPerYear)
                             var term1 = pmt * (factor - 1);
-                            var term2 = (double)loan.Amount * factor * loan.RatePctPerMo;
+                            var term2 = loan.Amount * factor * loan.RatePctPerMo;
                             var ipmtd = -term1 - term2;
                             var ipmt = (decimal)Math.Round(ipmtd, 2);
 
@@ -389,11 +389,11 @@ namespace YoFi.Core.Repositories
     
         class LoanDefinition
         {          
-            public decimal Amount { get; set; }
+            public double Amount { get; set; }
 
-            public decimal Rate { get; set; }
+            public double Rate { get; set; }
 
-            public double RatePctPerMo => (double)Rate / 100.0 / 12.0;
+            public double RatePctPerMo => Rate / 100.0 / 12.0;
 
             public string Origination { get; set; }
 
