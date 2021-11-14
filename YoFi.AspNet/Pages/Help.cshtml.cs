@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
 
 namespace YoFi.AspNet.Pages
 {
@@ -13,7 +14,9 @@ namespace YoFi.AspNet.Pages
 
         public string Highlight { get; set; }
 
-        public void OnGet(string id, string from = null)
+        public IEnumerable<HelpTopic> ShownTopics { get; private set;  }
+
+        public void OnGet(string id, string from = null, [FromServices] IConfiguration config = null)
         {
             Highlight = from;
 
@@ -23,6 +26,11 @@ namespace YoFi.AspNet.Pages
                 if (null == Topic)
                     Topic = new HelpTopic() { Title = "Sorry", Contents = new string[] { $"Can't find a help topic for <<{id}>>" } };
             }
+
+            if (null != config && config.GetSection("Brand").Exists())
+                ShownTopics = Topics.Where(x => !x.ShowInDemoOnly);
+            else
+                ShownTopics = Topics;
         }
 
         public class HelpTopic
@@ -38,17 +46,19 @@ namespace YoFi.AspNet.Pages
             public bool ExtendedIsList { get; set; }
 
             public string Button { get; set; }
+
             public string Href { get; set; }
 
+            public bool ShowInDemoOnly { get; set; }
         }
 
-        public IEnumerable<HelpTopic> Topics { get; } = new List<HelpTopic>()
+        private IEnumerable<HelpTopic> Topics { get; } = new List<HelpTopic>()
         {
             new HelpTopic()
             {
                 Key = "demo",
 
-                Title = "Welcome to the Demo",
+                Title = "Thanks for trying the Demo!",
 
                 Contents = new string[]
                 {
@@ -59,7 +69,9 @@ namespace YoFi.AspNet.Pages
                 Extended = new string[]
                 {
                     "Once you're running your own instance, you can turn off the demo by configuring your site to include your own branding information, such as setting a site name and icon. See the <a href=\"https://github.com/jcoliz/yofi/blob/master/docs/Configuration.md\">Configuration</a> page for details."
-                }
+                },
+
+                ShowInDemoOnly = true
             },
             new HelpTopic()
             {

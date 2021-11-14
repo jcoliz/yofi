@@ -17,7 +17,7 @@ else
     Layout = "_Layout";
     ViewData["Title"] = "Help";
 
-    @foreach (var topic in Model.Topics)
+    @foreach (var topic in Model.ShownTopics)
     {
         var alert = (topic.Key == Model.Highlight) ? "alert-primary p-2 mb-3 mt-3" : string.Empty;
         var testid = (topic.Key == Model.Highlight) ? "highlight" : string.Empty;
