@@ -33,45 +33,104 @@ namespace YoFi.Core.Repositories
         #endregion
 
         #region CRUD Operations
+
+        /// <summary>
+        /// All known items
+        /// </summary>
         public IQueryable<T> All => _context.Get<T>();
 
+        /// <summary>
+        /// All known items in the default order for <typeparamref name="T"/> items
+        /// </summary>
         public IQueryable<T> OrderedQuery => new T().InDefaultOrder(All);
 
-        // TODO: SingleAsync()
-        public Task<T> GetByIdAsync(int? id) => Task.FromResult(_context.Get<T>().Single(x => x.ID == id.Value));
-
-        // TODO: AnyAsync()
-        public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.Get<T>().Any(x => x.ID == id));
-
+        /// <summary>
+        /// Subset of all known items reduced by the specified query parameter
+        /// </summary>
+        /// <param name="q">Query describing the desired subset</param>
+        /// <returns>Requested items</returns>
         public virtual IQueryable<T> ForQuery(string q) => All;
 
+        /// Retrieve a single item by <paramref name="id"/>
+        /// </summary>
+        /// <remarks>
+        /// Will throw an exception if not found
+        /// </remarks>
+        /// <param name="id">Identifier of desired item</param>
+        /// <returns>Desired item</returns>
+        public Task<T> GetByIdAsync(int? id) => Task.FromResult(_context.Get<T>().Single(x => x.ID == id.Value));
+        // TODO: SingleAsync()
+
+        /// <summary>
+        /// Determine whether a single item exists with the given <paramref name="id"/>
+        /// </summary>
+        /// <param name="id">Identifier of desired item</param>
+        /// <returns>True if desired item exists</returns>
+        public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.Get<T>().Any(x => x.ID == id));
+        // TODO: AnyAsync()
+
+        /// <summary>
+        /// Add <paramref name="item"/> to the repository
+        /// </summary>
+        /// <param name="item">Item we wish to add</param>
         public async Task AddAsync(T item)
         {
             _context.Add(item);
             await _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Add <paramref name="items"/> to the repository
+        /// </summary>
+        /// <param name="items">Items we wish to add</param>
         public async Task AddRangeAsync(IEnumerable<T> items)
         {
             _context.AddRange(items);
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Update <paramref name="item"/> with new details
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="item"/> should be an object already retrieved through one of the properties
+        /// or methods of this class.
+        /// </remarks>
+        /// <param name="item">New details</param>
         public Task UpdateAsync(T item)
         {
             _context.Update(item);
             return _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Update <paramref name="items"/> with new details
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="items"/> should be objects already retrieved through one of the properties
+        /// or methods of this class.
+        /// </remarks>
+        /// <param name="items">Items we wish to update</param>
         public Task UpdateRangeAsync(IEnumerable<T> items)
         {
             _context.UpdateRange(items);
             return _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Remove <paramref name="item"/> from the repository
+        /// </summary>
+        /// <param name="item">Item to remove</param>
         public Task RemoveAsync(T item)
         {
             _context.Remove(item);
             return _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Remove <paramref name="items"/> from the repository
+        /// </summary>
+        /// <param name="items">Items to remove</param>
         public Task RemoveRangeAsync(IEnumerable<T> items)
         {
             _context.RemoveRange(items);
@@ -80,6 +139,12 @@ namespace YoFi.Core.Repositories
         #endregion
 
         #region Exporter
+
+        /// <summary>
+        /// Export all items to a spreadsheet, in default order
+        /// </summary>
+        /// <returns>Stream containing the spreadsheet file</returns>
+
         public Stream AsSpreadsheet()
         {
             var stream = new MemoryStream();

@@ -104,13 +104,27 @@ fully-created report.
 - Implements IDisplayReport
 - Contains a Table
 
+## IDisplayReport
+
+The interface used by the report renderer to display a report in HTML
+
 ## Table
 
 Generic dictionary of (TColumn,TRow) to TValue. Low-level building block which store the final arranged result of report data.
 
+## IReportable
+
+Defines a single item which can be included in the aggregation done by a report
+
+## Pages/Report(s).cshtml
+
+Provides user interaction with reports
+
+- Consumes IReportEngine
+
 ## Views/Shared/DisplayReport.cshtml
 
-Displays an IDisplayReport nicely on an HTML page.
+Partial view, displays an IDisplayReport nicely on an HTML page.
 
 - Consumes an IDisplayReport
 

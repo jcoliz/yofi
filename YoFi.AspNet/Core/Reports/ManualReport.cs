@@ -11,14 +11,38 @@ namespace YoFi.Core.Reports
     /// </remarks>
     public class ManualReport : Table<ColumnLabel, RowLabel, decimal>, IDisplayReport
     {
+        /// <summary>
+        /// Display name of the report
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// In-depth description of the report for display
+        /// </summary>
+        /// <remarks>
+        /// In practice, this is used exclusively to describe the timeframe covered by
+        /// the report, so could be renamed "timeframe"
+        /// </remarks>
         public string Description { get; set; }
 
+        /// <summary>
+        /// All the column labels which should be displayed
+        /// </summary>
         public IEnumerable<ColumnLabel> ColumnLabelsFiltered => base.ColumnLabels;
 
+        /// <summary>
+        /// All the row labels, in the order to display
+        /// </summary>
         public IEnumerable<RowLabel> RowLabelsOrdered => base.RowLabels;
 
+        /// <summary>
+        /// When displaying the report, how many levels higher to show as
+        /// </summary>
+        /// <remarks>
+        /// Typically the lowest-level of display formatting doesn't look great on its
+        /// own, so when NumLevels is 1, it's good to set DisplayLevelAdjustment to 1
+        /// and make it look like a heading.
+        /// </remarks>
         public int DisplayLevelAdjustment { get; set; }
 
         /// <summary>

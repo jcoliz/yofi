@@ -75,6 +75,14 @@ namespace YoFi.Core.Repositories
         /// <param name="item">New details</param>
         Task UpdateAsync(T item);
 
+        /// <summary>
+        /// Update <paramref name="items"/> with new details
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="items"/> should be objects already retrieved through one of the properties
+        /// or methods of this class.
+        /// </remarks>
+        /// <param name="items">Items we wish to update</param>
         Task UpdateRangeAsync(IEnumerable<T> items);
 
         /// <summary>

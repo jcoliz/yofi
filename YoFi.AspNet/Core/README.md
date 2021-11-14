@@ -1,5 +1,7 @@
 # YoFi Core
 
+Business logic and models, independent of any storage or UI framework.
+
 The vision for this directory is that ultimately I'll pull it out into its own project
 as a step for architectural separation.
 
