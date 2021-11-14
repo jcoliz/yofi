@@ -317,31 +317,38 @@ namespace YoFi.Core.Repositories
             {
                 try
                 {
-                    var loan = JsonSerializer.Deserialize<LoanDefinition>(loanjson, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                    if (loan != null && loan.OriginationDate != default)
+                    var document = JsonDocument.Parse(loanjson);
+                    if (document.RootElement.TryGetProperty("loan",out var element))
                     {
-                        // We have to recalculate the payment, we can't use the one that's send in. This is because the payment sent in is only prceise to two
-                        // decimal points. However, amortization tables are calculated based on payments to greater precision
+                        // There is a loan, now deserialize into a loan object
+                        var thisjson = element.GetRawText();
 
-                        // var pvif = Math.pow(1 + rate, nper);
-                        // var pmt = rate / (pvif - 1) * -(pv * pvif + fv);
-                        var pvif = Math.Pow(1 + loan.RatePctPerMo, loan.Term);
-                        var pmt = -loan.RatePctPerMo / (pvif - 1) * (double)loan.Amount * pvif;
+                        var loan = JsonSerializer.Deserialize<LoanDefinition>(thisjson, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                        if (loan != null && loan.OriginationDate != default)
+                        {
+                            // We have to recalculate the payment, we can't use the one that's send in. This is because the payment sent in is only prceise to two
+                            // decimal points. However, amortization tables are calculated based on payments to greater precision
 
-                        // TMP = POWER(1+InterestRate/PaymentsPerYear,PaymentSchedule[@[PMT NO]]-1)
-                        var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
-                        double factor = Math.Pow(1.0 + loan.RatePctPerMo, paymentnum);
+                            // var pvif = Math.pow(1 + rate, nper);
+                            // var pmt = rate / (pvif - 1) * -(pv * pvif + fv);
+                            var pvif = Math.Pow(1 + loan.RatePctPerMo, loan.Term);
+                            var pmt = -loan.RatePctPerMo / (pvif - 1) * (double)loan.Amount * pvif;
 
-                        // IPMT = PaymentSchedule[@[TOTAL PAYMENT]]*(M86-1)-LoanAmount*M86*(InterestRate/PaymentsPerYear)
-                        var term1 = pmt * (factor - 1);
-                        var term2 = (double)loan.Amount * factor * loan.RatePctPerMo;
-                        var ipmtd = - term1 - term2;
-                        var ipmt = (decimal)Math.Round(ipmtd, 2);
+                            // TMP = POWER(1+InterestRate/PaymentsPerYear,PaymentSchedule[@[PMT NO]]-1)
+                            var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
+                            double factor = Math.Pow(1.0 + loan.RatePctPerMo, paymentnum);
 
-                        var ppmt = transaction.Amount - ipmt;
+                            // IPMT = PaymentSchedule[@[TOTAL PAYMENT]]*(M86-1)-LoanAmount*M86*(InterestRate/PaymentsPerYear)
+                            var term1 = pmt * (factor - 1);
+                            var term2 = (double)loan.Amount * factor * loan.RatePctPerMo;
+                            var ipmtd = -term1 - term2;
+                            var ipmt = (decimal)Math.Round(ipmtd, 2);
 
-                        result.Add(new Split() { Amount = ipmt, Category = loan.Interest, Memo = "Auto calculated loan interest" });
-                        result.Add(new Split() { Amount = ppmt, Category = loan.Principal, Memo = "Auto calculated loan principal" });
+                            var ppmt = transaction.Amount - ipmt;
+
+                            result.Add(new Split() { Amount = ipmt, Category = loan.Interest, Memo = "Auto calculated loan interest" });
+                            result.Add(new Split() { Amount = ppmt, Category = loan.Principal, Memo = "Auto calculated loan principal" });
+                        }
                     }
                 }
                 catch
@@ -381,9 +388,7 @@ namespace YoFi.Core.Repositories
         #endregion
     
         class LoanDefinition
-        {
-            public string Type { get; set; }
-            
+        {          
             public decimal Amount { get; set; }
 
             public decimal Rate { get; set; }
