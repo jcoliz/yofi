@@ -33,7 +33,7 @@ namespace YoFi.AspNet.Pages
 
             public string[] Contents { get; set; }
 
-            public string[] Extended { get; set; }
+            public string[] Extended { get; set; } = new string[] { };
 
             public bool ExtendedIsList { get; set; }
 
@@ -44,6 +44,39 @@ namespace YoFi.AspNet.Pages
 
         public IEnumerable<HelpTopic> Topics { get; } = new List<HelpTopic>()
         {
+            new HelpTopic()
+            {
+                Key = "demo",
+
+                Title = "Welcome to the Demo",
+
+                Contents = new string[]
+                {
+                    "This is a demo instance of YoFi running with realistic sample data. Feel free to have a look around and experiment with the software. If you want to run with your own data or modify the code for your own use, it's easy to <a href=\"https://github.com/jcoliz/yofi/blob/master/deploy/ARM-Template.md\">Deploy your own</a> instance in Azure.",
+                    "You'll find a help topic for each page linked under the Actions menu. Or visit the <a href=\"/Help\">Help</a> page to see them all in one place."
+                },
+
+                Extended = new string[]
+                {
+                    "Once you're running your own instance, you can turn off the demo by configuring your site to include your own branding information, such as setting a site name and icon. See the <a href=\"https://github.com/jcoliz/yofi/blob/master/docs/Configuration.md\">Configuration</a> page for details."
+                }
+            },
+            new HelpTopic()
+            {
+                Key = "txs",
+
+                Title = "Categorizing Transactions",
+
+                Contents = new string[]
+                {
+                    "The Transactions page contains the complete list of transactions you've imported into the application. Your key task on this page is to assign categories to each transaction.",
+                    "The easiest way is to set up <a href=\"/Help?from=payees#payees\">Payee Matching Rules</a>, to automatically assign categories when you import statements. You can also edit individual transactions, then enter a category in this dialog."
+                },
+
+                Button = "Transactions",
+
+                Href = "/Transactions"
+            },
             new HelpTopic()
             {
                 Key = "payees",
