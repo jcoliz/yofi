@@ -64,8 +64,34 @@ namespace YoFi.Tests.Core
             repository = new TransactionRepository(context,storage:storage);            
         }
 
-        [TestMethod]
-        public void CalculateLoanSplits()
+        public static IEnumerable<object[]> CalculateLoanSplits_Data =>
+            new[]
+            {
+                new object[] { 1,-1000m,-687.71m },
+                new object[] { 2,-996.56m,-691.15m },
+                new object[] { 3,-993.11m,-694.6m },
+                new object[] { 4,-989.63m,-698.08m },
+                new object[] { 5,-986.14m,-701.57m },
+                new object[] { 6,-982.63m,-705.08m },
+                new object[] { 7,-979.11m,-708.6m },
+                new object[] { 8,-975.57m,-712.14m },
+                new object[] { 9,-972.01m,-715.7m },
+                new object[] { 10,-968.43m,-719.28m },
+                new object[] { 20,-931.64m,-756.07m },
+                new object[] { 21,-927.86m,-759.85m },
+                new object[] { 34,-876.96m,-810.75m },
+                new object[] { 53,-796.37m,-891.34m },
+                new object[] { 70,-717.5m,-970.21m },
+                new object[] { 90,-615.73m,-1071.98m },
+                new object[] { 111,-497.36m,-1190.35m },
+                new object[] { 133,-359.32m,-1328.39m },
+                new object[] { 148,-256.12m,-1431.59m },
+                new object[] { 180,-8.4m,-1679.31m },
+            };
+
+        [DynamicData(nameof(CalculateLoanSplits_Data))]
+        [DataTestMethod]
+        public void CalculateLoanSplits(int inmonth, decimal interest, decimal principal)
         {
             // https://www.calculator.net/amortization-calculator.html?cloanamount=200000&cloanterm=15&cinterestrate=6&printit=0&x=69&y=17
             // Loan amount: 200k
@@ -74,7 +100,11 @@ namespace YoFi.Tests.Core
             // Payment = 1687.71
 
             // Given: A transaction
-            var item = new Transaction() { Amount = -1687.71m, Timestamp = new DateTime(2000, 9, 1) };
+
+            var year = 2000 + (inmonth-1) / 12;
+            var month = 1 + (inmonth-1) % 12;
+
+            var item = new Transaction() { Amount = -1687.71m, Timestamp = new DateTime(year, month, 1) };
 
             // And: A json loan definition
             var loan = "{ \"type\": \"Loan\", \"pv\": 200000, \"rate\": 6, \"term\": 180, \"principal\": \"Principal\", \"interest\": \"Interest\", \"origination\": \"1/1/2000\" }";
@@ -86,8 +116,8 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(2, splits.Count());
 
             // And: The splits are as expected (using an excel amortization table for source)
-            Assert.AreEqual(-972.01m, splits.Where(x => x.Category == "Interest").Single().Amount);
-            Assert.AreEqual(-715.70m, splits.Where(x => x.Category == "Principal").Single().Amount);
+            Assert.AreEqual(interest, splits.Where(x => x.Category == "Interest").Single().Amount);
+            Assert.AreEqual(principal, splits.Where(x => x.Category == "Principal").Single().Amount);
         }
     }
 }
