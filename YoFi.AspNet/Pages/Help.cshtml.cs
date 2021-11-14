@@ -71,6 +71,10 @@ namespace YoFi.AspNet.Pages
                     "Once you're running your own instance, you can turn off the demo by configuring your site to include your own branding information, such as setting a site name and icon. See the <a href=\"https://github.com/jcoliz/yofi/blob/master/docs/Configuration.md\">Configuration</a> page for details."
                 },
 
+                Button = "Go",
+
+                Href = "/Transactions",
+
                 ShowInDemoOnly = true
             },
             new HelpTopic()

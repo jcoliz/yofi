@@ -130,5 +130,44 @@ namespace YoFi.Tests.Functional
 
             Assert.AreEqual(page.ToLower()[..3], (await element.GetAttributeAsync("id"))[..3]);
         }
+
+        /// <summary>
+        /// User Story 1196: [User Can] Receive necessary context when clicking "Try the demo" on the Home page Given: On the Home page
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task DemoHelp()
+        {
+            /*
+            Given: On the Home page
+            And: Not on a branded site (e.g. demo or eval)
+            When: Clicking "Try the demo"
+            Then: User is given a help prompt on the next page explaining this is a demo
+            */
+
+            // Given: We are already logged in and starting at the root of the site
+            // (Logged in needed so we can actually get to transactions page)
+            await GivenLoggedIn();
+
+            // And: Starting at the home page
+            var site = TestContext.Properties["webAppUrl"] as string;
+            await Page.GotoAsync(site + "Home");
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // When: Clicking on "Try the demo"
+            await Page.ClickAsync("text=Try the demo");
+
+            // Then: User is given a help prompt on the next page explaining this is a demo
+            var element = await Page.WaitForSelectorAsync("[data-test-id=\"help-topic-title\"]");
+            await Page.SaveScreenshotToAsync(TestContext);
+            var text = await element.TextContentAsync();
+            Assert.IsTrue(text.ToLowerInvariant().Contains("demo"));
+
+            // When: Clicking on "Go"
+            await Page.ClickAsync("div[role=\"document\"] >> text=Go");
+
+            // Then: User is taken to Transactions page
+            await Page.ThenIsOnPageAsync("Transactions");
+        }
     }
 }
