@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -69,5 +70,7 @@ namespace YoFi.Core.Repositories
         /// Remove all imported items without touching the live data set
         /// </summary>
         Task CancelImportAsync();
+
+        IEnumerable<Split> CalculateLoanSplits(Transaction transaction, string loanjson);
     }
 }

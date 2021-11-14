@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using Transaction = YoFi.Core.Models.Transaction;
@@ -305,6 +306,43 @@ namespace YoFi.Core.Repositories
             return RemoveRangeAsync(allimported);
         }
 
+        public IEnumerable<Split> CalculateLoanSplits(Transaction transaction, string loanjson)
+        {
+            var result = new List<Split>();
+
+            var trimmed = loanjson.Trim();
+            if (trimmed[0] == '{' && trimmed[^1] == '}')
+            {
+                try
+                {
+                    var loan = JsonSerializer.Deserialize<LoanDefinition>(loanjson, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                    if (loan != null && loan.OriginationDate != default)
+                    {
+                        // TMP = POWER(1+InterestRate/PaymentsPerYear,PaymentSchedule[@[PMT NO]]-1)
+                        var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
+                        double factor = Math.Pow(1.0 + loan.RatePctPerMo, paymentnum);
+
+                        // IPMT = PaymentSchedule[@[TOTAL PAYMENT]]*(M86-1)-LoanAmount*M86*(InterestRate/PaymentsPerYear)
+                        var term1 = (double)transaction.Amount * (factor - 1);
+                        var term2 = (double)loan.PV * factor * loan.RatePctPerMo;
+                        var ipmtd = - term1 - term2;
+                        var ipmt = (decimal)Math.Round(ipmtd, 2);
+
+                        var ppmt = transaction.Amount - ipmt;
+
+                        result.Add(new Split() { Amount = ipmt, Category = loan.Interest, Memo = "Auto calculated loan interest" });
+                        result.Add(new Split() { Amount = ppmt, Category = loan.Principal, Memo = "Auto calculated loan principal" });
+                    }
+                }
+                catch
+                {
+                    // Problems? Ignore
+                }
+            }
+
+            return result;
+        }
+
         #endregion
 
         #region internals
@@ -331,5 +369,26 @@ namespace YoFi.Core.Repositories
         }
 
         #endregion
+    
+        class LoanDefinition
+        {
+            public string Type { get; set; }
+            
+            public decimal PV { get; set; }
+
+            public decimal Rate { get; set; }
+
+            public double RatePctPerMo => (double)Rate / 100.0 / 12.0;
+
+            public string Origination { get; set; }
+
+            public DateTime OriginationDate => DateTime.Parse(Origination);
+
+            public int Term { get; set; }
+
+            public string Principal { get; set; }
+
+            public string Interest { get; set; }
+        }
     }
 }
