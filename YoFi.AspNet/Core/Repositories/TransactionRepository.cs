@@ -308,16 +308,16 @@ namespace YoFi.Core.Repositories
 
         // Based on https://gist.github.com/pies/4166888
 
-        public IEnumerable<Split> CalculateLoanSplits(Transaction transaction, string loanjson)
+        public IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string json)
         {
             var result = new List<Split>();
 
-            var trimmed = loanjson.Trim();
+            var trimmed = json.Trim();
             if (trimmed[0] == '{' && trimmed[^1] == '}')
             {
                 try
                 {
-                    var document = JsonDocument.Parse(loanjson);
+                    var document = JsonDocument.Parse(trimmed);
                     if (document.RootElement.TryGetProperty("loan",out var element))
                     {
                         // There is a loan, now deserialize into a loan object

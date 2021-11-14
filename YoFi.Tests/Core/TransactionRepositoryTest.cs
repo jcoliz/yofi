@@ -110,7 +110,7 @@ namespace YoFi.Tests.Core
             var loan = "{ \"loan\": { \"amount\": 200000, \"rate\": 6, \"term\": 180, \"principal\": \"Principal\", \"interest\": \"Interest\", \"origination\": \"1/1/2000\" } }";
 
             // When: Calculatiung loan splits
-            var splits = transactionRepository.CalculateLoanSplits(item, loan);
+            var splits = transactionRepository.CalculateCustomSplitRules(item, loan);
 
             // Then: Two splits are created
             Assert.AreEqual(2, splits.Count());

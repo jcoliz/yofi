@@ -71,6 +71,17 @@ namespace YoFi.Core.Repositories
         /// </summary>
         Task CancelImportAsync();
 
-        IEnumerable<Split> CalculateLoanSplits(Transaction transaction, string loanjson);
+        /// <summary>
+        /// Using the rules listed in the supplied <paramref name="json"/>, calculate splits for this
+        /// <paramref name="transaction"/>.
+        /// </summary>
+        /// <remarks>
+        /// Currently this is only implemented for splitting loan principal and interest,
+        /// but could be extended to others.
+        /// </remarks>
+        /// <param name="transaction">Transaction being considered</param>
+        /// <param name="json">Rules to apply</param>
+        /// <returns>New splits based on the rules</returns>
+        IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string json);
     }
 }
