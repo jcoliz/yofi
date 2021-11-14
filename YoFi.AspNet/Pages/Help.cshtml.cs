@@ -13,7 +13,7 @@ namespace YoFi.AspNet.Pages
 
         public string Highlight { get; set; }
 
-        public void OnGet(string id, string from)
+        public void OnGet(string id, string from = null)
         {
             Highlight = from;
 

@@ -44,10 +44,10 @@ namespace YoFi.Tests.Pages
         }
 
         [TestMethod]
-        public void TopicBlankNotFound()
+        public void TopicNotFound()
         {
             // When: getting help for (null)
-            pagemodel.OnGet(null);
+            pagemodel.OnGet("not found");
 
             // Then: "Sorry" returned as title
             Assert.AreEqual("Sorry",pagemodel.Topic.Title);
