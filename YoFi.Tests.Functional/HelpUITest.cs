@@ -91,7 +91,42 @@ namespace YoFi.Tests.Functional
         [DataTestMethod]
         public async Task MoreButton(string page)
         {
+            /*
+            Given: On each page in {Transactions, Import, Budget, Payees}
+            And: Clicking Actions > Help
+            When: Clicking "More..."
+            Then: All help topics are displayed on a single page, in a new window
+            And: The view is scrolled to the expanded help topic where we just clicked from 
+            */
 
+            // Given: On {page}
+            await WhenNavigatingToPage(page);
+
+            // And: Clicking Actions > Help
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Help Topic");
+            await Page.WaitForSelectorAsync("[data-test-id=\"help-topic-title\"]");
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // When: Clicking "More..."
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.ClickAsync("[data-test-id=\"btn-help-more\"]");
+            });
+
+            // Then: Is on Help page
+            await NextPage.ThenIsOnPageAsync("Help");
+
+            // And: There are lots of topics
+            var topics = await NextPage.QuerySelectorAllAsync("data-test-id=help-topic-title");
+
+            // Flexible to not break this test if we add topics
+            Assert.IsTrue(topics.Count >= 3);
+
+            // And: This topic is highlighted
+            var element = await NextPage.QuerySelectorAsync("[data-test-id=\"highlight\"]");
+
+            Assert.AreEqual(page.ToLower()[..3], (await element.GetAttributeAsync("id"))[..3]);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿@page
 @model YoFi.AspNet.Pages.HelpModel
 @{
-    string alert = string.Empty;
 }
 @if (null != Model.Topic)
 {
@@ -20,10 +19,11 @@ else
 
     @foreach (var topic in Model.Topics)
     {
-        alert = (topic.Key == Model.Highlight) ? "alert-primary p-2 mb-3 mt-3" : string.Empty;
+        var alert = (topic.Key == Model.Highlight) ? "alert-primary p-2 mb-3 mt-3" : string.Empty;
+        var testid = (topic.Key == Model.Highlight) ? "highlight" : string.Empty;
 
-        <div class="@alert">
-            <h2 id="@topic.Key" data-test-id="help-topic-title">@topic.Title</h2>
+        <div class="@alert" id="@topic.Key" data-test-id="@testid">
+            <h2 data-test-id="help-topic-title">@topic.Title</h2>
 
             @if (topic.ExtendedIsList)
             {
