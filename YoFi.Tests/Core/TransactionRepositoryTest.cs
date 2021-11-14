@@ -107,7 +107,7 @@ namespace YoFi.Tests.Core
             var item = new Transaction() { Amount = -1687.71m, Timestamp = new DateTime(year, month, 1) };
 
             // And: A json loan definition
-            var loan = "{ \"type\": \"Loan\", \"pv\": 200000, \"rate\": 6, \"term\": 180, \"principal\": \"Principal\", \"interest\": \"Interest\", \"origination\": \"1/1/2000\" }";
+            var loan = "{ \"type\": \"Loan\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"principal\": \"Principal\", \"interest\": \"Interest\", \"origination\": \"1/1/2000\" }";
 
             // When: Calculatiung loan splits
             var splits = transactionRepository.CalculateLoanSplits(item, loan);
