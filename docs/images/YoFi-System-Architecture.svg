@@ -27,12 +27,12 @@
      inkscape:pagecheckerboard="1"
      inkscape:document-units="in"
      showgrid="true"
-     inkscape:zoom="2.8284271"
-     inkscape:cx="438.40621"
-     inkscape:cy="559.8518"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="348.60365"
+     inkscape:cy="508.05623"
      inkscape:window-width="2804"
      inkscape:window-height="2054"
-     inkscape:window-x="-10"
+     inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer1"
@@ -361,6 +361,14 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="fill:#c8c4b7;stroke:#24221c;stroke-width:2.66667;stroke-miterlimit:1;stroke-dasharray:none"
+       id="rect1162"
+       width="816"
+       height="1056"
+       x="0"
+       y="0"
+       ry="24" />
     <a
        id="a4199"
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Core/Reports"
