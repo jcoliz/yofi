@@ -48,6 +48,7 @@ namespace YoFi.Tests.Functional
         [DataRow("Budget")]
         [DataRow("Payees")]
         [DataRow("Import")]
+        [DataRow("Transactions")]
         [DataTestMethod]
         public async Task HelpTopic(string page)
         {
@@ -88,6 +89,7 @@ namespace YoFi.Tests.Functional
         [DataRow("Budget")]
         [DataRow("Payees")]
         [DataRow("Import")]
+        [DataRow("Transactions")]
         [DataTestMethod]
         public async Task MoreButton(string page)
         {

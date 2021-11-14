@@ -63,7 +63,7 @@ namespace YoFi.AspNet.Pages
             },
             new HelpTopic()
             {
-                Key = "txs",
+                Key = "trans",
 
                 Title = "Categorizing Transactions",
 
