@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
+using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Repositories;
 using Transaction = YoFi.Core.Models.Transaction;
@@ -27,9 +28,10 @@ namespace YoFi.AspNet.Controllers
 
         #region Constructor
 
-        public TransactionsController(ITransactionRepository repository)
+        public TransactionsController(ITransactionRepository repository, IAsyncQueryExecution queryExecution)
         {
             _repository = repository;
+            _queryExecution = queryExecution;
         }
 
         #endregion
@@ -370,9 +372,8 @@ namespace YoFi.AspNet.Controllers
                 // If this fails in any way, nevermind.
             }
 
-            // TODO: QueryExec ToListAsync()
-            // TODO: AsNoTracking()
-            return View(result.ToList());
+            var list = await _queryExecution.ToListNoTrackingAsync(result);
+            return View(list);
         }
 
         /// <summary>
@@ -525,6 +526,7 @@ namespace YoFi.AspNet.Controllers
         #region Internals
 
         private readonly ITransactionRepository _repository;
+        private readonly IAsyncQueryExecution _queryExecution;
 
         /// <summary>
         /// Current default year

@@ -2,6 +2,7 @@
 using Common.AspNet.Test;
 using Common.DotNet.Test;
 using Common.NET.Test;
+using Common.EFCore;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -132,7 +133,7 @@ namespace YoFi.Tests.Database
             helper.SetUp();
             storage = new TestAzureStorage();
             _repository = new TransactionRepository(helper.context, storage: storage);
-            helper.controller = new TransactionsController(_repository);
+            helper.controller = new TransactionsController(_repository, new EFCoreAsyncQueryExecution());
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 
