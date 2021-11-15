@@ -124,7 +124,16 @@ namespace YoFi.Core.Importers
 
                 item.Payee = item.StrippedPayee;
                 if (string.IsNullOrEmpty(item.Category))
-                    item.Category = await _payees.GetCategoryMatchingPayeeAsync(item.Payee);
+                {
+                    var category = await _payees.GetCategoryMatchingPayeeAsync(item.Payee);
+
+                    // Consider custom split rules based on matched category
+                    var customsplits = _repository.CalculateCustomSplitRules(item, category);
+                    if (customsplits.Any())
+                        item.Splits = customsplits.ToList();
+                    else
+                        item.Category = category;
+                }
 
                 // (3B) Import splits
                 // Product Backlog Item 870: Export & import transactions with splits

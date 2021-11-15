@@ -25,8 +25,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="SampleData\BudgetTxs.json" />
-    <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
     <EmbeddedResource Include="SampleData\FullSampleData-Month02.ofx" />
+    <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
     <EmbeddedResource Include="SampleData\FullSampleData.json" />
     <EmbeddedResource Include="SampleData\Splits-Test.xlsx" />
     <EmbeddedResource Include="SampleData\TestData1.xlsx" />

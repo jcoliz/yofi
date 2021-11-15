@@ -56,7 +56,7 @@ namespace YoFi.AspNet.Controllers
 
             if (id.Contains("trx"))
             {
-                context.RemoveRange(context.Transactions.Where(x => x.Category.Contains(TestMarker) || x.Memo.Contains(TestMarker)));
+                context.RemoveRange(context.Transactions.Where(x => x.Category.Contains(TestMarker) || x.Memo.Contains(TestMarker) || x.Payee.Contains(TestMarker)));
                 context.RemoveRange(context.Splits.Where(x => x.Category.Contains(TestMarker)));
             }
 

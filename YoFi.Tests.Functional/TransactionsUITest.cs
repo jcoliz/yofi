@@ -47,7 +47,7 @@ namespace YoFi.Tests.Functional
                 // When: Asking server to clear this test data
                 var api = new ApiKeyTest();
                 api.SetUp(TestContext);
-                await api.ClearTestData("trx");
+                await api.ClearTestData("trx,payee");
             }
 
             // And: Releaging the page
@@ -541,6 +541,89 @@ namespace YoFi.Tests.Functional
             // Then: The fix split button is NOT visible
             fix = await NextPage.QuerySelectorAsync("data-test-id=btn-fix-split");
             Assert.IsNull(fix);
+        }
+
+        async Task GivenPayeeInDatabase(string category, string name)
+        {
+            // Given: We are starting at the payee index page
+
+            await GivenLoggedIn();
+            await Page.ClickAsync("text=Payees");
+            var originalitems = await Page.GetTotalItemsAsync();
+
+            // And: Creating a new item
+
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Create New");
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", category ?? NextCategory },
+                { "Name", name ?? NextName },
+            });
+            await Page.ClickAsync("input:has-text(\"Create\")");
+            await Page.SaveScreenshotToAsync(TestContext);
+        }
+
+        /// <summary>
+        /// User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided upon transaction import
+        /// </summary>
+        [TestMethod]
+        public async Task LoanPayeeMatch()
+        {
+            /*
+            Given: A payee with {loan details json} in the category and {name} in the name
+            When: Importing an OFX file containing a transaction with payee {name}
+            Then: The transaction is imported as a split, with correct categories and amounts for the {loan details json} 
+            */
+
+            // Given: A payee with {loan details} in the category and {name} in the name
+
+            // See TransactionRepositoryTest.CalculateLoanSplits for where we are getting this data from. This is
+            // payment #53, made on 5/1/2004 for this loan.
+
+            var loan = "{ \"loan\": { \"amount\": 200000, \"rate\": 6, \"term\": 180, \"principal\": \"Principal __TEST__\", \"interest\": \"Interest __TEST__\", \"origination\": \"1/1/2000\" } }";
+            var payee = "AA__TEST__ Loan Payment";
+            var principal = -891.34m;
+            var interest = -796.37m;
+
+            await GivenPayeeInDatabase(name: payee, category: loan);
+
+            // When: Importing an OFX file containing a transaction with payee {name}
+
+            await Page.ClickAsync("text=Import");
+            await Page.ClickAsync("[aria-label=\"Upload\"]");
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData\\User-Story-802.ofx" });
+            await Page.ClickAsync("text=Upload");
+            await Page.ClickAsync("button:has-text(\"Import\")");
+
+            await Page.ThenIsOnPageAsync("Transactions");
+
+            await Page.SearchFor($"p={payee}");
+
+            await Page.SaveScreenshotToAsync(TestContext);
+            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
+
+            // Then: The transaction is imported as a split
+            var element = await Page.QuerySelectorAsync(".display-category");
+            var text = await element.TextContentAsync();
+            Assert.AreEqual("SPLIT", text.Trim());
+
+            // And: The splits match the categories and amounts as expected from the {loan details} 
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.ClickAsync("[data-test-id=\"edit-splits\"]");
+            });
+
+            var line1_e = await NextPage.QuerySelectorAsync($"data-test-id=line-1 >> data-test-id=split-amount");
+            var line1 = await line1_e.TextContentAsync();
+            var line2_e = await NextPage.QuerySelectorAsync($"data-test-id=line-2 >> data-test-id=split-amount");
+            var line2 = await line2_e.TextContentAsync();
+            await line2_e.ScrollIntoViewIfNeededAsync();
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            Assert.AreEqual(interest, decimal.Parse(line2.Trim()));
+            Assert.AreEqual(principal, decimal.Parse(line1.Trim()));
+
         }
 
         // TODO

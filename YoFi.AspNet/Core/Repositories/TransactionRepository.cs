@@ -312,6 +312,9 @@ namespace YoFi.Core.Repositories
         {
             var result = new List<Split>();
 
+            if (string.IsNullOrEmpty(json))
+                return Enumerable.Empty<Split>();
+
             var trimmed = json.Trim();
             if (trimmed[0] == '{' && trimmed[^1] == '}')
             {
