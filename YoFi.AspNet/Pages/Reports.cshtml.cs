@@ -30,6 +30,7 @@ namespace YoFi.AspNet.Pages
             if (!Parameters.month.HasValue)
                 Parameters.month = DateTime.Now.Month;
 
+            // TODO: Make this Async()
             Reports = new List<IEnumerable<IDisplayReport>>(_reports.BuildSummary(Parameters));
         }
     }

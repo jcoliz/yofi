@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YoFi.AspNet.Core;
+using YoFi.Core;
 
 namespace YoFi.Tests.Helpers
 {

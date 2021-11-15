@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
-using YoFi.AspNet.Core;
 using YoFi.AspNet.Data;
 using YoFi.Core;
 using YoFi.Core.Importers;

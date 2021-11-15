@@ -10,7 +10,7 @@ using YoFi.Core.Repositories;
 using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using Ardalis.Filters;
-using YoFi.AspNet.Core;
+using YoFi.Core;
 
 namespace YoFi.AspNet.Controllers
 {

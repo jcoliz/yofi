@@ -1,4 +1,5 @@
 ﻿using Common.DotNet.Test;
+using Common.EFCore;
 using Common.NET.Test;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +46,7 @@ namespace YoFi.Tests.Database
 
             context = new ApplicationDbContext(options);
             storage = new TestAzureStorage();
-            controller = new ApiController();
+            controller = new ApiController(new EFCoreAsyncQueryExecution());
         }
 
         [TestCleanup]

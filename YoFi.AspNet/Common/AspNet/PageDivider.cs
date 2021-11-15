@@ -25,7 +25,7 @@ namespace Common.AspNet
 
         public Task<IQueryable<T>> ItemsForPage<T>(IQueryable<T> result, int? p)
         {
-            // TODO: CountAsync()
+            // TODO: QueryExec CountAsync()
             var count = result.Count();
 
             Page = p ?? 1;

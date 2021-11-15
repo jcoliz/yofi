@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
+using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 

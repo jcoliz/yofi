@@ -7,17 +7,32 @@ using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
 {
+    /// <summary>
+    /// Fulfill AJAX requests related to Payees
+    /// </summary>
     [Produces("application/json")]
     [Route("ajax/payee")]
     public class AjaxPayeeController: Controller
     {
+        /// <summary>
+        /// Repository where we can take our actions
+        /// </summary>
         private readonly IPayeeRepository _repository;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="repository"></param>
         public AjaxPayeeController(IPayeeRepository repository) 
         {
             _repository = repository;
         }
 
+        /// <summary>
+        /// Update the selection state for item #<paramref name="id"/>
+        /// </summary>
+        /// <param name="id">Which item</param>
+        /// <param name="value">New selection state</param>
         [HttpPost("select/{id}")]
         [ValidateAntiForgeryToken]
         [ValidatePayeeExists]
@@ -30,6 +45,10 @@ namespace YoFi.AspNet.Controllers
             return new OkResult();
         }
 
+        /// <summary>
+        /// Add a new item
+        /// </summary>
+        /// <param name="payee">Item to add</param>
         [HttpPost("add")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -40,6 +59,11 @@ namespace YoFi.AspNet.Controllers
             return new ObjectResult(payee);
         }
 
+        /// <summary>
+        /// Update (edit) item #<paramref name="id"/> to new values
+        /// </summary>
+        /// <param name="id">Which item</param>
+        /// <param name="payee">New values</param>
         [HttpPost("edit/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]

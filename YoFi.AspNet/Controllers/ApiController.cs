@@ -13,6 +13,13 @@ namespace YoFi.AspNet.Controllers
     [Route("api")]
     public class ApiController : Controller
     {
+        private readonly IAsyncQueryExecution _queryExecution;
+
+        public ApiController(IAsyncQueryExecution queryExecution)
+        {
+            _queryExecution = queryExecution;
+        }
+
         [HttpGet("{id}", Name = "Get")]
         [ApiBasicAuthorization]
         [ValidateTransactionExists]
@@ -25,6 +32,7 @@ namespace YoFi.AspNet.Controllers
         [ApiBasicAuthorization]
         public IActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
         {
+            // TODO: Make this Async()
             var json = reports.Build(parms).ToJson();
             return Content(json,"application/json");
         }
@@ -33,7 +41,8 @@ namespace YoFi.AspNet.Controllers
         [ApiBasicAuthorization]
         public async Task<IActionResult> GetTransactions([FromServices] ITransactionRepository repository, string q = null)
         {
-            return new OkObjectResult(await repository.ForQuery(q).ToListAsync());
+            var result = await _queryExecution.ToListNoTrackingAsync(repository.ForQuery(q));
+            return new OkObjectResult(result);
         }
 
         /// <summary>

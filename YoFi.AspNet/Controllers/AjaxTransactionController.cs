@@ -111,6 +111,8 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanRead")]
         public IActionResult CategoryAutocomplete(string q)
         {
+            // TODO: Move this logic down to repository. Way too much database knowledge here.
+
             const int numresults = 10;
 
             // Look for top N recent categories in transactions, first.
@@ -122,7 +124,7 @@ namespace YoFi.AspNet.Controllers
             // Merge the results
 
             // https://stackoverflow.com/questions/2812545/how-do-i-sum-values-from-two-dictionaries-in-c
-            // TODO: ToListAsync();
+            // TODO: QueryExec ToListAsync();
             var result = txd.Concat(spd).GroupBy(x => x.Key).Select(x => new { Key = x.Key, Value = x.Sum(g => g.Value) }).OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key).ToList();
 
             return new OkObjectResult(result);

@@ -222,7 +222,7 @@ namespace YoFi.AspNet.Controllers
                     Hidden = t.Hidden ?? false,
                     Selected = t.Selected ?? false
                 }).ToList();
-                // TODO: ToListAsync();
+                // TODO: QueryExec ToListAsync();
             }
             else
             {
@@ -238,7 +238,7 @@ namespace YoFi.AspNet.Controllers
                     HasReceipt = t.ReceiptUrl != null,
                     HasSplits = t.Splits.Any(),
                 }).ToList();
-                // TODO: ToListAsync();
+                // TODO: QueryExec ToListAsync();
             }
 
             return Task.CompletedTask;
