@@ -25,7 +25,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 #endif
 
-namespace YoFi.AspNet.Root
+namespace YoFi.AspNet.Main
 {
     public class Startup
     {

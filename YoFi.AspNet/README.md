@@ -18,6 +18,10 @@ Business logic and models, independent of any storage or UI framework.
 
 Entity Framework Core database definitions
 
+## Main
+
+Program.Main and Startup, application initializers
+
 ## Pages
 
 ASP.NET Pages
