@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core;
 using YoFi.Core.Models;
 
 namespace YoFi.AspNet.Controllers
@@ -21,6 +22,11 @@ namespace YoFi.AspNet.Controllers
     /// </remarks>
     public class TransactionsIndexPresenter : IViewParameters
     {
+        public TransactionsIndexPresenter(IAsyncQueryExecution queryExecution)
+        {
+            _queryExecution = queryExecution;
+        }
+
         #region Public Properties -- Used by View to display
 
         /// <summary>
@@ -101,6 +107,7 @@ namespace YoFi.AspNet.Controllers
         }
         private int _PageParameter = default_page;
         const int default_page = 1;
+        private readonly IAsyncQueryExecution _queryExecution;
 
         /// <summary>
         /// Whether to show the 'hidden' checkbox
@@ -203,12 +210,12 @@ namespace YoFi.AspNet.Controllers
         /// <summary>
         /// Build the <see cref="TransactionsIndexPresenter.Items"/> list out of the current query
         /// </summary>
-        internal Task ExecuteQueryAsync()
+        internal async Task ExecuteQueryAsync()
         {
             if (ShowHidden || ShowSelected)
             {
                 // Get the long form
-                Items = Query.Select(t => new TransactionIndexDto()
+                var dtoquery = Query.Select(t => new TransactionIndexDto()
                 {
                     ID = t.ID,
                     Timestamp = t.Timestamp,
@@ -221,13 +228,14 @@ namespace YoFi.AspNet.Controllers
                     BankReference = t.BankReference,
                     Hidden = t.Hidden ?? false,
                     Selected = t.Selected ?? false
-                }).ToList();
-                // TODO: QueryExec ToListAsync();
+                });
+
+                Items = await _queryExecution.ToListNoTrackingAsync(dtoquery);
             }
             else
             {
                 // Get the shorter form
-                Items = Query.Select(t => new TransactionIndexDto()
+                var dtoquery = Query.Select(t => new TransactionIndexDto()
                 {
                     ID = t.ID,
                     Timestamp = t.Timestamp,
@@ -237,11 +245,10 @@ namespace YoFi.AspNet.Controllers
                     Memo = t.Memo,
                     HasReceipt = t.ReceiptUrl != null,
                     HasSplits = t.Splits.Any(),
-                }).ToList();
-                // TODO: QueryExec ToListAsync();
-            }
+                });
 
-            return Task.CompletedTask;
+                Items = await _queryExecution.ToListNoTrackingAsync(dtoquery);
+            }
         }
 
         /// <summary>

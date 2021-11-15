@@ -94,7 +94,7 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var viewmodel = new TransactionsIndexPresenter()
+                var viewmodel = new TransactionsIndexPresenter(_queryExecution)
                 {
                     Divider = new PageDivider() { PageSize = PageSize },
                     Query = _repository.ForQuery(q)
