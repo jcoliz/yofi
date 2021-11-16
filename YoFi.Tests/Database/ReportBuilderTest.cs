@@ -463,6 +463,22 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(2, report.RowLabels.Count());
         }
 
+        [TestMethod]
+        public void Bug1185()
+        {
+            // Bug 1185: Managed budget report looks crazy if no monthly transactions
+
+            // Given: A database of transactions and budgettx, but
+            // CRITICALLY no monthly items
+            // So we can use the setup assembled on Initialize
+
+            // When: Building the 'managed-budget' report for the correct year
+            var report = builder.Build(new ReportParameters() { id = "managed-budget", year = 2020 });
+
+            // Then: The report is totally blank
+            Assert.AreEqual(0, report.RowLabels.Count());
+        }
+
         // Only enable this if need to generate more sample data
         //[TestMethod]
         public void GenerateData()

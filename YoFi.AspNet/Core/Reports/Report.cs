@@ -445,6 +445,11 @@ namespace YoFi.Core.Reports
                     LeafNodesOnly = oquery.LeafRowsOnly 
                 };
 
+            // Set a total value. This will establish the column's existence, even if there
+            // are no values
+            if (null != seriescolumn)
+                Table[seriescolumn, TotalRow] = 0;
+
             // The pattern for collector rows
             var collectorregex = new Regex("(.+?)\\[(.+?)\\]");
 
@@ -502,9 +507,7 @@ namespace YoFi.Core.Reports
             }
 
             //  4. Prune. Prune out rows that are not really needed.
-            // Don't need to prune leaf rows only, because extraneous rows were never propagated in the first place
-            if (!oquery.LeafRowsOnly)
-                BuildPhase_Prune();
+            BuildPhase_Prune();
         }
 
         /// <summary>
