@@ -76,7 +76,7 @@ namespace YoFi.AspNet.Controllers
                 if (!txid.HasValue)
                     return View();
 
-                return View(await _repository.NewFromTransaction(txid.Value));
+                return View(await _repository.NewFromTransactionAsync(txid.Value));
             }
             catch (InvalidOperationException)
             {
@@ -95,7 +95,7 @@ namespace YoFi.AspNet.Controllers
 
                 ViewData["TXID"] = id;
 
-                return PartialView("CreatePartial", await _repository.NewFromTransaction(id));
+                return PartialView("CreatePartial", await _repository.NewFromTransactionAsync(id));
             }
             catch (ArgumentException ex)
             {
@@ -164,7 +164,7 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkEdit(string Category)
         {
-            await _repository.BulkEdit(Category);
+            await _repository.BulkEditAsync(Category);
 
             return RedirectToAction(nameof(Index));
         }
@@ -175,7 +175,7 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkDelete()
         {
-            await _repository.BulkDelete();
+            await _repository.BulkDeleteAsync();
 
             return RedirectToAction(nameof(Index));
         }

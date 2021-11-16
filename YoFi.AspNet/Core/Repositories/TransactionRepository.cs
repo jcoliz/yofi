@@ -72,7 +72,7 @@ namespace YoFi.Core.Repositories
         /// Change category of all selected items to <paramref name="category"/>
         /// </summary>
         /// <param name="category">Next category</param>
-        public async Task BulkEdit(string category)
+        public async Task BulkEditAsync(string category)
         {
             foreach (var item in All.Where(x => x.Selected == true))
             {
@@ -154,7 +154,7 @@ namespace YoFi.Core.Repositories
         /// Export all items to a spreadsheet, in default order
         /// </summary>
         /// <returns>Stream containing the spreadsheet file</returns>
-        public async Task<Stream> AsSpreadsheet(int Year, bool allyears, string q)
+        public async Task<Stream> AsSpreadsheetAsync(int Year, bool allyears, string q)
         {
             var transactionsquery = ForQuery(q);
 
@@ -364,7 +364,7 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <param name="q">Substring query</param>
         /// <returns>List of containing categories</returns>
-        public async Task<IEnumerable<string>> CategoryAutocomplete(string q)
+        public async Task<IEnumerable<string>> CategoryAutocompleteAsync(string q)
         {
             if (string.IsNullOrEmpty(q))
                 return Enumerable.Empty<String>();

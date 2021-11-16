@@ -13,7 +13,7 @@ namespace YoFi.Tests.Helpers
         public override Payee MakeItem(int x) => new Payee() { ID = x, Category = x.ToString(), Name = x.ToString() };
         public override IQueryable<Payee> ForQuery(string q) => string.IsNullOrEmpty(q) ? All : All.Where(x => x.Category.Contains(q) || x.Name.Contains(q));
 
-        public Task BulkEdit(string category)
+        public Task BulkEditAsync(string category)
         {
             // We don't need to DO anything here.
             WasBulkEditCalled = true;
@@ -23,7 +23,7 @@ namespace YoFi.Tests.Helpers
         public bool WasBulkEditCalled { get; private set; } = false;
         public bool WasBulkDeleteCalled { get; private set; } = false;
 
-        public Task<Payee> NewFromTransaction(int txid)
+        public Task<Payee> NewFromTransactionAsync(int txid)
         {
             if (txid == 0)
                 throw new InvalidOperationException();
@@ -31,7 +31,7 @@ namespace YoFi.Tests.Helpers
             return Task.FromResult(new Payee() { Name = txid.ToString() });
         }
 
-        public Task BulkDelete()
+        public Task BulkDeleteAsync()
         {
             // We don't need to DO anything here.
             WasBulkDeleteCalled = true;

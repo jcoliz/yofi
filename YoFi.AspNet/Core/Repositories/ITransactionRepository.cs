@@ -38,13 +38,13 @@ namespace YoFi.Core.Repositories
         /// Change category of all selected items to <paramref name="category"/>
         /// </summary>
         /// <param name="category">Next category</param>
-        Task BulkEdit(string category);
+        Task BulkEditAsync(string category);
 
         /// <summary>
         /// Export all items to a spreadsheet, in default order
         /// </summary>
         /// <returns>Stream containing the spreadsheet file</returns>
-        Task<Stream> AsSpreadsheet(int year, bool allyears, string q);
+        Task<Stream> AsSpreadsheetAsync(int year, bool allyears, string q);
 
         /// <summary>
         /// Upload a receipt to blob storage and save the location to this <paramref name="transaction"/>
@@ -89,6 +89,6 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <param name="q">Substring query</param>
         /// <returns>List of containing categories</returns>
-        Task<IEnumerable<string>> CategoryAutocomplete(string q);
+        Task<IEnumerable<string>> CategoryAutocompleteAsync(string q);
     }
 }

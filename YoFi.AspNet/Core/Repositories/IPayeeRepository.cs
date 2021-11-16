@@ -13,12 +13,12 @@ namespace YoFi.Core.Repositories
         /// Change category of all selected items to <paramref name="category"/>
         /// </summary>
         /// <param name="category">Next category</param>
-        Task BulkEdit(string category);
+        Task BulkEditAsync(string category);
 
         /// <summary>
         /// Remove all selected items from the database
         /// </summary>
-        Task BulkDelete();
+        Task BulkDeleteAsync();
 
         /// <summary>
         /// Create a new payee based upon the supplied transaction (by id)
@@ -31,7 +31,7 @@ namespace YoFi.Core.Repositories
         /// it for the caller to work on some more.
         /// </remarks>
         /// <param name="txid">Id of existing transaction</param>
-        Task<Payee> NewFromTransaction(int txid);
+        Task<Payee> NewFromTransactionAsync(int txid);
 
         Task LoadCacheAsync();
 

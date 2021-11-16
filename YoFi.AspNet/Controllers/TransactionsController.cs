@@ -256,7 +256,7 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         public async Task<IActionResult> BulkEdit(string Category)
         {
-            await _repository.BulkEdit(Category);
+            await _repository.BulkEditAsync(Category);
 
             return RedirectToAction(nameof(Index));
         }
@@ -288,7 +288,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         public async Task<IActionResult> Download(bool allyears, string q = null)
         {
-            Stream stream = await _repository.AsSpreadsheet(Year,allyears,q);
+            Stream stream = await _repository.AsSpreadsheetAsync(Year,allyears,q);
 
             IActionResult result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "Transactions.xlsx");
 

@@ -111,7 +111,7 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanRead")]
         public async Task<IActionResult> CategoryAutocompleteAsync(string q)
         {
-            var result = await _repository.CategoryAutocomplete(q);
+            var result = await _repository.CategoryAutocompleteAsync(q);
             return new OkObjectResult(result);
         }
     }

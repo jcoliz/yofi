@@ -34,7 +34,7 @@ namespace YoFi.Core.Repositories
         /// Change category of all selected items to <paramref name="category"/>
         /// </summary>
         /// <param name="category">Next category</param>
-        public async Task BulkEdit(string category)
+        public async Task BulkEditAsync(string category)
         {
             foreach (var item in All.Where(x => x.Selected == true))
             {
@@ -49,7 +49,7 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// Remove all selected items from the database
         /// </summary>
-        public async Task BulkDelete()
+        public async Task BulkDeleteAsync()
         {
             _context.RemoveRange(All.Where(x => x.Selected == true));
             await _context.SaveChangesAsync();
@@ -66,7 +66,7 @@ namespace YoFi.Core.Repositories
         /// it for the caller to work on some more.
         /// </remarks>
         /// <param name="txid">Id of existing transaction</param>
-        public Task<Payee> NewFromTransaction(int txid)
+        public Task<Payee> NewFromTransactionAsync(int txid)
         {
             // TODO: QueryExec SingleAsync()
             var transaction = _context.Transactions.Where(x => x.ID == txid).Single();
