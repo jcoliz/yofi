@@ -385,7 +385,6 @@ namespace YoFi.Core.Repositories
             // Merge the results
 
             // https://stackoverflow.com/questions/2812545/how-do-i-sum-values-from-two-dictionaries-in-c
-            // TODO: QueryExec ToListAsync();
             var query = txd.Concat(spd).GroupBy(x => x.Key).Select(x => new { Key = x.Key, Value = x.Sum(g => g.Value) }).OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key);
 
             var result = await _queryExecution.ToListNoTrackingAsync(query);
