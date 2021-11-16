@@ -239,8 +239,12 @@ namespace YoFi.AspNet.Controllers
                 // Bug #846: This Edit function is not allowed to alter the
                 // ReceiptUrl. So we must preserve whatever was there.
 
-                // TODO: QueryExec FirstOrDefaultAsync()
-                var oldreceipturl = _repository.All.Where(x => x.ID == id).Select(x => x.ReceiptUrl).FirstOrDefault();                    
+                // Note that we need an as no tracking query here, or we'll have problems shortly when we query with one
+                // object but update another.
+                var oldreceiptquery = _repository.All.Where(x => x.ID == id);
+                var oldtransaction = await _queryExecution.ToListNoTrackingAsync(oldreceiptquery);
+                var oldreceipturl = oldtransaction.First().ReceiptUrl;
+
                 transaction.ReceiptUrl = oldreceipturl;
 
                 await _repository.UpdateAsync(transaction);
