@@ -71,9 +71,20 @@ namespace YoFi.AspNet.Controllers
             var category = await payeeRepository.GetCategoryMatchingPayeeAsync(item.StrippedPayee);
             if (category != null)
             {
-                item.Category = category;
+                var result = category;
+
+                // Consider custom split rules based on matched category
+                var customsplits = _repository.CalculateCustomSplitRules(item, category);
+                if (customsplits.Any())
+                {
+                    item.Splits = customsplits.ToList();
+                    result = "SPLIT"; // This is what we display in the UI to indicate a transaction has a split
+                }
+                else
+                    item.Category = category;
+
                 await _repository.UpdateAsync(item);
-                return new OkObjectResult(category);
+                return new OkObjectResult(result);
             }
             else
                 return new NotFoundObjectResult($"Payee {item.StrippedPayee} not found");

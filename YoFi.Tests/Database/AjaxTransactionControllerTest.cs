@@ -143,7 +143,7 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task ApplyPayee()
+        public async Task ApplyPayeeNotFound()
         {
             await repository.AddAsync
             (
@@ -160,7 +160,7 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task ApplyPayeeNotFound()
+        public async Task ApplyPayee()
         {
             await AddFive();
             var payeeRepository = new PayeeRepository(context);
@@ -175,6 +175,45 @@ namespace YoFi.Tests.Database
 
             Assert.AreEqual(expectedpayee.Category, itemresult);
             Assert.AreEqual(expectedpayee.Category, expected.Category);
+        }
+
+        [TestMethod]
+        public async Task ApplyPayeeLoanMatch()
+        {
+            // Given: A set of loan details
+            var inmonth = 133;
+            var interest = -359.32m;
+            var principal = -1328.39m;
+            var payment = -1687.71m;
+            var year = 2000 + (inmonth - 1) / 12;
+            var month = 1 + (inmonth - 1) % 12;
+            var principalcategory = "Mortgage Principal";
+            var interestcategory = "Mortgage Interest";
+            var rule = $"{principalcategory} [Loan] {{ \"interest\": \"{interestcategory}\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" }} ";
+            var payeename = "Mortgage Lender";
+
+            // Given: A test transaction in the database which is a payment for that loan
+            var transaction = new Transaction() { Payee = payeename, Amount = payment, Timestamp = new DateTime(year, month, 1) };
+            await repository.AddAsync(transaction);
+
+            // And: A payee matching rule for that loan
+            var payee = new Payee() { Name = payeename, Category = rule };
+            var payeeRepository = new PayeeRepository(context);
+            await payeeRepository.AddAsync(payee);
+
+            // When: Applying the payee to category which should match
+            var actionresult = await controller.ApplyPayee(transaction.ID, payeeRepository);
+
+            // Then: The request succeeds
+            var objresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
+            var itemresult = Assert.That.IsOfType<string>(objresult.Value);
+
+            // And: The item now has 2 splits which match the expected loan details
+            Assert.AreEqual("SPLIT", itemresult);
+            Assert.IsNull(transaction.Category);
+            Assert.AreEqual(2, transaction.Splits.Count);
+            Assert.AreEqual(interest, transaction.Splits.Where(x => x.Category == interestcategory).Single().Amount);
+            Assert.AreEqual(principal, transaction.Splits.Where(x => x.Category == principalcategory).Single().Amount);
         }
 
         [DataTestMethod]
