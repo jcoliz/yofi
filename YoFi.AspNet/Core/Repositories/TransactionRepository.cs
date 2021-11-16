@@ -1,4 +1,5 @@
 ﻿using Common.NET;
+using Excel.FinancialFunctions;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -341,7 +342,7 @@ namespace YoFi.Core.Repositories
                 // var pvif = Math.pow(1 + rate, nper);
                 // var pmt = rate / (pvif - 1) * -(pv * pvif + fv);
                 var pvif = Math.Pow(1 + loan.RatePctPerMo, loan.Term);
-                var pmt = -loan.RatePctPerMo / (pvif - 1) * loan.Amount * pvif;
+                var pmt = Financial.Pmt(rate: loan.RatePctPerMo, nper: loan.Term, pv: loan.Amount, fv:0, typ: Excel.FinancialFunctions.PaymentDue.EndOfPeriod);
 
                 // TMP = POWER(1+InterestRate/PaymentsPerYear,PaymentSchedule[@[PMT NO]]-1)
                 var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
