@@ -339,20 +339,10 @@ namespace YoFi.Core.Repositories
                 // We have to recalculate the payment, we can't use the one that's send in. This is because the payment sent in is only prceise to two
                 // decimal points. However, amortization tables are calculated based on payments to greater precision
 
-                // var pvif = Math.pow(1 + rate, nper);
-                // var pmt = rate / (pvif - 1) * -(pv * pvif + fv);
-                var pvif = Math.Pow(1 + loan.RatePctPerMo, loan.Term);
-                var pmt = Financial.Pmt(rate: loan.RatePctPerMo, nper: loan.Term, pv: loan.Amount, fv:0, typ: Excel.FinancialFunctions.PaymentDue.EndOfPeriod);
+                var pmt = Financial.Pmt(rate: loan.RatePctPerMo, nper: loan.Term, pv: loan.Amount, fv:0, typ: PaymentDue.EndOfPeriod);
 
-                // TMP = POWER(1+InterestRate/PaymentsPerYear,PaymentSchedule[@[PMT NO]]-1)
                 var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
-                double factor = Math.Pow(1.0 + loan.RatePctPerMo, paymentnum);
-
-                // IPMT = PaymentSchedule[@[TOTAL PAYMENT]]*(M86-1)-LoanAmount*M86*(InterestRate/PaymentsPerYear)
-                var term1 = pmt * (factor - 1);
-                var term2 = loan.Amount * factor * loan.RatePctPerMo;
-                var ipmtd = -term1 - term2;
-                var ipmt = (decimal)Math.Round(ipmtd, 2);
+                var ipmt = (decimal)Math.Round(Financial.IPmt(rate: loan.RatePctPerMo, per: 1 + paymentnum, nper: loan.Term, pv: loan.Amount, fv: 0, typ: PaymentDue.EndOfPeriod), 2);
 
                 var ppmt = transaction.Amount - ipmt;
 
