@@ -132,7 +132,7 @@ namespace YoFi.Tests.Database
             helper = new ControllerTestHelper<Transaction, TransactionsController>();
             helper.SetUp();
             storage = new TestAzureStorage();
-            _repository = new TransactionRepository(helper.context, storage: storage);
+            _repository = new TransactionRepository(helper.context, new EFCoreAsyncQueryExecution(), storage: storage);
             helper.controller = new TransactionsController(_repository, new EFCoreAsyncQueryExecution());
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;

@@ -83,5 +83,12 @@ namespace YoFi.Core.Repositories
         /// <param name="json">Rules to apply</param>
         /// <returns>New splits based on the rules</returns>
         IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string json);
+
+        /// <summary>
+        /// Give a category subtriung <paramref name="q"/> return all recent categories containing that
+        /// </summary>
+        /// <param name="q">Substring query</param>
+        /// <returns>List of containing categories</returns>
+        Task<IEnumerable<string>> CategoryAutocomplete(string q);
     }
 }

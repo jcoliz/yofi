@@ -1,4 +1,5 @@
 ﻿using Common.DotNet.Test;
+using Common.EFCore;
 using Common.NET.Test;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +50,7 @@ namespace YoFi.Tests.Database
 
             context = new ApplicationDbContext(options);
             var storage = new TestAzureStorage();
-            repository = new TransactionRepository(context,storage);
+            repository = new TransactionRepository(context, new EFCoreAsyncQueryExecution(), storage);
             controller = new AjaxTransactionController(repository);
         }
 
@@ -244,7 +245,7 @@ namespace YoFi.Tests.Database
 
             // When: Calling CategoryAutocomplete with '{word}'
             var word = "BB";
-            var actionresult = controller.CategoryAutocomplete(word);
+            var actionresult = await controller.CategoryAutocompleteAsync(word);
 
             // Then: All of the categories from given items which contain '{word}' are returned
             var objresult = Assert.That.IsOfType<OkObjectResult>(actionresult);

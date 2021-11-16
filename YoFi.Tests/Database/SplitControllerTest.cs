@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Repositories;
+using Common.EFCore;
 
 namespace YoFi.Tests.Database
 {
@@ -90,7 +91,7 @@ namespace YoFi.Tests.Database
             string actionname = "Edit";
             await helper.AddFiveItems();
             var expected = helper.Items[3];
-            var result = await controller.DeleteConfirmed(expected.ID,new TransactionRepository(context));
+            var result = await controller.DeleteConfirmed(expected.ID,new TransactionRepository(context, new EFCoreAsyncQueryExecution()));
             var actual = result as RedirectToActionResult;
 
             Assert.AreEqual(actionname, actual.ActionName);
@@ -161,7 +162,7 @@ namespace YoFi.Tests.Database
             context.SaveChanges();
 
             // When: Deleting that split
-            await controller.DeleteConfirmed(initial.ID, new TransactionRepository(context));
+            await controller.DeleteConfirmed(initial.ID, new TransactionRepository(context, new EFCoreAsyncQueryExecution()));
 
             // Then: The transaction now has the category from the split
             var actual = context.Transactions.Single();
@@ -183,7 +184,7 @@ namespace YoFi.Tests.Database
             context.SaveChanges();
 
             // When: Deleting one split
-            await controller.DeleteConfirmed(initial.ID, new TransactionRepository(context));
+            await controller.DeleteConfirmed(initial.ID, new TransactionRepository(context, new EFCoreAsyncQueryExecution()));
 
             // Then: The transaction still has null category
             var actual = context.Transactions.Single();

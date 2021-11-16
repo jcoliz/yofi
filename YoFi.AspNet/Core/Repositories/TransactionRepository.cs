@@ -24,8 +24,9 @@ namespace YoFi.Core.Repositories
         /// <param name="context">Where to find the data we actually contain</param>
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
-        public TransactionRepository(IDataContext context, IStorageService storage = null) : base(context)
+        public TransactionRepository(IDataContext context, IAsyncQueryExecution queryExecution, IStorageService storage = null) : base(context)
         {
+            _queryExecution = queryExecution;
             _storage = storage;
         }
 
@@ -362,6 +363,64 @@ namespace YoFi.Core.Repositories
 
             return result;
         }
+
+        /// <summary>
+        /// Give a category subtriung <paramref name="q"/> return all recent categories containing that
+        /// </summary>
+        /// <param name="q">Substring query</param>
+        /// <returns>List of containing categories</returns>
+        public async Task<IEnumerable<string>> CategoryAutocomplete(string q)
+        {
+            if (string.IsNullOrEmpty(q))
+                return Enumerable.Empty<String>();
+
+            const int numresults = 10;
+
+            // Look for top N recent categories in transactions, first.
+            var txd = All.Where(x => x.Timestamp > DateTime.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
+
+            // There are also some categories in splits. Get the top N there too.
+            var spd = Splits.Where(x => x.Transaction.Timestamp > DateTime.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
+
+            // Merge the results
+
+            // https://stackoverflow.com/questions/2812545/how-do-i-sum-values-from-two-dictionaries-in-c
+            // TODO: QueryExec ToListAsync();
+            var query = txd.Concat(spd).GroupBy(x => x.Key).Select(x => new { Key = x.Key, Value = x.Sum(g => g.Value) }).OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key);
+
+            var result = await _queryExecution.ToListNoTrackingAsync(query);
+
+            return result;
+
+            /* Just want to say how impressed I am with myself for getting this query to entirely run on server side :D
+             * 
+                  SELECT TOP(@__p_1) [t3].[Key]
+                  FROM (
+                      SELECT [t0].[Category] AS [Key], [t0].[c] AS [Value]
+                      FROM (
+                          SELECT TOP(@__p_1) [t].[Category], COUNT(*) AS [c]
+                          FROM [Transactions] AS [t]
+                          WHERE ([t].[Timestamp] > DATEADD(month, CAST(-12 AS int), GETDATE())) AND ((@__q_0 = N'') OR (CHARINDEX(@__q_0, [t].[Category]) > 0))
+                          GROUP BY [t].[Category]
+                          ORDER BY COUNT(*) DESC
+                      ) AS [t0]
+                      UNION ALL
+                      SELECT [t2].[Category] AS [Key], [t2].[c] AS [Value]
+                      FROM (
+                          SELECT TOP(@__p_1) [s].[Category], COUNT(*) AS [c]
+                          FROM [Split] AS [s]
+                          INNER JOIN [Transactions] AS [t1] ON [s].[TransactionID] = [t1].[ID]
+                          WHERE ([t1].[Timestamp] > DATEADD(month, CAST(-12 AS int), GETDATE())) AND ((@__q_0 = N'') OR (CHARINDEX(@__q_0, [s].[Category]) > 0))
+                          GROUP BY [s].[Category]
+                          ORDER BY COUNT(*) DESC
+                      ) AS [t2]
+                  ) AS [t3]
+                  GROUP BY [t3].[Key]
+                  ORDER BY SUM([t3].[Value]) DESC
+            */
+        }
+
+        private readonly IAsyncQueryExecution _queryExecution;
 
         #endregion
 

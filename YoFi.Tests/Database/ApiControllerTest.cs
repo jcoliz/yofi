@@ -95,7 +95,7 @@ namespace YoFi.Tests.Database
             await AddFiveTransactions();
             var expected = await context.Transactions.FirstAsync();
 
-            var actionresult = await controller.Get(expected.ID, new TransactionRepository(context));
+            var actionresult = await controller.Get(expected.ID, new TransactionRepository(context, new EFCoreAsyncQueryExecution()));
 
             var okresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
             var actual = Assert.That.IsOfType<Transaction>(okresult.Value);
@@ -180,7 +180,7 @@ namespace YoFi.Tests.Database
 
         async Task<IEnumerable<Transaction>> WhenCallingGetTxWithQ(string q)
         {
-            var actionresult = await controller.GetTransactions(new TransactionRepository(context), q: q);
+            var actionresult = await controller.GetTransactions(new TransactionRepository(context, new EFCoreAsyncQueryExecution()), q: q);
             var jsonresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
             var model = Assert.That.IsOfType<IEnumerable<Transaction>>(jsonresult.Value);
 
