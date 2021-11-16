@@ -130,16 +130,38 @@ namespace YoFi.Tests.Database
             return result;
         }
 
+        private Report WhenBuildingTheReport(ReportParameters parameters)
+        {
+            var report = builder.Build(parameters);
+
+            var hash = (DataHash == 0) ? string.Empty : $"-{DataHash:X}";
+            var filename = $"{TestContext.FullyQualifiedTestClassName}-{TestContext.TestName}{hash}.txt";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            using var writer = new StreamWriter(outstream);
+            report.Write(writer, true);
+            writer.Close();
+            TestContext.AddResultFile(filename);
+
+            return report;
+        }
+
+        public TestContext TestContext { get; set; }
+
+        private int DataHash;
+
         [DataRow(true)]
         [DataRow(false)]
         [DataTestMethod]
         public void All(bool showmonths)
         {
+            DataHash = showmonths ? 1 : 0;
+
             // Given: A large database of transactions
             // (Assembled on Initialize)
 
             // When: Building the 'All' report for the correct year
-            var report = builder.Build(new ReportParameters() { id = "all", year = 2020, showmonths = showmonths });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "all", year = 2020, showmonths = showmonths });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount);
@@ -159,11 +181,13 @@ namespace YoFi.Tests.Database
         [DataTestMethod]
         public void AllLevels(int level)
         {
+            DataHash = level;
+
             // Given: A large database of transactions
             // (Assembled on Initialize)
 
             // When: Building the 'All' report for the correct year, with level at '{level}'
-            var report = builder.Build(new ReportParameters() { id = "all", year = 2020, level = level });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "all", year = 2020, level = level });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount);
@@ -188,11 +212,13 @@ namespace YoFi.Tests.Database
         [DataTestMethod]
         public void AllMonths(int month)
         {
+            DataHash = month;
+
             // Given: A large database of transactions
             // (Assembled on Initialize)
 
             // When: Building the 'All' report for the correct year, with level at '{level}'
-            var report = builder.Build(new ReportParameters() { id = "all", year = 2020, month = month });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "all", year = 2020, month = month });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Where(x=>x.Timestamp.Month <= month).Sum(x => x.Amount);
@@ -214,6 +240,8 @@ namespace YoFi.Tests.Database
         [DataTestMethod]
         public async Task AllMonthsNewData(int index)
         {
+            DataHash = index;
+
             // Given: The generated sample dataset
             await SampleDataStore.LoadSingleAsync();
             context.Transactions.RemoveRange(context.Transactions);
@@ -223,7 +251,7 @@ namespace YoFi.Tests.Database
             // When: Building the 'All' report for the correct year, with level at '{level}'
             var months = new int[] { 1, 3, 6, 9, 12 };
             var month = months[index];
-            var report = builder.Build(new ReportParameters() { id = "all", year = 2021, month = month });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "all", year = 2021, month = month });
 
             // Then: Report has the correct total
             var expected = SampleDataStore.Single.Transactions.Where(x => x.Timestamp.Month <= month).Sum(x => x.Amount);
@@ -265,7 +293,7 @@ namespace YoFi.Tests.Database
             // (Assembled on Initialize)
 
             // When: Building the '{Category}' report for the correct year
-            var report = builder.Build(new ReportParameters() { id = category.ToLowerInvariant(), year = 2020 });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = category.ToLowerInvariant(), year = 2020 });
 
             // Then: Report has the correct total
             var expected = SumOfTopCategory(category);
@@ -287,7 +315,7 @@ namespace YoFi.Tests.Database
             // (Assembled on Initialize)
 
             // When: Building the '{Category}' report for the correct year
-            var report = builder.Build(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths});
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths});
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
@@ -307,7 +335,7 @@ namespace YoFi.Tests.Database
             // (Assembled on Initialize)
 
             // When: Building the 'budget' report for the correct year
-            var report = builder.Build(new ReportParameters() { id = "budget", year = 2020 });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "budget", year = 2020 });
 
             // Then: Report has the correct total
             var expected = BudgetTxs.Sum(x => x.Amount);
@@ -348,7 +376,7 @@ namespace YoFi.Tests.Database
             // (Assembled on Initialize)
 
             // When: Building the 'expenses-v-budget' report for the correct year
-            var report = builder.Build(new ReportParameters() { id = "expenses-v-budget", year = 2020 });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "expenses-v-budget", year = 2020 });
 
             // Then: Report has the correct total budget
             var BudgetCol = GetColumn(report,x=>x.Name == "Budget");
@@ -374,7 +402,7 @@ namespace YoFi.Tests.Database
             // (Assembled on Initialize)
 
             // When: Building the 'all-v-budget' report for the correct year
-            var report = builder.Build(new ReportParameters() { id = "all-v-budget", year = 2020 });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "all-v-budget", year = 2020 });
 
             // Then: Report has the correct total budget
             var BudgetCol = GetColumn(report, x => x.Name == "Budget");
@@ -443,7 +471,7 @@ namespace YoFi.Tests.Database
             context.SaveChanges();
 
             // When: Building the 'managed-budget' report for the correct year
-            var report = builder.Build(new ReportParameters() { id = "managed-budget", year = 2020 });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "managed-budget", year = 2020 });
 
             // Then: Report has the correct values 
             var BudgetCol = GetColumn(report, x => x.Name == "Budget");
@@ -473,7 +501,7 @@ namespace YoFi.Tests.Database
             // So we can use the setup assembled on Initialize
 
             // When: Building the 'managed-budget' report for the correct year
-            var report = builder.Build(new ReportParameters() { id = "managed-budget", year = 2020 });
+            var report = WhenBuildingTheReport(new ReportParameters() { id = "managed-budget", year = 2020 });
 
             // Then: The report is totally blank
             Assert.AreEqual(0, report.RowLabels.Count());
