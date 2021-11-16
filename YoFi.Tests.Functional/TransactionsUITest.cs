@@ -581,12 +581,12 @@ namespace YoFi.Tests.Functional
             // See TransactionRepositoryTest.CalculateLoanSplits for where we are getting this data from. This is
             // payment #53, made on 5/1/2004 for this loan.
 
-            var loan = "{ \"loan\": { \"amount\": 200000, \"rate\": 6, \"term\": 180, \"principal\": \"Principal __TEST__\", \"interest\": \"Interest __TEST__\", \"origination\": \"1/1/2000\" } }";
+            var rule = "Principal __TEST__ [Loan] { \"interest\": \"Interest __TEST__\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
             var payee = "AA__TEST__ Loan Payment";
             var principal = -891.34m;
             var interest = -796.37m;
 
-            await GivenPayeeInDatabase(name: payee, category: loan);
+            await GivenPayeeInDatabase(name: payee, category: rule);
 
             // When: Importing an OFX file containing a transaction with payee {name}
 
@@ -623,7 +623,6 @@ namespace YoFi.Tests.Functional
 
             Assert.AreEqual(interest, decimal.Parse(line2.Trim()));
             Assert.AreEqual(principal, decimal.Parse(line1.Trim()));
-
         }
 
         // TODO

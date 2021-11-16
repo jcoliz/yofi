@@ -304,56 +304,64 @@ namespace YoFi.Core.Repositories
 
         // Based on https://gist.github.com/pies/4166888
 
-        public IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string json)
+        public IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string rule)
         {
             var result = new List<Split>();
 
-            if (string.IsNullOrEmpty(json))
-                return Enumerable.Empty<Split>();
-
-            var trimmed = json.Trim();
-            if (trimmed[0] == '{' && trimmed[^1] == '}')
+            try
             {
-                try
-                {
-                    var document = JsonDocument.Parse(trimmed);
-                    if (document.RootElement.TryGetProperty("loan",out var element))
-                    {
-                        // There is a loan, now deserialize into a loan object
-                        var thisjson = element.GetRawText();
+                if (string.IsNullOrEmpty(rule))
+                    throw new ArgumentNullException();
 
-                        var loan = JsonSerializer.Deserialize<LoanDefinition>(thisjson, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (loan != null && loan.OriginationDate != default)
-                        {
-                            // We have to recalculate the payment, we can't use the one that's send in. This is because the payment sent in is only prceise to two
-                            // decimal points. However, amortization tables are calculated based on payments to greater precision
+                // Here's how the Loan rule looks:
+                // var rule = "Mortgage Principal [Loan] { \"interest\": \"Mortgage Interest\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
 
-                            // var pvif = Math.pow(1 + rate, nper);
-                            // var pmt = rate / (pvif - 1) * -(pv * pvif + fv);
-                            var pvif = Math.Pow(1 + loan.RatePctPerMo, loan.Term);
-                            var pmt = -loan.RatePctPerMo / (pvif - 1) * loan.Amount * pvif;
+                var trimmed = rule.Trim();
+                if (!trimmed.Contains("[Loan]"))
+                    throw new ArgumentException();
 
-                            // TMP = POWER(1+InterestRate/PaymentsPerYear,PaymentSchedule[@[PMT NO]]-1)
-                            var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
-                            double factor = Math.Pow(1.0 + loan.RatePctPerMo, paymentnum);
+                var split = trimmed.Split("[Loan]");
+                if (split.Count() != 2)
+                    throw new ArgumentException();
 
-                            // IPMT = PaymentSchedule[@[TOTAL PAYMENT]]*(M86-1)-LoanAmount*M86*(InterestRate/PaymentsPerYear)
-                            var term1 = pmt * (factor - 1);
-                            var term2 = loan.Amount * factor * loan.RatePctPerMo;
-                            var ipmtd = -term1 - term2;
-                            var ipmt = (decimal)Math.Round(ipmtd, 2);
+                var category = split[0].Trim();
 
-                            var ppmt = transaction.Amount - ipmt;
+                var loan = JsonSerializer.Deserialize<LoanDefinition>(split[1], new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                if (loan == null || loan.OriginationDate == default)
+                    throw new ArgumentException();
 
-                            result.Add(new Split() { Amount = ipmt, Category = loan.Interest, Memo = "Auto calculated loan interest" });
-                            result.Add(new Split() { Amount = ppmt, Category = loan.Principal, Memo = "Auto calculated loan principal" });
-                        }
-                    }
-                }
-                catch
-                {
-                    // Problems? Ignore
-                }
+                if (string.IsNullOrEmpty(loan.Principal))
+                    loan.Principal = category;
+                else if (string.IsNullOrEmpty(loan.Interest))
+                    loan.Interest = category;
+
+                // We have to recalculate the payment, we can't use the one that's send in. This is because the payment sent in is only prceise to two
+                // decimal points. However, amortization tables are calculated based on payments to greater precision
+
+                // var pvif = Math.pow(1 + rate, nper);
+                // var pmt = rate / (pvif - 1) * -(pv * pvif + fv);
+                var pvif = Math.Pow(1 + loan.RatePctPerMo, loan.Term);
+                var pmt = -loan.RatePctPerMo / (pvif - 1) * loan.Amount * pvif;
+
+                // TMP = POWER(1+InterestRate/PaymentsPerYear,PaymentSchedule[@[PMT NO]]-1)
+                var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
+                double factor = Math.Pow(1.0 + loan.RatePctPerMo, paymentnum);
+
+                // IPMT = PaymentSchedule[@[TOTAL PAYMENT]]*(M86-1)-LoanAmount*M86*(InterestRate/PaymentsPerYear)
+                var term1 = pmt * (factor - 1);
+                var term2 = loan.Amount * factor * loan.RatePctPerMo;
+                var ipmtd = -term1 - term2;
+                var ipmt = (decimal)Math.Round(ipmtd, 2);
+
+                var ppmt = transaction.Amount - ipmt;
+
+                result.Add(new Split() { Amount = ipmt, Category = loan.Interest, Memo = "Auto calculated loan interest" });
+                result.Add(new Split() { Amount = ppmt, Category = loan.Principal, Memo = "Auto calculated loan principal" });
+            }
+            catch
+            {
+                // Problems? Ignore. 
+                // We'll just return an empty list
             }
 
             return result;

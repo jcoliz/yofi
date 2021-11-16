@@ -106,18 +106,18 @@ namespace YoFi.Tests.Core
 
             var item = new Transaction() { Amount = -1687.71m, Timestamp = new DateTime(year, month, 1) };
 
-            // And: A json loan definition
-            var loan = "{ \"loan\": { \"amount\": 200000, \"rate\": 6, \"term\": 180, \"principal\": \"Principal\", \"interest\": \"Interest\", \"origination\": \"1/1/2000\" } }";
+            // And: A loan rule definition
+            var rule = "Mortgage Principal [Loan] { \"interest\": \"Mortgage Interest\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
 
             // When: Calculatiung loan splits
-            var splits = transactionRepository.CalculateCustomSplitRules(item, loan);
+            var splits = transactionRepository.CalculateCustomSplitRules(item, rule);
 
             // Then: Two splits are created
             Assert.AreEqual(2, splits.Count());
 
             // And: The splits are as expected (using an excel amortization table for source)
-            Assert.AreEqual(interest, splits.Where(x => x.Category == "Interest").Single().Amount);
-            Assert.AreEqual(principal, splits.Where(x => x.Category == "Principal").Single().Amount);
+            Assert.AreEqual(interest, splits.Where(x => x.Category == "Mortgage Interest").Single().Amount);
+            Assert.AreEqual(principal, splits.Where(x => x.Category == "Mortgage Principal").Single().Amount);
         }
     }
 }
