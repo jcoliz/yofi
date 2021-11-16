@@ -184,6 +184,15 @@ namespace YoFi.Tests.Functional
         }
         */
 
+        private async Task WhenCreatingTransaction(IPage page, Dictionary<string, string> values)
+        {
+            await page.ClickAsync("#dropdownMenuButtonAction");
+            await page.ClickAsync("text=Create New");
+            await page.FillFormAsync(values);
+            await page.SaveScreenshotToAsync(TestContext);
+            await page.ClickAsync("input:has-text(\"Create\")");
+        }
+
         [TestMethod]
         public async Task Create()
         {
@@ -191,10 +200,7 @@ namespace YoFi.Tests.Functional
 
             // When: Creating a new item
             var originalitems = await Page.GetTotalItemsAsync();
-
-            await Page.ClickAsync("#dropdownMenuButtonAction");
-            await Page.ClickAsync("text=Create New");
-            await Page.FillFormAsync(new Dictionary<string, string>()
+            await WhenCreatingTransaction(Page,new Dictionary<string, string>()
             {
                 { "Category", NextCategory },
                 { "Payee", NextName },
@@ -202,8 +208,6 @@ namespace YoFi.Tests.Functional
                 { "Amount", "100" },
                 { "Memo", testmarker },
             });
-            await Page.SaveScreenshotToAsync(TestContext);
-            await Page.ClickAsync("input:has-text(\"Create\")");
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
@@ -568,7 +572,7 @@ namespace YoFi.Tests.Functional
         /// User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided upon transaction import
         /// </summary>
         [TestMethod]
-        public async Task LoanPayeeMatch()
+        public async Task LoanPayeeMatchImport()
         {
             /*
             Given: A payee with {loan details json} in the category and {name} in the name
@@ -614,6 +618,67 @@ namespace YoFi.Tests.Functional
                 await Page.ClickAsync("[data-test-id=\"edit-splits\"]");
             });
 
+            var line1_e = await NextPage.QuerySelectorAsync($"data-test-id=line-1 >> data-test-id=split-amount");
+            var line1 = await line1_e.TextContentAsync();
+            var line2_e = await NextPage.QuerySelectorAsync($"data-test-id=line-2 >> data-test-id=split-amount");
+            var line2 = await line2_e.TextContentAsync();
+            await line2_e.ScrollIntoViewIfNeededAsync();
+            await NextPage.SaveScreenshotToAsync(TestContext);
+
+            Assert.AreEqual(interest, decimal.Parse(line2.Trim()));
+            Assert.AreEqual(principal, decimal.Parse(line1.Trim()));
+        }
+
+        /// <summary>
+        /// User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided 
+        /// (When applying payee from transations index)
+        /// </summary>
+        [TestMethod]
+        public async Task LoanPayeeMatchApplyPayee()
+        {
+            // Given: A transaction which represents a loan payment
+            var payee = "AA__TEST__ Loan Payment";
+            var principal = -891.34m;
+            var interest = -796.37m;
+
+            await WhenCreatingTransaction(Page, new Dictionary<string, string>()
+            {
+                { "Payee", payee },
+                { "Timestamp", "2004-05-01" },
+                { "Amount", (principal+interest).ToString() },
+                { "Memo", testmarker },
+            });
+
+            // And: A payee with {loan details} in the category and {name} in the name
+
+            // See TransactionRepositoryTest.CalculateLoanSplits for where we are getting this data from. This is
+            // payment #53, made on 5/1/2004 for this loan.
+
+            var rule = "Principal __TEST__ [Loan] { \"interest\": \"Interest __TEST__\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
+
+            await GivenPayeeInDatabase(name: payee, category: rule);
+
+            // When: Searching for this item
+            await Page.ClickAsync("text=Transactions");
+            await Page.SearchFor($"p={payee}");
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: Clicking 'Apply Payee' on the first line
+            var button = await Page.QuerySelectorAsync($"data-test-id=line-1 >> [aria-label=\"Apply Payee\"]");
+            await button.ClickAsync();
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: Editing the transaction
+            await Page.ReloadAsync();
+            await Page.SearchFor($"p={payee}");
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.ClickAsync("[data-test-id=edit-splits]");
+            });
+
+            // Then: Correct amounts are shown in splits
             var line1_e = await NextPage.QuerySelectorAsync($"data-test-id=line-1 >> data-test-id=split-amount");
             var line1 = await line1_e.TextContentAsync();
             var line2_e = await NextPage.QuerySelectorAsync($"data-test-id=line-2 >> data-test-id=split-amount");
