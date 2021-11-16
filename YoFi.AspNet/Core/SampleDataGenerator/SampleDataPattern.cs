@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using YoFi.Core.Models;
 
 namespace YoFi.Core.SampleGen
@@ -60,6 +61,11 @@ namespace YoFi.Core.SampleGen
         /// patterns as splits
         /// </remarks>
         public string Group { get; set; }
+
+        /// <summary>
+        /// Json loan definition, if this is a loan payment
+        /// </summary>
+        public string Loan { get; set; }
 
         /// <summary>
         /// What is the year we are operating on?
@@ -163,6 +169,10 @@ namespace YoFi.Core.SampleGen
             }
 
             Payees = Payee.Split(",").ToList();
+
+            Loan loan = null;
+            if (!string.IsNullOrEmpty(Loan))
+                loan = JsonSerializer.Deserialize<Loan>(Loan);
 
             var splits = group ?? new List<SampleDataPattern> { this };
 

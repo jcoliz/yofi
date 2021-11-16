@@ -327,7 +327,7 @@ namespace YoFi.Core.Repositories
 
                 var category = split[0].Trim();
 
-                var loan = JsonSerializer.Deserialize<LoanDefinition>(split[1], new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                var loan = JsonSerializer.Deserialize<Loan>(split[1], new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
                 if (loan == null || loan.OriginationDate == default)
                     throw new ArgumentException();
 
@@ -441,24 +441,5 @@ namespace YoFi.Core.Repositories
         }
 
         #endregion
-    
-        class LoanDefinition
-        {          
-            public double Amount { get; set; }
-
-            public double Rate { get; set; }
-
-            public double RatePctPerMo => Rate / 100.0 / 12.0;
-
-            public string Origination { get; set; }
-
-            public DateTime OriginationDate => DateTime.Parse(Origination);
-
-            public int Term { get; set; }
-
-            public string Principal { get; set; }
-
-            public string Interest { get; set; }
-        }
     }
 }

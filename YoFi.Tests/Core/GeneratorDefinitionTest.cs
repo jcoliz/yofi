@@ -377,6 +377,51 @@ namespace YoFi.Tests.Core.SampleGen
                 }
             }
         }
+
+        //[TestMethod]
+        public void Loan()
+        {
+            // Given: A loan scheme
+            var payment = -1581.02m;
+            var item = new SampleDataPattern()
+            {
+                DateFrequency = FrequencyEnum.Monthly,
+                DateJitter = JitterEnum.None,
+                AmountJitter = JitterEnum.None,
+                Category = "Principal",
+                AmountYearly = payment * 12,
+                Payee = "The Bank",
+                Loan = "{ \"interest\": \"Interest\", \"amount\": 375000, \"rate\": 3, \"term\": 360, \"origination\": \"1/1/ 2010\" }"
+            };
+
+            // When: Generating transactions
+            var actual = item.GetTransactions();
+
+            // Then: There are the right amount of transactions
+            Assert.AreEqual(12, actual.Count());
+
+            // And: For each transaction...
+            foreach (var result in actual)
+            {
+                // And: The amounts are exactly as expected
+                Assert.AreEqual(payment, result.Amount);
+
+                // And: The payee matches
+                Assert.AreEqual(item.Payee, result.Payee);
+
+                // And: There are splits
+                Assert.IsNotNull(result.Splits);
+
+                // And: There are two splits
+                Assert.AreEqual(2, result.Splits.Count);
+
+                // And: The interest split is as expected
+                Assert.AreEqual(-100, result.Splits.Where(x => x.Category == "Interest").Single().Amount);
+
+                // And: The principal split is as expected
+                Assert.AreEqual(-200, result.Splits.Where(x => x.Category == "Principal").Single().Amount);
+            }
+        }
         #endregion
 
         #region Others
