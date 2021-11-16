@@ -68,7 +68,7 @@ namespace YoFi.Core.Repositories
         /// <param name="txid">Id of existing transaction</param>
         public Task<Payee> NewFromTransaction(int txid)
         {
-            // TODO: SingleAsync()
+            // TODO: QueryExec SingleAsync()
             var transaction = _context.Transactions.Where(x => x.ID == txid).Single();
             var result = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
 
@@ -87,7 +87,7 @@ namespace YoFi.Core.Repositories
             // Load all payees into memory. This is an optimization. Rather than run a separate payee query for every 
             // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
 
-            // TODO: TOListAsync();
+            // TODO: QueryExec ToListAsync();
             payeecache = All.ToList();
 
             return Task.CompletedTask;
@@ -116,7 +116,7 @@ namespace YoFi.Core.Repositories
                         break;
                     }
 
-                //TODO: FirstOrDefaultAsync()
+                //TODO: QueryExec FirstOrDefaultAsync()
                 if (null == payee)
                     payee = payees.FirstOrDefault(x => Name.Contains(x.Name));
 

@@ -57,7 +57,7 @@ namespace YoFi.Core.Repositories
         /// <param name="id">Identifier of desired item</param>
         /// <returns>Desired item</returns>
         public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.TransactionsWithSplits.Single(x => x.ID == id.Value));
-        // TODO: SingleAsync()
+        // TODO: QueryExec SingleAsync()
 
         /// <summary>
         /// All splits including transactions
@@ -154,7 +154,7 @@ namespace YoFi.Core.Repositories
         /// Export all items to a spreadsheet, in default order
         /// </summary>
         /// <returns>Stream containing the spreadsheet file</returns>
-        public Task<Stream> AsSpreadsheet(int Year, bool allyears, string q)
+        public async Task<Stream> AsSpreadsheet(int Year, bool allyears, string q)
         {
             var transactionsquery = ForQuery(q);
 
@@ -178,18 +178,13 @@ namespace YoFi.Core.Repositories
                     BankReference = x.BankReference
                 }
                 );
-
-            // TODO: ToListAsync()
-            var transactions = transactionsdtoquery.ToList();
+            var transactions = await _queryExecution.ToListNoTrackingAsync(transactionsdtoquery);
 
             // Which splits?
 
             // Product Backlog Item 870: Export & import transactions with splits
-            var splitsquery = _context.Splits.Where(x => transactionsquery.Contains(x.Transaction));
-            splitsquery = splitsquery.OrderByDescending(x => x.Transaction.Timestamp);
-
-            // TODO: ToListAsync()
-            var splits = splitsquery.ToList();
+            var splitsquery = _context.Splits.Where(x => transactionsquery.Contains(x.Transaction)).OrderByDescending(x => x.Transaction.Timestamp);
+            var splits = await _queryExecution.ToListNoTrackingAsync(splitsquery);
 
             // Create the spreadsheet result
 
@@ -207,7 +202,7 @@ namespace YoFi.Core.Repositories
 
             stream.Seek(0, SeekOrigin.Begin);
 
-            return Task.FromResult(stream as Stream);
+            return stream as Stream;
         }
 
         #endregion
