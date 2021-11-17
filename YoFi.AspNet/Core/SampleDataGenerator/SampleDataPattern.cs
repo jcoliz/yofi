@@ -7,6 +7,83 @@ using YoFi.Core.Models;
 
 namespace YoFi.Core.SampleGen
 {
+    public interface ISplitPattern
+    {
+        decimal Amount { get; }
+
+        string Category { get; }
+    }
+
+    internal class SplitPattern : ISplitPattern
+    {
+        public decimal Amount { get; set; }
+
+        public string Category { get; set; }
+    }
+
+    public interface ITransactionDetails
+    {
+        IEnumerable<ISplitPattern> Splits { get; }
+
+        DateTime Date { get; }
+    }
+
+    public class TransactionDetails: ITransactionDetails
+    {
+        public IEnumerable<ISplitPattern> Splits { get; set;  }
+
+        public DateTime Date { get; set; }
+    }
+
+    public interface ITransactionDetailsFactory
+    {
+        ITransactionDetails ForDate(DateTime date);
+    }
+
+    public class SingleDetails: ITransactionDetailsFactory
+    {
+        private readonly SampleDataPattern _single;
+
+        public SingleDetails(SampleDataPattern single)
+        {
+            _single = single;
+        }
+
+        public ITransactionDetails ForDate(DateTime date)
+        {
+            return new TransactionDetails() { Date = date, Splits = Enumerable.Repeat(_single, 1) };
+        }
+    }
+
+    public class GroupDetails : ITransactionDetailsFactory
+    {
+        private readonly IEnumerable<SampleDataPattern> _group;
+
+        public GroupDetails(IEnumerable<SampleDataPattern> group)
+        {
+            _group = group;
+        }
+
+        public ITransactionDetails ForDate(DateTime date)
+        {
+            return new TransactionDetails() { Date = date, Splits = _group };
+        }
+    }
+    public class LoanDetails : ITransactionDetailsFactory
+    {
+        private readonly Loan _loan;
+
+        public LoanDetails(Loan loan)
+        {
+            _loan = loan;
+        }
+
+        public ITransactionDetails ForDate(DateTime date)
+        {
+            return new TransactionDetails() { Date = date, Splits = _loan.PaymentSplitsForDate(date).Select(x => new SplitPattern() { Category = x.Key, Amount = x.Value }) };
+        }
+    }
+
     /// <summary>
     /// Defines a single pattern of yearly spending
     /// </summary>
@@ -14,7 +91,7 @@ namespace YoFi.Core.SampleGen
     /// The sample data generator will use this to generate a series of transactions to
     /// match this spending pattern in a year
     /// </remarks>
-    public class SampleDataPattern
+    public class SampleDataPattern: ISplitPattern
     {
         /// <summary>
         /// Comma-separated list of possible transaction payees
@@ -66,6 +143,21 @@ namespace YoFi.Core.SampleGen
         /// Json loan definition, if this is a loan payment
         /// </summary>
         public string Loan { get; set; }
+
+        public Loan LoanObject
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(Loan))
+                {
+                    var loan = JsonSerializer.Deserialize<Loan>(Loan, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                    loan.Principal = Category;
+                    return loan;
+                }
+                else
+                    return null;
+            }
+        }
 
         /// <summary>
         /// What is the year we are operating on?
@@ -145,6 +237,8 @@ namespace YoFi.Core.SampleGen
         /// </summary>
         private readonly int[] SemiWeeklyDays = new int[] { 1, 15 };
 
+        decimal ISplitPattern.Amount => MakeAmount(AmountYearly / DateRepeats / FrequencyPerYear[DateFrequency]);
+
         /// <summary>
         /// Generate transactions for a given pattern (or group of patterns)
         /// </summary>
@@ -170,19 +264,32 @@ namespace YoFi.Core.SampleGen
 
             Payees = Payee.Split(",").ToList();
 
-            Loan loan = null;
-            if (!string.IsNullOrEmpty(Loan))
-                loan = JsonSerializer.Deserialize<Loan>(Loan);
+            // Let's figure out where we will get split details from
 
-            var splits = group ?? new List<SampleDataPattern> { this };
+            ITransactionDetailsFactory detailsfactory;
+
+            // Option #1: From our Loan if we have one
+            var loanobject = LoanObject;
+            if (loanobject != null)
+                detailsfactory = new LoanDetails(loanobject);
+
+            // Option #2: From the supplied details group, if supplied
+            else if (group?.Any() == true)
+                detailsfactory = new GroupDetails(group);
+
+            // Option #3: From ourselves if nothing else applies
+            else
+                detailsfactory = new SingleDetails(this);
+
+            // Now generate transactions
 
             if (DateFrequency == FrequencyEnum.Invalid)
                 throw new ApplicationException("Invalid date frequency");
-            
+
             if (DateFrequency == FrequencyEnum.SemiMonthly)
-                return Enumerable.Range(1, MonthsPerYear).SelectMany(month => SemiWeeklyDays.Select(day => GenerateTransaction(splits, new DateTime(Year, month, day))));
-        
-            return Enumerable.Repeat(1,DateRepeats).SelectMany(i=>Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTransaction(splits, MakeDate(x))));
+                return Enumerable.Range(1, MonthsPerYear).SelectMany(month => SemiWeeklyDays.Select(day => GenerateTransaction(detailsfactory.ForDate(new DateTime(Year, month, day)))));
+
+            return Enumerable.Repeat(1,DateRepeats).SelectMany(i=>Enumerable.Range(1, FrequencyPerYear[DateFrequency]).Select(x => GenerateTransaction(detailsfactory.ForDate(MakeDate(x)))));
         }
 
         /// <summary>
@@ -210,21 +317,21 @@ namespace YoFi.Core.SampleGen
         /// <param name="timestamp">What exact timestamp to assign to this transaction</param>
         /// <param name="group">Optional grouping of patterns to be turned into single transactions</param>
         /// <returns>The transactions generated</returns>
-        private Transaction GenerateTransaction(IEnumerable<SampleDataPattern> group, DateTime timestamp)
+        private Transaction GenerateTransaction(ITransactionDetails details) // IEnumerable<ISplitPattern> group, DateTime timestamp)
         {
             // I was tempted to refactor this by moving up to GetTransactions(). However,
             // it needs to be refigured every time to accomplish amount jitter
-            var generatedsplits = group.Select(s => new Split()
+            var generatedsplits = details.Splits.Select(s => new Split()
             {
                 Category = s.Category,
-                Amount = s.MakeAmount(s.AmountYearly / s.DateRepeats / FrequencyPerYear[DateFrequency])
+                Amount = s.Amount
             }).ToList();
 
             return new Transaction()
             {
                 Payee = MakePayee,
                 Splits = generatedsplits.Count > 1 ? generatedsplits : null,
-                Timestamp = timestamp,
+                Timestamp = details.Date,
                 Category = generatedsplits.Count == 1 ? generatedsplits.Single().Category : null,
                 Amount = generatedsplits.Sum(x => x.Amount)
             };

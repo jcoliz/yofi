@@ -10,6 +10,12 @@ namespace YoFi.Tests.Core.SampleGen
     [TestClass]
     public class GeneratorDefinitionTest
     {
+        [TestCleanup]
+        public void Cleanup()
+        {
+            SampleDataPattern.Year = DateTime.Now.Year;
+        }
+
         #region Helpers
         private int NumPeriodsFor(FrequencyEnum scheme) => SampleDataPattern.FrequencyPerYear[scheme];
 
@@ -78,7 +84,6 @@ namespace YoFi.Tests.Core.SampleGen
             // And: They are all on the same day
             Assert.IsTrue(actual.All(x => x.Timestamp.Day == actual.First().Timestamp.Day));
         }
-
 
         [TestMethod]
         public void YearlySimple()
@@ -344,10 +349,10 @@ namespace YoFi.Tests.Core.SampleGen
             // And: A set of "split" category/amount items
             var splits = new List<SampleDataPattern>()
             {
-                new SampleDataPattern() { Category = "1", AmountYearly = periodicamount * periods * -1, AmountJitter = JitterEnum.None },
-                new SampleDataPattern() { Category = "2", AmountYearly = periodicamount * periods * -2, AmountJitter = JitterEnum.None },
-                new SampleDataPattern() { Category = "3", AmountYearly = periodicamount * periods * -3, AmountJitter = JitterEnum.None },
-                new SampleDataPattern() { Category = "4", AmountYearly = periodicamount * periods * 10, AmountJitter = JitterEnum.None },
+                new SampleDataPattern() { Category = "1", AmountYearly = periodicamount * periods * -1, DateFrequency = scheme, AmountJitter = JitterEnum.None },
+                new SampleDataPattern() { Category = "2", AmountYearly = periodicamount * periods * -2, DateFrequency = scheme, AmountJitter = JitterEnum.None },
+                new SampleDataPattern() { Category = "3", AmountYearly = periodicamount * periods * -3, DateFrequency = scheme, AmountJitter = JitterEnum.None },
+                new SampleDataPattern() { Category = "4", AmountYearly = periodicamount * periods * 10, DateFrequency = scheme, AmountJitter = JitterEnum.None },
             };
 
             // When: Generating transactions
@@ -378,7 +383,7 @@ namespace YoFi.Tests.Core.SampleGen
             }
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void Loan()
         {
             // Given: A loan scheme
@@ -391,7 +396,7 @@ namespace YoFi.Tests.Core.SampleGen
                 Category = "Principal",
                 AmountYearly = payment * 12,
                 Payee = "The Bank",
-                Loan = "{ \"interest\": \"Interest\", \"amount\": 375000, \"rate\": 3, \"term\": 360, \"origination\": \"1/1/ 2010\" }"
+                Loan = "{ \"interest\": \"Interest\", \"amount\": 375000, \"rate\": 3, \"term\": 360, \"origination\": \"1/1/2010\" }"
             };
 
             // When: Generating transactions
@@ -416,10 +421,10 @@ namespace YoFi.Tests.Core.SampleGen
                 Assert.AreEqual(2, result.Splits.Count);
 
                 // And: The interest split is as expected
-                Assert.AreEqual(-100, result.Splits.Where(x => x.Category == "Interest").Single().Amount);
+                Assert.AreEqual(-670.0, (double)(result.Splits.Where(x => x.Category == "Interest").Single().Amount),20.0);
 
                 // And: The principal split is as expected
-                Assert.AreEqual(-200, result.Splits.Where(x => x.Category == "Principal").Single().Amount);
+                Assert.AreEqual(-900.0, (double)(result.Splits.Where(x => x.Category == "Principal").Single().Amount),20.0);
             }
         }
         #endregion

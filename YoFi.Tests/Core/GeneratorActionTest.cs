@@ -34,7 +34,7 @@ namespace YoFi.Tests.Core.SampleGen
             generator.LoadDefinitions(stream);
 
             // Then: They are all loaded
-            Assert.AreEqual(32, generator.Definitions.Count);
+            Assert.AreEqual(31, generator.Definitions.Count);
 
             // And: Quick spot check of schemes looks good
             Assert.AreEqual(6, generator.Definitions.Count(x => x.DateFrequency == FrequencyEnum.Quarterly));

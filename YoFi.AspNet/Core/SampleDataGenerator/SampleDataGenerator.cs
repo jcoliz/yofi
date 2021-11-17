@@ -82,29 +82,56 @@ namespace YoFi.Core.SampleGen
 
         public void GeneratePayees()
         {
-            Payees = Definitions.Where(def => def.Payee != null).ToLookup(def=>def.Payee).SelectMany(lookup=>lookup.Key.Split(',').Select(name => new Payee() { Name = name, Category = lookup.First().Category })).ToList();
+            // work out the normal case first
+            var normal = Definitions.Where(def => def.Payee != null && string.IsNullOrEmpty(def.Loan)).ToLookup(def => def.Payee).SelectMany(lookup => lookup.Key.Split(',').Select(name => new Payee() { Name = name, Category = lookup.First().Category }));
+
+            // now work out loans which get special handling
+            var loans = Definitions
+                .Where(def => def.Payee != null && !string.IsNullOrEmpty(def.Loan))
+                .Select(def => 
+                    new Payee() 
+                    { 
+                        Name = def.Payee, 
+                        Category = def.Category + " [Loan] " + def.Loan
+                    }
+                );
+
+            Payees = normal.Concat(loans).ToList();
         }
 
         public void GenerateBudget()
         {
             // Focus down to only those with valid category
-            var hascategory = Definitions.Where(x => x.Category != null);
+            // And exclude loans (will add them back later)
+            var hascategory = Definitions.Where(x => x.Category != null && string.IsNullOrEmpty(x.Loan));
 
             // Divide into dichotomy: THose with high/high jitter patterns and those without
             var ishighjitter = hascategory.ToLookup(x => x.DateJitter == JitterEnum.High && x.AmountJitter == JitterEnum.High);
 
             // Monthly budget for high/high jitter patterns
+            var months = Enumerable.Range(1, 12).Select(m => new DateTime(SampleDataPattern.Year, m, 1));
             var monthly = ishighjitter[true]
                             .ToLookup(x => x.Category)
-                            .SelectMany(g => Enumerable.Range(1, 12).Select(m => new BudgetTx { Category = g.Key, Amount = g.Sum(y => y.AmountYearly) / 12, Timestamp = new DateTime(SampleDataPattern.Year, m, 1) }));
+                            .SelectMany(g => months.Select(m => new BudgetTx { Category = g.Key, Amount = g.Sum(y => y.AmountYearly) / 12, Timestamp = m }));
 
             // Yearly budget for other patterns
             var yearly = ishighjitter[false]
                             .ToLookup(x => x.Category)
                             .Select(x => new BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
 
+            // Now work out loans
+            var loanbudgets = Definitions
+                .Where(d => !string.IsNullOrEmpty(d.Loan))
+                .SelectMany(d =>
+                    months.SelectMany(m =>
+                        d.LoanObject.PaymentSplitsForDate(m)                        
+                    )
+                )
+                .ToLookup(kvp => kvp.Key, kvp => kvp.Value)
+                .Select(l => new BudgetTx() { Category = l.Key, Amount = l.Sum(), Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
+
             // Combine them, that's our result
-            BudgetTxs = monthly.Concat(yearly).ToList();
+            BudgetTxs = monthly.Concat(yearly).Concat(loanbudgets).ToList();
         }
 
         /// <summary>

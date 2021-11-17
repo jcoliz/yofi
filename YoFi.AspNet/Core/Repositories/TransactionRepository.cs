@@ -307,15 +307,17 @@ namespace YoFi.Core.Repositories
 
         public IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string rule)
         {
-            var result = new List<Split>();
-
             try
             {
                 if (string.IsNullOrEmpty(rule))
                     throw new ArgumentNullException();
 
+                //
+                // Deserialize the loan object out of the rule as sent in
+                //
                 // Here's how the Loan rule looks:
                 // var rule = "Mortgage Principal [Loan] { \"interest\": \"Mortgage Interest\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
+                //
 
                 var trimmed = rule.Trim();
                 if (!trimmed.Contains("[Loan]"))
@@ -336,26 +338,19 @@ namespace YoFi.Core.Repositories
                 else if (string.IsNullOrEmpty(loan.Interest))
                     loan.Interest = category;
 
-                // We have to recalculate the payment, we can't use the one that's send in. This is because the payment sent in is only prceise to two
-                // decimal points. However, amortization tables are calculated based on payments to greater precision
+                //
+                // Calculate the payment for the transaction date, and transform that into splits
+                //
 
-                var pmt = Financial.Pmt(rate: loan.RatePctPerMo, nper: loan.Term, pv: loan.Amount, fv:0, typ: PaymentDue.EndOfPeriod);
-
-                var paymentnum = transaction.Timestamp.Year * 12 + transaction.Timestamp.Month - loan.OriginationDate.Year * 12 - loan.OriginationDate.Month;
-                var ipmt = (decimal)Math.Round(Financial.IPmt(rate: loan.RatePctPerMo, per: 1 + paymentnum, nper: loan.Term, pv: loan.Amount, fv: 0, typ: PaymentDue.EndOfPeriod), 2);
-
-                var ppmt = transaction.Amount - ipmt;
-
-                result.Add(new Split() { Amount = ipmt, Category = loan.Interest, Memo = "Auto calculated loan interest" });
-                result.Add(new Split() { Amount = ppmt, Category = loan.Principal, Memo = "Auto calculated loan principal" });
+                return loan.PaymentSplitsForDate(transaction.Timestamp).Select(x => new Split() { Amount = x.Value, Category = x.Key });
             }
             catch
             {
                 // Problems? Ignore. 
                 // We'll just return an empty list
-            }
 
-            return result;
+                return Enumerable.Empty<Split>();
+            }
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Excel.FinancialFunctions;
+using System;
+using System.Collections.Generic;
 
 namespace YoFi.Core.Models
 {
@@ -19,5 +21,18 @@ namespace YoFi.Core.Models
         public string Principal { get; set; }
 
         public string Interest { get; set; }
+
+        public IDictionary<string, decimal> PaymentSplitsForDate(DateTime date)
+        {
+            var paymentnum = date.Year * 12 + date.Month - OriginationDate.Year * 12 - OriginationDate.Month;
+            var ipmt = Financial.IPmt(rate: RatePctPerMo, per: 1 + paymentnum, nper: Term, pv: Amount, fv: 0, typ: PaymentDue.EndOfPeriod);
+            var pmt = Financial.Pmt(rate: RatePctPerMo, nper: Term, pv: Amount, fv: 0, typ: PaymentDue.EndOfPeriod);
+
+            return new Dictionary<string, decimal>()
+            {
+                { Interest, (decimal)Math.Round(ipmt,2) },
+                { Principal, (decimal)Math.Round(pmt,2) - (decimal)Math.Round(ipmt,2) },
+            };
+        }
     }
 }
