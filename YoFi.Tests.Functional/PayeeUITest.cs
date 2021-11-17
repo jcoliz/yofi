@@ -114,8 +114,8 @@ namespace YoFi.Tests.Functional
             await Page.SearchFor("am");
             await Page.ClickAsync("data-test-id=btn-search");
 
-            // Then: Exactly 2 items are found, because we know this about our source data
-            Assert.AreEqual(2, await Page.GetTotalItemsAsync());
+            // Then: Exactly 3 items are found, because we know this about our source data
+            Assert.AreEqual(3, await Page.GetTotalItemsAsync());
         }
 
         /// <summary>
