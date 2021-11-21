@@ -40,6 +40,7 @@
     <PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
     <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.13.1" />
+    <PackageReference Include="jcoliz.OpenOfficeXml.Serializer" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.21" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.21" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.21" />
@@ -66,7 +67,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ExcelFinancialFunctions\ExcelFinancialFunctions.fsproj" />
-    <ProjectReference Include="..\submodules\OfficeOpenXMLEasy\src\OfficeOpenXmlEasy.csproj" />
     <ProjectReference Include="..\submodules\OFXSharp\source\OfxSharp\OfxSharp.csproj" />
   </ItemGroup>
 
