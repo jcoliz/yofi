@@ -11,8 +11,7 @@ namespace Common.AspNet
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var httpcontext = context.HttpContext;
-            var storage = httpcontext.RequestServices.GetService(typeof(IStorageService));
-            var config = httpcontext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
+            var storage = httpcontext.RequestServices.GetService(typeof(IStorageService)) as IStorageService;
 
             if (storage == null)
             {
@@ -20,9 +19,9 @@ namespace Common.AspNet
                 return;
             }
 
-            if (config["Storage:BlobContainerName"] == null)
+            if (string.IsNullOrEmpty(storage.ContainerName))
             {
-                context.Result = new BadRequestObjectResult("Unable to process request. No Azure Blob Storage container is not configured for this application. [E2]") { StatusCode = 410 };
+                context.Result = new BadRequestObjectResult("Unable to process request. No Azure Blob Storage container is configured for this application. [E2]") { StatusCode = 410 };
                 return;
             }
 

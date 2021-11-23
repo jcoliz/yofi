@@ -45,14 +45,10 @@ namespace YoFi.Tests.Attributes
                 var storage = new Mock<IStorageService>();
                 services.Setup(x => x.GetService(It.Is<Type>(t=> t== typeof(IStorageService)))).Returns(storage.Object);
 
-                var config = new Mock<IConfiguration>();
-
                 if (haskey)
                 {
-                    config.Setup(x => x["Storage:BlobContainerName"]).Returns("Ok");
+                    storage.Setup(x => x.ContainerName).Returns("Ok");
                 }
-
-                services.Setup(x => x.GetService(It.Is<Type>(t => t == typeof(IConfiguration)))).Returns(config.Object);
             }
             else
             {
