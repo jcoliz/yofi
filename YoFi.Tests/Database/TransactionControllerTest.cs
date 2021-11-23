@@ -749,6 +749,42 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
+        public async Task OfxUploadLoanSplit_Story802()
+        {
+            // Given: A payee with {loan details} in the category and {name} in the name
+            // See TransactionRepositoryTest.CalculateLoanSplits for where we are getting this data from. This is
+            // payment #53, made on 5/1/2004 for this loan.
+            var principalcategory = "Principal __TEST__";
+            var interestcategory = "Interest __TEST__";
+            var rule = $"{principalcategory} [Loan] {{ \"interest\": \"{interestcategory}\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" }} ";
+            var payee = "AA__TEST__ Loan Payment";
+            var payeeRepository = new PayeeRepository(helper.context);
+            await payeeRepository.AddAsync(new Payee() { Name = payee, Category = rule });
+
+            // When: Importing an OFX file containing a transaction with payee {name}
+            var filename = "User-Story-802.ofx";
+            var stream = SampleData.Open(filename);
+            var length = stream.Length;
+            IFormFile file = new FormFile(stream, 0, length, filename, filename);
+            var actionresult = await controller.Upload(new List<IFormFile>() { file }, new TransactionImporter(_repository, payeeRepository));
+
+            // Then: All transactions are imported successfully
+            var rdresult = actionresult as RedirectToActionResult;
+            Assert.AreEqual("Import", rdresult.ActionName);
+            Assert.AreEqual(1, dbset.Count());
+
+            // And: The transaction is imported as a split
+            var txs = dbset.Include(x => x.Splits).ToList();
+            Assert.AreEqual(2, txs.Single().Splits.Count);
+
+            // And: The splits match the categories and amounts as expected from the {loan details} 
+            var principal = -891.34m;
+            var interest = -796.37m;
+            Assert.AreEqual(principal, txs.Single().Splits.Where(x => x.Category == principalcategory).Single().Amount);
+            Assert.AreEqual(interest, txs.Single().Splits.Where(x => x.Category == interestcategory).Single().Amount);
+        }
+
+        [TestMethod]
         public async Task OfxUploadNoBankRef()
         {
             // Given: An OFX file containing transactions with no bank reference

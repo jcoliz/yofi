@@ -21,6 +21,7 @@
     <None Remove="SampleData\TestData1.xlsx" />
     <None Remove="SampleData\Transactions1000.json" />
     <None Remove="SampleData\UploadSampleDataDefinition.xlsx" />
+    <None Remove="SampleData\User-Story-802.ofx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,7 @@
     <EmbeddedResource Include="SampleData\TestData1.xlsx" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
     <EmbeddedResource Include="SampleData\UploadSampleDataDefinition.xlsx" />
+    <EmbeddedResource Include="SampleData\User-Story-802.ofx" />
   </ItemGroup>
 
   <ItemGroup>
