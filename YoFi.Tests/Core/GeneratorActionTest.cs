@@ -144,7 +144,7 @@ namespace YoFi.Tests.Core.SampleGen
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new SpreadsheetReader();
             reader.Open(stream);
-            var transactions = reader.Deserialize<Transaction>();
+            var transactions = reader.Deserialize<Transaction>().ToList();
             var splits = reader.Deserialize<Split>("Split");
 
             // And: Matching the spits up to their transaction
