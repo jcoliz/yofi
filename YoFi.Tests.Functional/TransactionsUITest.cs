@@ -18,11 +18,8 @@ namespace YoFi.Tests.Functional
         [TestInitialize]
         public async Task SetUp()
         {
-            // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Transactions" on the navbar
-            await Page.ClickAsync("text=Transactions");
+            // When: Navigating to the main page for this section
+            await WhenNavigatingToPage(MainPageName);
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
@@ -549,8 +546,7 @@ namespace YoFi.Tests.Functional
         {
             // Given: We are starting at the payee index page
 
-            await GivenLoggedIn();
-            await Page.ClickAsync("text=Payees");
+            await WhenNavigatingToPage("Payees");
             var originalitems = await Page.GetTotalItemsAsync();
 
             // And: Creating a new item
@@ -592,7 +588,7 @@ namespace YoFi.Tests.Functional
 
             // When: Importing an OFX file containing a transaction with payee {name}
 
-            await Page.ClickAsync("text=Import");
+            await WhenNavigatingToPage("Import");
             await Page.ClickAsync("[aria-label=\"Upload\"]");
             await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData\\User-Story-802.ofx" });
             await Page.ClickAsync("text=Upload");
@@ -657,7 +653,7 @@ namespace YoFi.Tests.Functional
             await GivenPayeeInDatabase(name: payee, category: rule);
 
             // When: Searching for this item
-            await Page.ClickAsync("text=Transactions");
+            await WhenNavigatingToPage("Transactions");
             await Page.SearchFor($"p={payee}");
             await Page.SaveScreenshotToAsync(TestContext);
 

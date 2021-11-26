@@ -6,15 +6,6 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class HelpUITest: FunctionalUITest
     {
-        private async Task WhenNavigatingToPage(string page)
-        {
-            // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Budget" on the navbar
-            await Page.ClickAsync($"text={page}");
-        }
-
         /// <summary>
         /// User Story 1175: [User Can] View all help topics on a single page
         /// </summary>

@@ -225,3 +225,24 @@ function xsrf(xhr) {
         xhr.setRequestHeader("RequestVerificationToken", token);
     }
 }
+
+$(window).on('load', function () {
+    var element = $('.dialog-autoshow');
+    if (element.length) {
+        var endpoint = element.data('endpoint');
+        var modal = new bootstrap.Modal(element);
+
+        $.ajax({
+            url: endpoint,
+            success: function (htmlresult) {
+                element.find('.modal-body').html(htmlresult);
+                modal.show();
+            },
+            error: function (result) {
+                alert(result.responseText);
+                element.find('.modal-body').text(result.responseText);
+                modal.show();
+            }
+        });
+    }
+});

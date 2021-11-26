@@ -80,11 +80,22 @@ namespace YoFi.Tests.Functional
                 base.Context.SetDefaultTimeout(5000);
             }
         }
-
-        protected async Task ThenH2Is(string expected)
+        protected async Task WhenNavigatingToPage(string page)
         {
-            var content = await Page.TextContentAsync("h2");
-            Assert.AreEqual(expected, content);
+            // Given: We are already logged in and starting at the root of the site
+            await GivenLoggedIn();
+
+            // When: Clicking "{page}" on the navbar
+            await Page.ClickAsync($".navbar >> text={page}");
+
+            // And: Dismissing any help text
+            var dialogautoshow = await Page.QuerySelectorAsync(".dialog-autoshow");
+            if (null != dialogautoshow)
+            {
+                await dialogautoshow.WaitForElementStateAsync(ElementState.Visible);
+                await Page.ClickAsync("data-test-id=btn-help-close");
+                await dialogautoshow.WaitForElementStateAsync(ElementState.Hidden);
+            }
         }
 
         protected class IdOnly
@@ -95,6 +106,12 @@ namespace YoFi.Tests.Functional
 
     public static class PageExtensions
     {
+        public static async Task ThenH2Is(this IPage page, string expected)
+        {
+            var content = await page.TextContentAsync("h2");
+            Assert.AreEqual(expected, content);
+        }
+
         public static async Task FillFormAsync(this IPage page, Dictionary<string, string> entries)
         {
             foreach (var kvp in entries)

@@ -3,8 +3,9 @@
     var hasbrandconfig = _config.GetSection("Brand").Exists();
     var sitename = hasbrandconfig ? _config["Brand:Name"] : _config["Codebase:Name"];
 
-    var ishome = (string)ViewData["Title"] == "Home";
-    var islogin = (string)ViewData["Title"] == "Login";
+    var pagetitle = (string)ViewData["Title"];
+    var ishome = pagetitle == "Home";
+    var islogin = pagetitle == "Login";
 
     var bodyclass = islogin ? "signin text-center" : string.Empty;
     bodyclass = ishome ? "iscarousel" : bodyclass;
@@ -15,6 +16,7 @@
 
     var isdemo = _config["DemoOpenAccess"] == "True";
     var demotitle = isdemo ? "DEMO - " : string.Empty;
+
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -143,5 +145,6 @@
     </environment>
 
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>

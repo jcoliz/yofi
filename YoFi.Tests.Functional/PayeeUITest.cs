@@ -14,11 +14,8 @@ namespace YoFi.Tests.Functional
         [TestInitialize]
         public async Task SetUp()
         {
-            // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Payee" on the navbar
-            await Page.ClickAsync("text=Payees");
+            // When: Navigating to the main page for this section
+            await WhenNavigatingToPage(MainPageName);
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
@@ -31,8 +28,8 @@ namespace YoFi.Tests.Functional
             // Delete all test items
             //
 
-            // When: Clicking "Payee" on the navbar
-            await Page.ClickAsync("text=Payees");
+            // When: Clicking "{page}" on the navbar
+            await Page.ClickAsync($".navbar >> text={MainPageName}");
 
             // And: totalitems > expected TotalItemCount
             var totalitems = await Page.GetTotalItemsAsync();
@@ -57,8 +54,7 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task Initial()
         {
-            // Then: We are on the main page for this section
-            await Page.ThenIsOnPageAsync(MainPageName);
+            // When: We are on the main page for this section
 
             // And: All expected items are here
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
@@ -166,8 +162,6 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the payees page
 
             // Then: We are on the main page for this section
-            await Page.ThenIsOnPageAsync(MainPageName);
-
             await Page.ClickAsync("[aria-label=\"Upload\"]");
             await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
             await Page.ClickAsync("text=Upload");
@@ -263,7 +257,7 @@ namespace YoFi.Tests.Functional
             // for it. Also we will be equiped to clean it up here better.
 
             // Given: We are logged in and on the transactions page
-            await Page.ClickAsync("text=Transactions");
+            await WhenNavigatingToPage("Transactions");
 
             // When: Clicking 'Add Payee' on the first line
             var button = await Page.QuerySelectorAsync($"data-test-id=line-1 >> [aria-label=\"Add Payee\"]");
@@ -295,10 +289,9 @@ namespace YoFi.Tests.Functional
         async Task GivenPayeeInDatabase()
         {
             // Given: We are starting at the payee index page
-            await Page.ThenIsOnPageAsync(MainPageName);
-            var originalitems = await Page.GetTotalItemsAsync();
 
             // When: Creating a new item
+            var originalitems = await Page.GetTotalItemsAsync();
 
             await Page.ClickAsync("#dropdownMenuButtonAction");
             await Page.ClickAsync("text=Create New");

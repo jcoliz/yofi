@@ -22,7 +22,7 @@ namespace YoFi.Tests.Functional
             await Page.ThenIsOnPageAsync("Reports");
 
             // And: The summary is shown
-            await ThenH2Is("Summary");
+            await Page.ThenH2Is("Summary");
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace YoFi.Tests.Functional
 
             // Then: The expected report is generated
             await Page.ThenIsOnPageAsync(expected);
-            await ThenH2Is(expected);
+            await Page.ThenH2Is(expected);
         }
 
         [TestMethod]

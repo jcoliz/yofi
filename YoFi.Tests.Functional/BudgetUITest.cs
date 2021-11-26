@@ -18,10 +18,8 @@ namespace YoFi.Tests.Functional
         public async Task SetUp()
         {
             // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Budget" on the navbar
-            await Page.ClickAsync("text=Budget");
+            // When: Navigating to the main page for this section
+            await WhenNavigatingToPage("Budget");
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
@@ -34,8 +32,8 @@ namespace YoFi.Tests.Functional
             // Delete all test items
             //
 
-            // When: Clicking "Budget" on the navbar
-            await Page.ClickAsync("text=Budget");
+            // When: Navigating to the main page for this section
+            await WhenNavigatingToPage("Budget");
 
             // And: totalitems > expected TotalItemCount
             var totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
