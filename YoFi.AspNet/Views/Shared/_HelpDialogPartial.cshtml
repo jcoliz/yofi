@@ -1,13 +1,15 @@
 ﻿@model string
-@using System.Text 
+@using System.Text
+@inject IConfiguration _config
 @{
     var seenkey = "HelpSeen" + Model;
     string dialog_autoshow = null;
-    if (! this.Context.Session.TryGetValue(seenkey, out byte[] value))
+    var hasbrandconfig = _config.GetSection("Brand").Exists();
+    if (!hasbrandconfig && !this.Context.Session.TryGetValue(seenkey, out byte[] value))
     {
         dialog_autoshow = "dialog-autoshow";
         var bytes = Encoding.UTF8.GetBytes("true");
-        this.Context.Session.Set(seenkey,bytes);
+        this.Context.Session.Set(seenkey, bytes);
     }
 }
 <div class="partialdialog modal fade @dialog_autoshow" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModalLabel" aria-hidden="true" data-endpoint="/Help?id=@Model">
