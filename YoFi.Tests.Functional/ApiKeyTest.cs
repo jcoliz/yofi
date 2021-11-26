@@ -14,7 +14,9 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class ApiKeyTest
     {
-        HttpClient client;
+        protected HttpClient client = null;
+
+        protected TestConfigProperties Properties = null;
 
         public TestContext TestContext { get; set; }
 
@@ -23,12 +25,10 @@ namespace YoFi.Tests.Functional
 
         public void SetUp(TestContext context)
         {
-            var site = context.Properties["webAppUrl"];
-            client = new HttpClient() { BaseAddress = new Uri(site + "api/") };
+            var Properties = new TestConfigProperties(context.Properties);
+            client = new HttpClient() { BaseAddress = new Uri(Properties.Url + "api/") };
 
-            var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(ApiKeyTest))).Build();
-            var apikey = config["Api:Key"];
-            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"user:{apikey}"));
+            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"user:{Properties.ApiKey}"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64);
         }
 

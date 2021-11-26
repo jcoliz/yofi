@@ -1,5 +1,4 @@
 ﻿using jcoliz.OfficeOpenXml.Serializer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,7 +6,6 @@ using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 // Currently shaves off all of 4 seconds to run them in parallel!
@@ -27,6 +25,7 @@ namespace YoFi.Tests.Functional
         private int nextid = 1;
         protected string NextName => $"AA{testmarker}{TestContext.TestName}_{nextid++}";
         protected string NextCategory => $"AA{testmarker}:{TestContext.TestName}:{nextid++}";
+        protected TestConfigProperties Properties = null;
 
         protected FunctionalUITest() { }
 
@@ -34,9 +33,10 @@ namespace YoFi.Tests.Functional
         {
             var page = where ?? Page;
 
+            Properties = new TestConfigProperties(TestContext.Properties);
+
             // Navigate to the root of the site
-            var site = TestContext.Properties["webAppUrl"] as string;
-            await page.GotoAsync(site);
+            await page.GotoAsync(Properties.Url);
 
             // Are we already logged in?
             var hellouser = await page.QuerySelectorAsync("data-test-id=hello-user");
@@ -48,14 +48,9 @@ namespace YoFi.Tests.Functional
 
                 await page.ClickAsync("data-test-id=login");
 
-                // And: User credentials as specified in user secrets
-                var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(FunctionalUITest))).Build();
-                var email = config["AdminUser:Email"];
-                var password = config["AdminUser:Password"];
-
                 // When: Filling out the login form with those credentials and pressing "sign in"
-                await page.FillAsync("id=floatingInput", email);
-                await page.FillAsync("id=floatingPassword", password);
+                await page.FillAsync("id=floatingInput", Properties.AdminUserEmail);
+                await page.FillAsync("id=floatingPassword", Properties.AdminUserPassword);
                 await page.ClickAsync("data-test-id=signin");
 
                 // Then: We land back at the home page
@@ -63,7 +58,7 @@ namespace YoFi.Tests.Functional
 
                 // And: The navbar has our email
                 var content = await page.TextContentAsync("data-test-id=hello-user");
-                Assert.IsTrue(content.Contains(email));
+                Assert.IsTrue(content.Contains(Properties.AdminUserEmail));
 
                 // And: The login button is not visible
                 var login = await page.QuerySelectorAsync("data-test-id=login");
@@ -102,7 +97,8 @@ namespace YoFi.Tests.Functional
         {
             public int ID { get; set; }
         }
-    }
+
+    }    
 
     public static class PageExtensions
     {
@@ -140,7 +136,9 @@ namespace YoFi.Tests.Functional
         public static async Task ThenIsOnPageAsync(this IPage page, string expected)
         {
             var title = await page.TitleAsync();
-            Assert.AreEqual($"{expected} - Development - YoFi", title);
+            var split = title.Split(" - ");
+            Assert.AreEqual(expected,split.First());
+            Assert.AreEqual("YoFi",split.Last());
         }
 
         public static async Task ThenContainsItemsAsync(this IPage page, int from, int to)
