@@ -184,12 +184,14 @@
     });
 
     $("a[data-help-topic]").click(function () {
-        var topic = $(this).data("help-topic");
-        var endpoint = "/Help?id=" + topic;
         var element = $("#helpModal");
         if (element.length) {
+            var topic = $(this).data("help-topic");
+            var href = $(this).data("help-href");
+            var endpoint = "/Help?id=" + topic;
             var modal = new bootstrap.Modal(element);
             element.data("endpoint",endpoint);
+            $("#helpModalGoBtn").attr("href",href);
             modal.show();
         }
     });

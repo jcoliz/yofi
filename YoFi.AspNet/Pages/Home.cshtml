@@ -21,7 +21,7 @@
                     <p>YoFi is an open source web-based personal finance manager written in C# on ASP.NET Core. Host it on a cloud service to enable access to your personal finances from any device anywhere anytime, while maintaining complete control over your data.</p>
                     @if (Model.isDemo)
                     {
-                        <p><a href="#" class="btn btn-lg btn-primary" data-help-topic="demo">Try the demo</a></p>
+                        <p><a href="#" class="btn btn-lg btn-primary" data-help-topic="demo" data-help-href="/Transactions">Try the demo</a></p>
                     }
                     else
                     {
@@ -120,7 +120,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-test-id="btn-help-close">Cancel</button>
                     <a href="/Help" class="btn btn-secondary btnDismissModal" data-test-id="btn-help-more">Help</a>
-                    <a href="/Transactions" class="btn btn-primary btnDismissModal" data-test-id="btn-help-go">Go</a>
+                    <a id="helpModalGoBtn" class="btn btn-primary btnDismissModal" data-test-id="btn-help-go">Go</a>
                 </div>
             </form>
         </div>
