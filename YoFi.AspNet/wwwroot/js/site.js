@@ -183,6 +183,17 @@
         }
     });
 
+    $("a[data-help-topic]").click(function () {
+        var topic = $(this).data("help-topic");
+        var endpoint = "/Help?id=" + topic;
+        var element = $("#helpModal");
+        if (element.length) {
+            var modal = new bootstrap.Modal(element);
+            element.data("endpoint",endpoint);
+            modal.show();
+        }
+    });
+
     $('.btnDismissModal').click(function () {
         $(this).parentsUntil('#modal').modal('hide');
     });
@@ -232,6 +243,8 @@ $(window).on('load', function () {
         var endpoint = element.data('endpoint');
         var modal = new bootstrap.Modal(element);
 
+        // I think I don't need to do this. I think just SHOWING it will cause the
+        // load logic elsewhere to fire.
         $.ajax({
             url: endpoint,
             success: function (htmlresult) {
