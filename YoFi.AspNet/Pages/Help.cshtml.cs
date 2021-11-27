@@ -173,7 +173,7 @@ namespace YoFi.AspNet.Pages
                 {
                     "Import. Every data type can be imported from a spreadsheet into the app.",
                     "Export. Every data type can be exported out to a spreadsheet for separate processing.",
-                    "Reports via API. Personally, I use YoFi as part of my overall workflow which is contained in Excel. You can easily set up a Power Query to fetch reports from the YoFi API. Every report available in the browser can be fetched using the API, with the same parameters. So it's easy to set up a master report page containing the precise level of detail you're looking for.",
+                    "Reports via API. Personally, I use YoFi as part of my overall workflow which is contained in Excel. You can easily set up a Power Query to fetch reports from the YoFi API. Every report available in the browser can be fetched using the API, with the same parameters. So it's easy to set up a master report page containing the precise level of detail you're looking for. Check out the <a href=\"https://github.com/jcoliz/yofi/blob/master/docs/SampleAPIConnection.xlsx\">example spreadsheet</a> which pulls data from www.try-yofi.com using the API.",
                     "Data via API. Every data type can be searched and download using the API, which can be imported into Excel using Power Query."
                 },
 
