@@ -16,8 +16,10 @@ namespace YoFi.Tests.Functional
         const string MainPageName = "Transactions";
 
         [TestInitialize]
-        public async Task SetUp()
+        public new async Task SetUp()
         {
+            base.SetUp();
+
             // When: Navigating to the main page for this section
             await WhenNavigatingToPage(MainPageName);
 
@@ -559,7 +561,7 @@ namespace YoFi.Tests.Functional
                 { "Name", name ?? NextName },
             });
             await Page.ClickAsync("input:has-text(\"Create\")");
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"CreatedPayee");
         }
 
         /// <summary>
@@ -579,7 +581,7 @@ namespace YoFi.Tests.Functional
             // See TransactionRepositoryTest.CalculateLoanSplits for where we are getting this data from. This is
             // payment #53, made on 5/1/2004 for this loan.
 
-            var rule = "Principal __TEST__ [Loan] { \"interest\": \"Interest __TEST__\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
+            var rule = "__TEST__ Principal [Loan] { \"interest\": \"Interest __TEST__\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
             var payee = "AA__TEST__ Loan Payment";
             var principal = -891.34m;
             var interest = -796.37m;
@@ -591,6 +593,7 @@ namespace YoFi.Tests.Functional
             await WhenNavigatingToPage("Import");
             await Page.ClickAsync("[aria-label=\"Upload\"]");
             await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData\\User-Story-802.ofx" });
+            await Page.SaveScreenshotToAsync(TestContext, "SetInputFiles");
             await Page.ClickAsync("text=Upload");
             await Page.ClickAsync("button:has-text(\"Import\")");
 
@@ -648,7 +651,7 @@ namespace YoFi.Tests.Functional
             // See TransactionRepositoryTest.CalculateLoanSplits for where we are getting this data from. This is
             // payment #53, made on 5/1/2004 for this loan.
 
-            var rule = "Principal __TEST__ [Loan] { \"interest\": \"Interest __TEST__\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
+            var rule = "__TEST__ Principal [Loan] { \"interest\": \"Interest __TEST__\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
 
             await GivenPayeeInDatabase(name: payee, category: rule);
 

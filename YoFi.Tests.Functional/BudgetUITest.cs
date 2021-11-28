@@ -15,8 +15,10 @@ namespace YoFi.Tests.Functional
         const string MainPageName = "Budget Line Items";
 
         [TestInitialize]
-        public async Task SetUp()
+        public new async Task SetUp()
         {
+            base.SetUp();
+
             // Given: We are already logged in and starting at the root of the site
             // When: Navigating to the main page for this section
             await WhenNavigatingToPage("Budget");

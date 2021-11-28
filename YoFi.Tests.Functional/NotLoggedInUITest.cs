@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 namespace YoFi.Tests.Functional
 {
     [TestClass]
-    public class NotLoggedInUITest: PageTest
+    public class NotLoggedInUITest: FunctionalUITest
     {
-        private readonly string Site = "http://localhost:50419/";
-
         [TestMethod]
         public async Task HomePage()
         {
@@ -16,10 +14,10 @@ namespace YoFi.Tests.Functional
             // (This is accomplished by ordering this test before the login test)
 
             // When: Navigating to the root of the site
-            await Page.GotoAsync(Site);
+            await Page.GotoAsync(Properties.Url);
 
             // Then: The home page loads
-            await ThenIsOnPage("Home");
+            await Page.ThenIsOnPageAsync("Home");
         }
 
         [TestMethod]
@@ -32,13 +30,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("data-test-id=login");
 
             // Then: The login page loads
-            await ThenIsOnPage("Login");
-        }
-
-        private async Task ThenIsOnPage(string expected)
-        {
-            var title = await Page.TitleAsync();
-            Assert.AreEqual($"{expected} - Development - YoFi", title);
+            await Page.ThenIsOnPageAsync("Login");
         }
 
     }

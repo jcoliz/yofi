@@ -12,8 +12,10 @@ namespace YoFi.Tests.Functional
         const string MainPageName = "Payees";
 
         [TestInitialize]
-        public async Task SetUp()
+        public new async Task SetUp()
         {
+            base.SetUp();
+
             // When: Navigating to the main page for this section
             await WhenNavigatingToPage(MainPageName);
 

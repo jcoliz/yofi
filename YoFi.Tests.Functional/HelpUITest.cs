@@ -57,17 +57,23 @@ namespace YoFi.Tests.Functional
 
             // Then: The help topic specific to this page is displayed
             var element = await Page.WaitForSelectorAsync("[data-test-id=\"help-topic-title\"]");
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext, $"-{page}-help");
             var text = await element.TextContentAsync();
             Assert.IsTrue(text.Contains(page[..3]));
 
             // When: Clicking OK
             await Page.ClickAsync("[data-test-id=\"btn-help-close\"]");
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,$"-{page}-ok");
 
             // Then: The help topic is dismissed
             element = await Page.WaitForSelectorAsync("[data-test-id=\"help-topic-title\"]", new Microsoft.Playwright.PageWaitForSelectorOptions() { State = Microsoft.Playwright.WaitForSelectorState.Hidden });
             Assert.IsNull(element);
+
+            // And: The dialog is completely removed
+            var backdrop = await Page.WaitForSelectorAsync(".modal-backdrop", new Microsoft.Playwright.PageWaitForSelectorOptions() { State = Microsoft.Playwright.WaitForSelectorState.Hidden });
+            Assert.IsNull(backdrop);
+
+            await Page.SaveScreenshotToAsync(TestContext, $"-{page}-done");
         }
 
         /// <summary>

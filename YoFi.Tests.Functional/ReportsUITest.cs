@@ -15,8 +15,8 @@ namespace YoFi.Tests.Functional
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
-            // When: Clicking "Budget" on the navbar
-            await Page.ClickAsync("text=Reports");
+            // When: Clicking "Reports" on the navbar
+            await WhenNavigatingToPage("Reports");
 
             // Then: We land at the budget index page
             await Page.ThenIsOnPageAsync("Reports");

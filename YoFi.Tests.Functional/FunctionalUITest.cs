@@ -29,11 +29,15 @@ namespace YoFi.Tests.Functional
 
         protected FunctionalUITest() { }
 
+        [TestInitialize]
+        public void SetUp()
+        {
+            Properties = new TestConfigProperties(TestContext.Properties);
+        }
+
         protected async Task GivenLoggedIn(IPage where = null)
         {
             var page = where ?? Page;
-
-            Properties = new TestConfigProperties(TestContext.Properties);
 
             // Navigate to the root of the site
             await page.GotoAsync(Properties.Url);
@@ -84,12 +88,15 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync($".navbar >> text={page}");
 
             // And: Dismissing any help text
+            await Page.WaitForLoadStateAsync();
             var dialogautoshow = await Page.QuerySelectorAsync(".dialog-autoshow");
             if (null != dialogautoshow)
             {
                 await dialogautoshow.WaitForElementStateAsync(ElementState.Visible);
                 await Page.ClickAsync("data-test-id=btn-help-close");
                 await dialogautoshow.WaitForElementStateAsync(ElementState.Hidden);
+                await Page.WaitForSelectorAsync(".modal-backdrop", new Microsoft.Playwright.PageWaitForSelectorOptions() { State = Microsoft.Playwright.WaitForSelectorState.Hidden });
+                await Page.SaveScreenshotToAsync(TestContext,$"-{page}-autoshow");
             }
         }
 
@@ -126,9 +133,9 @@ namespace YoFi.Tests.Functional
 
         private static int ScreenShotCount = 1;
 
-        public static async Task SaveScreenshotToAsync(this IPage page, TestContext testContext)
+        public static async Task SaveScreenshotToAsync(this IPage page, TestContext testContext, string additional = null)
         {
-            var filename = $"Screenshot {testContext.FullyQualifiedTestClassName} {ScreenShotCount++:D4} {testContext.TestName}.png";
+            var filename = $"Screenshot {testContext.FullyQualifiedTestClassName} {ScreenShotCount++:D4} {testContext.TestName}{additional ?? ""}.png";
             await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true });
             testContext.AddResultFile(filename);
         }
@@ -136,7 +143,9 @@ namespace YoFi.Tests.Functional
         public static async Task ThenIsOnPageAsync(this IPage page, string expected)
         {
             var title = await page.TitleAsync();
-            var split = title.Split(" - ");
+            var split = title.Split(" - ").ToList();
+            if (split.First() == "DEMO")
+                split.RemoveAt(0);
             Assert.AreEqual(expected,split.First());
             Assert.AreEqual("YoFi",split.Last());
         }

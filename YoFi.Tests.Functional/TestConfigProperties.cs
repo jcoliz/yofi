@@ -10,6 +10,7 @@ namespace YoFi.Tests.Functional
         public string AdminUserPassword { get; private set; }
         public string ApiKey { get; private set; }
         public bool IsDevelopment { get; private set; }
+        public bool IsDemo { get; private set; }
 
         public TestConfigProperties(System.Collections.IDictionary testproperties)
         {
@@ -18,7 +19,8 @@ namespace YoFi.Tests.Functional
             AdminUserEmail = testproperties["email"] as string;
             AdminUserPassword = testproperties["password"] as string;
             ApiKey = testproperties["apikey"] as string;
-            IsDevelopment = (testproperties["environment"] as string) != "Development";
+            IsDevelopment = (testproperties["environment"] as string)?.Contains("Development") == true;
+            IsDemo = (testproperties["environment"] as string)?.Contains("Demo") == true;
 
             // Else get them from user secrets
             var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(FunctionalUITest))).Build();
