@@ -456,7 +456,10 @@ namespace YoFi.Core.Reports
             //  2. Place. Place each incoming data point into a report cell.
             foreach (var cell in cells)
             {
-                var keys = cell.Location.FilteredRowName.Split(':').Skip(SkipLevels).ToList();
+                var keysplit = cell.Location.FilteredRowName.Split(':');
+                if (keysplit.Count() == SkipLevels)
+                    keysplit = keysplit.ToList().Append("[Blank]").ToArray();
+                var keys = keysplit.Skip(SkipLevels).ToList();
                 if (keys.Any())
                 {
                     // Is this a collector row?

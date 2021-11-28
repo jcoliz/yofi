@@ -677,7 +677,6 @@ namespace YoFi.Tests.Core
             { "Two",Items.Take(20).Where(x => Items.IndexOf(x) % 3 != 0).ToList().AsQueryable() }
         };
 
-
         [TestMethod]
         public void TwoSeries()
         {
@@ -785,6 +784,88 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(200m, report[Jun, Else]);
             Assert.AreEqual(400m, report[Jun, report.TotalRow]);
         }
+
+        [TestMethod]
+        public void ThreeLevelsDeep_SkipLevel_IncludesBlanks_Bug1213()
+        {
+            // Given: Transaction source which includes categories of Top:[Blank]
+            // (i.e. just "Top"), and asking for skip-levels one
+            var items = Items.Take(20).Where(x=>x.Category.StartsWith("Other"));
+            report.Source = new NamedQueryList(items.AsQueryable());
+            report.NumLevels = 2;
+            report.SkipLevels = 1;
+
+            // When: Building the report
+            WhenBuildingTheReport(sorted: true);
+
+            // Then: The total includes all items
+            var expected = items.Sum(x => x.Amount);
+            Assert.AreEqual(expected, report.GrandTotal);
+
+            // And the "ID:[Blank]" row is included
+            expected = items.Where(x => x.Category == "Other").Sum(x => x.Amount);
+            var Blank = GetRow(x => x.Name == "[Blank]" && !x.IsTotal);
+            Assert.AreEqual(expected, report[report.TotalColumn,Blank]);
+        }
+
+        //[TestMethod]
+        public void Slicer_TwoSeriesDeepCols()
+        {
+            // User Story 1120: Summary report optimization: Run the report once,
+            // then extract pieces of the report out of the master
+            //
+            // Here's the idea. We run the "TwoSeriesDeepCols" report. Then we ask
+            // for a slice of the report starting at "Other".
+            //
+            // This gives the same result as if we had asked for an "Other" only report
+            // from the start
+
+            // First, let's build the EXPECTED result. This is what things SHOULD look
+            // like when we're done.
+            var bigitems = Items.Take(20);
+            var littleitems = bigitems.Where(x => x.Category.StartsWith("Other"));
+            var source = new NamedQueryList()
+            {
+                { "One",littleitems.Where((x,i) => i % 3 == 0).ToList().AsQueryable() },
+                { "Two",littleitems.Where((x,i) => i % 3 != 0).ToList().AsQueryable() }
+            };
+
+            report.WithMonthColumns = true;
+            report.Source = source;
+            report.NumLevels = 2;
+            report.SkipLevels = 1;
+            DataHash = 0;
+
+            WhenBuildingTheReport(sorted: true);
+
+            // Save off the generated report for later review
+            var expected = report;
+            report = new Report();
+
+            // Given: A report with two top-level categories, and three levels of depth
+
+            // NOW, create the report we want.
+            source = new NamedQueryList()
+            {
+                { "One",bigitems.Where((x,i) => i % 3 == 0).ToList().AsQueryable() },
+                { "Two",bigitems.Where((x,i) => i % 3 != 0).ToList().AsQueryable() }
+            };
+
+            report.WithMonthColumns = true;
+            report.Source = source;
+            report.NumLevels = 3;
+            DataHash = 1;
+
+            WhenBuildingTheReport(sorted: true);
+
+            // When: Asking for a slice of that report from one of the top-level categories
+
+            // Then: The resulting report contains looks like a fresh report we would have created
+            // Where: Only top-level categories of the one we selected
+            // And: One less level of depth
+            // And: Skip-leveled one
+        }
+
         [TestMethod]
         public void ManySeriesDeep()
         {
