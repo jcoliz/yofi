@@ -244,6 +244,7 @@ $(window).on('load', function () {
     if (element.length) {
         var endpoint = element.data('endpoint');
         var modal = new bootstrap.Modal(element);
+        modal.show();
 
         // I think I don't need to do this. I think just SHOWING it will cause the
         // load logic elsewhere to fire.
@@ -251,12 +252,10 @@ $(window).on('load', function () {
             url: endpoint,
             success: function (htmlresult) {
                 element.find('.modal-body').html(htmlresult);
-                modal.show();
             },
             error: function (result) {
                 alert(result.responseText);
                 element.find('.modal-body').text(result.responseText);
-                modal.show();
             }
         });
     }
