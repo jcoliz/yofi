@@ -46,13 +46,18 @@ namespace YoFi.Tests.Core
         void WhenBuildingTheReport(bool sorted = false)
         {
             report.Build();
+            WriteReportToContext(sorted);
 
+        }
+
+        private void WriteReportToContext(bool sorted = false)
+        {
             var hash = (DataHash == 0) ? string.Empty : $"-{DataHash:X}";
             var filename = $"Report-{TestContext.TestName}{hash}.txt";
             File.Delete(filename);
             using var outstream = File.OpenWrite(filename);
             using var writer = new StreamWriter(outstream);
-            report.Write(writer,sorted);
+            report.Write(writer, sorted);
             writer.Close();
             TestContext.AddResultFile(filename);
         }
@@ -808,7 +813,7 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(expected, report[report.TotalColumn,Blank]);
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void Slicer_TwoSeriesDeepCols()
         {
             // User Story 1120: Summary report optimization: Run the report once,
@@ -859,11 +864,16 @@ namespace YoFi.Tests.Core
             WhenBuildingTheReport(sorted: true);
 
             // When: Asking for a slice of that report from one of the top-level categories
+            var bigitemsreport = report;
+
+            report = bigitemsreport.TakeSlice("Other");
+            DataHash = 2;
+            WriteReportToContext(sorted: true);
 
             // Then: The resulting report contains looks like a fresh report we would have created
-            // Where: Only top-level categories of the one we selected
-            // And: One less level of depth
-            // And: Skip-leveled one
+            Assert.AreEqual(expected.RowLabelsOrdered.Count(), report.RowLabelsOrdered.Count());
+            expected.RowLabelsOrdered.SequenceEqual(report.RowLabelsOrdered);
+            Assert.AreEqual(expected.GrandTotal, report.GrandTotal);
         }
 
         [TestMethod]

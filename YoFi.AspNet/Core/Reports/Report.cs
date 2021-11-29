@@ -238,6 +238,45 @@ namespace YoFi.Core.Reports
         }
 
         /// <summary>
+        /// Produce a report which is a slice of this report, including everything below
+        /// the supplied <paramref name="rowname"/>
+        /// </summary>
+        /// <param name="rowname">Name of current row to use as root</param>
+        /// <returns>New report</returns>
+        public Report TakeSlice(string rowname)
+        {
+            // Find the row
+            var findrow = RowLabels.Where(x => x.Name == rowname && ! x.IsTotal);
+            if (!findrow.Any())
+                throw new ArgumentException("Row not found", nameof(rowname));
+
+            var sliceparent = findrow.Single();
+
+            // Find the rows constituting the slice
+            var includedrows = RowLabels.Where(x => x.DescendsFrom(sliceparent)).ToList();
+
+            // Bring the columns of the old report over
+            var result = new Report();
+
+            foreach (var column in ColumnLabelsFiltered)
+                if (!column.IsCalculated)
+                {
+                    foreach (var row in includedrows)
+                    {
+                        var value = this[column, row];
+                        result.Table[column, row] = value;
+
+                        if (row.Parent == sliceparent)
+                            result.Table[column, result.TotalRow] += value;
+                    }
+                }
+                else
+                    result.AddCustomColumn(column);
+
+            return result;
+        }
+
+        /// <summary>
         /// Render the report to console
         /// </summary>
         /// <param name="sorted">Whether to show rows in sorted order</param>
@@ -823,6 +862,22 @@ namespace YoFi.Core.Reports
         /// from all peers EXCEPT those in the list.
         /// </summary>
         public string Collector { get; set; } = null;
+
+        /// <summary>
+        /// Determine whether this row has the specified <paramref name="ancestor"/> in
+        /// its line of parentage
+        /// </summary>
+        /// <param name="ancestor">The row to search for</param>
+        /// <returns>True if we are some level of child from the specified <paramref name="ancestor"/></returns>
+        public bool DescendsFrom(RowLabel ancestor)
+        {
+            if (Parent == ancestor)
+                return true;
+            else if (Parent == null)
+                return false;
+            else
+                return Parent.DescendsFrom(ancestor);
+        }
     }
 
     /// <summary>
