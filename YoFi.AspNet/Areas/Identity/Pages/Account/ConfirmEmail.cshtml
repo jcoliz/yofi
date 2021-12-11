@@ -1,0 +1,37 @@
+﻿@page
+@model Microsoft.AspNetCore.Identity.UI.V4.Pages.Account.Internal.ConfirmEmailModel
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@{
+    ViewData["Title"] = "Confirm email";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>@Model.StatusMessage</p>
+
+@if (!Model.StatusMessage.ToLowerInvariant().Contains("error"))
+{
+    //
+    // Determine next step
+    //
+    // Note that we can confirm email for ANY user, not just a logged in user.
+    //
+    // If we're not logged in, next step is log in
+    //
+    // If we're logged in, but not authorized, we could go to "/Home"
+    //
+    if (!User.Identity.IsAuthenticated)
+    {
+        <p><a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Login">Log in &raquo;</a></p>
+    }
+    else if ((await AuthorizationService.AuthorizeAsync(User, "CanRead")).Succeeded)
+    {
+        <p><a class="btn btn-secondary" asp-controller="Transactions" asp-action="Index">Get started &raquo;</a></p>
+    }
+    else
+    {
+        <p>Your account must be validated by an administrator before you can access the content here.</p>
+        <p><a class="btn btn-secondary" asp-page="/Home">Home page &raquo;</a></p>
+    }
+}
