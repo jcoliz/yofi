@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,7 @@ using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
+using YoFi.Services;
 
 #if __DEMO_OPEN_ACCESS__
 using Microsoft.AspNetCore.Authorization;
@@ -94,6 +96,11 @@ namespace YoFi.AspNet.Main
             services.AddScoped<IDataContext, ApplicationDbContext>();
             services.AddScoped<IAsyncQueryExecution, EFCoreAsyncQueryExecution>();
 
+            if (Configuration.GetSection(SendGridEmailOptions.Section).Exists())
+            {
+                services.Configure<SendGridEmailOptions>(Configuration.GetSection(SendGridEmailOptions.Section));
+                services.AddTransient<IEmailSender, SendGridEmailService>();
+            }
 
             // -----------------------------------------------------------------------------
             //

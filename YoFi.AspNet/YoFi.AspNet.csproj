@@ -51,6 +51,7 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.5" PrivateAssets="All" />
+    <PackageReference Include="SendGrid" Version="9.25.1" />
     <PackageReference Include="System.Text.Json" Version="6.0.0" />
   </ItemGroup>
 
