@@ -135,7 +135,7 @@ namespace YoFi.Core.Reports
                     IsSortingAfterTotal = true,
                     DisplayAsPercent = true,
                     Custom = (cols) =>
-                        (report.GrandTotal == 0) ? 0 : cols.GetValueOrDefault("TOTAL") / report.GrandTotal
+                        (cols.GetValueOrDefault("GRANDTOTAL") == 0) ? 0 : cols.GetValueOrDefault("TOTAL") / cols.GetValueOrDefault("GRANDTOTAL")
                 };
             else if (name == "budgetavailable")
                 return new ColumnLabel()
@@ -164,7 +164,28 @@ namespace YoFi.Core.Reports
                 Parameters.month = DateTime.Now.Month;
 
             // Build the summary reports
-            var result = SummaryDefinitions.Select(x => x.Select(y => Build(new ReportParameters() { id = y, month = Parameters.month })).ToList<IDisplayReport>()).ToList();
+            //var result = SummaryDefinitions.Select(x => x.Select(y => Build(new ReportParameters() { id = y, month = Parameters.month })).ToList<IDisplayReport>()).ToList();
+
+            // User Story AB#1120: Summary report optimization: Run the report once, then extract pieces of the report out of the master
+            var all = Build(new ReportParameters() { id = "all-summary", month = Parameters.month });
+            var result = new List<List<IDisplayReport>>();
+            var leftside = new List<IDisplayReport>();
+            var incomereport = all.TakeSlice("Income");
+            incomereport.SortOrder = Report.SortOrders.TotalAscending;
+            incomereport.Definition = "income";
+            leftside.Add(incomereport);
+            var taxesreport = all.TakeSlice("Taxes");
+            taxesreport.Definition = "taxes";
+            leftside.Add(taxesreport);
+            result.Add(leftside);
+            var rightside = new List<IDisplayReport>();
+            rightside.Add(Build(new ReportParameters() { id = "expenses", month = Parameters.month }));
+            var savingsreport = all.TakeSlice("Savings");
+            savingsreport.Definition = "savings";
+            rightside.Add(savingsreport);
+            result.Add(rightside);
+
+            // TODO: Also need the "Expenses" report
 
             // Calculate the summary
 
@@ -296,6 +317,14 @@ namespace YoFi.Core.Reports
                 Source = "Actual",
                 Name = "All Transactions",
                 WithMonthColumns = true,
+            },
+            new ReportDefinition()
+            {
+                id = "all-summary",
+                NumLevels = 2,
+                Source = "Actual",
+                Name = "All Transactions Summary",
+                CustomColumns = "pctoftotal"
             },
             new ReportDefinition()
             {

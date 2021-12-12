@@ -131,7 +131,12 @@ namespace YoFi.Core.Reports
             get
             {
                 if (column.IsCalculated)
-                    return column.Custom(RowDetails(row));
+                {
+                    var cols = RowDetails(row);
+                    // Add in the grand total, because some column calculators need access to it
+                    cols["GRANDTOTAL"] = GrandTotal;
+                    return column.Custom(cols);
+                }
                 else
                     return Table[column, row];
             }
@@ -272,6 +277,8 @@ namespace YoFi.Core.Reports
                 }
                 else
                     result.AddCustomColumn(column);
+
+            result.Name = rowname;
 
             return result;
         }
