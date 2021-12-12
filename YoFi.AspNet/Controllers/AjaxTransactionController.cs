@@ -23,6 +23,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost("select/{id}")]
+        [Authorize(Policy = "CanWrite")]
         [ValidateAntiForgeryToken]
         [ValidateTransactionExists]
         public async Task<IActionResult> Select(int id, bool value)
@@ -35,6 +36,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost("hide/{id}")]
+        [Authorize(Policy = "CanWrite")]
         [ValidateAntiForgeryToken]
         [ValidateTransactionExists]
         public async Task<IActionResult> Hide(int id, bool value)
@@ -47,8 +49,8 @@ namespace YoFi.AspNet.Controllers
         }
 
         [HttpPost("edit/{id}")]
-        [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateAntiForgeryToken]
         [ValidateModel]
         [ValidateTransactionExists]
         public async Task<IActionResult> Edit(int id, [Bind("Memo,Payee,Category")] Transaction edited)

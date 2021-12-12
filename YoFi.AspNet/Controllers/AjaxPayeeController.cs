@@ -34,6 +34,7 @@ namespace YoFi.AspNet.Controllers
         /// <param name="id">Which item</param>
         /// <param name="value">New selection state</param>
         [HttpPost("select/{id}")]
+        [Authorize(Policy = "CanWrite")]
         [ValidateAntiForgeryToken]
         [ValidatePayeeExists]
         public async Task<IActionResult> Select(int id, bool value)
@@ -50,8 +51,8 @@ namespace YoFi.AspNet.Controllers
         /// </summary>
         /// <param name="payee">Item to add</param>
         [HttpPost("add")]
-        [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateAntiForgeryToken]
         [ValidateModel]
         public async Task<IActionResult> Add([Bind("Name,Category")] Payee payee)
         {
@@ -65,8 +66,8 @@ namespace YoFi.AspNet.Controllers
         /// <param name="id">Which item</param>
         /// <param name="payee">New values</param>
         [HttpPost("edit/{id}")]
-        [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
+        [ValidateAntiForgeryToken]
         [ValidateModel]
         [ValidatePayeeExists]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category")] Payee payee)
