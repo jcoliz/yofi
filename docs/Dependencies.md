@@ -5,8 +5,8 @@
 ### ASP<meta>.NET Core 3.1 LTS
 
 Fundamentally the app is built on .NET Core. It can run on Linux or Windows. My policy is to be
-on the latest LTS version, which is 3.1.19 as of this writing. The next LTS is predicted to be
-.NET 6.0 in November 2021. At that point, I'll upgrade to .NET 6.0.
+on the latest LTS version, which is 3.1.19 as of this writing. Once 6.0 is a bit more settled,
+I'll look at upgrading to that LTS.
 
 ### Entity Framework Core
 
@@ -17,13 +17,19 @@ It's amazing.
 
 Currently the only supported database is MS SQL Server. Support for MySQL is on the roadmap.
 
+## Services
+
 ### Azure Storage SDK
 
-For storing/retrieving receipts as blobs in Azure Storage.
+For storing/retrieving receipts as blobs in Azure Storage (optional)
 
-## Submodules
+### SendGrid
 
-### jcoliz/OfficeOpenXMLEasy
+For sending emails (optional)
+
+## Packages
+
+### OfficeOpenXMLEasy
 https://github.com/jcoliz/OfficeOpenXMLEasy
 
 For serializing/deserializing objects to/from spreadsheet files. Uses Office Open XML SDK.
@@ -31,8 +37,12 @@ For serializing/deserializing objects to/from spreadsheet files. Uses Office Ope
 ### OFX Sharp
 https://github.com/jcoliz/OFXSharp
 
-For parsing OFX files. I am consuming this as a submodule because the mainline
-OFX Sharp is compiled for full .NET Framework. Current development targets .NET Standard 2.0.
+For reading OFX files.
+
+### Excel Financial Functions
+https://github.com/fsprojects/ExcelFinancialFunctions/
+
+For calculating loan principal & interest breakdown.
 
 ## Infrastructure
 
