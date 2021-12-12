@@ -52,6 +52,23 @@ The [ARM deployment template](/deploy/ARM-Template.md) automatically adds these 
 The Api:Key key  is used to authenticate callers to certain API calls. If this key is missing, those API calls will fail. The [ARM deployment template](/deploy/ARM-Template.md) automatically generates an API Key and adds it to the App Service configuration environment variables. You may choose to move it to
 an Azure Key Vault for improved security.
 
+## E-Mail
+
+YoFi can use SendGrid to send emails on your behalf if you have an account set up. This is helpful if you want to allow others to
+create accounts and validate their email. If you're just using it yourself with the initial administrator account, this is not needed.
+
+### SendGrid:Key
+
+The API key issued by SendGrid for access.
+
+### SendGrid:Email
+
+The email address from which the emails are sent.
+
+### SendGrid:Sender
+
+The plain-language sender name that the emails will appear to be from.
+
 ## Branding
 
 These keys control how the brand of your specific site is presented. It is not required to set them. Default codebase branding will be used if these are missing.
