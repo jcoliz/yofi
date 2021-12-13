@@ -25,6 +25,8 @@ namespace YoFi.AspNet.Pages
 
         public Report Report { get; set; }
 
+        public string ChartJson { get; set; }
+
         public Task<IActionResult> OnGetAsync([Bind] ReportParameters parms)
         {
             try
@@ -63,6 +65,16 @@ namespace YoFi.AspNet.Pages
                 ViewData["showmonths"] = result.WithMonthColumns;
                 ViewData["Title"] = result.Name;
                 */
+
+                // Make a chart
+                var Chart = new Charting.ChartDef() { Type = "doughnut" };
+                Chart.Data.Labels = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>x.Name).ToArray();
+                Chart.Data.Datasets[0].Data = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>(int)(Math.Abs(Report[Report.TotalColumn,x]))).ToArray();
+                var numitems = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Count();
+                Chart.Data.Datasets[0].BackgroundColor = Enumerable.Range(0,numitems).Select(x=>$"rgba(255, 99, {x*50}, 0.2)").ToArray();
+                Chart.Data.Datasets[0].BorderColor = Enumerable.Range(0,numitems).Select(x=>$"rgba(255, 99, {x*50}, 1)").ToArray();
+
+                ChartJson = System.Text.Json.JsonSerializer.Serialize(Chart, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }); ;
 
                 return Task.FromResult(Page() as IActionResult);
             }
