@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,6 +25,39 @@ namespace YoFi.AspNet.Pages.Charting
             Green = (byte)green;
             Blue = (byte)blue;
             Alpha = (byte)(alpha * 255.0);
+        }
+
+        public ChartColor(string hex)
+        {
+            if (string.IsNullOrEmpty(hex))
+                throw new ArgumentNullException(nameof(hex));
+
+            if (hex[0] == '#')
+                hex = hex.Substring(1);
+
+            if (hex.Length != 6 && hex.Length != 8)
+                throw new ArgumentOutOfRangeException(nameof(hex), "Expected 6 or 8 hex characters");
+
+            byte parse(string param, int from)
+            {
+                byte result = default;
+
+                if (!byte.TryParse(hex.Substring(from, 2), NumberStyles.HexNumber, null, out result))
+                    throw new ArgumentOutOfRangeException(param, "Can't convert from hex");
+
+                return result;
+            }
+
+            Red = parse(nameof(Red), 0);
+            Green = parse(nameof(Green), 2);
+            Blue = parse(nameof(Blue), 4);
+
+            if (hex.Length == 8)
+            {
+                Alpha = parse(nameof(Alpha), 6);
+            }
+            else
+                Alpha = byte.MaxValue;
         }
 
         public override string ToString()
@@ -81,6 +115,7 @@ namespace YoFi.AspNet.Pages.Charting
         public ChartData Data { get; set; } = new ChartData();
 
         public ChartOptions Options { get; set; } = new ChartOptions();
+
     };
 
 }

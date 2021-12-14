@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using YoFi.AspNet.Pages.Charting;
 using YoFi.Core;
 using YoFi.Core.Reports;
 
@@ -67,14 +68,29 @@ namespace YoFi.AspNet.Pages
                 */
 
                 // Make a chart
+
+                var palette = new ChartColor[]
+                {
+                    new ChartColor("540D6E"),
+                    new ChartColor("EE4266"),
+                    new ChartColor("FFD23F"),
+                    new ChartColor("313628"),
+                    new ChartColor("3A6EA5"),
+                    new ChartColor("7F7C4A"),
+                    new ChartColor("7A918D"),
+                };
+
                 var Chart = new Charting.ChartDef() { Type = "doughnut" };
                 Chart.Data.Labels = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>x.Name).ToArray();
                 Chart.Data.Datasets[0].Data = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>(int)(Math.Abs(Report[Report.TotalColumn,x]))).ToArray();
                 var numitems = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Count();
-                Chart.Data.Datasets[0].BackgroundColor = Enumerable.Range(0,numitems).Select(x=>new Charting.ChartColor(255, 99, x * 50, 0.2)).ToArray();
-                Chart.Data.Datasets[0].BorderColor = Enumerable.Range(0,numitems).Select(x=> new Charting.ChartColor(255, 99, x * 50, 1.0)).ToArray();
+                Chart.Data.Datasets[0].BackgroundColor = palette.Take(numitems).ToArray();
+                Chart.Data.Datasets[0].BorderColor = palette.Take(numitems).ToArray();
 
                 ChartJson = System.Text.Json.JsonSerializer.Serialize(Chart, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }); ;
+
+                // TODO: Limit to 7 items max. Put the rest under "others"
+                // TODO: Pick only top rows
 
                 return Task.FromResult(Page() as IActionResult);
             }
