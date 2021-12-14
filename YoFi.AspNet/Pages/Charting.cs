@@ -99,6 +99,12 @@ namespace YoFi.AspNet.Pages.Charting
         public ChartDataSet[] Datasets { get; set; } = new ChartDataSet[] { new ChartDataSet() };
     }
 
+    public class ChartDataPoint
+    {
+        public string Label { get; set; }
+        public int Data { get; set; }
+    }
+
     public class ChartLegend
     {
         public string Position { get; set; } = "bottom";

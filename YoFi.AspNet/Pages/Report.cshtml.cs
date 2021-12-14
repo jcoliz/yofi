@@ -76,22 +76,28 @@ namespace YoFi.AspNet.Pages
                     new ChartColor("FFD23F"),
                     new ChartColor("313628"),
                     new ChartColor("3A6EA5"),
-                    new ChartColor("7F7C4A"),
                     new ChartColor("7A918D"),
+                    new ChartColor("7F7C4A"),
                 };
 
                 var Chart = new Charting.ChartDef() { Type = "doughnut" };
                 var labels = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
-                Chart.Data.Labels = labels.Select(x=>x.Name).ToArray();
-                Chart.Data.Datasets[0].Data = labels.Select(x=>(int)(Math.Abs(Report[Report.TotalColumn,x]))).ToArray();
+                var points = labels.Select(x => new ChartDataPoint() { Label = x.Name, Data = (int)(Math.Abs(Report[Report.TotalColumn, x])) });
 
+                // Limit to 6 items max. Put the rest under "others"
+                if (points.Count() > 6)
+                {
+                    var total = points.Skip(5).Sum(x => x.Data);
+                    points = points.Take(5).Append(new ChartDataPoint() { Label = "Others", Data = total });
+                }
+
+                Chart.Data.Labels = points.Select(x=>x.Label).ToArray();
+                Chart.Data.Datasets[0].Data = points.Select(x=>x.Data).ToArray();
                 var numitems = labels.Count();
                 Chart.Data.Datasets[0].BackgroundColor = palette.Take(numitems).Select(x => x.WithAlpha(0.5)).ToArray();
                 Chart.Data.Datasets[0].BorderColor = palette.Take(numitems).ToArray();
 
                 ChartJson = System.Text.Json.JsonSerializer.Serialize(Chart, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }); ;
-
-                // TODO: Limit to 7 items max. Put the rest under "others"
 
                 return Task.FromResult(Page() as IActionResult);
             }
