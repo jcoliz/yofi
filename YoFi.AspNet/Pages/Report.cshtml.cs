@@ -81,16 +81,17 @@ namespace YoFi.AspNet.Pages
                 };
 
                 var Chart = new Charting.ChartDef() { Type = "doughnut" };
-                Chart.Data.Labels = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>x.Name).ToArray();
-                Chart.Data.Datasets[0].Data = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>(int)(Math.Abs(Report[Report.TotalColumn,x]))).ToArray();
-                var numitems = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Count();
+                var labels = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
+                Chart.Data.Labels = labels.Select(x=>x.Name).ToArray();
+                Chart.Data.Datasets[0].Data = labels.Select(x=>(int)(Math.Abs(Report[Report.TotalColumn,x]))).ToArray();
+
+                var numitems = labels.Count();
                 Chart.Data.Datasets[0].BackgroundColor = palette.Take(numitems).Select(x => x.WithAlpha(0.5)).ToArray();
                 Chart.Data.Datasets[0].BorderColor = palette.Take(numitems).ToArray();
 
                 ChartJson = System.Text.Json.JsonSerializer.Serialize(Chart, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }); ;
 
                 // TODO: Limit to 7 items max. Put the rest under "others"
-                // TODO: Pick only top rows
 
                 return Task.FromResult(Page() as IActionResult);
             }
