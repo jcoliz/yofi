@@ -71,8 +71,8 @@ namespace YoFi.AspNet.Pages
                 Chart.Data.Labels = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>x.Name).ToArray();
                 Chart.Data.Datasets[0].Data = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>(int)(Math.Abs(Report[Report.TotalColumn,x]))).ToArray();
                 var numitems = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Count();
-                Chart.Data.Datasets[0].BackgroundColor = Enumerable.Range(0,numitems).Select(x=>$"rgba(255, 99, {x*50}, 0.2)").ToArray();
-                Chart.Data.Datasets[0].BorderColor = Enumerable.Range(0,numitems).Select(x=>$"rgba(255, 99, {x*50}, 1)").ToArray();
+                Chart.Data.Datasets[0].BackgroundColor = Enumerable.Range(0,numitems).Select(x=>new Charting.ChartColor(255, 99, x * 50, 0.2)).ToArray();
+                Chart.Data.Datasets[0].BorderColor = Enumerable.Range(0,numitems).Select(x=> new Charting.ChartColor(255, 99, x * 50, 1.0)).ToArray();
 
                 ChartJson = System.Text.Json.JsonSerializer.Serialize(Chart, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }); ;
 
