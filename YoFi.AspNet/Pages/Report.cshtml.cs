@@ -84,7 +84,7 @@ namespace YoFi.AspNet.Pages
                 Chart.Data.Labels = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>x.Name).ToArray();
                 Chart.Data.Datasets[0].Data = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Select(x=>(int)(Math.Abs(Report[Report.TotalColumn,x]))).ToArray();
                 var numitems = Report.RowLabelsOrdered.Where(x=>!x.IsTotal).Count();
-                Chart.Data.Datasets[0].BackgroundColor = palette.Take(numitems).ToArray();
+                Chart.Data.Datasets[0].BackgroundColor = palette.Take(numitems).Select(x => x.WithAlpha(0.5)).ToArray();
                 Chart.Data.Datasets[0].BorderColor = palette.Take(numitems).ToArray();
 
                 ChartJson = System.Text.Json.JsonSerializer.Serialize(Chart, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }); ;

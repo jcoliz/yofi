@@ -60,6 +60,11 @@ namespace YoFi.AspNet.Pages.Charting
                 Alpha = byte.MaxValue;
         }
 
+        public ChartColor WithAlpha(double alpha)
+        {
+            return new ChartColor(Red, Green, Blue, alpha);
+        }
+
         public override string ToString()
         {
             return $"#{Red:X2}{Green:X2}{Blue:X2}{Alpha:X2}";
