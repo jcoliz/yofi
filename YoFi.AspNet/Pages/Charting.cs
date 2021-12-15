@@ -88,17 +88,17 @@ namespace YoFi.AspNet.Pages.Charting
 
     public class ChartDataSet
     {
-        public int[] Data {get;set;}
-        public ChartColor[] BackgroundColor {get;set;}
-        public ChartColor[] BorderColor {get;set;}
-        public int BorderWidth {get;set;} = 1;
+        public IEnumerable<int> Data { get; set; }
+        public IEnumerable<ChartColor> BackgroundColor { get; set; }
+        public IEnumerable<ChartColor> BorderColor { get; set; }
+        public int BorderWidth { get; set; } = 1;
     }
 
     public class ChartData
     {
-        public string[] Labels { get; set; }
+        public IEnumerable<string> Labels { get; set; }
 
-        public ChartDataSet[] Datasets { get; set; } = new ChartDataSet[] { new ChartDataSet() };
+        public IEnumerable<ChartDataSet> Datasets { get; set; }
     }
 
     public class ChartDataPoint
@@ -116,6 +116,7 @@ namespace YoFi.AspNet.Pages.Charting
     {
         public ChartLegend Legend { get; set; } = new ChartLegend();
     }
+
     public class ChartOptions
     {
         public ChartPlugins Plugins { get; set; } = new ChartPlugins();
@@ -125,9 +126,9 @@ namespace YoFi.AspNet.Pages.Charting
     {
         public string Type { get; set; }
 
-        public ChartData Data { get; set; } = new ChartData();
+        public ChartData Data { get; } = new ChartData();
 
-        public ChartOptions Options { get; set; } = new ChartOptions();
+        public ChartOptions Options { get; } = new ChartOptions();
 
         public void SetDataPoints(IEnumerable<ChartDataPoint> points)
         {
@@ -142,14 +143,14 @@ namespace YoFi.AspNet.Pages.Charting
             }
 
             // Set labels
-            Data.Labels = points.Select(x => x.Label).ToArray();
+            Data.Labels = points.Select(x => x.Label);
 
             // Set data values
-            Data.Datasets[0].Data = points.Select(x => x.Data).ToArray();
+            Data.Datasets = new List<ChartDataSet>() { new ChartDataSet() { Data = points.Select(x => x.Data) } };
 
             // Set colors            
-            Data.Datasets[0].BorderColor = palette.Take(numitems).ToArray();
-            Data.Datasets[0].BackgroundColor = palette.Take(numitems).Select(x => x.WithAlpha(0.5)).ToArray();
+            Data.Datasets.Last().BorderColor = palette.Take(numitems);
+            Data.Datasets.Last().BackgroundColor = palette.Take(numitems).Select(x => x.WithAlpha(0.5));
         }
 
         private static ChartColor[] palette = new ChartColor[]
