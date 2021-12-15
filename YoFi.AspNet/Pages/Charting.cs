@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -127,6 +129,39 @@ namespace YoFi.AspNet.Pages.Charting
 
         public ChartOptions Options { get; set; } = new ChartOptions();
 
+        public void SetDataPoints(IEnumerable<ChartDataPoint> points)
+        {
+            const int maxpoints = 6;
+
+            // Reduce to maxitems. Put the rest under "others"
+            var numitems = points.Count();
+            if (numitems > maxpoints)
+            {
+                var total = points.Skip(maxpoints-1).Sum(x => x.Data);
+                points = points.Take(maxpoints-1).Append(new ChartDataPoint() { Label = "Others", Data = total });
+            }
+
+            // Set labels
+            Data.Labels = points.Select(x => x.Label).ToArray();
+
+            // Set data values
+            Data.Datasets[0].Data = points.Select(x => x.Data).ToArray();
+
+            // Set colors            
+            Data.Datasets[0].BorderColor = palette.Take(numitems).ToArray();
+            Data.Datasets[0].BackgroundColor = palette.Take(numitems).Select(x => x.WithAlpha(0.5)).ToArray();
+        }
+
+        private static ChartColor[] palette = new ChartColor[]
+        {
+            new ChartColor("540D6E"),
+            new ChartColor("EE4266"),
+            new ChartColor("FFD23F"),
+            new ChartColor("313628"),
+            new ChartColor("3A6EA5"),
+            new ChartColor("7A918D"),
+            new ChartColor("7F7C4A"),
+        };
     };
 
 }
