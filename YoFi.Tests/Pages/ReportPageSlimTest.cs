@@ -23,7 +23,7 @@ namespace YoFi.Tests.Pages
         public void SetUp()
         {
             var engine = new Mock<IReportEngine>();
-            engine.Setup(x => x.Build(It.IsAny<ReportParameters>())).Returns((ReportParameters p) => new Report() { Name = p.id });
+            engine.Setup(x => x.Build(It.IsAny<ReportParameters>())).Returns((ReportParameters p) => new Report() { Name = p.id, Source = Enumerable.Empty<NamedQuery>() });
             engine.Setup(x => x.Definitions).Returns(new List<ReportDefinition>() { new ReportDefinition() { Name = "Mock" } });
             pagemodel = new ReportModel(engine.Object);
         }

@@ -71,7 +71,7 @@ namespace YoFi.AspNet.Pages
                 //  - There is only one sign of information shown (all negative or all positive). However this isn't always the case :| If there is an item that's small
                 // off-sign it may be OK.
                 //  - There is a total column
-                var multisigned = Report.Source.Any(x => x.IsMultiSigned);
+                var multisigned = Report.Source?.Any(x => x.IsMultiSigned) ?? true;
                 if (! Report.WithMonthColumns && Report.WithTotalColumn && ! multisigned)
                 {
                     // We have to put a little more thought into whether this is a single-sign or multiple-sign report.
