@@ -389,7 +389,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(expected, report[ActualCol, report.TotalRow]);
 
             // And: Report has the correct # visible columns, budget, actual, progress
-            Assert.AreEqual(3, report.ColumnLabelsFiltered.Count());
+            Assert.AreEqual(4, report.ColumnLabelsFiltered.Count());
 
             // And: Report has the correct # rows
             Assert.AreEqual(12, report.RowLabels.Count());
