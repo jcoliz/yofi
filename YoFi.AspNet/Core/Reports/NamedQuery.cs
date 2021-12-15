@@ -28,11 +28,16 @@ namespace YoFi.Core.Reports
         public bool LeafRowsOnly { get; set; } = false;
 
         /// <summary>
+        /// Whether this query contains income AND expense items
+        /// </summary>
+        public bool IsMultiSigned { get; set; } = false;
+
+        /// <summary>
         /// Return a new query, which is the same as this query, but instead has the given <paramref name="newname"/>
         /// </summary>
         /// <param name="newname">New name for the resulting query</param>
         /// <returns>New query with the given <paramref name="newname"/></returns>
-        public NamedQuery Labeled(string newname) => new NamedQuery() { Name = newname, Query = Query, LeafRowsOnly = LeafRowsOnly };
+        public NamedQuery Labeled(string newname) => new NamedQuery() { Name = newname, Query = Query, LeafRowsOnly = LeafRowsOnly, IsMultiSigned = IsMultiSigned };
 
         /// <summary>
         /// Return a new query, which is the same as this query, but instead has the given <paramref name="leafrows"/>
@@ -40,6 +45,6 @@ namespace YoFi.Core.Reports
         /// </summary>
         /// <param name="leafrows">New value for LeafRowsOnly property</param>
         /// <returns>New query with the given <paramref name="leafrows"/></returns>
-        public NamedQuery AsLeafRowsOnly(bool leafrows) => new NamedQuery() { Name = Name, Query = Query, LeafRowsOnly = leafrows };
+        public NamedQuery AsLeafRowsOnly(bool leafrows) => new NamedQuery() { Name = Name, Query = Query, IsMultiSigned = IsMultiSigned, LeafRowsOnly = leafrows };
     }
 }

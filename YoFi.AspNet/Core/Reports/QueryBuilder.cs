@@ -119,7 +119,8 @@ namespace YoFi.Core.Reports
             return new List<NamedQuery>() {
                 new NamedQuery()
                 {
-                    Query = txs.Concat(splits)
+                    Query = txs.Concat(splits),
+                    IsMultiSigned = (top == null) && (excluded == null)
                 }
             };
         }
@@ -215,8 +216,8 @@ namespace YoFi.Core.Reports
                 var txsyear = _context.TransactionsWithSplits.Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
                 var splitsyear = _context.SplitsWithTransactions.Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
 
-                result.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear });
-                result.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear });
+                result.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear, IsMultiSigned = true });
+                result.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear, IsMultiSigned = true });
             }
 
             return result;
@@ -377,7 +378,7 @@ namespace YoFi.Core.Reports
                     .AsQueryable();
             }
 
-            return new NamedQuery() { Query = result };
+            return new NamedQuery() { Query = result, IsMultiSigned = (excluded == null) };
         }
 
         /// <summary>

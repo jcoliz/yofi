@@ -29,6 +29,8 @@ namespace YoFi.AspNet.Pages
 
         public string ChartJson { get; set; }
 
+        public bool ShowSideChart { get; set; }
+
         public Task<IActionResult> OnGetAsync([Bind] ReportParameters parms)
         {
             try
@@ -60,13 +62,34 @@ namespace YoFi.AspNet.Pages
                 // TODO: Make this Async()
                 Report = reports.Build(Parameters);
 
-                // Make a chart
-                var labels = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
-                var points = labels.Select(x => new ChartDataPoint() { Label = x.Name, Data = (int)(Math.Abs(Report[Report.TotalColumn, x])) });
-                var Chart = new ChartDef() { Type = "doughnut" };
-                Chart.SetDataPoints(points);
+                // Should we Make a chart??
 
-                ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }); ;
+                // We show a pie chart to the side of the report when all of the following are true:
+                //  - There are no months being shown
+                //  - There is only one sign of information shown (all negative or all positive). However this isn't always the case :| If there is an item that's small
+                // off-sign it may be OK.
+                //  - There is a total column
+                var multisigned = Report.Source.Any(x => x.IsMultiSigned);
+                if (! Report.WithMonthColumns && Report.WithTotalColumn && ! multisigned)
+                {
+                    // We have to put a little more thought into whether this is a single-sign or multiple-sign report.
+                    // Practically speaking, it's only an issue when we're showing "Income" and at least one other top-level row.
+                    // It SEEMS we can do this based on definition.SoureParameters. If it's empty, it is an "all" type report which
+                    // will have income AND expenses, so that's not cool for a pie report
+
+                    ShowSideChart = true;
+
+                    var labels = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
+                    var points = labels.Select(x => new ChartDataPoint() { Label = x.Name, Data = (int)(Math.Abs(Report[Report.TotalColumn, x])) });
+                    var Chart = new ChartDef() { Type = "doughnut" };
+                    Chart.SetDataPoints(points);
+
+                    ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }); ;
+                }
+                else
+                {
+                    ShowSideChart = false;
+                }
 
                 return Task.FromResult(Page() as IActionResult);
             }
