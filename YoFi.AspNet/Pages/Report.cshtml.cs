@@ -1,3 +1,4 @@
+using Common.ChartJS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using YoFi.AspNet.Pages.Charting;
 using YoFi.Core;
 using YoFi.Core.Reports;
 
@@ -81,12 +81,22 @@ namespace YoFi.AspNet.Pages
 
                     ShowSideChart = true;
 
-                    var labels = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
-                    var points = labels.Select(x => new ChartDataPoint() { Label = x.Name, Data = (int)(Math.Abs(Report[Report.TotalColumn, x])) });
-                    var Chart = new ChartDef() { Type = "doughnut" };
-                    Chart.SetDataPoints(points);
+                    // Flip the sign on values unless they're ordred ascending
+                    decimal factor = Report.SortOrder == Report.SortOrders.TotalAscending ? 1m : -1m;
 
-                    ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }); ;
+                    var col = Report.TotalColumn;
+                    var rows = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
+                    var points = rows.Select(row => ( row.Name, (int)(Report[col, row] * factor)));
+
+                    ChartConfig Chart = null;
+
+                    // Pie chart is only for all-positive values, else bar chart
+                    if ( points.All(x => x.Item2 >= 0) )
+                        Chart = ChartConfig.CreatePieChart(points, palette);
+                    else
+                        Chart = ChartConfig.CreateBarChart(points, palette);
+
+                    ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }); ;
                 }
 
                 if (Report.WithMonthColumns)
@@ -95,12 +105,12 @@ namespace YoFi.AspNet.Pages
 
                     // Flip the sign on values unless they're ordred ascending
                     decimal factor = Report.SortOrder == Report.SortOrders.TotalAscending ? 1m : -1m;
+
                     var cols = Report.ColumnLabelsFiltered.Where(x => !x.IsTotal && !x.IsCalculated);
                     var labels = cols.Select(x => x.Name);
                     var rows = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
-                    var series = rows.Select(row => new ChartDataSeries() { Label = row.Name, Data = cols.Select(col => (int)(Report[col, row]*factor)) });
-                    var Chart = new ChartDef() { Type = "line" };
-                    Chart.SetDataSeries(labels,series);
+                    var series = rows.Select(row => (row.Name, cols.Select(col => (int)(Report[col, row]*factor))));                    
+                    var Chart = ChartConfig.CreateLineChart(labels, series, palette);
 
                     ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }); ;
                 }
@@ -112,6 +122,17 @@ namespace YoFi.AspNet.Pages
                 return Task.FromResult(NotFound(ex.Message) as IActionResult);
             }
         }
+
+        private static readonly ChartColor[] palette = new ChartColor[]
+        {
+            new ChartColor("540D6E"),
+            new ChartColor("EE4266"),
+            new ChartColor("FFD23F"),
+            new ChartColor("313628"),
+            new ChartColor("3A6EA5"),
+            new ChartColor("7A918D"),
+            new ChartColor("7F7C4A"),
+        };
 
         /// <summary>
         /// Current default year
