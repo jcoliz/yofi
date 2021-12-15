@@ -254,6 +254,7 @@ namespace YoFi.Core.Reports
                 CustomColumns = "pctoftotal",
                 Source = "Actual",
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
+                NumLevels = 2,
                 Name = "Expenses",
             },
             new ReportDefinition()
@@ -371,7 +372,7 @@ namespace YoFi.Core.Reports
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
                 WholeYear = true,
                 YearProgress = true,
-                CustomColumns = "budgetpct",
+                CustomColumns = "budgetpct,budgetavailable",
                 WithTotalColumn = false,
                 NumLevels = 2,
             },
