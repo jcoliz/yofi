@@ -27,9 +27,11 @@ namespace YoFi.AspNet.Pages
 
         public Report Report { get; set; }
 
-        public string ChartJson { get; set; }
+        public string ChartJson { get; set; } = null;
 
-        public bool ShowSideChart { get; set; }
+        public bool ShowSideChart { get; set; } = false;
+
+        public bool ShowTopChart { get; set; } = false;
 
         public Task<IActionResult> OnGetAsync([Bind] ReportParameters parms)
         {
@@ -86,9 +88,21 @@ namespace YoFi.AspNet.Pages
 
                     ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }); ;
                 }
-                else
+
+                if (Report.WithMonthColumns)
                 {
-                    ShowSideChart = false;
+                    ShowTopChart = true;
+
+                    // Flip the sign on values unless they're ordred ascending
+                    decimal factor = Report.SortOrder == Report.SortOrders.TotalAscending ? 1m : -1m;
+                    var cols = Report.ColumnLabelsFiltered.Where(x => !x.IsTotal && !x.IsCalculated);
+                    var labels = cols.Select(x => x.Name);
+                    var rows = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
+                    var series = rows.Select(row => new ChartDataSeries() { Label = row.Name, Data = cols.Select(col => (int)(Report[col, row]*factor)) });
+                    var Chart = new ChartDef() { Type = "line" };
+                    Chart.SetDataSeries(labels,series);
+
+                    ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }); ;
                 }
 
                 return Task.FromResult(Page() as IActionResult);

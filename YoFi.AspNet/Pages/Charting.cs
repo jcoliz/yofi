@@ -88,10 +88,11 @@ namespace YoFi.AspNet.Pages.Charting
 
     public class ChartDataSet
     {
+        public string Label { get; set; } = null;
         public IEnumerable<int> Data { get; set; }
         public IEnumerable<ChartColor> BackgroundColor { get; set; }
         public IEnumerable<ChartColor> BorderColor { get; set; }
-        public int BorderWidth { get; set; } = 1;
+        public int? BorderWidth { get; set; }
     }
 
     public class ChartData
@@ -105,6 +106,12 @@ namespace YoFi.AspNet.Pages.Charting
     {
         public string Label { get; set; }
         public int Data { get; set; }
+    }
+
+    public class ChartDataSeries
+    {
+        public string Label { get; set; }
+        public IEnumerable<int> Data { get; set; }
     }
 
     public class ChartLegend
@@ -138,6 +145,7 @@ namespace YoFi.AspNet.Pages.Charting
             var numitems = points.Count();
             if (numitems > maxpoints)
             {
+                numitems = maxpoints;
                 var total = points.Skip(maxpoints-1).Sum(x => x.Data);
                 points = points.Take(maxpoints-1).Append(new ChartDataPoint() { Label = "Others", Data = total });
             }
@@ -146,11 +154,26 @@ namespace YoFi.AspNet.Pages.Charting
             Data.Labels = points.Select(x => x.Label);
 
             // Set data values
-            Data.Datasets = new List<ChartDataSet>() { new ChartDataSet() { Data = points.Select(x => x.Data) } };
+            Data.Datasets = new List<ChartDataSet>() { new ChartDataSet() { Data = points.Select(x => x.Data), BorderWidth = 1 } };
 
             // Set colors            
             Data.Datasets.Last().BorderColor = palette.Take(numitems);
             Data.Datasets.Last().BackgroundColor = palette.Take(numitems).Select(x => x.WithAlpha(0.5));
+        }
+
+        public void SetDataSeries(IEnumerable<string> labels, IEnumerable<ChartDataSeries> series)
+        {
+            const int maxitems = 6;
+
+            // Limit to only {maxitems} series
+            var numitems = series.Count();
+            if (numitems > maxitems)
+            {
+                series = series.Take(maxitems);
+            }
+
+            Data.Labels = labels;
+            Data.Datasets = series.Select((x, i) => new ChartDataSet() { Label = x.Label, Data = x.Data, BackgroundColor = new ChartColor[] { palette[i] },  BorderColor = new ChartColor[] { palette[i] } });
         }
 
         private static ChartColor[] palette = new ChartColor[]

@@ -36,7 +36,22 @@
 }
 else
 {
+    if (Model.ShowTopChart)
+    {
+        <canvas id="chart"></canvas>
+    }
+
     @await Html.PartialAsync("DisplayReport", Model.Report)
+}
+
+@if (!string.IsNullOrEmpty(Model.ChartJson))
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.2/dist/chart.min.js" integrity="sha256-D2tkh/3EROq+XuDEmgxOLW1oNxf0rLNlOwsPIUX+co4=" crossorigin="anonymous"></script>
+    <script>
+    const ctx = document.getElementById('chart').getContext('2d');
+    const setup = @Html.Raw(Model.ChartJson);
+    const myChart = new Chart(ctx, setup);
+    </script>
 }
 
 <hr />
