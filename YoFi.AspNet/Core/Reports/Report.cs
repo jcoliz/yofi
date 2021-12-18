@@ -251,7 +251,7 @@ namespace YoFi.Core.Reports
         public Report TakeSlice(string rowname)
         {
             // Find the row
-            var findrow = RowLabels.Where(x => x.Name == rowname && ! x.IsTotal);
+            var findrow = RowLabels.Where(x => x.Name == rowname && !x.IsTotal);
             if (!findrow.Any())
                 throw new ArgumentException("Row not found", nameof(rowname));
 
@@ -279,6 +279,42 @@ namespace YoFi.Core.Reports
                     result.AddCustomColumn(column);
 
             result.Name = rowname;
+
+            return result;
+        }
+
+        public Report TakeSliceExcept(IEnumerable<string> rownames)
+        {
+            // Find the parent rows to exclude
+            var excludedparentrows = RowLabels.Where(x => rownames.Contains(x.Name) && x.Parent == null && !x.IsTotal);
+            if (!excludedparentrows.Any())
+                throw new ArgumentException("Rows not found", nameof(rownames));
+
+            // Find all the rows (parent and child) to exclude
+            var excluded = excludedparentrows.SelectMany(x => RowLabels.Where(y => y.IsTotal || y.Equals(x) || y.DescendsFrom(x)));
+
+            // Find the rows constituting the slice
+            var includedrows = RowLabels.Except(excluded);
+
+            // Bring the columns of the old report over
+            var result = new Report();
+
+            foreach (var column in ColumnLabelsFiltered)
+                if (!column.IsCalculated)
+                {
+                    foreach (var row in includedrows)
+                    {
+                        var value = this[column, row];
+                        result.Table[column, row] = value;
+
+                        if (row.Parent == null && includedrows.Contains(row))
+                            result.Table[column, result.TotalRow] += value;
+                    }
+                }
+                else
+                    result.AddCustomColumn(column);
+
+            result.Name = string.Join(',',rownames);
 
             return result;
         }

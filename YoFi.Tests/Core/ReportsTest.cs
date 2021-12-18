@@ -877,6 +877,70 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public void Slicer_TakeSliceExceptOther()
+        {
+            // Given: A report with multiple top categories, and levels of depth below those
+            var allitems = Items.Take(19); 
+            report.Source = new NamedQueryList(allitems.AsQueryable());
+            report.NumLevels = 2;
+            WhenBuildingTheReport(sorted:true);
+            var allitemsreport = report;
+
+            // When: Taking a slice EXCEPT one category
+            report = allitemsreport.TakeSliceExcept(new string[] { "Other" });
+            DataHash = 1;
+            WriteReportToContext(sorted: true);
+            var actual = report;
+
+            // Then: The report looks like it would have if we'd have created it without the
+            // removed categories to begin with
+
+            var smallitems = allitems.Where(x => !x.Category.StartsWith("Other"));
+            report = new Report();
+            report.Source = new NamedQueryList(smallitems.AsQueryable());
+            DataHash = 2;
+            WhenBuildingTheReport(sorted: true);
+            var expected = report;
+
+            Assert.AreEqual(expected.RowLabelsOrdered.Count(), actual.RowLabelsOrdered.Count());
+            expected.RowLabelsOrdered.SequenceEqual(actual.RowLabelsOrdered);
+            Assert.AreEqual(expected.GrandTotal, actual.GrandTotal);
+        }
+
+        [TestMethod]
+        public void Slicer_TakeSliceExceptName()
+        {
+            // Given: A report with multiple top categories, and levels of depth below those
+            var allitems = Items.Take(19);
+            report.Source = new NamedQueryList(allitems.AsQueryable());
+            report.NumLevels = 2;
+            WhenBuildingTheReport(sorted: true);
+            var allitemsreport = report;
+
+            // When: Taking a slice EXCEPT one category
+            report = allitemsreport.TakeSliceExcept(new string[] { "Name" });
+            DataHash = 1;
+            WriteReportToContext(sorted: true);
+            var actual = report;
+
+            // Then: The report looks like it would have if we'd have created it without the
+            // removed categories to begin with
+
+            var smallitems = allitems.Where(x => !x.Category.StartsWith("Name"));
+            report = new Report();
+            report.Source = new NamedQueryList(smallitems.AsQueryable());
+            report.NumLevels = 2;
+            DataHash = 2;
+            WhenBuildingTheReport(sorted: true);
+            var expected = report;
+
+            Assert.AreEqual(expected.RowLabelsOrdered.Count(), actual.RowLabelsOrdered.Count());
+            expected.RowLabelsOrdered.SequenceEqual(actual.RowLabelsOrdered);
+            Assert.AreEqual(expected.GrandTotal, actual.GrandTotal);
+        }
+
+
+        [TestMethod]
         public void ManySeriesDeep()
         {
             // This crazy test creates a series for every single transaction
