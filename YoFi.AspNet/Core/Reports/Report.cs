@@ -319,6 +319,20 @@ namespace YoFi.Core.Reports
             return result;
         }
 
+        public void PruneToLevel(int newlevel)
+        {
+            if (newlevel < 1 || newlevel > NumLevels)
+                throw new ArgumentException("Invalid level", nameof(newlevel));
+
+            var minuslevels = NumLevels - newlevel;
+            foreach (var row in RowLabels.Where(x=>!x.IsTotal))
+                row.Level -= minuslevels;
+
+            Table.RowLabels.RemoveWhere(x => x.Level < 0);
+
+            NumLevels = newlevel;
+        }
+
         /// <summary>
         /// Render the report to console
         /// </summary>

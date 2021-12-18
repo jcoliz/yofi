@@ -939,6 +939,34 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(expected.GrandTotal, actual.GrandTotal);
         }
 
+        [TestMethod]
+        public void Prune()
+        {
+            // Given: a report with multiple levels of depth
+            var allitems = Items.Take(19);
+            report.Source = new NamedQueryList(allitems.AsQueryable());
+            report.NumLevels = 2;
+            WhenBuildingTheReport(sorted: true);
+
+            // When: Pruning it to one level
+            report.PruneToLevel(1);
+            var actual = report;
+
+            // Then: The reports looks like it would if it was originally created with 
+            // that level of depth
+            report = new Report();
+            report.Source = new NamedQueryList(allitems.AsQueryable());
+            report.NumLevels = 1;
+            DataHash = 1;
+            WhenBuildingTheReport(sorted: true);
+            var expected = report;
+
+            Assert.AreEqual(expected.RowLabelsOrdered.Count(), actual.RowLabelsOrdered.Count());
+            expected.RowLabelsOrdered.SequenceEqual(actual.RowLabelsOrdered);
+            Assert.AreEqual(expected.GrandTotal, actual.GrandTotal);
+
+        }
+
 
         [TestMethod]
         public void ManySeriesDeep()
