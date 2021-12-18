@@ -1,7 +1,8 @@
 ﻿@model YoFi.Core.Reports.IDisplayReport
 @{
+    var datatestid = $"report-{Model.Definition}";
 }
-<table class="table report">
+<table class="table report" data-test-id="@datatestid">
     <thead>
         <tr>
         <tr class="report-header">
@@ -43,6 +44,7 @@
                     var colformat = "report-col-amount" + (column.IsTotal ? " report-col-total" : string.Empty);
 
                     var cellformat = column.DisplayAsPercent ? "P0" : "C0";
+
 
                     <td class="@colformat">
                         @cell.ToString(cellformat)

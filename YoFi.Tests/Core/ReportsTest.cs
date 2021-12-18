@@ -896,8 +896,10 @@ namespace YoFi.Tests.Core
             // removed categories to begin with
 
             var smallitems = allitems.Where(x => !x.Category.StartsWith("Other"));
-            report = new Report();
-            report.Source = new NamedQueryList(smallitems.AsQueryable());
+            report = new Report()
+            {
+                Source = new NamedQueryList(smallitems.AsQueryable())
+            };
             DataHash = 2;
             WhenBuildingTheReport(sorted: true);
             var expected = report;
@@ -927,8 +929,10 @@ namespace YoFi.Tests.Core
             // removed categories to begin with
 
             var smallitems = allitems.Where(x => !x.Category.StartsWith("Name"));
-            report = new Report();
-            report.Source = new NamedQueryList(smallitems.AsQueryable());
+            report = new Report()
+            {
+                Source = new NamedQueryList(smallitems.AsQueryable())
+            };
             report.NumLevels = 2;
             DataHash = 2;
             WhenBuildingTheReport(sorted: true);
@@ -954,8 +958,10 @@ namespace YoFi.Tests.Core
 
             // Then: The reports looks like it would if it was originally created with 
             // that level of depth
-            report = new Report();
-            report.Source = new NamedQueryList(allitems.AsQueryable());
+            report = new Report()
+            {
+                Source = new NamedQueryList(allitems.AsQueryable())
+            };
             report.NumLevels = 1;
             DataHash = 1;
             WhenBuildingTheReport(sorted: true);

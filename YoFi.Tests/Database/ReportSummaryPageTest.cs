@@ -63,7 +63,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(149000.08m, totals["Income"]);
             Assert.AreEqual(-31872m, totals["Taxes"]);
             Assert.AreEqual(-64619.77m, totals["Expenses"]);
-            Assert.AreEqual(-32600.16m, totals["Savings"]);
+            Assert.AreEqual(-32600.16m, totals["Explicit Savings"]);
         }
     }
 }

@@ -92,7 +92,7 @@ namespace YoFi.Core.Reports
 
             if (!string.IsNullOrEmpty(definition.CustomColumns))
                 foreach (var col in definition.CustomColumns.Split(","))
-                    report.AddCustomColumn(CustomColumnFor(col,report));
+                    report.AddCustomColumn(CustomColumnFor(col));
 
             // Override level based on parameters
 
@@ -115,7 +115,7 @@ namespace YoFi.Core.Reports
             return report;
         }
 
-        private ColumnLabel CustomColumnFor(string name,Report report)
+        private ColumnLabel CustomColumnFor(string name)
         {
             if (name == "budgetpct")
                 return new ColumnLabel()
@@ -192,7 +192,7 @@ namespace YoFi.Core.Reports
             netincomereport[TotalColumn, taxesrow] = taxes;
             netincomereport[pctcol, taxesrow] = -taxes / income;
             netincomereport[TotalColumn, TotalRow] = income + taxes;
-            netincomereport[pctcol, TotalRow] = netincomereport.GrandTotal / income;
+            netincomereport[pctcol, TotalRow] = (income + taxes) / income;
             leftside.Add(netincomereport);
 
             // Add the left side to the final result
@@ -211,10 +211,11 @@ namespace YoFi.Core.Reports
             // Slice out the savings report
             var savingsreport = all.TakeSlice("Savings");
             savingsreport.Definition = "savings";
+            savingsreport.Name = "Explicit Savings";
             rightside.Add(savingsreport);
 
             // Create a new manual Profit report: Income + Taxes + Expenses
-            var profitreport = new ManualReport() { Name = "Profit" };
+            var profitreport = new ManualReport() { Name = "Net Savings" };
             var netincomerow = new RowLabel() { Name = "Net Income" };
             var expensesrow = new RowLabel() { Name = "Expenses" };
             pctcol = new ColumnLabel() { Name = "% of Net Income", IsSortingAfterTotal = true, DisplayAsPercent = true };

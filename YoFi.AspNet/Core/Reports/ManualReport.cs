@@ -48,12 +48,12 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// The row which contains the total for columns
         /// </summary>
-        public RowLabel TotalRow { get; } = new RowLabel() { IsTotal = true };
+        public RowLabel TotalRow => RowLabel.Total;
 
         /// <summary>
         /// The column which contains the total for rows
         /// </summary>
-        public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
+        public ColumnLabel TotalColumn => ColumnLabel.Total;
 
         /// <summary>
         /// The total of the total column
@@ -61,11 +61,12 @@ namespace YoFi.Core.Reports
         public decimal GrandTotal => this[TotalColumn, TotalRow];
 
         /// <summary>
-        /// Report definition returns null
+        /// Report definition
         /// </summary>
         /// <remarks>
-        /// Because this is a manual report, no definition was used in its making
+        /// Because this is a manual report, no definition was used in its making.
+        /// However, sometimes we use this as a report tag for testing.
         /// </remarks>
-        string IDisplayReport.Definition => null;
+        public string Definition { get; set; }
     }
 }
