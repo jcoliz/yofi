@@ -166,26 +166,47 @@ namespace YoFi.Core.Reports
             // Build the summary reports
             //var result = SummaryDefinitions.Select(x => x.Select(y => Build(new ReportParameters() { id = y, month = Parameters.month })).ToList<IDisplayReport>()).ToList();
 
+            //
             // User Story AB#1120: Summary report optimization: Run the report once, then extract pieces of the report out of the master
+            //
+            // The idea here is to build a single report doing all the SQL queries just ONCE, then carve it up into
+            // the various reports we want to display
+
             var all = Build(new ReportParameters() { id = "all-summary", month = Parameters.month });
             var result = new List<List<IDisplayReport>>();
+
+            // Slice out the Income report
             var leftside = new List<IDisplayReport>();
             var incomereport = all.TakeSlice("Income");
             incomereport.SortOrder = Report.SortOrders.TotalAscending;
             incomereport.Definition = "income";
             leftside.Add(incomereport);
+
+            // Slice out the Taxes report
             var taxesreport = all.TakeSlice("Taxes");
             taxesreport.Definition = "taxes";
             leftside.Add(taxesreport);
+
+            // Add the left side to the final result
             result.Add(leftside);
+
+            // Now prepare the right side
             var rightside = new List<IDisplayReport>();
-            rightside.Add(Build(new ReportParameters() { id = "expenses", month = Parameters.month }));
+
+            // Add the expenses report
+            var expensesreport = all.TakeSliceExcept(new string[] { "Savings", "Income", "Taxes", "Transfer", "Unmapped" });
+            expensesreport.PruneToLevel(1);
+            expensesreport.Definition = "expenses";
+            expensesreport.Name = "Expenses";
+            rightside.Add(expensesreport);
+
+            // Slice out the savings report
             var savingsreport = all.TakeSlice("Savings");
             savingsreport.Definition = "savings";
             rightside.Add(savingsreport);
-            result.Add(rightside);
 
-            // TODO: Also need the "Expenses" report
+            // Add the right side to the final result
+            result.Add(rightside);
 
             // Calculate the summary
 

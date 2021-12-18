@@ -165,12 +165,12 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// The row which contains the total for columns
         /// </summary>
-        public RowLabel TotalRow { get; } = new RowLabel() { IsTotal = true };
+        public RowLabel TotalRow => RowLabel.Total;
 
         /// <summary>
         /// The column which contains the total for rows
         /// </summary>
-        public ColumnLabel TotalColumn { get; } = new ColumnLabel() { IsTotal = true };
+        public ColumnLabel TotalColumn => ColumnLabel.Total;
 
         /// <summary>
         /// The total of the total column
@@ -246,6 +246,11 @@ namespace YoFi.Core.Reports
         /// Produce a report which is a slice of this report, including everything below
         /// the supplied <paramref name="rowname"/>
         /// </summary>
+        /// <remarks>
+        /// The use case for taking a slice of an existing report is that it allows you to
+        /// just run all the queries once for a master report, then break it up into
+        /// component pieces for individual display
+        /// </remarks>
         /// <param name="rowname">Name of current row to use as root</param>
         /// <returns>New report</returns>
         public Report TakeSlice(string rowname)
@@ -279,10 +284,22 @@ namespace YoFi.Core.Reports
                     result.AddCustomColumn(column);
 
             result.Name = rowname;
+            result.NumLevels = NumLevels - 1;
 
             return result;
         }
 
+        /// <summary>
+        /// Produce a report which is a slice of this report, excluding everything below
+        /// the supplied <paramref name="rownames"/>
+        /// </summary>
+        /// <remarks>
+        /// The use case for taking a slice of an existing report is that it allows you to
+        /// just run all the queries once for a master report, then break it up into
+        /// component pieces for individual display
+        /// </remarks>
+        /// <param name="rownames">Name of top-level rows to exclude</param>
+        /// <returns>New report</returns>
         public Report TakeSliceExcept(IEnumerable<string> rownames)
         {
             // Find the parent rows to exclude
@@ -315,10 +332,15 @@ namespace YoFi.Core.Reports
                     result.AddCustomColumn(column);
 
             result.Name = string.Join(',',rownames);
+            result.NumLevels = NumLevels;
 
             return result;
         }
 
+        /// <summary>
+        /// Prune off levels below <paramref name="newlevel"/>
+        /// </summary>
+        /// <param name="newlevel">Resulting value of NumLevels after operation is complete</param>
         public void PruneToLevel(int newlevel)
         {
             if (newlevel < 1 || newlevel > NumLevels)
@@ -935,6 +957,11 @@ namespace YoFi.Core.Reports
             else
                 return Parent.DescendsFrom(ancestor);
         }
+
+        /// <summary>
+        /// Universal total row
+        /// </summary>
+        public static readonly RowLabel Total = new RowLabel() { IsTotal = true };
     }
 
     /// <summary>
@@ -969,5 +996,11 @@ namespace YoFi.Core.Reports
         /// on values in other columns
         /// </summary>
         public Func<Dictionary<string,decimal>, decimal> Custom { get; set; }
+
+        /// <summary>
+        /// Universal total column
+        /// </summary>
+        public static readonly ColumnLabel Total = new ColumnLabel() { IsTotal = true };
+
     }
 }
