@@ -148,12 +148,6 @@ namespace YoFi.Core.Reports
                 return null;
         }
 
-        private readonly static List<List<string>> SummaryDefinitions = new List<List<string>>()
-        {
-            new List<string>() { "income","taxes" },
-            new List<string>() { "expenses", "savings"}
-        };
-
         public IEnumerable<IEnumerable<IDisplayReport>> BuildSummary(ReportParameters parms)
         {
             ReportParameters Parameters = parms;
@@ -163,10 +157,6 @@ namespace YoFi.Core.Reports
             if (!Parameters.month.HasValue)
                 Parameters.month = DateTime.Now.Month;
 
-            // Build the summary reports
-            //var result = SummaryDefinitions.Select(x => x.Select(y => Build(new ReportParameters() { id = y, month = Parameters.month })).ToList<IDisplayReport>()).ToList();
-
-            //
             // User Story AB#1120: Summary report optimization: Run the report once, then extract pieces of the report out of the master
             //
             // The idea here is to build a single report doing all the SQL queries just ONCE, then carve it up into
@@ -187,6 +177,24 @@ namespace YoFi.Core.Reports
             taxesreport.Definition = "taxes";
             leftside.Add(taxesreport);
 
+            // Create a manual Net Income report: Income + Taxes
+
+            var netincomereport = new ManualReport() { Name = "Net Income", Description = "--" };
+            var incomerow = new RowLabel() { Name = "Income" };
+            var taxesrow = new RowLabel() { Name = "Taxes" };
+            var pctcol = new ColumnLabel() { Name = "% of Income", IsSortingAfterTotal = true, DisplayAsPercent = true };
+            var income = incomereport.GrandTotal;
+            var taxes = taxesreport.GrandTotal;
+            var TotalColumn = ColumnLabel.Total;
+            var TotalRow = RowLabel.Total;
+            netincomereport[TotalColumn, incomerow] = income;
+            netincomereport[pctcol, incomerow] = 1m;
+            netincomereport[TotalColumn, taxesrow] = taxes;
+            netincomereport[pctcol, taxesrow] = -taxes / income;
+            netincomereport[TotalColumn, TotalRow] = income + taxes;
+            netincomereport[pctcol, TotalRow] = netincomereport.GrandTotal / income;
+            leftside.Add(netincomereport);
+
             // Add the left side to the final result
             result.Add(leftside);
 
@@ -205,41 +213,23 @@ namespace YoFi.Core.Reports
             savingsreport.Definition = "savings";
             rightside.Add(savingsreport);
 
-            // Add the right side to the final result
-            result.Add(rightside);
-
-            // Calculate the summary
-
-            decimal TotalForReport(string name) =>
-                result.SelectMany(x => x).Where(x => x.Name == name).First().GrandTotal;
-
-            // Net Income: Income + Taxes
-
-            var netincome = new ManualReport() { Name = "Net Income", Description = "--" };
-            var incomerow = new RowLabel() { Name = "Income" };
-            var taxesrow = new RowLabel() { Name = "Taxes" };
-            var pctcol = new ColumnLabel() { Name = "% of Income", IsSortingAfterTotal = true, DisplayAsPercent = true };
-            netincome[netincome.TotalColumn, incomerow] = TotalForReport("Income");
-            netincome[pctcol, incomerow] = 1m;
-            netincome[netincome.TotalColumn, taxesrow] = TotalForReport("Taxes");
-            netincome[pctcol, taxesrow] = -TotalForReport("Taxes") / TotalForReport("Income");
-            netincome[netincome.TotalColumn, netincome.TotalRow] = TotalForReport("Income") + TotalForReport("Taxes");
-            netincome[pctcol, netincome.TotalRow] = netincome.GrandTotal / TotalForReport("Income");
-            result[0].Add(netincome);
-
-            // Profit: Income + Taxes + Expenses
-
-            var profit = new ManualReport() { Name = "Profit" };
+            // Create a new manual Profit report: Income + Taxes + Expenses
+            var profitreport = new ManualReport() { Name = "Profit" };
             var netincomerow = new RowLabel() { Name = "Net Income" };
             var expensesrow = new RowLabel() { Name = "Expenses" };
             pctcol = new ColumnLabel() { Name = "% of Net Income", IsSortingAfterTotal = true, DisplayAsPercent = true };
-            profit[profit.TotalColumn, netincomerow] = netincome.GrandTotal;
-            profit[pctcol, netincomerow] = 1m;
-            profit[profit.TotalColumn, expensesrow] = TotalForReport("Expenses");
-            profit[pctcol, expensesrow] = -TotalForReport("Expenses") / netincome.GrandTotal;
-            profit[profit.TotalColumn, profit.TotalRow] = netincome.GrandTotal + TotalForReport("Expenses");
-            profit[pctcol, profit.TotalRow] = (netincome.GrandTotal + TotalForReport("Expenses")) / netincome.GrandTotal;
-            result[1].Add(profit);
+            var netincome = netincomereport.GrandTotal;
+            var expenses = expensesreport.GrandTotal;
+            profitreport[TotalColumn, netincomerow] = netincome;
+            profitreport[pctcol, netincomerow] = 1m;
+            profitreport[TotalColumn, expensesrow] = expenses;
+            profitreport[pctcol, expensesrow] = -expenses / netincome;
+            profitreport[TotalColumn, TotalRow] = netincome + expenses;
+            profitreport[pctcol, TotalRow] = (netincome + expenses) / netincome;
+            rightside.Add(profitreport);
+
+            // Add the right side to the final result
+            result.Add(rightside);
 
             return result;
         }
