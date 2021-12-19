@@ -26,6 +26,33 @@ namespace YoFi.Tests.Functional
         }
 
         /// <summary>
+        /// Reports cover lage
+        /// </summary>
+        /// <remarks>
+        /// Feature 1114: Report Cover Page: One page summary view of the whole picture
+        /// </remarks>
+        [TestMethod]
+        public async Task Summary()
+        {
+            // Given: We are logged in and on the reports page
+            await ClickReports();
+
+            // When: Checking the total of the {income} summary
+            var total = await Page.QuerySelectorAsync("data-test-id=report-income >> tr.report-row-total >> td.report-col-total");
+            var totaltext = (await total.TextContentAsync()).Trim();
+
+            // And: Clicking on the detailed report link for the {income} report
+            await Page.ClickAsync("data-test-id=income-detail");
+
+            // Then: The total on the detailed report is the same as in the summary
+            var summarytotal = await Page.QuerySelectorAsync("tr.report-row-total >> td.report-col-total");
+            var summarytotaltext = (await summarytotal.TextContentAsync()).Trim();
+
+            Assert.AreEqual(summarytotaltext, totaltext);
+
+        }
+
+        /// <summary>
         /// Simply ensure that each report loads and thinks it loaded
         /// </summary>
         /// <param name="expected">Name of the report</param>

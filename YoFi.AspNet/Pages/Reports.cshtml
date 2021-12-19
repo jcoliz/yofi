@@ -28,7 +28,7 @@
                     @await Html.PartialAsync("DisplayReport", report)
                     @if (!string.IsNullOrEmpty(report.Definition))
                     {
-                        <a asp-page="Report" asp-route-id="@report.Definition-detail" class="col-sm-1 col-2 ms-auto btn btn-outline-secondary"><i class="fas fa-angle-double-right"></i></a>
+                        <a asp-page="Report" asp-route-id="@report.Definition-detail" class="col-sm-1 col-2 ms-auto btn btn-outline-secondary" data-test-id="@report.Definition-detail"><i class="fas fa-angle-double-right"></i></a>
                     }
                 </div>
             }
