@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace YoFi.Core.Reports
 {
@@ -68,5 +69,15 @@ namespace YoFi.Core.Reports
         /// However, sometimes we use this as a report tag for testing.
         /// </remarks>
         public string Definition { get; set; }
+
+        /// <summary>
+        /// Bulk set datapoints
+        /// </summary>
+        /// <param name="datapoints">Array of (col,row,value) tuples</param>
+        internal void SetData((ColumnLabel col, RowLabel row, decimal value)[] datapoints)
+        {
+            foreach (var (col, row, value) in datapoints)
+                this[col, row] = value;
+        }
     }
 }

@@ -148,6 +148,15 @@ namespace YoFi.Core.Reports
                 return null;
         }
 
+        /// <summary>
+        /// Build the summary reports
+        /// </summary>
+        /// <remarks>
+        /// These are a set of reports meant to give an overall "Income Statement" style picture of the
+        /// users' income/expense life.
+        /// </remarks>
+        /// <param name="parms"></param>
+        /// <returns></returns>
         public IEnumerable<IEnumerable<IDisplayReport>> BuildSummary(ReportParameters parms)
         {
             ReportParameters Parameters = parms;
@@ -185,14 +194,15 @@ namespace YoFi.Core.Reports
             var pctcol = new ColumnLabel() { Name = "% of Income", IsSortingAfterTotal = true, DisplayAsPercent = true };
             var income = incomereport.GrandTotal;
             var taxes = taxesreport.GrandTotal;
-            var TotalColumn = ColumnLabel.Total;
-            var TotalRow = RowLabel.Total;
-            netincomereport[TotalColumn, incomerow] = income;
-            netincomereport[pctcol, incomerow] = 1m;
-            netincomereport[TotalColumn, taxesrow] = taxes;
-            netincomereport[pctcol, taxesrow] = -taxes / income;
-            netincomereport[TotalColumn, TotalRow] = income + taxes;
-            netincomereport[pctcol, TotalRow] = (income + taxes) / income;
+            netincomereport.SetData(new[] 
+            {
+                (ColumnLabel.Total, incomerow,      income),
+                (ColumnLabel.Total, taxesrow,       taxes),
+                (ColumnLabel.Total, RowLabel.Total, income + taxes),
+                (pctcol,            incomerow,      1m),
+                (pctcol,            taxesrow,       -taxes / income),
+                (pctcol,            RowLabel.Total, (income + taxes) / income)
+            });
             leftside.Add(netincomereport);
 
             // Add the left side to the final result
@@ -221,12 +231,15 @@ namespace YoFi.Core.Reports
             pctcol = new ColumnLabel() { Name = "% of Net Income", IsSortingAfterTotal = true, DisplayAsPercent = true };
             var netincome = netincomereport.GrandTotal;
             var expenses = expensesreport.GrandTotal;
-            profitreport[TotalColumn, netincomerow] = netincome;
-            profitreport[pctcol, netincomerow] = 1m;
-            profitreport[TotalColumn, expensesrow] = expenses;
-            profitreport[pctcol, expensesrow] = -expenses / netincome;
-            profitreport[TotalColumn, TotalRow] = netincome + expenses;
-            profitreport[pctcol, TotalRow] = (netincome + expenses) / netincome;
+            profitreport.SetData(new[]
+            {
+                (ColumnLabel.Total, netincomerow,   netincome),
+                (ColumnLabel.Total, expensesrow,    expenses),
+                (ColumnLabel.Total, RowLabel.Total, netincome + expenses),
+                (pctcol,            netincomerow,   1m),
+                (pctcol,            expensesrow,    -expenses / netincome),
+                (pctcol,            RowLabel.Total, (netincome + expenses) / netincome)
+            });
             rightside.Add(profitreport);
 
             // Add the right side to the final result
