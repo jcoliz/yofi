@@ -96,6 +96,7 @@ namespace YoFi.Tests.Functional
         {
             // Given: We are logged in and on the All Transactions report
             await AllReport("All Transactions");
+            await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
 
             // When: Selecting "hide months"
             await Page.ClickAsync("id=dropdownMenuButtonColumns");
@@ -109,6 +110,7 @@ namespace YoFi.Tests.Functional
         {
             // Given: We are logged in and on the All Transactions report
             await AllReport("All Transactions");
+            await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
 
             // When: Selecting "June"
             await Page.ClickAsync("id=dropdownMenuButtonMonth");
