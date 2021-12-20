@@ -60,7 +60,7 @@ namespace Common.ChartJS
         }
         private void FillSingle(IEnumerable<(string Label, int Data)> points, IEnumerable<ChartColor> colors)
         {
-            const int maxpoints = 6;
+            const int maxpoints = 7;
 
             // Reduce to maxitems. Put the rest under "others"
             var numitems = points.Count();
@@ -75,11 +75,11 @@ namespace Common.ChartJS
             Data.Labels = points.Select(x => x.Label);
 
             // Set data values
-            Data.Datasets = new List<ChartDataSet>() { new ChartDataSet() { Data = points.Select(x => x.Data), BorderWidth = 1 } };
+            Data.Datasets = new List<ChartDataSet>() { new ChartDataSet() { Data = points.Select(x => x.Data), BorderWidth = 2 } };
 
             // Set colors            
             Data.Datasets.Last().BorderColor = colors.Take(numitems);
-            Data.Datasets.Last().BackgroundColor = colors.Take(numitems).Select(x => x.WithAlpha(0.5));
+            Data.Datasets.Last().BackgroundColor = colors.Take(numitems).Select(x => x.WithAlpha(0.8));
         }
 
     };

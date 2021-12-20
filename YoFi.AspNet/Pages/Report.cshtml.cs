@@ -128,10 +128,10 @@ namespace YoFi.AspNet.Pages
             new ChartColor("540D6E"),
             new ChartColor("EE4266"),
             new ChartColor("FFD23F"),
-            new ChartColor("313628"),
-            new ChartColor("3A6EA5"),
+            new ChartColor("875D5A"),
+            new ChartColor("FFD3DA"),
+            new ChartColor("8EE3EF"),
             new ChartColor("7A918D"),
-            new ChartColor("7F7C4A"),
         };
 
         /// <summary>
