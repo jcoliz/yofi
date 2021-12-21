@@ -68,15 +68,33 @@ namespace YoFi.Core.Models
             public string Category { get; set; }
         }
 
+        /// <summary>
+        /// Divide this line item up into individual components through the year
+        /// </summary>
         public IEnumerable<IReportable> Reportables
             => Enumerable
                 .Range(0, Frequency)
                 .Select(x => new Reportable()
                 {
-                    Timestamp = Timestamp + TimeSpan.FromDays(364 / Frequency),
+                    Timestamp = Period(x),
                     Category = Category,
                     Amount = Amount / Frequency
                 });
+
+        /// <summary>
+        /// Timestamp for the nth instance of our divided period
+        /// </summary>
+        /// <param name="which"></param>
+        private DateTime Period(int which)
+        {
+            if (Frequency <= 1 || Frequency >= 365)
+                return Timestamp;
+            if (Frequency == 365)
+                return Timestamp + TimeSpan.FromDays(which);
+            if (12 % Frequency == 0)
+                return new DateTime(Timestamp.Year, which + 1, 1);
+            return Timestamp + TimeSpan.FromDays((364 / Frequency) * which);
+        }
 
         // TODO: This can be combined with ImportEquals. ImportEquals is actually a better equality comparer
 
