@@ -59,6 +59,25 @@ namespace YoFi.Core.Models
         /// </summary>
         public string Memo { get; set; }
 
+        public class Reportable : IReportable
+        {
+            public decimal Amount { get; set; }
+
+            public DateTime Timestamp { get; set; }
+
+            public string Category { get; set; }
+        }
+
+        public IEnumerable<IReportable> Reportables
+            => Enumerable
+                .Range(0, Frequency)
+                .Select(x => new Reportable()
+                {
+                    Timestamp = Timestamp + TimeSpan.FromDays(364 / Frequency),
+                    Category = Category,
+                    Amount = Amount / Frequency
+                });
+
         // TODO: This can be combined with ImportEquals. ImportEquals is actually a better equality comparer
 
         public override bool Equals(object obj)
