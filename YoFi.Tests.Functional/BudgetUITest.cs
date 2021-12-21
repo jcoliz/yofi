@@ -221,5 +221,103 @@ namespace YoFi.Tests.Functional
             // And: Total number of items is back to the standard amount
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
+
+        /// <summary>
+        /// User Story 911: [User Can] Designate additional 'memo' information about a single budget line item
+        /// </summary>
+        [TestMethod]
+        public async Task CreateWithMemo()
+        {
+            // Given: We are already logged in and on the budget page
+
+            // When: Creating a new item with a Memo
+            var memotext = "Memo Created";
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Create New");
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", NextCategory },
+                { "Timestamp", "2021-12-31" },
+                { "Amount", "100" },
+                { "Memo", memotext },
+            });
+            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.ClickAsync("input:has-text(\"Create\")");
+
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: The first item shown has the newly created memo
+            var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=memo");
+            var text = await element.TextContentAsync();
+            var actual = text.Trim();
+
+            Assert.AreEqual(memotext, actual);
+
+#if false
+            var page = Page;
+
+            // Go to http://localhost:50419/Reports
+            await page.GotoAsync("http://localhost:50419/Reports");
+            // Click text=Budget
+            await page.ClickAsync("text=Budget");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs", page.Url);
+            // Click [data-test-id="btn-help-close"]
+            await page.ClickAsync("[data-test-id=\"btn-help-close\"]");
+            // Click #dropdownMenuButtonAction
+            await page.ClickAsync("#dropdownMenuButtonAction");
+            // Click text=Create New
+            await page.ClickAsync("text=Create New");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs/Create", page.Url);
+            // Click input[name="Category"]
+            await page.ClickAsync("input[name=\"Category\"]");
+            // Fill input[name="Category"]
+            await page.FillAsync("input[name=\"Category\"]", "AA__TEST__");
+            // Press Tab
+            await page.PressAsync("input[name=\"Category\"]", "Tab");
+            // Fill input[name="Timestamp"]
+            await page.FillAsync("input[name=\"Timestamp\"]", "2021-12-31");
+            // Press Tab
+            await page.PressAsync("input[name=\"Timestamp\"]", "Tab");
+            // Fill input[name="Amount"]
+            await page.FillAsync("input[name=\"Amount\"]", "100");
+            // Press Tab
+            await page.PressAsync("input[name=\"Amount\"]", "Tab");
+            // Fill input[name="Memo"]
+            await page.FillAsync("input[name=\"Memo\"]", "This is a memo");
+            // Click input:has-text("Create")
+            await page.ClickAsync("input:has-text(\"Create\")");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs", page.Url);
+            // Click text=This is a memo
+            await page.ClickAsync("text=This is a memo");
+            // Click [aria-label="Edit"] i
+            await page.ClickAsync("[aria-label=\"Edit\"] i");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs/Edit/16433", page.Url);
+            // Click input[name="Memo"]
+            await page.ClickAsync("input[name=\"Memo\"]");
+            // Click text=YoFi Transactions Import Reports Payees Budget Help Hello j@coliz.com! Log out E
+            await page.ClickAsync("text=YoFi Transactions Import Reports Payees Budget Help Hello j@coliz.com! Log out E");
+            // Click input[name="Memo"]
+            await page.ClickAsync("input[name=\"Memo\"]");
+            // Press a with modifiers
+            await page.PressAsync("input[name=\"Memo\"]", "Control+a");
+            // Fill input[name="Memo"]
+            await page.FillAsync("input[name=\"Memo\"]", "This is a new memo");
+            // Click text=Save
+            await page.ClickAsync("text=Save");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs", page.Url);
+            // Click text=This is a new memo
+            await page.ClickAsync("text=This is a new memo");
+            // Click [aria-label="Delete"]
+            await page.ClickAsync("[aria-label=\"Delete\"]");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs/Delete/16433", page.Url);
+            // Click text=This is a new memo
+            await page.ClickAsync("text=This is a new memo");
+            // Click input:has-text("Delete")
+            await page.ClickAsync("input:has-text(\"Delete\")");
+            // Assert.AreEqual("http://localhost:50419/BudgetTxs", page.Url);
+#endif
+        }
     }
 }

@@ -46,16 +46,19 @@
         </tr>
     </thead>
     <tbody>
+        @{
+            var line = 1;
+        }
         @foreach (var item in Model)
         {
-        <tr>
+        <tr data-test-id="line-@(line++)">
             <td>
                 @Html.DisplayFor(modelItem => item.Timestamp)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Category)
             </td>
-            <td>
+            <td data-test-id="memo">
                 @Html.DisplayFor(modelItem => item.Memo)
             </td>
             <td style="text-align:right">
