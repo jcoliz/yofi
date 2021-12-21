@@ -224,6 +224,7 @@ namespace YoFi.Tests.Functional
 
         /// <summary>
         /// User Story 911: [User Can] Designate additional 'memo' information about a single budget line item
+        /// -- User Can create an item with a memo
         /// </summary>
         [TestMethod]
         public async Task CreateWithMemo()
@@ -318,6 +319,39 @@ namespace YoFi.Tests.Functional
             await page.ClickAsync("input:has-text(\"Delete\")");
             // Assert.AreEqual("http://localhost:50419/BudgetTxs", page.Url);
 #endif
+        }
+
+        /// <summary>
+        /// User Story 911: [User Can] Designate additional 'memo' information about a single budget line item
+        /// -- User Can edit the memo and change it
+        /// </summary>
+        [TestMethod]
+        public async Task EditMemo()
+        {
+            // Given: One item created 
+            await CreateWithMemo();
+
+            // When: Editing the memo to {newmemo}
+            var newmemo = "Edited the memo";
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Memo", newmemo },
+            });
+
+            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.ClickAsync("text=Save");
+
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: The first item shown has the newly created memo
+            var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=memo");
+            var text = await element.TextContentAsync();
+            var actual = text.Trim();
+
+            Assert.AreEqual(newmemo, actual);
         }
     }
 }
