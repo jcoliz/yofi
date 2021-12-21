@@ -46,6 +46,19 @@ namespace YoFi.Core.Models
         /// </summary>
         public string Category { get; set; }
 
+        /// <summary>
+        /// How many times is budget item tracked throughout the year
+        /// </summary>
+        /// <remarks>
+        /// e.g. for a budget tracked monthly, use '12' here. The Amount is still yearly
+        /// </remarks>
+        public int Frequency { get; set; }
+
+        /// <summary>
+        /// Additional information about this budget line item for reference
+        /// </summary>
+        public string Memo { get; set; }
+
         // TODO: This can be combined with ImportEquals. ImportEquals is actually a better equality comparer
 
         public override bool Equals(object obj)
