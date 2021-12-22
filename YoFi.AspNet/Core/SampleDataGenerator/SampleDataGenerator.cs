@@ -112,12 +112,12 @@ namespace YoFi.Core.SampleGen
             var months = Enumerable.Range(1, 12).Select(m => new DateTime(SampleDataPattern.Year, m, 1));
             var monthly = ishighjitter[true]
                             .ToLookup(x => x.Category)
-                            .SelectMany(g => months.Select(m => new BudgetTx { Category = g.Key, Amount = g.Sum(y => y.AmountYearly) / 12, Timestamp = m }));
+                            .Select(g => new BudgetTx { Category = g.Key, Amount = g.Sum(y => y.AmountYearly), Frequency = 12, Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
 
             // Yearly budget for other patterns
             var yearly = ishighjitter[false]
                             .ToLookup(x => x.Category)
-                            .Select(x => new BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
+                            .Select(x => new BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Frequency = 1, Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
 
             // Now work out loans
             var loanbudgets = Definitions
@@ -128,7 +128,7 @@ namespace YoFi.Core.SampleGen
                     )
                 )
                 .ToLookup(kvp => kvp.Key, kvp => kvp.Value)
-                .Select(l => new BudgetTx() { Category = l.Key, Amount = l.Sum(), Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
+                .Select(l => new BudgetTx() { Category = l.Key, Amount = l.Sum(), Frequency = 1, Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
 
             // Combine them, that's our result
             BudgetTxs = monthly.Concat(yearly).Concat(loanbudgets).ToList();
