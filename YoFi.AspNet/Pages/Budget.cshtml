@@ -17,7 +17,7 @@
                 Actions
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
-                <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
+                <a asp-controller="BudgetTxs" asp-action="Index" class="btn">Edit Budget</a>
             </div>
         </div>
     </div>
@@ -45,12 +45,6 @@
 *@
 
 @await Html.PartialAsync("DisplayReport", Model.Report)
-
-@*
-    HELP DIALOG    
-*@
-
-@await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "budget")
 
 @*
     CHART SCRIPTING
