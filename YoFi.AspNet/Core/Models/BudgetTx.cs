@@ -54,6 +54,33 @@ namespace YoFi.Core.Models
         /// </remarks>
         public int Frequency { get; set; }
 
+        [NotMapped]
+        public string FrequencyName
+        {
+            get
+            {
+                if (Frequency < 2)
+                    return string.Empty;
+                else return Frequency switch
+                {
+                    4 => "Quarterly",
+                    12 => "Monthly",
+                    52 => "Weekly",
+                    _ => Frequency.ToString()
+                };
+            }
+            set
+            {
+                Frequency = value switch
+                {
+                    "Quarterly" => 4,
+                    "Monthly" => 12,
+                    "Weekly" => 52,
+                    _ => 1,
+                };
+            }
+        }
+
         /// <summary>
         /// Additional information about this budget line item for reference
         /// </summary>
