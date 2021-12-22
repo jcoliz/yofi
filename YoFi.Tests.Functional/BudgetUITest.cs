@@ -21,7 +21,7 @@ namespace YoFi.Tests.Functional
 
             // Given: We are already logged in and starting at the root of the site
             // When: Navigating to the main page for this section
-            await WhenNavigatingToPage("Budget");
+            await WhenNavigatingToPage("Budget/Edit Budget");
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
@@ -35,7 +35,7 @@ namespace YoFi.Tests.Functional
             //
 
             // When: Navigating to the main page for this section
-            await WhenNavigatingToPage("Budget");
+            await WhenNavigatingToPage("Budget/Edit Budget");
 
             // And: totalitems > expected TotalItemCount
             var totalitems = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));

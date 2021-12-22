@@ -33,7 +33,7 @@ namespace YoFi.Tests.Functional
         /// <summary>
         /// User Story 1174: [User can] View page-specific help when desired
         /// </summary>
-        [DataRow("Budget")]
+        [DataRow("Budget/Edit Budget")]
         [DataRow("Payees")]
         [DataRow("Import")]
         [DataRow("Transactions")]
@@ -80,7 +80,7 @@ namespace YoFi.Tests.Functional
         /// User Story 1180: [User Can] Quickly navigate from a page's help topic to more details on that topic
         /// </summary>
         /// <param name="page">Which page to test on </param>
-        [DataRow("Budget")]
+        [DataRow("Budget/Edit Budget")]
         [DataRow("Payees")]
         [DataRow("Import")]
         [DataRow("Transactions")]

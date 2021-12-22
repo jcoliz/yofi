@@ -79,15 +79,33 @@ namespace YoFi.Tests.Functional
                 base.Context.SetDefaultTimeout(5000);
             }
         }
-        protected async Task WhenNavigatingToPage(string page)
+        protected async Task WhenNavigatingToPage(string path)
         {
+            // NOTE: page can be a click path as well, if there are "/"
+            var split = path.Split('/');
+
             // Given: We are already logged in and starting at the root of the site
             await GivenLoggedIn();
 
             // When: Clicking "{page}" on the navbar
-            await Page.ClickAsync($".navbar >> text={page}");
+            await Page.ClickAsync($".navbar >> text={split[0]}");
+            await Page.WaitForLoadStateAsync();
+
+            if (split.Length > 1)
+            {
+                // Special case. The old "Budget" top level page has now been moved to
+                // the "Edit Budget" page, sitting behind the new "Budget" page.
+                // This code will get you there
+                await Page.ClickAsync("#dropdownMenuButtonAction");
+                await Page.ClickAsync($"text={split[1]}");
+            }
 
             // And: Dismissing any help text
+            await DismissHelpTest();
+        }
+
+        protected async Task DismissHelpTest()
+        {
             await Page.WaitForLoadStateAsync();
             var dialogautoshow = await Page.QuerySelectorAsync(".dialog-autoshow");
             if (null != dialogautoshow)
@@ -96,7 +114,7 @@ namespace YoFi.Tests.Functional
                 await Page.ClickAsync("data-test-id=btn-help-close");
                 await dialogautoshow.WaitForElementStateAsync(ElementState.Hidden);
                 await Page.WaitForSelectorAsync(".modal-backdrop", new Microsoft.Playwright.PageWaitForSelectorOptions() { State = Microsoft.Playwright.WaitForSelectorState.Hidden });
-                await Page.SaveScreenshotToAsync(TestContext,$"-{page}-autoshow");
+                await Page.SaveScreenshotToAsync(TestContext, $"-autoshow");
             }
         }
 
@@ -104,7 +122,6 @@ namespace YoFi.Tests.Functional
         {
             public int ID { get; set; }
         }
-
     }    
 
     public static class PageExtensions
