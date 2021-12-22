@@ -65,7 +65,15 @@
                 @Html.DisplayFor(modelItem => item.Memo)
             </td>
             <td data-test-id="freq">
-                @Html.DisplayFor(modelItem => item.Frequency)
+                @(item.Frequency switch
+                {
+                    0 => string.Empty,
+                    1 => string.Empty,
+                    4 => "Quarterly",
+                    12 => "Monthly",
+                    52 => "Weekly",
+                    _ => @item.Frequency.ToString()
+                })
             </td>
             <td style="text-align:right">
                 @Html.DisplayFor(modelItem => item.Amount)
