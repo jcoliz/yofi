@@ -40,6 +40,29 @@ namespace Common.ChartJS
             return result;
         }
 
+        public static ChartConfig CreateMultiBarChart(IEnumerable<string> labels, IEnumerable<(string Label, IEnumerable<int> Data)> series, IEnumerable<ChartColor> colors)
+        {
+            var result = new ChartConfig() { Type = "bar" };
+
+            result.Options.Plugins.Legend.Display = true;
+            result.Options.Plugins.Legend.Position = "top";
+
+            result.FillMulti(labels, series, colors);
+
+            result.Data.Datasets = result.Data.Datasets.ToList();
+
+            double alpha = 1.0;
+            foreach (var dataset in result.Data.Datasets)
+            {
+                var setcolors = colors.Select(x => x.WithAlpha(alpha)).ToList();
+                dataset.BackgroundColor = setcolors;
+                dataset.BorderColor = setcolors;
+                alpha /= 2;
+            }
+
+            return result;
+        }
+
         public static ChartConfig CreateLineChart(IEnumerable<string> labels, IEnumerable<(string Label,IEnumerable<int> Data)> series, IEnumerable<ChartColor> colors)
         {
             var result = new ChartConfig() { Type = "line" };
@@ -53,8 +76,7 @@ namespace Common.ChartJS
                 series = series.Take(maxitems);
             }
 
-            result.Data.Labels = labels;
-            result.Data.Datasets = series.Select((x, i) => new ChartDataSet() { Label = x.Label, Data = x.Data, BackgroundColor = new ChartColor[] { colors.Skip(i).First() }, BorderColor = new ChartColor[] { colors.Skip(i).First() } });
+            result.FillMulti(labels, series, colors);
 
             return result;
         }
@@ -80,6 +102,20 @@ namespace Common.ChartJS
             // Set colors            
             Data.Datasets.Last().BorderColor = colors.Take(numitems);
             Data.Datasets.Last().BackgroundColor = colors.Take(numitems).Select(x => x.WithAlpha(0.8));
+        }
+
+        private void FillMulti(IEnumerable<string> labels, IEnumerable<(string Label, IEnumerable<int> Data)> series, IEnumerable<ChartColor> colors)
+        {
+            // Limit series to how many colors we have
+            var maxitems = colors.Count();
+            var numitems = series.Count();
+            if (numitems > maxitems)
+            {
+                series = series.Take(maxitems);
+            }
+
+            Data.Labels = labels;
+            Data.Datasets = series.Select((x, i) => new ChartDataSet() { Label = x.Label, Data = x.Data, BackgroundColor = new ChartColor[] { colors.Skip(i).First() }, BorderColor = new ChartColor[] { colors.Skip(i).First() } });
         }
 
     };
