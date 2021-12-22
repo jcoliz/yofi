@@ -1,0 +1,67 @@
+﻿@page
+@model YoFi.AspNet.Pages.BudgetModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Budget Summary";
+}
+
+@*
+    PAGE NAVBAR
+*@
+
+<nav class="navbar navbar-light navbar-page mb-3">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+        <div class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </a>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+@*
+    HEADINGS
+*@
+
+<h2>@Model.Report.Name</h2>
+
+@if (!string.IsNullOrEmpty(Model.Report.Description))
+{
+    <h3>@Model.Report.Description</h3>
+}
+
+@*
+    CHART
+*@
+
+<canvas id="chart"></canvas>
+
+@*
+    REPORT
+*@
+
+@await Html.PartialAsync("DisplayReport", Model.Report)
+
+@*
+    HELP DIALOG    
+*@
+
+@await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "budget")
+
+@*
+    CHART SCRIPTING
+*@
+
+@if (!string.IsNullOrEmpty(Model.ChartJson))
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.2/dist/chart.min.js" integrity="sha256-D2tkh/3EROq+XuDEmgxOLW1oNxf0rLNlOwsPIUX+co4=" crossorigin="anonymous"></script>
+    <script>
+    const ctx = document.getElementById('chart').getContext('2d');
+    const setup = @Html.Raw(Model.ChartJson);
+    const myChart = new Chart(ctx, setup);
+    </script>
+}
