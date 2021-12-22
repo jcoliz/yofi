@@ -97,7 +97,7 @@ namespace YoFi.Tests.Database
 
             // Then: They are in the database as expected
             var count = await context.BudgetTxs.CountAsync();
-            Assert.AreEqual(87, count);
+            Assert.AreEqual(32, count);
         }
 
         [TestMethod]
@@ -122,7 +122,7 @@ namespace YoFi.Tests.Database
             count = await context.Payees.CountAsync();
             Assert.AreEqual(40, count);
             count = await context.BudgetTxs.CountAsync();
-            Assert.AreEqual(156, count);
+            Assert.AreEqual(46, count);
         }
     }
 }

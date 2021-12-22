@@ -101,25 +101,28 @@ namespace YoFi.Core.SampleGen
 
         public void GenerateBudget()
         {
+            int frequency(SampleDataPattern p)
+            {
+                if (p.DateJitter == JitterEnum.High && p.AmountJitter == JitterEnum.High)
+                {
+                    if (p.DateFrequency == FrequencyEnum.Weekly)
+                        return 52;
+                    else
+                        return 12;
+                }
+                else
+                    return 1;
+            }
+
             // Focus down to only those with valid category
             // And exclude loans (will add them back later)
-            var hascategory = Definitions.Where(x => x.Category != null && string.IsNullOrEmpty(x.Loan));
-
-            // Divide into dichotomy: THose with high/high jitter patterns and those without
-            var ishighjitter = hascategory.ToLookup(x => x.DateJitter == JitterEnum.High && x.AmountJitter == JitterEnum.High);
-
-            // Monthly budget for high/high jitter patterns
-            var months = Enumerable.Range(1, 12).Select(m => new DateTime(SampleDataPattern.Year, m, 1));
-            var monthly = ishighjitter[true]
-                            .ToLookup(x => x.Category)
-                            .Select(g => new BudgetTx { Category = g.Key, Amount = g.Sum(y => y.AmountYearly), Frequency = 12, Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
-
-            // Yearly budget for other patterns
-            var yearly = ishighjitter[false]
-                            .ToLookup(x => x.Category)
-                            .Select(x => new BudgetTx { Category = x.Key, Amount = x.Sum(y => y.AmountYearly), Frequency = 1, Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
+            var regular = Definitions
+                .Where(x => x.Category != null && string.IsNullOrEmpty(x.Loan))
+                .ToLookup(x=>x.Category)
+                .Select(l => new BudgetTx { Category = l.Key, Amount = l.Sum(y => y.AmountYearly), Frequency = frequency(l.First()), Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
 
             // Now work out loans
+            var months = Enumerable.Range(1, 12).Select(m => new DateTime(SampleDataPattern.Year, m, 1));
             var loanbudgets = Definitions
                 .Where(d => !string.IsNullOrEmpty(d.Loan))
                 .SelectMany(d =>
@@ -131,7 +134,7 @@ namespace YoFi.Core.SampleGen
                 .Select(l => new BudgetTx() { Category = l.Key, Amount = l.Sum(), Frequency = 1, Timestamp = new DateTime(SampleDataPattern.Year, 1, 1) });
 
             // Combine them, that's our result
-            BudgetTxs = monthly.Concat(yearly).Concat(loanbudgets).ToList();
+            BudgetTxs = regular.Concat(loanbudgets).ToList();
         }
 
         /// <summary>
