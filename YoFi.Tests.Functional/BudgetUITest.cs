@@ -11,7 +11,7 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class BudgetUITest : FunctionalUITest
     {
-        const int TotalItemCount = 156;
+        const int TotalItemCount = 46;
         const string MainPageName = "Budget Line Items";
 
         [TestInitialize]
@@ -75,8 +75,8 @@ namespace YoFi.Tests.Functional
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
 
-            // And: This page covers items 26-50
-            await Page.ThenContainsItemsAsync(from: 26, to: 50);
+            // And: This page covers items 26-46
+            await Page.ThenContainsItemsAsync(from: 26, to: 46);
         }
 
         [TestMethod]
@@ -87,8 +87,8 @@ namespace YoFi.Tests.Functional
             // When: Searching for "Healthcare"
             await Page.SearchFor("Healthcare");
 
-            // Then: Exactly 25 items are found, because we know this about our source data
-            Assert.AreEqual(25, await Page.GetTotalItemsAsync());
+            // Then: Exactly 3 items are found, because we know this about our source data
+            Assert.AreEqual(3, await Page.GetTotalItemsAsync());
         }
 
         [TestMethod]
