@@ -480,7 +480,7 @@ namespace YoFi.Tests.Database
             var JRow = GetRow(report, x => x.Name == "J");
 
             Assert.AreEqual(SumOfManagedBudgetTxsTopCategory("Income"), report[BudgetCol, IncomeRow]);
-            Assert.AreEqual(SumOfManagedBudgetTxsTopCategory("J"), report[BudgetCol, JRow]);
+            Assert.AreEqual((double)SumOfManagedBudgetTxsTopCategory("J"), (double)report[BudgetCol, JRow],1e-6);
             Assert.AreEqual(SumOfTopCategory("Income"), report[ActualCol, IncomeRow]);
             Assert.AreEqual(SumOfTopCategory("J"), report[ActualCol, JRow]);
 

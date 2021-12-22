@@ -360,10 +360,15 @@ namespace YoFi.Core.Reports
         /// <returns>Resulting query</returns>
         private NamedQuery QueryBudgetSingle(IEnumerable<string> excluded = null)
         {
+            var result = QueryBudgetSingle_AsBudgetTx(excluded);
+            return new NamedQuery() { Query = result, IsMultiSigned = (excluded == null) };
+        }
+
+        private IQueryable<BudgetTx> QueryBudgetSingle_AsBudgetTx(IEnumerable<string> excluded = null)
+        {
             var result = _context.BudgetTxs
                 .Where(x => x.Timestamp.Year == Year)
-                .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Timestamp, Category = x.Category })
-                .AsQueryable<IReportable>();
+                .AsQueryable();
 
             if (excluded?.Any() == true)
             {
@@ -378,7 +383,7 @@ namespace YoFi.Core.Reports
                     .AsQueryable();
             }
 
-            return new NamedQuery() { Query = result, IsMultiSigned = (excluded == null) };
+            return result;
         }
 
         /// <summary>
@@ -392,11 +397,14 @@ namespace YoFi.Core.Reports
         private NamedQuery QueryManagedBudgetSingle()
         {
             // Start with the full set of all budget line items
-            var budgettxs = QueryBudgetSingle().Query;
+            var budgettxs = QueryBudgetSingle_AsBudgetTx();
 
-            // "Managed" Categories are those with more than one budgettx in a year.
-            var categories = budgettxs.GroupBy(x => x.Category).Select(g => new { Key = g.Key, Count = g.Count() }).Where(x => x.Count > 1).Select(x => x.Key);
-            var managedtxs = budgettxs.Where(x => x.Timestamp.Month <= Month && categories.Contains(x.Category));
+            // "Managed" Categories are those with frequency > 1
+            var managedtxs = budgettxs.Where(x => x.Frequency > 1).AsEnumerable();
+
+            // Now we need to discover the reportable items up to this month
+            // In order to do that, we need to NOW bring the transactions into memory, and work on them.
+            var result = managedtxs.SelectMany(x => x.Reportables.Where(r=>r.Timestamp.Month <= Month)).AsQueryable();
 
 #if false
             // Review the results for debugging
@@ -404,7 +412,7 @@ namespace YoFi.Core.Reports
                 Console.WriteLine($"{it.Timestamp} {it.Category} {it.Amount}");
 #endif
 
-            return new NamedQuery() { Query = managedtxs, LeafRowsOnly = true };
+            return new NamedQuery() { Query = result, LeafRowsOnly = true };
         }
 
         /*
