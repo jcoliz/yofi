@@ -39,6 +39,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Memo)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Frequency)
+            </th>
             <th style="text-align:right">
                 @Html.DisplayNameFor(model => model.Amount)
             </th>
@@ -60,6 +63,9 @@
             </td>
             <td data-test-id="memo">
                 @Html.DisplayFor(modelItem => item.Memo)
+            </td>
+            <td data-test-id="freq">
+                @Html.DisplayFor(modelItem => item.Frequency)
             </td>
             <td style="text-align:right">
                 @Html.DisplayFor(modelItem => item.Amount)
