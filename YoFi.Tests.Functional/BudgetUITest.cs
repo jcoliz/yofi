@@ -314,5 +314,67 @@ namespace YoFi.Tests.Functional
 
             Assert.IsTrue(actual.Contains("memo"));
         }
+
+        /// <summary>
+        /// User Story 1194: [User Can] Delete multiple budgettx in a single operation
+        /// </summary>
+        [TestMethod]
+        public async Task BulkDelete()
+        {
+            /*
+            Given: On the Edit Budget page, logged in
+            And: Three new items added with a distinctive name
+            And: Showing a search result with just those added items
+            When: Entering bulk edit mode
+            And: Clicking select on each item
+            And: Clicking "Delete" on the bulk edit bar
+            And: Clicking "OK" on the confirmation dialog
+            Then: Still on the Edit Budget page
+            And: Showing all items
+            And: Bulk edit toolbar is gone (Don't know how to check for this)
+            And: Total number of items is back to the standard amount
+             */
+
+            // Given: On the Edit Budget page, logged in
+            // (Done by Setup())
+
+            // And: Three new items added with a distinctive name
+            await Create();
+            await Create();
+            await Create();
+
+            // And: Showing a search result with just those added items
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+#if false
+            // When: Entering bulk edit mode
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Bulk Edit");
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: Clicking select on each item
+            var numdelete = int.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
+            for (int i = 1; i <= numdelete; i++)
+                await Page.ClickAsync($"data-test-id=line-{i} >> data-test-id=check-select");
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // When: Clicking "Delete" on the bulk edit bar
+            await Page.ClickAsync("data-test-id=btn-bulk-delete");
+
+            // And: Clicking "OK" on the confirmation dialog
+            await Page.WaitForSelectorAsync("#deleteConfirmModal");
+            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.ClickAsync("data-test-id=btn-modal-ok");
+
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: Total number of items is back to the standard amount
+            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
+#endif
+
+        }
     }
 }
