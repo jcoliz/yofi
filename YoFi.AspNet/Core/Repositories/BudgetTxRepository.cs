@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using YoFi.Core.Models;
 
 namespace YoFi.Core.Repositories
@@ -9,10 +10,19 @@ namespace YoFi.Core.Repositories
     /// <remarks>
     /// BudgetTx items are pretty simple. No additional logic. Just need to implement here how to query them
     /// </remarks>
-    public class BudgetTxRepository: BaseRepository<BudgetTx>
+    public class BudgetTxRepository: BaseRepository<BudgetTx>, IBudgetTxRepository
     {
         public BudgetTxRepository(IDataContext context): base(context)
         {
+        }
+
+        /// <summary>
+        /// Remove all selected items from the database
+        /// </summary>
+        public async Task BulkDeleteAsync()
+        {
+            _context.RemoveRange(All.Where(x => x.Selected == true));
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>

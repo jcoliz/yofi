@@ -347,7 +347,6 @@ namespace YoFi.Tests.Functional
             await Page.SearchFor(testmarker);
             await Page.SaveScreenshotToAsync(TestContext);
 
-#if false
             // When: Entering bulk edit mode
             await Page.ClickAsync("#dropdownMenuButtonAction");
             await Page.ClickAsync("text=Bulk Edit");
@@ -361,6 +360,8 @@ namespace YoFi.Tests.Functional
 
             // When: Clicking "Delete" on the bulk edit bar
             await Page.ClickAsync("data-test-id=btn-bulk-delete");
+            await Page.SaveScreenshotToAsync(TestContext);
+
 
             // And: Clicking "OK" on the confirmation dialog
             await Page.WaitForSelectorAsync("#deleteConfirmModal");
@@ -373,8 +374,6 @@ namespace YoFi.Tests.Functional
 
             // And: Total number of items is back to the standard amount
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
-#endif
-
         }
     }
 }

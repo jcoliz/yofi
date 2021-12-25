@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Controllers.Slim
@@ -27,7 +28,7 @@ namespace YoFi.Tests.Controllers.Slim
         public void SetUp()
         {
             repository = new MockBudgetTxRepository();
-            controller = new BudgetTxsController(repository, new MockQueryExecution());
+            controller = new BudgetTxsController(repository as IBudgetTxRepository, new MockQueryExecution());
         }
 
         [TestMethod]

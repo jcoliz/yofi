@@ -4,6 +4,17 @@
     ViewData["Title"] = "Budget Line Items";
 }
 
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+<input type="hidden" id="xsrf"
+       name="xsrf" value="@GetAntiXsrfRequestToken()">
+
 <nav class="navbar navbar-light navbar-page mb-3">
     <div class="container">
         <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
@@ -20,6 +31,11 @@
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
                 <a asp-action="Create" class="btn">Create New</a>
+                <a asp-action="Index" class="btn"
+                   asp-route-q="@ViewData["Query"]"
+                   asp-route-v="@ViewData["ToggleSelected"]">
+                    @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
+                </a>
                 <a asp-action="Download" class="btn">Export</a>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
             </div>
@@ -27,9 +43,23 @@
     </div>
 </nav>
 
+@if ((bool)(ViewData["ShowSelected"]))
+{
+    <div class="form-actions d-flex">
+        <p class="me-2 fs-6 mt-auto mb-auto">Bulk edit operations:</p>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" class="btn btn-outline-secondary mt-1 mb-1" data-test-id="btn-bulk-delete">Delete</a>
+    </div>
+}
+
 <table class="table">
     <thead>
         <tr>
+            @if ((bool)(ViewData["ShowSelected"]))
+            {
+                <th>
+                    Edit
+                </th>
+            }
             <th>
                 Date
             </th>
@@ -54,27 +84,34 @@
         }
         @foreach (var item in Model)
         {
-        <tr data-test-id="line-@(line++)">
-            <td>
-                @Html.DisplayFor(modelItem => item.Timestamp)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category)
-            </td>
-            <td data-test-id="memo">
-                @Html.DisplayFor(modelItem => item.Memo)
-            </td>
-            <td data-test-id="freq">
-                @item.FrequencyName
-            </td>
-            <td style="text-align:right">
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
-                <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
-            </td>
-        </tr>
+            <tr data-test-id="line-@(line++)">
+                @if ((bool)(ViewData["ShowSelected"]))
+                {
+                    <td>
+                        @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/budget/select/@item.ID" data-test-id="check-select">
+                    </td>
+                }
+                <td>
+                    @Html.DisplayFor(modelItem => item.Timestamp)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category)
+                </td>
+                <td data-test-id="memo">
+                    @Html.DisplayFor(modelItem => item.Memo)
+                </td>
+                <td data-test-id="freq">
+                    @item.FrequencyName
+                </td>
+                <td style="text-align:right">
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+                <td>
+                    <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
+                    <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
+                </td>
+            </tr>
         }
     </tbody>
 </table>
@@ -87,5 +124,22 @@
         <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
     </div>
 </form>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form asp-action="BulkDelete">
+                <div class="modal-body">
+                    <h2 data-test-id="help-title">Are you sure?</h2>
+                    <p>These items will be deleted permanantly, with no option to recover them.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" data-test-id="btn-modal-ok">OK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "budget")

@@ -80,6 +80,7 @@ namespace YoFi.AspNet.Main
                 }
             );
 
+            services.AddScoped<IBudgetTxRepository, BudgetTxRepository>();
             services.AddScoped<IRepository<BudgetTx>, BudgetTxRepository>();
             services.AddScoped<IPayeeRepository, PayeeRepository>();
             services.AddScoped<IRepository<Payee>, PayeeRepository>();

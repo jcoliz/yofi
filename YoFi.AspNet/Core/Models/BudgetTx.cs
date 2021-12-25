@@ -86,6 +86,11 @@ namespace YoFi.Core.Models
         /// </summary>
         public string Memo { get; set; }
 
+        /// <summary>
+        /// Whether this object will be included in the next bulk operation
+        /// </summary>
+        public bool? Selected { get; set; }
+
         public class Reportable : IReportable
         {
             public decimal Amount { get; set; }

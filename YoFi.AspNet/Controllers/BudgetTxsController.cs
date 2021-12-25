@@ -19,17 +19,17 @@ namespace YoFi.AspNet.Controllers
     {
         public static int PageSize { get; } = 25;
 
-        private readonly IRepository<BudgetTx> _repository;
+        private readonly IBudgetTxRepository _repository;
         private readonly IAsyncQueryExecution _queryExecution;
 
-        public BudgetTxsController(IRepository<BudgetTx> repository, IAsyncQueryExecution queryExecution)
+        public BudgetTxsController(IBudgetTxRepository repository, IAsyncQueryExecution queryExecution)
         {
             _repository = repository;
             _queryExecution = queryExecution;
         }
 
         // GET: BudgetTxs
-        public async Task<IActionResult> Index(string q = null, int? p = null)
+        public async Task<IActionResult> Index(string q = null, string v = null, int? p = null)
         {
 
             //
@@ -39,6 +39,16 @@ namespace YoFi.AspNet.Controllers
             ViewData["Query"] = q;
 
             var result = _repository.ForQuery(q);
+
+            //
+            // Process VIEW (V) parameters
+            //
+
+            // "v=s" means show the selection checkbox. Used in bulk edit mode
+            ViewData["ViewP"] = v;
+            bool showSelected = v?.ToLowerInvariant().Contains("s") == true;
+            ViewData["ShowSelected"] = showSelected;
+            ViewData["ToggleSelected"] = showSelected ? null : "s";
 
             //
             // Process PAGE (P) parameters
@@ -115,6 +125,16 @@ namespace YoFi.AspNet.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _repository.RemoveAsync(await _repository.GetByIdAsync(id));
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
+        public async Task<IActionResult> BulkDelete()
+        {
+            await _repository.BulkDeleteAsync();
 
             return RedirectToAction(nameof(Index));
         }

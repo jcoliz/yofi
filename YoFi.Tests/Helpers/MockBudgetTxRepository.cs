@@ -19,12 +19,17 @@ namespace YoFi.Tests.Helpers
         public IEnumerable<T> MakeItems(int numitems);
     }
 
-    public class MockBudgetTxRepository : BaseMockRepository<BudgetTx>
+    public class MockBudgetTxRepository : BaseMockRepository<BudgetTx>, IBudgetTxRepository
     {
         static readonly DateTime defaulttimestamp = new DateTime(2020, 1, 1);
 
         public override BudgetTx MakeItem(int x) => new BudgetTx() { ID = x, Amount = x, Category = x.ToString(), Timestamp = defaulttimestamp };
 
         public override IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? All : All.Where(x => x.Category.Contains(q));
+
+        public Task BulkDeleteAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
