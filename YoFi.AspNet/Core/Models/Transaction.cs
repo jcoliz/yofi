@@ -28,6 +28,7 @@ namespace YoFi.Core.Models
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         [Display(Name = "Date")]
         [DataType(DataType.Date)]
+        [Column(TypeName = "date")]
         public DateTime Timestamp { get; set; }
 
         /// <summary>
