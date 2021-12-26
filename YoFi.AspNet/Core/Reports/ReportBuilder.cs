@@ -67,19 +67,22 @@ namespace YoFi.Core.Reports
 
             report.Source = _qbuilder.LoadFrom(definition);
 
-            // WholeYear needs to be handled after source is set
+            // Removing yearprogress for now. It causes the query to be run TWICE,
+            // making the report TWICE as long to run. Ugh. I will need to find a faster way.
 
+#if false
+            // WholeYear needs to be handled after source is set
             if (definition.YearProgress == true)
             {
                 // What is the highest transaction in the "Actuals"?
-                var latesttime = report.Source.Where(x => x.Name == "Actual").Select(q => q.Query.DefaultIfEmpty().Max(a => (a == null) ? DateTime.MinValue : a.Timestamp)).Max();
+                var latesttime = report.Source.Where(x => x.Name == "Actual").First().Query.Max(x=>x.Timestamp);
 
                 // What % of the way is it through that year?
                 var yearprogress = (double)latesttime.DayOfYear / 365.0;
 
                 report.Description += $" {yearprogress:P0}";
             }
-
+#endif
             // Special case for yoy report
 
             if (parameters.id == "yoy")
@@ -248,9 +251,9 @@ namespace YoFi.Core.Reports
             return result;
         }
 
-        #region IReportEngine
+#region IReportEngine
         IEnumerable<ReportDefinition> IReportEngine.Definitions => Definitions;
-        #endregion
+#endregion
 
         public static List<ReportDefinition> Definitions = new List<ReportDefinition>()
         {
