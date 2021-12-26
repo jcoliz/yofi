@@ -449,5 +449,42 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(frequency_text, actual);
         }
 
+        /// <summary>
+        /// [User can] Upload new payees to a spreadsheet which was created in Excel
+        /// </summary>
+        [TestMethod]
+        public async Task Upload()
+        {
+            //
+            // Step 1: Upload payees
+            //
+
+            // Given: We are logged in and on the payees page
+
+            // Then: We are on the main page for this section
+            await Page.ClickAsync("[aria-label=\"Upload\"]");
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            await Page.ClickAsync("text=Upload");
+
+            // Then: We land at the uploaded OK page
+            await Page.ThenIsOnPageAsync("Uploaded Budget");
+
+            //
+            // Step 2: Search for the new payees
+            //
+
+            // When: Navigating to edit budget page
+            await WhenNavigatingToPage("Budget/Edit Budget");
+
+            // Then: {numadded} more items found than before, because we just added them
+            var numadded = 4;
+            Assert.AreEqual(TotalItemCount + numadded, await Page.GetTotalItemsAsync());
+
+            // When: Searching for what we just imported
+            await Page.SearchFor(testmarker);
+
+            // Then: {numadded} items are found, because we know this about our imported data
+            Assert.AreEqual(numadded, await Page.GetTotalItemsAsync());
+        }
     }
 }
