@@ -80,7 +80,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
-        public async Task<IActionResult> Create([Bind("ID,Amount,Timestamp,Category,Memo")] BudgetTx item)
+        public async Task<IActionResult> Create([Bind("ID,Amount,Timestamp,Category,Memo,Frequency")] BudgetTx item)
         {
             await _repository.AddAsync(item);
 

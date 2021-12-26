@@ -375,5 +375,43 @@ namespace YoFi.Tests.Functional
             // And: Total number of items is back to the standard amount
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
+
+        /// <summary>
+        /// User Story 1226: [User Can] Describe their budget with a single line item per category, which may repeat over the year
+        /// -- User can create a new budget line item with an alternative frequency
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task CreateWithFrequency()
+        {
+            // Given: We are already logged in and on the budget page
+
+            // When: Creating a new item with a Memo
+            var frequency_num = "12";
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Create New");
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", NextCategory },
+                { "Timestamp", "2021-12-31" },
+                { "Amount", "100" },
+                { "Frequency", frequency_num },
+            });
+            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.ClickAsync("input:has-text(\"Create\")");
+
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: The first item shown has the newly created memo
+            var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=freq");
+            var text = await element.TextContentAsync();
+            var actual = text.Trim();
+
+            var frequency_text = "Monthly";
+            Assert.AreEqual(frequency_text, actual);
+
+        }
     }
 }
