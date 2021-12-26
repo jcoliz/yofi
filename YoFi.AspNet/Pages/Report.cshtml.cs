@@ -14,7 +14,7 @@ using YoFi.Core.Reports;
 namespace YoFi.AspNet.Pages
 {
     [Authorize(Policy = "CanRead")]
-    public class ReportModel : PageModel, IReportNavbarViewModel
+    public class ReportModel : PageModel, IReportNavbarViewModel, IReportAndChartViewModel
     {
         public ReportModel(IReportEngine _reports)
         {
@@ -32,6 +32,8 @@ namespace YoFi.AspNet.Pages
         public bool ShowSideChart { get; set; } = false;
 
         public bool ShowTopChart { get; set; } = false;
+
+        IDisplayReport IReportAndChartViewModel.Report => Report;
 
         public Task<IActionResult> OnGetAsync([Bind] ReportParameters parms)
         {

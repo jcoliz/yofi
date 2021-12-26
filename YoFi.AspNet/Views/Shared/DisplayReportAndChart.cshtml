@@ -1,0 +1,60 @@
+﻿@model YoFi.AspNet.Pages.IReportAndChartViewModel
+@{
+}
+@*
+    HEADINGS
+*@
+
+<h2>@Model.Report.Name</h2>
+
+@if (!string.IsNullOrEmpty(Model.Report.Description))
+{
+    <h3>@Model.Report.Description</h3>
+}
+
+@*
+    SIDE-BY-SIDE
+*@
+
+@if (Model.ShowSideChart)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <canvas id="chart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <div class="bg-light border p-2 mb-3">
+                @await Html.PartialAsync("DisplayReport", Model.Report)
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const ctx = document.getElementById('chart').getContext('2d');
+    const setup = @Html.Raw(Model.ChartJson);
+    const myChart = new Chart(ctx, setup);
+    </script>
+}
+
+@*
+    CHART-ABOVE-REPORT
+*@
+
+else
+{
+    if (Model.ShowTopChart)
+    {
+        <canvas id="chart"></canvas>
+    }
+
+    @await Html.PartialAsync("DisplayReport", Model.Report)
+}
+
+@if (!string.IsNullOrEmpty(Model.ChartJson))
+{
+    <script>
+    const ctx = document.getElementById('chart').getContext('2d');
+    const setup = @Html.Raw(Model.ChartJson);
+    const myChart = new Chart(ctx, setup);
+    </script>
+}

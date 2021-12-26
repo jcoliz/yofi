@@ -24,38 +24,14 @@
 </nav>
 
 @*
-    HEADINGS
+    BACKGROUND LOADER
 *@
 
-<h2>@Model.Report.Name</h2>
+<div class="w-100 loadr" data-endpoint="/ReportPartial?id=expenses-v-budget">
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border my-5" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
 
-@if (!string.IsNullOrEmpty(Model.Report.Description))
-{
-    <h3>@Model.Report.Description</h3>
-}
-
-@*
-    CHART
-*@
-
-<canvas id="chart" class="mb-3"></canvas>
-
-@*
-    REPORT
-*@
-
-@await Html.PartialAsync("DisplayReport", Model.Report)
-
-@*
-    CHART SCRIPTING
-*@
-
-@if (!string.IsNullOrEmpty(Model.ChartJson))
-{
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.2/dist/chart.min.js" integrity="sha256-D2tkh/3EROq+XuDEmgxOLW1oNxf0rLNlOwsPIUX+co4=" crossorigin="anonymous"></script>
-    <script>
-    const ctx = document.getElementById('chart').getContext('2d');
-    const setup = @Html.Raw(Model.ChartJson);
-    const myChart = new Chart(ctx, setup);
-    </script>
-}
+    </div>
+</div>

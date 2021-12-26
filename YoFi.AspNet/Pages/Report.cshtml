@@ -6,52 +6,6 @@
 }
 
 @await Html.PartialAsync("_ReportNavbarPartial", Model)
-
-<h2>@Model.Report.Name</h2>
-
-@if (!string.IsNullOrEmpty(Model.Report.Description))
-{
-    <h3>@Model.Report.Description</h3>
-}
-
-@if (Model.ShowSideChart)
-{
-    <div class="row">
-        <div class="col-md-6">
-            <canvas id="chart"></canvas>
-        </div>
-        <div class="col-md-6">
-            <div class="bg-light border p-2 mb-3">
-                @await Html.PartialAsync("DisplayReport", Model.Report)
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.2/dist/chart.min.js" integrity="sha256-D2tkh/3EROq+XuDEmgxOLW1oNxf0rLNlOwsPIUX+co4=" crossorigin="anonymous"></script>
-    <script>
-    const ctx = document.getElementById('chart').getContext('2d');
-    const setup = @Html.Raw(Model.ChartJson);
-    const myChart = new Chart(ctx, setup);
-    </script>
-}
-else
-{
-    if (Model.ShowTopChart)
-    {
-        <canvas id="chart"></canvas>
-    }
-
-    @await Html.PartialAsync("DisplayReport", Model.Report)
-}
-
-@if (!string.IsNullOrEmpty(Model.ChartJson))
-{
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.2/dist/chart.min.js" integrity="sha256-D2tkh/3EROq+XuDEmgxOLW1oNxf0rLNlOwsPIUX+co4=" crossorigin="anonymous"></script>
-    <script>
-    const ctx = document.getElementById('chart').getContext('2d');
-    const setup = @Html.Raw(Model.ChartJson);
-    const myChart = new Chart(ctx, setup);
-    </script>
-}
+@await Html.PartialAsync("DisplayReportAndChart", Model)
 
 <hr />

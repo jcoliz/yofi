@@ -262,4 +262,20 @@ $(window).on('load', function () {
             }
         });
     }
+
+    var loadr = $('.loadr');
+    if (loadr.length) {
+        var endpoint = loadr.data('endpoint')
+
+        $.ajax({
+            url: endpoint,
+            success: function (htmlresult) {
+                loadr.html(htmlresult);
+            },
+            error: function (result) {
+                alert(result.responseText);
+                loadr.html("<p/>");
+            }
+        });
+    }
 });
