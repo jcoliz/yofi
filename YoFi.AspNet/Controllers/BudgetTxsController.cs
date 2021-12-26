@@ -142,7 +142,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        public async Task<IActionResult> Upload(List<IFormFile> files, [FromServices] BaseImporter<BudgetTx> importer)
+        public async Task<IActionResult> Upload(List<IFormFile> files, [FromServices] IImporter<BudgetTx> importer)
         {
             try
             {
