@@ -148,12 +148,16 @@ namespace YoFi.Tests.Functional
             return result;
         }
 
-        private static int ScreenShotCount = 1;
+        private static Dictionary<string, int> ScreenShotCounter = new Dictionary<string, int>();
 
-        public static async Task SaveScreenshotToAsync(this IPage page, TestContext testContext, string additional = null)
+        public static async Task SaveScreenshotToAsync(this IPage page, TestContext testContext, string moment = null)
         {
-            var filename = $"Screenshot {testContext.FullyQualifiedTestClassName} {ScreenShotCount++:D4} {testContext.TestName}{additional ?? ""}.png";
-            await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true });
+            var testname = $"{testContext.FullyQualifiedTestClassName} {testContext.TestName}";
+            var counter = 1 + ScreenShotCounter.GetValueOrDefault(testname);
+            ScreenShotCounter[testname] = counter;
+
+            var filename = $"Screenshot {testname} {counter:D4}{moment ?? String.Empty}.png";
+            await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true, FullPage = true });
             testContext.AddResultFile(filename);
         }
 
