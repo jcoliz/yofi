@@ -74,31 +74,50 @@ namespace YoFi.AspNet.Pages
                 // off-sign it may be OK.
                 //  - There is a total column
                 var multisigned = Report.Source?.Any(x => x.IsMultiSigned) ?? true;
-                if (! Report.WithMonthColumns && Report.WithTotalColumn && ! multisigned)
+                if (! Report.WithMonthColumns && ! multisigned)
                 {
-                    // We have to put a little more thought into whether this is a single-sign or multiple-sign report.
-                    // Practically speaking, it's only an issue when we're showing "Income" and at least one other top-level row.
-                    // It SEEMS we can do this based on definition.SoureParameters. If it's empty, it is an "all" type report which
-                    // will have income AND expenses, so that's not cool for a pie report
-
-                    ShowSideChart = true;
-
                     // Flip the sign on values unless they're ordred ascending
                     decimal factor = Report.SortOrder == Report.SortOrders.TotalAscending ? 1m : -1m;
 
-                    var col = Report.TotalColumn;
-                    var rows = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
-                    var points = rows.Select(row => ( row.Name, (int)(Report[col, row] * factor)));
+                    if (Report.WithTotalColumn)
+                    {
+                        // We have to put a little more thought into whether this is a single-sign or multiple-sign report.
+                        // Practically speaking, it's only an issue when we're showing "Income" and at least one other top-level row.
+                        // It SEEMS we can do this based on definition.SoureParameters. If it's empty, it is an "all" type report which
+                        // will have income AND expenses, so that's not cool for a pie report
 
-                    ChartConfig Chart = null;
+                        ShowSideChart = true;
 
-                    // Pie chart is only for all-positive values, else bar chart
-                    if ( points.All(x => x.Item2 >= 0) )
-                        Chart = ChartConfig.CreatePieChart(points, palette);
+                        var col = Report.TotalColumn;
+                        var rows = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
+                        var points = rows.Select(row => (row.Name, (int)(Report[col, row] * factor)));
+
+                        ChartConfig Chart = null;
+
+                        // Pie chart is only for all-positive values, else bar chart
+                        if (points.All(x => x.Item2 >= 0))
+                            Chart = ChartConfig.CreatePieChart(points, palette);
+                        else
+                            Chart = ChartConfig.CreateBarChart(points, palette);
+
+                        ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }); ;
+                    }
                     else
-                        Chart = ChartConfig.CreateBarChart(points, palette);
+                    {
+                        // If it has no total column, we will plot a multi-bar chart on the top using each series column as a series
+                        ShowTopChart = true;
 
-                    ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }); ;
+                        var rows = Report.RowLabelsOrdered.Where(x => !x.IsTotal && x.Parent == null);
+                        var labels = rows.Select(x => x.Name);
+
+                        var cols = Report.ColumnLabelsFiltered.Where(x => !x.IsTotal && !x.IsCalculated);
+                        var series = cols.Select(col => (col.Name, rows.Select(row => (int)(Report[col, row] * factor))));
+                        var Chart = ChartConfig.CreateMultiBarChart(labels, series, palette);
+
+                        // TODO: Need to scale down the budget based on the %complete of the year
+
+                        ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }); ;
+                    }
                 }
 
                 if (Report.WithMonthColumns)

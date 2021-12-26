@@ -36,9 +36,9 @@ namespace YoFi.AspNet.Pages
             _reportengine = reportengine;
         }
 
-        public IActionResult OnGet(string id)
+        public IActionResult OnGet([Bind] ReportParameters parms)
         {
-            Report = _reportengine.Build(new ReportParameters() { id = id });
+            Report = _reportengine.Build(parms);
 
             // Flip the sign on values unless they're ordred ascending
             decimal factor = Report.SortOrder == Report.SortOrders.TotalAscending ? 1m : -1m;
