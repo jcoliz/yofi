@@ -563,10 +563,9 @@ namespace YoFi.Core.Reports
                     LeafNodesOnly = oquery.LeafRowsOnly 
                 };
 
-            // Set a total value. This will establish the column's existence, even if there
-            // are no values
+            // Make sure the series column is in the report, even if a total is never entered
             if (null != seriescolumn)
-                Table[seriescolumn, TotalRow] = 0;
+                Table.ColumnLabels.Add(seriescolumn);
 
             // The pattern for collector rows
             var collectorregex = new Regex("(.+?)\\[(.+?)\\]");
