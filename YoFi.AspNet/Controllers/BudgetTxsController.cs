@@ -97,7 +97,7 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
         [ValidateBudgetTxExists]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Timestamp,Category,Memo")] BudgetTx item)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Amount,Timestamp,Category,Memo,Frequency")] BudgetTx item)
         {
             try
             {

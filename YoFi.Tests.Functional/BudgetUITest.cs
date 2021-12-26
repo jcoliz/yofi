@@ -138,6 +138,7 @@ namespace YoFi.Tests.Functional
             });
             await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("input:has-text(\"Create\")");
+            await Page.WaitForLoadStateAsync();
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
@@ -380,7 +381,6 @@ namespace YoFi.Tests.Functional
         /// User Story 1226: [User Can] Describe their budget with a single line item per category, which may repeat over the year
         /// -- User can create a new budget line item with an alternative frequency
         /// </summary>
-        /// <returns></returns>
         [TestMethod]
         public async Task CreateWithFrequency()
         {
@@ -404,14 +404,50 @@ namespace YoFi.Tests.Functional
             await Page.ThenIsOnPageAsync(MainPageName);
             await Page.SaveScreenshotToAsync(TestContext);
 
-            // And: The first item shown has the newly created memo
+            // And: The first item shown has the newly created frequency
+            await Page.SearchFor(testmarker);
             var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=freq");
             var text = await element.TextContentAsync();
             var actual = text.Trim();
 
             var frequency_text = "Monthly";
             Assert.AreEqual(frequency_text, actual);
-
         }
+
+        /// <summary>
+        /// User Story 1226: [User Can] Describe their budget with a single line item per category, which may repeat over the year
+        /// -- User can create a edit an existing budget line item to an alternative frequency
+        /// </summary>
+        [TestMethod]
+        public async Task EditFrequency()
+        {
+            // Given: One item created with no special frequency
+            await Create();
+
+            // When: Editing the memo to {newmemo}
+            var frequency_num = "12";
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Frequency", frequency_num },
+            });
+
+            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.ClickAsync("text=Save");
+
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // And: The first item shown has the newly created frequency
+            await Page.SearchFor(testmarker);
+            var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=freq");
+            var text = await element.TextContentAsync();
+            var actual = text.Trim();
+
+            var frequency_text = "Monthly";
+            Assert.AreEqual(frequency_text, actual);
+        }
+
     }
 }
