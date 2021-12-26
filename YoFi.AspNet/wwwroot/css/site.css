@@ -202,3 +202,21 @@ body.iscarousel {
     top: 18px;
     z-index: 1;
 }
+
+@keyframes delayVisibility {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.spinner-container {
+    animation: delayVisibility linear 1s; 
+}
