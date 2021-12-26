@@ -682,18 +682,14 @@ namespace YoFi.Core.Reports
                 // The peer-collection row will be in place before we get here. So if the peer-collector is not
                 // found, we are not peer-collecting.
                 // Peer collection is (currently) only done for series values.
-                if (seriescolumn != null)
+                if (seriescolumn != null && CollectorRows != null && CollectorRows.Any())
                 {
                     // Let's find any peer-collecting rows where we share a common category parent
                     var peerstart = parentid;
 
-                    /*
                     var depth = 1 + parentid.Count(x => x == ':');
                     var collectors = CollectorRows[depth];
-                    var compare  = collectors.Where(x => x.UniqueID.StartsWith(parentid));
-                    */
-
-                    var foundrows = RowLabels.Where(x => x.Collector != null && x.UniqueID.StartsWith(parentid) && ( x.UniqueID.Count(y=>y==':') == 1 + parentid.Count(y=>y==':')));
+                    var foundrows = collectors.Where(x => x.UniqueID.StartsWith(parentid));
 
                     // Consider each peer-collector to see if it collects US
                     foreach(var collectorrow in foundrows)
