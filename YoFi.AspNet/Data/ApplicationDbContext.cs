@@ -26,6 +26,8 @@ namespace YoFi.AspNet.Data
             // Add your customizations after calling base.OnModelCreating(builder);
 
             builder.Entity<Split>().ToTable("Split");
+
+            builder.Entity<Transaction>().HasIndex(p => new { p.Timestamp, p.Category });
         }
 
         public DbSet<Transaction> Transactions { get; set; }

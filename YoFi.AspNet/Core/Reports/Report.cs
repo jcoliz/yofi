@@ -255,10 +255,12 @@ namespace YoFi.Core.Reports
         /// <returns>New report</returns>
         public Report TakeSlice(string rowname)
         {
+            var result = new Report();
+
             // Find the row
             var findrow = RowLabels.Where(x => x.Name == rowname && !x.IsTotal);
             if (!findrow.Any())
-                throw new ArgumentException("Row not found", nameof(rowname));
+                return result;
 
             var sliceparent = findrow.Single();
 
@@ -266,8 +268,6 @@ namespace YoFi.Core.Reports
             var includedrows = RowLabels.Where(x => x.DescendsFrom(sliceparent)).ToList();
 
             // Bring the columns of the old report over
-            var result = new Report();
-
             foreach (var column in ColumnLabelsFiltered)
                 if (!column.IsCalculated)
                 {

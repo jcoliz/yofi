@@ -119,7 +119,12 @@ namespace YoFi.Core.Reports
             return new List<NamedQuery>() {
                 new NamedQuery()
                 {
-                    Query = txs.Concat(splits),
+                    Query = txs, //.Concat(splits),
+                    IsMultiSigned = (top == null) && (excluded == null)
+                },
+                new NamedQuery()
+                {
+                    Query = splits,
                     IsMultiSigned = (top == null) && (excluded == null)
                 }
             };
