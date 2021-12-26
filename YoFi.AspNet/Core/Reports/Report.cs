@@ -528,7 +528,15 @@ namespace YoFi.Core.Reports
 
             //  2. Place. Place each incoming data point into a report cell.
             BuildPhase_Place(cells: selected, oquery: source);
+
+            // Update collector row labels
+            CollectorRows = RowLabels.Where(x => x.Collector != null).ToLookup(x => x.UniqueID.Count(y => y == ':'));
         }
+
+        /// <summary>
+        /// Collection of rows which collect the totals of other rows
+        /// </summary>
+        private ILookup<int,RowLabel> CollectorRows = null;
 
         /// <summary>
         /// Pre-calculated set of labels for month columns
@@ -648,9 +656,10 @@ namespace YoFi.Core.Reports
             {
                 // Find the actual parent ROW, given that ID. Or create if not exists
                 var parentid = string.Join(':', parentsplit);
-                var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
-                if (parentrow == null)
-                    parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
+
+                var parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };                
+                if (Table.RowLabels.TryGetValue(parentrow,out var foundrow))
+                    parentrow = foundrow;
                 row.Parent = parentrow;
 
                 // Do the accumlation of values into the parent row
@@ -677,6 +686,13 @@ namespace YoFi.Core.Reports
                 {
                     // Let's find any peer-collecting rows where we share a common category parent
                     var peerstart = parentid;
+
+                    /*
+                    var depth = 1 + parentid.Count(x => x == ':');
+                    var collectors = CollectorRows[depth];
+                    var compare  = collectors.Where(x => x.UniqueID.StartsWith(parentid));
+                    */
+
                     var foundrows = RowLabels.Where(x => x.Collector != null && x.UniqueID.StartsWith(parentid) && ( x.UniqueID.Count(y=>y==':') == 1 + parentid.Count(y=>y==':')));
 
                     // Consider each peer-collector to see if it collects US
@@ -824,7 +840,7 @@ namespace YoFi.Core.Reports
         /// <returns>Comparsion value. -1 if <paramref name="first"/> sorts before <paramref name="second"/></returns>
         int IComparer<RowLabel>.Compare(RowLabel first, RowLabel second) => CompareRows(first, second);
 
-        #endregion
+#endregion
     }
 
 
