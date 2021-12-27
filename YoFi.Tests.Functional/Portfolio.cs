@@ -31,6 +31,38 @@ namespace YoFi.Tests.Functional
         }
 
         /// <summary>
+        /// Home page for new visitors, second carousel slide
+        /// </summary>
+        [TestMethod]
+        public async Task _01A_Home_Carousel2()
+        {
+            // Navigate to https://www.try-yofi.com/Home
+            await NavigateToAsync("Home");
+
+            // Click the second carousel tab
+            await Page.ClickAsync("[aria-label=\"Slide 2\"]");
+
+            await Task.Delay(1000);
+            await Page.SaveScreenshotToAsync(TestContext);
+        }
+
+        /// <summary>
+        /// Home page for new visitors, third carousel slide
+        /// </summary>
+        [TestMethod]
+        public async Task _01B_Home_Carousel3()
+        {
+            // Navigate to https://www.try-yofi.com/Home
+            await NavigateToAsync("Home");
+
+            // Click the third carousel tab
+            await Page.ClickAsync("[aria-label=\"Slide 3\"]");
+
+            await Task.Delay(1000);
+            await Page.SaveScreenshotToAsync(TestContext);
+        }
+
+        /// <summary>
         /// Main page showing all transactions, one page at a time
         /// </summary>
         [TestMethod]
@@ -174,6 +206,27 @@ namespace YoFi.Tests.Functional
         }
 
         /// <summary>
+        /// Actions menu on Transactions Index. Other pages have a similar menu
+        /// </summary>
+        [TestMethod]
+        public async Task _09_Transactions_BulkEdit()
+        {
+            // Navigate to https://www.try-yofi.com/Transactions
+            await NavigateToAsync("Transactions");
+
+            // Dismiss the help text, if appears
+            await DismissHelpTest();
+
+            // Click "Actions" in the page navbar
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+
+            // Click "Bulk Edit" in the actions dropdown
+            await Page.ClickAsync("text=Bulk Edit");
+
+            await Page.SaveScreenshotToAsync(TestContext);
+        }
+
+        /// <summary>
         /// Main page of reports. Shows user an overview of their income/spending/saving on a single screen
         /// </summary>
         [TestMethod]
@@ -266,8 +319,8 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task _16_Reports_SideChart()
         {
-            // Navigate to https://www.try-yofi.com/Report/income
-            await NavigateToAsync("Report/income");
+            // Navigate to https://www.try-yofi.com/Report/expenses
+            await NavigateToAsync("Report/expenses");
 
             // Wait for the page to load fully in the background
             await Page.WaitForSelectorAsync("table.report");
