@@ -16,14 +16,16 @@ namespace YoFi.AspNet.Pages
     [Authorize(Policy = "CanRead")]
     public class ReportModel : PageModel, IReportNavbarViewModel, IReportAndChartViewModel
     {
-        public ReportModel(IReportEngine _reports)
+        public ReportModel(IReportEngine reports)
         {
-            reports = _reports;
+            _reports = reports;
         }
+
+        public string Title { get; set; }
 
         public ReportParameters Parameters { get; set; }
 
-        IEnumerable<ReportDefinition> IReportNavbarViewModel.Definitions => reports.Definitions;
+        IEnumerable<ReportDefinition> IReportNavbarViewModel.Definitions => _reports.Definitions;
 
         public Report Report { get; set; }
 
@@ -60,6 +62,8 @@ namespace YoFi.AspNet.Pages
                 else
                     parms.month = 12;
             }
+
+            Title = _reports.Definitions.Where(x=>x.id == parms.id).SingleOrDefault()?.Name ?? "Not Found";
         }
 
         /// <summary>
@@ -117,6 +121,6 @@ namespace YoFi.AspNet.Pages
         }
 
         private DateTime? _Now;
-        private readonly IReportEngine reports;
+        private readonly IReportEngine _reports;
     }
 }

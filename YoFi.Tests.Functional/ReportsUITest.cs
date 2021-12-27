@@ -48,6 +48,9 @@ namespace YoFi.Tests.Functional
             // And: Clicking on the detailed report link for the {income} report
             await Page.ClickAsync($"data-test-id={which}-detail");
 
+            // And: Waiting for the page to fully load
+            await Page.WaitForSelectorAsync("table.report");
+
             // Then: The total on the detailed report is the same as in the summary
             var summarytotal = await Page.QuerySelectorAsync("tr.report-row-total >> td.report-col-total");
             var summarytotaltext = (await summarytotal.TextContentAsync()).Trim();
@@ -86,6 +89,9 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("text=Choose a Report");
             await Page.ClickAsync($"text={expected}");
 
+            // And: Waiting for the page to fully load
+            await Page.WaitForSelectorAsync("table.report");
+
             // Then: The expected report is generated
             await Page.ThenIsOnPageAsync(expected);
             await Page.ThenH2Is(expected);
@@ -102,6 +108,9 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("id=dropdownMenuButtonColumns");
             await Page.ClickAsync("text=Hide");
 
+            // And: Waiting for the page to fully load
+            await Page.WaitForSelectorAsync("table.report");
+
             // Then: There is only the one "amount" column, which is the total
             await ThenColumnCountIs(1);
         }
@@ -115,6 +124,9 @@ namespace YoFi.Tests.Functional
             // When: Selecting "June"
             await Page.ClickAsync("id=dropdownMenuButtonMonth");
             await Page.ClickAsync("text=6 June");
+
+            // And: Waiting for the page to load
+            await Page.WaitForSelectorAsync("table.report");
 
             // Then: There are 7 amount columns, one for each month plus total
             // NOTE: This relies on the fact that the sample data generator creates data for all months
