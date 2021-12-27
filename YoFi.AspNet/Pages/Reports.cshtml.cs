@@ -7,6 +7,10 @@ using YoFi.Core.Reports;
 
 namespace YoFi.AspNet.Pages
 {
+    /// <summary>
+    /// Page which creates a summary of individual reports to provide an overall
+    /// picture of the users' finances
+    /// </summary>
     [Authorize(Policy = "CanRead")]
     public class ReportsModel : PageModel, IReportNavbarViewModel
     {

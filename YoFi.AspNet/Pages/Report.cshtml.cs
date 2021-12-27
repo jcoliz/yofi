@@ -13,6 +13,12 @@ using YoFi.Core.Reports;
 
 namespace YoFi.AspNet.Pages
 {
+    /// <summary>
+    /// Page to display a single report as described in the GET parameters
+    /// </summary>
+    /// <remarks>
+    /// Note this is just a shell. The report generation is done in the background by ReportPartial.
+    /// </remarks>
     [Authorize(Policy = "CanRead")]
     public class ReportModel : PageModel, IReportNavbarViewModel, IReportAndChartViewModel
     {

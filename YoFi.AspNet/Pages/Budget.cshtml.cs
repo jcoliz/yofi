@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Common.ChartJS;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using YoFi.Core.Reports;
@@ -16,6 +17,7 @@ namespace YoFi.AspNet.Pages
     /// <remarks>
     /// This is just a shell to background load a budget vs actual report
     /// </remarks>
+    [Authorize(Policy = "CanRead")]
     public class BudgetModel : PageModel
     {
         public void OnGet()

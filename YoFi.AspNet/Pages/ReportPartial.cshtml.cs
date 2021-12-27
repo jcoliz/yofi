@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Common.ChartJS;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using YoFi.Core.Reports;
@@ -14,9 +15,12 @@ namespace YoFi.AspNet.Pages
     /// Page which will return a partial view of the supplied report
     /// </summary>
     /// <remarks>
-    /// Currently only used by the budget report to do a background load. Could
-    /// easily be extended to cover ALL loads
+    /// This page does the actual work of generating the chart and budget.
+    /// The idea is that the outer frame with a loading spinner was delivered to the
+    /// user in response to their URL request, then in the background via AJAX, we are
+    /// asked to do the work.
     /// </remarks>
+    [Authorize(Policy = "CanRead")]
     public class ReportPartialModel : PageModel, IReportAndChartViewModel
     {
         private readonly IReportEngine _reportengine;
@@ -111,7 +115,14 @@ namespace YoFi.AspNet.Pages
                     ChartJson = JsonSerializer.Serialize(Chart, new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }); ;
                 }
 
-                return Task.FromResult(Partial("DisplayReportAndChart", this) as IActionResult);
+                //var result = Partial("DisplayReportAndChart", this as IReportAndChartViewModel);
+
+                var result = new PartialViewResult
+                {
+                    ViewName = "DisplayReportAndChart",
+                    ViewData = ViewData,
+                };
+                return Task.FromResult(result as IActionResult);
             }
             catch (KeyNotFoundException ex)
             {
