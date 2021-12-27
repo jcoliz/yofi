@@ -44,10 +44,12 @@ else
 {
     if (Model.ShowTopChart)
     {
-        <canvas id="chart"></canvas>
+        <canvas id="chart" class="mb-3"></canvas>
     }
 
-    @await Html.PartialAsync("DisplayReport", Model.Report)
+    <div class="bg-light border p-2">
+        @await Html.PartialAsync("DisplayReport", Model.Report)
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(Model.ChartJson))

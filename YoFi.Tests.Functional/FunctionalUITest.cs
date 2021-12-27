@@ -114,7 +114,10 @@ namespace YoFi.Tests.Functional
                 await Page.ClickAsync("data-test-id=btn-help-close");
                 await dialogautoshow.WaitForElementStateAsync(ElementState.Hidden);
                 await Page.WaitForSelectorAsync(".modal-backdrop", new Microsoft.Playwright.PageWaitForSelectorOptions() { State = Microsoft.Playwright.WaitForSelectorState.Hidden });
+
+#if VERBOSE_SCREENSHOTS
                 await Page.SaveScreenshotToAsync(TestContext, $"-autoshow");
+#endif
             }
         }
 
@@ -152,11 +155,11 @@ namespace YoFi.Tests.Functional
 
         public static async Task SaveScreenshotToAsync(this IPage page, TestContext testContext, string moment = null)
         {
-            var testname = $"{testContext.FullyQualifiedTestClassName} {testContext.TestName}";
+            var testname = $"{testContext.FullyQualifiedTestClassName.Split(".").Last()}/{testContext.TestName}";
             var counter = 1 + ScreenShotCounter.GetValueOrDefault(testname);
             ScreenShotCounter[testname] = counter;
 
-            var filename = $"Screenshot {testname} {counter:D4}{moment ?? String.Empty}.png";
+            var filename = $"Screenshot/{testname} {counter:D4}{moment ?? String.Empty}.png";
             await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true, FullPage = true });
             testContext.AddResultFile(filename);
         }
