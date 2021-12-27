@@ -70,7 +70,6 @@ namespace YoFi.Core.Reports
             // Removing yearprogress for now. It causes the query to be run TWICE,
             // making the report TWICE as long to run. Ugh. I will need to find a faster way.
 
-#if false
             // WholeYear needs to be handled after source is set
             if (definition.YearProgress == true)
             {
@@ -82,7 +81,7 @@ namespace YoFi.Core.Reports
 
                 report.Description += $" {yearprogress:P0}";
             }
-#endif
+
             // Special case for yoy report
 
             if (parameters.id == "yoy")
