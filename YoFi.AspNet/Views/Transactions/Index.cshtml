@@ -184,7 +184,7 @@
                     @if (item.HasSplits)
                     {
                         <a asp-action="Edit" asp-route-id="@item.ID" target="_blank" data-test-id="edit-splits">
-                            <i class="fa fa-edit"></i>
+                            <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
                         </a>
                     }
                     else
