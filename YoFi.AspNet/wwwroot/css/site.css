@@ -1,7 +1,10 @@
 ﻿:root {
     --color-1: #120a66;
+    --color-1-darker: #0A0638;
+    --color-1-lighter: #6458EE;
     --color-2: #CECCE0;
 }
+/* Lighter/darker is using coolors.co shades */
 
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
@@ -229,4 +232,20 @@ body.iscarousel {
 .btn-primary {
     background-color: var(--color-1);
     border-color: var(--color-1);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-1-darker);
+    border-color: var(--color-1-darker);
+}
+
+.btn-primary:focus {
+    background-color: var(--color-1-darker);
+    border-color: var(--color-1-darker);
+}
+
+.btn-primary:disabled, .btn-primary.disabled {
+    color: #fff;
+    background-color: var(--color-1-lighter);
+    border-color: var(--color-1-lighter);
 }
