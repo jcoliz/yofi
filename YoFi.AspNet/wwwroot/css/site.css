@@ -1,4 +1,9 @@
-﻿/* Wrapping element */
+﻿:root {
+    --color-1: #120a66;
+    --color-2: #CECCE0;
+}
+
+/* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
     padding-top: 15px;
@@ -17,14 +22,14 @@ up {
 
 .report tr.report-row-3 {
     font-weight: bold;
-    background-color: #38ace5;
+    background-color: #8985b3; 
     border-top-style: solid;
     border-bottom-style: solid;
 }
 
 .report tr.report-row-2 {
     font-weight: bold;
-    background-color: #caebfa;
+    background-color: var(--color-2);
 }
 
 .report tr.report-row-1 {
@@ -84,7 +89,7 @@ up {
 }
 
 .navbar-page {
-    background-color: #b1e6fc;
+    background-color: var(--color-2);
 }
 
 .form-group {
@@ -219,4 +224,9 @@ body.iscarousel {
 
 .spinner-container {
     animation: delayVisibility linear 1s; 
+}
+
+.btn-primary {
+    background-color: var(--color-1);
+    border-color: var(--color-1);
 }
