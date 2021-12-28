@@ -69,5 +69,26 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual("Log in", text);
         }
 
+        /// <summary>
+        /// User Story 1249: [User Can] Receive information about HTTP failures in a manner visually consistent with the rest of the site
+        /// </summary>
+        [TestMethod]
+        public async Task NotFound()
+        {
+            // Given: We are already logged in and starting at the root of the site
+            await GivenLoggedIn();
+
+            // When: Typing in a Url which does not exist
+            await Page.GotoAsync(Properties.Url + "/NotFound");
+
+            // Then: We land at HTTP Error
+            await Page.ThenIsOnPageAsync("HTTP Error 404");
+
+            // And: The page is displaying the error
+            var h1 = await Page.QuerySelectorAsync("h1");
+            Assert.IsNotNull(h1);
+            var h1_text = await h1.TextContentAsync();
+            Assert.AreEqual("404", h1_text);
+        }
     }
 }
