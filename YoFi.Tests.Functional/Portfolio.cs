@@ -428,5 +428,17 @@ namespace YoFi.Tests.Functional
 
             await Page.SaveScreenshotToAsync(TestContext);
         }
+
+        /// <summary>
+        /// HTTP Error Page
+        /// </summary>
+        [TestMethod]
+        public async Task _40_HttpError()
+        {
+            // Navigate to https://www.try-yofi.com/Payees
+            await NavigateToAsync("StatusCode?e=404");
+
+            await Page.SaveScreenshotToAsync(TestContext);
+        }
     }
 }
