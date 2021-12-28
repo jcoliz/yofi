@@ -193,7 +193,7 @@ namespace YoFi.AspNet.Main
                 app.UseExceptionHandler("/Transactions/Error");
             }
 
-            app.UseStatusCodePages();
+            app.UseStatusCodePagesWithReExecute("/StatusCode","?e={0}");
 
             // https://stackoverflow.com/questions/41336783/set-culture-and-ui-culture-in-appsettings-json-asp-net-core-localization
             var locale = "en-US"; // Configuration["SiteLocale"];

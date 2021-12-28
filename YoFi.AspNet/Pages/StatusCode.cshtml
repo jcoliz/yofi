@@ -1,0 +1,13 @@
+﻿@page
+@model YoFi.AspNet.Pages.StatusCodeModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "HTTP Error " + Model.ErrorCode;
+}
+<div class="mt-2">
+    <h1 class="text-center" style="font-size:200px">@Model.ErrorCode</h1>
+    <h2 class="text-center">@Model.Reason</h2>
+</div>
+<div class="text-center mt-5">
+    <p><a class="btn btn-primary" asp-page="Home">Home Page &raquo;</a></p>
+</div>
