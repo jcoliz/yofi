@@ -435,7 +435,7 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task _40_HttpError()
         {
-            // Navigate to https://www.try-yofi.com/Payees
+            // Navigate to https://www.try-yofi.com/StatusCode?e=404
             await NavigateToAsync("StatusCode?e=404");
 
             await Page.SaveScreenshotToAsync(TestContext);
