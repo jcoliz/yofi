@@ -687,6 +687,26 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(principal, decimal.Parse(line1.Trim()));
         }
 
+        /// <summary>
+        /// [User Can] Choose from a prompt of recently-used transactions when typing just a few letters in any category input
+        /// </summary>
+        [TestMethod]
+        public async Task AutoComplete()
+        {
+            // Given: We are logged in and on the transactions page
+            // (Handled in SetUp)
+
+            // When: Typing a few letters into the search box
+            await Page.TypeAsync("[data-test-id=\"q\"]", "inc");
+
+            // Then: There is a drop-down list of the expected length showing options
+            var element = await Page.WaitForSelectorAsync("div.bootstrap-autocomplete");
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            var children = await element.QuerySelectorAllAsync("a");
+            Assert.AreEqual(5, children.Count);
+        }
+
         // TODO
 
         /// <summary>
@@ -746,5 +766,6 @@ namespace YoFi.Tests.Functional
 
             // Then: A matched category is there automatically
         }
+
     }
 }
