@@ -96,5 +96,34 @@ namespace YoFi.Tests.Pages
 
             Assert.IsTrue(result.Data.Datasets.All(x => x.Data.Count() == itemscount));
         }
+
+        [TestMethod]
+        public void CreateLineChart()
+        {
+            // Given: Some data
+            var itemscount = 20;
+            var labels = Enumerable.Range(0, itemscount).Select(x => x.ToString());
+
+            var seriescount = 10;
+            var series = Enumerable.Range(0, seriescount).Select
+            (
+                s => ($"Series {s}", Enumerable.Range(0, itemscount))
+            );
+
+            // When: Creating a multi bar chart from it
+            var result = ChartConfig.CreateLineChart(labels, series, ThreeColors);
+
+            // Then: It looks about right
+            Assert.AreEqual("line", result.Type);
+            Assert.AreEqual(itemscount, result.Data.Labels.Count());
+
+            Assert.AreEqual(ThreeColors.Count, result.Data.Datasets.Count());
+
+            var serieslabels = result.Data.Datasets.Select(x => x.Label);
+            var expectedlabels = Enumerable.Range(0, ThreeColors.Count).Select(s => $"Series {s}");
+            Assert.IsTrue(serieslabels.SequenceEqual(expectedlabels));
+
+            Assert.IsTrue(result.Data.Datasets.All(x => x.Data.Count() == itemscount));
+        }
     }
 }
