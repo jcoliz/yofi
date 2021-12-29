@@ -59,10 +59,12 @@ namespace YoFi.Core.Models
         {
             get
             {
-                if (Frequency < 2)
-                    return string.Empty;
+                if (Frequency < 0)
+                    return "Invalid";
                 else return Frequency switch
                 {
+                    0 => "Yearly",
+                    1 => "Yearly",
                     4 => "Quarterly",
                     12 => "Monthly",
                     52 => "Weekly",
@@ -80,6 +82,10 @@ namespace YoFi.Core.Models
                 };
             }
         }
+
+        static int DefaultFrequency => 1;
+
+        public enum FrequencyEnum { Yearly = 1, Quarterly = 4, Monthly = 12, Weekly = 52 };
 
         /// <summary>
         /// Additional information about this budget line item for reference

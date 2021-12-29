@@ -102,7 +102,7 @@
                     @Html.DisplayFor(modelItem => item.Memo)
                 </td>
                 <td data-test-id="freq">
-                    @item.FrequencyName
+                    @(item.Frequency > 1 ? item.FrequencyName : string.Empty)
                 </td>
                 <td style="text-align:right">
                     @Html.DisplayFor(modelItem => item.Amount)
