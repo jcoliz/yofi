@@ -81,8 +81,8 @@
         <form asp-action="BulkEdit" asp-route-o="@Model.OrderParameter" method="post">
             <div class="form-actions">
                 <p>
-                    Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete" autocomplete="off" />
-                    <input type="submit" value="OK" class="btn btn-primary" data-bs-toggle="tooltip" title="Submit" />
+                    Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete align-middle" autocomplete="off" />
+                    <input type="submit" value="OK" class="btn btn-primary"/>
                     <a asp-action="Index" asp-route-o="@Model.OrderParameter" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ToggleSelected" class="btn btn-outline-secondary">Cancel</a>
                 </p>
             </div>
