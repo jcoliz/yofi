@@ -12,9 +12,9 @@
             beforeSend: xsrf,
             type: "POST",
             error: function (request, status, error) {
-                // Swallow 403 errors. User doesn't have permission to post a state change
+                // Swallow 401 & 403 errors. User doesn't have permission to post a state change
                 // but we don't have to bug them about it
-                if (request.status != 403)
+                if (![401,403].includes(request.status))
                     alert(status + ": " + error);
             }
         });
