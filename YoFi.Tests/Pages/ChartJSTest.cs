@@ -125,5 +125,20 @@ namespace YoFi.Tests.Pages
 
             Assert.IsTrue(result.Data.Datasets.All(x => x.Data.Count() == itemscount));
         }
+
+        [DataRow(int.MaxValue, 0, 0, 1.0)]
+        [DataRow(int.MinValue, 0, 0, 1.0)]
+        [DataRow(0, int.MaxValue, 0, 1.0)]
+        [DataRow(0, int.MinValue, 0, 1.0)]
+        [DataRow(0, 0, int.MaxValue, 1.0)]
+        [DataRow(0, 0, int.MinValue, 1.0)]
+        [DataRow(0, 0, 0, double.MaxValue)]
+        [DataRow(0, 0, 0, double.MinValue)]
+        [DataTestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void BadChartColors(int r, int g, int b, double alpha)
+        {
+            var color = new ChartColor(r, g, b, alpha);
+        }
     }
 }
