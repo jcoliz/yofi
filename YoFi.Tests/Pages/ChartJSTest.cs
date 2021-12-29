@@ -51,7 +51,7 @@ namespace YoFi.Tests.Pages
             var count = ChartConfig.MaxSegments * 2;
             var data = Enumerable.Range(0, count).Select(x => (x.ToString(), x));
 
-            // When: Creating a pie cahrt from it
+            // When: Creating a bar chart from it
             var result = ChartConfig.CreateBarChart(data, ThreeColors);
 
             // Then: It looks about right
@@ -65,6 +65,36 @@ namespace YoFi.Tests.Pages
 
             var expectedlabels = Enumerable.Range(0, ChartConfig.MaxSegments - 1).Select(x => x.ToString());
             Assert.IsTrue(expectedlabels.SequenceEqual(result.Data.Labels.Take(ChartConfig.MaxSegments - 1)));
+        }
+        [TestMethod]
+        public void CreateMultiBarChart()
+        {
+            // Given: Some data
+            var itemscount = 20;
+            var labels = Enumerable.Range(0, itemscount).Select(x =>x.ToString());
+
+            var seriescount = 10;
+            var series = Enumerable.Range(0, seriescount).Select
+            (
+                s => ($"Series {s}",Enumerable.Range(0,itemscount))
+            );
+
+            // When: Creating a multi bar chart from it
+            var result = ChartConfig.CreateMultiBarChart(labels, series, ThreeColors);
+
+            // Then: It looks about right
+            Assert.AreEqual("bar", result.Type);
+            Assert.AreEqual(itemscount, result.Data.Labels.Count());
+
+            // This is actually wrong. It limits the SERIES to how many colors we have to represent
+            // DATA points. Ugh.
+            Assert.AreEqual(ThreeColors.Count, result.Data.Datasets.Count());
+
+            var serieslabels = result.Data.Datasets.Select(x => x.Label);
+            var expectedlabels = Enumerable.Range(0, ThreeColors.Count).Select(s => $"Series {s}");
+            Assert.IsTrue(serieslabels.SequenceEqual(expectedlabels));
+
+            Assert.IsTrue(result.Data.Datasets.All(x => x.Data.Count() == itemscount));
         }
     }
 }
