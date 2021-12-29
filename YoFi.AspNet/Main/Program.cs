@@ -13,9 +13,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using YoFi.AspNet.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace YoFi.AspNet.Main
 {
+    [ExcludeFromCodeCoverage]
     public class Program
     {
         private static readonly Queue<string> logme = new Queue<string>();

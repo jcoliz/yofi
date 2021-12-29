@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
@@ -28,6 +29,7 @@ using System.Threading.Tasks;
 
 namespace YoFi.AspNet.Main
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         private readonly Queue<string> logme = new Queue<string>();
