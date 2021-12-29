@@ -381,13 +381,17 @@ namespace YoFi.Tests.Functional
         /// User Story 1226: [User Can] Describe their budget with a single line item per category, which may repeat over the year
         /// -- User can create a new budget line item with an alternative frequency
         /// </summary>
-        [TestMethod]
-        public async Task CreateWithFrequency()
+        
+        [DataRow("1","")]
+        [DataRow("4", "Quarterly")]
+        [DataRow("12", "Monthly")]
+        [DataRow("52", "Weekly")]
+        [DataTestMethod]
+        public async Task CreateWithFrequency(string number, string text)
         {
             // Given: We are already logged in and on the budget page
 
             // When: Creating a new item with a Memo
-            var frequency_num = "12";
             await Page.ClickAsync("#dropdownMenuButtonAction");
             await Page.ClickAsync("text=Create New");
             await Page.FillFormAsync(new Dictionary<string, string>()
@@ -395,8 +399,8 @@ namespace YoFi.Tests.Functional
                 { "Category", NextCategory },
                 { "Timestamp", "2021-12-31" },
                 { "Amount", "100" },
-                { "Frequency", frequency_num },
             });
+            await Page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { number });
             await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("input:has-text(\"Create\")");
 
@@ -406,12 +410,21 @@ namespace YoFi.Tests.Functional
 
             // And: The first item shown has the newly created frequency
             await Page.SearchFor(testmarker);
-            var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=freq");
-            var text = await element.TextContentAsync();
-            var actual = text.Trim();
+            var freq = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=freq");
+            var freqtext = await freq.TextContentAsync();
+            var actual = freqtext.Trim();
 
-            var frequency_text = "Monthly";
-            Assert.AreEqual(frequency_text, actual);
+            Assert.AreEqual(text, actual);
+
+            /*
+                await page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { "4" });
+                // Select 52
+                await page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { "52" });
+                // Select 12
+                await page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { "12" });
+                // Select 1
+                await page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { "1" });
+             */
         }
 
         /// <summary>
