@@ -363,49 +363,32 @@ namespace YoFi.Core.Repositories
             if (string.IsNullOrEmpty(q))
                 return Enumerable.Empty<String>();
 
-            const int numresults = 10;
+            try
+            {
+                const int numresults = 10;
 
-            // Look for top N recent categories in transactions, first.
-            var txd = All.Where(x => x.Timestamp > DateTime.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
+                // Look for top N recent categories in transactions, first.
+                var txd = All.Where(x => x.Timestamp > DateTime.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
 
-            // There are also some categories in splits. Get the top N there too.
-            var spd = Splits.Where(x => x.Transaction.Timestamp > DateTime.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
+                // There are also some categories in splits. Get the top N there too.
+                var spd = Splits.Where(x => x.Transaction.Timestamp > DateTime.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
 
-            // Merge the results
+                // Merge the results
 
-            // https://stackoverflow.com/questions/2812545/how-do-i-sum-values-from-two-dictionaries-in-c
-            var query = txd.Concat(spd).GroupBy(x => x.Key).Select(x => new { Key = x.Key, Value = x.Sum(g => g.Value) }).OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key);
+                // Bug AB#1251: Because of the latest index changes I can't concat transaction and split queries on the server side anymore. I have to do it on the client.
+                var txresult = await _queryExecution.ToListNoTrackingAsync(txd.GroupBy(x => x.Key).Select(x => new { x.Key, Value = x.Sum(g => g.Value) }));
+                var splitresult = await _queryExecution.ToListNoTrackingAsync(spd.GroupBy(x => x.Key).Select(x => new { x.Key, Value = x.Sum(g => g.Value) }));
 
-            var result = await _queryExecution.ToListNoTrackingAsync(query);
+                // Need a rather complex merge here because splits and transactions COULD have the same category, and those need to be summed here first
+                var result = txresult.Concat(splitresult).ToLookup(x=>x.Key).Select(x=> new { x.Key, Value = x.Sum(y => y.Value) }).OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key).ToList();
 
-            return result;
-
-            /* Just want to say how impressed I am with myself for getting this query to entirely run on server side :D
-             * 
-                  SELECT TOP(@__p_1) [t3].[Key]
-                  FROM (
-                      SELECT [t0].[Category] AS [Key], [t0].[c] AS [Value]
-                      FROM (
-                          SELECT TOP(@__p_1) [t].[Category], COUNT(*) AS [c]
-                          FROM [Transactions] AS [t]
-                          WHERE ([t].[Timestamp] > DATEADD(month, CAST(-12 AS int), GETDATE())) AND ((@__q_0 = N'') OR (CHARINDEX(@__q_0, [t].[Category]) > 0))
-                          GROUP BY [t].[Category]
-                          ORDER BY COUNT(*) DESC
-                      ) AS [t0]
-                      UNION ALL
-                      SELECT [t2].[Category] AS [Key], [t2].[c] AS [Value]
-                      FROM (
-                          SELECT TOP(@__p_1) [s].[Category], COUNT(*) AS [c]
-                          FROM [Split] AS [s]
-                          INNER JOIN [Transactions] AS [t1] ON [s].[TransactionID] = [t1].[ID]
-                          WHERE ([t1].[Timestamp] > DATEADD(month, CAST(-12 AS int), GETDATE())) AND ((@__q_0 = N'') OR (CHARINDEX(@__q_0, [s].[Category]) > 0))
-                          GROUP BY [s].[Category]
-                          ORDER BY COUNT(*) DESC
-                      ) AS [t2]
-                  ) AS [t3]
-                  GROUP BY [t3].[Key]
-                  ORDER BY SUM([t3].[Value]) DESC
-            */
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // TODO: I should log this
+                return Enumerable.Empty<String>();
+            }
         }
 
         private readonly IAsyncQueryExecution _queryExecution;
