@@ -21,6 +21,8 @@ namespace Common.ChartJS
 
         public ChartOptions Options { get; } = new ChartOptions();
 
+        public const int MaxSegments = 7;
+
         public static ChartConfig CreatePieChart(IEnumerable<(string Label,int Data)> points, IEnumerable<ChartColor> colors)
         {
             var result = new ChartConfig() { Type = "doughnut" };
@@ -82,15 +84,14 @@ namespace Common.ChartJS
         }
         private void FillSingle(IEnumerable<(string Label, int Data)> points, IEnumerable<ChartColor> colors)
         {
-            const int maxpoints = 7;
 
             // Reduce to maxitems. Put the rest under "others"
             var numitems = points.Count();
-            if (numitems > maxpoints)
+            if (numitems > MaxSegments)
             {
-                numitems = maxpoints;
-                var total = points.Skip(maxpoints - 1).Sum(x => x.Data);
-                points = points.Take(maxpoints - 1).Append(("Others", total));
+                numitems = MaxSegments;
+                var total = points.Skip(MaxSegments - 1).Sum(x => x.Data);
+                points = points.Take(MaxSegments - 1).Append(("Others", total));
             }
 
             // Set labels
