@@ -415,36 +415,25 @@ namespace YoFi.Tests.Functional
             var actual = freqtext.Trim();
 
             Assert.AreEqual(text, actual);
-
-            /*
-                await page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { "4" });
-                // Select 52
-                await page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { "52" });
-                // Select 12
-                await page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { "12" });
-                // Select 1
-                await page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { "1" });
-             */
         }
 
         /// <summary>
         /// User Story 1226: [User Can] Describe their budget with a single line item per category, which may repeat over the year
         /// -- User can create a edit an existing budget line item to an alternative frequency
         /// </summary>
-        [TestMethod]
-        public async Task EditFrequency()
+        [DataRow("1", "")]
+        [DataRow("4", "Quarterly")]
+        [DataRow("12", "Monthly")]
+        [DataRow("52", "Weekly")]
+        [DataTestMethod]
+        public async Task EditFrequency(string frequency_num, string frequency_text)
         {
             // Given: One item created with no special frequency
             await Create();
 
-            // When: Editing the memo to {newmemo}
-            var frequency_num = "12";
+            // When: Editing the memo to {newfrequency}
             await Page.ClickAsync("[aria-label=\"Edit\"]");
-            await Page.FillFormAsync(new Dictionary<string, string>()
-            {
-                { "Frequency", frequency_num },
-            });
-
+            await Page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { frequency_num });
             await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("text=Save");
 
@@ -458,12 +447,11 @@ namespace YoFi.Tests.Functional
             var text = await element.TextContentAsync();
             var actual = text.Trim();
 
-            var frequency_text = "Monthly";
             Assert.AreEqual(frequency_text, actual);
         }
 
         /// <summary>
-        /// [User can] Upload new payees to a spreadsheet which was created in Excel
+        /// [User can] Upload new budget line items from a spreadsheet which was created in Excel
         /// </summary>
         [TestMethod]
         public async Task Upload()
