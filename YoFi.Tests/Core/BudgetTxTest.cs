@@ -68,7 +68,22 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(expected, actual);
         }
 
+        [DataRow("Garbage",1)]
         [DataTestMethod]
+        public void StringToFrequency(string frequency, int expected)
+        {
+            // Given: An empty budgettx, with an invalid frequency
+            var tx = new BudgetTx() { Frequency = -1 };
+
+            // When: Setting the frequency using the "FrequencyName" field
+            tx.FrequencyName = frequency;
+
+            // Then: The resulting int value matches the {expected} value
+            var actual = tx.Frequency;
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
         public void FrequencyToEnum()
         {
             // Stepping through the frequency enum
@@ -77,6 +92,18 @@ namespace YoFi.Tests.Core
                 // Ensure that the string is returned as expected for each value
                 var e = (BudgetTx.FrequencyEnum)o;
                 FrequencyToString((int)e, e.ToString());
+            }
+        }
+
+        [TestMethod]
+        public void EnumToFrequency()
+        {
+            // Stepping through the frequency enum
+            foreach (var o in Enum.GetValues(typeof(BudgetTx.FrequencyEnum)))
+            {
+                // Ensure that the string is returned as expected for each value
+                var e = (BudgetTx.FrequencyEnum)o;
+                StringToFrequency(e.ToString(), (int)e);
             }
         }
     }
