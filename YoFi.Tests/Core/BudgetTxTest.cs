@@ -51,5 +51,33 @@ namespace YoFi.Tests.Core
             // This evenly divides on months, so should always be on the same day of week
             Assert.IsTrue(reportables.All(x => x.Timestamp.DayOfWeek == reportables.First().Timestamp.DayOfWeek));
         }
+
+        [DataRow(-1,"Invalid")]
+        [DataRow(0, "Yearly")]
+        [DataRow(26, "26")]
+        [DataTestMethod]
+        public void FrequencyToString(int frequency, string expected)
+        {
+            // Given: A budgettx with the given {frequency}
+            var tx = new BudgetTx() { Frequency = frequency };
+
+            // When: Asking for the word representation of it
+            var actual = tx.FrequencyName;
+
+            // Then: That matches the {expected} value
+            Assert.AreEqual(expected, actual);
+        }
+
+        [DataTestMethod]
+        public void FrequencyToEnum()
+        {
+            // Stepping through the frequency enum
+            foreach(var o in Enum.GetValues(typeof(BudgetTx.FrequencyEnum)))
+            {
+                // Ensure that the string is returned as expected for each value
+                var e = (BudgetTx.FrequencyEnum)o;
+                FrequencyToString((int)e, e.ToString());
+            }
+        }
     }
 }

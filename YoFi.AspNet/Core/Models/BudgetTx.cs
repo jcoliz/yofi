@@ -83,8 +83,6 @@ namespace YoFi.Core.Models
             }
         }
 
-        static int DefaultFrequency => 1;
-
         public enum FrequencyEnum { Yearly = 1, Quarterly = 4, Monthly = 12, Weekly = 52 };
 
         /// <summary>
