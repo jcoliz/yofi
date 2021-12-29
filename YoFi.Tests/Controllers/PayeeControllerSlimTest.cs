@@ -13,8 +13,8 @@ namespace YoFi.Tests.Controllers.Slim
     [TestClass]
     public class PayeeControllerSlimTest: BaseControllerSlimTest<Payee>
     {
-        private PayeesController payeeController => base.controller as PayeesController;
-        private MockPayeeRepository payeeRepository => base.repository as MockPayeeRepository;
+        private PayeesController itemController => base.controller as PayeesController;
+        private MockPayeeRepository itemRepository => base.repository as MockPayeeRepository;
 
         [TestInitialize]
         public void SetUp()
@@ -28,7 +28,7 @@ namespace YoFi.Tests.Controllers.Slim
         {
             // When: Creating a payee from a given transaction id
             var txid = 1234;
-            var actionresult = await payeeController.Create(txid);
+            var actionresult = await itemController.Create(txid);
 
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<Payee>(viewresult.Model);
@@ -42,7 +42,7 @@ namespace YoFi.Tests.Controllers.Slim
         {
             // When: Creating a payee from a given transaction id
             var txid = 1234;
-            var actionresult = await payeeController.CreateModal(txid);
+            var actionresult = await itemController.CreateModal(txid);
 
             var viewresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
             var model = Assert.That.IsOfType<Payee>(viewresult.Model);
@@ -55,7 +55,7 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task CreateFromTxNotFound()
         {
             // When: Creating a payee from a non-existant id
-            var actionresult = await payeeController.Create(0);
+            var actionresult = await itemController.Create(0);
 
             // Then: The result is 'not found'
             Assert.That.IsOfType<NotFoundResult>(actionresult);
@@ -69,7 +69,7 @@ namespace YoFi.Tests.Controllers.Slim
 
             // When: Retrieving details for a selected item to edit it
             var selected = repository.All.Skip(1).First();
-            var actionresult = await payeeController.EditModal(selected.ID);
+            var actionresult = await itemController.EditModal(selected.ID);
 
             var viewresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
             var model = Assert.That.IsOfType<Payee>(viewresult.Model);
@@ -82,28 +82,28 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task BulkEdit()
         {
             // When: Calling BulkEdit
-            var actionresult = await payeeController.BulkEdit("Test");
+            var actionresult = await itemController.BulkEdit("Test");
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
             Assert.AreEqual("Index", redirresult.ActionName);
 
             // And: Bulk edit operation was performed
-            Assert.IsTrue(payeeRepository.WasBulkEditCalled);
+            Assert.IsTrue(itemRepository.WasBulkEditCalled);
         }
 
         [TestMethod]
         public async Task BulkDelete()
         {
             // When: Calling BulkDelete
-            var actionresult = await payeeController.BulkDelete();
+            var actionresult = await itemController.BulkDelete();
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
             Assert.AreEqual("Index", redirresult.ActionName);
 
             // And: Bulk edit operation was performed
-            Assert.IsTrue(payeeRepository.WasBulkDeleteCalled);
+            Assert.IsTrue(itemRepository.WasBulkDeleteCalled);
         }
     }
 }

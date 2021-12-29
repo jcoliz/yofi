@@ -22,7 +22,7 @@ namespace YoFi.Tests.Controllers.Slim
     [TestClass]
     public class BudgetTxControllerSlimTest : BaseControllerSlimTest<BudgetTx>
     {
-        private BudgetTxsController budgettxController => base.controller as BudgetTxsController;
+        private BudgetTxsController itemController => base.controller as BudgetTxsController;
         private MockBudgetTxRepository itemRepository  => base.repository as MockBudgetTxRepository;
 
         [TestInitialize]
@@ -40,7 +40,7 @@ namespace YoFi.Tests.Controllers.Slim
             repository.AddItems(numitems);
 
             // When: Calling Index page 1
-            var actionresult = await budgettxController.Index(p: 1);
+            var actionresult = await itemController.Index(p: 1);
 
             // Then: View is returned
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
@@ -66,7 +66,7 @@ namespace YoFi.Tests.Controllers.Slim
             repository.AddItems(itemcount);
 
             // When: Calling Index page 2
-            var actionresult = await budgettxController.Index(p: 2);
+            var actionresult = await itemController.Index(p: 2);
 
             // Then: View is returned
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
@@ -92,7 +92,7 @@ namespace YoFi.Tests.Controllers.Slim
 
             // When: Calling index q={word}
             var word = "1";
-            var actionresult = await budgettxController.Index(q: word);
+            var actionresult = await itemController.Index(q: word);
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<List<BudgetTx>>(viewresult.Model);
 
@@ -104,7 +104,7 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task BulkDelete()
         {
             // When: Calling BulkDelete
-            var actionresult = await budgettxController.BulkDelete();
+            var actionresult = await itemController.BulkDelete();
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);

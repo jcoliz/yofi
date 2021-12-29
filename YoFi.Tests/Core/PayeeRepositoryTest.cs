@@ -30,7 +30,7 @@ namespace YoFi.Tests.Core
 
         protected override int CompareKeys(Payee x, Payee y) => x.Name.CompareTo(y.Name);
 
-        PayeeRepository payeeRepository => base.repository as PayeeRepository;
+        PayeeRepository itemRepository => base.repository as PayeeRepository;
 
         [TestInitialize]
         public void SetUp()
@@ -53,7 +53,7 @@ namespace YoFi.Tests.Core
 
             // When: Applying bulk edit to the repository using a new category
             var newcategory = "New Category";
-            await payeeRepository.BulkEditAsync(newcategory);
+            await itemRepository.BulkEditAsync(newcategory);
 
             // Then: The selected items have the new category
             Assert.IsTrue(subset.All(x => x.Category == newcategory));
@@ -81,7 +81,7 @@ namespace YoFi.Tests.Core
             context.AddRange(all);
 
             // When: Applying bulk edit to the repository using null
-            await payeeRepository.BulkEditAsync(null);
+            await itemRepository.BulkEditAsync(null);
 
             // And: All items are unchanged
             Assert.IsTrue(expected.SequenceEqual(repository.All));
@@ -105,7 +105,7 @@ namespace YoFi.Tests.Core
             context.AddRange(all);
 
             // When: Bulk deleting the selected items
-            await payeeRepository.BulkDeleteAsync();
+            await itemRepository.BulkDeleteAsync();
 
             // Then: The number of items is total minus deleted
             Assert.AreEqual(numtotalitems-numdeleteditems,repository.All.Count());
@@ -124,7 +124,7 @@ namespace YoFi.Tests.Core
             context.Add(transaction);
 
             // When: Creating a new payee from that transaction
-            var actual = await payeeRepository.NewFromTransactionAsync(transaction.ID);
+            var actual = await itemRepository.NewFromTransactionAsync(transaction.ID);
 
             // Then: The resulting payee matches category & payee name
             Assert.AreEqual(payee, actual.Name);
