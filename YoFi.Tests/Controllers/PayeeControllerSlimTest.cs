@@ -105,6 +105,5 @@ namespace YoFi.Tests.Controllers.Slim
             // And: Bulk edit operation was performed
             Assert.IsTrue(payeeRepository.WasBulkDeleteCalled);
         }
-
     }
 }

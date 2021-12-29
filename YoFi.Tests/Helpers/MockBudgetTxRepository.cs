@@ -26,10 +26,13 @@ namespace YoFi.Tests.Helpers
         public override BudgetTx MakeItem(int x) => new BudgetTx() { ID = x, Amount = x, Category = x.ToString(), Timestamp = defaulttimestamp };
 
         public override IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? All : All.Where(x => x.Category.Contains(q));
+        public bool WasBulkDeleteCalled { get; private set; } = false;
 
         public Task BulkDeleteAsync()
         {
-            throw new NotImplementedException();
+            // We don't need to DO anything here.
+            WasBulkDeleteCalled = true;
+            return Task.CompletedTask;
         }
     }
 }

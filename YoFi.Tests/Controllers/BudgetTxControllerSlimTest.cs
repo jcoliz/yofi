@@ -23,6 +23,7 @@ namespace YoFi.Tests.Controllers.Slim
     public class BudgetTxControllerSlimTest : BaseControllerSlimTest<BudgetTx>
     {
         private BudgetTxsController budgettxController => base.controller as BudgetTxsController;
+        private MockBudgetTxRepository itemRepository  => base.repository as MockBudgetTxRepository;
 
         [TestInitialize]
         public void SetUp()
@@ -98,6 +99,19 @@ namespace YoFi.Tests.Controllers.Slim
             // Then: Only the exoected items are returned
             var expected = repository.All.Where(x => x.Category.Contains(word));
             Assert.IsTrue(expected.SequenceEqual(model));
+        }
+        [TestMethod]
+        public async Task BulkDelete()
+        {
+            // When: Calling BulkDelete
+            var actionresult = await budgettxController.BulkDelete();
+
+            // Then: Returns a redirection to Index
+            var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
+            Assert.AreEqual("Index", redirresult.ActionName);
+
+            // And: Bulk edit operation was performed
+            Assert.IsTrue(itemRepository.WasBulkDeleteCalled);
         }
     }
 }
