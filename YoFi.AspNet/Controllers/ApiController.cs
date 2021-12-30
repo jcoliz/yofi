@@ -1,6 +1,7 @@
 ﻿using Common.AspNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core;
@@ -9,8 +10,9 @@ using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
 {
-    [Produces("application/json")]
     [Route("api")]
+    [Produces("application/json")]
+    [SkipStatusCodePages]
     public class ApiController : Controller
     {
         private readonly IAsyncQueryExecution _queryExecution;
@@ -33,8 +35,15 @@ namespace YoFi.AspNet.Controllers
         public IActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
         {
             // TODO: Make this Async()
-            var json = reports.Build(parms).ToJson();
-            return Content(json,"application/json");
+            try
+            {
+                var json = reports.Build(parms).ToJson();
+                return Content(json, "application/json");
+            }
+            catch (KeyNotFoundException)
+            {
+                return new NotFoundResult();
+            }
         }
 
         [HttpGet("txi")]

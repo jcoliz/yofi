@@ -11,8 +11,9 @@ using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Controllers
 {
-    [Produces("application/json")]
     [Route("ajax/tx")]
+    [Produces("application/json")]
+    [SkipStatusCodePages]
     public class AjaxTransactionController: Controller
     {
         private readonly ITransactionRepository _repository;

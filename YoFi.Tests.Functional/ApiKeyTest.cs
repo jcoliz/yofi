@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -32,7 +33,6 @@ namespace YoFi.Tests.Functional
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64);
         }
 
-
         [TestMethod]
         public async Task GetTxi()
         {
@@ -51,6 +51,58 @@ namespace YoFi.Tests.Functional
             // And: All items contain the query parameter in the payee
             var payees = response.EnumerateArray().Select(x => x.GetProperty("Payee").GetString());
             Assert.IsTrue(payees.All(x => x.Contains(q)));
+        }
+
+        [TestMethod]
+        public async Task GetNotFound()
+        {
+            // When: Calling the API with a transaction ID that doesn't exist
+            var response = await client.GetAsync("0");
+
+            // Then: The result code is "404 not found"
+            Assert.AreEqual(System.Net.HttpStatusCode.NotFound,response.StatusCode);
+
+            // And: The response body is empty
+            Assert.AreEqual(0, response.Content.Headers.ContentLength);
+        }
+
+        [TestMethod]
+        public async Task ReportNotFound()
+        {
+            // When: Calling the API with a transaction ID that doesn't exist
+            var response = await client.GetAsync("ReportV2/notfound");
+
+#if false
+            var stream = await response.Content.ReadAsStreamAsync();
+            using var sr = new StreamReader(stream);
+            var body = await sr.ReadToEndAsync();
+#endif
+            
+            // Then: The result code is "404 not found"
+            Assert.AreEqual(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+
+            // And: The response body is empty
+            Assert.AreEqual(0, response.Content.Headers.ContentLength);
+        }
+
+        [TestMethod]
+        public async Task AuthFails()
+        {
+            // Given: A bad auth header
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", "Wrong");
+
+            // When: Calling an API that otherwise works
+            var q = "Ralphs";
+            var response = await client.GetAsync($"txi/?q={q}");
+
+            // Then: The response is 401 "Unauthorized"
+            Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
+
+            // And: The body is a helpful error message containing the error code "E5"
+            var stream = await response.Content.ReadAsStreamAsync();
+            using var sr = new StreamReader(stream);
+            var body = await sr.ReadToEndAsync();
+            Assert.IsTrue(body.Contains("E5"));
         }
 
         public async Task<JsonElement> WhenRequesting(string url)

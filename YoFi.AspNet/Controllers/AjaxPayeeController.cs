@@ -10,8 +10,9 @@ namespace YoFi.AspNet.Controllers
     /// <summary>
     /// Fulfill AJAX requests related to Payees
     /// </summary>
-    [Produces("application/json")]
     [Route("ajax/payee")]
+    [Produces("application/json")]
+    [SkipStatusCodePages]
     public class AjaxPayeeController: Controller
     {
         /// <summary>
