@@ -1,7 +1,11 @@
 ﻿using Common.DotNet.Test;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -35,10 +39,10 @@ namespace YoFi.Tests.Pages
         public void SetUp()
         {
             var engine = new Mock<IReportEngine>();
-            engine.Setup(x => x.Build(It.IsAny<ReportParameters>())).Returns((ReportParameters p) => new Report() { Name = p.id, Source = Enumerable.Empty<NamedQuery>() });
+            engine.Setup(x => x.Build(It.IsAny<ReportParameters>())).Returns((ReportParameters p) => new Report() { Name = p.id, Source = Enumerable.Empty<NamedQuery>(), WithMonthColumns = p.showmonths ?? false, WithTotalColumn = !(p.id=="nototal") });
             engine.Setup(x => x.Definitions).Returns(new List<ReportDefinition>() { new ReportDefinition() { Name = "Mock" } });
-            pagemodel = new ReportPartialModel(engine.Object);
             outermodel = new ReportModel(engine.Object);
+            pagemodel = new ReportPartialModel(engine.Object);
         }
 
         [TestMethod]
@@ -154,6 +158,28 @@ namespace YoFi.Tests.Pages
             // Then: The page is showing all 12 months
             // because we've asked for a prior year
             Assert.AreEqual(12, outermodel.Parameters.month);
+        }
+
+        [TestMethod]
+        public async Task MultiBarChart()
+        {
+            var parameters = new ReportParameters() { id = "nototal" };
+            var actionresult = await pagemodel.OnGetAsync(parameters);
+            Assert.That.IsOfType<PartialViewResult>(actionresult);
+
+            Assert.IsTrue(pagemodel.ShowTopChart);
+            Assert.IsTrue(pagemodel.ChartJson.Contains("bar"));
+        }
+
+        [TestMethod]
+        public async Task LineChart()
+        {
+            var parameters = new ReportParameters() { showmonths = true };
+            var actionresult = await pagemodel.OnGetAsync(parameters);
+            Assert.That.IsOfType<PartialViewResult>(actionresult);
+
+            Assert.IsTrue(pagemodel.ShowTopChart);
+            Assert.IsTrue(pagemodel.ChartJson.Contains("line"));
         }
     }
 }
