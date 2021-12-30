@@ -140,5 +140,34 @@ namespace YoFi.Tests.Pages
         {
             var color = new ChartColor(r, g, b, alpha);
         }
+
+        [DataRow("ABCDEFXX")]
+        [DataRow("XYZABC")]
+        [DataRow("ABCDABCDABCD")]
+        [DataRow("#ABCD")]
+        [DataRow("ABCD")]
+        [DataTestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void BadChartColorsHex(string hex)
+        {
+            var color = new ChartColor(hex);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void BadChartColorNull()
+        {
+            var color = new ChartColor(null as string);
+        }
+
+        [DataRow("#00112233")]
+        [DataRow("#FFFFFFFF")]
+        [TestMethod]
+        public void OkChartColorsHex(string hex)
+        {
+            var color = new ChartColor(hex);
+
+            Assert.AreEqual(hex, color.ToString());
+        }
     }
 }
