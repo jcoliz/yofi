@@ -181,6 +181,13 @@ namespace YoFi.Tests.Attributes
             var attribute = new ValidateBudgetTxExistsAttribute();
             Assert.IsNotNull(attribute);
         }
+
+        [TestMethod]
+        public void SplitExists()
+        {
+            var attribute = new ValidateSplitExistsAttribute();
+            Assert.IsNotNull(attribute);
+        }
     }
 
 }
