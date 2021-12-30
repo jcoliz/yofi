@@ -78,14 +78,21 @@ namespace Common.ChartJS
         {
             return $"#{Red:X2}{Green:X2}{Blue:X2}{Alpha:X2}";
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ChartColor color &&
+                   Red == color.Red &&
+                   Green == color.Green &&
+                   Blue == color.Blue &&
+                   Alpha == color.Alpha;
+        }
     }
 
     public class ChartColorJsonConverter : JsonConverter<ChartColor>
     {
-        public override ChartColor Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            throw new NotImplementedException();
-        }
+        public override ChartColor Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+            new ChartColor(reader.GetString());
 
         public override void Write(Utf8JsonWriter writer, ChartColor value, JsonSerializerOptions options)
         {

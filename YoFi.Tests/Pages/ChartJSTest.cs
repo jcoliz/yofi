@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 namespace YoFi.Tests.Pages
 {
@@ -160,14 +161,30 @@ namespace YoFi.Tests.Pages
             var color = new ChartColor(null as string);
         }
 
+        [DataRow("#12345678")]
         [DataRow("#00112233")]
         [DataRow("#FFFFFFFF")]
-        [TestMethod]
+        [DataRow("#00000000")]
+        [DataTestMethod]
         public void OkChartColorsHex(string hex)
         {
             var color = new ChartColor(hex);
 
             Assert.AreEqual(hex, color.ToString());
+        }
+
+        [DataRow("#12345678")]
+        [DataRow("#00112233")]
+        [DataRow("#FFFFFFFF")]
+        [DataRow("#00000000")]
+        [DataTestMethod]
+        public void ColorToJson(string hex)
+        {
+            var color = new ChartColor(hex);
+            var json = JsonSerializer.Serialize(color);
+            var actual = JsonSerializer.Deserialize<ChartColor>(json);
+
+            Assert.AreEqual(color, actual);
         }
     }
 }
