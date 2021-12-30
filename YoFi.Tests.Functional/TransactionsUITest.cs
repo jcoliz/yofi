@@ -549,7 +549,6 @@ namespace YoFi.Tests.Functional
             // Given: We are starting at the payee index page
 
             await WhenNavigatingToPage("Payees");
-            var originalitems = await Page.GetTotalItemsAsync();
 
             // And: Creating a new item
 

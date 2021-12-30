@@ -384,7 +384,7 @@ namespace YoFi.Core.Repositories
 
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // TODO: I should log this
                 return Enumerable.Empty<String>();

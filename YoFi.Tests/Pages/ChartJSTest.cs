@@ -11,9 +11,9 @@ namespace YoFi.Tests.Pages
     [TestClass]
     public class ChartJSTest
     {
-        private static ChartColor Red = new ChartColor(1, 0, 0, 1.0);
-        private static ChartColor Green = new ChartColor(0, 1, 0, 1.0);
-        private static ChartColor Blue  = new ChartColor(0, 0, 1, 1.0);
+        private static readonly ChartColor Red = new ChartColor(1, 0, 0, 1.0);
+        private static readonly ChartColor Green = new ChartColor(0, 1, 0, 1.0);
+        private static readonly ChartColor Blue  = new ChartColor(0, 0, 1, 1.0);
 
         private static List<ChartColor> ThreeColors;
 
@@ -139,7 +139,7 @@ namespace YoFi.Tests.Pages
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void BadChartColors(int r, int g, int b, double alpha)
         {
-            var color = new ChartColor(r, g, b, alpha);
+            new ChartColor(r, g, b, alpha);
         }
 
         [DataRow("ABCDEFXX")]
@@ -151,14 +151,14 @@ namespace YoFi.Tests.Pages
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void BadChartColorsHex(string hex)
         {
-            var color = new ChartColor(hex);
+            new ChartColor(hex);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void BadChartColorNull()
         {
-            var color = new ChartColor(null as string);
+            new ChartColor(null as string);
         }
 
         [DataRow("#12345678")]

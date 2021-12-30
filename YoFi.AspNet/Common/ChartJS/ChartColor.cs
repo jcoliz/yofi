@@ -42,16 +42,14 @@ namespace Common.ChartJS
                 throw new ArgumentNullException(nameof(hex));
 
             if (hex[0] == '#')
-                hex = hex.Substring(1);
+                hex = hex[1..];
 
             if (hex.Length != 6 && hex.Length != 8)
                 throw new ArgumentOutOfRangeException(nameof(hex), "Expected 6 or 8 hex characters");
 
             byte parse(string param, int from)
             {
-                byte result = default;
-
-                if (!byte.TryParse(hex.Substring(from, 2), NumberStyles.HexNumber, null, out result))
+                if (!byte.TryParse(hex.Substring(from, 2), NumberStyles.HexNumber, null, out byte result))
                     throw new ArgumentOutOfRangeException(param, "Can't convert from hex");
 
                 return result;
@@ -86,6 +84,11 @@ namespace Common.ChartJS
                    Green == color.Green &&
                    Blue == color.Blue &&
                    Alpha == color.Alpha;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Red, Green, Blue, Alpha);
         }
     }
 
