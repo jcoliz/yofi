@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using YoFi.Core;
 using YoFi.Core.Reports;
+using Common.DotNet;
 
 namespace YoFi.AspNet.Pages
 {
@@ -22,9 +23,10 @@ namespace YoFi.AspNet.Pages
     [Authorize(Policy = "CanRead")]
     public class ReportModel : PageModel, IReportNavbarViewModel, IReportAndChartViewModel
     {
-        public ReportModel(IReportEngine reports)
+        public ReportModel(IReportEngine reports, IClock clock)
         {
             _reports = reports;
+            _clock = clock;
         }
 
         public string Title { get; set; }
@@ -59,12 +61,12 @@ namespace YoFi.AspNet.Pages
 
             if (!parms.month.HasValue)
             {
-                bool iscurrentyear = (Year == Now.Year);
+                bool iscurrentyear = (Year == _clock.Now.Year);
 
                 // By default, month is the current month when looking at the current year.
                 // When looking at previous years, default is the whole year (december)
                 if (iscurrentyear)
-                    parms.month = Now.Month;
+                    parms.month = _clock.Now.Month;
                 else
                     parms.month = 12;
             }
@@ -88,11 +90,11 @@ namespace YoFi.AspNet.Pages
                     var value = HttpContext?.Session.GetString(nameof(Year));
                     if (string.IsNullOrEmpty(value))
                     {
-                        Year = Now.Year;
+                        Year = _clock.Now.Year;
                     }
                     else
                     {
-                        _Year = (int.TryParse(value, out int y)) ? y : Now.Year;
+                        _Year = (int.TryParse(value, out int y)) ? y : _clock.Now.Year;
                     }
                 }
 
@@ -108,25 +110,7 @@ namespace YoFi.AspNet.Pages
         }
         private int? _Year = null;
 
-        /// <summary>
-        /// Current datetime
-        /// </summary>
-        /// <remarks>
-        /// Which may be overridden by tests
-        /// </remarks>
-        public DateTime Now
-        {
-            get
-            {
-                return _Now ?? DateTime.Now;
-            }
-            set
-            {
-                _Now = value;
-            }
-        }
-
-        private DateTime? _Now;
         private readonly IReportEngine _reports;
+        private readonly IClock _clock;
     }
 }

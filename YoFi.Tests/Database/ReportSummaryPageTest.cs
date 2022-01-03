@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Common.DotNet;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace YoFi.Tests.Database
     public class ReportSummaryPageTest
     {
         private ApplicationDbContext context;
+        private TestClock clock;
 
         [TestInitialize]
         public void SetUp()
@@ -33,6 +35,9 @@ namespace YoFi.Tests.Database
                 .Options;
 
             context = new ApplicationDbContext(options);
+
+            // By default it's 2021, which is the year all our sample data is generated for
+            clock = new TestClock() { Now = new System.DateTime(2021, 1, 1) };
         }
 
         [TestCleanup]
@@ -57,7 +62,7 @@ namespace YoFi.Tests.Database
             context.SaveChanges();
 
             // When: Getting the "Reports" Page
-            var reportspage = new ReportsModel(new ReportBuilder(context));
+            var reportspage = new ReportsModel(new ReportBuilder(context,clock),clock);
             reportspage.OnGet(new ReportParameters() { year = 2021, month = 12 });
 
             // Then: All the totals are as expected
@@ -76,7 +81,7 @@ namespace YoFi.Tests.Database
             context.SaveChanges();
 
             // When: Getting the "Reports" Page for the NEXT year, where there is no data
-            var reportspage = new ReportsModel(new ReportBuilder(context));
+            var reportspage = new ReportsModel(new ReportBuilder(context,clock),clock);
             reportspage.OnGet(new ReportParameters() { year = 2022, month = 12 });
 
             // Then: All the totals are as expected

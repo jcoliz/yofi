@@ -22,6 +22,7 @@ namespace YoFi.Tests.Core.SampleGen
         public void SetUp()
         {
             generator = new SampleDataGenerator();
+            SampleDataPattern.Year = 2021;
         }
 
         [TestMethod]

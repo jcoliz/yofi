@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.DotNet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,12 +23,14 @@ namespace YoFi.Core.Reports
         /// Constructor
         /// </summary>
         /// <param name="context">Where to pull report data from</param>
-        public ReportBuilder(IDataContext context)
+        public ReportBuilder(IDataContext context, IClock clock)
         {
             _qbuilder = new QueryBuilder(context);
+            _clock = clock;
         }
 
         private readonly QueryBuilder _qbuilder;
+        private readonly IClock _clock;
 
         /// <summary>
         /// Build the report from the given <paramref name="parameters"/>
@@ -40,7 +43,7 @@ namespace YoFi.Core.Reports
 
             // TODO: Need a test-definable year!
             int Month = _qbuilder.Month = parameters.month ?? 12;
-            int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
+            int Year = _qbuilder.Year = parameters.year ?? _clock.Now.Year;
 
             if (!Definitions.Any(x => x.id == parameters.id))
                 throw new KeyNotFoundException($"Unable to find report {parameters.id}");
@@ -172,7 +175,7 @@ namespace YoFi.Core.Reports
 
             // Fixup parameter
             if (!Parameters.month.HasValue)
-                Parameters.month = DateTime.Now.Month;
+                Parameters.month = _clock.Now.Month;
             // TODO: Need a test-definable date!
 
             // User Story AB#1120: Summary report optimization: Run the report once, then extract pieces of the report out of the master

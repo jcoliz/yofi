@@ -22,6 +22,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using Dto = YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
 using Transaction = YoFi.Core.Models.Transaction;
+using Common.DotNet;
 
 namespace YoFi.Tests.Database
 {
@@ -36,6 +37,8 @@ namespace YoFi.Tests.Database
         DbSet<Transaction> dbset => helper.dbset;
 
         TestAzureStorage storage;
+
+        TestClock clock;
 
         public TestContext TestContext { get; set; }
 
@@ -133,7 +136,8 @@ namespace YoFi.Tests.Database
             helper.SetUp();
             storage = new TestAzureStorage();
             _repository = new TransactionRepository(helper.context, new EFCoreAsyncQueryExecution(), storage: storage);
-            helper.controller = new TransactionsController(_repository, new EFCoreAsyncQueryExecution());
+            clock = new TestClock(); // Use DateTime now for now
+            helper.controller = new TransactionsController(_repository, new EFCoreAsyncQueryExecution(), clock);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;
 

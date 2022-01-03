@@ -1,4 +1,5 @@
-﻿using Common.NET.Test;
+﻿using Common.DotNet;
+using Common.NET.Test;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,6 +20,7 @@ namespace YoFi.Tests.Database
     {
         public ApplicationDbContext context = null;
         public ReportBuilder builder = null;
+        private TestClock clock = null;
 
         IEnumerable<Transaction> Transactions1000;
         IEnumerable<BudgetTx> BudgetTxs;
@@ -43,7 +45,8 @@ namespace YoFi.Tests.Database
 
             context = new ApplicationDbContext(options);
 
-            builder = new ReportBuilder(context);
+            clock = new TestClock() { Now = new DateTime(2000, 1, 1) };
+            builder = new ReportBuilder(context,clock);
 
             var txs = LoadTransactions();
             context.Transactions.AddRange(txs);

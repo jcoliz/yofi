@@ -10,6 +10,12 @@ namespace YoFi.Tests.Core.SampleGen
     [TestClass]
     public class GeneratorDefinitionTest
     {
+        [TestInitialize]
+        public void SetUp()
+        {
+            SampleDataPattern.Year = 2021;
+        }
+
         [TestCleanup]
         public void Cleanup()
         {

@@ -1,4 +1,5 @@
-﻿using Common.DotNet.Test;
+﻿using Common.DotNet;
+using Common.DotNet.Test;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -34,14 +35,16 @@ namespace YoFi.Tests.Pages
 
         private ReportModel outermodel;
         private ReportPartialModel pagemodel;
+        private TestClock clock;
 
         [TestInitialize]
         public void SetUp()
         {
+            clock = new TestClock();
             var engine = new Mock<IReportEngine>();
             engine.Setup(x => x.Build(It.IsAny<ReportParameters>())).Returns((ReportParameters p) => new Report() { Name = p.id, Source = Enumerable.Empty<NamedQuery>(), WithMonthColumns = p.showmonths ?? false, WithTotalColumn = !(p.id=="nototal") });
             engine.Setup(x => x.Definitions).Returns(new List<ReportDefinition>() { new ReportDefinition() { Name = "Mock" } });
-            outermodel = new ReportModel(engine.Object);
+            outermodel = new ReportModel(engine.Object,clock);
             pagemodel = new ReportPartialModel(engine.Object);
         }
 
@@ -91,7 +94,7 @@ namespace YoFi.Tests.Pages
 
             // When: Getting the page with a report for a previous year
             var parameters = new ReportParameters() { year = now - 1 };
-            outermodel.Now = new DateTime(now,1,1);
+            clock.Now = new DateTime(now,1,1);
             outermodel.OnGet(parameters);
 
             var actionresult = await pagemodel.OnGetAsync(outermodel.Parameters);
@@ -138,7 +141,7 @@ namespace YoFi.Tests.Pages
         {
             // Given: It is now certain {year}
             var year = 2019;
-            outermodel.Now = new DateTime(year, 1, 1);
+            clock.Now = new DateTime(year, 1, 1);
 
             // And: The "Year" set in the session is a previous year
             var sessionyear = year - 1;

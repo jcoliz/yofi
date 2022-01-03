@@ -1,4 +1,5 @@
-﻿using Common.DotNet.Test;
+﻿using Common.DotNet;
+using Common.DotNet.Test;
 using Common.EFCore;
 using Common.NET.Test;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,8 @@ namespace YoFi.Tests.Database
 
         public TestAzureStorage storage = null;
 
+        private TestClock clock = null;
+
         public ILoggerFactory logfact = LoggerFactory.Create(builder => 
         {
         builder
@@ -47,6 +50,7 @@ namespace YoFi.Tests.Database
             context = new ApplicationDbContext(options);
             storage = new TestAzureStorage();
             controller = new ApiController(new EFCoreAsyncQueryExecution());
+            clock = new TestClock();
         }
 
         [TestCleanup]
@@ -63,22 +67,22 @@ namespace YoFi.Tests.Database
 
         async Task AddFiveTransactions()
         {            
-            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m });
-            context.Transactions.Add(new Transaction() { Category = "AA:AA", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m });
-            context.Transactions.Add(new Transaction() { Category = "CC:AA", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m });
-            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m });
-            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m });
+            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "3", Timestamp = clock.Now + TimeSpan.FromDays(2), Amount = 100m });
+            context.Transactions.Add(new Transaction() { Category = "AA:AA", Payee = "2", Timestamp = clock.Now + TimeSpan.FromDays(3), Amount = 200m });
+            context.Transactions.Add(new Transaction() { Category = "CC:AA", Payee = "5", Timestamp = clock.Now + TimeSpan.FromDays(0), Amount = 300m });
+            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "1", Timestamp = clock.Now + TimeSpan.FromDays(4), Amount = 400m });
+            context.Transactions.Add(new Transaction() { Category = "BB:AA", Payee = "4", Timestamp = clock.Now + TimeSpan.FromDays(2), Amount = 500m });
             
             await context.SaveChangesAsync();
         }
 
         async Task AddFiveBudgetTxs()
         {
-            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 06, 01), Category = "BB:BB", Amount = 100m });
-            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 06, 01), Category = "BB:AA", Amount = 200m });
-            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 05, 01), Category = "CC:AA", Amount = 300m });
-            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 05, 01), Category = "AA:AA", Amount = 400m });
-            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(DateTime.Now.Year, 05, 01), Category = "AA:BB", Amount = 500m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(clock.Now.Year, 06, 01), Category = "BB:BB", Amount = 100m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(clock.Now.Year, 06, 01), Category = "BB:AA", Amount = 200m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(clock.Now.Year, 05, 01), Category = "CC:AA", Amount = 300m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(clock.Now.Year, 05, 01), Category = "AA:AA", Amount = 400m });
+            context.BudgetTxs.Add(new BudgetTx() { Timestamp = new System.DateTime(clock.Now.Year, 05, 01), Category = "AA:BB", Amount = 500m });
 
             await context.SaveChangesAsync();
         }
@@ -105,12 +109,13 @@ namespace YoFi.Tests.Database
         [TestMethod]
         public async Task ReportV2()
         {
-            int year = DateTime.Now.Year;
+            int year = 2021;
+            clock.Now = new DateTime(year, 1, 1);
 
             await AddFiveTransactions();
             await context.SaveChangesAsync();
 
-            var actionresult = controller.ReportV2( new ReportParameters() { id = "all" }, new ReportBuilder(context) );
+            var actionresult = controller.ReportV2( new ReportParameters() { id = "all" }, new ReportBuilder(context,clock) );
             var okresult = Assert.That.IsOfType<ContentResult>(actionresult);
             var report = okresult.Content;
 
@@ -135,12 +140,13 @@ namespace YoFi.Tests.Database
         [TestMethod]
         public async Task ReportV2export()
         {
-            int year = DateTime.Now.Year;
+            int year = 2021;
+            clock.Now = new DateTime(year, 1, 1);
 
             await AddFiveBudgetTxs();
             await AddFiveTransactions();
 
-            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
+            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context,clock));
             var okresult = Assert.That.IsOfType<ContentResult>(actionresult);
             var report = okresult.Content;
 
@@ -165,7 +171,7 @@ namespace YoFi.Tests.Database
         [TestMethod]
         public void ReportV2exportEmpty()
         {
-            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context));
+            var actionresult = controller.ReportV2(new ReportParameters() { id = "export" }, new ReportBuilder(context,clock));
             var okresult = Assert.That.IsOfType<ContentResult>(actionresult);
             var report = okresult.Content;
 

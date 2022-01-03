@@ -85,7 +85,18 @@ namespace YoFi.Core.SampleGen
         /// <summary>
         /// What is the year we are operating on?
         /// </summary>
-        public static int Year { get; set; } = DateTime.Now.Year;
+        public static int Year 
+        { 
+            get
+            {
+                return _Year ?? throw new ApplicationException("Must set a year first");
+            }
+            set
+            {
+                _Year = value;
+            }
+        }
+        private static int? _Year;
 
         /// <summary>
         /// How much jitter exactly is there in a given kind of amount jitter?

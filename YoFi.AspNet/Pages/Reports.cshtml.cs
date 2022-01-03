@@ -1,3 +1,4 @@
+using Common.DotNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -20,19 +21,21 @@ namespace YoFi.AspNet.Pages
 
         IEnumerable<ReportDefinition> IReportNavbarViewModel.Definitions => _reports.Definitions;
 
-        public ReportsModel(IReportEngine reports)
+        public ReportsModel(IReportEngine reports, IClock clock)
         {
             _reports = reports;
+            _clock = clock;
         }
 
         private readonly IReportEngine _reports;
+        private readonly IClock _clock;
 
         public void OnGet([Bind("year,month")] ReportParameters parms)
         {
             Parameters = parms;
             Parameters.id = "summary";
             if (!Parameters.month.HasValue)
-                Parameters.month = DateTime.Now.Month;
+                Parameters.month = _clock.Now.Month;
 
             // TODO: Make this Async()
             Reports = new List<IEnumerable<IDisplayReport>>(_reports.BuildSummary(Parameters));

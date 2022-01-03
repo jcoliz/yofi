@@ -1,5 +1,6 @@
 ﻿using Ardalis.Filters;
 using Common.AspNet;
+using Common.DotNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,10 +29,11 @@ namespace YoFi.AspNet.Controllers
 
         #region Constructor
 
-        public TransactionsController(ITransactionRepository repository, IAsyncQueryExecution queryExecution)
+        public TransactionsController(ITransactionRepository repository, IAsyncQueryExecution queryExecution, IClock clock)
         {
             _repository = repository;
             _queryExecution = queryExecution;
+            _clock = clock;
         }
 
         #endregion
@@ -531,6 +533,7 @@ namespace YoFi.AspNet.Controllers
 
         private readonly ITransactionRepository _repository;
         private readonly IAsyncQueryExecution _queryExecution;
+        private readonly IClock _clock;
 
         /// <summary>
         /// Current default year
@@ -551,11 +554,11 @@ namespace YoFi.AspNet.Controllers
                     var value = this.HttpContext?.Session.GetString(nameof(Year));
                     if (string.IsNullOrEmpty(value))
                     {
-                        Year = DateTime.Now.Year;
+                        Year = _clock.Now.Year;
                     }
                     else
                     {
-                        _Year = (int.TryParse(value, out int y)) ? y : DateTime.Now.Year;
+                        _Year = (int.TryParse(value, out int y)) ? y : _clock.Now.Year;
                     }
                 }
 
