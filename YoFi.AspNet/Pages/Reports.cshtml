@@ -20,9 +20,11 @@
 
     @foreach (var section in Model.Reports)
     {
-        <div class="col-lg-6 p-4">
+    <div class="col-lg-6 p-4">
 
-            @foreach (var report in section)
+        @foreach (var report in section)
+        {
+            if (report.RowLabelsOrdered.Where(x => !x.IsTotal).Any())
             {
                 <div class="bg-light border p-2 mb-4 row">
                     @await Html.PartialAsync("DisplayReport", report)
@@ -32,6 +34,7 @@
                     }
                 </div>
             }
-        </div>
+        }
+    </div>
     }
 </div>
