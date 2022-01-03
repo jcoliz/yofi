@@ -24,6 +24,8 @@ namespace YoFi.Tests.Database
             context = new ApplicationDbContext(options);
 
             generator = new SampleDataGenerator();
+
+            SampleDataPattern.Year = 2021;
         }
 
         [TestCleanup]
