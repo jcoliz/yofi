@@ -250,6 +250,9 @@ namespace YoFi.Tests.Functional
             await Page.ThenIsOnPageAsync(MainPageName);
             await Page.SaveScreenshotToAsync(TestContext);
 
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext);
+
             // And: The first item shown has the newly created memo
             var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=memo");
             var text = await element.TextContentAsync();
@@ -281,6 +284,9 @@ namespace YoFi.Tests.Functional
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            await Page.SearchFor(testmarker);
             await Page.SaveScreenshotToAsync(TestContext);
 
             // And: The first item shown has the newly created memo
@@ -430,6 +436,10 @@ namespace YoFi.Tests.Functional
         {
             // Given: One item created with no special frequency
             await Create();
+
+            // And: Page displaying only that item
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Editing the memo to {newfrequency}
             await Page.ClickAsync("[aria-label=\"Edit\"]");
