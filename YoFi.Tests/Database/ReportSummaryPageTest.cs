@@ -49,6 +49,8 @@ namespace YoFi.Tests.Database
         [TestMethod]
         public async Task ReportsGet()
         {
+            // TODO: Need to make a separate test that checks against only having transactions in the previous year
+
             // Given: A complete sample data set
             await SampleDataStore.LoadSingleAsync();
             context.Transactions.AddRange(SampleDataStore.Single.Transactions);
@@ -64,6 +66,25 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(-31872m, totals["Taxes"]);
             Assert.AreEqual(-64619.77m, totals["Expenses"]);
             Assert.AreEqual(-32600.16m, totals["Explicit Savings"]);
+        }
+        [TestMethod]
+        public async Task ReportsGetNewYear()
+        {
+            // Given: A complete sample data set
+            await SampleDataStore.LoadSingleAsync();
+            context.Transactions.AddRange(SampleDataStore.Single.Transactions);
+            context.SaveChanges();
+
+            // When: Getting the "Reports" Page for the NEXT year, where there is no data
+            var reportspage = new ReportsModel(new ReportBuilder(context));
+            reportspage.OnGet(new ReportParameters() { year = 2022, month = 12 });
+
+            // Then: All the totals are as expected
+            var totals = reportspage.Reports.SelectMany(x => x).ToDictionary(x => x.Name, x => x.GrandTotal);
+            Assert.AreEqual(0, totals["Income"]);
+            Assert.AreEqual(0, totals["Taxes"]);
+            Assert.AreEqual(0, totals["Expenses"]);
+            Assert.AreEqual(0, totals["Explicit Savings"]);
         }
     }
 }

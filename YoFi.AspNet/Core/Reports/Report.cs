@@ -255,7 +255,7 @@ namespace YoFi.Core.Reports
         /// <returns>New report</returns>
         public Report TakeSlice(string rowname)
         {
-            var result = new Report();
+            var result = new Report() { Name = rowname };
 
             // Find the row
             var findrow = RowLabels.Where(x => x.Name == rowname && !x.IsTotal);
@@ -283,7 +283,6 @@ namespace YoFi.Core.Reports
                 else
                     result.AddCustomColumn(column);
 
-            result.Name = rowname;
             result.NumLevels = NumLevels - 1;
 
             return result;
@@ -302,10 +301,10 @@ namespace YoFi.Core.Reports
         /// <returns>New report</returns>
         public Report TakeSliceExcept(IEnumerable<string> rownames)
         {
+            var result = new Report();
+
             // Find the parent rows to exclude
             var excludedparentrows = RowLabels.Where(x => rownames.Contains(x.Name) && x.Parent == null && !x.IsTotal);
-            if (!excludedparentrows.Any())
-                throw new ArgumentException("Rows not found", nameof(rownames));
 
             // Find all the rows (parent and child) to exclude
             var excluded = excludedparentrows.SelectMany(x => RowLabels.Where(y => y.IsTotal || y.Equals(x) || y.DescendsFrom(x)));
@@ -314,8 +313,6 @@ namespace YoFi.Core.Reports
             var includedrows = RowLabels.Except(excluded);
 
             // Bring the columns of the old report over
-            var result = new Report();
-
             foreach (var column in ColumnLabelsFiltered)
                 if (!column.IsCalculated)
                 {

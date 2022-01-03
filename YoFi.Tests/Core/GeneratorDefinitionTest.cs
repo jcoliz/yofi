@@ -399,6 +399,9 @@ namespace YoFi.Tests.Core.SampleGen
                 Loan = "{ \"interest\": \"Interest\", \"amount\": 375000, \"rate\": 3, \"term\": 360, \"origination\": \"1/1/2010\" }"
             };
 
+            // And: It's 2021
+            SampleDataPattern.Year = 2021;
+
             // When: Generating transactions
             var actual = item.GetTransactions();
 

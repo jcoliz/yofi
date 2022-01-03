@@ -38,6 +38,7 @@ namespace YoFi.Core.Reports
         {
             var report = new Report();
 
+            // TODO: Need a test-definable year!
             int Month = _qbuilder.Month = parameters.month ?? 12;
             int Year = _qbuilder.Year = parameters.year ?? DateTime.Now.Year;
 
@@ -167,13 +168,16 @@ namespace YoFi.Core.Reports
             // Fixup parameter
             if (!Parameters.month.HasValue)
                 Parameters.month = DateTime.Now.Month;
+            // TODO: Need a test-definable date!
 
             // User Story AB#1120: Summary report optimization: Run the report once, then extract pieces of the report out of the master
             //
             // The idea here is to build a single report doing all the SQL queries just ONCE, then carve it up into
             // the various reports we want to display
 
-            var all = Build(new ReportParameters() { id = "all-summary", month = Parameters.month });
+            var buildparms = new ReportParameters() { id = "all-summary", month = Parameters.month, year = parms.year };
+            var all = Build(buildparms);
+
             var result = new List<List<IDisplayReport>>();
 
             // Slice out the Income report
@@ -202,8 +206,8 @@ namespace YoFi.Core.Reports
                 (ColumnLabel.Total, taxesrow,       taxes),
                 (ColumnLabel.Total, RowLabel.Total, income + taxes),
                 (pctcol,            incomerow,      1m),
-                (pctcol,            taxesrow,       -taxes / income),
-                (pctcol,            RowLabel.Total, (income + taxes) / income)
+                (pctcol,            taxesrow,       (income == 0) ? 0 : -taxes / income),
+                (pctcol,            RowLabel.Total, (income == 0) ? 0 : (income + taxes) / income)
             });
             leftside.Add(netincomereport);
 
@@ -239,8 +243,8 @@ namespace YoFi.Core.Reports
                 (ColumnLabel.Total, expensesrow,    expenses),
                 (ColumnLabel.Total, RowLabel.Total, netincome + expenses),
                 (pctcol,            netincomerow,   1m),
-                (pctcol,            expensesrow,    -expenses / netincome),
-                (pctcol,            RowLabel.Total, (netincome + expenses) / netincome)
+                (pctcol,            expensesrow,    (netincome == 0) ? 0 : -expenses / netincome),
+                (pctcol,            RowLabel.Total, (netincome == 0) ? 0 : (netincome + expenses) / netincome)
             });
             rightside.Add(profitreport);
 
