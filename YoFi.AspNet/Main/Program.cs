@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using YoFi.AspNet.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+using Common.DotNet;
 
 namespace YoFi.AspNet.Main
 {
@@ -79,7 +80,8 @@ namespace YoFi.AspNet.Main
                 {
                     var configuration = services.GetRequiredService<IConfiguration>();
                     var context = services.GetRequiredService<ApplicationDbContext>();
-                    Data.Seed.AddSampleData(context, configuration);
+                    var clock = services.GetRequiredService<IClock>();
+                    Data.Seed.AddSampleData(context, configuration, clock);
                 }
                 catch (Exception ex)
                 {

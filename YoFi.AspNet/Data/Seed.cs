@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core.SampleGen;
 using Common.NET.Data;
+using Common.DotNet;
 
 namespace YoFi.AspNet.Data
 {
@@ -68,12 +69,14 @@ namespace YoFi.AspNet.Data
         /// ONLY IF: This is not a branded site, AND there is no data of any time already there
         /// </remarks>
         /// <returns></returns>
-        public static void AddSampleData(ApplicationDbContext context, IConfiguration Configuration)
+        public static void AddSampleData(ApplicationDbContext context, IConfiguration Configuration, IClock clock)
         {
             if (!Configuration.GetSection("Brand").Exists())
             {
                 if (! context.Transactions.Any() && ! context.Payees.Any() && ! context.BudgetTxs.Any() )
                 {
+                    SampleDataPattern.Year = clock.Now.Year;
+
                     // Load sample data
                     var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
                     var generator = new SampleDataGenerator();
