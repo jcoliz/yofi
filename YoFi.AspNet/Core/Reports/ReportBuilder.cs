@@ -75,10 +75,15 @@ namespace YoFi.Core.Reports
             if (definition.YearProgress == true)
             {
                 // What is the highest transaction in the "Actuals"?
-                var latesttime = report.Source.Where(x => x.Name == "Actual").First().Query.Max(x=>x.Timestamp);
+                var actualitems = report.Source.Where(x => x.Name == "Actual");
+                var yearprogress = 0.0;
+                if (actualitems.Any() && actualitems.First().Query.Any())
+                {
+                    var latesttime = actualitems.First().Query.Max(x => x.Timestamp);
 
-                // What % of the way is it through that year?
-                var yearprogress = (double)latesttime.DayOfYear / 365.0;
+                    // What % of the way is it through that year?
+                    yearprogress = (double)latesttime.DayOfYear / 365.0;
+                }
 
                 report.Description += $" {yearprogress:P0}";
             }
