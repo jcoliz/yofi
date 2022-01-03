@@ -12,6 +12,13 @@
     <h3>@Model.Report.Description</h3>
 }
 
+@if (!Model.Report.RowLabelsOrdered.Any(x=>!x.IsTotal))
+{
+    <p>No data found for selected timeframe.</p>
+}
+else
+{ 
+
 @*
     SIDE-BY-SIDE
 *@
@@ -59,4 +66,5 @@ else
     const setup = @Html.Raw(Model.ChartJson);
     const myChart = new Chart(ctx, setup);
     </script>
+}
 }
