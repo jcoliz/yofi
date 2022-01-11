@@ -6,3 +6,4 @@ $env:ConnectionStrings__DefaultConnection = "Data Source=(localdb)\MSSQLLocalDB;
 Start-Job -Name uitestsbg -ScriptBlock { dotnet run } -WorkingDirectory $(Get-Location)
 Pop-Location
 Remove-Item Env:\ConnectionStrings__DefaultConnection
+Remove-Item Env:\Clock__Now

@@ -9,3 +9,5 @@ Pop-Location
 dotnet test -s $settings
 Stop-Job -Name uitests
 Remove-Job -Name uitests
+Remove-Item Env:\ConnectionStrings__DefaultConnection
+Remove-Item Env:\Clock__Now
