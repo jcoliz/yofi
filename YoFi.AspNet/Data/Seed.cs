@@ -85,10 +85,23 @@ namespace YoFi.AspNet.Data
                     generator.GeneratePayees();
                     generator.GenerateBudget();
 
+                    // Make all the transactions hidden
+                    foreach (var t in generator.Transactions)
+                        t.Hidden = true;
+
                     // Insert into database
                     context.Transactions.AddRange(generator.Transactions);
                     context.Payees.AddRange(generator.Payees);
                     context.BudgetTxs.AddRange(generator.BudgetTxs);
+                    context.SaveChanges();
+                }
+
+                // Un-hide any transactions which are up until today
+                var unhideme = context.Transactions.Where(x => x.Timestamp <= clock.Now && x.Hidden == true);
+                if (unhideme.Any())
+                {
+                    foreach (var t in unhideme)
+                        t.Hidden = false;
                     context.SaveChanges();
                 }
             }
