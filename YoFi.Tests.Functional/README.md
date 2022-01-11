@@ -45,6 +45,19 @@ do not load the app code at all.
 
 ## How to use it
 
+### Set up a dedicated LocalDB
+
+It's best to isolate functional tests into their own LocalDB database, so they don't mix with data in your
+primary development instance. I created a database called "yofi-test-functional" using the SQL Server
+Object Explorer in Visual Studio. Then, I copied the Connection String out of the Properties pane for
+that database. That connection string needs to go in startbg.ps1 and runtests.ps1.
+
+### Be aware of the clock
+
+The functional tests expect all transactions to be visible, not hidden. However, for public demo purposes, the
+demo hides future transactions so to look more realistic. The solution is to set the Clock:Now configuration
+to 12-31-{year}. This will ensure all transactions are visible.
+
 ### Use the runtests.ps1 script
 
 This test builds the app code, runs it in the background, then builds and runs the functional tests
