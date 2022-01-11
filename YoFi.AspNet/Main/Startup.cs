@@ -107,6 +107,8 @@ namespace YoFi.AspNet.Main
                 services.AddTransient<IEmailSender, SendGridEmailService>();
             }
 
+            services.Configure<BrandConfig>(Configuration.GetSection(BrandConfig.Section));
+
             // -----------------------------------------------------------------------------
             //
             // WARNING: Elevation of privelage risk lives here

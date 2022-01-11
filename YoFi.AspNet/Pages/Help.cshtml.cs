@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.DotNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace YoFi.AspNet.Pages
 {
@@ -16,7 +18,7 @@ namespace YoFi.AspNet.Pages
 
         public IEnumerable<HelpTopic> ShownTopics { get; private set;  }
 
-        public void OnGet(string id, string from = null, [FromServices] IConfiguration config = null)
+        public void OnGet(string id, string from = null, [FromServices] IOptions<BrandConfig> brandconfig = null)
         {
             Highlight = from;
 
@@ -27,7 +29,7 @@ namespace YoFi.AspNet.Pages
                     Topic = new HelpTopic() { Title = "Sorry", Contents = new string[] { $"Can't find a help topic for <<{id}>>" } };
             }
 
-            if (null != config && config.GetSection("Brand").Exists())
+            if (null != brandconfig?.Value?.Name)
                 ShownTopics = Topics.Where(x => !x.ShowInDemoOnly);
             else
                 ShownTopics = Topics;
