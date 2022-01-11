@@ -2,23 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.DotNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace YoFi.AspNet.Pages
 {
     [AllowAnonymous]
     public class HomeModel : PageModel
     {
-        private readonly IConfiguration _configuration;
-        public HomeModel(IConfiguration configuration)
+        public HomeModel(IOptions<BrandConfig> brandconfig)
         {
-            _configuration = configuration;
+            isDemo =  !brandconfig.Value.Exists;
         }
 
-        public bool isDemo => ! _configuration.GetSection("Brand").Exists();
+        public bool isDemo { get; private set; }
 
         public void OnGet()
         {
