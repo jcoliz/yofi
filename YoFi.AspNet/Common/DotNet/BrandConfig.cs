@@ -13,5 +13,7 @@ namespace Common.DotNet
         public string Icon { get; set; }
         public string Link { get; set; }
         public string Owner { get; set; }
+
+        public bool Exists => Name != null;
     }
 }

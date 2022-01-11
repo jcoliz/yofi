@@ -1,7 +1,10 @@
-﻿@inject IConfiguration _config
+﻿@using Microsoft.Extensions.Options; 
+@using Common.DotNet;
+@inject IConfiguration _config
+@inject IOptions<BrandConfig> _brandconfig
 @{
-    var hasbrandconfig = _config.GetSection("Brand").Exists();
-    var sitename = hasbrandconfig ? _config["Brand:Name"] : _config["Codebase:Name"];
+    var hasbrandconfig = _brandconfig.Value.Exists;
+    var sitename = hasbrandconfig ? _brandconfig.Value.Name : _config["Codebase:Name"];
 
     var pagetitle = (string)ViewData["Title"];
     var ishome = pagetitle == "Home";
@@ -103,12 +106,12 @@
                     <div class="col-sm-5">
                         @if (hasbrandconfig)
                         {
-                            <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" href="/" aria-label="@_config["Brand:Name"]">
-                                <span class="fs-5"><i class="@_config["Brand:Icon"]"></i> @_config["Brand:Name"]</span>
+                            <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" href="/" aria-label="_brandconfig.Value.Name">
+                                <span class="fs-5"><i class="@_brandconfig.Value.Icon"></i> @_brandconfig.Value.Name</span>
                             </a>
                             <ul class="list-unstyled small text-muted">
-                                <li class="mb-2"><a href="@_config["Brand:Link"]">@_config["Brand:Link"]</a></li>
-                                <li class="mb-2">@_config["Brand:Owner"]</li>
+                                <li class="mb-2"><a href="_brandconfig.Value.Link">@_brandconfig.Value.Link</a></li>
+                                <li class="mb-2">@_brandconfig.Value.Owner</li>
                             </ul>
                         }
                         @if (ishome)

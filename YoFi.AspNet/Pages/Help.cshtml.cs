@@ -29,7 +29,7 @@ namespace YoFi.AspNet.Pages
                     Topic = new HelpTopic() { Title = "Sorry", Contents = new string[] { $"Can't find a help topic for <<{id}>>" } };
             }
 
-            if (null != brandconfig?.Value?.Name)
+            if (brandconfig?.Value.Exists ?? false)
                 ShownTopics = Topics.Where(x => !x.ShowInDemoOnly);
             else
                 ShownTopics = Topics;
