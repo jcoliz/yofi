@@ -1,10 +1,11 @@
 ﻿@using Microsoft.Extensions.Options;
 @using Common.DotNet;
 @inject IOptions<BrandConfig> _brandconfig
+@inject IOptions<CodebaseConfig> _codebaseonfig
 @inject IConfiguration _config
 @{
     var hasbrandconfig = _brandconfig.Value.Exists;
-    var sitename = hasbrandconfig ? _brandconfig.Value.Name : _config["Codebase:Name"];
+    var sitename = hasbrandconfig ? _brandconfig.Value.Name : _codebaseonfig.Value.Name;
 
     var pagetitle = (string)ViewData["Title"];
     var ishome = pagetitle == "Home";
@@ -60,11 +61,11 @@
             <div class="container-fluid">
                 @if (hasbrandconfig)
                 {
-                    <span class="navbar-brand"><i class="@_config["Brand:Icon"]"></i> @_config["Brand:Name"]</span>
+                    <span class="navbar-brand"><i class="@_brandconfig.Value.Icon"]"></i> @_brandconfig.Value.Name</span>
                 }
                 else
                 {
-                    <span class="navbar-brand">@_config["Codebase:Name"]</span>
+                    <span class="navbar-brand">@_codebaseonfig.Value.Name</span>
                 }
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -125,13 +126,13 @@
                         <ul class="list-unstyled small text-muted mb-0">
                             <li>Powered by:</li>
                         </ul>
-                        <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" target="_blank" href="@_config["Codebase:Link"]" aria-label="YoFi">
-                            <span class="fs-5">@_config["Codebase:Name"]</span>
+                        <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" target="_blank" href="@_codebaseonfig.Value.Link]" aria-label="YoFi">
+                            <span class="fs-5">@_codebaseonfig.Value.Name</span>
                         </a>
                         <ul class="list-unstyled small text-muted">
-                            <li class="mb-2">@_config["Codebase:Tagline"]</li>
-                            <li class="mb-2">Code licensed <a href="@_config["Codebase:LicenseLink"]" target="_blank">@_config["Codebase:License"]</a>.</li>
-                            <li class="mb-2">Report an <a href="@_config["Codebase:IssuesLink"]">issue</a>.</li>
+                            <li class="mb-2">@_codebaseonfig.Value.Tagline</li>
+                            <li class="mb-2">Code licensed <a href="@_codebaseonfig.Value.LicenseLink" target="_blank">@_codebaseonfig.Value.License</a>.</li>
+                            <li class="mb-2">Report an <a href="@_codebaseonfig.Value.IssuesLink">issue</a>.</li>
                             <li class="mb-2">v0.9.5</li>
                         </ul>
                     </div>

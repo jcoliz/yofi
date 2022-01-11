@@ -69,9 +69,9 @@ namespace YoFi.AspNet.Data
         /// ONLY IF: This is not a branded site, AND there is no data of any time already there
         /// </remarks>
         /// <returns></returns>
-        public static void AddSampleData(ApplicationDbContext context, IConfiguration Configuration, IClock clock)
+        public static void AddSampleData(ApplicationDbContext context, bool isBranded, IClock clock)
         {
-            if (!Configuration.GetSection("Brand").Exists())
+            if (!isBranded)
             {
                 if (! context.Transactions.Any() && ! context.Payees.Any() && ! context.BudgetTxs.Any() )
                 {

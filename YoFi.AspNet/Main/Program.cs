@@ -15,6 +15,7 @@ using YoFi.AspNet.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using Common.DotNet;
+using Microsoft.Extensions.Options;
 
 namespace YoFi.AspNet.Main
 {
@@ -78,10 +79,10 @@ namespace YoFi.AspNet.Main
 
                 try
                 {
-                    var configuration = services.GetRequiredService<IConfiguration>();
                     var context = services.GetRequiredService<ApplicationDbContext>();
+                    var brandconfig = services.GetRequiredService<IOptions<BrandConfig>>();
                     var clock = services.GetRequiredService<IClock>();
-                    Data.Seed.AddSampleData(context, configuration, clock);
+                    Data.Seed.AddSampleData(context, isBranded:brandconfig.Value.Exists, clock);
                 }
                 catch (Exception ex)
                 {

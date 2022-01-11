@@ -8,10 +8,10 @@
 @using Microsoft.Extensions.Options;
 @using Common.DotNet;
 @inject IOptions<BrandConfig> _brandconfig
-@inject IConfiguration _config
+@inject IOptions<CodebaseConfig> _codebaseonfig
 @{
     var hasbrandconfig = _brandconfig.Value.Exists;
-    var sitename = hasbrandconfig ? _brandconfig.Value.Name : _config["Codebase:Name"];
+    var sitename = hasbrandconfig ? _brandconfig.Value.Name : _codebaseonfig.Value.Name;
     ViewData["Title"] = "Login";
 }
 
@@ -20,7 +20,7 @@
 
         @if (hasbrandconfig)
         {
-            <a class="d-inline-flex align-items-center mb-4 link-dark text-decoration-none" href="/" aria-label="@_brandconfig.Value.Name"]">
+            <a class="d-inline-flex align-items-center mb-4 link-dark text-decoration-none" href="/" aria-label="@_brandconfig.Value.Name" ]">
                 <span class="fs-1"><i class="@_brandconfig.Value.Icon"></i> @_brandconfig.Value.Name</span>
             </a>
         }

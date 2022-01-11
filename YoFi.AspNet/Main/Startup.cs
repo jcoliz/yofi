@@ -106,6 +106,7 @@ namespace YoFi.AspNet.Main
                 services.AddTransient<IEmailSender, SendGridEmailService>();
             }
 
+            services.Configure<CodebaseConfig>(Configuration.GetSection(CodebaseConfig.Section));
             services.Configure<BrandConfig>(Configuration.GetSection(BrandConfig.Section));
             services.Configure<ApiConfig>(Configuration.GetSection(ApiConfig.Section));
 
