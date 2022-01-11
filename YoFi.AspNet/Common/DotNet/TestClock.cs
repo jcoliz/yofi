@@ -23,23 +23,15 @@ namespace Common.DotNet
                 var offset = value - DateTime.Now;
 
                 IsSet = true;
-                if (IsLocked)
-                {
-                    Explict = value;
-                }
-                else
-                {
-                    Offset = offset;
-                }
+                Explict = value;
+                Offset = offset;
             }
             get
             {
-                var modified = DateTime.Now + Offset;
-
                 if (IsSet && IsLocked)
                     return Explict;
                 else
-                    return modified;
+                    return DateTime.Now + Offset;
             }
         }
     }

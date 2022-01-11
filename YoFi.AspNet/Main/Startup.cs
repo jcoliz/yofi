@@ -99,7 +99,6 @@ namespace YoFi.AspNet.Main
 
             services.AddScoped<IDataContext, ApplicationDbContext>();
             services.AddScoped<IAsyncQueryExecution, EFCoreAsyncQueryExecution>();
-            services.AddSingleton<IClock>(new SystemClock());
 
             if (Configuration.GetSection(SendGridEmailOptions.Section).Exists())
             {
@@ -141,6 +140,22 @@ namespace YoFi.AspNet.Main
                 logme.Enqueue($"*** AZURESTORAGE *** Found Storage Connection String");
                 services.AddSingleton<IStorageService>(new Services.AzureStorageService(storageconnection));
             }
+
+            // Setting the system clock is used by functional tests to maintain a controlled environment
+            var clock_now = Configuration["Clock:Now"];
+            if (clock_now != null)
+            {
+                logme.Enqueue($"*** CLOCK *** Found clock setting {clock_now}");
+                if (System.DateTime.TryParse(clock_now,out var clock_set))
+                {
+                    logme.Enqueue($"Setting system clock to {clock_set}");
+                    services.AddSingleton<IClock>(new TestClock() { Now = clock_set });
+                }
+                else
+                    logme.Enqueue($"Failed to parse as valid time");
+            }
+            else
+                services.AddSingleton<IClock>(new SystemClock());
         }
 
         private void ConfigureAuthorizationNormal(IServiceCollection services)
