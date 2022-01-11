@@ -1,6 +1,9 @@
 ﻿@model string
 @using System.Text
-@inject IConfiguration _config
+@using Microsoft.Extensions.Options;
+@using Common.DotNet;
+@inject IOptions<BrandConfig> _brandconfig
+
 @{
     string dialog_autoshow = null;
     /*
@@ -9,7 +12,7 @@
     */
 
     var seenkey = "HelpSeen" + Model;
-    var hasbrandconfig = _config.GetSection("Brand").Exists();
+    var hasbrandconfig = _brandconfig.Value.Exists;
     if (!hasbrandconfig && !this.Context.Session.TryGetValue(seenkey, out byte[] value))
     {
         dialog_autoshow = "dialog-autoshow";
