@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Common.DotNet;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -16,7 +18,11 @@ namespace YoFi.Tests.Pages
         public void OnGet()
         {
             // Given: A blank model page
-            var page = new HomeModel(null);
+
+            var config = new Mock<IOptions<BrandConfig>>();
+            config.Setup(x => x.Value).Returns(new BrandConfig());
+
+            var page = new HomeModel(config.Object);
 
             // When: Calling Get
             page.OnGet();
@@ -31,11 +37,12 @@ namespace YoFi.Tests.Pages
         {
             var brandexists = !isdemo;
 
-            var section = new Mock<IConfigurationSection>();
-            section.Setup(x => x.Value).Returns(brandexists ? "Brand" : null);
-            section.Setup(x => x.GetChildren()).Returns(brandexists ? new List<IConfigurationSection>() { section.Object } : Enumerable.Empty<IConfigurationSection>());
-            var config = new Mock<IConfiguration>();
-            config.Setup(x => x.GetSection(It.IsAny<string>())).Returns(section.Object);
+            var brand = new BrandConfig();
+            if (!isdemo)
+                brand.Name = "Is not demo!";
+
+            var config = new Mock<IOptions<BrandConfig>>();
+            config.Setup(x => x.Value).Returns(brand);
 
             var page = new HomeModel(config.Object);
 

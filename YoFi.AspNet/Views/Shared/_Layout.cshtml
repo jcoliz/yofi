@@ -1,7 +1,7 @@
-﻿@using Microsoft.Extensions.Options; 
+﻿@using Microsoft.Extensions.Options;
 @using Common.DotNet;
-@inject IConfiguration _config
 @inject IOptions<BrandConfig> _brandconfig
+@inject IConfiguration _config
 @{
     var hasbrandconfig = _brandconfig.Value.Exists;
     var sitename = hasbrandconfig ? _brandconfig.Value.Name : _config["Codebase:Name"];
