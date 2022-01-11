@@ -108,6 +108,7 @@ namespace YoFi.AspNet.Main
             }
 
             services.Configure<BrandConfig>(Configuration.GetSection(BrandConfig.Section));
+            services.Configure<ApiConfig>(Configuration.GetSection(ApiConfig.Section));
 
             // -----------------------------------------------------------------------------
             //

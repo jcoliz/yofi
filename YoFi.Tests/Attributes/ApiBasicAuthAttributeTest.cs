@@ -1,4 +1,5 @@
 ﻿using Common.AspNet;
+using Common.DotNet;
 using Common.DotNet.Test;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -25,13 +27,15 @@ namespace YoFi.Tests.Attributes
         {
             // Given: Http context with basic auth header, but not base64 password
             var httpcontext = new DefaultHttpContext();
-            var config = new Mock<IConfiguration>();
+            var config = new Mock<IOptions<ApiConfig>>();
 
             if (password != null)
-                config.Setup(x => x["Api:Key"]).Returns(password);
+                config.Setup(x => x.Value).Returns(new ApiConfig() { Key = password });
+            else
+                config.Setup(x => x.Value).Returns(new ApiConfig());
 
             var services = new Mock<IServiceProvider>();
-            services.Setup(x => x.GetService(typeof(IConfiguration))).Returns(config.Object);
+            services.Setup(x => x.GetService(typeof(IOptions<ApiConfig>))).Returns(config.Object);
             httpcontext.RequestServices = services.Object;
 
             if (auth != null)

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Common.DotNet;
 
 namespace Common.AspNet
 {
@@ -15,11 +17,11 @@ namespace Common.AspNet
             var httpcontext = context.HttpContext;
             try
             {
-                IConfiguration config = httpcontext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
-                var expectedpassword = config["Api:Key"];
+                var config = httpcontext.RequestServices.GetService(typeof(IOptions<ApiConfig>)) as IOptions<ApiConfig>;
+                var expectedpassword = config.Value.Key;
 
                 if (string.IsNullOrEmpty(expectedpassword))
-                    throw new ApplicationException();
+                    throw new ApplicationException("Unexpected configuration [E6]");
 
                 var Headers = context.HttpContext.Request.Headers;
 
