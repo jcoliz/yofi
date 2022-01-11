@@ -4,9 +4,11 @@ Own your finances. Own your data.
 
 YoFi is an open-source web-based personal finance manager written in C# on ASP<meta/>.NET Core. Host it on a cloud service to enable access to your personal finances from any device anywhere anytime, all while maintaining complete control over your data.
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md) 
 [![Build Status](https://jcoliz.visualstudio.com/Ofx/_apis/build/status/YoFi%20DotNet?branchName=master)](https://jcoliz.visualstudio.com/Ofx/_build/latest?definitionId=20&branchName=master)
 [![Release](https://jcoliz.vsrm.visualstudio.com/_apis/public/Release/badge/c9089da1-9273-4ee3-b0a0-b26a5e1661d7/1/1)](https://jcoliz.vsrm.visualstudio.com/_apis/public/Release/badge/c9089da1-9273-4ee3-b0a0-b26a5e1661d7/1/1)
 ![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/jcoliz/YoFi/25)
+
 
 ## Features
 
@@ -76,3 +78,12 @@ Also see the full list of [Dependencies](/docs/Dependencies.md) taken by the pro
 ## Give feedback
 
 I'd love to hear what you think! If you'd like to see something change, please feel free to [open an issue](https://github.com/jcoliz/yofi/issues/new).
+
+## Code of conduct
+
+We as members, contributors, and leaders pledge to make participation in our
+community a harassment-free experience for everyone. We pledge to act and
+interact in ways that contribute to an open, welcoming, diverse, inclusive, 
+and healthy community.
+
+Please review the [Code of conduct](/code_of_conduct.md) for more details.
