@@ -101,7 +101,7 @@ namespace YoFi.Core.SampleGen
 
         public void GenerateBudget()
         {
-            int frequency(SampleDataPattern p)
+            static int frequency(SampleDataPattern p)
             {
                 if (p.DateJitter == JitterEnum.High && p.AmountJitter == JitterEnum.High)
                 {
