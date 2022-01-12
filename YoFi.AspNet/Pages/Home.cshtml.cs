@@ -14,9 +14,9 @@ namespace YoFi.AspNet.Pages
     [AllowAnonymous]
     public class HomeModel : PageModel
     {
-        public HomeModel(IOptions<BrandConfig> brandconfig)
+        public HomeModel(DemoConfig democonfig)
         {
-            isDemo =  !brandconfig.Value.Exists;
+            isDemo = democonfig.IsDemo;
         }
 
         public bool isDemo { get; private set; }

@@ -18,7 +18,7 @@ namespace YoFi.AspNet.Pages
 
         public IEnumerable<HelpTopic> ShownTopics { get; private set;  }
 
-        public void OnGet(string id, string from = null, [FromServices] IOptions<BrandConfig> brandconfig = null)
+        public void OnGet(string id, string from = null, [FromServices] DemoConfig democonfig = null)
         {
             Highlight = from;
 
@@ -29,7 +29,7 @@ namespace YoFi.AspNet.Pages
                     Topic = new HelpTopic() { Title = "Sorry", Contents = new string[] { $"Can't find a help topic for <<{id}>>" } };
             }
 
-            if (brandconfig?.Value.Exists ?? false)
+            if (!democonfig.IsDemo)
                 ShownTopics = Topics.Where(x => !x.ShowInDemoOnly);
             else
                 ShownTopics = Topics;

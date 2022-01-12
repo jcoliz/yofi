@@ -80,9 +80,9 @@ namespace YoFi.AspNet.Main
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
-                    var brandconfig = services.GetRequiredService<IOptions<BrandConfig>>();
+                    var democonfig = services.GetRequiredService<DemoConfig>();
                     var clock = services.GetRequiredService<IClock>();
-                    Data.Seed.AddSampleData(context, isBranded:brandconfig.Value.Exists, clock);
+                    Data.Seed.AddSampleData(context, isDemo:democonfig.IsDemo, clock);
                 }
                 catch (Exception ex)
                 {

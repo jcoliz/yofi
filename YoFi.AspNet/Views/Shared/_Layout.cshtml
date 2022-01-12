@@ -2,7 +2,7 @@
 @using Common.DotNet;
 @inject IOptions<BrandConfig> _brandconfig
 @inject IOptions<CodebaseConfig> _codebaseonfig
-@inject IConfiguration _config
+@inject DemoConfig _democonfig;
 @{
     var hasbrandconfig = _brandconfig.Value.Exists;
     var sitename = hasbrandconfig ? _brandconfig.Value.Name : _codebaseonfig.Value.Name;
@@ -18,9 +18,7 @@
 
     var needswarning = ViewContext.RouteData.Values.ContainsKey("controller");
 
-    var isdemo = _config["DemoOpenAccess"] == "True";
-    var demotitle = isdemo ? "DEMO - " : string.Empty;
-
+    var demotitle = _democonfig.IsOpenAccess ? "DEMO - " : string.Empty;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -87,7 +85,7 @@
     <div class="@bodycontent">
         @RenderBody()
 
-        @if (isdemo && needswarning)
+        @if (_democonfig.IsOpenAccess && needswarning)
         {
             <div class="alert alert-danger" role="alert">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16">

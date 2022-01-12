@@ -2,18 +2,12 @@
 @using System.Text
 @using Microsoft.Extensions.Options;
 @using Common.DotNet;
-@inject IOptions<BrandConfig> _brandconfig
+@inject DemoConfig _democonfig;
 
 @{
     string dialog_autoshow = null;
-    /*
-     * User Story 1209: Revert automatic help. Makes functional tests unstable
-     *
-    */
-
     var seenkey = "HelpSeen" + Model;
-    var hasbrandconfig = _brandconfig.Value.Exists;
-    if (!hasbrandconfig && !this.Context.Session.TryGetValue(seenkey, out byte[] value))
+    if (_democonfig.IsDemo && !this.Context.Session.TryGetValue(seenkey, out byte[] value))
     {
         dialog_autoshow = "dialog-autoshow";
         var bytes = Encoding.UTF8.GetBytes("true");

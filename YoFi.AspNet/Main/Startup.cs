@@ -128,14 +128,22 @@ namespace YoFi.AspNet.Main
             // against elevation of privs.
             //
             // -----------------------------------------------------------------------------
+
+            var democonfig = new DemoConfig() { IsDemo = ! Configuration.GetSection("Brand").Exists() };
+
 #if __DEMO_OPEN_ACCESS__
-            if (Configuration.GetSection("Brand").Exists())
+            if (!democonfig.IsDemo)
                 ConfigureAuthorizationNormal(services);
             else
                 ConfigureAuthorizationDemo(services);
+
+            democonfig.IsOpenAccess = true;
 #else
             ConfigureAuthorizationNormal(services);
+            democonfig.IsOpenAccess = false;
 #endif
+            services.AddSingleton<DemoConfig>(democonfig);
+
             var storageconnection = Configuration.GetConnectionString("StorageConnection");
             if (!string.IsNullOrEmpty(storageconnection))
             {
@@ -188,11 +196,6 @@ namespace YoFi.AspNet.Main
                 options.AddPolicy("CanWrite", policy => policy.RequireRole("Verified"));
             });
             services.AddScoped<IAuthorizationHandler, AnonymousAuthHandler>();
-
-            // Note that this configuration setting should be used only for warning the user
-            // Not for making any access decisions. All access decisions need to use auth
-            // policy.
-            Configuration["DemoOpenAccess"] = "True";
         }
 #endif
 
