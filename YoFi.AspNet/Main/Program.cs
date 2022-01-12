@@ -45,7 +45,7 @@ namespace YoFi.AspNet.Main
                     {
                         using var sr = File.OpenText("version.txt");
                         var version = sr.ReadToEnd();
-                        logger.LogInformation($"** Version: {version,8}                                        **");
+                        logger.LogInformation($"** Version: {version[..8],8}                                        **");
                     }
                     else
                         logger.LogInformation(" Unable to locate version info.");
@@ -69,8 +69,8 @@ namespace YoFi.AspNet.Main
                 try
                 {
                     var serviceProvider = services.GetRequiredService<IServiceProvider>();
-                    var configuration = services.GetRequiredService<IConfiguration>();
-                    Data.Seed.CreateRoles(serviceProvider, configuration).Wait();
+                    var adminuserconfig = services.GetRequiredService<IOptions<AdminUserConfig>>();
+                    Data.Seed.CreateRoles(serviceProvider, adminuserconfig).Wait();
                 }
                 catch (Exception ex)
                 {

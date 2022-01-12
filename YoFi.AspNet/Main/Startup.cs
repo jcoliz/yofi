@@ -109,6 +109,7 @@ namespace YoFi.AspNet.Main
             services.Configure<CodebaseConfig>(Configuration.GetSection(CodebaseConfig.Section));
             services.Configure<BrandConfig>(Configuration.GetSection(BrandConfig.Section));
             services.Configure<ApiConfig>(Configuration.GetSection(ApiConfig.Section));
+            services.Configure<AdminUserConfig>(Configuration.GetSection(AdminUserConfig.Section));
 
             // -----------------------------------------------------------------------------
             //

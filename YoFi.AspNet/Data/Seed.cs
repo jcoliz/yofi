@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using YoFi.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace YoFi.AspNet.Data
     // https://gooroo.io/GoorooTHINK/Article/17333/Custom-user-roles-and-rolebased-authorization-in-ASPNET-core/28380#.WxwmNExFyAd
     public static class Seed
     {
-        public static async Task CreateRoles(IServiceProvider serviceProvider, IConfiguration Configuration)
+        public static async Task CreateRoles(IServiceProvider serviceProvider, IOptions<AdminUserConfig> adminUserConfig)
         {
             //adding custom roles
             var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -36,21 +37,19 @@ namespace YoFi.AspNet.Data
             }
 
             //creating a super user who could maintain the web app
-            var adminusersection = Configuration.GetSection("AdminUser");
-
-            if (null != adminusersection && adminusersection.Exists())
+            if (adminUserConfig?.Value?.Email != null)
             {
                 var poweruser = new ApplicationUser
                 {
-                    UserName = adminusersection["Email"],
-                    Email = adminusersection["Email"]
+                    UserName = adminUserConfig.Value.Email,
+                    Email =  adminUserConfig.Value.Email
                 };
 
-                string UserPassword = adminusersection["Password"];
-                var _user = await UserManager.FindByEmailAsync(adminusersection["Email"]);
+                var _user = await UserManager.FindByEmailAsync( adminUserConfig.Value.Email);
 
                 if (_user == null)
                 {
+                    string UserPassword = adminUserConfig.Value.Password;
                     var createPowerUser = await UserManager.CreateAsync(poweruser, UserPassword);
                     if (createPowerUser.Succeeded)
                     {
