@@ -18,7 +18,7 @@ namespace YoFi.AspNet.Pages
 
         public IEnumerable<HelpTopic> ShownTopics { get; private set;  }
 
-        public void OnGet(string id, string from = null, [FromServices] DemoConfig democonfig = null)
+        public void OnGet([FromServices] DemoConfig democonfig, string id, string from = null)
         {
             Highlight = from;
 

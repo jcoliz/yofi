@@ -1,3 +1,4 @@
+using Common.DotNet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using YoFi.AspNet.Pages;
@@ -32,7 +33,7 @@ namespace YoFi.Tests.Pages
         public void TopicFound(string topic)
         {
             // When: getting help for {topic}
-            pagemodel.OnGet(topic);
+            pagemodel.OnGet(new DemoConfig(), topic);
 
             // Then: title matches the topic
             Assert.IsTrue(pagemodel.Topic.Title.ToLower().Contains(topic[..2]));
@@ -47,7 +48,7 @@ namespace YoFi.Tests.Pages
         public void TopicNotFound()
         {
             // When: getting help for (null)
-            pagemodel.OnGet("not found");
+            pagemodel.OnGet(new DemoConfig(), "not found");
 
             // Then: "Sorry" returned as title
             Assert.AreEqual("Sorry",pagemodel.Topic.Title);

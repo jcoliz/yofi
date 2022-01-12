@@ -18,11 +18,7 @@ namespace YoFi.Tests.Pages
         public void OnGet()
         {
             // Given: A blank model page
-
-            var config = new Mock<IOptions<BrandConfig>>();
-            config.Setup(x => x.Value).Returns(new BrandConfig());
-
-            var page = new HomeModel(config.Object);
+            var page = new HomeModel(new DemoConfig());
 
             // When: Calling Get
             page.OnGet();
@@ -35,16 +31,7 @@ namespace YoFi.Tests.Pages
         [DataTestMethod]
         public void Demo(bool isdemo)
         {
-            var brandexists = !isdemo;
-
-            var brand = new BrandConfig();
-            if (!isdemo)
-                brand.Name = "Is not demo!";
-
-            var config = new Mock<IOptions<BrandConfig>>();
-            config.Setup(x => x.Value).Returns(brand);
-
-            var page = new HomeModel(config.Object);
+            var page = new HomeModel(new DemoConfig() { IsDemo = isdemo });
 
             Assert.AreEqual(isdemo, page.isDemo);
         }
