@@ -17,6 +17,20 @@ else
     Layout = "_Layout";
     ViewData["Title"] = "Help";
 
+    @*
+        PAGE NAVBAR
+    *@
+
+    <nav class="navbar navbar-light navbar-page mb-3">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+        </div>
+    </nav>
+
+    @*
+        EACH TOPIC
+    *@
+
     @foreach (var topic in Model.ShownTopics)
     {
         var alert = (topic.Key == Model.Highlight) ? "alert-primary p-2 mb-3 mt-3" : string.Empty;
