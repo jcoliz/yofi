@@ -1,6 +1,7 @@
-﻿@model string
+﻿@model (string,string)
 <div class="text-center">
-    <div><h2>Complete @Model</h2></div>
+    <h2>@Model.Item1</h2>
+    <p>@Model.Item2</p>
     <div><a class="btn btn-secondary mt-3" href="/Admin">Close</a></div>
 </div>
 

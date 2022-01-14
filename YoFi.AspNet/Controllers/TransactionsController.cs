@@ -456,53 +456,73 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Seed(string id, [FromServices] IDataContext context)
         {
-            SampleDataPattern.Year = _clock.Now.Year;
-
-            // Load sample data
-            var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
-            var generator = new SampleDataGenerator();
-            generator.LoadDefinitions(instream);
-
-            // TODO: Fail if there are already conflicting items
-
-            var ok = false;
-            if ("budget" == id || "all" == id)
+            var result = string.Empty;
+            var resultdetails = string.Empty;
+            try
             {
-                generator.GenerateBudget();
-                context.AddRange(generator.BudgetTxs);
-                ok = true;
+                SampleDataPattern.Year = _clock.Now.Year;
+
+                // Load sample data
+                var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
+                var generator = new SampleDataGenerator();
+                generator.LoadDefinitions(instream);
+
+                // TODO: Fail if there are already conflicting items
+
+                var ok = false;
+                if ("budget" == id)
+                {
+                    generator.GenerateBudget();
+                    context.AddRange(generator.BudgetTxs);
+                    resultdetails = $"Added {generator.BudgetTxs.Count} budget line items";
+                    ok = true;
+                }
+                if ("txq1" == id)
+                {
+                    generator.GenerateTransactions(addids: false);
+                    var txq1 = generator.Transactions.Where(x => x.Timestamp < new DateTime(_clock.Now.Year, 4, 1));
+                    context.AddRange(txq1);
+                    resultdetails = $"Added {txq1.Count()} transactions";
+                    ok = true;
+                }
+                if ("all" == id)
+                {
+                    generator.GenerateTransactions(addids: false);
+                    generator.GenerateBudget();
+                    generator.GeneratePayees();
+                    context.AddRange(generator.Payees);
+                    context.AddRange(generator.BudgetTxs);
+                    context.AddRange(generator.Transactions);
+                    resultdetails = $"Added {generator.Transactions.Count} transactions, {generator.BudgetTxs.Count} budget line items, and {generator.Payees.Count} payees";
+                    ok = true;
+                }
+                if ("payee" == id)
+                {
+                    generator.GeneratePayees();
+                    context.AddRange(generator.Payees);
+                    resultdetails = $"Added {generator.Payees.Count} payees";
+                    ok = true;
+                }
+
+                if (ok)
+                {
+                    result = "Completed";
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    result = "Failed";
+                    resultdetails = $"Sorry, the data type {id} was unknown to the system";
+                }
+
             }
-            if ("txq1" == id)
+            catch (Exception ex)
             {
-                generator.GenerateTransactions(addids: false);
-                context.AddRange(generator.Transactions.Where(x => x.Timestamp < new DateTime(_clock.Now.Year, 4, 1)));
-                ok = true;
-            }
-            if ("all" == id)
-            {
-                generator.GenerateTransactions(addids: false);
-                context.AddRange(generator.Transactions);
-                ok = true;
-            }
-            if ("payee" == id || "all" == id)
-            {
-                generator.GeneratePayees();
-                context.AddRange(generator.Payees);
-                ok = true;
+                result = "Failed";
+                resultdetails = $"Sorry, the operation failed. Please file an issue on GitHub. {ex.GetType().Name}: {ex.Message}";
             }
 
-            if (ok)
-            {
-                await context.SaveChangesAsync();
-            }
-            else
-            {
-                // TODO: Return an error
-            }
-
-            // TODO: Try/Catch errors?
-
-            return PartialView("Seed",id);
+            return PartialView("Seed",(result,resultdetails));
         }
 
         [HttpPost]
