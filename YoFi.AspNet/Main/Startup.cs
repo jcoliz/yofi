@@ -112,7 +112,11 @@ namespace YoFi.AspNet.Main
             //
             // -----------------------------------------------------------------------------
 
-            var democonfig = new DemoConfig() { IsEnabled = Configuration["Demo:IsEnabled"]?.ToLowerInvariant() == "true" };
+            var democonfig = new DemoConfig();
+            Configuration.GetSection(DemoConfig.Section).Bind(democonfig);
+
+            // IsOpenAccess cannot be set in configuration. Override it to false for now.
+            democonfig.IsOpenAccess = false;
 
 #if __DEMO_OPEN_ACCESS__
             if (!democonfig.IsEnabled)
@@ -123,7 +127,6 @@ namespace YoFi.AspNet.Main
             democonfig.IsOpenAccess = true;
 #else
             ConfigureAuthorizationNormal(services);
-            democonfig.IsOpenAccess = false;
 #endif
             services.AddSingleton<DemoConfig>(democonfig);
 
@@ -150,8 +153,7 @@ namespace YoFi.AspNet.Main
             else
                 services.AddSingleton<IClock>(new SystemClock());
 
-            // For demo site, we want to go to the Home page by default
-            if (democonfig.IsEnabled)
+            if (democonfig.IsHomePageRoot)
             {
                 services.AddRazorPages(options =>
                 {
@@ -240,8 +242,7 @@ namespace YoFi.AspNet.Main
 
             app.UseEndpoints(x => 
             {
-                // Except in demo mode, "/" goes to transactions 
-                if (!demo.IsEnabled)
+                if (!demo.IsHomePageRoot)
                     x.MapControllerRoute(name: "root", pattern: "/", defaults: new { controller = "Transactions", action = "Index" } );
                 
                 x.MapControllerRoute(name: "default", pattern: "{controller}/{action=Index}/{id?}");

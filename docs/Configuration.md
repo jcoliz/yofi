@@ -88,3 +88,25 @@ Url where you host your site, e.g. "https://www.yomoney.net/"
 ### Brand:Owner
 
 Name of company or individual responsible for your site.
+
+## Demo
+
+These keys control how much of demonstration this version is, vs full production.
+
+### Demo:IsEnabled
+
+False by default, but set true for www.try-yofi.com. This seeds the database automatically, as well adds
+extra help text and simplifies the click path for evaluating users. 
+
+Functional tests also use this to ensure there is data.
+
+### Demo:IsHomePageRoot
+
+True by default. Indicates that https://{site}/ will show the Home page. Set this to "false" to bypass that
+and go straight to your transactions list.
+
+## Clock
+
+### Clock:Now
+
+Useful during development if you want to force the system to think it's a certain day. Functional tests use this.
