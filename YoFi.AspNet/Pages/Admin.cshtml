@@ -89,19 +89,19 @@
         <td>883</td>
         <td>Transactions</td>
         <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
-        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal"><i class="fa fa-trash-alt"></i> Delete</button></th>
+        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="tx"><i class="fa fa-trash-alt"></i> Delete</button></th>
     </tr>
     <tr>
         <td>128</td>
         <td>Budget Line Items</td>
         <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
-        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal"><i class="fa fa-trash-alt"></i> Delete</button></th>
+        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="budget"><i class="fa fa-trash-alt"></i> Delete</button></th>
     </tr>
     <tr>
         <td>46</td>
         <td>Payee Matching Rules</td>
         <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
-        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal"><i class="fa fa-trash-alt"></i> Delete</button></th>
+        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="payee"><i class="fa fa-trash-alt"></i> Delete</button></th>
     </tr>
     <tbody>
     </tbody>
@@ -112,8 +112,6 @@
 @*
     WAIT FOR SEEDING DIALOG
 *@
-
-@* TODO: Somehow we have to RESET this dialog back to its initial state after completion *@
 
 <div class="buttondialog modal fade" id="seedModal" tabindex="-1" role="dialog" aria-hidden="true" data-endpoint="/Transactions/Seed">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -134,10 +132,11 @@
     DELETE CONFIRMATION DIALOG
 *@
 
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+<div class="iddialog modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <form asp-controller="Transactions" asp-action="DatabaseDelete">
+                <input type="hidden" name="id" value="test" />
                 <div class="modal-body">
                     <h2 data-test-id="help-title">Are you sure?</h2>
                     <p>These items will be deleted permanantly, with no option to recover them.</p>

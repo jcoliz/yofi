@@ -86,6 +86,15 @@
         });
     })
 
+    $('.iddialog').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var id = button.data('id')
+        var modal = $(this);
+        var form = modal.find('form');
+        var hiddenid = form.find('input[name="id"]');
+        hiddenid.val(id);
+    })
+
     $('.partialdialog').on('show.bs.modal', function (event) {
         var modal = $(this);
         var endpoint = modal.data('endpoint')
