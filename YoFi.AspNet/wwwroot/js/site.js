@@ -58,6 +58,27 @@
         });
     })
 
+    $('.buttondialog').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var id = button.data('id')
+        var modal = $(this);
+        var endpoint = modal.data('endpoint');
+        if (id.length > 0)
+            endpoint = endpoint + "/" + id;
+
+        $.ajax({
+            url: endpoint,
+            success: function (htmlresult) {
+                modal.find('.modal-body').html(htmlresult);
+            },
+            error: function (result) {
+                alert(result.responseText);
+                modal.find('.modal-body').text(result.responseText);
+            }
+        });
+    })
+
+
     $('.partialdialog').on('show.bs.modal', function (event) {
         var modal = $(this);
         var endpoint = modal.data('endpoint')
