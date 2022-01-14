@@ -467,41 +467,76 @@ namespace YoFi.AspNet.Controllers
                 var generator = new SampleDataGenerator();
                 generator.LoadDefinitions(instream);
 
-                // TODO: Fail if there are already conflicting items
-
                 var ok = false;
                 if ("budget" == id)
                 {
-                    generator.GenerateBudget();
-                    context.AddRange(generator.BudgetTxs);
-                    resultdetails = $"Added {generator.BudgetTxs.Count} budget line items";
-                    ok = true;
+                    if (!context.BudgetTxs.Any())
+                    {
+                        generator.GenerateBudget();
+                        context.AddRange(generator.BudgetTxs);
+                        resultdetails = $"Added {generator.BudgetTxs.Count} budget line items";
+                        ok = true;
+                    }
+                    else
+                    {
+                        result = "Sorry";
+                        resultdetails = $"Cannot add budget line items when the database already has some";
+                    }
                 }
-                if ("txq1" == id)
+                else if ("txq1" == id)
                 {
-                    generator.GenerateTransactions(addids: false);
-                    var txq1 = generator.Transactions.Where(x => x.Timestamp < new DateTime(_clock.Now.Year, 4, 1));
-                    context.AddRange(txq1);
-                    resultdetails = $"Added {txq1.Count()} transactions";
-                    ok = true;
+                    if (!context.Transactions.Any())
+                    {
+                        generator.GenerateTransactions(addids: false);
+                        var txq1 = generator.Transactions.Where(x => x.Timestamp < new DateTime(_clock.Now.Year, 4, 1));
+                        context.AddRange(txq1);
+                        resultdetails = $"Added {txq1.Count()} transactions";
+                        ok = true;
+                    }
+                    else
+                    {
+                        result = "Sorry";
+                        resultdetails = $"Cannot add transactions when the database already has some";
+                    }
                 }
-                if ("all" == id)
+                else if ("all" == id)
                 {
-                    generator.GenerateTransactions(addids: false);
-                    generator.GenerateBudget();
-                    generator.GeneratePayees();
-                    context.AddRange(generator.Payees);
-                    context.AddRange(generator.BudgetTxs);
-                    context.AddRange(generator.Transactions);
-                    resultdetails = $"Added {generator.Transactions.Count} transactions, {generator.BudgetTxs.Count} budget line items, and {generator.Payees.Count} payees";
-                    ok = true;
+                    if (!context.Transactions.Any() && !context.BudgetTxs.Any() && !context.Payees.Any())
+                    {
+                        generator.GenerateTransactions(addids: false);
+                        generator.GenerateBudget();
+                        generator.GeneratePayees();
+                        context.AddRange(generator.Payees);
+                        context.AddRange(generator.BudgetTxs);
+                        context.AddRange(generator.Transactions);
+                        resultdetails = $"Added {generator.Transactions.Count} transactions, {generator.BudgetTxs.Count} budget line items, and {generator.Payees.Count} payees";
+                        ok = true;
+                    }
+                    else
+                    {
+                        result = "Sorry";
+                        resultdetails = $"Cannot add full sample data set unlesss the database is completely empty";
+                    }
                 }
-                if ("payee" == id)
+                else if ("payee" == id)
                 {
-                    generator.GeneratePayees();
-                    context.AddRange(generator.Payees);
-                    resultdetails = $"Added {generator.Payees.Count} payees";
-                    ok = true;
+                    if (!context.Payees.Any())
+                    {
+                        generator.GeneratePayees();
+                        context.AddRange(generator.Payees);
+                        resultdetails = $"Added {generator.Payees.Count} payees";
+                        ok = true;
+                    }
+                    else
+                    {
+                        result = "Sorry";
+                        resultdetails = $"Cannot add payees when the database already has some";
+                    }
+                }
+                else
+                {
+                    result = "Sorry";
+                    resultdetails = $"The data type {id} was unknown to the system";
                 }
 
                 if (ok)
@@ -509,17 +544,11 @@ namespace YoFi.AspNet.Controllers
                     result = "Completed";
                     await context.SaveChangesAsync();
                 }
-                else
-                {
-                    result = "Failed";
-                    resultdetails = $"Sorry, the data type {id} was unknown to the system";
-                }
-
             }
             catch (Exception ex)
             {
-                result = "Failed";
-                resultdetails = $"Sorry, the operation failed. Please file an issue on GitHub. {ex.GetType().Name}: {ex.Message}";
+                result = "Sorry";
+                resultdetails = $"The operation failed. Please file an issue on GitHub. {ex.GetType().Name}: {ex.Message}";
             }
 
             return PartialView("Seed",(result,resultdetails));
