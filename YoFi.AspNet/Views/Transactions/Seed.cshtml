@@ -1,0 +1,9 @@
+﻿@model string
+<div class="text-center">
+    <div><h2>Complete @Model</h2></div>
+    <div><a class="btn btn-secondary mt-3" href="/Admin">Close</a></div>
+</div>
+
+@*  Note that the close button forces a reload on the Admin page, which is a bit of a hack.
+    We need to get the contents of the seeding dialog reset, and this is the fastest way!
+*@
