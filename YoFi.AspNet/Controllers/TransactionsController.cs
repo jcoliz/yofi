@@ -469,6 +469,12 @@ namespace YoFi.AspNet.Controllers
                 context.AddRange(generator.BudgetTxs);
                 await context.SaveChangesAsync();
             }
+            else if ("txq1" == id)
+            {
+                generator.GenerateTransactions(addids: false);
+                context.AddRange(generator.Transactions.Where(x=>x.Timestamp < new DateTime(_clock.Now.Year,4,1)));
+                await context.SaveChangesAsync();
+            }
             else
             {
                 await Task.Delay(2000);
@@ -487,6 +493,11 @@ namespace YoFi.AspNet.Controllers
             {
                 // TODO: Async() ??
                 context.RemoveRange(context.BudgetTxs);
+                await context.SaveChangesAsync();
+            }
+            else if ("tx" == id)
+            {
+                context.RemoveRange(context.TransactionsWithSplits);
                 await context.SaveChangesAsync();
             }
 
