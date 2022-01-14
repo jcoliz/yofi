@@ -82,7 +82,7 @@
             <div class="form-actions">
                 <p>
                     Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete align-middle" autocomplete="off" />
-                    <input type="submit" value="OK" class="btn btn-primary"/>
+                    <input type="submit" value="OK" class="btn btn-primary" />
                     <a asp-action="Index" asp-route-o="@Model.OrderParameter" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ToggleSelected" class="btn btn-outline-secondary">Cancel</a>
                 </p>
             </div>
@@ -90,142 +90,165 @@
     </div>
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            @if (Model.ShowHidden)
-            {
-                <th>
-                    Hidden
-                </th>
-            }
-            @if (Model.ShowSelected)
-            {
-                <th>
-                    Edit
-                </th>
-            }
-            <th class="col-1">
-                <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextDateOrder">Date</a>
-            </th>
-            <th class="col-5">
-                <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextPayeeOrder">@nameof(Transaction.Payee)</a>
-            </th>
-            <th class="col-1" style="text-align:right">
-                <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextAmountOrder">@nameof(Transaction.Amount)</a>
-            </th>
-            <th class="col-2">
-                <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextCategoryOrder">@nameof(Transaction.Category)</a>
-            </th>
-            <th class="col-2">
-                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Memo)
-            </th>
-            @if (Model.ShowHidden)
-            {
-                <th>
-                    <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextBankReferenceOrder">@nameof(Transaction.BankReference)</a>
-                </th>
-            }
-            <th colspan="5" class="col-1">
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var line = 1;
-        }
-        @foreach (var item in Model.Items)
-        {
-            <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@(line++)">
+@if (0 == Model.Divider.PageTotalItems)
+{
+    if (string.IsNullOrEmpty(Model.QueryParameter))
+    {
+        <h4 class="mb-3">Your database is empty</h4>
+
+        <p>Please visit the Import page to add your data.</p>
+
+        <p><a class="btn btn-primary" asp-controller="Transactions" asp-action="Import">Import &raquo;</a></p>
+
+        <p>Or visit the Admin page to inject some sample data.</p>
+
+        <p><a class="btn btn-primary" asp-page="/Admin">Admin &raquo;</a></p>
+    }
+    else
+    {
+        <h4>No items found</h4>
+    }
+}
+else
+{
+
+    <table class="table">
+        <thead>
+            <tr>
                 @if (Model.ShowHidden)
                 {
-                    <td>
-                        @{ var checkedornot = (item.Hidden == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID">
-                    </td>
+                    <th>
+                        Hidden
+                    </th>
                 }
                 @if (Model.ShowSelected)
                 {
-                    <td>
-                        @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select">
-                    </td>
+                    <th>
+                        Edit
+                    </th>
                 }
-                <td>
-                    @Html.DisplayFor(modelItem => item.Timestamp)
-                </td>
-                <td class="display-payee">
-                    @Html.DisplayFor(modelItem => item.Payee)
-                </td>
-                <td style="text-align:right">
-                    @Html.DisplayFor(modelItem => item.Amount)
-                </td>
-                <td class="display-category">
-                    @if (item.HasSplits)
-                    {
-                        <span>SPLIT</span>
-                    }
-                    else
-                    {
-                        @Html.DisplayFor(modelItem => item.Category)
-                    }
-                </td>
-                <td class="display-memo">
-                    @Html.DisplayFor(modelItem => item.Memo)
-                </td>
+                <th class="col-1">
+                    <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextDateOrder">Date</a>
+                </th>
+                <th class="col-5">
+                    <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextPayeeOrder">@nameof(Transaction.Payee)</a>
+                </th>
+                <th class="col-1" style="text-align:right">
+                    <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextAmountOrder">@nameof(Transaction.Amount)</a>
+                </th>
+                <th class="col-2">
+                    <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextCategoryOrder">@nameof(Transaction.Category)</a>
+                </th>
+                <th class="col-2">
+                    @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Memo)
+                </th>
                 @if (Model.ShowHidden)
                 {
-                    <td>
-                        @Html.DisplayFor(modelItem => item.BankReference)
-                    </td>
+                    <th>
+                        <a asp-action="Index" asp-route-q="@Model.QueryParameter" asp-route-v="@Model.ViewParameter" asp-route-o="@Model.NextBankReferenceOrder">@nameof(Transaction.BankReference)</a>
+                    </th>
                 }
-                <td style="padding-left:0; padding-right:5px">
-
-                    @if (item.HasSplits)
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.ID" target="_blank" data-test-id="edit-splits">
-                            <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
-                        </a>
-                    }
-                    else
-                    {
-                        <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editModal">
-                            <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
-                        </a>
-                    }
-                </td>
-                <td style="padding-left:0; padding-right:5px">
-                    <a asp-action="Index"
-                       asp-route-o="@Model.OrderParameter"
-                       asp-route-v="@Model.ViewParameter"
-                       asp-route-q="p=@item.Payee?.Trim()">
-                        <i class="fa fa-search" data-bs-toggle="tooltip" title="Search Payee"></i>
-                    </a>
-                </td>
-                <td style="padding-left:0; padding-right:5px">
-                    <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#addPayeeModal">
-                        <i class="fa fa-plus" data-bs-toggle="tooltip" title="Add Payee"></i>
-                    </a>
-                </td>
-                <td style="padding-left:0; padding-right:5px">
-                    <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush" data-bs-toggle="tooltip" title="Apply Payee"></i></a>
-                </td>
-                <td style="padding-left:0; padding-right:0" class="display-receipt">
-                    @if (item.HasReceipt)
-                    {
-                        <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="far fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
-                    }
-                    else
-                    {
-                        <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank"><i class="fa fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
-                    }
-                </td>
+                <th colspan="5" class="col-1">
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @{
+                var line = 1;
+            }
+            @foreach (var item in Model.Items)
+            {
+                <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@(line++)">
+                    @if (Model.ShowHidden)
+                    {
+                        <td>
+                            @{ var checkedornot = (item.Hidden == true) ? "checked" : string.Empty; }
+                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID">
+                        </td>
+                    }
+                    @if (Model.ShowSelected)
+                    {
+                        <td>
+                            @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
+                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select">
+                        </td>
+                    }
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Timestamp)
+                    </td>
+                    <td class="display-payee">
+                        @Html.DisplayFor(modelItem => item.Payee)
+                    </td>
+                    <td style="text-align:right">
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                    <td class="display-category">
+                        @if (item.HasSplits)
+                        {
+                            <span>SPLIT</span>
+                        }
+                        else
+                        {
+                            @Html.DisplayFor(modelItem => item.Category)
+                        }
+                    </td>
+                    <td class="display-memo">
+                        @Html.DisplayFor(modelItem => item.Memo)
+                    </td>
+                    @if (Model.ShowHidden)
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.BankReference)
+                        </td>
+                    }
+                    <td style="padding-left:0; padding-right:5px">
 
-@await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", Model.Divider)
+                        @if (item.HasSplits)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.ID" target="_blank" data-test-id="edit-splits">
+                                <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editModal">
+                                <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
+                            </a>
+                        }
+                    </td>
+                    <td style="padding-left:0; padding-right:5px">
+                        <a asp-action="Index"
+                           asp-route-o="@Model.OrderParameter"
+                           asp-route-v="@Model.ViewParameter"
+                           asp-route-q="p=@item.Payee?.Trim()">
+                            <i class="fa fa-search" data-bs-toggle="tooltip" title="Search Payee"></i>
+                        </a>
+                    </td>
+                    <td style="padding-left:0; padding-right:5px">
+                        <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#addPayeeModal">
+                            <i class="fa fa-plus" data-bs-toggle="tooltip" title="Add Payee"></i>
+                        </a>
+                    </td>
+                    <td style="padding-left:0; padding-right:5px">
+                        <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush" data-bs-toggle="tooltip" title="Apply Payee"></i></a>
+                    </td>
+                    <td style="padding-left:0; padding-right:0" class="display-receipt">
+                        @if (item.HasReceipt)
+                        {
+                            <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="far fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
+                        }
+                        else
+                        {
+                            <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank"><i class="fa fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", Model.Divider)
+}
 
 <div class="actiondialog modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-endpoint="/Transactions/EditModal/">
     <div class="modal-dialog modal-dialog-centered" role="document">
