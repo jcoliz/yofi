@@ -115,7 +115,7 @@ namespace YoFi.AspNet.Main
             var democonfig = new DemoConfig() { IsEnabled = Configuration["Demo:IsEnabled"]?.ToLowerInvariant() == "true" };
 
 #if __DEMO_OPEN_ACCESS__
-            if (!democonfig.IsDemo)
+            if (!democonfig.IsEnabled)
                 ConfigureAuthorizationNormal(services);
             else
                 ConfigureAuthorizationDemo(services);
