@@ -1,6 +1,7 @@
 ﻿using Ardalis.Filters;
 using Common.AspNet;
 using Common.DotNet;
+using Common.NET.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Repositories;
+using YoFi.Core.SampleGen;
 using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers
@@ -452,9 +454,26 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Seed(string id)
+        public async Task<IActionResult> Seed(string id, [FromServices] IDataContext context)
         {
-            await Task.Delay(2000);
+            SampleDataPattern.Year = _clock.Now.Year;
+
+            // Load sample data
+            var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
+            var generator = new SampleDataGenerator();
+            generator.LoadDefinitions(instream);
+
+            if ("budget" == id)
+            {
+                generator.GenerateBudget();
+                context.AddRange(generator.BudgetTxs);
+                await context.SaveChangesAsync();
+            }
+            else
+            {
+                await Task.Delay(2000);
+            }
+
             return PartialView("Seed",id);
         }
 
