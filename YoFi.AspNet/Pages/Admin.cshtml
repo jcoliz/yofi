@@ -48,17 +48,17 @@
         <tr>
             <td>@Model.NumTransactions</td>
             <td>Transactions</td>
-            <td><div class="float-end"><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button> <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="tx"><i class="fa fa-trash-alt"></i> Delete</button></div></td>
+            <td><div class="float-end"><a class="btn btn-sm btn-secondary" asp-controller="Transactions" asp-action="Index"><i class="far fa-eye"></i> View</a> <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="tx"><i class="fa fa-trash-alt"></i> Delete</button></div></td>
         </tr>
         <tr>
             <td>@Model.NumBudgetTxs</td>
             <td>Budget Line Items</td>
-            <td><div class="float-end"><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button> <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="budget"><i class="fa fa-trash-alt"></i> Delete</button></div></td>
+            <td><div class="float-end"><a class="btn btn-sm btn-secondary" asp-controller="BudgetTxs" asp-action="Index"><i class="far fa-eye"></i> View</a> <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="budget"><i class="fa fa-trash-alt"></i> Delete</button></div></td>
         </tr>
         <tr>
             <td>@Model.NumPayees</td>
             <td>Payee Matching Rules</td>
-            <td><div class="float-end"><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button> <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="payee"><i class="fa fa-trash-alt"></i> Delete</button></div></td>
+            <td><div class="float-end"><a class="btn btn-sm btn-secondary" asp-controller="Payees" asp-action="Index"><i class="far fa-eye"></i> View</a> <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="payee"><i class="fa fa-trash-alt"></i> Delete</button></div></td>
         </tr>
         <tbody>
         </tbody>
