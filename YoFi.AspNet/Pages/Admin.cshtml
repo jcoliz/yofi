@@ -6,6 +6,22 @@
 }
 
 @*
+    XSRF Anti-Forgery Token
+    Needed for AJAX POST requests
+*@
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Model.HttpContext).RequestToken;
+    }
+}
+
+<input type="hidden" id="xsrf"
+       name="xsrf" value="@GetAntiXsrfRequestToken()">
+
+@*
     PAGE NAVBAR
 *@
 
@@ -29,25 +45,25 @@
 
 <div class="row mb-2">
     <div class="col-lg-3 col-md-6 flex-fill d-flex">
-        <div class="btn m-1 p-2 flex-fill" style="background-color:lightblue" data-id="all" data-bs-toggle="modal" data-bs-target="#seedModal">
+        <div class="btn m-1 p-2 flex-fill" style="background-color:lightblue" data-id="all" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
             <h4>Full Sample Data</h4>
             <p>Includes 12 months of transactions, payee matching rules, and a budget</p>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 flex-fill d-flex">
-        <div class="btn m-1 p-2 flex-fill " style="background-color:lightblue" data-id="txq1" data-bs-toggle="modal" data-bs-target="#seedModal">
+        <div class="btn m-1 p-2 flex-fill " style="background-color:lightblue" data-id="txq1" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
             <h4>Q1 Transactions</h4>
             <p>A single quarter's worth of transactions only</p>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 flex-fill d-flex">
-        <div class="btn m-1 p-2 flex-fill" style="background-color:lightblue" data-id="budget" data-bs-toggle="modal" data-bs-target="#seedModal">
+        <div class="btn m-1 p-2 flex-fill" style="background-color:lightblue" data-id="budget" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
             <h4>Budget</h4>
             <p>A single year's budget line items, which correspond to the sample transactions</p>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 flex-fill d-flex">
-        <div class="btn m-1 p-2 flex-fill " style="background-color:lightblue" data-id="payee" data-bs-toggle="modal" data-bs-target="#seedModal">
+        <div class="btn m-1 p-2 flex-fill " style="background-color:lightblue" data-id="payee" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
             <h4>Payee Matching Rules</h4>
             <p>Only payee matching rules. Helpful to see how payee matching works with OFX import</p>
         </div>

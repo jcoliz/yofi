@@ -65,19 +65,26 @@
         var endpoint = modal.data('endpoint');
         if (id.length > 0)
             endpoint = endpoint + "/" + id;
+        var method = button.data('method');
+        if (method.length <= 0)
+            method = "GET";
 
         $.ajax({
             url: endpoint,
+            beforeSend: xsrf,
+            type: method,
             success: function (htmlresult) {
                 modal.find('.modal-body').html(htmlresult);
             },
             error: function (result) {
-                alert(result.responseText);
-                modal.find('.modal-body').text(result.responseText);
+                var message = result.responseText;
+                if (message.length <= 0)
+                    message = "Error " + result.status + " " + result.statusText;
+                alert(message);
+                modal.find('.modal-body').text(message);
             }
         });
     })
-
 
     $('.partialdialog').on('show.bs.modal', function (event) {
         var modal = $(this);

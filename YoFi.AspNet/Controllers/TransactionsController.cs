@@ -448,17 +448,14 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction("Edit", new { id = id });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Seed(string id)
         {
-            Response.Headers[HeaderNames.CacheControl] = "no-cache, no-store, must-revalidate";
-            Response.Headers[HeaderNames.Expires] = "0";
-            Response.Headers[HeaderNames.Pragma] = "no-cache";
-
             await Task.Delay(2000);
             return PartialView("Seed",id);
         }
-
 
         #endregion
 
