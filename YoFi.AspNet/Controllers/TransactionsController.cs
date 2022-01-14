@@ -465,26 +465,45 @@ namespace YoFi.AspNet.Controllers
 
             // TODO: Fail if there are already conflicting items
 
-            if ("budget" == id)
+            var ok = false;
+            if ("budget" == id || "all" == id)
             {
                 generator.GenerateBudget();
                 context.AddRange(generator.BudgetTxs);
-                await context.SaveChangesAsync();
+                ok = true;
             }
-            else if ("txq1" == id)
+            if ("txq1" == id)
             {
                 generator.GenerateTransactions(addids: false);
-                context.AddRange(generator.Transactions.Where(x=>x.Timestamp < new DateTime(_clock.Now.Year,4,1)));
+                context.AddRange(generator.Transactions.Where(x => x.Timestamp < new DateTime(_clock.Now.Year, 4, 1)));
+                ok = true;
+            }
+            if ("all" == id)
+            {
+                generator.GenerateTransactions(addids: false);
+                context.AddRange(generator.Transactions);
+                ok = true;
+            }
+            if ("payee" == id || "all" == id)
+            {
+                generator.GeneratePayees();
+                context.AddRange(generator.Payees);
+                ok = true;
+            }
+
+            if (ok)
+            {
                 await context.SaveChangesAsync();
             }
             else
             {
-                await Task.Delay(2000);
+                // TODO: Return an error
             }
+
+            // TODO: Try/Catch errors?
 
             return PartialView("Seed",id);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -501,6 +520,15 @@ namespace YoFi.AspNet.Controllers
             {
                 context.RemoveRange(context.TransactionsWithSplits);
                 await context.SaveChangesAsync();
+            }
+            else if ("payee" == id)
+            {
+                context.RemoveRange(context.Payees);
+                await context.SaveChangesAsync();
+            }
+            else
+            {
+                // TODO: Return an error
             }
 
             // TODO: This just redirects back to Admin, so the numbers can be reloaded.

@@ -12,7 +12,8 @@ namespace YoFi.AspNet.Pages
     [Authorize(Roles = "Admin")]
     public class AdminModel : PageModel
     {
-        public bool HasData { get; set; }
+        public bool HasSomeData { get; set; }
+        public bool HasAllData { get; set; }
         public int NumTransactions { get; set; }
         public int NumBudgetTxs { get; set; }
         public int NumPayees { get; set; }
@@ -31,7 +32,8 @@ namespace YoFi.AspNet.Pages
             NumBudgetTxs = _context.BudgetTxs.Count();
             NumPayees = _context.Payees.Count();
 
-            HasData = NumTransactions > 0 || NumBudgetTxs > 0 || NumPayees > 0;
+            HasSomeData = NumTransactions > 0 || NumBudgetTxs > 0 || NumPayees > 0;
+            HasAllData = NumTransactions > 0 && NumBudgetTxs > 0 && NumPayees > 0;
         }
     }
 }
