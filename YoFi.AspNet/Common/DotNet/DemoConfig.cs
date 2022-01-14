@@ -18,7 +18,8 @@
         ///   * Pop up help messages when first entering most top-level pages
         ///   * "Try the demo" on the home page, vs "Get started"
         ///   * Including extra help text in the combined help page
+        ///   * "/" goes to Home instead of Transactions
         /// </remarks>
-        public bool IsDemo { get; set; }
+        public bool IsEnabled { get; set; }
     }
 }

@@ -7,7 +7,7 @@
 @{
     string dialog_autoshow = null;
     var seenkey = "HelpSeen" + Model;
-    if (_democonfig.IsDemo && !this.Context.Session.TryGetValue(seenkey, out byte[] value))
+    if (_democonfig.IsEnabled && !this.Context.Session.TryGetValue(seenkey, out byte[] value))
     {
         dialog_autoshow = "dialog-autoshow";
         var bytes = Encoding.UTF8.GetBytes("true");

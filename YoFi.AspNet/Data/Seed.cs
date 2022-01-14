@@ -65,7 +65,7 @@ namespace YoFi.AspNet.Data
         /// Add sample data to the database
         /// </summary>
         /// <remarks>
-        /// ONLY IF: This is not a branded site, AND there is no data of any time already there
+        /// ONLY IF: The demo is enabled, AND there is no data of any time already there
         /// </remarks>
         /// <returns></returns>
         public static void AddSampleData(ApplicationDbContext context, bool isDemo, IClock clock)

@@ -16,7 +16,7 @@ namespace YoFi.AspNet.Pages
     {
         public HomeModel(DemoConfig democonfig)
         {
-            isDemo = democonfig.IsDemo;
+            isDemo = democonfig.IsEnabled;
         }
 
         public bool isDemo { get; private set; }

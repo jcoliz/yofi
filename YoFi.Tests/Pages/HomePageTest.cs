@@ -31,7 +31,7 @@ namespace YoFi.Tests.Pages
         [DataTestMethod]
         public void Demo(bool isdemo)
         {
-            var page = new HomeModel(new DemoConfig() { IsDemo = isdemo });
+            var page = new HomeModel(new DemoConfig() { IsEnabled = isdemo });
 
             Assert.AreEqual(isdemo, page.isDemo);
         }

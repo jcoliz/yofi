@@ -82,7 +82,7 @@ namespace YoFi.AspNet.Main
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     var democonfig = services.GetRequiredService<DemoConfig>();
                     var clock = services.GetRequiredService<IClock>();
-                    Data.Seed.AddSampleData(context, isDemo:democonfig.IsDemo, clock);
+                    Data.Seed.AddSampleData(context, isDemo:democonfig.IsEnabled, clock);
                 }
                 catch (Exception ex)
                 {

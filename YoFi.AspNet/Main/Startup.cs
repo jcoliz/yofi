@@ -53,23 +53,6 @@ namespace YoFi.AspNet.Main
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
 
-            // Add application services.
-            // Story #1024: Moving to built-in UI. Not sure if I need this?
-            //services.AddTransient<IEmailSender, EmailSender>();
-
-            // For an unbranded site, we want to go to the Home page by default
-            if (Configuration.GetSection("Brand").Exists())
-            {
-                services.AddRazorPages().AddRazorRuntimeCompilation();
-            }
-            else
-            {
-                services.AddRazorPages(options =>
-                {
-                    options.Conventions.AddPageRoute("/Home", "/");
-                }).AddRazorRuntimeCompilation();
-            }
-
             // https://andrewlock.net/an-introduction-to-session-storage-in-asp-net-core/
             services.AddDistributedMemoryCache();
             services.AddSession();
@@ -129,7 +112,7 @@ namespace YoFi.AspNet.Main
             //
             // -----------------------------------------------------------------------------
 
-            var democonfig = new DemoConfig() { IsDemo = ! Configuration.GetSection("Brand").Exists() };
+            var democonfig = new DemoConfig() { IsEnabled = Configuration["Demo:IsEnabled"]?.ToLowerInvariant() == "true" };
 
 #if __DEMO_OPEN_ACCESS__
             if (!democonfig.IsDemo)
@@ -166,6 +149,19 @@ namespace YoFi.AspNet.Main
             }
             else
                 services.AddSingleton<IClock>(new SystemClock());
+
+            // For demo site, we want to go to the Home page by default
+            if (democonfig.IsEnabled)
+            {
+                services.AddRazorPages(options =>
+                {
+                    options.Conventions.AddPageRoute("/Home", "/");
+                }).AddRazorRuntimeCompilation();
+            }
+            else
+            {
+                services.AddRazorPages().AddRazorRuntimeCompilation();
+            }
         }
 
         private void ConfigureAuthorizationNormal(IServiceCollection services)
@@ -200,7 +196,7 @@ namespace YoFi.AspNet.Main
 #endif
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IEnumerable<IStorageService> storages)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IEnumerable<IStorageService> storages, DemoConfig demo)
         {
             while (logme.Any())
                 logger.LogInformation(logme.Dequeue());
@@ -244,8 +240,8 @@ namespace YoFi.AspNet.Main
 
             app.UseEndpoints(x => 
             {
-                // In branded mode, "/" goes to transactions 
-                if (Configuration.GetSection("Brand").Exists())
+                // Except in demo mode, "/" goes to transactions 
+                if (!demo.IsEnabled)
                     x.MapControllerRoute(name: "root", pattern: "/", defaults: new { controller = "Transactions", action = "Index" } );
                 
                 x.MapControllerRoute(name: "default", pattern: "{controller}/{action=Index}/{id?}");
