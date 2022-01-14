@@ -137,7 +137,7 @@
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <form asp-action="BulkDelete">
+            <form asp-controller="Transactions" asp-action="DatabaseDelete">
                 <div class="modal-body">
                     <h2 data-test-id="help-title">Are you sure?</h2>
                     <p>These items will be deleted permanantly, with no option to recover them.</p>

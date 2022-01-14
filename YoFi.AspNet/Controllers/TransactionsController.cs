@@ -448,6 +448,7 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction("Edit", new { id = id });
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
@@ -455,6 +456,19 @@ namespace YoFi.AspNet.Controllers
         {
             await Task.Delay(2000);
             return PartialView("Seed",id);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DatabaseDelete(string id)
+        {
+            // TODO: This just redirects back to Admin, so the numbers can be reloaded.
+            //
+            // It would be better to do this via Ajax, and then we could fill in the new item,
+            // and possibly return errors, all without leaving the page.
+            return RedirectToPage("/Admin");
         }
 
         #endregion
