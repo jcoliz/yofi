@@ -462,13 +462,20 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public Task<IActionResult> DatabaseDelete(string id)
+        public async Task<IActionResult> DatabaseDelete(string id, [FromServices] IDataContext context)
         {
+            if ("budget" == id)
+            {
+                // TODO: Async() ??
+                context.RemoveRange(context.BudgetTxs);
+                await context.SaveChangesAsync();
+            }
+
             // TODO: This just redirects back to Admin, so the numbers can be reloaded.
             //
             // It would be better to do this via Ajax, and then we could fill in the new item,
             // and possibly return errors, all without leaving the page.
-            return Task.FromResult((IActionResult)RedirectToPage("/Admin"));
+            return (IActionResult)RedirectToPage("/Admin");
         }
 
         #endregion
