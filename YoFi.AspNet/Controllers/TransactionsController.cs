@@ -463,6 +463,8 @@ namespace YoFi.AspNet.Controllers
             var generator = new SampleDataGenerator();
             generator.LoadDefinitions(instream);
 
+            // TODO: Fail if there are already conflicting items
+
             if ("budget" == id)
             {
                 generator.GenerateBudget();
