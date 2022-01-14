@@ -31,83 +31,98 @@
     </div>
 </nav>
 
-<h2>Welcome!</h2>
+@if (Model.HasData)
+{
+    <h2>Database Status</h2>
 
-<h4>Thanks for deploying YoFi</h4>
+    <p>Current database statistics:</p>
 
-<p>I appreciate you taking the time to try out YoFi. Find problems? Have questions? Please <a href="https://github.com/jcoliz/yofi/issues" target="_blank">open an issue</a> or <a href="https://github.com/jcoliz/yofi/discussions" target="_blank">start a discussion</a> on GitHub.</p>
+    <table class="table mx-4">
+        <thead>
+            <tr>
+                <th>Qty</th>
+                <th>Type</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tr>
+            <td>@Model.NumTransactions</td>
+            <td>Transactions</td>
+            <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
+            <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="tx"><i class="fa fa-trash-alt"></i> Delete</button></th>
+        </tr>
+        <tr>
+            <td>@Model.NumBudgetTxs</td>
+            <td>Budget Line Items</td>
+            <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
+            <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="budget"><i class="fa fa-trash-alt"></i> Delete</button></th>
+        </tr>
+        <tr>
+            <td>@Model.NumPayees</td>
+            <td>Payee Matching Rules</td>
+            <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
+            <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="payee"><i class="fa fa-trash-alt"></i> Delete</button></th>
+        </tr>
+        <tbody>
+        </tbody>
+    </table>
 
-<h4>Your database is currently empty</h4>
+    <p>Note: You can disable deleting of data from this screen by setting the SITE__NODELETE environment variable in your web app configuration.</p>
+}
+else
+{
+    <h2>Welcome!</h2>
 
-<p>You can import your own data in OFX or XLSX files on the <a asp-controller="Transactions" asp-action="Import">Import</a> page. There you'll also find some sample data files you can download to see how they should be formatted. You could turn around and upload those files to get some sample data.</p>
+    <h4>Thanks for deploying YoFi</h4>
 
-<p>Alternately, you can inject sample data into the database here.</p>
+    <p>I appreciate you taking the time to try out YoFi. Find problems? Have questions? Please <a href="https://github.com/jcoliz/yofi/issues" target="_blank">open an issue</a> or <a href="https://github.com/jcoliz/yofi/discussions" target="_blank">start a discussion</a> on GitHub.</p>
+
+    <h4>Your database is currently empty</h4>
+
+    <p>You can import your own data in OFX or XLSX files on the <a asp-controller="Transactions" asp-action="Import">Import</a> page. There you'll also find some sample data files you can download to see how they should be formatted. You could turn around and upload those files to get some sample data.</p>
+
+    <p>Alternately, you can inject sample data into the database here now, or add some later using the "Admin" link on the site navigation bar. You can also remove sample data once you're done with it using that same link.</p>
+}
 
 <div class="row mb-2">
-    <div class="col-lg-3 col-md-6 flex-fill d-flex">
-        <div class="btn m-1 p-2 flex-fill" style="background-color:lightblue" data-id="all" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-            <h4>Full Sample Data</h4>
-            <p>Includes 12 months of transactions, payee matching rules, and a budget</p>
+    @if (!Model.HasData)
+    {
+        <div class="col-lg-3 col-md-6 flex-fill d-flex">
+            <div class="btn m-1 p-2 flex-fill" style="background-color:lightblue" data-id="all" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
+                <h4>Full Sample Data</h4>
+                <p>Includes 12 months of transactions, payee matching rules, and a budget</p>
+            </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6 flex-fill d-flex">
-        <div class="btn m-1 p-2 flex-fill " style="background-color:lightblue" data-id="txq1" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-            <h4>Q1 Transactions</h4>
-            <p>A single quarter's worth of transactions only</p>
+    }
+    @if (0 == Model.NumTransactions)
+    {
+        <div class="col-lg-3 col-md-6 flex-fill d-flex">
+            <div class="btn m-1 p-2 flex-fill " style="background-color:lightblue" data-id="txq1" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
+                <h4>Q1 Transactions</h4>
+                <p>A single quarter's worth of transactions only</p>
+            </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6 flex-fill d-flex">
-        <div class="btn m-1 p-2 flex-fill" style="background-color:lightblue" data-id="budget" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-            <h4>Budget</h4>
-            <p>A single year's budget line items, which correspond to the sample transactions</p>
+    }
+    @if (0 == Model.NumBudgetTxs)
+    {
+        <div class="col-lg-3 col-md-6 flex-fill d-flex">
+            <div class="btn m-1 p-2 flex-fill" style="background-color:lightblue" data-id="budget" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
+                <h4>Budget</h4>
+                <p>A single year's budget line items, which correspond to the sample transactions</p>
+            </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6 flex-fill d-flex">
-        <div class="btn m-1 p-2 flex-fill " style="background-color:lightblue" data-id="payee" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-            <h4>Payee Matching Rules</h4>
-            <p>Only payee matching rules. Helpful to see how payee matching works with OFX import</p>
+    }
+    @if (0 == Model.NumPayees)
+    {
+        <div class="col-lg-3 col-md-6 flex-fill d-flex">
+            <div class="btn m-1 p-2 flex-fill " style="background-color:lightblue" data-id="payee" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
+                <h4>Payee Matching Rules</h4>
+                <p>Only payee matching rules. Helpful to see how payee matching works with OFX import</p>
+            </div>
         </div>
-    </div>
+    }
 </div>
-
-<p>You can return to this page later to clear the sample data, or to add different kinds of data, using the "Admin" link on the site navigation bar. </p>
-
-<h2>Database Status</h2>
-
-<p>Current database statistics:</p>
-
-<table class="table mx-4">
-    <thead>
-        <tr>
-            <th>Qty</th>
-            <th>Type</th>
-            <th></th>
-            <th></th>
-        </tr>
-    </thead>
-    <tr>
-        <td>@Model.NumTransactions</td>
-        <td>Transactions</td>
-        <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
-        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="tx"><i class="fa fa-trash-alt"></i> Delete</button></th>
-    </tr>
-    <tr>
-        <td>@Model.NumBudgetTxs</td>
-        <td>Budget Line Items</td>
-        <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
-        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="budget"><i class="fa fa-trash-alt"></i> Delete</button></th>
-    </tr>
-    <tr>
-        <td>@Model.NumPayees</td>
-        <td>Payee Matching Rules</td>
-        <th><button class="btn btn-sm btn-secondary"><i class="far fa-eye"></i> View</button></th>
-        <th><button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="payee"><i class="fa fa-trash-alt"></i> Delete</button></th>
-    </tr>
-    <tbody>
-    </tbody>
-</table>
-
-<p>Note: You can disable deleting of data from this screen by setting the SITE__NODELETE environment variable in your web app configuration.</p>
 
 @*
     WAIT FOR SEEDING DIALOG
