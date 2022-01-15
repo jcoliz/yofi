@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using YoFi.Core;
 using YoFi.Core.Reports;
 using Common.DotNet;
+using YoFi.AspNet.Pages.Helpers;
 
 namespace YoFi.AspNet.Pages
 {
@@ -54,14 +55,16 @@ namespace YoFi.AspNet.Pages
                 parms.id = "all";
             }
 
+            var sessionvars = new SessionVariables(HttpContext);
+
             if (parms.year.HasValue)
-                Year = parms.year.Value;
+                sessionvars.Year = parms.year.Value;
             else
-                parms.year = Year;
+                parms.year = sessionvars.Year ?? _clock.Now.Year;
 
             if (!parms.month.HasValue)
             {
-                bool iscurrentyear = (Year == _clock.Now.Year);
+                bool iscurrentyear = (parms.year == _clock.Now.Year);
 
                 // By default, month is the current month when looking at the current year.
                 // When looking at previous years, default is the whole year (december)
@@ -73,42 +76,6 @@ namespace YoFi.AspNet.Pages
 
             Title = _reports.Definitions.Where(x=>x.id == parms.id).SingleOrDefault()?.Name ?? "Not Found";
         }
-
-        /// <summary>
-        /// Current default year
-        /// </summary>
-        /// <remarks>
-        /// If you set this in the reports, it applies throughout the app,
-        /// defaulting to that year.
-        /// </remarks>
-        private int Year
-        {
-            get
-            {
-                if (!_Year.HasValue)
-                {
-                    var value = HttpContext?.Session.GetString(nameof(Year));
-                    if (string.IsNullOrEmpty(value))
-                    {
-                        Year = _clock.Now.Year;
-                    }
-                    else
-                    {
-                        _Year = (int.TryParse(value, out int y)) ? y : _clock.Now.Year;
-                    }
-                }
-
-                return _Year.Value;
-            }
-            set
-            {
-                _Year = value;
-
-                var serialisedDate = _Year.ToString();
-                HttpContext?.Session.SetString(nameof(Year), serialisedDate);
-            }
-        }
-        private int? _Year = null;
 
         private readonly IReportEngine _reports;
         private readonly IClock _clock;
