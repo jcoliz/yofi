@@ -11,6 +11,7 @@ using YoFi.Core.Reports;
 
 namespace YoFi.AspNet.Pages
 {
+
     /// <summary>
     /// Budget summary page
     /// </summary>
@@ -20,8 +21,12 @@ namespace YoFi.AspNet.Pages
     [Authorize(Policy = "CanRead")]
     public class BudgetModel : PageModel
     {
-        public void OnGet()
+        public int? Year { get; private set; }
+
+        public void OnGet(int y)
         {
+            if (y > 0)
+                Year = y;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿@page
 @model YoFi.AspNet.Pages.BudgetModel
+@inject Common.DotNet.IClock _clock
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Budget Summary";
@@ -12,22 +13,43 @@
 <nav class="navbar navbar-light navbar-page mb-3">
     <div class="container">
         <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
-        <div class="nav-item dropdown">
-            <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Actions
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
-                <a asp-controller="BudgetTxs" asp-action="Index" class="btn">Edit Budget</a>
+            <div class="nav-item dropdown ms-auto">
+                <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonYear" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Year
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonYear">
+                    @{
+                        int currentyear = _clock.Now.Year;
+                        for (int y = 2017; y <= currentyear; ++y)
+                        {
+                            <a asp-route-y="@y"
+                               class="dropdown-item">@y</a>
+                        }
+                    }
+                </div>
             </div>
+
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Actions
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
+                    <a asp-controller="BudgetTxs" asp-action="Index" class="btn">Edit Budget</a>
+                </div>
+            </div>
+
         </div>
-    </div>
 </nav>
 
 @*
     BACKGROUND LOADER
 *@
 
-<div class="w-100 loadr" data-endpoint="/ReportPartial?id=expenses-v-budget">
+@{ 
+    var url = "/ReportPartial?id=expenses-v-budget" + ((Model.Year.HasValue) ? $"&year={Model.Year.Value}" : string.Empty);
+}
+
+<div class="w-100 loadr" data-endpoint="@url">
     <div class="d-flex justify-content-center spinner-container">
         <div class="spinner-border my-5" role="status">
             <span class="visually-hidden">Loading...</span>
