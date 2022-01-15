@@ -454,7 +454,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Seed(string id, [FromServices] IDataContext context)
+        public async Task<IActionResult> Seed(string id, [FromServices] IDataContext context, [FromServices] IClock clock)
         {
             var result = string.Empty;
             var resultdetails = string.Empty;
@@ -483,14 +483,26 @@ namespace YoFi.AspNet.Controllers
                         resultdetails = $"Cannot add budget line items when the database already has some";
                     }
                 }
-                else if ("txq1" == id)
+                else if ("txtoday" == id)
+                {
+                    DateTime last = DateTime.MinValue;
+                    var lastq = context.Transactions.OrderByDescending(x => x.Timestamp).Select(x => x.Timestamp);
+                    if (lastq.Any())
+                        last = lastq.First();
+
+                    generator.GenerateTransactions(addids: false);
+                    var added = generator.Transactions.Where(x => x.Timestamp > last && x.Timestamp <= clock.Now);
+                    context.AddRange(added);
+                    resultdetails = $"Added {added.Count()} transactions";
+                    ok = true;
+                }
+                else if ("txyear" == id)
                 {
                     if (!context.Transactions.Any())
                     {
                         generator.GenerateTransactions(addids: false);
-                        var txq1 = generator.Transactions.Where(x => x.Timestamp < new DateTime(_clock.Now.Year, 4, 1));
-                        context.AddRange(txq1);
-                        resultdetails = $"Added {txq1.Count()} transactions";
+                        context.AddRange(generator.Transactions);
+                        resultdetails = $"Added {generator.Transactions.Count()} transactions";
                         ok = true;
                     }
                     else
@@ -499,7 +511,7 @@ namespace YoFi.AspNet.Controllers
                         resultdetails = $"Cannot add transactions when the database already has some";
                     }
                 }
-                else if ("all" == id)
+                else if ("all" == id || "today" == id)
                 {
                     if (!context.Transactions.Any() && !context.BudgetTxs.Any() && !context.Payees.Any())
                     {
@@ -508,8 +520,12 @@ namespace YoFi.AspNet.Controllers
                         generator.GeneratePayees();
                         context.AddRange(generator.Payees);
                         context.AddRange(generator.BudgetTxs);
-                        context.AddRange(generator.Transactions);
-                        resultdetails = $"Added {generator.Transactions.Count} transactions, {generator.BudgetTxs.Count} budget line items, and {generator.Payees.Count} payees";
+
+                        IEnumerable<Transaction> txs = generator.Transactions;
+                        if ("today" == id)
+                            txs = txs.Where(x => x.Timestamp <= clock.Now);
+                        context.AddRange(txs);
+                        resultdetails = $"Added {txs.Count()} transactions, {generator.BudgetTxs.Count} budget line items, and {generator.Payees.Count} payees";
                         ok = true;
                     }
                     else
