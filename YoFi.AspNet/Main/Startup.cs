@@ -16,6 +16,7 @@ using System.Globalization;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Data;
+using YoFi.AspNet.Pages;
 using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
@@ -93,6 +94,7 @@ namespace YoFi.AspNet.Main
             services.Configure<BrandConfig>(Configuration.GetSection(BrandConfig.Section));
             services.Configure<ApiConfig>(Configuration.GetSection(ApiConfig.Section));
             services.Configure<AdminUserConfig>(Configuration.GetSection(AdminUserConfig.Section));
+            services.Configure<AdminModel.PageConfig>(Configuration.GetSection(AdminModel.PageConfig.Section));
 
             // -----------------------------------------------------------------------------
             //
