@@ -19,6 +19,8 @@
     var needswarning = ViewContext.RouteData.Values.ContainsKey("controller");
 
     var demotitle = _democonfig.IsOpenAccess ? "DEMO - " : string.Empty;
+
+    var isadmin = User.IsInRole("Admin");
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -75,6 +77,10 @@
                         <li class="nav-item"><a class="nav-link" asp-page="/Budget">Budget</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Payees" asp-action="Index">Payees</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Transactions" asp-action="Import">Import</a></li>
+                        @if (isadmin)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Admin">Admin</a></li>
+                        }
                         <li class="nav-item"><a class="nav-link" asp-page="/Help">Help</a></li>
                     </ul>
                     @await Html.PartialAsync("_LoginPartial")
