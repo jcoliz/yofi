@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
+using YoFi.AspNet.Pages.Helpers;
 using YoFi.Core.Reports;
 
 namespace YoFi.AspNet.Pages
@@ -34,8 +35,25 @@ namespace YoFi.AspNet.Pages
         {
             Parameters = parms;
             Parameters.id = "summary";
+
+            var sessionvars = new SessionVariables(HttpContext);
+
+            if (Parameters.year.HasValue)
+                sessionvars.Year = Parameters.year.Value;
+            else
+                Parameters.year = sessionvars.Year ?? _clock.Now.Year;
+
             if (!Parameters.month.HasValue)
-                Parameters.month = _clock.Now.Month;
+            {
+                bool iscurrentyear = (Parameters.year == _clock.Now.Year);
+
+                // By default, month is the current month when looking at the current year.
+                // When looking at previous years, default is the whole year (december)
+                if (iscurrentyear)
+                    Parameters.month = _clock.Now.Month;
+                else
+                    Parameters.month = 12;
+            }
 
             // TODO: Make this Async()
             Reports = new List<IEnumerable<IDisplayReport>>(_reports.BuildSummary(Parameters));
