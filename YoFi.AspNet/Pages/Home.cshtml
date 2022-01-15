@@ -23,6 +23,10 @@
                     {
                         <p><a href="#" class="btn btn-lg btn-primary" data-help-topic="demo" data-help-href="/Transactions">Try the demo</a></p>
                     }
+                    else if (Model.IsRouteToAdmin)
+                    {
+                        <p><a class="btn btn-lg btn-primary" asp-page="/Admin">Get started</a></p>
+                    }
                     else
                     {
                         <p><a class="btn btn-lg btn-primary" asp-controller="Transactions" asp-action="Index">Get started</a></p>
