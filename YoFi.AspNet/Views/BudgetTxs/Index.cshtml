@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Budget Line Items";
+
+    var pagedivider = ViewData[nameof(Common.AspNet.PageDivider)] as Common.AspNet.PageDivider;
 }
 
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
@@ -51,72 +53,95 @@
     </div>
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            @if ((bool)(ViewData["ShowSelected"]))
-            {
-                <th>
-                    Edit
-                </th>
-            }
-            <th>
-                Date
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Memo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Frequency)
-            </th>
-            <th style="text-align:right">
-                @Html.DisplayNameFor(model => model.Amount)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var line = 1;
-        }
-        @foreach (var item in Model)
-        {
-            <tr data-test-id="line-@(line++)">
+@if (0 == pagedivider.PageTotalItems)
+{
+    if (string.IsNullOrEmpty(ViewData["Query"] as string))
+    {
+        <h4 class="mb-3">Your database is empty</h4>
+
+        <p>You can visit the Admin page to inject some sample data.</p>
+
+        <p><a class="btn btn-primary" asp-page="/Admin">Admin &raquo;</a></p>
+
+        <h4>Importer</h4>
+
+        <p>Or you can import items here.</p>
+    }
+    else
+    {
+        <h4>No items found</h4>
+    }
+}
+else
+{
+
+    <table class="table">
+        <thead>
+            <tr>
                 @if ((bool)(ViewData["ShowSelected"]))
                 {
-                    <td>
-                        @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/budget/select/@item.ID" data-test-id="check-select">
-                    </td>
+                    <th>
+                        Edit
+                    </th>
                 }
-                <td>
-                    @Html.DisplayFor(modelItem => item.Timestamp)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Category)
-                </td>
-                <td data-test-id="memo">
-                    @Html.DisplayFor(modelItem => item.Memo)
-                </td>
-                <td data-test-id="freq">
-                    @(item.Frequency > 1 ? item.FrequencyName : string.Empty)
-                </td>
-                <td style="text-align:right">
-                    @Html.DisplayFor(modelItem => item.Amount)
-                </td>
-                <td>
-                    <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
-                    <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
-                </td>
+                <th>
+                    Date
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Category)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Memo)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Frequency)
+                </th>
+                <th style="text-align:right">
+                    @Html.DisplayNameFor(model => model.Amount)
+                </th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @{
+                var line = 1;
+            }
+            @foreach (var item in Model)
+            {
+                <tr data-test-id="line-@(line++)">
+                    @if ((bool)(ViewData["ShowSelected"]))
+                    {
+                        <td>
+                            @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
+                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/budget/select/@item.ID" data-test-id="check-select">
+                        </td>
+                    }
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Timestamp)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Category)
+                    </td>
+                    <td data-test-id="memo">
+                        @Html.DisplayFor(modelItem => item.Memo)
+                    </td>
+                    <td data-test-id="freq">
+                        @(item.Frequency > 1 ? item.FrequencyName : string.Empty)
+                    </td>
+                    <td style="text-align:right">
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                    <td>
+                        <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
+                        <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-@await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", ViewData[nameof(Common.AspNet.PageDivider)])
+    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", pagedivider)
+}
 
 <form method="post" enctype="multipart/form-data" asp-controller="BudgetTxs" asp-action="Upload">
     <div class="input-group mb-3 mt-3">
