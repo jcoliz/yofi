@@ -182,7 +182,7 @@ namespace YoFi.Tests.Functional
         public async Task _08_Transactions_Uploaded()
         {
             // Navigate to https://www.try-yofi.com/Transactions/Import
-            await NavigateToAsync("Transactions/Import");
+            await NavigateToAsync("Import");
 
             // Dismiss the help text, if appears
             await DismissHelpTest();

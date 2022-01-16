@@ -34,7 +34,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("text=Import");
 
             // Then: We land at import page
-            await Page.ThenIsOnPageAsync("Import Transactions");
+            await Page.ThenIsOnPageAsync("Importer");
         }
 
         [TestMethod]
