@@ -86,7 +86,7 @@ namespace YoFi.AspNet.Pages
                 else if (command == "ok")
                 {
                     await _repository.FinalizeImportAsync();
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index),"Transactions");
                 }
                 else
                     throw new ArgumentException();

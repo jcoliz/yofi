@@ -80,7 +80,17 @@ namespace YoFi.Tests.Database
             return result;
         }
 
+        public async Task AddFiveItems()
+        {
+            // context.AddRange(Items) doesn't work :(
+            foreach (var item in Items)
+                context.Add(item);
+
+            await context.SaveChangesAsync();
+        }
+
         private List<Transaction> Items => TransactionControllerTest.TransactionItems.Take(5).ToList();
+        private IEnumerable<Transaction> TransactionItems => TransactionControllerTest.TransactionItems;
 
         [TestMethod]
         public async Task Upload()
@@ -96,6 +106,62 @@ namespace YoFi.Tests.Database
 
             // Now check the state of the DB
             Assert.AreEqual(Items.Count, dbset.Count());
+        }
+
+        [TestMethod]
+        public async Task Import()
+        {
+            // Given: A mix of transactions, some flagged as imported, some as not
+            var noimportitems = TransactionItems.Take(10);
+            var importitems = TransactionItems.Skip(10).Take(5).ToList();
+            foreach (var item in importitems)
+                item.Imported = true;
+
+            context.Transactions.AddRange(noimportitems.Concat(importitems));
+            context.SaveChanges();
+
+            // When: Calling Import
+            var result = await page.OnGetAsync();
+
+            // Then: Page result
+            var viewresult = Assert.That.IsOfType<PageResult>(result);
+
+            // Then: Only the imported transactions are shown
+            Assert.IsTrue(importitems.SequenceEqual(page.Transactions));
+        }
+
+        [TestMethod]
+        public async Task ImportOk()
+        {
+            // Given: As set of items, some with imported & selected flags, some with not
+            var notimported = 1; // How many should remain?
+            foreach (var item in Items.Skip(notimported))
+                item.Imported = item.Selected = true;
+            await AddFiveItems();
+
+            // When: Approving the import
+            var result = await page.OnPostGoAsync("ok");
+            Assert.That.IsOfType<RedirectToActionResult>(result);
+
+            // Then: All items remain, none have imported flag
+            Assert.AreEqual(5, dbset.Count());
+            Assert.AreEqual(0, dbset.Where(x => x.Imported == true).Count());
+        }
+
+
+        [TestMethod]
+        public async Task Bug839()
+        {
+            // Bug 839: Imported items are selected automatically :(
+            await DoUpload(Items);
+
+            await page.OnPostGoAsync("ok");
+
+            var numimported = await dbset.Where(x => x.Imported == true).CountAsync();
+            var numselected = await dbset.Where(x => x.Selected == true).CountAsync();
+
+            Assert.AreEqual(0, numimported);
+            Assert.AreEqual(0, numselected);
         }
 
 #if false
@@ -124,20 +190,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(regexpayee.Category, actual.Category);
         }
 
-        [TestMethod]
-        public async Task Bug839()
-        {
-            // Bug 839: Imported items are selected automatically :(
-            await DoUpload(Items);
-
-            await controller.ProcessImported("ok");
-
-            var numimported = await dbset.Where(x => x.Imported == true).CountAsync();
-            var numselected = await dbset.Where(x => x.Selected == true).CountAsync();
-
-            Assert.AreEqual(0, numimported);
-            Assert.AreEqual(0, numselected);
-        }
 
         [TestMethod]
         public async Task UploadSplitsWithTransactions()
@@ -258,23 +310,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(expected, dbset.Count());
         }
 
-        [TestMethod]
-        public async Task ImportOk()
-        {
-            // Given: As set of items, some with imported & selected flags, some with not
-            var notimported = 1; // How many should remain?
-            foreach (var item in Items.Skip(notimported))
-                item.Imported = item.Selected = true;
-            await helper.AddFiveItems();
-
-            // When: Approving the import
-            var result = await controller.ProcessImported("ok");
-            Assert.That.IsOfType<RedirectToActionResult>(result);
-
-            // Then: All items remain, none have imported flag
-            Assert.AreEqual(5, dbset.Count());
-            Assert.AreEqual(0, dbset.Where(x => x.Imported == true).Count());
-        }
 
         [DataRow(null)]
         [DataRow("Bogus")]
@@ -319,26 +354,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(imported, dbset.Count());
         }
 
-        [TestMethod]
-        public async Task Import()
-        {
-            // Given: A mix of transactions, some flagged as imported, some as not
-            var noimportitems = TransactionItems.Take(10);
-            var importitems = TransactionItems.Skip(10).Take(5).ToList();
-            foreach (var item in importitems)
-                item.Imported = true;
 
-            context.Transactions.AddRange(noimportitems.Concat(importitems));
-            context.SaveChanges();
-
-            // When: Calling Import
-            var result = await controller.Import();
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as IEnumerable<Transaction>;
-
-            // Then: Only the imported transactions are flagged
-            CollectionAssert.AreEqual(importitems, model.ToList());
-        }
 
         [TestMethod]
         public async Task ImportHighlight()
