@@ -24,6 +24,8 @@ namespace YoFi.AspNet.Pages
 
         public IEnumerable<Transaction> Transactions { get; private set; } = Enumerable.Empty<Transaction>();
 
+        public HashSet<int> Highlights { get; private set; } = new HashSet<int>();
+
         public ImportModel(ITransactionRepository repository, IAsyncQueryExecution queryExecution)
         {
             _repository = repository;
@@ -105,6 +107,9 @@ namespace YoFi.AspNet.Pages
 
             // Prepare the visual results
             await OnGetAsync();
+
+            // Set the highlights
+            Highlights = importer.HighlightIDs.ToHashSet();
 
             return Page();
         }
