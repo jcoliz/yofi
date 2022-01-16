@@ -7,6 +7,7 @@ using Common.ChartJS;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using YoFi.AspNet.Pages.Helpers;
 using YoFi.Core.Reports;
 
 namespace YoFi.AspNet.Pages
@@ -23,10 +24,16 @@ namespace YoFi.AspNet.Pages
     {
         public int? Year { get; private set; }
 
-        public void OnGet(int y)
+        public void OnGet(int? y)
         {
-            if (y > 0)
-                Year = y;
+            var sessionvars = new SessionVariables(HttpContext);
+
+            if (y.HasValue)
+                sessionvars.Year = y.Value;
+            else
+                y = sessionvars.Year;
+
+            Year = y;
         }
     }
 }
