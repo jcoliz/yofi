@@ -140,6 +140,31 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
+        public async Task Highlights()
+        {
+            // Given: Uploading a set of transactions once, successfully
+            var originalitems = TransactionItems.Skip(10).Take(5);
+            await DoUpload(originalitems.ToList());
+            await page.OnPostGoAsync("ok");
+
+            // And: Having made subtle changes to the transactions
+            foreach (var t in dbset)
+                t.Timestamp += TimeSpan.FromDays(10);
+            await context.SaveChangesAsync();
+
+            var excpectedduplicates = dbset.Select(x => x.ID).ToHashSet();
+
+            // When: Uploading more transactions, which includes the original transactions
+            await DoUpload(TransactionItems.Take(15).ToList());
+
+            // Then: The overlapping new transactions are highlighted and deselected, indicating that they
+            // are probably duplicates
+            var selected = dbset.Where(x => x.Selected == true).ToList();
+            Assert.AreEqual(10, selected.Count);
+            Assert.AreEqual(5, page.Highlights.Count);
+        }
+
+        [TestMethod]
         public async Task ImportOk()
         {
             // Given: As set of items, some with imported & selected flags, some with not
