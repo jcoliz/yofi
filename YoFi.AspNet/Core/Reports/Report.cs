@@ -177,6 +177,16 @@ namespace YoFi.Core.Reports
         /// </summary>
         public decimal GrandTotal => this[TotalColumn, TotalRow];
 
+        /// <summary>
+        /// How far through the year does this report go?
+        /// </summary>
+        /// <remarks>
+        /// This only applies for reports who have YearProgress=true in their report definition.
+        /// Currently, this is calculated by the report builder. 
+        /// TODO: Better is to calculate it here in this clasee.
+        /// </remarks>
+        public double YearProgress { get; set; }
+
         #endregion
 
         #region Public Methods

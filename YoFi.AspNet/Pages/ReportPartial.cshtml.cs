@@ -93,7 +93,20 @@ namespace YoFi.AspNet.Pages
                         var labels = rows.Select(x => x.Name);
 
                         var cols = Report.ColumnLabelsFiltered.Where(x => !x.IsTotal && !x.IsCalculated);
-                        var series = cols.Select(col => (col.Name, rows.Select(row => (int)(Report[col, row] * factor))));
+                        var series = cols.Select(col => (col.Name, rows.Select(row => (int)(Report[col, row] * factor)))).ToList();
+
+                        // Task 1232: Budget summary: Scale budget based on % completion of the year
+                        //
+                        // We need to scale ONLY the "Budget" column, and ONLY when the report has a non-zero "YearProgress" value
+
+                        if (Report.YearProgress != 0.0)
+                        {
+                            var i = series.FindIndex(x => x.Name == "Budget");
+
+                            // Rebuild the series with a factor
+                            series[i] = (series[i].Name + " (YTD)", series[i].Item2.Select(x => (int)((double)x * Report.YearProgress)));
+                        }
+
                         var Chart = ChartConfig.CreateMultiBarChart(labels, series, palette);
 
                         // TODO: Need to scale down the budget based on the %complete of the year
