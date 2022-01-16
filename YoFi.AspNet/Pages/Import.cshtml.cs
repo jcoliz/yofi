@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNet;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,11 +15,14 @@ using YoFi.Core.Repositories;
 
 namespace YoFi.AspNet.Pages
 {
+    [ValidateAntiForgeryToken]
+    [Authorize(Policy = "CanRead")]
     public class ImportModel : PageModel
     {
         public const int PageSize = 25;
         private ITransactionRepository _repository;
         private IAsyncQueryExecution _queryExecution;
+        private IAuthorizationService _authorizationService;
 
         public PageDivider Divider { get; private set; } = new PageDivider() { PageSize = PageSize };
 
@@ -26,13 +30,14 @@ namespace YoFi.AspNet.Pages
 
         public HashSet<int> Highlights { get; private set; } = new HashSet<int>();
 
-        public ImportModel(ITransactionRepository repository, IAsyncQueryExecution queryExecution)
+        public ImportModel(ITransactionRepository repository, IAsyncQueryExecution queryExecution, IAuthorizationService authorizationService)
         {
             _repository = repository;
             _queryExecution = queryExecution;
+            _authorizationService = authorizationService;
         }
 
-        public async Task OnGetAsync(int? p = null)
+        public async Task<IActionResult> OnGetAsync(int? p = null)
         {
             // TODO: Should add a DTO here
             IQueryable<Transaction> result = _repository.OrderedQuery.Where(x => x.Imported == true);
@@ -57,6 +62,8 @@ namespace YoFi.AspNet.Pages
             }
 #endif
             Transactions = await _queryExecution.ToListNoTrackingAsync(result);
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostGoAsync(string command)
@@ -65,6 +72,12 @@ namespace YoFi.AspNet.Pages
             {
                 if (string.IsNullOrEmpty(command))
                     throw new ArgumentException();
+
+                // Sadly we cannot do "Authorize" filters on Page Hanlders. So we have to do this ourselves.
+                // https://stackoverflow.com/questions/43231535/how-to-validate-user-agains-policy-in-code-in-aspnet-core
+                var canwrite = await _authorizationService.AuthorizeAsync(User, "CanWrite");
+                if (!canwrite.Succeeded)
+                    throw new UnauthorizedAccessException();
 
                 if (command == "cancel")
                 {
@@ -82,12 +95,24 @@ namespace YoFi.AspNet.Pages
             {
                 return BadRequest();
             }
+            catch (UnauthorizedAccessException)
+            {
+                // This more directly mimics what the authorize filter would have done
+                return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
+            }
 
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files, [FromServices] TransactionImporter importer)
         {
+            // Sadly we cannot do "Authorize" filters on Page Hanlders. So we have to do this ourselves.
+            // https://stackoverflow.com/questions/43231535/how-to-validate-user-agains-policy-in-code-in-aspnet-core
+            var canwrite = await _authorizationService.AuthorizeAsync(User, "CanWrite");
+            if (!canwrite.Succeeded)
+                // This more directly mimics what the authorize filter would have done
+                return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
+
             // Open each file in turn, and send them to the importer
 
             foreach (var formFile in files)
