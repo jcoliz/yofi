@@ -44,6 +44,9 @@ namespace YoFi.AspNet.Pages
         {
             try
             {
+                // NOTE that ReportPartial doesn't do anything to the parms.
+                // Caller is expected to handle filing in defaults for parms.
+
                 // TODO: Make this Async()
                 Report = _reportengine.Build(parms);
 
