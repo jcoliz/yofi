@@ -32,7 +32,7 @@
 
 @if (!Model.Transactions.Any())
 {
-    <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="Upload">
+    <form method="post" enctype="multipart/form-data" asp-page-handler="Upload">
         <div class="input-group mb-3 mt-3">
             <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
             <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
@@ -41,7 +41,7 @@
 }
 else
 {
-    <form asp-action="ProcessImported">
+    <form method="post" asp-page-handler="Go">
         <button type="submit" name="command" value="ok" class="btn btn-primary mb-3">Import</button>
         <button type="submit" name="command" value="cancel" class="btn btn-outline-secondary mb-3">Delete</button>
     </form>
