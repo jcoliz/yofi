@@ -1,13 +1,19 @@
 ﻿using Common.AspNet.Test;
 using Common.DotNet;
+using Common.DotNet.Test;
 using Common.EFCore;
 using Common.NET.Test;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
@@ -21,11 +27,11 @@ namespace YoFi.Tests.Database
     [TestClass]
     public class ImportPageTest
     {
-#if false
         private ApplicationDbContext context;
         private TestClock clock;
         private ImportModel page;
         private TransactionRepository repository;
+        private DbSet<Transaction> dbset;
 
         [TestInitialize]
         public void SetUp()
@@ -35,6 +41,7 @@ namespace YoFi.Tests.Database
                 .Options;
 
             context = new ApplicationDbContext(options);
+            dbset = context.Transactions;
 
             // By default it's 2021, which is the year all our sample data is generated for
             clock = new TestClock() { Now = new System.DateTime(2021, 1, 1) };
@@ -44,7 +51,11 @@ namespace YoFi.Tests.Database
 
             repository = new TransactionRepository(context, qex, storage: storage);
 
-            page = new ImportModel(repository, qex, null);
+            var authservice = new Mock<IAuthorizationService>();
+            AuthorizationResult result = AuthorizationResult.Success();
+            authservice.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>())).Returns(Task.FromResult(result));
+
+            page = new ImportModel(repository, qex, authservice.Object);
         }
 
         [TestCleanup]
@@ -68,6 +79,26 @@ namespace YoFi.Tests.Database
 
             return result;
         }
+
+        private List<Transaction> Items => TransactionControllerTest.TransactionItems.Take(5).ToList();
+
+        [TestMethod]
+        public async Task Upload()
+        {
+            // Can't use the helper's upload bevause Transaction upload does not return the uploaded items.
+            var result = await DoUpload(Items);
+
+            // Test the status
+            var actual = Assert.That.IsOfType<PageResult>(result);
+
+            // Check the items on the page
+            Assert.AreEqual(Items.Count, page.Transactions.Count());
+
+            // Now check the state of the DB
+            Assert.AreEqual(Items.Count, dbset.Count());
+        }
+
+#if false
 
         [TestMethod]
         public async Task Bug880()
@@ -335,21 +366,6 @@ namespace YoFi.Tests.Database
             Assert.IsNull(viewresult.ViewData["Highlight"]);
         }
 
-        [TestMethod]
-        public async Task Upload()
-        {
-            // Can't use the helper's upload bevause Transaction upload does not return the uploaded items.
-            var result = await DoUpload(Items);
-
-            // Test the status
-            var actual = result as RedirectToActionResult;
-
-            Assert.AreEqual("Import", actual.ActionName);
-
-            // Now check the state of the DB
-
-            Assert.AreEqual(Items.Count, dbset.Count());
-        }
 
         [TestMethod]
         public async Task UploadWithID()
