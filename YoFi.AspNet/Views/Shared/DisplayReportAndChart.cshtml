@@ -9,7 +9,7 @@
 
 @if (!string.IsNullOrEmpty(Model.Report.Description))
 {
-    <h3>@Model.Report.Description</h3>
+    <h4>@Model.Report.Description</h4>
 }
 
 @if (!Model.Report.RowLabelsOrdered.Any(x=>!x.IsTotal))
@@ -18,6 +18,8 @@
 }
 else
 { 
+
+<br/>
 
 @*
     SIDE-BY-SIDE

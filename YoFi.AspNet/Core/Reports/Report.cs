@@ -265,7 +265,7 @@ namespace YoFi.Core.Reports
         /// <returns>New report</returns>
         public Report TakeSlice(string rowname)
         {
-            var result = new Report() { Name = rowname };
+            var result = new Report() { Name = rowname, Description = Description };
 
             // Find the row
             var findrow = RowLabels.Where(x => x.Name == rowname && !x.IsTotal);
