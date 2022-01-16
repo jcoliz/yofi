@@ -48,19 +48,6 @@ namespace YoFi.AspNet.Pages
 
             result = await Divider.ItemsForPage(result, p);
 
-#if false
-            try
-            {
-                if (!string.IsNullOrEmpty(highlight))
-                {
-                    ViewData["Highlight"] = highlight.Split(':').Select(x => Convert.ToInt32(x)).ToHashSet();
-                }
-            }
-            catch
-            {
-                // If this fails in any way, nevermind.
-            }
-#endif
             Transactions = await _queryExecution.ToListNoTrackingAsync(result);
 
             return Page();
