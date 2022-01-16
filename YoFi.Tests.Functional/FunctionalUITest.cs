@@ -19,7 +19,9 @@ namespace YoFi.Tests.Functional
 
         public override BrowserNewContextOptions ContextOptions => _ContextOptions;
 
-        private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions { AcceptDownloads = true };
+        private static ViewportSize iPadLandscapeViewport = new ViewportSize() { Width = 1080, Height = 810 };
+
+        private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions { AcceptDownloads = true, ViewportSize = iPadLandscapeViewport };
 
         protected const string testmarker = "__TEST__";
         private int nextid = 1;
@@ -73,7 +75,7 @@ namespace YoFi.Tests.Functional
                 await Context.StorageStateAsync(new BrowserContextStorageStateOptions { Path = ConfigFileName });
 
                 // Set it as our new context options for later contexts
-                _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName, AcceptDownloads = true };
+                _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName, AcceptDownloads = true, ViewportSize = iPadLandscapeViewport };
 
                 // Once we're logged int, the timeouts can get a lot tighter
                 base.Context.SetDefaultTimeout(5000);
