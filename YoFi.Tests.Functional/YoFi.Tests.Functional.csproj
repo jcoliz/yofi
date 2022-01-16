@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="SampleData\budget-white-60x.png" />
+    <None Remove="SampleData\FullSampleData-Month01.ofx" />
     <None Remove="SampleData\OneTransactionSplits-Total100.xlsx" />
     <None Remove="SampleData\Test-Generator-GenerateUploadSampleData.xlsx" />
     <None Remove="SampleData\User-Story-802.ofx" />
@@ -15,6 +16,9 @@
 
   <ItemGroup>
     <Content Include="SampleData\budget-white-60x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleData\FullSampleData-Month01.ofx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleData\OneTransactionSplits-Total100.xlsx">

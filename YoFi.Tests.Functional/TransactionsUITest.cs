@@ -711,15 +711,31 @@ namespace YoFi.Tests.Functional
         /// <summary>
         /// [User Can] Import transactions from an OFX file 
         /// </summary>
-        public void ImportOfx()
+        [TestMethod]
+        public async Task ImportOfx()
         {
-            // Given: On import page
+            // Given: Test Payees in the database
+            await GivenPayeeInDatabase(name: "AA__TEST__1", category: "AA__TEST__:A");
+            await GivenPayeeInDatabase(name: "AA__TEST__2", category: "AA__TEST__:B");
+            await GivenPayeeInDatabase(name: "AA__TEST__3", category: "AA__TEST__:C");
 
-            // When: Importing an OFX file, where all the payees are already known
+            // And: Starting On import page
+            await WhenNavigatingToPage("Import");
+            await Page.ThenIsOnPageAsync("Importer");
+
+            // When: Importing an OFX file, where the transactions match the existing payees
+            await Page.ClickAsync("[aria-label=\"Upload\"]");
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData\\FullSampleDAta-Month01.ofx" });
+            await Page.SaveScreenshotToAsync(TestContext, "-SetInputFiles");
+            await Page.ClickAsync("text=Upload");
+
+            await Page.ThenIsOnPageAsync("Importer");
+            await Page.SaveScreenshotToAsync(TestContext, "-Uploaded");
 
             // Then: Expected number of items present in importer
+            Assert.AreEqual(6, await Page.GetTotalItemsAsync());
 
-            // And: All categories are set
+            // And: All categories are set correctly
         }
 
         /// <summary>
