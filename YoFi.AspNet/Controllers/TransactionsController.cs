@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
+using YoFi.AspNet.Pages.Helpers;
 using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Repositories;
@@ -293,7 +294,9 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         public async Task<IActionResult> Download(bool allyears, string q = null)
         {
-            Stream stream = await _repository.AsSpreadsheetAsync(Year,allyears,q);
+            var sessionvars = new SessionVariables(HttpContext);
+
+            Stream stream = await _repository.AsSpreadsheetAsync(sessionvars.Year ?? _clock.Now.Year, allyears,q);
 
             IActionResult result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: "Transactions.xlsx");
 
@@ -302,7 +305,10 @@ namespace YoFi.AspNet.Controllers
 
         public IActionResult DownloadPartial()
         {
-            return PartialView();
+            var sessionvars = new SessionVariables(HttpContext);
+            var year = sessionvars.Year ?? _clock.Now.Year;
+
+            return PartialView(year);
         }
 
         #endregion
@@ -691,46 +697,6 @@ namespace YoFi.AspNet.Controllers
         private readonly ITransactionRepository _repository;
         private readonly IAsyncQueryExecution _queryExecution;
         private readonly IClock _clock;
-
-        /// <summary>
-        /// Current default year
-        /// </summary>
-        /// <remarks>
-        /// If you set this in the reports, it applies throughout the app,
-        /// defaulting to that year.
-        /// 
-        /// Note this is public so that tests could set it if needed. Currently, unit tests rely on
-        /// DateTime.Now for test data, so this is probably OK.
-        /// </remarks>
-        public int Year
-        {
-            get
-            {
-                if (!_Year.HasValue)
-                {
-                    var value = this.HttpContext?.Session.GetString(nameof(Year));
-                    if (string.IsNullOrEmpty(value))
-                    {
-                        Year = _clock.Now.Year;
-                    }
-                    else
-                    {
-                        _Year = (int.TryParse(value, out int y)) ? y : _clock.Now.Year;
-                    }
-                }
-
-                return _Year.Value;
-            }
-            set
-            {
-                _Year = value;
-
-                var serialisedDate = _Year.ToString();
-                this.HttpContext?.Session.SetString(nameof(Year), serialisedDate);
-            }
-        }
-        private int? _Year = null;
-
         #endregion
 
         #region IController

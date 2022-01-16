@@ -1985,7 +1985,7 @@ namespace YoFi.Tests.Database
 
             // Then: It returns an empty model
             var viewresult = result as PartialViewResult;
-            Assert.IsNull(viewresult.Model);
+            Assert.IsInstanceOfType(viewresult.Model,typeof(int));
         }
 
         [TestMethod]
