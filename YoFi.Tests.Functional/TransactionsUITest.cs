@@ -37,6 +37,10 @@ namespace YoFi.Tests.Functional
             // Given: Clicking "Transactions" on the navbar
             await Page.ClickAsync("text=Transactions");
 
+            // And: Showing hidden items
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Show Hidden");
+
             // If: totalitems > expected TotalItemCount
             var totalitems = await Page.GetTotalItemsAsync();
             if (totalitems > TotalItemCount)
@@ -706,13 +710,12 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(5, children.Count);
         }
 
-        // TODO
-
         /// <summary>
         /// [User Can] Import transactions from an OFX file 
+        ///     - [User Can] Preview transactions before commiting to import them
         /// </summary>
         [TestMethod]
-        public async Task ImportOfx()
+        public async Task ImportOfxPreview()
         {
             // Given: Test Payees in the database
             await GivenPayeeInDatabase(name: "AA__TEST__1", category: "AA__TEST__:A");
@@ -722,6 +725,7 @@ namespace YoFi.Tests.Functional
             // And: Starting On import page
             await WhenNavigatingToPage("Import");
             await Page.ThenIsOnPageAsync("Importer");
+            await Page.SaveScreenshotToAsync(TestContext, "-OnPageImporter");
 
             // When: Importing an OFX file, where the transactions match the existing payees
             await Page.ClickAsync("[aria-label=\"Upload\"]");
@@ -736,6 +740,31 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(6, await Page.GetTotalItemsAsync());
 
             // And: All categories are set correctly
+        }
+
+        /// <summary>
+        /// [User Can] Import transactions from an OFX file 
+        /// </summary>
+        [TestMethod]
+        public async Task ImportOfx()
+        {
+            // Given: Transactions already imported on the import page
+            await ImportOfxPreview();
+
+            // When: Accepting the import
+            await Page.ClickAsync("button:has-text(\"Import\")");
+            await Page.ThenIsOnPageAsync("Transactions");
+
+            // And: Searching for items by categories
+            // Then: The number of found items matches the input data
+            await Page.SearchFor($"c=AA__TEST__:A");
+            Assert.AreEqual(3, await Page.GetTotalItemsAsync());
+
+            await Page.SearchFor($"c=AA__TEST__:B");
+            Assert.AreEqual(2, await Page.GetTotalItemsAsync());
+
+            await Page.SearchFor($"c=AA__TEST__:C");
+            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
         }
 
         /// <summary>
