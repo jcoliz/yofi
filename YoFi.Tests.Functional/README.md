@@ -112,7 +112,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 Starting test execution, please wait...
 A total of 1 test files matched the specified pattern.
 
-Passed!  - Failed:     0, Passed:    69, Skipped:     0, Total:    69, Duration: 1 m - YoFi.Tests.Functional.dll (netcoreapp3.1)
+Passed!  - Failed:     0, Passed:   123, Skipped:     0, Total:   123, Duration: 2 m 35 s - YoFi.Tests.Functional.dll (netcoreapp3.1)
 ```
 
 ### Or, run the code first
@@ -147,7 +147,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 Starting test execution, please wait...
 A total of 1 test files matched the specified pattern.
 
-Passed!  - Failed:     0, Passed:     7, Skipped:     0, Total:     7, Duration: 5 s - YoFi.PWTests.dll (netcoreapp3.1)
+Passed!  - Failed:     0, Passed:   123, Skipped:     0, Total:   123, Duration: 2 m 35 s - YoFi.Tests.Functional.dll (netcoreapp3.1)
 ```
 
 ## Steps to reproduce
