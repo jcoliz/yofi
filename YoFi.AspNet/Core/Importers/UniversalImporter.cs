@@ -23,14 +23,24 @@ namespace YoFi.Core.Importers
             _budgettxImporter = budgettxImporter;
         }
 
-        void QueueImportFromXlsx(Stream stream)
+        public void QueueImportFromXlsx(Stream stream)
         {
             throw new NotImplementedException();
         }
 
-        Task ProcessImportAsync()
+        public void QueueImportFromXlsx<T>(Stream stream)
         {
-            throw new NotImplementedException();
+            if (typeof(T) == typeof(BudgetTx))
+            {
+                _budgettxImporter.QueueImportFromXlsx(stream);
+            }
+            else
+                throw new NotImplementedException();
+        }
+
+        public async Task ProcessImportAsync()
+        {
+            await _budgettxImporter.ProcessImportAsync();
         }
     }
 }
