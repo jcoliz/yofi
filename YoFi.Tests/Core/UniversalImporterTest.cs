@@ -48,8 +48,11 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class UniversalImporterTest
     {
+        public TestContext TestContext { get; set; }
+
         private UniversalImporter importer;
         private MockBudgetTxRepository budgetrepo;
+        private MockPayeeRepository payeerepo;
 
 
         static private IFormFile PrepareUpload(IEnumerable<object> what, string name)
@@ -70,12 +73,32 @@ namespace YoFi.Tests.Core
             return file;
         }
 
+        private MemoryStream PrepareSpreadsheet<T>(IEnumerable<T> what, string name) where T: class
+        {
+            var stream = new MemoryStream();
+            using (var ssr = new SpreadsheetWriter())
+            {
+                ssr.Open(stream);
+                ssr.Serialize(what, name);
+            }
+            stream.Seek(0, SeekOrigin.Begin);
+            var dir = TestContext.FullyQualifiedTestClassName;
+            Directory.CreateDirectory(dir);
+            var filename = $"{dir}/{TestContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            stream.CopyTo(outstream);
+            TestContext.AddResultFile(filename);
+
+            return stream;
+        }
+
         [TestInitialize]
         public void SetUp()
         {
             budgetrepo = new MockBudgetTxRepository();
             var budgetimport = new BaseImporter<BudgetTx>(budgetrepo);
-            var payeerepo = new MockPayeeRepository();
+            payeerepo = new MockPayeeRepository();
             var payeeimport = new BaseImporter<Payee>(payeerepo);
             var txrepo = new MockTransactionRepository();
             var tximport = new TransactionImporter(txrepo, payeerepo);
@@ -88,18 +111,19 @@ namespace YoFi.Tests.Core
             Assert.IsNotNull(importer);
         }
 
+        /// <summary>
+        /// Tests the case where we DO know to expect budget TX items.
+        /// </summary>
+        /// <remarks>
+        /// In this case, it's irrelevant what the sheets are named
+        /// </remarks>
+        /// <returns></returns>
         [TestMethod]
         public async Task BudgetTxNoName()
         {
             // Given: A spreadsheet with budget transactions in a sheet named {Something Random}
             var items = budgetrepo.MakeItems(5);
-            var stream = new MemoryStream();
-            using (var ssr = new SpreadsheetWriter())
-            {
-                ssr.Open(stream);
-                ssr.Serialize(items, "Random-Budget-tx");
-            }
-            stream.Seek(0, SeekOrigin.Begin);
+            using var stream = PrepareSpreadsheet(items, "Random-Budget-Tx");
 
             // When: Importing it
             importer.QueueImportFromXlsx<BudgetTx>(stream);
@@ -107,6 +131,21 @@ namespace YoFi.Tests.Core
 
             // Then: All items imported
             items.SequenceEqual(budgetrepo.Items);
+        }
+
+        [TestMethod]
+        public async Task PayeeNoName()
+        {
+            // Given: A spreadsheet with payees in a sheet named {Something Random}
+            var items = payeerepo.MakeItems(5);
+            using var stream = PrepareSpreadsheet(items, "Random-Payee-s");
+
+            // When: Importing it
+            importer.QueueImportFromXlsx<Payee>(stream);
+            await importer.ProcessImportAsync();
+
+            // Then: All items imported
+            items.SequenceEqual(payeerepo.Items);
         }
         public void BudgetTx()
         {
@@ -117,12 +156,6 @@ namespace YoFi.Tests.Core
         public void Payee()
         {
             // Given: A spreadsheet with payees in a sheet named "Payee", and all other kinds of data too
-            // When: Importing it
-            // Then: All items imported
-        }
-        public void PayeeNoName()
-        {
-            // Given: A spreadsheet with payees in a sheet named {Something Random}
             // When: Importing it
             // Then: All items imported
         }

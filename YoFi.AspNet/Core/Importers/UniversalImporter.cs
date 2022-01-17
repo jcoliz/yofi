@@ -35,6 +35,11 @@ namespace YoFi.Core.Importers
                 _budgettxImporter.QueueImportFromXlsx(stream);
             }
             else
+            if (typeof(T) == typeof(Payee))
+            {
+                _payeeImporter.QueueImportFromXlsx(stream);
+            }
+            else
                 throw new NotImplementedException();
         }
 
