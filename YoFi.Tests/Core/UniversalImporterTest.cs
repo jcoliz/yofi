@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using YoFi.Core.Importers;
+using YoFi.Core.Models;
+using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
 {
@@ -14,7 +16,13 @@ namespace YoFi.Tests.Core
         [TestInitialize]
         public void SetUp()
         {
-            importer = new UniversalImporter(null, null, null);
+            var budgetrepo = new MockBudgetTxRepository();
+            var budgetimport = new BaseImporter<BudgetTx>(budgetrepo);
+            var payeerepo = new MockPayeeRepository();
+            var payeeimport = new BaseImporter<Payee>(payeerepo);
+            var txrepo = new MockTransactionRepository();
+            var tximport = new TransactionImporter(txrepo, payeerepo);
+            importer = new UniversalImporter(tximport, payeeimport, budgetimport);
         }
 
         [TestMethod]
