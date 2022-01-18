@@ -26,19 +26,34 @@ namespace YoFi.Core.Importers
 
         public void QueueImportFromXlsx(Stream stream)
         {
+            // Universal importer supports extracting data types from spreadsheets which are
+            // explicitly named.
+
             using var ssr = new SpreadsheetReader();
             ssr.Open(stream);
-            if (ssr.SheetNames.Contains(nameof(BudgetTx)))
+            if (ssr.SheetNames.Any())
             {
-                _budgettxImporter.QueueImportFromXlsx(ssr);
-            }
-            if (ssr.SheetNames.Contains(nameof(Payee)))
-            {
-                _payeeImporter.QueueImportFromXlsx(ssr);
-            }
-            if (ssr.SheetNames.Contains(nameof(Transaction)))
-            {
-                _transactionImporter.QueueImportFromXlsx(ssr);
+                if (ssr.SheetNames.Contains(nameof(BudgetTx)))
+                {
+                    _budgettxImporter.QueueImportFromXlsx(ssr);
+                }
+                if (ssr.SheetNames.Contains(nameof(Payee)))
+                {
+                    _payeeImporter.QueueImportFromXlsx(ssr);
+                }
+                if (ssr.SheetNames.Contains(nameof(Transaction)))
+                {
+                    _transactionImporter.QueueImportFromXlsx(ssr);
+                }
+
+                // Also, it will extract try to extract transactions from spreadsheets with ANY
+                // name, as long as they're not claimed by something else
+                var firstname = ssr.SheetNames.First();
+                var others = new string[] { nameof(BudgetTx), nameof(Payee), nameof(Transaction), nameof(Split) };
+                if (!others.Contains(firstname))
+                {
+                    _transactionImporter.QueueImportFromXlsx(ssr);
+                }
             }
         }
 

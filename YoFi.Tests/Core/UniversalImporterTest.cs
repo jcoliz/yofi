@@ -212,23 +212,60 @@ namespace YoFi.Tests.Core
             // Then: All items imported
             Assert.IsTrue(items.SequenceEqual(txrepo.Items));
         }
-        public void TransactionsNoName()
+
+        [TestMethod]
+        public async Task TransactionsNoName()
         {
-            // Given: A spreadsheet with transactions in a sheet named {Something Random} and splits in a sheet named {something random}
+            // Given: A spreadsheet with transactions in a sheet named "Transaction", and all other kinds of data too
+            using var helper = new ImportPackageHelper();
+            var items = txrepo.MakeItems(5);
+            helper.Add(items, "Random-Tranxs");
+            var stream = helper.GetFile(TestContext);
+
             // When: Importing it
+            importer.QueueImportFromXlsx(stream);
+            await importer.ProcessImportAsync();
+
             // Then: All items imported
+            Assert.IsTrue(items.SequenceEqual(txrepo.Items));
         }
-        public void TransactionsAndSplitsNoName()
+
+        [DataRow("Random-Tranxs")]
+        [DataRow(null)]
+        [DataTestMethod]
+        public async Task TransactionsAndSplits(string name)
         {
-            // Given: A spreadsheet with transactions and splits in sheets each named {Something Random}
+            // Given: A spreadsheet with transactions in sheet named {Something Random} and splits in "Split"
+            using var helper = new ImportPackageHelper();
+            var items = txrepo.MakeItems(5);
+            helper.Add(items, name);
+            var splits = new List<Split>()
+            {
+                new Split() { Amount = 100m, Category = "1", TransactionID = 1 },
+                new Split() { Amount = 200m, Category = "2A", TransactionID = 2 },
+                new Split() { Amount = 200m, Category = "2B", TransactionID = 2 },
+                new Split() { Amount = 300m, Category = "3A", TransactionID = 3 },
+                new Split() { Amount = 300m, Category = "3B", TransactionID = 3 },
+                new Split() { Amount = 300m, Category = "3B", TransactionID = 3 }
+            };
+            helper.Add(splits, null);
+            var stream = helper.GetFile(TestContext);
+
             // When: Importing it
+            importer.QueueImportFromXlsx(stream);
+            await importer.ProcessImportAsync();
+
             // Then: All items imported
-        }
-        public void TransactionsAndSplits()
-        {
-            // Given: A spreadsheet with transactions and splits in sheets each named "Transaction", and "Split"
-            // When: Importing it
-            // Then: All items imported
+            Assert.IsTrue(items.SequenceEqual(txrepo.Items));
+
+            int i = 3;
+            do
+            {
+                var tx = txrepo.Items.Where(x => x.Payee == i.ToString()).Single();
+                Assert.AreEqual(i, tx.Splits.Count);
+            }
+            while (--i > 0);
+
         }
         public void TransactionsOfx()
         {
