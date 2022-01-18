@@ -28,6 +28,8 @@ namespace YoFi.AspNet.Pages
 
         public IEnumerable<Transaction> Transactions { get; private set; } = Enumerable.Empty<Transaction>();
 
+        public IEnumerable<BudgetTx> BudgetTxs { get; set; } = Enumerable.Empty<BudgetTx>();
+
         public HashSet<int> Highlights { get; private set; } = new HashSet<int>();
 
         public ImportModel(ITransactionRepository repository, IAsyncQueryExecution queryExecution, IAuthorizationService authorizationService)
@@ -116,6 +118,7 @@ namespace YoFi.AspNet.Pages
 
             // Process the imported files
             await importer.ProcessImportAsync();
+            BudgetTxs = importer.ImportedBudgetTxs;
 
             // Prepare the visual results
             await OnGetAsync();

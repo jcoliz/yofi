@@ -41,6 +41,8 @@
 }
 else
 {
+    <h2>Imported Transactions</h2>
+    <p>These transactions are waiting in an import queue. Do you want to import them now, or delete them?</p>
     <form method="post" asp-page-handler="Go">
         <button type="submit" name="command" value="ok" class="btn btn-primary mb-3">Import</button>
         <button type="submit" name="command" value="cancel" class="btn btn-outline-secondary mb-3">Delete</button>
@@ -103,7 +105,50 @@ else
     </table>
 
     @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", Model.Divider)
+}
 
+@if (Model.BudgetTxs.Any())
+{
+    <h2>Imported Budget Line Items</h2>
+    <p>These items have been imported to your budget line items. You can review your entire set of budget line items on the Edit Budget page.</p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Date
+                </th>
+                <th>
+                    Category
+                </th>
+                <th>
+                    Memo
+                </th>
+                <th>
+                    Amount
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.BudgetTxs)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Timestamp)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Category)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Memo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 
 @await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "import")
