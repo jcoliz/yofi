@@ -66,13 +66,13 @@ namespace YoFi.AspNet.Controllers
         [ApiBasicAuthorization]
         public async Task<IActionResult> ClearTestData(string id, [FromServices] IDataContext context)
         {
-            if (id.Contains("payee"))
+            if (id.Contains("payee") || "all" == id)
                 context.RemoveRange(context.Payees.Where(x => x.Category.Contains(TestMarker)));
 
-            if (id.Contains("budgettx"))
+            if (id.Contains("budgettx") || "all" == id)
                 context.RemoveRange(context.BudgetTxs.Where(x => x.Category.Contains(TestMarker)));
 
-            if (id.Contains("trx"))
+            if (id.Contains("trx") || "all" == id)
             {
                 context.RemoveRange(context.Transactions.Where(x => x.Category.Contains(TestMarker) || x.Memo.Contains(TestMarker) || x.Payee.Contains(TestMarker)));
                 context.RemoveRange(context.Splits.Where(x => x.Category.Contains(TestMarker)));

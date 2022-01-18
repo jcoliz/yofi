@@ -11,7 +11,7 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class BudgetUITest : FunctionalUITest
     {
-        const int TotalItemCount = 46;
+        public const int TotalItemCount = 46;
         const string MainPageName = "Budget Line Items";
 
         [TestInitialize]

@@ -12,8 +12,8 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class TransactionsUITest : FunctionalUITest
     {
-        const int TotalItemCount = 889;
-        const string MainPageName = "Transactions";
+        public const int TotalItemCount = 889;
+        public const string MainPageName = "Transactions";
 
         [TestInitialize]
         public new async Task SetUp()
@@ -548,24 +548,6 @@ namespace YoFi.Tests.Functional
             Assert.IsNull(fix);
         }
 
-        async Task GivenPayeeInDatabase(string category, string name)
-        {
-            // Given: We are starting at the payee index page
-
-            await WhenNavigatingToPage("Payees");
-
-            // And: Creating a new item
-
-            await Page.ClickAsync("#dropdownMenuButtonAction");
-            await Page.ClickAsync("text=Create New");
-            await Page.FillFormAsync(new Dictionary<string, string>()
-            {
-                { "Category", category ?? NextCategory },
-                { "Name", name ?? NextName },
-            });
-            await Page.ClickAsync("input:has-text(\"Create\")");
-            await Page.SaveScreenshotToAsync(TestContext,"CreatedPayee");
-        }
 
         /// <summary>
         /// User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided upon transaction import
@@ -708,76 +690,6 @@ namespace YoFi.Tests.Functional
 
             var children = await element.QuerySelectorAllAsync("a");
             Assert.AreEqual(5, children.Count);
-        }
-
-        /// <summary>
-        /// [User Can] Import transactions from an OFX file 
-        ///     - [User Can] Preview transactions before commiting to import them
-        /// </summary>
-        [TestMethod]
-        public async Task ImportOfxPreview()
-        {
-            // Given: Test Payees in the database
-            await GivenPayeeInDatabase(name: "AA__TEST__1", category: "AA__TEST__:A");
-            await GivenPayeeInDatabase(name: "AA__TEST__2", category: "AA__TEST__:B");
-            await GivenPayeeInDatabase(name: "AA__TEST__3", category: "AA__TEST__:C");
-
-            // And: Starting On import page
-            await WhenNavigatingToPage("Import");
-            await Page.ThenIsOnPageAsync("Importer");
-            await Page.SaveScreenshotToAsync(TestContext, "-OnPageImporter");
-
-            // When: Importing an OFX file, where the transactions match the existing payees
-            await Page.ClickAsync("[aria-label=\"Upload\"]");
-            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData\\FullSampleDAta-Month01.ofx" });
-            await Page.SaveScreenshotToAsync(TestContext, "-SetInputFiles");
-            await Page.ClickAsync("text=Upload");
-
-            await Page.ThenIsOnPageAsync("Importer");
-            await Page.SaveScreenshotToAsync(TestContext, "-Uploaded");
-
-            // Then: Expected number of items present in importer
-            Assert.AreEqual(6, await Page.GetTotalItemsAsync());
-
-            // And: All categories are set correctly
-        }
-
-        /// <summary>
-        /// [User Can] Import transactions from an OFX file 
-        /// </summary>
-        [TestMethod]
-        public async Task ImportOfx()
-        {
-            // Given: Transactions already imported on the import page
-            await ImportOfxPreview();
-
-            // When: Accepting the import
-            await Page.ClickAsync("button:has-text(\"Import\")");
-            await Page.ThenIsOnPageAsync("Transactions");
-
-            // And: Searching for items by categories
-            // Then: The number of found items matches the input data
-            await Page.SearchFor($"c=AA__TEST__:A");
-            Assert.AreEqual(3, await Page.GetTotalItemsAsync());
-
-            await Page.SearchFor($"c=AA__TEST__:B");
-            Assert.AreEqual(2, await Page.GetTotalItemsAsync());
-
-            await Page.SearchFor($"c=AA__TEST__:C");
-            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
-        }
-
-        /// <summary>
-        /// [User Can] Preview transactions before commiting to import them,
-        /// and choose to discard them all in one operation.
-        /// </summary>
-        public void ImportOfxDelete()
-        {
-            // Given: Imported an OFX file
-
-            // When: Deleting them
-
-            // Then: No items present in importer
         }
 
         /// <summary>

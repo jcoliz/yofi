@@ -106,6 +106,25 @@ namespace YoFi.Tests.Functional
             await DismissHelpTest();
         }
 
+        protected async Task GivenPayeeInDatabase(string category, string name)
+        {
+            // Given: We are starting at the payee index page
+
+            await WhenNavigatingToPage("Payees");
+
+            // And: Creating a new item
+
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.ClickAsync("text=Create New");
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", category ?? NextCategory },
+                { "Name", name ?? NextName },
+            });
+            await Page.ClickAsync("input:has-text(\"Create\")");
+            await Page.SaveScreenshotToAsync(TestContext, "CreatedPayee");
+        }
+
         protected async Task DismissHelpTest()
         {
             await Page.WaitForLoadStateAsync();
@@ -143,9 +162,11 @@ namespace YoFi.Tests.Functional
                 await page.FillAsync($"input[name=\"{kvp.Key}\"]", kvp.Value);
         }
 
-        public static async Task<int> GetTotalItemsAsync(this IPage page)
+        public static async Task<int> GetTotalItemsAsync(this IPage page) => await page.GetNumberAsync("data-test-id=totalitems");
+
+        public static async Task<int> GetNumberAsync(this IPage page, string selector)
         {
-            var totalitems = await page.TextContentAsync("data-test-id=totalitems");
+            var totalitems = await page.TextContentAsync(selector);
 
             if (!Int32.TryParse(totalitems, out int result))
                 result = 0;
@@ -161,7 +182,9 @@ namespace YoFi.Tests.Functional
             var counter = 1 + ScreenShotCounter.GetValueOrDefault(testname);
             ScreenShotCounter[testname] = counter;
 
-            var filename = $"Screenshot/{testname} {counter:D4}{moment ?? String.Empty}.png";
+            var displaymoment = string.IsNullOrEmpty(moment) ? string.Empty : $"-{moment}";
+
+            var filename = $"Screenshot/{testname} {counter:D4}{displaymoment}.png";
             await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true, FullPage = true });
             testContext.AddResultFile(filename);
         }
