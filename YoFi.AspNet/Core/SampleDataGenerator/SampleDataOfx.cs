@@ -11,7 +11,8 @@ namespace YoFi.Core.SampleGen
     {
         public static void WriteToOfx(IEnumerable<Transaction> transactions, Stream stream)
         {
-            using var writer = new StreamWriter(stream);
+            // Needs to be left open in case stream is a memory stream that we are going to use later
+            var writer = new StreamWriter(stream);
 
             // Write header
 

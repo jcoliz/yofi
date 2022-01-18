@@ -33,8 +33,15 @@
     </div>
 </nav>
 
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <h2>Error</h2>
+    <p class="alert-danger p-3">@Model.Error</p>
+}
+
 @if (!Model.Transactions.Any())
 {
+    <h2>Select Files</h2>
     <form method="post" enctype="multipart/form-data" asp-page-handler="Upload">
         <div class="input-group mb-3 mt-3">
             <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
@@ -42,7 +49,7 @@
         </div>
     </form>
 
-    <h4 class="mt-4">Sample Files</h4>
+    <h2 class="mt-4">Sample Data</h2>
     <p>
         Here are a collection of files you could download, then upload on this page, to add some sample data to your database. These files will demonstrate how to
         format your own data for uploading.
@@ -77,7 +84,7 @@
         }
     </div>
 
-    <div class="row">
+    <div class="row mb-3">
         @for (int m = 1; m <= 12; m++)
         {
             <div class="col-lg-1 col-md-2 col-sm-3 col-4 p-2 d-flex">

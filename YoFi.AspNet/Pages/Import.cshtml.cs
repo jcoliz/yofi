@@ -14,6 +14,7 @@ using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.SampleGen;
 
 namespace YoFi.AspNet.Pages
 {
@@ -37,6 +38,8 @@ namespace YoFi.AspNet.Pages
         public int NumPayeesUploaded { get; private set; }
 
         public HashSet<int> Highlights { get; private set; } = new HashSet<int>();
+
+        public string Error { get; private set; }
 
         public ImportModel(ITransactionRepository repository, IAsyncQueryExecution queryExecution, IAuthorizationService authorizationService)
         {
@@ -101,39 +104,47 @@ namespace YoFi.AspNet.Pages
 
         public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files, [FromServices] UniversalImporter importer)
         {
-            // Sadly we cannot do "Authorize" filters on Page Hanlders. So we have to do this ourselves.
-            // https://stackoverflow.com/questions/43231535/how-to-validate-user-agains-policy-in-code-in-aspnet-core
-            var canwrite = await _authorizationService.AuthorizeAsync(User, "CanWrite");
-            if (!canwrite.Succeeded)
-                // This more directly mimics what the authorize filter would have done
-                return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
-
-            // Open each file in turn, and send them to the importer
-
-            foreach (var formFile in files)
+            try
             {
-                using var stream = formFile.OpenReadStream();
+                // Sadly we cannot do "Authorize" filters on Page Hanlders. So we have to do this ourselves.
+                // https://stackoverflow.com/questions/43231535/how-to-validate-user-agains-policy-in-code-in-aspnet-core
+                var canwrite = await _authorizationService.AuthorizeAsync(User, "CanWrite");
+                if (!canwrite.Succeeded)
+                    // This more directly mimics what the authorize filter would have done
+                    return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
 
-                var filetype = Path.GetExtension(formFile.FileName).ToLowerInvariant();
+                // Open each file in turn, and send them to the importer
 
-                if (filetype == ".ofx")
-                    await importer.QueueImportFromOfxAsync(stream);
-                else if (filetype == ".xlsx")
-                    importer.QueueImportFromXlsx(stream);
+                foreach (var formFile in files)
+                {
+                    using var stream = formFile.OpenReadStream();
+
+                    var filetype = Path.GetExtension(formFile.FileName).ToLowerInvariant();
+
+                    if (filetype == ".ofx")
+                        await importer.QueueImportFromOfxAsync(stream);
+                    else if (filetype == ".xlsx")
+                        importer.QueueImportFromXlsx(stream);
+                }
+
+                // Process the imported files
+                await importer.ProcessImportAsync();
+                BudgetTxs = importer.ImportedBudgetTxs.Take(MaxOtherItemsToShow);
+                Payees = importer.ImportedPayees.Take(MaxOtherItemsToShow);
+                NumBudgetTxsUploaded = importer.ImportedBudgetTxs.Count();
+                NumPayeesUploaded = importer.ImportedPayees.Count();
+
+                // Prepare the visual results
+                await OnGetAsync();
+
+                // Set the highlights
+                Highlights = importer.HighlightIDs.ToHashSet();
+
             }
-
-            // Process the imported files
-            await importer.ProcessImportAsync();
-            BudgetTxs = importer.ImportedBudgetTxs.Take(MaxOtherItemsToShow);
-            Payees = importer.ImportedPayees.Take(MaxOtherItemsToShow);
-            NumBudgetTxsUploaded = importer.ImportedBudgetTxs.Count();
-            NumPayeesUploaded = importer.ImportedPayees.Count();
-
-            // Prepare the visual results
-            await OnGetAsync();
-
-            // Set the highlights
-            Highlights = importer.HighlightIDs.ToHashSet();
+            catch (Exception ex)
+            {
+                Error = $"The import failed. This error was given: {ex.GetType().Name}: {ex.Message}";
+            }
 
             return Page();
         }
@@ -200,17 +211,31 @@ namespace YoFi.AspNet.Pages
                     var outtxids = outtxs.Where(x=>x.ID > 0).Select(x => x.ID).ToHashSet();
                     var outsplits = splits.Where(x=>outtxids.Contains(x.TransactionID));
 
-                    // Then write that back out
-                    var stream = new MemoryStream();
-                    using (var ssw = new SpreadsheetWriter())
+                    if ("xlsx" == how)
                     {
-                        ssw.Open(stream);
-                        ssw.Serialize(outtxs);
-                        ssw.Serialize(outsplits);
+                        // Then write that back out
+                        var stream = new MemoryStream();
+                        using (var ssw = new SpreadsheetWriter())
+                        {
+                            ssw.Open(stream);
+                            ssw.Serialize(outtxs);
+                            ssw.Serialize(outsplits);
+                        }
+                        stream.Seek(0, SeekOrigin.Begin);
+                        var monthname = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
+                        result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{month:D2}-{monthname}.{how}");
+
                     }
-                    stream.Seek(0, SeekOrigin.Begin);
-                    var monthname = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
-                    result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{month:D2}-{monthname}.xlsx");
+                    else if ("ofx" == how)
+                    {
+                        // Write it as an OFX
+                        var stream = new MemoryStream();
+                        SampleDataOfx.WriteToOfx(outtxs, stream);
+
+                        stream.Seek(0, SeekOrigin.Begin);
+                        var monthname = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
+                        result = File(stream, contentType: "application/ofx", fileDownloadName: $"{month:D2}-{monthname}.{how}");
+                    }
                 }
             }
 
