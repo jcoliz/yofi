@@ -103,6 +103,25 @@ namespace YoFi.Tests.Database
         private IEnumerable<Transaction> TransactionItems => TransactionControllerTest.TransactionItems;
         private List<Payee> PayeeItems => TransactionControllerTest.PayeeItems;
 
+        static public IFormFile PrepareUpload<X>(IEnumerable<X> what) where X : class
+        {
+            // Build a spreadsheet with the chosen number of items
+            // Note that we are not disposing the stream. User of the file will do so later.
+            var stream = new MemoryStream();
+            using (var ssr = new SpreadsheetWriter())
+            {
+                ssr.Open(stream);
+                ssr.Serialize(what);
+            }
+
+            // Create a formfile with it
+            var filename = $"{typeof(X).Name}s";
+            stream.Seek(0, SeekOrigin.Begin);
+            IFormFile file = new FormFile(stream, 0, stream.Length, filename, $"{filename}.xlsx");
+
+            return file;
+        }
+
         [TestMethod]
         public async Task Upload()
         {
@@ -508,15 +527,22 @@ namespace YoFi.Tests.Database
             // [???] What should the UI look like here??
         }
 
-        public void PayeeImport()
+        [TestMethod]
+        public async Task PayeeImportLots()
         {
-            // Given: An XLSX file with payees in a sheet called "payees"
+            // Given: An XLSX file with TOO MANY payees in a sheet called "payees"
+            var howmany = 50;
+            var lotsofpayees = Enumerable.Range(1, howmany).Select(x => new Payee() { Name = x.ToString(), Category = x.ToString() });
+            var file = PrepareUpload(lotsofpayees);
 
             // When: Uploading it
+            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
 
-            // Then: All items are imported successfully
+            // Then: Only the first few are shown
+            Assert.AreEqual(ImportModel.MaxOtherItemsToShow, page.Payees.Count());
 
-            // [???] What should the UI look like here??
+            // And: There is an indicator that more are available
+            Assert.AreEqual(howmany, page.NumPayeesUploaded);
         }
 
         //
@@ -541,8 +567,6 @@ namespace YoFi.Tests.Database
 
             Assert.AreEqual(3, context.Payees.Count());
             Assert.AreEqual(4, context.BudgetTxs.Count());
-
-            // [???] What should the UI look like here??
         }
     }
 }

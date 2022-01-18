@@ -294,7 +294,7 @@ namespace Common.AspNet.Test
         }
 
 #if true
-        static public IFormFile PrepareUpload<X>(ICollection<X> what) where X : class
+        static public IFormFile PrepareUpload<X>(IEnumerable<X> what) where X : class
         {
             // Build a spreadsheet with the chosen number of items
             // Note that we are not disposing the stream. User of the file will do so later.

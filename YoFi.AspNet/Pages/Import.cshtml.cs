@@ -20,6 +20,7 @@ namespace YoFi.AspNet.Pages
     public class ImportModel : PageModel
     {
         public const int PageSize = 25;
+        public const int MaxOtherItemsToShow = 10;
         private ITransactionRepository _repository;
         private IAsyncQueryExecution _queryExecution;
         private IAuthorizationService _authorizationService;
@@ -28,8 +29,10 @@ namespace YoFi.AspNet.Pages
 
         public IEnumerable<Transaction> Transactions { get; private set; } = Enumerable.Empty<Transaction>();
 
-        public IEnumerable<BudgetTx> BudgetTxs { get; set; } = Enumerable.Empty<BudgetTx>();
-        public IEnumerable<Payee> Payees { get; set; } = Enumerable.Empty<Payee>();
+        public IEnumerable<BudgetTx> BudgetTxs { get; private set; } = Enumerable.Empty<BudgetTx>();
+        public IEnumerable<Payee> Payees { get; private set; } = Enumerable.Empty<Payee>();
+        public int NumBudgetTxsUploaded { get; private set; }
+        public int NumPayeesUploaded { get; private set; }
 
         public HashSet<int> Highlights { get; private set; } = new HashSet<int>();
 
@@ -119,8 +122,10 @@ namespace YoFi.AspNet.Pages
 
             // Process the imported files
             await importer.ProcessImportAsync();
-            BudgetTxs = importer.ImportedBudgetTxs;
-            Payees = importer.ImportedPayees;
+            BudgetTxs = importer.ImportedBudgetTxs.Take(MaxOtherItemsToShow);
+            Payees = importer.ImportedPayees.Take(MaxOtherItemsToShow);
+            NumBudgetTxsUploaded = importer.ImportedBudgetTxs.Count();
+            NumPayeesUploaded = importer.ImportedPayees.Count();
 
             // Prepare the visual results
             await OnGetAsync();
