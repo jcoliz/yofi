@@ -1,4 +1,5 @@
-﻿using System;
+﻿using jcoliz.OfficeOpenXml.Serializer;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,16 @@ namespace YoFi.Core.Importers
 
         public void QueueImportFromXlsx(Stream stream)
         {
-            throw new NotImplementedException();
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            if (ssr.SheetNames.Contains(nameof(BudgetTx)))
+            {
+                _budgettxImporter.QueueImportFromXlsx(ssr);
+            }
+            if (ssr.SheetNames.Contains(nameof(Payee)))
+            {
+                _payeeImporter.QueueImportFromXlsx(ssr);
+            }
         }
 
         public void QueueImportFromXlsx<T>(Stream stream)
@@ -46,6 +56,7 @@ namespace YoFi.Core.Importers
         public async Task ProcessImportAsync()
         {
             await _budgettxImporter.ProcessImportAsync();
+            await _payeeImporter.ProcessImportAsync();
         }
     }
 }

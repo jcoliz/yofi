@@ -1,7 +1,6 @@
-﻿using System;
+﻿using jcoliz.OfficeOpenXml.Serializer;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace YoFi.Core.Importers
@@ -23,6 +22,16 @@ namespace YoFi.Core.Importers
         /// </remarks>
         /// <param name="stream">Where to find the spreadsheet to import</param>
         void QueueImportFromXlsx(Stream stream);
+
+        /// <summary>
+        /// Declare that items from the spreadsheet in the given <paramref name="reader"/> should be
+        /// imported.
+        /// </summary>
+        /// <remarks>
+        /// Same behaviour as the stream version, just doesn't need to open the spreadsheet, because
+        /// the caller already has it open.
+        /// </remarks>
+        void QueueImportFromXlsx(ISpreadsheetReader reader);
 
         /// <summary>
         /// Import previously queued files into their final destination

@@ -31,12 +31,21 @@ namespace YoFi.Tests.Core
             _writer.Serialize(what, name);
         }
 
-        public IFormFile GetFile(string filename)
+        public Stream GetFile(TestContext testContext)
         {
             _writer.Dispose();
 
             _stream.Seek(0, SeekOrigin.Begin);
-            return new FormFile(_stream, 0, _stream.Length, filename, $"{filename}.xlsx");
+
+            var dir = testContext.FullyQualifiedTestClassName;
+            Directory.CreateDirectory(dir);
+            var filename = $"{dir}/{testContext.TestName}.xlsx";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            _stream.CopyTo(outstream);
+            testContext.AddResultFile(filename);
+
+            return _stream;
         }
 
         public void Dispose()
@@ -82,6 +91,7 @@ namespace YoFi.Tests.Core
                 ssr.Serialize(what, name);
             }
             stream.Seek(0, SeekOrigin.Begin);
+
             var dir = TestContext.FullyQualifiedTestClassName;
             Directory.CreateDirectory(dir);
             var filename = $"{dir}/{TestContext.TestName}.xlsx";
@@ -130,7 +140,7 @@ namespace YoFi.Tests.Core
             await importer.ProcessImportAsync();
 
             // Then: All items imported
-            items.SequenceEqual(budgetrepo.Items);
+            Assert.IsTrue(items.SequenceEqual(budgetrepo.Items));
         }
 
         [TestMethod]
@@ -145,19 +155,43 @@ namespace YoFi.Tests.Core
             await importer.ProcessImportAsync();
 
             // Then: All items imported
-            items.SequenceEqual(payeerepo.Items);
+            Assert.IsTrue(items.SequenceEqual(payeerepo.Items));
         }
-        public void BudgetTx()
+
+        [TestMethod]
+        public async Task BudgetTx()
         {
-            // Given: A spreadsheet with budget transactions in a sheet named "BudgetTx", and all other kinds of data too
+            // Given: A spreadsheet with budget transactions in a sheet named "BudgetTx", and other kinds of data too
+            using var helper = new ImportPackageHelper();
+            helper.Add(payeerepo.MakeItems(5),null);
+            var items = budgetrepo.MakeItems(5);
+            helper.Add(items, null);
+            var stream = helper.GetFile(TestContext);
+
             // When: Importing it
+            importer.QueueImportFromXlsx(stream);
+            await importer.ProcessImportAsync();
+
             // Then: All items imported
+            Assert.IsTrue(items.SequenceEqual(budgetrepo.Items));
         }
-        public void Payee()
+
+        [TestMethod]
+        public async Task Payee()
         {
             // Given: A spreadsheet with payees in a sheet named "Payee", and all other kinds of data too
+            using var helper = new ImportPackageHelper();
+            helper.Add(budgetrepo.MakeItems(5), null);
+            var items = payeerepo.MakeItems(5);
+            helper.Add(items, null);
+            var stream = helper.GetFile(TestContext);
+
             // When: Importing it
+            importer.QueueImportFromXlsx(stream);
+            await importer.ProcessImportAsync();
+
             // Then: All items imported
+            Assert.IsTrue(items.SequenceEqual(payeerepo.Items));
         }
         public void Transactions()
         {

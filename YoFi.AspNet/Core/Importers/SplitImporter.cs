@@ -57,9 +57,14 @@ namespace YoFi.Core.Importers
         /// </summary>
         public void QueueImportFromXlsx(Stream stream)
         {
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            var items = ssr.Deserialize<Split>(exceptproperties: new string[] { "ID" });
+            using var reader = new SpreadsheetReader();
+            reader.Open(stream);
+            QueueImportFromXlsx(reader);
+        }
+
+        public void QueueImportFromXlsx(ISpreadsheetReader reader)
+        {
+            var items = reader.Deserialize<Split>(exceptproperties: new string[] { "ID" });
             incoming.UnionWith(items);
         }
 
