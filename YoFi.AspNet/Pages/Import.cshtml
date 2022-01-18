@@ -39,6 +39,52 @@
             <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
         </div>
     </form>
+
+    <h4 class="mt-4">Sample Files</h4>
+    <p>
+        Here are a collection of files you could download, then upload on this page, to add some sample data to your database. These files will demonstrate how to
+        format your own data for uploading.
+    </p>
+
+    <div class="row">
+        <div class="col-sm-4 col-12 p-2 d-flex">
+            <div class="btn flex-fill" style="background-color:lightblue">
+                XLSX<br />Full Data Set<br />2022
+            </div>
+        </div>
+        <div class="col-sm-4 col-12 p-2 d-flex">
+            <div class="btn flex-fill" style="background-color:lightblue">
+                XLSX<br />Budget<br />2022
+            </div>
+        </div>
+        <div class="col-sm-4 col-12 p-2 d-flex">
+            <div class="btn flex-fill" style="background-color:lightblue">
+                XLSX<br />Payees<br />2022
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        @for (int m = 1; m <= 12; m++)
+        {
+            <div class="col-lg-1 col-md-2 col-sm-3 col-4 p-2 d-flex">
+                <div class="btn flex-fill" style="background-color:lightblue">
+                    XLSX<br />@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)<br />2022
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row">
+        @for (int m = 1; m <= 12; m++)
+        {
+            <div class="col-lg-1 col-md-2 col-sm-3 col-4 p-2 d-flex">
+                <div class="btn flex-fill" style="background-color:lightblue">
+                    OFX<br />@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)<br />2022
+                </div>
+            </div>
+        }
+    </div>
 }
 else
 {
