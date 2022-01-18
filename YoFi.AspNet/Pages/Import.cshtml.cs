@@ -135,5 +135,14 @@ namespace YoFi.AspNet.Pages
 
             return Page();
         }
+
+        public async Task<IActionResult> OnGetSampleAsync(string what, string how)
+        {
+            Stream stream = await _repository.AsSpreadsheetAsync(2022, allyears:false, q:"d=0101");
+
+            IActionResult result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
+
+            return result;
+        }
     }
 }

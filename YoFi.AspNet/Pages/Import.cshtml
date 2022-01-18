@@ -1,5 +1,7 @@
 ﻿@page
 @using YoFi.AspNet.Pages
+@using Common.DotNet
+@inject Common.DotNet.IClock _clock
 @model YoFi.AspNet.Pages.ImportModel
 @{
     Layout = "_Layout";
@@ -48,19 +50,19 @@
 
     <div class="row">
         <div class="col-sm-4 col-12 p-2 d-flex">
-            <div class="btn flex-fill" style="background-color:lightblue">
-                XLSX<br />Full Data Set<br />2022
-            </div>
+            <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="xlsx" asp-route-what="full">
+                XLSX<br />Full Data Set<br />@_clock.Now.Year
+            </a>
         </div>
         <div class="col-sm-4 col-12 p-2 d-flex">
-            <div class="btn flex-fill" style="background-color:lightblue">
-                XLSX<br />Budget<br />2022
-            </div>
+            <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="xlsx" asp-route-what="budget">
+                XLSX<br />Budget<br />@_clock.Now.Year
+            </a>
         </div>
         <div class="col-sm-4 col-12 p-2 d-flex">
-            <div class="btn flex-fill" style="background-color:lightblue">
-                XLSX<br />Payees<br />2022
-            </div>
+            <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="xlsx" asp-route-what="payees">
+                XLSX<br />Payees<br />@_clock.Now.Year
+            </a>
         </div>
     </div>
 
@@ -68,9 +70,9 @@
         @for (int m = 1; m <= 12; m++)
         {
             <div class="col-lg-1 col-md-2 col-sm-3 col-4 p-2 d-flex">
-                <div class="btn flex-fill" style="background-color:lightblue">
-                    XLSX<br />@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)<br />2022
-                </div>
+                <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="xlsx" asp-route-what="@m">
+                    XLSX<br />@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)<br />@_clock.Now.Year
+                </a>
             </div>
         }
     </div>
@@ -79,9 +81,9 @@
         @for (int m = 1; m <= 12; m++)
         {
             <div class="col-lg-1 col-md-2 col-sm-3 col-4 p-2 d-flex">
-                <div class="btn flex-fill" style="background-color:lightblue">
-                    OFX<br />@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)<br />2022
-                </div>
+                <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="ofx" asp-route-what="@m">
+                    OFX<br />@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)<br />@_clock.Now.Year
+                </a>
             </div>
         }
     </div>
