@@ -25,19 +25,6 @@ namespace YoFi.Tests.Functional
 #endif
 
         [TestMethod]
-        public async Task ClickImport()
-        {
-            // Given: We are already logged in and starting at the root of the site
-            await GivenLoggedIn();
-
-            // When: Clicking "Import" on the navbar
-            await Page.ClickAsync("text=Import");
-
-            // Then: We land at import page
-            await Page.ThenIsOnPageAsync("Importer");
-        }
-
-        [TestMethod]
         public async Task ClickProfile()
         {
             // Given: We are already logged in and starting at the root of the site
