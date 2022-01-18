@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
@@ -107,12 +108,9 @@ namespace YoFi.Tests.Core
         public void SetUp()
         {
             budgetrepo = new MockBudgetTxRepository();
-            var budgetimport = new BaseImporter<BudgetTx>(budgetrepo);
             payeerepo = new MockPayeeRepository();
-            var payeeimport = new BaseImporter<Payee>(payeerepo);
             txrepo = new MockTransactionRepository();
-            var tximport = new TransactionImporter(txrepo, payeerepo);
-            importer = new UniversalImporter(tximport, payeeimport, budgetimport);
+            importer = new UniversalImporter(new AllRepositories(txrepo, budgetrepo, payeerepo));
         }
 
         [TestMethod]

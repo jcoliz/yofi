@@ -24,10 +24,10 @@ namespace YoFi.Core.Importers
         /// </summary>
         /// <param name="repository">Where to store transactions</param>
         /// <param name="payees">Where to find payees for matching</param>
-        public TransactionImporter(ITransactionRepository repository, IPayeeRepository payees)
+        public TransactionImporter(AllRepositories repos)
         {
-            _repository = repository;
-            _payees = payees;
+            _repository = repos.Transactions;
+            _payees = repos.Payees;
         }
 
         /// <summary>

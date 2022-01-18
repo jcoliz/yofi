@@ -5,26 +5,25 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 
 namespace YoFi.Core.Importers
 {
     /// <summary>
     /// Handles importing any and all data types in a single upload file
     /// </summary>
-    public class UniversalImporter
+    public class UniversalImporter: TransactionImporter
     {
-        private readonly TransactionImporter _transactionImporter;
         private readonly IImporter<Payee> _payeeImporter;
         private readonly IImporter<BudgetTx> _budgettxImporter;
 
-        public UniversalImporter(TransactionImporter transactionImporter, IImporter<Payee> payeeImporter, IImporter<BudgetTx> budgettxImporter)
+        public UniversalImporter(AllRepositories repos) : base(repos)
         {
-            _transactionImporter = transactionImporter;
-            _payeeImporter = payeeImporter;
-            _budgettxImporter = budgettxImporter;
+            _budgettxImporter = new BaseImporter<BudgetTx>(repos.BudgetTxs);
+            _payeeImporter = new BaseImporter<Payee>(repos.Payees);
         }
 
-        public void QueueImportFromXlsx(Stream stream)
+        public new void QueueImportFromXlsx(Stream stream)
         {
             // Universal importer supports extracting data types from spreadsheets which are
             // explicitly named.
@@ -43,7 +42,7 @@ namespace YoFi.Core.Importers
                 }
                 if (ssr.SheetNames.Contains(nameof(Transaction)))
                 {
-                    _transactionImporter.QueueImportFromXlsx(ssr);
+                    base.QueueImportFromXlsx(ssr);
                 }
 
                 // Also, it will extract try to extract transactions from spreadsheets with ANY
@@ -52,7 +51,7 @@ namespace YoFi.Core.Importers
                 var others = new string[] { nameof(BudgetTx), nameof(Payee), nameof(Transaction), nameof(Split) };
                 if (!others.Contains(firstname))
                 {
-                    _transactionImporter.QueueImportFromXlsx(ssr);
+                    base.QueueImportFromXlsx(ssr);
                 }
             }
         }
@@ -72,11 +71,11 @@ namespace YoFi.Core.Importers
                 throw new NotImplementedException();
         }
 
-        public async Task ProcessImportAsync()
+        public new async Task ProcessImportAsync()
         {
             await _budgettxImporter.ProcessImportAsync();
             await _payeeImporter.ProcessImportAsync();
-            await _transactionImporter.ProcessImportAsync();
+            await base.ProcessImportAsync();
         }
     }
 }

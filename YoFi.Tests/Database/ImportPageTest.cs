@@ -77,7 +77,7 @@ namespace YoFi.Tests.Database
             var file = ControllerTestHelper<Transaction, AspNet.Controllers.TransactionsController>.PrepareUpload(what);
 
             // Upload that
-            var result = await page.OnPostUploadAsync(new List<IFormFile>() { file }, new TransactionImporter(repository, new PayeeRepository(context)));
+            var result = await page.OnPostUploadAsync(new List<IFormFile>() { file }, new TransactionImporter(new AllRepositories( repository, new BudgetTxRepository(context), new PayeeRepository(context))));
 
             return result;
         }
@@ -425,7 +425,7 @@ namespace YoFi.Tests.Database
             IFormFile file = new FormFile(stream, 0, stream.Length, filename, $"{filename}.xlsx");
 
             // Upload it!
-            var result = await page.OnPostUploadAsync(new List<IFormFile>() { file }, new TransactionImporter(repository, new PayeeRepository(context)));
+            var result = await page.OnPostUploadAsync(new List<IFormFile>() { file }, new TransactionImporter( new AllRepositories( repository, new BudgetTxRepository(context), new PayeeRepository(context))));
             Assert.That.IsOfType<PageResult>(result);
 
             // Did the transaction and splits find each other?
@@ -454,7 +454,8 @@ namespace YoFi.Tests.Database
             var stream = SampleData.Open(filename);
             var length = stream.Length;
             IFormFile file = new FormFile(stream, 0, length, filename, filename);
-            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, new TransactionImporter(repository, payeeRepository));
+            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, new TransactionImporter( new AllRepositories(repository, new BudgetTxRepository(context), payeeRepository)));
+
             Assert.That.IsOfType<PageResult>(actionresult);
 
             // Then: All transactions are imported successfully
@@ -482,7 +483,7 @@ namespace YoFi.Tests.Database
             var stream = SampleData.Open(filename);
             var length = stream.Length;
             IFormFile file = new FormFile(stream, 0, length, filename, filename);
-            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, new TransactionImporter(repository, new PayeeRepository(context)));
+            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, new TransactionImporter( new AllRepositories( repository, new BudgetTxRepository(context), new PayeeRepository(context))));
 
             // Then: All transactions are imported successfully
             Assert.That.IsOfType<PageResult>(actionresult);
