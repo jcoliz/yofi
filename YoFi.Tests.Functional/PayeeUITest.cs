@@ -163,7 +163,7 @@ namespace YoFi.Tests.Functional
 
             // Given: We are logged in and on the payees page
 
-            // Then: We are on the main page for this section
+            // And: Uploading payees
             await Page.ClickAsync("[aria-label=\"Upload\"]");
             await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
             await Page.ClickAsync("text=Upload");

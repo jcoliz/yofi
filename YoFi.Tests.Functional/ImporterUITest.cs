@@ -34,7 +34,7 @@ namespace YoFi.Tests.Functional
             // Given: Asked server to clear this test data
             var api = new ApiKeyTest();
             api.SetUp(TestContext);
-            await api.ClearTestData("trx,payee,budget");
+            await api.ClearTestData("all");
 
             // When: Navigating to Admin Page
             await WhenNavigatingToPage("Admin");
@@ -118,6 +118,41 @@ namespace YoFi.Tests.Functional
             // When: Deleting them
 
             // Then: No items present in importer
+        }
+
+        /// <summary>
+        /// User Story 1178: [User Can] Import spreadsheets with all data types in a single spreadsheet from the main Import page
+        /// </summary>
+        [TestMethod]
+        public async Task ImportAll()
+        {
+            // Given: All items start with the normal amounts
+            await WhenNavigatingToPage("Admin");
+            Assert.AreEqual(TransactionsUITest.TotalItemCount, await Page.GetNumberAsync("data-test-id=num-tx"));
+            Assert.AreEqual(BudgetUITest.TotalItemCount, await Page.GetNumberAsync("data-test-id=num-budget"));
+            Assert.AreEqual(PayeeUITest.TotalItemCount, await Page.GetNumberAsync("data-test-id=num-payee"));
+
+            // When: Returning to the upload page
+            await WhenNavigatingToPage(MainPageLink);
+            await Page.ThenIsOnPageAsync(MainPageName);
+
+            // And: Uploading a sample file with all kinds of content in it
+            await Page.ClickAsync("[aria-label=\"Upload\"]");
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            await Page.ClickAsync("text=Upload");
+            await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
+
+            // And: Accepting the transactions upload
+            await Page.ClickAsync("button:has-text(\"Import\")");
+
+            // Then: The counts of items have increased by the expected amount
+            var expectedtx = TransactionsUITest.TotalItemCount + 25;
+            var expectedbudget = BudgetUITest.TotalItemCount + 4;
+            var expectedpayee = PayeeUITest.TotalItemCount + 3;
+            await WhenNavigatingToPage("Admin");
+            Assert.AreEqual(expectedtx, await Page.GetNumberAsync("data-test-id=num-tx"));
+            Assert.AreEqual(expectedbudget, await Page.GetNumberAsync("data-test-id=num-budget"));
+            Assert.AreEqual(expectedpayee, await Page.GetNumberAsync("data-test-id=num-payee"));
         }
 
     }
