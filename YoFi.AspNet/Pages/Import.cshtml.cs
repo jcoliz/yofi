@@ -21,9 +21,9 @@ namespace YoFi.AspNet.Pages
     {
         public const int PageSize = 25;
         public const int MaxOtherItemsToShow = 10;
-        private ITransactionRepository _repository;
-        private IAsyncQueryExecution _queryExecution;
-        private IAuthorizationService _authorizationService;
+        private readonly ITransactionRepository _repository;
+        private readonly IAsyncQueryExecution _queryExecution;
+        private readonly IAuthorizationService _authorizationService;
 
         public PageDivider Divider { get; private set; } = new PageDivider() { PageSize = PageSize };
 

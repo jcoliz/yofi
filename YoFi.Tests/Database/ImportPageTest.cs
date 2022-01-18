@@ -129,7 +129,7 @@ namespace YoFi.Tests.Database
             var result = await DoUpload(Items);
 
             // Test the status
-            var actual = Assert.That.IsOfType<PageResult>(result);
+            Assert.That.IsOfType<PageResult>(result);
 
             // Check the items on the page
             Assert.AreEqual(Items.Count, page.Transactions.Count());
@@ -154,7 +154,7 @@ namespace YoFi.Tests.Database
             var result = await page.OnGetAsync();
 
             // Then: Page result
-            var viewresult = Assert.That.IsOfType<PageResult>(result);
+            Assert.That.IsOfType<PageResult>(result);
 
             // Then: Only the imported transactions are shown
             Assert.IsTrue(importitems.SequenceEqual(page.Transactions));
@@ -219,7 +219,7 @@ namespace YoFi.Tests.Database
             await Add(items);
 
             // When: Approving the import
-            var result = await page.OnPostGoAsync("ok");
+            await page.OnPostGoAsync("ok");
 
             // Then: Only selected items remain
             Assert.AreEqual(imported, dbset.Count());

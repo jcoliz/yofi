@@ -40,7 +40,7 @@ namespace YoFi.AspNet.Pages
             Config = config.Value;
         }
 
-        public async Task OnGetAsync()
+        public void OnGetAsync()
         {
             // TODO: CountAsync()
             NumTransactions = _context.Transactions.Count();

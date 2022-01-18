@@ -65,24 +65,6 @@ namespace YoFi.Tests.Core
         private MockPayeeRepository payeerepo;
         private MockTransactionRepository txrepo;
 
-        static private IFormFile PrepareUpload(IEnumerable<object> what, string name)
-        {
-            // Build a spreadsheet with the chosen number of items
-            // Note that we are not disposing the stream. User of the file will do so later.
-            var stream = new MemoryStream();
-            using (var ssr = new SpreadsheetWriter())
-            {
-                ssr.Open(stream);
-                ssr.Serialize(what,name);
-            }
-
-            // Create a formfile with it
-            stream.Seek(0, SeekOrigin.Begin);
-            IFormFile file = new FormFile(stream, 0, stream.Length, name, $"{name}.xlsx");
-
-            return file;
-        }
-
         private MemoryStream PrepareSpreadsheet<T>(IEnumerable<T> what, string name) where T: class
         {
             var stream = new MemoryStream();

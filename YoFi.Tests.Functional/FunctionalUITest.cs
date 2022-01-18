@@ -19,7 +19,7 @@ namespace YoFi.Tests.Functional
 
         public override BrowserNewContextOptions ContextOptions => _ContextOptions;
 
-        private static ViewportSize iPadLandscapeViewport = new ViewportSize() { Width = 1080, Height = 810 };
+        private static readonly ViewportSize iPadLandscapeViewport = new ViewportSize() { Width = 1080, Height = 810 };
 
         private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions { AcceptDownloads = true, ViewportSize = iPadLandscapeViewport };
 
@@ -174,7 +174,7 @@ namespace YoFi.Tests.Functional
             return result;
         }
 
-        private static Dictionary<string, int> ScreenShotCounter = new Dictionary<string, int>();
+        private static readonly Dictionary<string, int> ScreenShotCounter = new Dictionary<string, int>();
 
         public static async Task SaveScreenshotToAsync(this IPage page, TestContext testContext, string moment = null)
         {
