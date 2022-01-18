@@ -63,10 +63,8 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
-        public override Transaction MakeItem(int x)
-        {
-            throw new NotImplementedException();
-        }
+        public override Transaction MakeItem(int x) =>
+            new Transaction() { ID = x, Payee = x.ToString(), Category = x.ToString(), Amount = x * 100m, Timestamp = new DateTime(2001, 1, 1) + TimeSpan.FromDays(x) };
 
         public Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype)
         {

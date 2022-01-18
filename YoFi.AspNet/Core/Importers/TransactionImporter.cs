@@ -1,5 +1,4 @@
 ﻿using jcoliz.OfficeOpenXml.Serializer;
-using Microsoft.EntityFrameworkCore;
 using OfxSharp;
 using System;
 using System.Collections.Generic;
@@ -64,16 +63,22 @@ namespace YoFi.Core.Importers
         /// <param name="stream">Source of data</param>
         public void QueueImportFromXlsx(Stream stream)
         {
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            var items = ssr.Deserialize<Transaction>();
+            using var reader = new SpreadsheetReader();
+            reader.Open(stream);
+            QueueImportFromXlsx(reader);
+        }
+
+        public void QueueImportFromXlsx(ISpreadsheetReader reader)
+        {
+            var items = reader.Deserialize<Transaction>();
             incoming.AddRange(items);
 
             // If there are also splits included here, let's grab those
             // And transform the flat data into something easier to use.
-            if (ssr.SheetNames.Contains("Split"))
-                splits.AddRange(ssr.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
+            if (reader.SheetNames.Contains("Split"))
+                splits.AddRange(reader.Deserialize<Split>()?.ToLookup(x => x.TransactionID));
         }
+
 
         /// <summary>
         /// Add the previously queued transactions to the database, in an 'imported' state
@@ -172,7 +177,9 @@ namespace YoFi.Core.Importers
             // transactions in the system.
 
             var needbankrefs = _repository.All.Where(x => null == x.BankReference);
-            if (await needbankrefs.AnyAsync())
+
+            // TODO: AnyAsync()
+            if (needbankrefs.Any())
             {
                 foreach (var tx in needbankrefs)
                 {

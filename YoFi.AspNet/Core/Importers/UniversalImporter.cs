@@ -36,6 +36,10 @@ namespace YoFi.Core.Importers
             {
                 _payeeImporter.QueueImportFromXlsx(ssr);
             }
+            if (ssr.SheetNames.Contains(nameof(Transaction)))
+            {
+                _transactionImporter.QueueImportFromXlsx(ssr);
+            }
         }
 
         public void QueueImportFromXlsx<T>(Stream stream)
@@ -57,6 +61,7 @@ namespace YoFi.Core.Importers
         {
             await _budgettxImporter.ProcessImportAsync();
             await _payeeImporter.ProcessImportAsync();
+            await _transactionImporter.ProcessImportAsync();
         }
     }
 }

@@ -40,12 +40,14 @@ namespace YoFi.Tests.Helpers
 
         public Task LoadCacheAsync()
         {
-            throw new NotImplementedException();
+            // Mock payee repository doesn't support payee matching
+            return Task.CompletedTask;
         }
 
         public Task<string> GetCategoryMatchingPayeeAsync(string Name)
         {
-            throw new NotImplementedException();
+            // Mock payee repository doesn't support payee matching
+            return Task.FromResult((string)null);
         }
     }
 }

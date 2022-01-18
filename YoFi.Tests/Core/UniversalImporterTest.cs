@@ -62,7 +62,7 @@ namespace YoFi.Tests.Core
         private UniversalImporter importer;
         private MockBudgetTxRepository budgetrepo;
         private MockPayeeRepository payeerepo;
-
+        private MockTransactionRepository txrepo;
 
         static private IFormFile PrepareUpload(IEnumerable<object> what, string name)
         {
@@ -110,7 +110,7 @@ namespace YoFi.Tests.Core
             var budgetimport = new BaseImporter<BudgetTx>(budgetrepo);
             payeerepo = new MockPayeeRepository();
             var payeeimport = new BaseImporter<Payee>(payeerepo);
-            var txrepo = new MockTransactionRepository();
+            txrepo = new MockTransactionRepository();
             var tximport = new TransactionImporter(txrepo, payeerepo);
             importer = new UniversalImporter(tximport, payeeimport, budgetimport);
         }
@@ -193,11 +193,24 @@ namespace YoFi.Tests.Core
             // Then: All items imported
             Assert.IsTrue(items.SequenceEqual(payeerepo.Items));
         }
-        public void Transactions()
+
+        [TestMethod]
+        public async Task Transactions()
         {
             // Given: A spreadsheet with transactions in a sheet named "Transaction", and all other kinds of data too
+            using var helper = new ImportPackageHelper();
+            helper.Add(budgetrepo.MakeItems(5), null);
+            helper.Add(payeerepo.MakeItems(5), null);
+            var items = txrepo.MakeItems(5);
+            helper.Add(items, null);
+            var stream = helper.GetFile(TestContext);
+
             // When: Importing it
+            importer.QueueImportFromXlsx(stream);
+            await importer.ProcessImportAsync();
+
             // Then: All items imported
+            Assert.IsTrue(items.SequenceEqual(txrepo.Items));
         }
         public void TransactionsNoName()
         {
