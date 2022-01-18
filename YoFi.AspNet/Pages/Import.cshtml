@@ -111,6 +111,7 @@ else
 {
     <h2>Imported Budget Line Items</h2>
     <p>These items have been imported to your budget line items. You can review your entire set of budget line items on the Edit Budget page.</p>
+    <a asp-controller="BudgetTxs" asp-action="Index" class="btn btn-primary">Edit Budget &raquo;</a>
 
     <table class="table">
         <thead>
@@ -144,6 +145,39 @@ else
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (Model.Payees.Any())
+{
+    <h2>Imported Payee Matching Rules</h2>
+    <p>These items have been imported to your payee matching rules. You can review your entire set on the Payees page.</p>
+    <a asp-controller="Payees" asp-action="Index" class="btn btn-primary">Payees &raquo;</a>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Category
+                </th>
+                <th>
+                    Name
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Payees)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Category)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
                     </td>
                 </tr>
             }

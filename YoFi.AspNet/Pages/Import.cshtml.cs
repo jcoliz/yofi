@@ -29,6 +29,7 @@ namespace YoFi.AspNet.Pages
         public IEnumerable<Transaction> Transactions { get; private set; } = Enumerable.Empty<Transaction>();
 
         public IEnumerable<BudgetTx> BudgetTxs { get; set; } = Enumerable.Empty<BudgetTx>();
+        public IEnumerable<Payee> Payees { get; set; } = Enumerable.Empty<Payee>();
 
         public HashSet<int> Highlights { get; private set; } = new HashSet<int>();
 
@@ -119,6 +120,7 @@ namespace YoFi.AspNet.Pages
             // Process the imported files
             await importer.ProcessImportAsync();
             BudgetTxs = importer.ImportedBudgetTxs;
+            Payees = importer.ImportedPayees;
 
             // Prepare the visual results
             await OnGetAsync();

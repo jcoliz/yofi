@@ -18,6 +18,7 @@ namespace YoFi.Core.Importers
         private readonly IImporter<BudgetTx> _budgettxImporter;
 
         public IEnumerable<BudgetTx> ImportedBudgetTxs { get; private set; } = Enumerable.Empty<BudgetTx>();
+        public IEnumerable<Payee> ImportedPayees { get; private set; } = Enumerable.Empty<Payee>();
 
         public UniversalImporter(AllRepositories repos) : base(repos)
         {
@@ -76,7 +77,7 @@ namespace YoFi.Core.Importers
         public new async Task ProcessImportAsync()
         {
             ImportedBudgetTxs = await _budgettxImporter.ProcessImportAsync();
-            await _payeeImporter.ProcessImportAsync();
+            ImportedPayees = await _payeeImporter.ProcessImportAsync();
             await base.ProcessImportAsync();
         }
     }
