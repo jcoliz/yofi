@@ -91,7 +91,7 @@ namespace YoFi.AspNet.Pages
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files, [FromServices] TransactionImporter importer)
+        public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files, [FromServices] UniversalImporter importer)
         {
             // Sadly we cannot do "Authorize" filters on Page Hanlders. So we have to do this ourselves.
             // https://stackoverflow.com/questions/43231535/how-to-validate-user-agains-policy-in-code-in-aspnet-core

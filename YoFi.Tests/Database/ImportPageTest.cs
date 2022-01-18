@@ -34,7 +34,7 @@ namespace YoFi.Tests.Database
         private ImportModel page;
         private TransactionRepository repository;
         private DbSet<Transaction> dbset;
-        private TransactionImporter importer;
+        private UniversalImporter importer;
 
         [TestInitialize]
         public void SetUp()
@@ -53,7 +53,7 @@ namespace YoFi.Tests.Database
             var storage = new TestAzureStorage();
 
             repository = new TransactionRepository(context, qex, storage: storage);
-            importer = new TransactionImporter(new AllRepositories(repository, new BudgetTxRepository(context), new PayeeRepository(context)));
+            importer = new UniversalImporter(new AllRepositories(repository, new BudgetTxRepository(context), new PayeeRepository(context)));
 
             var authservice = new Mock<IAuthorizationService>();
             AuthorizationResult result = AuthorizationResult.Success();
@@ -480,17 +480,69 @@ namespace YoFi.Tests.Database
             // Given: An OFX file containing transactions with no bank reference
             var filename = "FullSampleData-Month02.ofx";
             var expected = 74;
-
-            // When: Uploading that file
             var stream = SampleData.Open(filename);
             var length = stream.Length;
             IFormFile file = new FormFile(stream, 0, length, filename, filename);
+
+            // When: Uploading that file
             var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
 
             // Then: All transactions are imported successfully
             Assert.That.IsOfType<PageResult>(actionresult);
 
             Assert.AreEqual(expected, dbset.Count());
+        }
+
+        //
+        // User Story 1177: [User Can] Import Payees or BudgetTx from main Import page
+        //
+
+        public void BudgetImport()
+        {
+            // Given: An XLSX file with budget transactions in a sheet called "BudgetTx"
+
+            // When: Uploading it
+
+            // Then: All items are imported successfully
+
+            // [???] What should the UI look like here??
+        }
+
+        public void PayeeImport()
+        {
+            // Given: An XLSX file with payees in a sheet called "payees"
+
+            // When: Uploading it
+
+            // Then: All items are imported successfully
+
+            // [???] What should the UI look like here??
+        }
+
+        //
+        // User Story 1178: [User Can] Import spreadsheets with all data types in a single spreadsheet from the main Import page
+        //
+
+        [TestMethod]
+        public async Task AllDataTypes()
+        {
+            // Given: An XLSX file with all four types of data in sheets named for their type
+            var filename = "Test-Generator-GenerateUploadSampleData.xlsx";
+            var stream = SampleData.Open(filename);
+            var length = stream.Length;
+            IFormFile file = new FormFile(stream, 0, length, filename, filename);
+
+            // When: Uploading it
+            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
+
+            // Then: All items are imported successfully
+            Assert.AreEqual(25, dbset.Count());
+            Assert.AreEqual(12, dbset.Count(x=>x.Splits.Count > 0));
+
+            Assert.AreEqual(3, context.Payees.Count());
+            Assert.AreEqual(4, context.BudgetTxs.Count());
+
+            // [???] What should the UI look like here??
         }
     }
 }
