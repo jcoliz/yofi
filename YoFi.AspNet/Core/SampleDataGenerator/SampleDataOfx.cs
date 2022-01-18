@@ -71,6 +71,7 @@ namespace YoFi.Core.SampleGen
             using var footer = Common.NET.Data.SampleData.Open("ofx-footer.txt");
             using var footerreader = new StreamReader(footer);
             writer.Write(footerreader.ReadToEnd());
+            writer.Flush();
         }
     }
 }
