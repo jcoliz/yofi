@@ -152,11 +152,12 @@ namespace YoFi.AspNet.Pages
             }
             else if ("budget" == what)
             {
-                // Load in just the payees into memory
+                // Load in just the budget into memory
                 using var ssr = new SpreadsheetReader();
                 ssr.Open(instream);
                 var items = ssr.Deserialize<BudgetTx>();
 
+                // Then write that back out
                 var stream = new MemoryStream();
                 using (var ssw = new SpreadsheetWriter())
                 {
@@ -165,6 +166,52 @@ namespace YoFi.AspNet.Pages
                 }
                 stream.Seek(0, SeekOrigin.Begin);
                 result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
+            }
+            else if ("payees" == what)
+            {
+                // Load in just the payees into memory
+                using var ssr = new SpreadsheetReader();
+                ssr.Open(instream);
+                var items = ssr.Deserialize<Payee>();
+
+                // Then write that back out
+                var stream = new MemoryStream();
+                using (var ssw = new SpreadsheetWriter())
+                {
+                    ssw.Open(stream);
+                    ssw.Serialize(items);
+                }
+                stream.Seek(0, SeekOrigin.Begin);
+                result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
+            }
+            else
+            {
+                // At this point, only transactions are of interest
+                // Load in just the transactions and splits into memory
+                using var ssr = new SpreadsheetReader();
+                ssr.Open(instream);
+                var txs = ssr.Deserialize<Transaction>();
+                var splits = ssr.Deserialize<Split>();
+
+                if (int.TryParse(what, out var month))
+                {
+                    // Narrow down to the required month
+                    var outtxs = txs.Where(x => x.Timestamp.Month == month);
+                    var outtxids = outtxs.Where(x=>x.ID > 0).Select(x => x.ID).ToHashSet();
+                    var outsplits = splits.Where(x=>outtxids.Contains(x.TransactionID));
+
+                    // Then write that back out
+                    var stream = new MemoryStream();
+                    using (var ssw = new SpreadsheetWriter())
+                    {
+                        ssw.Open(stream);
+                        ssw.Serialize(outtxs);
+                        ssw.Serialize(outsplits);
+                    }
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var monthname = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
+                    result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{month:D2}-{monthname}.xlsx");
+                }
             }
 
             return result;
