@@ -267,6 +267,41 @@ namespace YoFi.Tests.Core
             while (--i > 0);
 
         }
+
+        [TestMethod]
+        public async Task All()
+        {
+            // Given: A spreadsheet with ALL kinds of data in a single sheet
+            using var helper = new ImportPackageHelper();
+            var bitems = budgetrepo.MakeItems(4);
+            helper.Add(bitems, null);
+            var pitems = payeerepo.MakeItems(5);
+            helper.Add(pitems, null);
+            var txitems = txrepo.MakeItems(6);
+            helper.Add(txitems, null);
+            var splits = new List<Split>()
+            {
+                new Split() { Amount = 100m, Category = "1", TransactionID = 1 },
+                new Split() { Amount = 200m, Category = "2A", TransactionID = 2 },
+                new Split() { Amount = 200m, Category = "2B", TransactionID = 2 },
+                new Split() { Amount = 300m, Category = "3A", TransactionID = 3 },
+                new Split() { Amount = 300m, Category = "3B", TransactionID = 3 },
+                new Split() { Amount = 300m, Category = "3B", TransactionID = 3 }
+            };
+            helper.Add(splits, null);
+            var stream = helper.GetFile(TestContext);
+
+            // When: Importing it
+            importer.QueueImportFromXlsx(stream);
+            await importer.ProcessImportAsync();
+
+            // Then: All items imported
+            Assert.IsTrue(txitems.SequenceEqual(txrepo.Items));
+            Assert.IsTrue(pitems.SequenceEqual(payeerepo.Items));
+            Assert.IsTrue(bitems.SequenceEqual(budgetrepo.Items));
+            Assert.IsTrue(splits.SequenceEqual(txrepo.Items.SelectMany(x=>x.Splits ?? Enumerable.Empty<Split>())));
+        }
+
         public void TransactionsOfx()
         {
             // Given: An OFX file with transactions
