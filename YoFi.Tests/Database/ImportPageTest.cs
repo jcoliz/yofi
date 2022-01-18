@@ -516,15 +516,22 @@ namespace YoFi.Tests.Database
         // User Story 1177: [User Can] Import Payees or BudgetTx from main Import page
         //
 
-        public void BudgetImport()
+        [TestMethod]
+        public async Task BudgetImportLots()
         {
-            // Given: An XLSX file with budget transactions in a sheet called "BudgetTx"
+            // Given: An XLSX file with TOO MANY budget transactions in a sheet called "BudgetTx"
+            var howmany = 50;
+            var lotsofbtx = Enumerable.Range(1, howmany).Select(x => new BudgetTx() { Timestamp = clock.Now + TimeSpan.FromDays(x), Category = x.ToString() });
+            var file = PrepareUpload(lotsofbtx);
 
             // When: Uploading it
+            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
 
             // Then: All items are imported successfully
+            Assert.AreEqual(ImportModel.MaxOtherItemsToShow, page.BudgetTxs.Count());
 
-            // [???] What should the UI look like here??
+            // And: There is an indicator that more are available
+            Assert.AreEqual(howmany, page.NumBudgetTxsUploaded);
         }
 
         [TestMethod]
