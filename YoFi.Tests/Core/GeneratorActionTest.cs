@@ -22,7 +22,7 @@ namespace YoFi.Tests.Core.SampleGen
         public void SetUp()
         {
             generator = new SampleDataGenerator();
-            SampleDataPattern.Year = 2021;
+            SampleDataPattern.Year = 2022;
         }
 
         [TestMethod]
@@ -231,7 +231,9 @@ namespace YoFi.Tests.Core.SampleGen
             using var stream = new MemoryStream();
             generator.Save(stream);
             stream.Seek(0, SeekOrigin.Begin);
-            var filename = $"Test-Generator-{TestContext.TestName}.xlsx";
+            var year = SampleDataPattern.Year;
+            Directory.CreateDirectory(year.ToString());
+            var filename = $"{year}/SampleData-Full.xlsx";
             File.Delete(filename);
             using var outstream = File.OpenWrite(filename);
             stream.CopyTo(outstream);

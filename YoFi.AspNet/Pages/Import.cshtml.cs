@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.AspNet;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -136,11 +138,34 @@ namespace YoFi.AspNet.Pages
             return Page();
         }
 
-        public async Task<IActionResult> OnGetSampleAsync(string what, string how)
+        public async Task<IActionResult> OnGetSampleAsync(string what, string how, [FromServices] IWebHostEnvironment e)
         {
-            Stream stream = await _repository.AsSpreadsheetAsync(2022, allyears:false, q:"d=0101");
+            var dir = e.WebRootPath;
+            // Load the full sample data off disk
+            var instream = System.IO.File.OpenRead($"{dir}/sample/SampleData-Full.xlsx");
 
-            IActionResult result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
+            IActionResult result = NotFound();
+            if ("all" == what)
+            {
+                // Just return it!
+                result = File(instream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
+            }
+            else if ("budget" == what)
+            {
+                // Load in just the payees into memory
+                using var ssr = new SpreadsheetReader();
+                ssr.Open(instream);
+                var items = ssr.Deserialize<BudgetTx>();
+
+                var stream = new MemoryStream();
+                using (var ssw = new SpreadsheetWriter())
+                {
+                    ssw.Open(stream);
+                    ssw.Serialize(items);
+                }
+                stream.Seek(0, SeekOrigin.Begin);
+                result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
+            }
 
             return result;
         }
