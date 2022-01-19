@@ -57,9 +57,7 @@ namespace YoFi.AspNet.Controllers
             // Process PAGE (P) parameters
             //
 
-            var divider = new PageDivider();
-            divider.BuildFromWirePageInfo(qresult.PageInfo);
-            ViewData[nameof(PageDivider)] = divider;
+            ViewData[nameof(PageDivider)] = new PageDivider(qresult.PageInfo);
 
             // Show the index
             return View(qresult.Items);

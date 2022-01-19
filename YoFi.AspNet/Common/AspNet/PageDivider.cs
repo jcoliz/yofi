@@ -30,7 +30,12 @@ namespace Common.AspNet
         public int? LastPage { get; private set; }
         public IViewParameters ViewParameters { get; set; }
 
-        public void BuildFromWirePageInfo(IWirePageInfo info)
+        public PageDivider()
+        {
+
+        }
+
+        public PageDivider(IWirePageInfo info)
         {
             PageSize = info.PageSize;
             Page = info.Page;
