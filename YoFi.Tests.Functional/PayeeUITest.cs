@@ -18,6 +18,7 @@ namespace YoFi.Tests.Functional
 
             // When: Navigating to the main page for this section
             await WhenNavigatingToPage(MainPageName);
+            // NOTE: This line has failed in full-suite testing then passed later in individual testing
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);

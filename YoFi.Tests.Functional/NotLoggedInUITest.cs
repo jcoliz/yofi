@@ -28,6 +28,7 @@ namespace YoFi.Tests.Functional
 
             // When: Clicking on the login link
             await Page.ClickAsync("data-test-id=login");
+            // NOTE: This line has failed in full-suite testing then passed later in individual testing
 
             // Then: The login page loads
             await Page.ThenIsOnPageAsync("Login");
