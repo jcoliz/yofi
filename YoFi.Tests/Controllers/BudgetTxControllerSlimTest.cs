@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Controllers.Slim
@@ -46,23 +47,24 @@ namespace YoFi.Tests.Controllers.Slim
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
 
             // And: Correct kind of model is returned 
-            var model = Assert.That.IsOfType<IEnumerable<BudgetTx>>(viewresult.Model);
+            var model = Assert.That.IsOfType<IWireQueryResult<BudgetTx>>(viewresult.Model);
 
             // And: Model has one page of items
-            Assert.AreEqual(BudgetTxsController.PageSize, model.Count());
+            var pagesize = BaseRepository<BudgetTx>.DefaultPageSize;
+            Assert.AreEqual(pagesize, model.Items.Count());
 
             // And: Page Item values are as expected
-            var pages = viewresult.ViewData[nameof(PageDivider)] as PageDivider;
-            Assert.AreEqual(1, pages.PageFirstItem);
-            Assert.AreEqual(BudgetTxsController.PageSize, pages.PageLastItem);
-            Assert.AreEqual(numitems, pages.PageTotalItems);
+            Assert.AreEqual(1, model.PageInfo.FirstItem);
+            Assert.AreEqual(pagesize, model.PageInfo.NumItems);
+            Assert.AreEqual(numitems, model.PageInfo.TotalItems);
         }
 
         [TestMethod]
         public async Task IndexPage2()
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
-            var itemcount = BudgetTxsController.PageSize + PayeesController.PageSize / 2;
+            var pagesize = BaseRepository<BudgetTx>.DefaultPageSize;
+            var itemcount = pagesize * 3 / 2;
             repository.AddItems(itemcount);
 
             // When: Calling Index page 2
@@ -72,16 +74,15 @@ namespace YoFi.Tests.Controllers.Slim
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
 
             // And: Correct kind of model is returned 
-            var model = Assert.That.IsOfType<List<BudgetTx>>(viewresult.Model);
+            var model = Assert.That.IsOfType<IWireQueryResult<BudgetTx>>(viewresult.Model);
 
             // And: Only items after one page's worth of items are returned
-            Assert.AreEqual(BudgetTxsController.PageSize / 2, model.Count);
+            Assert.AreEqual(pagesize / 2, model.Items.Count());
 
             // And: Page Item values are as expected
-            var pages = viewresult.ViewData[nameof(PageDivider)] as PageDivider;
-            Assert.AreEqual(1 + BudgetTxsController.PageSize, pages.PageFirstItem);
-            Assert.AreEqual(itemcount, pages.PageLastItem);
-            Assert.AreEqual(itemcount, pages.PageTotalItems);
+            Assert.AreEqual(1 + pagesize, model.PageInfo.FirstItem);
+            Assert.AreEqual(itemcount, model.PageInfo.FirstItem + model.PageInfo.NumItems - 1);
+            Assert.AreEqual(itemcount, model.PageInfo.TotalItems);
         }
 
         [TestMethod]
@@ -94,11 +95,11 @@ namespace YoFi.Tests.Controllers.Slim
             var word = "1";
             var actionresult = await itemController.Index(q: word);
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
-            var model = Assert.That.IsOfType<List<BudgetTx>>(viewresult.Model);
+            var model = Assert.That.IsOfType<IWireQueryResult<BudgetTx>>(viewresult.Model);
 
             // Then: Only the exoected items are returned
             var expected = repository.All.Where(x => x.Category.Contains(word));
-            Assert.IsTrue(expected.SequenceEqual(model));
+            Assert.IsTrue(expected.SequenceEqual(model.Items));
         }
         [TestMethod]
         public async Task BulkDelete()

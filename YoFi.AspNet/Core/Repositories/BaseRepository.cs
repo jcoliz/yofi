@@ -154,7 +154,9 @@ namespace YoFi.Core.Repositories
             return result;
         }
 
-        private int PageSize = 25;
+        public const int DefaultPageSize = 25;
+
+        private int PageSize = DefaultPageSize;
 
         public Task<int> GetPageSizeAsync() => Task.FromResult(PageSize);
 

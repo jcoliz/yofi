@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Controllers.Slim
@@ -70,10 +71,10 @@ namespace YoFi.Tests.Controllers.Slim
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
 
             // And: Correct kind of model is returned 
-            var model = Assert.That.IsOfType<IEnumerable<T>>(viewresult.Model);
+            var model = Assert.That.IsOfType<IWireQueryResult<T>>(viewresult.Model);
 
             // And: Model is empty
-            Assert.AreEqual(0, model.Count());
+            Assert.AreEqual(0, model.Items.Count());
         }
 
         [TestMethod]

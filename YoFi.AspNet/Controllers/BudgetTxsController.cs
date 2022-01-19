@@ -18,8 +18,6 @@ namespace YoFi.AspNet.Controllers
     [Authorize(Policy = "CanRead")]
     public class BudgetTxsController : Controller, IController<BudgetTx>
     {
-        public static int PageSize { get; } = 25;
-
         private readonly IBudgetTxRepository _repository;
 
         public BudgetTxsController(IBudgetTxRepository repository)
