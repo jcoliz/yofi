@@ -29,6 +29,7 @@ namespace YoFi.Core.Repositories.Wire
         string Query { get; }
         int? Page { get; }
         string Order { get; }
+        public string View { get; }
     }
 
     public class WireQueryParameters : IWireQueryParameters
@@ -38,6 +39,8 @@ namespace YoFi.Core.Repositories.Wire
         public int? Page { get; set; }
 
         public string Order { get; set; }
+
+        public string View { get; set; }
     }
 
     public interface IWireQueryResult<T>

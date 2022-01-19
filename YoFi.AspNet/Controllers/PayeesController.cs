@@ -50,7 +50,7 @@ namespace YoFi.AspNet.Controllers
             // Run Query
             //
 
-            var qresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = q, Page = p });
+            var qresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = q, Page = p, View = v });
 
             //
             // Process PAGE (P) parameters
