@@ -11,6 +11,7 @@ using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -35,8 +36,6 @@ namespace YoFi.AspNet.Controllers
             // Process QUERY (Q) parameters
             //
 
-            var result = _repository.ForQuery(q);
-
             ViewData["Query"] = q;
 
             //
@@ -50,14 +49,21 @@ namespace YoFi.AspNet.Controllers
             ViewData["ToggleSelected"] = showSelected ? null : "s";
 
             //
+            // Run Query
+            //
+
+            var qresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = q, Page = p });
+
+            //
             // Process PAGE (P) parameters
             //
 
-            var divider = new PageDivider() { PageSize = PageSize, ViewParameters = new PageDivider.DefaultViewParameters() { QueryParameter = q, ViewParameter = v } };
-            result = await divider.ItemsForPage(result, p);
+            var divider = new PageDivider();
+            divider.BuildFromWirePageInfo(qresult.PageInfo);
             ViewData[nameof(PageDivider)] = divider;
 
-            return View(await _queryExecution.ToListNoTrackingAsync(result));
+            // Show the index
+            return View(qresult.Items);
         }
 
         // GET: Payees/Details/5

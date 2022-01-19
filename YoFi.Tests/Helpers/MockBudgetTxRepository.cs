@@ -11,7 +11,7 @@ using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Helpers
 {
-    public interface IMockRepository<T>: IRepository<T> where T: class, IModelItem<T>
+    public interface IMockRepository<T>: IWireRespository<T>, IRepository<T> where T: class, IModelItem<T>
     {
         public void AddItems(int numitems);
 
@@ -34,34 +34,6 @@ namespace YoFi.Tests.Helpers
             // We don't need to DO anything here.
             WasBulkDeleteCalled = true;
             return Task.CompletedTask;
-        }
-
-        public Task<IWireQueryResult<BudgetTx>> GetByQueryAsync(IWireQueryParameters parms)
-        {
-            // So, I just copied the code from the production BaseRepository
-
-            var query = ForQuery(parms.Query);
-
-            var count = query.Count();
-            const int pagesize = 25;
-            var pages = new WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: pagesize);
-
-            if (count > pagesize)
-                query = query.Skip(pages.FirstItem - 1).Take(pages.NumItems);
-
-            var list = query.ToList();
-            IWireQueryResult<BudgetTx> result = new WireQueryResult<BudgetTx>() { Items = list, PageInfo = pages, Parameters = parms };
-            return Task.FromResult(result);
-        }
-
-        public Task<int> GetPageSizeAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task SetPageSizeAsync(int value)
-        {
-            throw new NotImplementedException();
         }
     }
 }

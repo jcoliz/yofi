@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Core.Repositories
 {
@@ -7,7 +8,7 @@ namespace YoFi.Core.Repositories
     /// Provides access to Payee items, along with 
     /// domain-specific business logic unique to Payee items
     /// </summary>
-    public interface IPayeeRepository : IRepository<Payee>
+    public interface IPayeeRepository : IWireRespository<Payee>, IRepository<Payee>
     {
         /// <summary>
         /// Change category of all selected items to <paramref name="category"/>
