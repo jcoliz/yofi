@@ -49,7 +49,7 @@ namespace YoFi.Tests.Database
 
             context = new ApplicationDbContext(options);
             storage = new TestAzureStorage();
-            controller = new ApiController(new EFCoreAsyncQueryExecution());
+            controller = new ApiController();
             clock = new TestClock();
         }
 

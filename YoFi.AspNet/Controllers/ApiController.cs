@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using YoFi.Core;
 using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -15,11 +16,8 @@ namespace YoFi.AspNet.Controllers
     [SkipStatusCodePages]
     public class ApiController : Controller
     {
-        private readonly IAsyncQueryExecution _queryExecution;
-
-        public ApiController(IAsyncQueryExecution queryExecution)
+        public ApiController()
         {
-            _queryExecution = queryExecution;
         }
 
         [HttpGet("{id}", Name = "Get")]
@@ -50,8 +48,8 @@ namespace YoFi.AspNet.Controllers
         [ApiBasicAuthorization]
         public async Task<IActionResult> GetTransactions([FromServices] ITransactionRepository repository, string q = null)
         {
-            var result = await _queryExecution.ToListNoTrackingAsync(repository.ForQuery(q));
-            return new OkObjectResult(result);
+            var result = await repository.GetByQueryAsync(new WireQueryParameters() { Query = q });
+            return new OkObjectResult(result.Items);
         }
 
         /// <summary>

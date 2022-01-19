@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
@@ -24,7 +25,7 @@ namespace YoFi.Tests.Core
     [TestClass]
     public abstract class BaseRepositoryTest<T> where T: class, IModelItem<T>, new()
     {
-        protected IRepository<T> repository;
+        protected IWireRespository<T> repository;
         protected MockDataContext context;
 
         /// <summary>
@@ -58,43 +59,43 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
-        public void IndexEmpty()
+        public async Task IndexEmpty()
         {
             // Given: No items in the repository
 
             // When: Querying items from the repository
-            var model = repository.ForQuery(null);
+            var qresult = await repository.GetByQueryAsync(new WireQueryParameters());
 
             // Then: No items returned
-            Assert.AreEqual(0, model.Count());
+            Assert.AreEqual(0, qresult.Items.Count());
         }
 
         [TestMethod]
 
-        public void IndexSingle()
+        public async Task IndexSingle()
         {
             // Given: A single item in the data set
             var expected = Items.Take(1);
             context.AddRange(expected);
 
             // When: Querying items from the repository
-            var model = repository.ForQuery(null);
+            var qresult = await repository.GetByQueryAsync(new WireQueryParameters());
 
             // Then: The results match what we added to the data set
-            Assert.IsTrue(model.SequenceEqual(expected));
+            Assert.IsTrue(qresult.Items.SequenceEqual(expected));
         }
 
         [TestMethod]
-        public void IndexMany()
+        public async Task IndexMany()
         {
             var expected = Items.Take(5).ToList();
             context.AddRange(expected);
 
-            var model = repository.ForQuery(null);
+            var qresult = await repository.GetByQueryAsync(new WireQueryParameters());
 
             // Test that the resulting items are the same as expected items ordered correctly
             expected.Sort(CompareKeys);
-            Assert.IsTrue(expected.SequenceEqual(model));
+            Assert.IsTrue(qresult.Items.SequenceEqual(expected));
         }
 
         [TestMethod]

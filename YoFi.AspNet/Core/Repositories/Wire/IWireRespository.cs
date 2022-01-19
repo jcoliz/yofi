@@ -16,7 +16,7 @@ namespace YoFi.Core.Repositories.Wire
     /// A repository implementing this will have to return complete objects upward, not queryables,
     /// and ergo must execute its own queries, not let the UI do it.
     /// </remarks>
-    public interface IWireRespository<T> where T: class
+    public interface IWireRespository<T>: IRepository<T> where T: class
     {
         Task<IWireQueryResult<T>> GetByQueryAsync(IWireQueryParameters parms);
 

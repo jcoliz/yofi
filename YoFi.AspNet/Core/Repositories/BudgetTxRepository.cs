@@ -30,6 +30,6 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <param name="q">Query describing the desired subset</param>
         /// <returns>Requested items</returns>
-        public override IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q));
+        protected override IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q));
     }
 }

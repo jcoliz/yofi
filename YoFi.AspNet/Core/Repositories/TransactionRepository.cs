@@ -43,7 +43,7 @@ namespace YoFi.Core.Repositories
         /// </remarks>
         /// <param name="q">Query describing the desired subset</param>
         /// <returns>Query of requested items</returns>
-        public override IQueryable<Transaction> ForQuery(string q)
+        protected override IQueryable<Transaction> ForQuery(string q)
         {
             var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits));
             qbuilder.BuildForQ(q);

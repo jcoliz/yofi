@@ -46,13 +46,11 @@ namespace YoFi.Core.Repositories
         public IQueryable<T> OrderedQuery => new T().InDefaultOrder(All);
 
         /// <summary>
-        /// Subset of all known items reduced by the specified query parameter
+        /// Subset of all known items reduced by the specified query parameters
         /// </summary>
-        /// <param name="q">Query describing the desired subset</param>
-        /// <returns>Requested items</returns>
-        public virtual IQueryable<T> ForQuery(string q) => All;
+        protected virtual IQueryable<T> ForQuery(string q) => throw new NotImplementedException();
 
-        protected virtual IQueryable<T> ForQuery(IWireQueryParameters parms) => ForQuery(q:parms.Query);
+        protected virtual IQueryable<T> ForQuery(IWireQueryParameters parms) => ForQuery(parms.Query);
 
         /// Retrieve a single item by <paramref name="id"/>
         /// </summary>

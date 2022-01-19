@@ -28,7 +28,7 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <param name="q">Query describing the desired subset</param>
         /// <returns>Requested items</returns>
-        public override IQueryable<Payee> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q) || x.Name.Contains(q));
+        protected override IQueryable<Payee> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => x.Category.Contains(q) || x.Name.Contains(q));
 
         /// <summary>
         /// Change category of all selected items to <paramref name="category"/>

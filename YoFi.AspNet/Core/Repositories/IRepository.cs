@@ -30,13 +30,6 @@ namespace YoFi.Core.Repositories
         IQueryable<T> OrderedQuery { get; }
 
         /// <summary>
-        /// Subset of all known items reduced by the specified query parameter
-        /// </summary>
-        /// <param name="q">Query describing the desired subset</param>
-        /// <returns>Requested items</returns>
-        IQueryable<T> ForQuery(string q);
-
-        /// <summary>
         /// Retrieve a single item by <paramref name="id"/>
         /// </summary>
         /// <remarks>

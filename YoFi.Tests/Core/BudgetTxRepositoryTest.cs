@@ -23,13 +23,13 @@ namespace YoFi.Tests.Core
             {
                 return new List<BudgetTx>()
                 {
-                    new BudgetTx() { ID = 1, Timestamp = new System.DateTime(2020, 06, 01),  Category = "A", Amount = 100m },
-                    new BudgetTx() { ID = 2, Timestamp = new System.DateTime(2020, 06, 01),  Category = "B", Amount = 200m },
-                    new BudgetTx() { ID = 3, Timestamp = new System.DateTime(2020, 05, 01),  Category = "C", Amount = 500m },
-                    new BudgetTx() { ID = 4, Timestamp = new System.DateTime(2020, 05, 01),  Category = "B", Amount = 400m },
-                    new BudgetTx() { ID = 5, Timestamp = new System.DateTime(2020, 05, 01),  Category = "A", Amount = 300m },
-                    new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01), Category = "C", Amount = 700m },
-                    new BudgetTx() { Timestamp = new System.DateTime(2020, 07, 01), Category = "A", Amount = 800m },
+                    new BudgetTx() { ID = 1, Timestamp = new System.DateTime(2020, 06, 01),  Category = "A", Amount = 200m },
+                    new BudgetTx() { ID = 2, Timestamp = new System.DateTime(2020, 06, 01),  Category = "B", Amount = 300m },
+                    new BudgetTx() { ID = 3, Timestamp = new System.DateTime(2020, 05, 01),  Category = "C", Amount = 700m },
+                    new BudgetTx() { ID = 4, Timestamp = new System.DateTime(2020, 05, 01),  Category = "B", Amount = 600m },
+                    new BudgetTx() { ID = 5, Timestamp = new System.DateTime(2020, 05, 01),  Category = "A", Amount = 500m },
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01), Category = "C", Amount = 400m },
+                    new BudgetTx() { Timestamp = new System.DateTime(2020, 07, 01), Category = "A", Amount = 100m },
                 };
             }
         }
@@ -61,7 +61,7 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
-        public void IndexQ()
+        public async Task IndexQ()
         {
             // Given: Five items in the data set
             var all = Items.Take(5);
@@ -71,10 +71,12 @@ namespace YoFi.Tests.Core
             var lookup = all.ToLookup(x => x.Category, x=>x);
             var expected = lookup.First();
             var category = expected.Key;
-            var model = repository.ForQuery(category);
+            var qresult = await repository.GetByQueryAsync(new WireQueryParameters() { Query = category });
 
             // Then: Only the matching items are returned
-            Assert.IsTrue(expected.SequenceEqual(model));
+            var items = expected.ToList();
+            items.Sort(CompareKeys);
+            Assert.IsTrue(qresult.Items.SequenceEqual(items));
         }
 
         [TestMethod]
