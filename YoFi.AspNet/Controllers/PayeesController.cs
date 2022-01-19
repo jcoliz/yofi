@@ -18,8 +18,6 @@ namespace YoFi.AspNet.Controllers
     [Authorize(Policy = "CanRead")]
     public class PayeesController : Controller, IController<Payee>
     {
-        public static int PageSize { get; } = 25;
-
         private readonly IPayeeRepository _repository;
 
         public PayeesController(IPayeeRepository repository)
@@ -27,21 +25,13 @@ namespace YoFi.AspNet.Controllers
             _repository = repository;
         }
 
-        // GET: Payees
         public async Task<IActionResult> Index(string q = null, string v = null, int? p = null)
         {
-            //
-            // Process QUERY (Q) parameters
-            //
-
-            ViewData["Query"] = q;
-
             //
             // Process VIEW (V) parameters
             //
 
             // "v=s" means show the selection checkbox. Used in bulk edit mode
-            ViewData["ViewP"] = v;
             bool showSelected = v?.ToLowerInvariant().Contains("s") == true;
             ViewData["ShowSelected"] = showSelected;
             ViewData["ToggleSelected"] = showSelected ? null : "s";
@@ -51,25 +41,15 @@ namespace YoFi.AspNet.Controllers
             //
 
             var qresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = q, Page = p, View = v });
-
-            //
-            // Process PAGE (P) parameters
-            //
-
-            ViewData[nameof(PageDivider)] = new PageDivider(qresult.PageInfo);
-
-            // Show the index
-            return View(qresult.Items);
+            return View(qresult);
         }
 
-        // GET: Payees/Details/5
         [ValidatePayeeExists]
         public async Task<IActionResult> Details(int? id)
         {
             return View(await _repository.GetByIdAsync(id));
         }
 
-        // GET: Payees/Create
         public async Task<IActionResult> Create(int? txid)
         {
             try
@@ -87,7 +67,7 @@ namespace YoFi.AspNet.Controllers
                 return NotFound();
             }
         }
-        // GET: Payees/CreateModel/{id}
+
         public async Task<IActionResult> CreateModal(int id)
         {
             try
@@ -109,9 +89,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // POST: Payees/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -123,21 +100,15 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Payees/Edit/5
         [ValidatePayeeExists]
         public async Task<IActionResult> Edit(int? id) => await Details(id);
 
-        // GET: Payees/EditModal/5
         [ValidatePayeeExists]
         public async Task<IActionResult> EditModal(int? id)
         {
             return PartialView("EditPartial", await _repository.GetByIdAsync(id));
         }
 
-
-        // POST: Payees/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -160,7 +131,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // POST: Payees/BulkEdit
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -171,7 +141,6 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Payees/BulkDelete
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -182,11 +151,9 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Payees/Delete/5
         [ValidatePayeeExists]
         public async Task<IActionResult> Delete(int? id) => await Details(id);
 
-        // POST: Payees/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
@@ -227,7 +194,6 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
-        // GET: Payees/Download
         [ActionName("Download")]
         public Task<IActionResult> Download()
         {
