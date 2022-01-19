@@ -149,7 +149,7 @@ namespace YoFi.AspNet.Pages
             return Page();
         }
 
-        public async Task<IActionResult> OnGetSampleAsync(string what, string how, [FromServices] IWebHostEnvironment e)
+        public IActionResult OnGetSample(string what, string how, [FromServices] IWebHostEnvironment e)
         {
             var dir = e.WebRootPath;
             // Load the full sample data off disk
