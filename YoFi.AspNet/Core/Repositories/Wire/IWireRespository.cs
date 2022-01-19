@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +25,12 @@ namespace YoFi.Core.Repositories.Wire
         Task SetPageSizeAsync(int value);
     }
 
+    /// <summary>
+    /// The parameters which can be used to query results from a wire repository 
+    /// </summary>
+    /// <remarks>
+    /// The exact meaning of each item is up to the repository itself
+    /// </remarks>
     public interface IWireQueryParameters
     {
         string Query { get; }
@@ -32,29 +39,37 @@ namespace YoFi.Core.Repositories.Wire
         public string View { get; }
     }
 
-    public class WireQueryParameters : IWireQueryParameters
-    {
-        public string Query { get; set; }
-
-        public int? Page { get; set; }
-
-        public string Order { get; set; }
-
-        public string View { get; set; }
-    }
-
-    public interface IWireQueryResult<T>
+    /// <summary>
+    /// The common base which all wire query results will follow
+    /// </summary>
+    /// <remarks>
+    /// Useful for cases where type of items don't matter
+    /// </remarks>
+    public interface IWireQueryResultBase
     {
         /// <summary>
         /// Parameters used to generate this query
         /// </summary>
         IWireQueryParameters Parameters { get; }
 
-        IEnumerable<T> Items { get; }
-
         IWirePageInfo PageInfo { get; }
     }
 
+    /// <summary>
+    /// The result of a wire repository query
+    /// </summary>
+    /// <typeparam name="T">Type of items returned</typeparam>
+    public interface IWireQueryResult<T>: IWireQueryResultBase
+    {
+        /// <summary>
+        /// Items which were found as a result of the query
+        /// </summary>
+        IEnumerable<T> Items { get; }
+    }
+
+    /// <summary>
+    /// Information about the page of results which was returned
+    /// </summary>
     public interface IWirePageInfo
     {
         /// <summary>

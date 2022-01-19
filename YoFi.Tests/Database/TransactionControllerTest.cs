@@ -740,7 +740,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(PageSize, model.Items.Count());
 
             // And: Page Item values are as expected
-            var pages = new PageDivider(model.PageInfo,model.Parameters);
+            var pages = new PageDivider(model);
             Assert.AreEqual(1,pages.PageFirstItem);
             Assert.AreEqual(PageSize, pages.PageLastItem);
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
@@ -764,7 +764,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(PageSize / 2, model.Items.Count());
 
             // And: Page Item values are as expected
-            var pages = new PageDivider(model.PageInfo, model.Parameters);
+            var pages = new PageDivider(model);
             Assert.AreEqual(1 + PageSize, pages.PageFirstItem);
             Assert.AreEqual(items.Count(), pages.PageLastItem);
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
@@ -788,7 +788,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(items.Count() % PageSize, model.Items.Count());
 
             // And: Page values are as expected
-            var pages = new PageDivider(model.PageInfo, model.Parameters);
+            var pages = new PageDivider(model);
             Assert.AreEqual(3, pages.PreviousPreviousPage);
             Assert.AreEqual(1, pages.FirstPage);
         }
@@ -811,7 +811,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(PageSize, model.Items.Count());
 
             // And: Page values are as expected
-            var pages = new PageDivider(model.PageInfo, model.Parameters);
+            var pages = new PageDivider(model);
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
 

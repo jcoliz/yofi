@@ -35,8 +35,10 @@ namespace Common.AspNet
 
         }
 
-        public PageDivider(IWirePageInfo info, IWireQueryParameters parms)
+        public PageDivider(IWireQueryResultBase qresult)
         {
+            var info = qresult.PageInfo;
+            var parms = qresult.Parameters;
             PageSize = info.PageSize;
             Page = info.Page;
             PageTotalItems = info.TotalItems;
