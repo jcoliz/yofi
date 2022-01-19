@@ -166,8 +166,6 @@ namespace YoFi.Tests.Helpers
                 throw new NotImplementedException();
         }
 
-        public Task ToListAsync<T>(IQueryable<T> query) => Task.FromResult(query.ToList());
-
         public void RemoveRange(IEnumerable<object> items)
         {
             if (items == null)
@@ -196,5 +194,9 @@ namespace YoFi.Tests.Helpers
             foreach (var item in items)
                 Update(item);
         }
+
+        Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) => Task.FromResult(query.ToList());
+
+        Task<int> IDataContext.CountAsync<T>(IQueryable<T> query) => Task.FromResult(query.Count());
     }
 }

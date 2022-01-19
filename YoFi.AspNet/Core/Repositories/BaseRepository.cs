@@ -140,19 +140,18 @@ namespace YoFi.Core.Repositories
         #endregion
 
         #region Wire Interface
-        public Task<IWireQueryResult<T>> GetByQueryAsync(IWireQueryParameters parms)
+        public async Task<IWireQueryResult<T>> GetByQueryAsync(IWireQueryParameters parms)
         {
             var query = ForQuery(parms.Query);
 
-            // TODO: CountAsync()
-            var count = query.Count();
-            var pages = new Wire.WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: PageSize);
-            query = query.Skip(pages.FirstItem - 1).Take(pages.NumItems);
+            var count = await _context.CountAsync(query);
+            var pages = new WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: PageSize);
+            if (count > PageSize)
+                query = query.Skip(pages.FirstItem - 1).Take(pages.NumItems);
 
-            // TODO: ToListAsync()
-            var list = query.ToList();
+            var list = await _context.ToListNoTrackingAsync(query);
             IWireQueryResult<T> result = new WireQueryResult<T>() { Items = list, PageInfo = pages, Parameters = parms };
-            return Task.FromResult(result);
+            return result;
         }
 
         private int PageSize = 25;

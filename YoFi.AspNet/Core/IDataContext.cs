@@ -86,5 +86,15 @@ namespace YoFi.Core
         /// did NOT call update on them. Should be rare.
         /// </remarks>
         Task SaveChangesAsync();
+
+        /// <summary>
+        /// Execute ToList query asynchronously, with no tracking
+        /// </summary>
+        /// <typeparam name="T">Type of entities being queried</typeparam>
+        /// <param name="query">Query to execute</param>
+        /// <returns>List of items</returns>
+        Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class;
+
+        Task<int> CountAsync<T>(IQueryable<T> query) where T : class;
     }
 }
