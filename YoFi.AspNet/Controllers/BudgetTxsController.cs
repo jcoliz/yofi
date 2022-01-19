@@ -30,19 +30,11 @@ namespace YoFi.AspNet.Controllers
         // GET: BudgetTxs
         public async Task<IActionResult> Index(string q = null, string v = null, int? p = null)
         {
-
-            //
-            // Process QUERY (Q) parameters
-            //
-
-            ViewData["Query"] = q;
-
             //
             // Process VIEW (V) parameters
             //
 
             // "v=s" means show the selection checkbox. Used in bulk edit mode
-            ViewData["ViewP"] = v;
             bool showSelected = v?.ToLowerInvariant().Contains("s") == true;
             ViewData["ShowSelected"] = showSelected;
             ViewData["ToggleSelected"] = showSelected ? null : "s";
@@ -51,16 +43,8 @@ namespace YoFi.AspNet.Controllers
             // Run Query
             //
 
-            var qresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = q, Page = p, View = v});
-
-            //
-            // Process PAGE (P) parameters
-            //
-
-            ViewData[nameof(PageDivider)] = new PageDivider(qresult.PageInfo);
-
-            // Show the index
-            return View(qresult.Items);
+            var qresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = q, Page = p, View = v });
+            return View(qresult);
         }
 
         // GET: BudgetTxs/Details/5
