@@ -52,6 +52,8 @@ namespace YoFi.Core.Repositories
         /// <returns>Requested items</returns>
         public virtual IQueryable<T> ForQuery(string q) => All;
 
+        protected virtual IQueryable<T> ForQuery(IWireQueryParameters parms) => ForQuery(q:parms.Query);
+
         /// Retrieve a single item by <paramref name="id"/>
         /// </summary>
         /// <remarks>
@@ -142,7 +144,7 @@ namespace YoFi.Core.Repositories
         #region Wire Interface
         public async Task<IWireQueryResult<T>> GetByQueryAsync(IWireQueryParameters parms)
         {
-            var query = ForQuery(parms.Query);
+            var query = ForQuery(parms);
 
             var count = await _context.CountAsync(query);
             var pages = new WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: PageSize);

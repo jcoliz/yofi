@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.Core.Repositories
@@ -45,7 +46,16 @@ namespace YoFi.Core.Repositories
         public override IQueryable<Transaction> ForQuery(string q)
         {
             var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits));
-            qbuilder.Build(q);
+            qbuilder.BuildForQ(q);
+            return qbuilder.Query;
+        }
+
+        protected override IQueryable<Transaction> ForQuery(IWireQueryParameters parms)
+        {
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits));
+            qbuilder.BuildForQ(parms.Query);
+            qbuilder.ApplyOrderParameter(parms.Order);
+            qbuilder.ApplyViewParameter(parms.View);
             return qbuilder.Query;
         }
 
@@ -391,13 +401,18 @@ namespace YoFi.Core.Repositories
             }
         }
 
+        #endregion
+
+        #region Fields
+
+        private readonly IStorageService _storage;
         private readonly IAsyncQueryExecution _queryExecution;
 
         #endregion
 
-        #region internals
+        #region Internal Query-builder helpers
 
-        private readonly IStorageService _storage;
+
 
         #endregion
 

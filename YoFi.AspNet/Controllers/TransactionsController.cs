@@ -17,6 +17,7 @@ using YoFi.AspNet.Pages.Helpers;
 using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Core.SampleGen;
 using Transaction = YoFi.Core.Models.Transaction;
 
@@ -25,12 +26,6 @@ namespace YoFi.AspNet.Controllers
     [Authorize(Policy = "CanRead")]
     public class TransactionsController : Controller, IController<Transaction>
     {
-        #region Public Properties
-
-        public static int PageSize { get; } = 25;
-
-        #endregion
-
         #region Constructor
 
         public TransactionsController(ITransactionRepository repository, IAsyncQueryExecution queryExecution, IClock clock)
@@ -100,45 +95,8 @@ namespace YoFi.AspNet.Controllers
         {
             try
             {
-                var viewmodel = new TransactionsIndexPresenter(_queryExecution)
-                {
-                    Divider = new PageDivider() { PageSize = PageSize },
-                    Query = _repository.ForQuery(q)
-                };
-
-                //
-                // Process QUERY (Q) parameter
-                //
-
-                viewmodel.QueryParameter = q;
-
-                //
-                // Process VIEW (V) parameter
-                //
-
-                viewmodel.ViewParameter = v;
-                viewmodel.ApplyViewParameter();
-
-                //
-                // Process ORDER (O) parameter
-                //
-
-                viewmodel.OrderParameter = o;
-                viewmodel.ApplyOrderParameter();
-
-                //
-                // Process PAGE (P) parameter
-                //
-
-                viewmodel.PageParameter = p;
-                await viewmodel.ApplyPageParameterAsync();
-
-                //
-                // Execute Query
-                //
-
-                await viewmodel.ExecuteQueryAsync();
-
+                var qresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = q, Page = p, View = v, Order = o });
+                var viewmodel = new TransactionsIndexPresenter(qresult);
                 return View(viewmodel);
             }
             catch (ArgumentException)

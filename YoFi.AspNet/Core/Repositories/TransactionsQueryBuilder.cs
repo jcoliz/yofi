@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using YoFi.Core.Models;
 
@@ -47,7 +48,7 @@ namespace YoFi.Core.Repositories
         /// </remarks>
         /// <param name="q">Query parameter</param>
         /// <returns>Resulting query refined by <paramref name="q"/></returns>
-        public void Build(string q)
+        public void BuildForQ(string q)
         {
             if (!string.IsNullOrEmpty(q))
             {
@@ -151,6 +152,93 @@ namespace YoFi.Core.Repositories
             }
         }
 
+        /// <summary>
+        /// Interprets the "o" (Order) parameter on a transactions search
+        /// </summary>
+        /// <remarks>
+        /// Public so can be used by other controllers.
+        /// </remarks>
+        /// <param name="result">Initial query to further refine</param>
+        /// <param name="p">Order parameter</param>
+        /// <returns>Resulting query refined by <paramref name="o"/></returns>
+        internal void ApplyOrderParameter(string o)
+        {
+            Query = o switch
+            {
+                // Coverlet finds cyclomatic complexity of 42 in this function!!?? No clue why it's not just 10.
+                "aa" => Query.OrderBy(s => s.Amount),
+                "ad" => Query.OrderByDescending(s => s.Amount),
+                "ra" => Query.OrderBy(s => s.BankReference),
+                "rd" => Query.OrderByDescending(s => s.BankReference),
+                "pa" => Query.OrderBy(s => s.Payee),
+                "pd" => Query.OrderByDescending(s => s.Payee),
+                "ca" => Query.OrderBy(s => s.Category),
+                "cd" => Query.OrderByDescending(s => s.Category),
+                "da" => Query.OrderBy(s => s.Timestamp).ThenBy(s => s.Payee),
+                "dd" => Query.OrderByDescending(s => s.Timestamp).ThenBy(s => s.Payee),
+                null => Query.OrderByDescending(s => s.Timestamp).ThenBy(s => s.Payee),
+                _ => Query
+            };
+        }
+
+        /// <summary>
+        /// Apply the view parameter to the presenter
+        /// </summary>
+        internal void ApplyViewParameter(string v)
+        {
+            if (v?.ToLowerInvariant().Contains("h") != true)
+                Query = Query.Where(x => x.Hidden != true);
+        }
+
+#if false
+//
+// Leaving out the DTOs for now, to simplify. I'll come back to this.
+//
+        /// <summary>
+        /// Build the <see cref="TransactionsIndexPresenter.Items"/> list out of the current query
+        /// </summary>
+        internal async Task ExecuteQueryAsync()
+        {
+            if (ShowHidden || ShowSelected)
+            {
+                // Get the long form
+                var dtoquery = Query.Select(t => new TransactionIndexDto()
+                {
+                    ID = t.ID,
+                    Timestamp = t.Timestamp,
+                    Payee = t.Payee,
+                    Amount = t.Amount,
+                    Category = t.Category,
+                    Memo = t.Memo,
+                    HasReceipt = t.ReceiptUrl != null,
+                    HasSplits = t.Splits.Any(),
+                    BankReference = t.BankReference,
+                    Hidden = t.Hidden ?? false,
+                    Selected = t.Selected ?? false
+                });
+
+                Items = await _queryExecution.ToListNoTrackingAsync(dtoquery);
+            }
+            else
+            {
+                // Get the shorter form
+                var dtoquery = Query.Select(t => new TransactionIndexDto()
+                {
+                    ID = t.ID,
+                    Timestamp = t.Timestamp,
+                    Payee = t.Payee,
+                    Amount = t.Amount,
+                    Category = t.Category,
+                    Memo = t.Memo,
+                    HasReceipt = t.ReceiptUrl != null,
+                    HasSplits = t.Splits.Any(),
+                });
+
+                Items = await _queryExecution.ToListNoTrackingAsync(dtoquery);
+            }
+        }
+#endif
+
         #endregion
 
         #region Internals
@@ -235,7 +323,46 @@ namespace YoFi.Core.Repositories
                 throw new ArgumentException($"Unexpected query parameter {value}", nameof(value));
         }
 
-        #endregion
+#endregion
 
     }
+
+    /// <summary>
+    /// The transaction data for Index page
+    /// </summary>
+    public class TransactionIndexDto
+    {
+        public int ID { get; set; }
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
+        [Display(Name = "Date")]
+        public DateTime Timestamp { get; set; }
+        public string Payee { get; set; }
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        public decimal Amount { get; set; }
+        public string Category { get; set; }
+        public string Memo { get; set; }
+        public bool HasReceipt { get; set; }
+        public bool HasSplits { get; set; }
+
+        // Only needed in some cases
+
+        public string BankReference { get; set; }
+        public bool Hidden { get; set; }
+        public bool Selected { get; set; }
+
+        // This is just for test cases, so it's a limited transaltion, just what we need for
+        // certain cases.
+        public static explicit operator Transaction(TransactionIndexDto o) => new Transaction()
+        {
+            Category = o.Category,
+            Memo = o.Memo,
+            Payee = o.Payee
+        };
+
+        public bool Equals(Transaction other)
+        {
+            return string.Equals(Payee, other.Payee) && Amount == other.Amount && Timestamp.Date == other.Timestamp.Date;
+        }
+    }
+
 }

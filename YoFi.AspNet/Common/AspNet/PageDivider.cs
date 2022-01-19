@@ -35,13 +35,15 @@ namespace Common.AspNet
 
         }
 
-        public PageDivider(IWirePageInfo info)
+        public PageDivider(IWirePageInfo info, IWireQueryParameters parms)
         {
             PageSize = info.PageSize;
             Page = info.Page;
             PageTotalItems = info.TotalItems;
             PageFirstItem = info.FirstItem;
             PageLastItem = info.FirstItem + info.NumItems - 1;
+
+            ViewParameters = new DefaultViewParameters() { OrderParameter = parms.Order, QueryParameter = parms.Query, ViewParameter = parms.View };
 
             if (info.TotalItems > PageSize)
             {

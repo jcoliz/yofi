@@ -125,7 +125,7 @@ else
         </tbody>
     </table>
 
-    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", new Common.AspNet.PageDivider(Model.PageInfo))
+    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", new Common.AspNet.PageDivider(Model.PageInfo, Model.Parameters))
 }
 <form method="post" enctype="multipart/form-data" asp-controller="Payees" asp-action="Upload">
     <div class="input-group mb-3 mt-3">

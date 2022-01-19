@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Core.Repositories
 {
@@ -10,7 +11,7 @@ namespace YoFi.Core.Repositories
     /// Provides access to Transaction items, along with 
     /// domain-specific business logic specific to Transactions
     /// </summary>
-    public interface ITransactionRepository: IRepository<Transaction>
+    public interface ITransactionRepository: IWireRespository<Transaction>, IRepository<Transaction>
     {
         /// <summary>
         /// Retrieve a single item by <paramref name="id"/>, including children splits
