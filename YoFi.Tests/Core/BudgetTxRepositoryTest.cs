@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
@@ -194,5 +195,74 @@ namespace YoFi.Tests.Core
             importer.QueueImportFromXlsx(stream);
             return await importer.ProcessImportAsync();
         }
+
+        #region Wire Interface
+
+        //
+        // This region contains tests which test the budget repository implementing the new Wire Repository
+        // interface.
+        //
+
+        private async Task GivenItemsInRepository(int numitems)
+        {
+            var manyitems = Enumerable.Range(1, numitems).Select(x => new BudgetTx() { Amount = x * 100m, Category = x.ToString(), Timestamp = new DateTime(2020, 1, 1) + TimeSpan.FromDays(x) });
+            await itemRepository.AddRangeAsync(manyitems);
+        }
+
+        [TestMethod]
+        public async Task IndexPage1()
+        {
+            // Given: A very long set of items 
+            var numitems = 100;
+            await GivenItemsInRepository(numitems);
+
+            // When: Calling Index page 1
+            var result = await itemRepository.GetByQueryAsync(new WireQueryParameters());
+
+            // And: Model has one page of items
+            Assert.AreEqual(result.PageInfo.PageSize, result.Items.Count());
+            Assert.AreEqual(result.PageInfo.NumItems, result.Items.Count());
+
+            // And: Page Item values are as expected
+            Assert.AreEqual(1, result.PageInfo.FirstItem);
+            Assert.AreEqual(numitems, result.PageInfo.TotalItems);
+        }
+
+        [TestMethod]
+        public async Task IndexPage2()
+        {
+            // Given: A long set of items, which is longer than one page, but not as long as two pages 
+            var pagesize = await itemRepository.GetPageSizeAsync();
+            var numitems = pagesize * 3 / 2;
+            await GivenItemsInRepository(numitems);
+
+            // When: Calling Index page 2
+            var result = await itemRepository.GetByQueryAsync(new WireQueryParameters() { Page = 2 });
+
+            // And: Only items after one page's worth of items are returned
+            Assert.AreEqual(pagesize / 2, result.Items.Count());
+
+            // And: Page Item values are as expected
+            Assert.AreEqual(1 + pagesize, result.PageInfo.FirstItem);
+            Assert.AreEqual(2, result.PageInfo.TotalPages);
+            Assert.AreEqual(numitems, result.PageInfo.TotalItems);
+        }
+
+        [TestMethod]
+        public async Task IndexQSubstring()
+        {
+            // Given: A mix of items, some with '{word}' in their category and some without
+            await GivenItemsInRepository(11);
+
+            // When: Calling index q={word}
+            var word = "1";
+            var result = await itemRepository.GetByQueryAsync(new WireQueryParameters() { Query = word });
+
+            // Then: Only the expected items are returned
+            var expected = repository.All.Where(x => x.Category.Contains(word));
+            Assert.IsTrue(expected.SequenceEqual(result.Items));
+        }
+
+        #endregion
     }
 }

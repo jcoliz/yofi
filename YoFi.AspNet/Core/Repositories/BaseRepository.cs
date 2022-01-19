@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Core.Repositories
 {
@@ -15,7 +16,7 @@ namespace YoFi.Core.Repositories
     /// This base repository class largely implements the IRepository(T) interface, with some items left abstract for the inherited class
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-    public class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, new()
+    public class BaseRepository<T> : IWireRespository<T>, IRepository<T> where T: class, IModelItem<T>, new()
     {
         #region Constructor
 
@@ -136,6 +137,35 @@ namespace YoFi.Core.Repositories
             _context.RemoveRange(items);
             return _context.SaveChangesAsync();
         }
+        #endregion
+
+        #region Wire Interface
+        public Task<IWireQueryResult<T>> GetByQueryAsync(IWireQueryParameters parms)
+        {
+            var query = ForQuery(parms.Query);
+
+            // TODO: CountAsync()
+            var count = query.Count();
+            var pages = new Wire.WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: PageSize);
+            query = query.Skip(pages.FirstItem - 1).Take(pages.NumItems);
+
+            // TODO: ToListAsync()
+            var list = query.ToList();
+            IWireQueryResult<T> result = new WireQueryResult<T>() { Items = list, PageInfo = pages, Parameters = parms };
+            return Task.FromResult(result);
+        }
+
+        private int PageSize = 25;
+
+        public Task<int> GetPageSizeAsync() => Task.FromResult(PageSize);
+
+        public Task SetPageSizeAsync(int value)
+        {
+            PageSize = value;
+
+            return Task.CompletedTask;
+        }
+
         #endregion
 
         #region Exporter

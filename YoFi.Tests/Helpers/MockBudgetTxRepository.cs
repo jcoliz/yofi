@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Repositories;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Helpers
 {
@@ -33,6 +34,34 @@ namespace YoFi.Tests.Helpers
             // We don't need to DO anything here.
             WasBulkDeleteCalled = true;
             return Task.CompletedTask;
+        }
+
+        public Task<IWireQueryResult<BudgetTx>> GetByQueryAsync(IWireQueryParameters parms)
+        {
+            // So, I just copied the code from the production BaseRepository
+
+            var query = ForQuery(parms.Query);
+
+            var count = query.Count();
+            const int pagesize = 25;
+            var pages = new WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: pagesize);
+
+            if (count > pagesize)
+                query = query.Skip(pages.FirstItem - 1).Take(pages.NumItems);
+
+            var list = query.ToList();
+            IWireQueryResult<BudgetTx> result = new WireQueryResult<BudgetTx>() { Items = list, PageInfo = pages, Parameters = parms };
+            return Task.FromResult(result);
+        }
+
+        public Task<int> GetPageSizeAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SetPageSizeAsync(int value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

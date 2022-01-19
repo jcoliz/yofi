@@ -3,9 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core.Repositories.Wire;
 
 namespace Common.AspNet
 {
+    /// <summary>
+    /// Used as a view model for a pagination control
+    /// </summary>
+    /// <remarks>
+    /// Contains everything we need to show our standard pagination control
+    /// </remarks>
     public class PageDivider
     {
         public const int DefaultPageSize = 25;
@@ -22,6 +29,36 @@ namespace Common.AspNet
         public int? FirstPage { get; private set; }
         public int? LastPage { get; private set; }
         public IViewParameters ViewParameters { get; set; }
+
+        public void BuildFromWirePageInfo(IWirePageInfo info)
+        {
+            PageSize = info.PageSize;
+            Page = info.Page;
+            PageTotalItems = info.TotalItems;
+            PageFirstItem = info.FirstItem;
+            PageLastItem = info.FirstItem + info.NumItems - 1;
+
+            if (info.NumItems > PageSize)
+            {
+                if (Page > 1)
+                    PreviousPage = Page - 1;
+                else
+                    if ((Page + 1) * PageSize < info.NumItems)
+                    NextNextPage = Page + 2;
+
+                if (Page * PageSize < info.NumItems)
+                    NextPage = Page + 1;
+                else
+                    if (Page > 2)
+                    PreviousPreviousPage = Page - 2;
+
+                if (Page > 2)
+                    FirstPage = 1;
+
+                if ((Page + 1) * PageSize < info.NumItems)
+                    LastPage = 1 + (info.NumItems - 1) / PageSize;
+            }
+        }
 
         public Task<IQueryable<T>> ItemsForPage<T>(IQueryable<T> result, int? p)
         {

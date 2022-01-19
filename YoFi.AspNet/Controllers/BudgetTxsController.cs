@@ -11,6 +11,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Importers;
 using Ardalis.Filters;
 using YoFi.Core;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.AspNet.Controllers
 {
@@ -38,8 +39,6 @@ namespace YoFi.AspNet.Controllers
 
             ViewData["Query"] = q;
 
-            var result = _repository.ForQuery(q);
-
             //
             // Process VIEW (V) parameters
             //
@@ -51,15 +50,21 @@ namespace YoFi.AspNet.Controllers
             ViewData["ToggleSelected"] = showSelected ? null : "s";
 
             //
+            // Run Query
+            //
+
+            var qresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = q, Page = p });
+
+            //
             // Process PAGE (P) parameters
             //
 
-            var divider = new PageDivider() { PageSize = PageSize, ViewParameters = new PageDivider.DefaultViewParameters() { QueryParameter = q, ViewParameter = v } };
-            result = await divider.ItemsForPage(result, p);
+            var divider = new PageDivider();
+            divider.BuildFromWirePageInfo(qresult.PageInfo);
             ViewData[nameof(PageDivider)] = divider;
 
             // Show the index
-            return View(await _queryExecution.ToListNoTrackingAsync(result));
+            return View(qresult.Items);
         }
 
         // GET: BudgetTxs/Details/5
