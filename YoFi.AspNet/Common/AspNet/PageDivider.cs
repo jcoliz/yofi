@@ -38,15 +38,15 @@ namespace Common.AspNet
             PageFirstItem = info.FirstItem;
             PageLastItem = info.FirstItem + info.NumItems - 1;
 
-            if (info.NumItems > PageSize)
+            if (info.TotalItems > PageSize)
             {
                 if (Page > 1)
                     PreviousPage = Page - 1;
                 else
-                    if ((Page + 1) * PageSize < info.NumItems)
+                    if ((Page + 1) * PageSize < info.TotalItems)
                     NextNextPage = Page + 2;
 
-                if (Page * PageSize < info.NumItems)
+                if (Page * PageSize < info.TotalItems)
                     NextPage = Page + 1;
                 else
                     if (Page > 2)
@@ -55,8 +55,8 @@ namespace Common.AspNet
                 if (Page > 2)
                     FirstPage = 1;
 
-                if ((Page + 1) * PageSize < info.NumItems)
-                    LastPage = 1 + (info.NumItems - 1) / PageSize;
+                if ((Page + 1) * PageSize < info.TotalItems)
+                    LastPage = 1 + (info.TotalItems - 1) / PageSize;
             }
         }
 
