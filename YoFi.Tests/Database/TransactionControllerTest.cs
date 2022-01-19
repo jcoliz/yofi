@@ -20,9 +20,10 @@ using YoFi.AspNet.Data;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
-using Dto = YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
+using Dto = YoFi.Core.Models.Transaction; // YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
 using Transaction = YoFi.Core.Models.Transaction;
 using Common.DotNet;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Database
 {
@@ -41,6 +42,9 @@ namespace YoFi.Tests.Database
         TestClock clock;
 
         public TestContext TestContext { get; set; }
+
+        private int PageSize => BaseRepository<Payee>.DefaultPageSize;
+
 
         private static TestContext _testContext;
 
@@ -730,15 +734,15 @@ namespace YoFi.Tests.Database
             // When: Calling Index page 1
             var result = await controller.Index(p:1);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
+            var model = Assert.That.IsOfType<IWireQueryResult<Transaction>>(viewresult.Model);
 
             // Then: Only one page's worth of items are returned
-            Assert.AreEqual(TransactionsController.PageSize, model.Items.Count());
+            Assert.AreEqual(PageSize, model.Items.Count());
 
             // And: Page Item values are as expected
-            var pages = model.Divider;
+            var pages = new PageDivider(model.PageInfo,model.Parameters);
             Assert.AreEqual(1,pages.PageFirstItem);
-            Assert.AreEqual(TransactionsController.PageSize, pages.PageLastItem);
+            Assert.AreEqual(PageSize, pages.PageLastItem);
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
 
@@ -754,14 +758,14 @@ namespace YoFi.Tests.Database
             // When: Calling Index page 2
             var result = await controller.Index(p:2);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
+            var model = Assert.That.IsOfType<IWireQueryResult<Transaction>>(viewresult.Model);
 
             // Then: Only items after one page's worth of items are returned
-            Assert.AreEqual(TransactionsController.PageSize / 2, model.Items.Count());
+            Assert.AreEqual(PageSize / 2, model.Items.Count());
 
             // And: Page Item values are as expected
-            var pages = model.Divider;
-            Assert.AreEqual(1 + TransactionsController.PageSize, pages.PageFirstItem);
+            var pages = new PageDivider(model.PageInfo, model.Parameters);
+            Assert.AreEqual(1 + PageSize, pages.PageFirstItem);
             Assert.AreEqual(items.Count(), pages.PageLastItem);
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
@@ -778,13 +782,13 @@ namespace YoFi.Tests.Database
             // When: Calling Index page 5
             var result = await controller.Index(p: 5);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
+            var model = Assert.That.IsOfType<IWireQueryResult<Transaction>>(viewresult.Model);
 
             // Then: Only the remaining items are returned
-            Assert.AreEqual(items.Count() % TransactionsController.PageSize, model.Items.Count());
+            Assert.AreEqual(items.Count() % PageSize, model.Items.Count());
 
             // And: Page values are as expected
-            var pages = model.Divider;
+            var pages = new PageDivider(model.PageInfo, model.Parameters);
             Assert.AreEqual(3, pages.PreviousPreviousPage);
             Assert.AreEqual(1, pages.FirstPage);
         }
@@ -801,13 +805,13 @@ namespace YoFi.Tests.Database
             // When: Calling Index page 1
             var result = await controller.Index(p: 1);
             var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
+            var model = Assert.That.IsOfType<IWireQueryResult<Transaction>>(viewresult.Model);
 
             // Then: Only one page's worth of items are returned
-            Assert.AreEqual(TransactionsController.PageSize, model.Items.Count());
+            Assert.AreEqual(PageSize, model.Items.Count());
 
             // And: Page values are as expected
-            var pages = model.Divider;
+            var pages = new PageDivider(model.PageInfo, model.Parameters);
             Assert.AreEqual(items.Count(), pages.PageTotalItems);
         }
 
