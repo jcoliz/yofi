@@ -21,12 +21,10 @@ namespace YoFi.AspNet.Controllers
         public static int PageSize { get; } = 25;
 
         private readonly IBudgetTxRepository _repository;
-        private readonly IAsyncQueryExecution _queryExecution;
 
-        public BudgetTxsController(IBudgetTxRepository repository, IAsyncQueryExecution queryExecution)
+        public BudgetTxsController(IBudgetTxRepository repository)
         {
             _repository = repository;
-            _queryExecution = queryExecution;
         }
 
         // GET: BudgetTxs

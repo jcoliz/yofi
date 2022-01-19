@@ -21,12 +21,10 @@ namespace YoFi.AspNet.Controllers
         public static int PageSize { get; } = 25;
 
         private readonly IPayeeRepository _repository;
-        private readonly IAsyncQueryExecution _queryExecution;
 
-        public PayeesController(IPayeeRepository repository, IAsyncQueryExecution queryExecution)
+        public PayeesController(IPayeeRepository repository)
         {
             _repository = repository;
-            _queryExecution = queryExecution;
         }
 
         // GET: Payees

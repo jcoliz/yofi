@@ -59,7 +59,7 @@ namespace YoFi.Tests.Database
         {
             helper = new ControllerTestHelper<Payee, PayeesController>();
             helper.SetUp();
-            helper.controller = new PayeesController(new PayeeRepository(helper.context), new EFCoreAsyncQueryExecution());
+            helper.controller = new PayeesController(new PayeeRepository(helper.context));
             helper.Items.AddRange(PayeeItems.Take(5));
             helper.dbset = helper.context.Payees;
             helper.KeyFor = (x => x.Name);
