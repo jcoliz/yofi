@@ -63,7 +63,7 @@ namespace YoFi.Tests.Database
         {
             helper = new ControllerTestHelper<BudgetTx, BudgetTxsController>();
             helper.SetUp();
-            helper.controller = new BudgetTxsController(new BudgetTxRepository(helper.context),new EFCoreAsyncQueryExecution());
+            helper.controller = new BudgetTxsController(new BudgetTxRepository(helper.context));
             helper.Items.AddRange(BudgetTxItems.Take(5));
 
             helper.dbset = helper.context.BudgetTxs;

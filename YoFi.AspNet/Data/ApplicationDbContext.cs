@@ -77,6 +77,8 @@ namespace YoFi.AspNet.Data
 
         Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
 
-        //Task IDataContext.ToListAsync<T>(IQueryable<T> query) => query.ToListAsync();
+        Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) => query.ToListAsync();
+
+        Task<int> IDataContext.CountAsync<T>(IQueryable<T> query) => query.CountAsync();
     }
 }

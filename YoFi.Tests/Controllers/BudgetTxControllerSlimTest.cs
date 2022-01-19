@@ -29,7 +29,7 @@ namespace YoFi.Tests.Controllers.Slim
         public void SetUp()
         {
             repository = new MockBudgetTxRepository();
-            controller = new BudgetTxsController(repository as IBudgetTxRepository, new MockQueryExecution());
+            controller = new BudgetTxsController(repository as IBudgetTxRepository);
         }
 
         [TestMethod]

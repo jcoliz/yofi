@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Repositories;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Helpers
 {
-    public interface IMockRepository<T>: IRepository<T> where T: class, IModelItem<T>
+    public interface IMockRepository<T>: IWireRespository<T>, IRepository<T> where T: class, IModelItem<T>
     {
         public void AddItems(int numitems);
 
