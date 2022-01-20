@@ -740,10 +740,9 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(PageSize, model.Items.Count());
 
             // And: Page Item values are as expected
-            var pages = new PageDivider(model);
-            Assert.AreEqual(1,pages.PageInfo.FirstItem);
-            Assert.AreEqual(PageSize, pages.PageInfo.NumItems);
-            Assert.AreEqual(items.Count(), pages.PageInfo.TotalItems);
+            Assert.AreEqual(1,model.PageInfo.FirstItem);
+            Assert.AreEqual(PageSize, model.PageInfo.NumItems);
+            Assert.AreEqual(items.Count(), model.PageInfo.TotalItems);
         }
 
         [TestMethod]
@@ -764,10 +763,9 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(PageSize / 2, model.Items.Count());
 
             // And: Page Item values are as expected
-            var pages = new PageDivider(model);
-            Assert.AreEqual(1 + PageSize, pages.PageInfo.FirstItem);
-            Assert.AreEqual(items.Count(), pages.PageInfo.FirstItem + pages.PageInfo.NumItems - 1);
-            Assert.AreEqual(items.Count(), pages.PageInfo.TotalItems);
+            Assert.AreEqual(1 + PageSize, model.PageInfo.FirstItem);
+            Assert.AreEqual(items.Count(), model.PageInfo.FirstItem + model.PageInfo.NumItems - 1);
+            Assert.AreEqual(items.Count(), model.PageInfo.TotalItems);
         }
 
         [TestMethod]
@@ -788,8 +786,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(items.Count() % PageSize, model.Items.Count());
 
             // And: Page values are as expected
-            var pages = new PageDivider(model);
-            Assert.AreEqual(5, pages.PageInfo.Page);
+            Assert.AreEqual(5, model.PageInfo.Page);
         }
 
         [TestMethod]
@@ -810,8 +807,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(PageSize, model.Items.Count());
 
             // And: Page values are as expected
-            var pages = new PageDivider(model);
-            Assert.AreEqual(items.Count(), pages.PageInfo.TotalItems);
+            Assert.AreEqual(items.Count(), model.PageInfo.TotalItems);
         }
 
         [TestMethod]

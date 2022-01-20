@@ -246,7 +246,7 @@ else
         </tbody>
     </table>
 
-    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", new Common.AspNet.PageDivider(Model))
+    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", Model)
 }
 
 <div class="actiondialog modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" data-endpoint="/Transactions/EditModal/">
