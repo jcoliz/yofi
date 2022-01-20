@@ -727,7 +727,7 @@ namespace YoFi.Tests.Database
         {
             // Given: 3 pages of items 
             await Helpers.SampleDataStore.LoadSingleAsync();
-            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider.DefaultPageSize * 3);
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageSize * 3);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -751,7 +751,7 @@ namespace YoFi.Tests.Database
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             await Helpers.SampleDataStore.LoadSingleAsync();
-            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider.DefaultPageSize * 3 / 2);
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageSize * 3 / 2);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -775,7 +775,7 @@ namespace YoFi.Tests.Database
         {
             // Given: 4 1/2 pages of items
             await Helpers.SampleDataStore.LoadSingleAsync();
-            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider.DefaultPageSize * 9 / 2);
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageSize * 9 / 2);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
@@ -798,7 +798,7 @@ namespace YoFi.Tests.Database
         {
             // Given: 1 1/2 pages of items
             await Helpers.SampleDataStore.LoadSingleAsync();
-            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageDivider.DefaultPageSize * 3/2);
+            var items = Helpers.SampleDataStore.Single.Transactions.Take(PageSize * 3 / 2);
             context.Transactions.AddRange(items);
             context.SaveChanges();
 
