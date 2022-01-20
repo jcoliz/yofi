@@ -7,5 +7,23 @@
       "{year}"
     ],
     "Kind": "Primary"
+  },
+  {
+    "ID": "budget",
+    "Description": [
+      "XLSX",
+      "Budget",
+      "{year}"
+    ],
+    "Kind": "Primary"
+  },
+  {
+    "ID": "payees",
+    "Description": [
+      "XLSX",
+      "Payees",
+      "{year}"
+    ],
+    "Kind": "Primary"
   }
 ]
