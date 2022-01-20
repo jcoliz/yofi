@@ -8,9 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-// Currently shaves off all of 4 seconds to run them in parallel!
-// Two or three workers seems to yield the optimum results.
-[assembly: Parallelize(Workers = 3, Scope = ExecutionScope.ClassLevel)]
+// Can't parallelize anymore. The tests have too much overlap now
+// [assembly: Parallelize(Workers = 3, Scope = ExecutionScope.ClassLevel)]
 
 namespace YoFi.Tests.Functional
 {

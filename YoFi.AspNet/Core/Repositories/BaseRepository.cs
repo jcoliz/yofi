@@ -144,10 +144,14 @@ namespace YoFi.Core.Repositories
         {
             var query = ForQuery(parms);
 
-            var count = await _context.CountAsync(query);
-            var pages = new WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: PageSize);
-            if (count > PageSize)
-                query = query.Skip(pages.FirstItem - 1).Take(pages.NumItems);
+            IWirePageInfo pages = null;
+            if (!parms.All)
+            {
+                var count = await _context.CountAsync(query);
+                pages = new WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: PageSize);
+                if (count > PageSize)
+                    query = query.Skip(pages.FirstItem - 1).Take(pages.NumItems);
+            }
 
             var list = await _context.ToListNoTrackingAsync(query);
             IWireQueryResult<T> result = new WireQueryResult<T>() { Items = list, PageInfo = pages, Parameters = parms };

@@ -18,6 +18,14 @@ namespace YoFi.Core.Repositories.Wire
         int? Page { get; }
         string Order { get; }
         public string View { get; }
+        
+        /// <summary>
+        /// Return all items which otherwise match the other paramters
+        /// </summary>
+        /// <remarks>
+        /// That is, do not paginate the results
+        /// </remarks>
+        public bool All { get; }
     }
 
     /// <summary>

@@ -212,6 +212,25 @@ namespace YoFi.Tests.Database
             Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
         }
 
+        [TestMethod]
+        public async Task GetTxQMany()
+        {
+            // Given: A mix of MANY transactions, some with '{word}' in their category, memo, or payee and some without
+            var word = "Word";
+            var expected = 100;
+            var items = Enumerable.Range(1, expected).Select(x => new Transaction() { Amount = x*100m, Payee = x.ToString(), Timestamp = clock.Now + TimeSpan.FromDays(x), Memo = word });
+            var moreitems = Enumerable.Range(1, 20).Select(x => new Transaction() { Amount = x * 100m, Payee = x.ToString(), Timestamp = clock.Now + TimeSpan.FromDays(x) });
+            context.Transactions.AddRange(items.Concat(moreitems));
+            context.SaveChanges();
+
+            // When: Calling GetTransactions q={word}
+            var model = await WhenCallingGetTxWithQ(word);
+
+            // Then: Only the transactions with '{word}' in their category, memo, or payee are returned
+            Assert.AreEqual(expected, model.Count());
+            Assert.IsTrue(model.All(tx => tx.Category?.Contains(word) == true || tx.Memo?.Contains(word) == true || tx.Payee?.Contains(word) == true));
+        }
+
         [DataRow(true)]
         [DataRow(false)]
         [DataTestMethod]

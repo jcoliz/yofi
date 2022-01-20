@@ -17,5 +17,7 @@ namespace YoFi.Core.Repositories.Wire
         public string Order { get; set; }
 
         public string View { get; set; }
+
+        public bool All { get; set; }
     }
 }

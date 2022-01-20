@@ -48,7 +48,7 @@ namespace YoFi.AspNet.Controllers
         [ApiBasicAuthorization]
         public async Task<IActionResult> GetTransactions([FromServices] ITransactionRepository repository, string q = null)
         {
-            var result = await repository.GetByQueryAsync(new WireQueryParameters() { Query = q });
+            var result = await repository.GetByQueryAsync(new WireQueryParameters() { Query = q, All = true });
             return new OkObjectResult(result.Items);
         }
 
