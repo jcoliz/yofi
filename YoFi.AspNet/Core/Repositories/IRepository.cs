@@ -43,18 +43,20 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// All known items
         /// </summary>
+        /// <remarks>
+        /// WARNING this is deprecated. I am working on removing it from the public
+        /// interface.
+        /// </remarks>
         IQueryable<T> All { get; }
-
-        /// <summary>
-        /// All known items in the default order for <typeparamref name="T"/> items
-        /// </summary>
-        //IQueryable<T> OrderedQuery { get; }
 
         /// <summary>
         /// Retrieve a single item by <paramref name="id"/>
         /// </summary>
         /// <remarks>
         /// Will throw an exception if not found
+        /// 
+        /// Also note that you can send in x={id} as a query parameter into GetByQueryAsync
+        /// if you don't want item tracking.
         /// </remarks>
         /// <param name="id">Identifier of desired item</param>
         /// <returns>Desired item</returns>
