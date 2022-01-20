@@ -8,7 +8,7 @@ namespace YoFi.Core.Repositories
     /// Provides access to Payee items, along with 
     /// domain-specific business logic unique to Payee items
     /// </summary>
-    public interface IBudgetTxRepository : IWireRespository<BudgetTx>, IRepository<BudgetTx>
+    public interface IBudgetTxRepository : IRepository<BudgetTx>
     {
         /// <summary>
         /// Remove all selected items from the database

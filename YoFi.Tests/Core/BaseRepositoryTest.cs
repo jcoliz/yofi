@@ -25,7 +25,7 @@ namespace YoFi.Tests.Core
     [TestClass]
     public abstract class BaseRepositoryTest<T> where T: class, IModelItem<T>, new()
     {
-        protected IWireRespository<T> repository;
+        protected IRepository<T> repository;
         protected MockDataContext context;
 
         /// <summary>

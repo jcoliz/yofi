@@ -7,25 +7,6 @@ using System.Threading.Tasks;
 namespace YoFi.Core.Repositories.Wire
 {
     /// <summary>
-    /// Repository accessed "over the wire", not on the same machine as the UI
-    /// </summary>
-    /// <remarks>
-    /// Repositories implementing this can be accesswed without sharing memory space or compute
-    /// with the calling UI. 
-    /// 
-    /// A repository implementing this will have to return complete objects upward, not queryables,
-    /// and ergo must execute its own queries, not let the UI do it.
-    /// </remarks>
-    public interface IWireRespository<T>: IRepository<T> where T: class
-    {
-        Task<IWireQueryResult<T>> GetByQueryAsync(IWireQueryParameters parms);
-
-        Task<int> GetPageSizeAsync();
-
-        Task SetPageSizeAsync(int value);
-    }
-
-    /// <summary>
     /// The parameters which can be used to query results from a wire repository 
     /// </summary>
     /// <remarks>

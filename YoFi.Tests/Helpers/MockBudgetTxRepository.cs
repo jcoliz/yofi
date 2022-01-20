@@ -11,7 +11,7 @@ using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Helpers
 {
-    public interface IMockRepository<T>: IWireRespository<T>, IRepository<T> where T: class, IModelItem<T>
+    public interface IMockRepository<T>: IRepository<T> where T: class, IModelItem<T>
     {
         public void AddItems(int numitems);
 

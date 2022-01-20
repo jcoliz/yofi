@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Core.Repositories
 {
@@ -19,6 +20,26 @@ namespace YoFi.Core.Repositories
     public interface IRepository<T> where T: class //, IModelItem<T>
     {
         #region CRUD operations
+
+        /// <summary>
+        /// Primary over-the-wire query operation to retrieve items
+        /// </summary>
+        /// <param name="parms">Parameters describing the desired items</param>
+        /// <returns>Results</returns>
+        Task<IWireQueryResult<T>> GetByQueryAsync(IWireQueryParameters parms);
+
+        /// <summary>
+        /// Over-the-wire method to get page size
+        /// </summary>
+        /// <returns>Current page size being used in query results</returns>
+        Task<int> GetPageSizeAsync();
+
+        /// <summary>
+        /// Over-the-wire method to set page size
+        /// </summary>
+        /// <param name="value">page size to be used in query results</param>
+        Task SetPageSizeAsync(int value);
+
         /// <summary>
         /// All known items
         /// </summary>

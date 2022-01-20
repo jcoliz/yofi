@@ -11,7 +11,7 @@ namespace YoFi.Core.Repositories
     /// Provides access to Transaction items, along with 
     /// domain-specific business logic specific to Transactions
     /// </summary>
-    public interface ITransactionRepository: IWireRespository<Transaction>, IRepository<Transaction>
+    public interface ITransactionRepository: IRepository<Transaction>
     {
         /// <summary>
         /// Retrieve a single item by <paramref name="id"/>, including children splits

@@ -16,7 +16,7 @@ namespace YoFi.Core.Repositories
     /// This base repository class largely implements the IRepository(T) interface, with some items left abstract for the inherited class
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-    public class BaseRepository<T> : IWireRespository<T>, IRepository<T> where T: class, IModelItem<T>, new()
+    public class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, new()
     {
         #region Constructor
 
