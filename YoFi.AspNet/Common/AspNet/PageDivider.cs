@@ -16,18 +16,12 @@ namespace Common.AspNet
     /// </remarks>
     public class PageDivider: IWireQueryResultBase
     {
-        public int PageSize => PageInfo.PageSize;
-        public int Page => PageInfo.Page;
-        public int PageFirstItem => PageInfo.FirstItem;
-        public int PageLastItem => PageInfo.FirstItem + PageInfo.NumItems - 1;
-        public int PageTotalItems => PageInfo.TotalItems;
-
-        public bool ShowPreviousPage => (Page > 1);
-        public bool ShowNextNextPage => (Page == 1 && Page + 1 < PageInfo.TotalPages);
-        public bool ShowNextPage => (Page < PageInfo.TotalPages);
-        public bool ShowPreviousPreviousPage => !ShowNextPage && Page > 2;
-        public bool ShowFirstPage => (Page > 2 && PageInfo.TotalPages > 3);
-        public bool ShowLastPage => (Page + 1 < PageInfo.TotalPages && PageInfo.TotalPages > 3);
+        public bool ShowPreviousPage => (PageInfo.Page > 1);
+        public bool ShowNextNextPage => (PageInfo.Page == 1 && PageInfo.Page + 1 < PageInfo.TotalPages);
+        public bool ShowNextPage => (PageInfo.Page < PageInfo.TotalPages);
+        public bool ShowPreviousPreviousPage => !ShowNextPage && PageInfo.Page > 2;
+        public bool ShowFirstPage => (PageInfo.Page > 2 && PageInfo.TotalPages > 3);
+        public bool ShowLastPage => (PageInfo.Page + 1 < PageInfo.TotalPages && PageInfo.TotalPages > 3);
 
         public IWireQueryParameters Parameters { get; private set; }
 

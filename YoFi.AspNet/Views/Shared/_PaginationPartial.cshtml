@@ -1,7 +1,7 @@
 ﻿@model Common.AspNet.PageDivider
 <div class="mt-2 row">
     <div class="col-sm-7">
-        <p class="fs-6">Displaying <span data-test-id="firstitem">@Model.PageFirstItem</span> through <span data-test-id="lastitem">@Model.PageLastItem</span> of <span data-test-id="totalitems">@Model.PageTotalItems</span>.</p>
+        <p class="fs-6">Displaying <span data-test-id="firstitem">@Model.PageInfo.FirstItem</span> through <span data-test-id="lastitem">@(Model.PageInfo.FirstItem + Model.PageInfo.NumItems - 1)</span> of <span data-test-id="totalitems">@Model.PageInfo.TotalItems</span>.</p>
     </div>
     <nav class="col-sm-5" aria-label="Pagination control">
         <ul class="pagination pagination-sm justify-content-end">
@@ -38,7 +38,7 @@
                 </li>
             }
             <li class="page-item active" aria-current="page">
-                <span class="page-link">@Model.Page</span>
+                <span class="page-link">@Model.PageInfo.Page</span>
             </li>
             @if (Model.ShowNextPage)
             {
