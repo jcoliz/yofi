@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YoFi.Core.Models;
 using YoFi.Core.SampleGen;
 using YoFi.Tests.Helpers;
 
@@ -75,12 +76,17 @@ namespace YoFi.Tests.Core.SampleGen
             var result = await loader.DownloadSampleDataAsync("full");
 
             // Then: A spreadsheet is returned
-            // Which: Contains all types of data, and lots of it
             using var ssr = new SpreadsheetReader();
             ssr.Open(result);
+
+            // Which: Contains all types of data
             var sheets = ssr.SheetNames;
             var expectedsheets = new[] { "Transaction", "Split", "Payee", "BudgetTx" };
             Assert.IsTrue(expectedsheets.All(x=>sheets.Contains(x)));
+
+            // And which: Contains lots of transactions
+            var txs = ssr.Deserialize<Transaction>();
+            Assert.AreEqual(889, txs.Count());
         }
     }
 }
