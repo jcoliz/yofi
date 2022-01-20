@@ -1,7 +1,5 @@
-﻿using Common.AspNet;
-using Common.AspNet.Test;
+﻿using Common.AspNet.Test;
 using Common.DotNet.Test;
-using Common.EFCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

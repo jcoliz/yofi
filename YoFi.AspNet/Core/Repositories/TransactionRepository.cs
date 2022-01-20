@@ -26,9 +26,8 @@ namespace YoFi.Core.Repositories
         /// <param name="context">Where to find the data we actually contain</param>
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
-        public TransactionRepository(IDataContext context, IAsyncQueryExecution queryExecution, IStorageService storage = null) : base(context)
+        public TransactionRepository(IDataContext context, IStorageService storage = null) : base(context)
         {
-            _queryExecution = queryExecution;
             _storage = storage;
         }
 
@@ -212,13 +211,13 @@ namespace YoFi.Core.Repositories
                     BankReference = x.BankReference
                 }
                 );
-            var transactions = await _queryExecution.ToListNoTrackingAsync(transactionsdtoquery);
+            var transactions = await _context.ToListNoTrackingAsync(transactionsdtoquery);
 
             // Which splits?
 
             // Product Backlog Item 870: Export & import transactions with splits
             var splitsquery = _context.Splits.Where(x => transactionsquery.Contains(x.Transaction)).OrderByDescending(x => x.Transaction.Timestamp);
-            var splits = await _queryExecution.ToListNoTrackingAsync(splitsquery);
+            var splits = await _context.ToListNoTrackingAsync(splitsquery);
 
             // Create the spreadsheet result
 
@@ -409,8 +408,8 @@ namespace YoFi.Core.Repositories
                 // Merge the results
 
                 // Bug AB#1251: Because of the latest index changes I can't concat transaction and split queries on the server side anymore. I have to do it on the client.
-                var txresult = await _queryExecution.ToListNoTrackingAsync(txd.GroupBy(x => x.Key).Select(x => new { x.Key, Value = x.Sum(g => g.Value) }));
-                var splitresult = await _queryExecution.ToListNoTrackingAsync(spd.GroupBy(x => x.Key).Select(x => new { x.Key, Value = x.Sum(g => g.Value) }));
+                var txresult = await _context.ToListNoTrackingAsync(txd.GroupBy(x => x.Key).Select(x => new { x.Key, Value = x.Sum(g => g.Value) }));
+                var splitresult = await _context.ToListNoTrackingAsync(spd.GroupBy(x => x.Key).Select(x => new { x.Key, Value = x.Sum(g => g.Value) }));
 
                 // Need a rather complex merge here because splits and transactions COULD have the same category, and those need to be summed here first
                 var result = txresult.Concat(splitresult).ToLookup(x=>x.Key).Select(x=> new { x.Key, Value = x.Sum(y => y.Value) }).OrderByDescending(x => x.Value).Take(numresults).Select(x => x.Key).ToList();
@@ -428,7 +427,6 @@ namespace YoFi.Core.Repositories
         #region Fields
 
         private readonly IStorageService _storage;
-        private readonly IAsyncQueryExecution _queryExecution;
 
         #endregion
 

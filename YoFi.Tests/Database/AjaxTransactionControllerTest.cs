@@ -1,5 +1,4 @@
 ﻿using Common.DotNet.Test;
-using Common.EFCore;
 using Common.NET.Test;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +49,7 @@ namespace YoFi.Tests.Database
 
             context = new ApplicationDbContext(options);
             var storage = new TestAzureStorage();
-            repository = new TransactionRepository(context, new EFCoreAsyncQueryExecution(), storage);
+            repository = new TransactionRepository(context, storage);
             controller = new AjaxTransactionController(repository);
         }
 

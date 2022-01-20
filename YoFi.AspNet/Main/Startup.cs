@@ -1,5 +1,4 @@
 ﻿using Common.DotNet;
-using Common.EFCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -84,7 +83,6 @@ namespace YoFi.AspNet.Main
             services.AddScoped<IReportEngine, ReportBuilder>();
 
             services.AddScoped<IDataContext, ApplicationDbContext>();
-            services.AddScoped<IAsyncQueryExecution, EFCoreAsyncQueryExecution>();
 
             if (Configuration.GetSection(SendGridEmailOptions.Section).Exists())
             {

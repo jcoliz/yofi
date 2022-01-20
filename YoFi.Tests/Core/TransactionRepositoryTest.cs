@@ -61,7 +61,7 @@ namespace YoFi.Tests.Core
         {
             context = new MockDataContext();
             var storage = new TestAzureStorage();
-            repository = new TransactionRepository(context, new MockQueryExecution(), storage:storage);            
+            repository = new TransactionRepository(context, storage:storage);            
         }
 
         public static IEnumerable<object[]> CalculateLoanSplits_Data =>

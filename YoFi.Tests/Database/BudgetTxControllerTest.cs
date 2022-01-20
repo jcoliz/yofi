@@ -1,7 +1,6 @@
 ﻿using Common.AspNet;
 using Common.AspNet.Test;
 using Common.DotNet.Test;
-using Common.EFCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,7 +10,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
-using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;

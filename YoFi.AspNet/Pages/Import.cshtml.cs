@@ -25,7 +25,6 @@ namespace YoFi.AspNet.Pages
     {
         public const int MaxOtherItemsToShow = 10;
         private readonly ITransactionRepository _repository;
-        private readonly IAsyncQueryExecution _queryExecution;
         private readonly IAuthorizationService _authorizationService;
         public IWireQueryResult<Transaction> Transactions { get; private set; }
 
@@ -38,10 +37,9 @@ namespace YoFi.AspNet.Pages
 
         public string Error { get; private set; }
 
-        public ImportModel(ITransactionRepository repository, IAsyncQueryExecution queryExecution, IAuthorizationService authorizationService)
+        public ImportModel(ITransactionRepository repository, IAuthorizationService authorizationService)
         {
             _repository = repository;
-            _queryExecution = queryExecution;
             _authorizationService = authorizationService;
         }
 

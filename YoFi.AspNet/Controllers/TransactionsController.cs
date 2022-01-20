@@ -28,10 +28,9 @@ namespace YoFi.AspNet.Controllers
     {
         #region Constructor
 
-        public TransactionsController(ITransactionRepository repository, IAsyncQueryExecution queryExecution, IClock clock)
+        public TransactionsController(ITransactionRepository repository, IClock clock)
         {
             _repository = repository;
-            _queryExecution = queryExecution;
             _clock = clock;
         }
 
@@ -540,7 +539,6 @@ namespace YoFi.AspNet.Controllers
         #region Internals
 
         private readonly ITransactionRepository _repository;
-        private readonly IAsyncQueryExecution _queryExecution;
         private readonly IClock _clock;
         #endregion
 

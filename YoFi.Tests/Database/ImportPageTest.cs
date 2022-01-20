@@ -1,7 +1,6 @@
 ﻿using Common.AspNet.Test;
 using Common.DotNet;
 using Common.DotNet.Test;
-using Common.EFCore;
 using Common.NET.Test;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Authorization;
@@ -49,17 +48,16 @@ namespace YoFi.Tests.Database
             // By default it's 2021, which is the year all our sample data is generated for
             clock = new TestClock() { Now = new System.DateTime(2021, 1, 1) };
 
-            var qex = new EFCoreAsyncQueryExecution();
             var storage = new TestAzureStorage();
 
-            repository = new TransactionRepository(context, qex, storage: storage);
+            repository = new TransactionRepository(context, storage: storage);
             importer = new UniversalImporter(new AllRepositories(repository, new BudgetTxRepository(context), new PayeeRepository(context)));
 
             var authservice = new Mock<IAuthorizationService>();
             AuthorizationResult result = AuthorizationResult.Success();
             authservice.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>())).Returns(Task.FromResult(result));
 
-            page = new ImportModel(repository, qex, authservice.Object);
+            page = new ImportModel(repository, authservice.Object);
         }
 
         [TestCleanup]
