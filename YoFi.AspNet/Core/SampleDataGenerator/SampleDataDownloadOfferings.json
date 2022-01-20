@@ -1,29 +1,28 @@
 [
   {
     "ID": "full",
-    "Description": [
-      "XLSX",
-      "Full Data Set",
-      "{year}"
-    ],
+    "Description": "Full Data Set",
+    "FileType": "XLSX",
     "Kind": "Primary"
   },
   {
     "ID": "budget",
-    "Description": [
-      "XLSX",
-      "Budget",
-      "{year}"
-    ],
+    "Description": "Budget",
+    "FileType": "XLSX",
     "Kind": "Primary"
   },
   {
     "ID": "payees",
-    "Description": [
-      "XLSX",
-      "Payees",
-      "{year}"
-    ],
+    "Description": "Payees",
+    "FileType": "XLSX",
     "Kind": "Primary"
+  },
+  {
+    "FileType": "XLSX",
+    "Kind": "Monthly"
+  },
+  {
+    "FileType": "OFX",
+    "Kind": "Monthly"
   }
 ]

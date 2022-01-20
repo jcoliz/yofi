@@ -1,6 +1,7 @@
 ﻿using Common.DotNet;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -38,7 +39,29 @@ namespace YoFi.Core.SampleGen
 
             var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
             options.Converters.Add(new JsonStringEnumConverter());
-            var result = await JsonSerializer.DeserializeAsync<List<DownloadOffering>>(stream, options);
+            var inputs = await JsonSerializer.DeserializeAsync<List<DownloadOffering>>(stream, options);
+
+            var result = 
+                inputs
+                    .Where(x => x.Kind == SampleDataDownloadOfferingKind.Primary)
+                    .Concat
+                    (
+                        inputs
+                            .Where(x => x.Kind == SampleDataDownloadOfferingKind.Monthly)
+                            .SelectMany(o => 
+                                Enumerable.Range(1, 12)
+                                .Select(m=> 
+                                    new DownloadOffering() 
+                                    { 
+                                        FileType = o.FileType, 
+                                        Kind = o.Kind,
+                                        Description = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m),
+                                        ID = m.ToString()
+                                    } 
+                                )
+                            )
+                    )
+                    .ToList();
 
             return result;
         }
@@ -58,9 +81,9 @@ namespace YoFi.Core.SampleGen
     {
         public string ID { get; set; }
 
-        public string FileType { get; set; } = "xlsx";
+        public string FileType { get; set; }
 
-        public IEnumerable<string> Description { get; set; }
+        public string Description { get; set; }
 
         public SampleDataDownloadOfferingKind Kind { get; set; }
     }

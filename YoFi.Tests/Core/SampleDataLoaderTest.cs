@@ -57,13 +57,14 @@ namespace YoFi.Tests.Core.SampleGen
             Assert.IsTrue(offerings.Count(x => x.Kind == SampleDataDownloadOfferingKind.Primary) >= 3);
         }
 
-        public async Task GetDownloadOfferings()
+        [TestMethod]
+        public async Task GetMonthlyOfferings()
         {
             // When: Requesting download offerings
             var offerings = await loader.GetDownloadOfferingsAsync();
 
             // Then: Many are returned
-            Assert.IsTrue(offerings.Count() > 20);
+            Assert.AreEqual(24, offerings.Count(x => x.Kind == SampleDataDownloadOfferingKind.Monthly));
         }
     }
 }

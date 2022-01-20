@@ -76,6 +76,8 @@ namespace YoFi.Core.SampleGen
 
     public enum SampleDataDownloadOfferingKind { None = 0, Primary, Monthly }
 
+    public enum SampleDataDownloadFileType { None = 0, XLSX, OFX }
+
     /// <summary>
     /// Describes a set of sample data which the user could choose to download
     /// </summary>
@@ -94,7 +96,7 @@ namespace YoFi.Core.SampleGen
         /// <summary>
         /// Multi-line description
         /// </summary>
-        IEnumerable<string> Description { get; }
+        string Description { get; }
 
         /// <summary>
         /// What kind of data it is
