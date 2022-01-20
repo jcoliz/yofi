@@ -16,25 +16,25 @@ namespace YoFi.Core.SampleGen
     {
         private readonly IDataContext _context;
         private readonly IClock _clock;
-        private readonly string _directory;
-
+        private readonly ISampleDataConfiguration _config;
+ 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="context">Application data context</param>
         /// <param name="directory">Location of sample data file</param>
-        public SampleDataLoader(IDataContext context, IClock clock, string directory)
+        public SampleDataLoader(IDataContext context, IClock clock, ISampleDataConfiguration config)
         {
             _context = context;
             _clock = clock;
-            _directory = directory;
+            _config = config;
         }
 
         public Task<Stream> DownloadSampleDataAsync(string id)
         {
             Stream stream;
 
-            var instream = System.IO.File.OpenRead($"{_directory}/SampleData-Full.xlsx");
+            var instream = System.IO.File.OpenRead($"{_config.Directory}/SampleData-Full.xlsx");
 
             if ("full" == id)
             {

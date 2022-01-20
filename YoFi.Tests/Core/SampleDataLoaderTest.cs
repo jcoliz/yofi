@@ -1,6 +1,7 @@
 ﻿using Common.DotNet;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,10 @@ namespace YoFi.Tests.Core.SampleGen
         {
             context = new MockDataContext();
             clock = new TestClock() { Now = new DateTime(2022, 1, 1) };
-            loader = new SampleDataLoader(context, clock, Environment.CurrentDirectory + "/SampleData");
+            var dir = Environment.CurrentDirectory + "/SampleData";
+            var config = new Mock<ISampleDataConfiguration>();
+            config.Setup(x => x.Directory).Returns(dir);
+            loader = new SampleDataLoader(context, clock, config.Object);
         }
 
         [TestMethod]

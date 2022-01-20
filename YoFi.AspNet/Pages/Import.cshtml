@@ -56,44 +56,27 @@
     </p>
 
     <div class="row">
-        <div class="col-sm-4 col-12 p-2 d-flex">
-            <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="xlsx" asp-route-what="full">
-                XLSX<br />Full Data Set<br />@_clock.Now.Year
-            </a>
-        </div>
-        <div class="col-sm-4 col-12 p-2 d-flex">
-            <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="xlsx" asp-route-what="budget">
-                XLSX<br />Budget<br />@_clock.Now.Year
-            </a>
-        </div>
-        <div class="col-sm-4 col-12 p-2 d-flex">
-            <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="xlsx" asp-route-what="payees">
-                XLSX<br />Payees<br />@_clock.Now.Year
-            </a>
-        </div>
-    </div>
-
-    <div class="row">
-        @for (int m = 1; m <= 12; m++)
+        @foreach (var offering in Model.Offerings.Where(x => x.Kind == YoFi.Core.SampleGen.SampleDataDownloadOfferingKind.Primary))
         {
-            <div class="col-lg-1 col-md-2 col-sm-3 col-4 p-2 d-flex">
-                <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="xlsx" asp-route-what="@m">
-                    XLSX<br />@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)<br />@_clock.Now.Year
+            <div class="col-sm-4 col-12 p-2 d-flex">
+                <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-what="@offering.ID">
+                    @offering.FileType<br />@offering.Description<br />@_clock.Now.Year
                 </a>
             </div>
         }
     </div>
 
     <div class="row mb-3">
-        @for (int m = 1; m <= 12; m++)
+        @foreach (var offering in Model.Offerings.Where(x => x.Kind == YoFi.Core.SampleGen.SampleDataDownloadOfferingKind.Monthly))
         {
             <div class="col-lg-1 col-md-2 col-sm-3 col-4 p-2 d-flex">
-                <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-how="ofx" asp-route-what="@m">
-                    OFX<br />@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)<br />@_clock.Now.Year
+                <a class="btn flex-fill" style="background-color:lightblue" asp-page-handler="Sample" asp-route-what="@offering.ID">
+                    @offering.FileType<br />@offering.Description<br />@_clock.Now.Year
                 </a>
             </div>
         }
     </div>
+
 }
 else
 {

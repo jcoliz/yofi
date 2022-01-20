@@ -106,4 +106,15 @@ namespace YoFi.Core.SampleGen
         /// </remarks>
         SampleDataDownloadOfferingKind Kind { get; }
     }
+
+    /// <summary>
+    /// Necessary configuration for SampleDataLoader
+    /// </summary>
+    public interface ISampleDataConfiguration
+    {
+        /// <summary>
+        /// Directory where the sample data files are stored
+        /// </summary>
+        string Directory { get; }
+    }
 }

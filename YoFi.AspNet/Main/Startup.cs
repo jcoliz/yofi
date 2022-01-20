@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -21,6 +22,7 @@ using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
+using YoFi.Core.SampleGen;
 using YoFi.Services;
 
 #if __DEMO_OPEN_ACCESS__
@@ -79,10 +81,10 @@ namespace YoFi.AspNet.Main
             services.AddScoped<SplitImporter>();
             services.AddScoped<IImporter<Payee>, BaseImporter<Payee>>();
             services.AddScoped<IImporter<BudgetTx>, BaseImporter<BudgetTx>>();
-
             services.AddScoped<IReportEngine, ReportBuilder>();
-
             services.AddScoped<IDataContext, ApplicationDbContext>();
+            services.AddScoped<ISampleDataLoader, SampleDataLoader>();
+            services.AddScoped<ISampleDataConfiguration, SampleDataConfiguration>();
 
             if (Configuration.GetSection(SendGridEmailOptions.Section).Exists())
             {
@@ -277,6 +279,19 @@ namespace YoFi.AspNet.Main
 
             return value.ToLowerInvariant();
         }
+    }
+
+    /// <summary>
+    /// Dependency injection container to tell the sample data loader where we
+    /// have stored the sample file it needs
+    /// </summary>
+    public class SampleDataConfiguration : ISampleDataConfiguration
+    {
+        public SampleDataConfiguration(IWebHostEnvironment e)
+        {
+            Directory = e.WebRootPath + "/sample";
+        }
+        public string Directory { get; private set; }
     }
 
 #if __DEMO_OPEN_ACCESS__

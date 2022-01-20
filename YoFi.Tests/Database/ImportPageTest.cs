@@ -22,6 +22,7 @@ using YoFi.AspNet.Pages;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.SampleGen;
 
 namespace YoFi.Tests.Database
 {
@@ -57,7 +58,13 @@ namespace YoFi.Tests.Database
             AuthorizationResult result = AuthorizationResult.Success();
             authservice.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>())).Returns(Task.FromResult(result));
 
-            page = new ImportModel(repository, authservice.Object);
+            var dir = Environment.CurrentDirectory + "/SampleData";
+            var config = new Mock<ISampleDataConfiguration>();
+            config.Setup(x => x.Directory).Returns(dir);
+
+            var loader = new SampleDataLoader(context, clock, config.Object);
+
+            page = new ImportModel(repository, authservice.Object, loader);
         }
 
         [TestCleanup]

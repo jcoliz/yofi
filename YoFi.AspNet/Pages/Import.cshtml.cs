@@ -26,7 +26,10 @@ namespace YoFi.AspNet.Pages
         public const int MaxOtherItemsToShow = 10;
         private readonly ITransactionRepository _repository;
         private readonly IAuthorizationService _authorizationService;
+        private readonly ISampleDataLoader _loader;
+
         public IWireQueryResult<Transaction> Transactions { get; private set; }
+        public IEnumerable<ISampleDataDownloadOffering> Offerings { get; private set; }
 
         public IEnumerable<BudgetTx> BudgetTxs { get; private set; } = Enumerable.Empty<BudgetTx>();
         public IEnumerable<Payee> Payees { get; private set; } = Enumerable.Empty<Payee>();
@@ -37,16 +40,19 @@ namespace YoFi.AspNet.Pages
 
         public string Error { get; private set; }
 
-        public ImportModel(ITransactionRepository repository, IAuthorizationService authorizationService)
+        public ImportModel(ITransactionRepository repository, IAuthorizationService authorizationService, ISampleDataLoader loader)
         {
             _repository = repository;
             _authorizationService = authorizationService;
+            _loader = loader;
         }
 
         public async Task<IActionResult> OnGetAsync(int? p = null)
         {
             // TODO: Should add a DTO here
             Transactions = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = "i=1", Page = p, View = "h" } );
+
+            Offerings = await _loader.GetDownloadOfferingsAsync();
 
             return Page();
         }
@@ -136,94 +142,28 @@ namespace YoFi.AspNet.Pages
             return Page();
         }
 
-        public IActionResult OnGetSample(string what, string how, [FromServices] IWebHostEnvironment e)
+        public async Task<IActionResult> OnGetSampleAsync(string what) //, string how, [FromServices] IWebHostEnvironment e)
         {
-            var dir = e.WebRootPath;
-            // Load the full sample data off disk
-            var instream = System.IO.File.OpenRead($"{dir}/sample/SampleData-Full.xlsx");
-
             IActionResult result = NotFound();
-            if ("all" == what)
+            try
             {
-                // Just return it!
-                result = File(instream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
-            }
-            else if ("budget" == what)
-            {
-                // Load in just the budget into memory
-                using var ssr = new SpreadsheetReader();
-                ssr.Open(instream);
-                var items = ssr.Deserialize<BudgetTx>();
+                var offerings = await _loader.GetDownloadOfferingsAsync();
 
-                // Then write that back out
-                var stream = new MemoryStream();
-                using (var ssw = new SpreadsheetWriter())
+                var offering = offerings.Where(x => x.ID == what).Single();
+                if (null != offering)
                 {
-                    ssw.Open(stream);
-                    ssw.Serialize(items);
+                    var stream = await _loader.DownloadSampleDataAsync(what);
+                    if (offering.FileType == SampleDataDownloadFileType.XLSX)
+                        result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{offering.Description}.{offering.FileType}");
+                    else if (offering.FileType == SampleDataDownloadFileType.OFX)
+                        result = File(stream, contentType: "application/ofx", fileDownloadName: $"{offering.Description}.{offering.FileType}");
+                    // else not found
                 }
-                stream.Seek(0, SeekOrigin.Begin);
-                result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
+                // else not found
             }
-            else if ("payees" == what)
+            catch (Exception)
             {
-                // Load in just the payees into memory
-                using var ssr = new SpreadsheetReader();
-                ssr.Open(instream);
-                var items = ssr.Deserialize<Payee>();
-
-                // Then write that back out
-                var stream = new MemoryStream();
-                using (var ssw = new SpreadsheetWriter())
-                {
-                    ssw.Open(stream);
-                    ssw.Serialize(items);
-                }
-                stream.Seek(0, SeekOrigin.Begin);
-                result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{what}.xlsx");
-            }
-            else
-            {
-                // At this point, only transactions are of interest
-                // Load in just the transactions and splits into memory
-                using var ssr = new SpreadsheetReader();
-                ssr.Open(instream);
-                var txs = ssr.Deserialize<Transaction>();
-                var splits = ssr.Deserialize<Split>();
-
-                if (int.TryParse(what, out var month))
-                {
-                    // Narrow down to the required month
-                    var outtxs = txs.Where(x => x.Timestamp.Month == month);
-                    var outtxids = outtxs.Where(x=>x.ID > 0).Select(x => x.ID).ToHashSet();
-                    var outsplits = splits.Where(x=>outtxids.Contains(x.TransactionID));
-
-                    if ("xlsx" == how)
-                    {
-                        // Then write that back out
-                        var stream = new MemoryStream();
-                        using (var ssw = new SpreadsheetWriter())
-                        {
-                            ssw.Open(stream);
-                            ssw.Serialize(outtxs);
-                            ssw.Serialize(outsplits);
-                        }
-                        stream.Seek(0, SeekOrigin.Begin);
-                        var monthname = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
-                        result = File(stream, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"{month:D2}-{monthname}.{how}");
-
-                    }
-                    else if ("ofx" == how)
-                    {
-                        // Write it as an OFX
-                        var stream = new MemoryStream();
-                        SampleDataOfx.WriteToOfx(outtxs, stream);
-
-                        stream.Seek(0, SeekOrigin.Begin);
-                        var monthname = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
-                        result = File(stream, contentType: "application/ofx", fileDownloadName: $"{month:D2}-{monthname}.{how}");
-                    }
-                }
+                result = BadRequest();
             }
 
             return result;
