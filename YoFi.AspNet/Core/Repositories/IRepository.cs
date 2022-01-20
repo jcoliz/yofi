@@ -27,7 +27,7 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// All known items in the default order for <typeparamref name="T"/> items
         /// </summary>
-        IQueryable<T> OrderedQuery { get; }
+        //IQueryable<T> OrderedQuery { get; }
 
         /// <summary>
         /// Retrieve a single item by <paramref name="id"/>

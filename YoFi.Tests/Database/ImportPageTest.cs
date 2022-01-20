@@ -132,7 +132,7 @@ namespace YoFi.Tests.Database
             Assert.That.IsOfType<PageResult>(result);
 
             // Check the items on the page
-            Assert.AreEqual(Items.Count, page.Transactions.Count());
+            Assert.AreEqual(Items.Count, page.Transactions.Items.Count());
 
             // Now check the state of the DB
             Assert.AreEqual(Items.Count, dbset.Count());
@@ -157,7 +157,7 @@ namespace YoFi.Tests.Database
             Assert.That.IsOfType<PageResult>(result);
 
             // Then: Only the imported transactions are shown
-            Assert.IsTrue(importitems.SequenceEqual(page.Transactions));
+            Assert.IsTrue(importitems.SequenceEqual(page.Transactions.Items));
         }
 
         [TestMethod]

@@ -14,6 +14,7 @@ using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Core.SampleGen;
 
 namespace YoFi.AspNet.Pages
@@ -22,15 +23,11 @@ namespace YoFi.AspNet.Pages
     [Authorize(Policy = "CanRead")]
     public class ImportModel : PageModel
     {
-        public const int PageSize = 25;
         public const int MaxOtherItemsToShow = 10;
         private readonly ITransactionRepository _repository;
         private readonly IAsyncQueryExecution _queryExecution;
         private readonly IAuthorizationService _authorizationService;
-
-        public PageDivider Divider { get; private set; } = new PageDivider() { PageSize = PageSize };
-
-        public IEnumerable<Transaction> Transactions { get; private set; } = Enumerable.Empty<Transaction>();
+        public IWireQueryResult<Transaction> Transactions { get; private set; }
 
         public IEnumerable<BudgetTx> BudgetTxs { get; private set; } = Enumerable.Empty<BudgetTx>();
         public IEnumerable<Payee> Payees { get; private set; } = Enumerable.Empty<Payee>();
@@ -51,15 +48,7 @@ namespace YoFi.AspNet.Pages
         public async Task<IActionResult> OnGetAsync(int? p = null)
         {
             // TODO: Should add a DTO here
-            IQueryable<Transaction> result = _repository.OrderedQuery.Where(x => x.Imported == true);
-
-            //
-            // Process PAGE (P) parameters
-            //
-
-            result = await Divider.ItemsForPage(result, p);
-
-            Transactions = await _queryExecution.ToListNoTrackingAsync(result);
+            Transactions = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = "i=1", Page = p, View = "h" } );
 
             return Page();
         }

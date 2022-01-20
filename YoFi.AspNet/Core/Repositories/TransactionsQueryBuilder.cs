@@ -71,6 +71,7 @@ namespace YoFi.Core.Repositories
                             'r' => TransactionsForQuery_HasReceipt(Query, value),
                             'a' => TransactionsForQuery_Amount(Query, value),
                             'd' => TransactionsForQuery_Date(Query, value),
+                            'i' => TransactionsForQuery_Imported(Query, value),
                             _ => throw new ArgumentException($"Unknown query parameter {key}", nameof(key))
                         };
 
@@ -186,7 +187,7 @@ namespace YoFi.Core.Repositories
         /// </summary>
         internal void ApplyViewParameter(string v)
         {
-            if (v?.ToLowerInvariant().Contains("h") != true)
+            if (!(v?.ToLowerInvariant().Contains("h") == true))
                 Query = Query.Where(x => x.Hidden != true);
         }
 
@@ -286,6 +287,17 @@ namespace YoFi.Core.Repositories
                 "1" => result.Where(x => x.ReceiptUrl != null),
                 _ => throw new ArgumentException($"Unexpected query parameter {value}", nameof(value))
             };
+        /// <summary>
+        /// Transalte query on having the import flag set
+        /// </summary>
+        private static IQueryable<Transaction> TransactionsForQuery_Imported(IQueryable<Transaction> result, string value) =>
+            value switch
+            {
+                "0" => result.Where(x => x.Imported != true),
+                "1" => result.Where(x => x.Imported == true),
+                _ => throw new ArgumentException($"Unexpected query parameter {value}", nameof(value))
+            };
+
 
         /// <summary>
         /// Translate query on amount

@@ -39,7 +39,7 @@
     <p class="alert-danger p-3">@Model.Error</p>
 }
 
-@if (!Model.Transactions.Any())
+@if (0 == Model.Transactions.PageInfo.TotalItems)
 {
     <h2>Select Files</h2>
     <form method="post" enctype="multipart/form-data" asp-page-handler="Upload">
@@ -129,7 +129,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model.Transactions)
+            @foreach (var item in Model.Transactions.Items)
             {
                 var highlight = ((ViewData["Highlight"] as HashSet<int>)?.Contains(item.ID) ?? false) ? "alert alert-warning" : string.Empty;
                 <tr class="@highlight">
@@ -160,7 +160,7 @@ else
         </tbody>
     </table>
 
-    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", Model.Divider)
+    @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", new Common.AspNet.PageDivider(Model.Transactions))
 }
 
 @if (Model.NumBudgetTxsUploaded > 0)
