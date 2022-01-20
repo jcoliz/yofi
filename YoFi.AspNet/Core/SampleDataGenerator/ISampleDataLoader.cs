@@ -32,7 +32,7 @@ namespace YoFi.Core.SampleGen
         /// Discover the available sample data download offerings
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<ISampleDataDownloadOffering>> GetDownloadOfferings();
+        Task<IEnumerable<ISampleDataDownloadOffering>> GetDownloadOfferingsAsync();
 
         /// <summary>
         /// Retrieve a sample data download offering

@@ -1,0 +1,11 @@
+[
+  {
+    "ID": "full",
+    "Description": [
+      "XLSX",
+      "Full Data Set",
+      "{year}"
+    ],
+    "Kind": "Primary"
+  }
+]
