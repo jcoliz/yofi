@@ -25,6 +25,7 @@ namespace YoFi.Tests.Functional
         {
             // Given: Starting at the home page, not logged in
             await HomePage();
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking on the login link
             await Page.ClickAsync("data-test-id=login");
