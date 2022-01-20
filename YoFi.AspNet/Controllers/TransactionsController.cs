@@ -205,9 +205,9 @@ namespace YoFi.AspNet.Controllers
 
                 // Note that we need an as no tracking query here, or we'll have problems shortly when we query with one
                 // object but update another.
-                var oldreceiptquery = _repository.All.Where(x => x.ID == id);
-                var oldtransaction = await _queryExecution.ToListNoTrackingAsync(oldreceiptquery);
-                var oldreceipturl = oldtransaction.First().ReceiptUrl;
+                var oresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = $"x={id}" } );
+                var oldtransaction = oresult.Items.Single();
+                var oldreceipturl = oldtransaction.ReceiptUrl;
 
                 transaction.ReceiptUrl = oldreceipturl;
 

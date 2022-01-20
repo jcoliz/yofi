@@ -72,6 +72,7 @@ namespace YoFi.Core.Repositories
                             'a' => TransactionsForQuery_Amount(Query, value),
                             'd' => TransactionsForQuery_Date(Query, value),
                             'i' => TransactionsForQuery_Imported(Query, value),
+                            'x' => TransactionsForQuery_ID(Query, value),
                             _ => throw new ArgumentException($"Unknown query parameter {key}", nameof(key))
                         };
 
@@ -249,6 +250,12 @@ namespace YoFi.Core.Repositories
         /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_Payee(IQueryable<Transaction> result, string value) =>
             result.Where(x => x.Payee.Contains(value));
+
+        /// <summary>
+        /// Transalte query on ID
+        /// </summary>
+        private static IQueryable<Transaction> TransactionsForQuery_ID(IQueryable<Transaction> result, string value) =>
+            result.Where(x => x.ID == int.Parse(value));
 
         /// <summary>
         /// Translate query on category, including splits
