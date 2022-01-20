@@ -1,4 +1,5 @@
 ﻿using Common.DotNet;
+using jcoliz.OfficeOpenXml.Serializer;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using YoFi.Core.Models;
 
 namespace YoFi.Core.SampleGen
 {
@@ -30,19 +32,51 @@ namespace YoFi.Core.SampleGen
 
         public Task<Stream> DownloadSampleDataAsync(string id)
         {
-            Stream result;
+            Stream stream;
 
             var instream = System.IO.File.OpenRead($"{_directory}/SampleData-Full.xlsx");
 
             if ("full" == id)
             {
                 // Just return it!
-                result = instream;
+                stream = instream;
+            }
+            else if ("budgettx" == id)
+            {
+                // Load in just the budget into memory
+                using var ssr = new SpreadsheetReader();
+                ssr.Open(instream);
+                var items = ssr.Deserialize<BudgetTx>();
+
+                // Then write that back out
+                stream = new MemoryStream();
+                using (var ssw = new SpreadsheetWriter())
+                {
+                    ssw.Open(stream);
+                    ssw.Serialize(items);
+                }
+                stream.Seek(0, SeekOrigin.Begin);
+            }
+            else if ("payee" == id)
+            {
+                // Load in just the payees into memory
+                using var ssr = new SpreadsheetReader();
+                ssr.Open(instream);
+                var items = ssr.Deserialize<Payee>();
+
+                // Then write that back out
+                stream = new MemoryStream();
+                using (var ssw = new SpreadsheetWriter())
+                {
+                    ssw.Open(stream);
+                    ssw.Serialize(items);
+                }
+                stream.Seek(0, SeekOrigin.Begin);
             }
             else
                 throw new ApplicationException($"Not found sample data ID {id}");
 
-            return Task.FromResult(result);
+            return Task.FromResult(stream);
         }
 
         public async Task<IEnumerable<ISampleDataDownloadOffering>> GetDownloadOfferingsAsync()

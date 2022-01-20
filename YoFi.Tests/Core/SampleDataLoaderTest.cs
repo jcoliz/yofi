@@ -88,5 +88,22 @@ namespace YoFi.Tests.Core.SampleGen
             var txs = ssr.Deserialize<Transaction>();
             Assert.AreEqual(889, txs.Count());
         }
+
+        [DataRow("BudgetTx")]
+        [DataRow("Payee")]
+        [DataTestMethod]
+        public async Task DownloadOtherPrimaryOfferings(string what)
+        {
+            // When: Requesting the "full" download
+            var result = await loader.DownloadSampleDataAsync(what.ToLowerInvariant());
+
+            // Then: A spreadsheet is returned
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(result);
+
+            // Which: Contains {what} kind of data
+            var sheets = ssr.SheetNames;
+            Assert.IsTrue(sheets.Contains(what));
+        }
     }
 }
