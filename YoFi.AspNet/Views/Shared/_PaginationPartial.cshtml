@@ -5,7 +5,7 @@
     </div>
     <nav class="col-sm-5" aria-label="Pagination control">
         <ul class="pagination pagination-sm justify-content-end">
-            @if (Model.FirstPage.HasValue)
+            @if (Model.ShowFirstPage)
             {
                 <li class="page-item">
                     <a asp-route-o="@Model.Parameters.Order"
@@ -15,54 +15,58 @@
                        class="page-link">&laquo;</a>
                 </li>
             }
-            @if (Model.PreviousPreviousPage.HasValue)
+            @if (Model.ShowPreviousPreviousPage)
             {
+                var showpage = Model.PageInfo.Page - 2;
                 <li class="page-item">
                     <a asp-route-o="@Model.Parameters.Order"
-                       asp-route-p="@Model.PreviousPreviousPage"
+                       asp-route-p="@showpage"
                        asp-route-q="@Model.Parameters.Query"
                        asp-route-v="@Model.Parameters.View"
-                       class="page-link">@Model.PreviousPreviousPage</a>
+                       class="page-link">@showpage</a>
                 </li>
             }
-            @if (Model.PreviousPage.HasValue)
+            @if (Model.ShowPreviousPage)
             {
+                var showpage = Model.PageInfo.Page - 1;
                 <li class="page-item">
                     <a asp-route-o="@Model.Parameters.Order"
-                       asp-route-p="@Model.PreviousPage"
+                       asp-route-p="@showpage"
                        asp-route-q="@Model.Parameters.Query"
                        asp-route-v="@Model.Parameters.View"
-                       class="page-link">@Model.PreviousPage</a>
+                       class="page-link">@showpage</a>
                 </li>
             }
             <li class="page-item active" aria-current="page">
                 <span class="page-link">@Model.Page</span>
             </li>
-            @if (Model.NextPage.HasValue)
+            @if (Model.ShowNextPage)
             {
+                var showpage = Model.PageInfo.Page + 1;
                 <li class="page-item">
                     <a asp-route-o="@Model.Parameters.Order"
-                       asp-route-p="@Model.NextPage"
+                       asp-route-p="@showpage"
                        asp-route-q="@Model.Parameters.Query"
                        asp-route-v="@Model.Parameters.View"
-                       class="page-link" data-test-id="nextpage">@Model.NextPage</a>
+                       class="page-link" data-test-id="nextpage">@showpage</a>
                 </li>
             }
-            @if (Model.NextNextPage.HasValue)
+            @if (Model.ShowNextNextPage)
             {
+                var showpage = Model.PageInfo.Page + 2;
                 <li class="page-item">
                     <a asp-route-o="@Model.Parameters.Order"
-                       asp-route-p="@Model.NextNextPage"
+                       asp-route-p="@showpage"
                        asp-route-q="@Model.Parameters.Query"
                        asp-route-v="@Model.Parameters.View"
-                       class="page-link">@Model.NextNextPage</a>
+                       class="page-link">@showpage</a>
                 </li>
             }
-            @if (Model.LastPage.HasValue)
+            @if (Model.ShowLastPage)
             {
                 <li class="page-item">
                     <a asp-route-o="@Model.Parameters.Order"
-                       asp-route-p="@Model.LastPage"
+                       asp-route-p="@Model.PageInfo.TotalPages"
                        asp-route-q="@Model.Parameters.Query"
                        asp-route-v="@Model.Parameters.View"
                        aria-label="Last Page"

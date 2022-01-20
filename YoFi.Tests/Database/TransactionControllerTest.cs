@@ -789,8 +789,7 @@ namespace YoFi.Tests.Database
 
             // And: Page values are as expected
             var pages = new PageDivider(model);
-            Assert.AreEqual(3, pages.PreviousPreviousPage);
-            Assert.AreEqual(1, pages.FirstPage);
+            Assert.AreEqual(5, pages.PageInfo.Page);
         }
 
         [TestMethod]

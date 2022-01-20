@@ -21,12 +21,13 @@ namespace Common.AspNet
         public int PageFirstItem => PageInfo.FirstItem;
         public int PageLastItem => PageInfo.FirstItem + PageInfo.NumItems - 1;
         public int PageTotalItems => PageInfo.TotalItems;
-        public int? PreviousPage => (Page > 1) ? (Page - 1) : (int?)null;
-        public int? NextNextPage => (Page == 1 && Page + 1 < PageInfo.TotalPages) ? Page + 2 : (int?)null;
-        public int? NextPage => (Page < PageInfo.TotalPages) ? Page + 1 : (int?)null;
-        public int? PreviousPreviousPage => ! NextPage.HasValue && Page > 2 ? Page - 2 : (int?)null;
-        public int? FirstPage => (Page > 2 && PageInfo.TotalPages > 3) ? 1 : (int?)null;
-        public int? LastPage => (Page + 1 < PageInfo.TotalPages && PageInfo.TotalPages > 3) ? PageInfo.TotalPages : (int?)null;
+
+        public bool ShowPreviousPage => (Page > 1);
+        public bool ShowNextNextPage => (Page == 1 && Page + 1 < PageInfo.TotalPages);
+        public bool ShowNextPage => (Page < PageInfo.TotalPages);
+        public bool ShowPreviousPreviousPage => !ShowNextPage && Page > 2;
+        public bool ShowFirstPage => (Page > 2 && PageInfo.TotalPages > 3);
+        public bool ShowLastPage => (Page + 1 < PageInfo.TotalPages && PageInfo.TotalPages > 3);
 
         public IWireQueryParameters Parameters { get; private set; }
 
