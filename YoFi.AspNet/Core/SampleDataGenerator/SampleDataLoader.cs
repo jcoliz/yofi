@@ -74,7 +74,40 @@ namespace YoFi.Core.SampleGen
                 stream.Seek(0, SeekOrigin.Begin);
             }
             else
-                throw new ApplicationException($"Not found sample data ID {id}");
+            {
+                var split = id.ToLowerInvariant().Split('-');
+                if (split.Length == 2 && int.TryParse(split[1], out var month))
+                {
+                    // At this point, only transactions are of interest
+                    // Load in just the transactions and splits into memory
+                    using var ssr = new SpreadsheetReader();
+                    ssr.Open(instream);
+                    var txs = ssr.Deserialize<Transaction>();
+                    var splits = ssr.Deserialize<Split>();
+
+                    // Narrow down to the required month
+                    var outtxs = txs.Where(x => x.Timestamp.Month == month);
+                    var outtxids = outtxs.Where(x => x.ID > 0).Select(x => x.ID).ToHashSet();
+                    var outsplits = splits.Where(x => outtxids.Contains(x.TransactionID));
+
+                    if ("xlsx" == split[0])
+                    {
+                        // Then write that back out
+                        stream = new MemoryStream();
+                        using (var ssw = new SpreadsheetWriter())
+                        {
+                            ssw.Open(stream);
+                            ssw.Serialize(outtxs);
+                            ssw.Serialize(outsplits);
+                        }
+                        stream.Seek(0, SeekOrigin.Begin);
+                    }
+                    else
+                        throw new ApplicationException($"Not found sample data ID {id}");
+                }
+                else
+                    throw new ApplicationException($"Not found sample data ID {id}");
+            }
 
             return Task.FromResult(stream);
         }
@@ -102,7 +135,7 @@ namespace YoFi.Core.SampleGen
                                         FileType = o.FileType, 
                                         Kind = o.Kind,
                                         Description = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m),
-                                        ID = m.ToString()
+                                        ID = $"{o.FileType}-{m}"
                                     } 
                                 )
                             )
@@ -127,7 +160,7 @@ namespace YoFi.Core.SampleGen
     {
         public string ID { get; set; }
 
-        public string FileType { get; set; }
+        public SampleDataDownloadFileType FileType { get; set; }
 
         public string Description { get; set; }
 

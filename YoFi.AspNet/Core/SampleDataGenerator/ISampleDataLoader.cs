@@ -91,7 +91,7 @@ namespace YoFi.Core.SampleGen
         /// <summary>
         /// Extension of the downloaded file
         /// </summary>
-        string FileType { get; }
+        SampleDataDownloadFileType FileType { get; }
 
         /// <summary>
         /// Multi-line description

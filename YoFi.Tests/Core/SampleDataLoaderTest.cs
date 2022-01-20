@@ -105,5 +105,36 @@ namespace YoFi.Tests.Core.SampleGen
             var sheets = ssr.SheetNames;
             Assert.IsTrue(sheets.Contains(what));
         }
+
+        [TestMethod]
+        public async Task DownloadMontlhyXLSXOfferings()
+        {
+            // Given: Known set of monthly XLSX offerings
+            var offerings = await loader.GetDownloadOfferingsAsync();
+            var desired = offerings.Where(x => x.Kind == SampleDataDownloadOfferingKind.Monthly && x.FileType == SampleDataDownloadFileType.XLSX);
+
+            // For: Each offering
+            foreach(var offering in desired)
+            {
+                // When: Requesting the download
+                var result = await loader.DownloadSampleDataAsync(offering.ID);
+
+                // Then: A spreadsheet is returned
+                using var ssr = new SpreadsheetReader();
+                ssr.Open(result);
+
+                // Which: Contains ONLY Transactions and/or Splits
+                var sheets = ssr.SheetNames;
+                var expectedsheets = new[] { "Transaction", "Split" };
+                Assert.IsTrue(sheets.All(x => expectedsheets.Contains(x)));
+
+                // And: About the right amount of transactions
+                var txs = ssr.Deserialize<Transaction>();
+                var count = txs.Count();
+                Assert.IsTrue(count < 100);
+                Assert.IsTrue(count > 20);
+            }
+
+        }
     }
 }
