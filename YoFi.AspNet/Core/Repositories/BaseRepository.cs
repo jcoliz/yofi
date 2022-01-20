@@ -43,7 +43,7 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// All known items in the default order for <typeparamref name="T"/> items
         /// </summary>
-        public IQueryable<T> OrderedQuery => new T().InDefaultOrder(All);
+        protected IQueryable<T> OrderedQuery => new T().InDefaultOrder(All);
 
         /// <summary>
         /// Subset of all known items reduced by the specified query parameters
