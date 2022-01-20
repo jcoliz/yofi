@@ -134,7 +134,30 @@ namespace YoFi.Tests.Core.SampleGen
                 Assert.IsTrue(count < 100);
                 Assert.IsTrue(count > 20);
             }
+        }
 
+        [TestMethod]
+        public async Task DownloadMontlhyOFXOfferings()
+        {
+            // Given: Known set of monthly OFX offerings
+            var offerings = await loader.GetDownloadOfferingsAsync();
+            var desired = offerings.Where(x => x.Kind == SampleDataDownloadOfferingKind.Monthly && x.FileType == SampleDataDownloadFileType.OFX);
+
+            // For: Each offering
+            foreach (var offering in desired)
+            {
+                // When: Requesting the download
+                var result = await loader.DownloadSampleDataAsync(offering.ID);
+
+                // Then: An OFX file is returned
+                var Document = await OfxSharp.OfxDocumentReader.FromSgmlFileAsync(result);
+
+                // Which: Contains about the right amount of transactions
+                var txs = Document.Statements.SelectMany(x => x.Transactions);
+                var count = txs.Count();
+                Assert.IsTrue(count < 100);
+                Assert.IsTrue(count > 20);
+            }
         }
     }
 }

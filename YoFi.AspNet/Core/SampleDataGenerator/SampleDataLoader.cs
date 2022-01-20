@@ -75,7 +75,7 @@ namespace YoFi.Core.SampleGen
             }
             else
             {
-                var split = id.ToLowerInvariant().Split('-');
+                var split = id.Split('-');
                 if (split.Length == 2 && int.TryParse(split[1], out var month))
                 {
                     // At this point, only transactions are of interest
@@ -90,7 +90,7 @@ namespace YoFi.Core.SampleGen
                     var outtxids = outtxs.Where(x => x.ID > 0).Select(x => x.ID).ToHashSet();
                     var outsplits = splits.Where(x => outtxids.Contains(x.TransactionID));
 
-                    if ("xlsx" == split[0])
+                    if (SampleDataDownloadFileType.XLSX == Enum.Parse<SampleDataDownloadFileType>(split[0]))
                     {
                         // Then write that back out
                         stream = new MemoryStream();
@@ -100,6 +100,14 @@ namespace YoFi.Core.SampleGen
                             ssw.Serialize(outtxs);
                             ssw.Serialize(outsplits);
                         }
+                        stream.Seek(0, SeekOrigin.Begin);
+                    }
+                    else if (SampleDataDownloadFileType.OFX == Enum.Parse<SampleDataDownloadFileType>(split[0]))
+                    {
+                        // Write it as an OFX
+                        stream = new MemoryStream();
+                        SampleDataOfx.WriteToOfx(outtxs, stream);
+
                         stream.Seek(0, SeekOrigin.Begin);
                     }
                     else
