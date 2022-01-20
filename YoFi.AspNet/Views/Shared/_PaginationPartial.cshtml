@@ -5,7 +5,7 @@
     </div>
     <nav class="col-sm-5" aria-label="Pagination control">
         <ul class="pagination pagination-sm justify-content-end">
-            @if (Model.ShowFirstPage)
+            @if (Model.PageInfo.Page > 2 && Model.PageInfo.TotalPages > 3)
             {
                 <li class="page-item">
                     <a asp-route-o="@Model.Parameters.Order"
@@ -15,7 +15,7 @@
                        class="page-link">&laquo;</a>
                 </li>
             }
-            @if (Model.ShowPreviousPreviousPage)
+            @if (Model.PageInfo.Page == Model.PageInfo.TotalPages && Model.PageInfo.TotalPages > 2)
             {
                 var showpage = Model.PageInfo.Page - 2;
                 <li class="page-item">
@@ -26,7 +26,7 @@
                        class="page-link">@showpage</a>
                 </li>
             }
-            @if (Model.ShowPreviousPage)
+            @if (Model.PageInfo.Page > 1)
             {
                 var showpage = Model.PageInfo.Page - 1;
                 <li class="page-item">
@@ -40,7 +40,7 @@
             <li class="page-item active" aria-current="page">
                 <span class="page-link">@Model.PageInfo.Page</span>
             </li>
-            @if (Model.ShowNextPage)
+            @if (Model.PageInfo.Page < Model.PageInfo.TotalPages)
             {
                 var showpage = Model.PageInfo.Page + 1;
                 <li class="page-item">
@@ -51,7 +51,7 @@
                        class="page-link" data-test-id="nextpage">@showpage</a>
                 </li>
             }
-            @if (Model.ShowNextNextPage)
+            @if (Model.PageInfo.Page == 1 && Model.PageInfo.TotalPages > 2)
             {
                 var showpage = Model.PageInfo.Page + 2;
                 <li class="page-item">
@@ -62,7 +62,7 @@
                        class="page-link">@showpage</a>
                 </li>
             }
-            @if (Model.ShowLastPage)
+            @if (Model.PageInfo.Page + 1 < Model.PageInfo.TotalPages && Model.PageInfo.TotalPages > 3)
             {
                 <li class="page-item">
                     <a asp-route-o="@Model.Parameters.Order"
