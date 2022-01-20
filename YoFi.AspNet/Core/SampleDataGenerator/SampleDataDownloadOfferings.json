@@ -6,13 +6,13 @@
     "Kind": "Primary"
   },
   {
-    "ID": "budgettx",
+    "ID": "BudgetTx",
     "Description": "Budget",
     "FileType": "XLSX",
     "Kind": "Primary"
   },
   {
-    "ID": "payee",
+    "ID": "Payee",
     "Description": "Payees",
     "FileType": "XLSX",
     "Kind": "Primary"

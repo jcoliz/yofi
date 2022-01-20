@@ -41,7 +41,7 @@ namespace YoFi.Core.SampleGen
                 // Just return it!
                 stream = instream;
             }
-            else if ("budgettx" == id)
+            else if (nameof(BudgetTx) == id)
             {
                 // Load in just the budget into memory
                 using var ssr = new SpreadsheetReader();
@@ -57,7 +57,7 @@ namespace YoFi.Core.SampleGen
                 }
                 stream.Seek(0, SeekOrigin.Begin);
             }
-            else if ("payee" == id)
+            else if (nameof(Payee) == id)
             {
                 // Load in just the payees into memory
                 using var ssr = new SpreadsheetReader();

@@ -81,7 +81,7 @@ namespace YoFi.Tests.Core.SampleGen
 
             // Which: Contains all types of data
             var sheets = ssr.SheetNames;
-            var expectedsheets = new[] { "Transaction", "Split", "Payee", "BudgetTx" };
+            var expectedsheets = new[] { nameof(Transaction), nameof(Split), nameof(Payee), nameof(BudgetTx) };
             Assert.IsTrue(expectedsheets.All(x=>sheets.Contains(x)));
 
             // And which: Contains lots of transactions
@@ -89,13 +89,13 @@ namespace YoFi.Tests.Core.SampleGen
             Assert.AreEqual(889, txs.Count());
         }
 
-        [DataRow("BudgetTx")]
-        [DataRow("Payee")]
+        [DataRow(nameof(BudgetTx))]
+        [DataRow(nameof(Payee))]
         [DataTestMethod]
         public async Task DownloadOtherPrimaryOfferings(string what)
         {
             // When: Requesting the "full" download
-            var result = await loader.DownloadSampleDataAsync(what.ToLowerInvariant());
+            var result = await loader.DownloadSampleDataAsync(what);
 
             // Then: A spreadsheet is returned
             using var ssr = new SpreadsheetReader();
@@ -125,7 +125,7 @@ namespace YoFi.Tests.Core.SampleGen
 
                 // Which: Contains ONLY Transactions and/or Splits
                 var sheets = ssr.SheetNames;
-                var expectedsheets = new[] { "Transaction", "Split" };
+                var expectedsheets = new[] { nameof(Transaction), nameof(Split) };
                 Assert.IsTrue(sheets.All(x => expectedsheets.Contains(x)));
 
                 // And: About the right amount of transactions
