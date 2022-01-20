@@ -17,12 +17,21 @@
     <None Remove="SampleData\BudgetTxsManaged.json" />
     <None Remove="SampleData\FullSampleData-Month02.ofx" />
     <None Remove="SampleData\FullSampleData.json" />
+    <None Remove="SampleData\SampleData-Full.xlsx" />
     <None Remove="SampleData\Splits-Test.xlsx" />
     <None Remove="SampleData\Test-Generator-GenerateUploadSampleData.xlsx" />
     <None Remove="SampleData\TestData1.xlsx" />
     <None Remove="SampleData\Transactions1000.json" />
     <None Remove="SampleData\UploadSampleDataDefinition.xlsx" />
     <None Remove="SampleData\User-Story-802.ofx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="SampleData\SampleData-Full.xlsx">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using Common.DotNet;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace YoFi.Tests.Core.SampleGen
         {
             context = new MockDataContext();
             clock = new TestClock() { Now = new DateTime(2022, 1, 1) };
-            loader = new SampleDataLoader(context, clock, string.Empty);
+            loader = new SampleDataLoader(context, clock, Environment.CurrentDirectory + "/SampleData");
         }
 
         [TestMethod]
@@ -65,6 +66,21 @@ namespace YoFi.Tests.Core.SampleGen
 
             // Then: Many are returned
             Assert.AreEqual(24, offerings.Count(x => x.Kind == SampleDataDownloadOfferingKind.Monthly));
+        }
+
+        [TestMethod]
+        public async Task DownloadSingleOffering()
+        {
+            // When: Requesting the "full" download
+            var result = await loader.DownloadSampleDataAsync("full");
+
+            // Then: A spreadsheet is returned
+            // Which: Contains all types of data, and lots of it
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(result);
+            var sheets = ssr.SheetNames;
+            var expectedsheets = new[] { "Transaction", "Split", "Payee", "BudgetTx" };
+            Assert.IsTrue(expectedsheets.All(x=>sheets.Contains(x)));
         }
     }
 }

@@ -30,7 +30,19 @@ namespace YoFi.Core.SampleGen
 
         public Task<Stream> DownloadSampleDataAsync(string id)
         {
-            throw new NotImplementedException();
+            Stream result;
+
+            var instream = System.IO.File.OpenRead($"{_directory}/SampleData-Full.xlsx");
+
+            if ("full" == id)
+            {
+                // Just return it!
+                result = instream;
+            }
+            else
+                throw new ApplicationException($"Not found sample data ID {id}");
+
+            return Task.FromResult(result);
         }
 
         public async Task<IEnumerable<ISampleDataDownloadOffering>> GetDownloadOfferingsAsync()
