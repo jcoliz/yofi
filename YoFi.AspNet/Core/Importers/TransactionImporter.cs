@@ -108,7 +108,7 @@ namespace YoFi.Core.Importers
             // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
             // transactions in the system.
 
-            await EnsureAllTransactionsHaveBankRefs();
+            await _repository.AssignBankReferences();
 
             // Flag duplicate transactions. If there is an existing transaction with the same bank reference, we'll have to investigate further
 
@@ -166,28 +166,6 @@ namespace YoFi.Core.Importers
         }
 
         #region Internals
-
-        /// <summary>
-        /// Retroactively assign bankrefs to any transactions which don't already have them
-        /// </summary>
-        private async Task EnsureAllTransactionsHaveBankRefs()
-        {
-            // To handle the case where there may be transactions already in the system before the importer
-            // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
-            // transactions in the system.
-
-            var needbankrefs = _repository.All.Where(x => null == x.BankReference);
-
-            // TODO: AnyAsync()
-            if (needbankrefs.Any())
-            {
-                foreach (var tx in needbankrefs)
-                {
-                    tx.GenerateBankReference();
-                }
-                await _repository.UpdateRangeAsync(needbankrefs);
-            }
-        }
 
         /// <summary>
         /// Deal with conflicting transactions

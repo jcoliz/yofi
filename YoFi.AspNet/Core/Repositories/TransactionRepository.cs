@@ -157,6 +157,29 @@ namespace YoFi.Core.Repositories
             return result.ID;
         }
 
+        /// <summary>
+        /// Ensure all items have a bank reference
+        /// </summary>
+        /// <returns></returns>
+        public async Task AssignBankReferences()
+        {
+            // To handle the case where there may be transactions already in the system before the importer
+            // assigned them a bankreference, we will assign bankreferences retroactively to any overlapping
+            // transactions in the system.
+
+            var needbankrefs = All.Where(x => null == x.BankReference);
+
+            // TODO: AnyAsync()
+            if (needbankrefs.Any())
+            {
+                foreach (var tx in needbankrefs)
+                {
+                    tx.GenerateBankReference();
+                }
+                await UpdateRangeAsync(needbankrefs);
+            }
+        }
+
         #endregion
 
         #region Export
@@ -400,7 +423,6 @@ namespace YoFi.Core.Repositories
                 return Enumerable.Empty<String>();
             }
         }
-
         #endregion
 
         #region Fields

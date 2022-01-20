@@ -91,5 +91,11 @@ namespace YoFi.Core.Repositories
         /// <param name="q">Substring query</param>
         /// <returns>List of containing categories</returns>
         Task<IEnumerable<string>> CategoryAutocompleteAsync(string q);
+
+        /// <summary>
+        /// Ensure all transactions have a bank reference
+        /// </summary>
+        /// <returns></returns>
+        Task AssignBankReferences();
     }
 }

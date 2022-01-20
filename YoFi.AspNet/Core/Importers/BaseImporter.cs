@@ -54,6 +54,7 @@ namespace YoFi.Core.Importers
         public async Task<IEnumerable<T>> ProcessImportAsync()
         {
             // Remove duplicate items
+            // TODO: This seems like it could have some performance problems. Is it loading the whole dataset into memory??
             var result = _importing.Except(_repository.All).ToList();
 
             // Add remaining items

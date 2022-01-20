@@ -18,6 +18,21 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
+        public async Task AssignBankReferences()
+        {
+            var needbankrefs = All.Where(x => null == x.BankReference);
+
+            // TODO: AnyAsync()
+            if (needbankrefs.Any())
+            {
+                foreach (var tx in needbankrefs)
+                {
+                    tx.GenerateBankReference();
+                }
+                await UpdateRangeAsync(needbankrefs);
+            }
+        }
+
         public Task<Stream> AsSpreadsheetAsync(int year, bool allyears, string q)
         {
             throw new NotImplementedException();
