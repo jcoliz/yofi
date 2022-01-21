@@ -158,6 +158,7 @@ namespace YoFi.Core.SampleGen
             using var stream = Common.NET.Data.SampleData.Open("SampleDataSeedOfferings.json");
 
             var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
+            options.Converters.Add(new JsonStringEnumConverter());
             var result = await JsonSerializer.DeserializeAsync<List<SeedOffering>>(stream, options);
 
             return result;
@@ -191,5 +192,7 @@ namespace YoFi.Core.SampleGen
         public bool IsRecommended { get; set; }
 
         public bool IsAvailable { get; set; }
+
+        public SampleDataSeedOfferingCondition Condition { get; set; }
     }
 }

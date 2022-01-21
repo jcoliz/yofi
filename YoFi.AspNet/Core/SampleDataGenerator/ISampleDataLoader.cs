@@ -42,6 +42,8 @@ namespace YoFi.Core.SampleGen
         Task<Stream> DownloadSampleDataAsync(string id);
     }
 
+    public enum SampleDataSeedOfferingCondition { Always = 0, Empty, MoreTransactionsReady, NoTransactions, NoBudgetTxs, NoPayees };
+
     /// <summary>
     /// Describes a set of seed data which user could choose to apply to the
     /// database
@@ -72,6 +74,8 @@ namespace YoFi.Core.SampleGen
         /// Whether this offering can be seeded, given the current state of the DB
         /// </summary>
         bool IsAvailable { get; }
+
+        SampleDataSeedOfferingCondition Condition { get; }
     }
 
     public enum SampleDataDownloadOfferingKind { None = 0, Primary, Monthly }
