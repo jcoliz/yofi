@@ -83,8 +83,8 @@ else
     <h2>Imported Transactions</h2>
     <p>These transactions are waiting in an import queue. Do you want to import them now, or delete them?</p>
     <form method="post" asp-page-handler="Go">
-        <button type="submit" name="command" value="ok" class="btn btn-primary mb-3">Import</button>
-        <button type="submit" name="command" value="cancel" class="btn btn-outline-secondary mb-3">Delete</button>
+        <button type="submit" name="command" value="ok" class="btn btn-primary mb-3" data-test-id="btn-import">Import</button>
+        <button type="submit" name="command" value="cancel" class="btn btn-outline-secondary mb-3" data-test-id="btn-delete">Delete</button>
     </form>
 
     <table class="table">

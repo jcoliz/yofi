@@ -167,7 +167,7 @@ namespace YoFi.Tests.Functional
         public async Task _07_Transactions_Import()
         {
             // Navigate to https://www.try-yofi.com/Transactions/Import
-            await NavigateToAsync("Transactions/Import");
+            await NavigateToAsync("Import");
 
             // Dismiss the help text, if appears
             await DismissHelpTest();
@@ -181,7 +181,7 @@ namespace YoFi.Tests.Functional
         [TestMethod]
         public async Task _08_Transactions_Uploaded()
         {
-            // Navigate to https://www.try-yofi.com/Transactions/Import
+            // Navigate to https://www.try-yofi.com/Import
             await NavigateToAsync("Import");
 
             // Dismiss the help text, if appears
@@ -197,12 +197,12 @@ namespace YoFi.Tests.Functional
 
             // Click the "Upload" button
             // (Note that this requires a validated account to accomplish)
-            await Page.ClickAsync("text=Upload");
+            await Page.ClickAsync("text=\"Upload\"");
 
             await Page.SaveScreenshotToAsync(TestContext);
 
             // To clean up, click the "Delete" button
-            await Page.ClickAsync("text=Delete");
+            await Page.ClickAsync("data-test-id=btn-delete");
         }
 
         /// <summary>
