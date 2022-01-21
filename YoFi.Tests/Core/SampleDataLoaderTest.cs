@@ -193,8 +193,34 @@ namespace YoFi.Tests.Core.SampleGen
             // When: Requesting download offerings
             var offerings = await loader.GetSeedOfferingsAsync();
 
-            // Then: At least one is returned
+            // Then: All are returned
             Assert.AreEqual(6,offerings.Count(x=>x.IsAvailable));
+        }
+
+        [TestMethod]
+        public async Task SeedOfferingTransactionsUnAvailable()
+        {
+            // Given: One transaction in the database
+            context.Add(new Transaction());
+
+            // When: Requesting download offerings
+            var offerings = await loader.GetSeedOfferingsAsync();
+
+            // Then: correct number are returned
+            Assert.AreEqual(3, offerings.Count(x => x.IsAvailable));
+        }
+
+        [TestMethod]
+        public async Task SeedOfferingPayeeAvailable()
+        {
+            // Given: One transaction in the database
+            context.Add(new Payee());
+
+            // When: Requesting download offerings
+            var offerings = await loader.GetSeedOfferingsAsync();
+
+            // Then: correct number are returned
+            Assert.AreEqual(2, offerings.Count(x => x.IsAvailable));
         }
 
     }
