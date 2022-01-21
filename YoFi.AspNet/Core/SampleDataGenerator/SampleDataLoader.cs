@@ -170,7 +170,8 @@ namespace YoFi.Core.SampleGen
         /// <remarks>
         /// Notice the 'available' field. Some offerings are not available if there
         /// is already overlapping data, yet this will return them anyway, but set
-        /// the 'available' property to false.
+        /// the 'available' property to false. The SeedAsync() method will refuse to
+        /// seed offerings which are not allowable at the time of seeding.
         /// </remarks>
         /// <returns>All known seed offerings</returns>
         public async Task<IEnumerable<ISampleDataSeedOffering>> ListSeedOfferingsAsync()
@@ -182,7 +183,10 @@ namespace YoFi.Core.SampleGen
             var result = await JsonSerializer.DeserializeAsync<List<SeedOffering>>(stream, options);
 
             foreach (var offering in result)
+            {
                 offering.IsAvailable = RulesOK(offering.Rules);
+                offering.Description = offering.Description.Replace("{today}", _clock.Now.ToString("D"));
+            }
 
             return result;
         }
@@ -203,7 +207,8 @@ namespace YoFi.Core.SampleGen
                 throw new ApplicationException($"Not found seed ID {id}");
             var offering = found.Single();
 
-            // Ensure this is available
+            // Ensure this is available. Note that re-listing them above ensures their
+            // availability is recalculated.
             if (!offering.IsAvailable)
                 throw new ApplicationException($"This data type is unavailable: {offering.Description}");
 
@@ -218,24 +223,25 @@ namespace YoFi.Core.SampleGen
                 var txs = ssr.Deserialize<Transaction>().ToList();
 
                 // Apply splits
+                // TODO: DRY. Created a function for this repeated code
                 if (ssr.SheetNames.Contains("Split"))
                 {
                     var splits = ssr.Deserialize<Split>().ToLookup(x => x.TransactionID);
-                    foreach(var item in txs.Where(x=>x.ID > 0))
+                    foreach(var tx in txs.Where(x=>x.ID > 0))
                     {
-                        var mysplits = splits.Where(x => x.Key == item.ID).SelectMany(x => x);
-                        if (mysplits.Any())
+                        if (splits.Contains(tx.ID))
                         {
-                            item.Splits = mysplits.ToList();
-                            item.Category = null;
-                            foreach (var split in item.Splits)
+                            tx.Splits = splits[tx.ID].ToList();
+                            tx.Category = null;
+                            foreach (var split in tx.Splits)
                             {
                                 // Clear any imported IDs
                                 split.ID = 0;
                                 split.TransactionID = 0;
                             }
                         }
-                        item.ID = 0;
+                        // Also clear item ID, which will cause problems on import
+                        tx.ID = 0;
                     }
                 }
 
@@ -257,21 +263,21 @@ namespace YoFi.Core.SampleGen
                 if (ssr.SheetNames.Contains("Split"))
                 {
                     var splits = ssr.Deserialize<Split>().ToLookup(x => x.TransactionID);
-                    foreach (var item in added.Where(x => x.ID > 0))
+                    foreach (var tx in added.Where(x => x.ID > 0))
                     {
-                        var mysplits = splits.Where(x => x.Key == item.ID).SelectMany(x => x);
-                        if (mysplits.Any())
+                        if (splits.Contains(tx.ID))
                         {
-                            item.Splits = mysplits.ToList();
-                            item.Category = null;
-                            foreach (var split in item.Splits)
+                            tx.Splits = splits[tx.ID].ToList();
+                            tx.Category = null;
+                            foreach (var split in tx.Splits)
                             {
                                 // Clear any imported IDs
                                 split.ID = 0;
                                 split.TransactionID = 0;
                             }
                         }
-                        item.ID = 0;
+                        // Also clear item ID, which will cause problems on import
+                        tx.ID = 0;
                     }
                 }
 
