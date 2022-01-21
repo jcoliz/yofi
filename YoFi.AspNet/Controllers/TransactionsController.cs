@@ -330,28 +330,9 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DatabaseDelete(string id, [FromServices] IDataContext context)
+        public async Task<IActionResult> DatabaseDelete(string id, [FromServices] IAdministrative dbadmin)
         {
-            if ("budget" == id)
-            {
-                // TODO: Async() ??
-                context.RemoveRange(context.BudgetTxs);
-                await context.SaveChangesAsync();
-            }
-            else if ("tx" == id)
-            {
-                context.RemoveRange(context.TransactionsWithSplits);
-                await context.SaveChangesAsync();
-            }
-            else if ("payee" == id)
-            {
-                context.RemoveRange(context.Payees);
-                await context.SaveChangesAsync();
-            }
-            else
-            {
-                // TODO: Return an error
-            }
+            await dbadmin.ClearDatabaseAsync(id);
 
             // TODO: This just redirects back to Admin, so the numbers can be reloaded.
             //
