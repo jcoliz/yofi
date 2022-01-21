@@ -27,9 +27,9 @@
      inkscape:pagecheckerboard="1"
      inkscape:document-units="in"
      showgrid="true"
-     inkscape:zoom="2.8284272"
-     inkscape:cx="445.47726"
-     inkscape:cy="554.54848"
+     inkscape:zoom="4.0000001"
+     inkscape:cx="288.99999"
+     inkscape:cy="473.12499"
      inkscape:window-width="3840"
      inkscape:window-height="2066"
      inkscape:window-x="-11"
@@ -394,7 +394,7 @@
     <rect
        style="fill:none;fill-opacity:1;stroke:#50632a;stroke-width:2.112;stroke-linecap:butt;stroke-miterlimit:3;stroke-dasharray:6.336, 2.112;stroke-dashoffset:0;stroke-opacity:1"
        id="rect42243"
-       width="456"
+       width="600"
        height="96"
        x="180"
        y="348"
@@ -643,85 +643,113 @@
         </g>
       </g>
     </a>
-    <g
-       id="g97786"
+    <a
+       id="a3451-7"
+       xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Services/AzureStorageService.cs"
+       target="_blank"
+       xlink:title="AzureStorageService"
+       transform="translate(217.96319)">
+      <g
+         id="g62320-4"
+         transform="translate(107.65085,-46.385925)">
+        <g
+           id="g65519-6">
+          <rect
+             style="fill:#c8bdd7;fill-opacity:1;stroke:#48395b;stroke-width:1.96319;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
+             id="rect62310-5"
+             height="94.036812"
+             x="312.34915"
+             y="852.34912"
+             width="118.03681"
+             ry="23.509203" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+             x="371.60193"
+             y="895.36908"
+             id="text62318-6"><tspan
+               sodipodi:role="line"
+               x="371.60193"
+               y="895.36908"
+               style="text-align:center;text-anchor:middle"
+               id="tspan63213-1">SendGrid</tspan><tspan
+               sodipodi:role="line"
+               x="371.60193"
+               y="914.56909"
+               style="text-align:center;text-anchor:middle"
+               id="tspan5073">Email Service</tspan></text>
+        </g>
+      </g>
+    </a>
+    <a
+       id="a3234"
+       xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Views"
+       target="_blank"
+       xlink:title="Views"
        transform="translate(-12,-48)">
-      <a
-         id="a3234"
-         xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Views"
-         target="_blank"
-         xlink:title="Views">
-        <g
-           id="g36631"
-           transform="translate(12,36)">
-          <rect
-             style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
-             id="rect21261"
-             height="48"
-             x="216"
-             y="168"
-             width="96"
-             ry="12" />
-          <text
-             xml:space="preserve"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+      <g
+         id="g36631"
+         transform="translate(12,36)">
+        <rect
+           style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
+           id="rect21261"
+           height="48"
+           x="216"
+           y="168"
+           width="96"
+           ry="12" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+           x="244"
+           y="197.75391"
+           id="text21265"><tspan
+             sodipodi:role="line"
+             id="tspan21263"
              x="244"
-             y="197.75391"
-             id="text21265"><tspan
-               sodipodi:role="line"
-               id="tspan21263"
-               x="244"
-               y="197.75391">Views</tspan></text>
-        </g>
-      </a>
-      <a
-         id="a3018"
-         xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Controllers"
-         target="_blank"
-         xlink:title="Controllers">
-        <g
-           id="g36636"
-           transform="translate(12,36)">
-          <rect
-             style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
-             id="rect21308"
-             height="48"
-             x="216"
-             y="240"
-             width="96"
-             ry="12" />
-          <text
-             xml:space="preserve"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+             y="197.75391">Views</tspan></text>
+      </g>
+    </a>
+    <a
+       id="a3018"
+       xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Controllers"
+       target="_blank"
+       xlink:title="Controllers"
+       transform="translate(-12,-48)">
+      <g
+         id="g36636"
+         transform="translate(12,36)">
+        <rect
+           style="fill:#ffd965;fill-opacity:1;stroke:#7f6000;stroke-width:1.26491;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;image-rendering:auto"
+           id="rect21308"
+           height="48"
+           x="216"
+           y="240"
+           width="96"
+           ry="12" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+           x="225.38672"
+           y="269.82812"
+           id="text21312"><tspan
+             sodipodi:role="line"
+             id="tspan21310"
              x="225.38672"
-             y="269.82812"
-             id="text21312"><tspan
-               sodipodi:role="line"
-               id="tspan21310"
-               x="225.38672"
-               y="269.82812">Controllers</tspan></text>
-        </g>
-      </a>
-      <rect
-         style="fill:none;fill-opacity:1;stroke:#7f6000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:4, 2;stroke-dashoffset:0;stroke-opacity:1;image-rendering:auto"
-         id="rect21308-1"
-         height="167.21524"
-         x="204.19722"
-         y="180"
-         width="143.6076"
-         ry="12" />
-    </g>
+             y="269.82812">Controllers</tspan></text>
+      </g>
+    </a>
     <path
        style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:18, 3;stroke-dashoffset:0;stroke-opacity:1"
        d="M 24,324 H 792"
        id="path74220" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:18,3;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 24,780 H 792"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:18, 3;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 24,768 H 792"
        id="path74400" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:18,3;stroke-dashoffset:0;stroke-opacity:1"
-       d="m 408,780 v 252"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:18, 3;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 408,767.99996 V 1032"
        id="path74400-3" />
     <text
        xml:space="preserve"
@@ -760,30 +788,30 @@
     <text
        xml:space="preserve"
        style="font-size:21.3347px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;stroke-width:1.00007"
-       x="22.039928"
-       y="806.9917"
+       x="22.570223"
+       y="791.61108"
        id="text84068-8"
        transform="scale(1.0000672,0.99993281)"><tspan
          sodipodi:role="line"
          id="tspan84066-7"
-         x="22.039928"
-         y="806.9917"
+         x="22.570223"
+         y="791.61108"
          style="font-size:21.3347px;stroke-width:1.00007">Data</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:21.3347px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;stroke-width:1.00007"
-       x="793.06635"
-       y="807.6167"
+       x="793.54858"
+       y="791.70575"
        id="text84068-8-9"
        transform="scale(1.0000672,0.99993281)"><tspan
          sodipodi:role="line"
          id="tspan84066-7-9"
-         x="793.06635"
-         y="807.6167"
+         x="793.54858"
+         y="791.70575"
          style="font-size:21.3347px;text-align:end;text-anchor:end;stroke-width:1.00007">Services</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Filled)"
-       d="M 395.82833,107.70201 336,156"
+       d="M 395.82834,107.70201 312,156"
        id="path1071"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0" />
@@ -803,12 +831,12 @@
          id="tspan4436"
          x="791.5"
          y="68.5"
-         style="font-size:13.3333px">Your own finances.</tspan><tspan
+         style="font-size:13.3333px">Own your finances.</tspan><tspan
          sodipodi:role="line"
          x="791.5"
          y="84.499962"
          id="tspan4440"
-         style="font-size:13.3333px">Your own code.</tspan></text>
+         style="font-size:13.3333px">Own your data.</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:13.3333px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;text-align:end;text-anchor:end"
@@ -918,6 +946,39 @@
         </g>
       </g>
     </a>
+    <a
+       id="a2374-5"
+       xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/Importers/IImporter.cs"
+       target="_blank"
+       xlink:title="IImporter(T)"
+       transform="translate(288)">
+      <g
+         id="g5956-5">
+        <rect
+           style="fill:#dee9c9;fill-opacity:1;stroke:#50632a;stroke-width:2;stroke-miterlimit:3;stroke-dasharray:none;stroke-opacity:1"
+           id="rect7439-7"
+           width="120"
+           height="48"
+           x="348"
+           y="372"
+           ry="12" />
+        <g
+           id="g7445-4"
+           transform="translate(1.0117187,132)">
+          <text
+             xml:space="preserve"
+             style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none"
+             x="407.30469"
+             y="267.96484"
+             id="text7443-0"><tspan
+               sodipodi:role="line"
+               x="407.30469"
+               y="267.96484"
+               style="font-size:16px;text-align:center;text-anchor:middle"
+               id="tspan7441-9">IEmailSender</tspan></text>
+        </g>
+      </g>
+    </a>
     <text
        xml:space="preserve"
        style="font-size:13.3333px;line-height:1.2;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;text-align:end;text-anchor:end"
@@ -992,19 +1053,11 @@
        inkscape:connection-end="#g5962" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
-       d="M 536.0012,204 440.00834,348"
+       d="M 544.00102,204 496.00709,348"
        id="path6568"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
        inkscape:connection-start="#g36626"
-       inkscape:connection-end="#rect42243" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
-       d="M 329.57425,297.74906 369.69052,348"
-       id="path7226"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-start="#g97786"
        inkscape:connection-end="#rect42243" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Empty)"
@@ -1142,5 +1195,167 @@
        inkscape:connector-curvature="0"
        inkscape:connection-start="#a1737"
        inkscape:connection-end="#a4402" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Empty)"
+       d="M 696.8806,805.9632 696.05155,420"
+       id="path5549"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#a3451-7"
+       inkscape:connection-end="#a2374-5" />
+    <g
+       id="g5693"
+       transform="matrix(0.13084367,0,0,0.13084367,645.29181,964.73978)"
+       style="stroke-width:7.64271"
+       inkscape:transform-center-x="0.17677671"
+       inkscape:transform-center-y="1.0606601">
+      <g
+         id="g5635"
+         style="stroke-width:7.64271">
+	<path
+   class="st1"
+   d="m 179.3,176.3 18.5,-14.5 c 5.2,9 13.5,14.2 23,14.2 10.3,0 15.8,-6.7 15.8,-14 0,-8.7 -10.6,-11.5 -21.9,-15 -14.2,-4.4 -30.1,-9.9 -30.1,-30.2 0,-17 14.8,-30.5 35.3,-30.5 17.3,0 27.2,6.5 35.8,15.4 L 239,114.3 c -4.4,-6.5 -10.6,-10 -18.9,-10 -9.4,0 -14.5,5.1 -14.5,11.8 0,8.1 10.2,10.9 21.5,14.7 14.4,4.7 30.7,11 30.7,31.4 0,16.9 -13.4,33.1 -36.8,33.1 -19.3,0.1 -32.1,-8.1 -41.7,-19 z m 162.6,-55.1 h 19.8 v 8.1 c 4.7,-6 11.8,-9.6 20.1,-9.6 17.1,0 27.5,11 27.5,29.8 v 44.3 H 389 v -41.7 c 0,-9.7 -4.5,-15.4 -13.4,-15.4 -7.6,0 -13.8,5.2 -13.8,17.4 v 39.7 h -19.9 z m 72,36.4 c 0,-25.7 18.9,-37.8 35.3,-37.8 9.4,0 16.9,3.5 21.7,8.6 V 87.8 h 19.9 v 106.1 h -19.9 v -8.1 c -4.8,5.7 -12.5,9.6 -21.9,9.6 -15.5,0 -35.1,-12.3 -35.1,-37.8 z m 57.5,-0.2 c 0,-10.8 -7.8,-19.5 -18.6,-19.5 -11,0 -19.5,8.3 -19.5,19.5 0,11.2 8.4,19.6 19.5,19.6 10.8,0 18.6,-8.8 18.6,-19.6 z m 24,-16.5 c 0,-30.2 22.8,-54.5 54.2,-54.5 15.7,0 28.9,5.7 38.5,14.7 3.9,3.7 7.2,7.9 9.8,12.5 l -17.7,10.8 c -6.5,-12.1 -16.6,-18.3 -30.4,-18.3 -19.3,0 -34.3,15.8 -34.3,34.9 0,19.5 14.7,34.9 35,34.9 15.4,0 26.3,-8.7 30.1,-22.2 h -33.3 v -19.3 h 55.1 v 8.1 c 0,28.5 -20.3,53 -51.9,53 -33.2,-0.1 -55.1,-25.3 -55.1,-54.6 z m 112,-19.7 h 19.8 v 11.9 c 3.6,-7.6 10.2,-11.9 20.1,-11.9 h 8 l -7.2,19.3 h -5.4 c -10.6,0 -15.3,5.5 -15.3,19 v 34.3 h -19.9 v -72.6 z m 53,0 h 19.9 v 72.7 h -19.9 v -53.3 h -7.2 z m 10,-11 c 6.6,0 11.9,-5.3 11.9,-11.9 0,-6.6 -5.3,-11.9 -11.9,-11.9 -6.6,0 -11.9,5.3 -11.9,11.9 0,6.5 5.3,11.9 11.9,11.9 z m 14.6,47.4 c 0,-25.7 18.9,-37.8 35.3,-37.8 9.4,0 16.9,3.5 21.7,8.6 V 87.8 h 19.9 V 193.9 H 742 v -8.1 c -4.8,5.7 -12.5,9.6 -21.9,9.6 -15.5,0 -35.1,-12.3 -35.1,-37.8 z m 57.6,-0.2 c 0,-10.8 -7.8,-19.5 -18.6,-19.5 -11,0 -19.5,8.3 -19.5,19.5 0,11.2 8.4,19.6 19.5,19.6 10.7,0 18.6,-8.8 18.6,-19.6 z m -405.4,0 c 0,-20.9 -15.3,-37.6 -37.5,-37.6 -20.9,0 -37.8,16.9 -37.8,37.8 0,20.9 15.7,37.8 38.4,37.8 15.7,0 27,-7.6 33.3,-18.4 l -15.8,-9.4 c -3.3,6.4 -9.8,10.4 -17.4,10.4 -10.5,0 -17,-5.2 -19.3,-13.2 h 56.1 z M 282,148.7 c 3.1,-6.8 9.4,-11.5 17.9,-11.5 8.4,0 14.7,3.9 17.3,11.5 z"
+   id="path5633"
+   style="stroke-width:7.64271" />
+
+</g>
+      <g
+         id="g5651"
+         style="stroke-width:7.64271">
+	<rect
+   x="70.599998"
+   y="151.5"
+   class="st2"
+   width="42.400002"
+   height="42.400002"
+   id="rect5637"
+   style="stroke-width:7.64271" />
+
+	<polygon
+   class="st2"
+   points="28.2,151.5 70.6,151.5 70.6,109 28.2,109 "
+   id="polygon5639"
+   style="stroke-width:7.64271" />
+
+	<rect
+   x="28.200001"
+   y="151.5"
+   class="st3"
+   width="42.400002"
+   height="42.400002"
+   id="rect5641"
+   style="stroke-width:7.64271" />
+
+	<polygon
+   class="st4"
+   points="155.5,151.5 155.5,109 113.1,109 113.1,151.5 "
+   id="polygon5643"
+   style="stroke-width:7.64271" />
+
+	<rect
+   x="70.599998"
+   y="66.599998"
+   class="st4"
+   width="42.400002"
+   height="42.400002"
+   id="rect5645"
+   style="stroke-width:7.64271" />
+
+	<polygon
+   class="st5"
+   points="113.1,109 70.6,109 70.6,151.5 113.1,151.5 "
+   id="polygon5647"
+   style="stroke-width:7.64271" />
+
+	<rect
+   x="113.1"
+   y="66.599998"
+   class="st3"
+   width="42.400002"
+   height="42.400002"
+   id="rect5649"
+   style="stroke-width:7.64271" />
+
+</g>
+      <g
+         id="g5667"
+         style="stroke-width:7.64271">
+	<g
+   id="g5665"
+   style="stroke-width:7.64271">
+		<path
+   class="st1"
+   d="m 199.4,41 v 24.7 h -5.7 V 41 h -8.8 v -5 h 23.4 v 4.9 h -8.9 z"
+   id="path5653"
+   style="stroke-width:7.64271" />
+
+		<path
+   class="st1"
+   d="m 249.9,65.7 h -5.4 l -6.6,-21.6 -6.6,21.6 h -5.4 l -8.3,-29.8 6,0.1 5.5,21 6.2,-21 h 5.7 l 6.2,21 5.4,-21 h 5.7 z"
+   id="path5655"
+   style="stroke-width:7.64271" />
+
+		<path
+   class="st1"
+   d="M 269.7,65.7 V 36 h 5.7 v 29.7 z"
+   id="path5657"
+   style="stroke-width:7.64271" />
+
+		<path
+   class="st1"
+   d="M 288.7,65.7 V 36 h 5.7 v 24.7 h 9.9 l 0.1,5 z"
+   id="path5659"
+   style="stroke-width:7.64271" />
+
+		<path
+   class="st1"
+   d="M 316.2,65.7 V 36 h 5.7 v 29.7 z"
+   id="path5661"
+   style="stroke-width:7.64271" />
+
+		<path
+   class="st1"
+   d="m 348,66.3 c -8.4,0 -13.9,-6.2 -13.9,-15.4 0,-9.2 5.5,-15.4 14,-15.4 8.5,0 13.9,6.2 13.9,15.4 -0.1,9.1 -5.5,15.4 -14,15.4 z m 0,-26.1 c -5.1,0 -8.1,4.2 -8.1,10.7 0,6.5 3.1,10.7 8.1,10.7 5.1,0 8.2,-4.2 8.2,-10.7 0,-6.5 -3.1,-10.7 -8.2,-10.7 z"
+   id="path5663"
+   style="stroke-width:7.64271" />
+
+	</g>
+
+</g>
+    </g>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
+       d="M 696.55033,900.00001 696,960"
+       id="path5741"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#a3451-7" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
+       d="m 279,276 45,72"
+       id="path6421"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#a3018" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
+       d="m 264,204 v 24"
+       id="path6445"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#a3234"
+       inkscape:connection-end="#a3018" />
   </g>
+  <style
+     type="text/css"
+     id="style5631">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#243746;}
+	.st2{fill:#99E1F4;}
+	.st3{fill:#1A82E2;}
+	.st4{fill:#00B2E3;}
+	.st5{fill:#009DD9;}
+	.st6{opacity:0.35;fill:#FFFFFF;}
+	.st7{opacity:0.75;fill:#FFFFFF;}
+</style>
 </svg>
