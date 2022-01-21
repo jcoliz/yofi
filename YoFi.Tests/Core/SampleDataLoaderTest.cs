@@ -164,6 +164,36 @@ namespace YoFi.Tests.Core.SampleGen
             }
         }
 
+        [ExpectedException(typeof(ApplicationException))]
+        [TestMethod]
+        public async Task BogusSampleDataFails()
+        {
+            // When: Requesting download with a bogus ID
+            var result = await loader.DownloadSampleDataAsync("Bogus");
+
+            // Then: Exception is thrown
+        }
+
+        [ExpectedException(typeof(ArgumentException))]
+        [TestMethod]
+        public async Task BogusSampleDataFileTypeFails()
+        {
+            // When: Requesting download with a bogus ID
+            var result = await loader.DownloadSampleDataAsync("Bogus-1");
+
+            // Then: Exception is thrown
+        }
+
+        [ExpectedException(typeof(ApplicationException))]
+        [TestMethod]
+        public async Task SampleDataFileTypeNoneFails()
+        {
+            // When: Requesting download with a bogus ID
+            var result = await loader.DownloadSampleDataAsync("None-1");
+
+            // Then: Exception is thrown
+        }
+
         [TestMethod]
         public async Task GetSingleSeedOffering()
         {
@@ -207,7 +237,7 @@ namespace YoFi.Tests.Core.SampleGen
             var offerings = await loader.GetSeedOfferingsAsync();
 
             // Then: correct number are returned
-            Assert.AreEqual(3, offerings.Count(x => x.IsAvailable));
+            Assert.AreEqual(4, offerings.Count(x => x.IsAvailable));
         }
 
         [TestMethod]
@@ -224,14 +254,20 @@ namespace YoFi.Tests.Core.SampleGen
         }
 
         [DataRow("payee")]
+        [DataRow("today")]
         [DataRow("budget")]
         [DataRow("txyear")]
         [DataRow("all")]
+        [DataRow("txtoday")]
         [DataTestMethod]
         public async Task ApplySeedOffering(string id)
         {
             // Given: Empty Database
             //...
+
+            // And: It's April 1st
+            clock.IsLocked = true; // Need to lock so that "timestamp == now" calculation in RulesOK works ok
+            clock.Now = new DateTime(clock.Now.Year, 3, 22);
 
             // When: Seeding with the chosen offering {id}
             await loader.SeedAsync(id);
@@ -242,30 +278,17 @@ namespace YoFi.Tests.Core.SampleGen
             Assert.IsFalse(chosen.IsAvailable);
 
             // And: The correct number and type of items are in the database
+            if (chosen.Rules.Contains("Today"))
+            {
+                Assert.AreEqual(202, context.Transactions.Count());
+                Assert.IsFalse(context.Transactions.Any(x => x.Timestamp > clock.Now));
+            }
             if (chosen.Rules.Contains(nameof(Transaction)))
                 Assert.AreEqual(889, context.Transactions.Count());
             if (chosen.Rules.Contains(nameof(Payee)))
                 Assert.AreEqual(40, context.Payees.Count());
             if (chosen.Rules.Contains(nameof(BudgetTx)))
                 Assert.AreEqual(46, context.BudgetTxs.Count());
-        }
-
-        [TestMethod]
-        public async Task ApplySeedOfferingTxToday()
-        {
-            // Given: It's 3 months into the year
-            clock.Now = new DateTime(clock.Now.Year, 4, 1);
-
-            // When: Seeding with the offering id "txtoday"
-            await loader.SeedAsync("txtoday");
-
-            // Then: One third of transactions are added
-            var count = context.Transactions.Count();
-            Assert.IsTrue(count > 200);
-            Assert.IsTrue(count < 400);
-
-            // And: None are after today
-            Assert.IsFalse(context.Transactions.Any(x=>x.Timestamp > clock.Now));
         }
 
         [TestMethod]

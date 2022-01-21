@@ -5,7 +5,6 @@
     "Description": "Transactions through {today}, plus payee matching rules, and a budget.",
     "Condition": "Empty",
     "Rules": [
-      "Transaction",
       "Today",
       "Payee",
       "BudgetTx"

@@ -253,7 +253,8 @@ namespace YoFi.Core.SampleGen
                 }
                 if ("Today" == rule)
                 {
-                    // We'll come back to this
+                    if (_context.Transactions.Any(x=>x.Timestamp >= _clock.Now))
+                        return false;
                 }
             }
 
