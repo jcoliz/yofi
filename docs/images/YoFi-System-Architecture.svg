@@ -27,9 +27,9 @@
      inkscape:pagecheckerboard="1"
      inkscape:document-units="in"
      showgrid="true"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="348.25008"
-     inkscape:cy="508.05621"
+     inkscape:zoom="2.8284272"
+     inkscape:cx="445.47726"
+     inkscape:cy="554.54848"
      inkscape:window-width="3840"
      inkscape:window-height="2066"
      inkscape:window-x="-11"
@@ -252,7 +252,8 @@
        id="a3801"
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Core/Models"
        target="_blank"
-       xlink:title="Models">
+       xlink:title="Models"
+       transform="translate(-288)">
       <g
          id="g39917"
          transform="translate(204,372)">
@@ -289,7 +290,8 @@
        id="a4402"
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Core/Repositories"
        target="_blank"
-       xlink:title="Repositories">
+       xlink:title="Repositories"
+       transform="translate(-144)">
       <g
          id="g3410">
         <rect
@@ -321,7 +323,8 @@
        id="a1737"
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Core/Importers"
        target="_blank"
-       xlink:title="Importers">
+       xlink:title="Importers"
+       transform="translate(144)">
       <g
          id="g38456"
          transform="translate(0,228)">
@@ -544,7 +547,8 @@
        id="a1526"
        xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/IStorageService.cs"
        target="_blank"
-       xlink:title="IStorageService">
+       xlink:title="IStorageService"
+       transform="translate(-192)">
       <g
          id="g1115">
         <rect
@@ -852,7 +856,8 @@
        id="a2588"
        xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/Repositories/IRepository.cs"
        target="_blank"
-       xlink:title="IRepository(T)">
+       xlink:title="IRepository(T)"
+       transform="translate(-144)">
       <g
          id="g5453">
         <rect
@@ -884,7 +889,8 @@
        id="a2374"
        xlink:href="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/Core/Importers/IImporter.cs"
        target="_blank"
-       xlink:title="IImporter(T)">
+       xlink:title="IImporter(T)"
+       transform="translate(144)">
       <g
          id="g5956">
         <rect
@@ -961,23 +967,8 @@
        inkscape:connection-start="#g46826"
        inkscape:connection-end="#g41311" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Filled)"
-       d="M 400,516 344,684"
-       id="path2195"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-start="#g38456"
-       inkscape:connection-end="#rect33513" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
-       d="m 565.33333,516 93.33334,168"
-       id="path4789"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-start="#a4402" />
-    <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Empty)"
-       d="M 552,468 V 420"
+       d="M 408,468 V 420"
        id="path5673"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -985,7 +976,7 @@
        inkscape:connection-end="#g5453" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Empty)"
-       d="M 408,468 V 420"
+       d="M 552,468 V 420"
        id="path6146"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1025,19 +1016,12 @@
        inkscape:connection-end="#a3603" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
-       d="m 396,708 h 36"
+       d="M 276,708 H 240"
        id="path7789"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
        inkscape:connection-start="#a3603"
        inkscape:connection-end="#a3801" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Empty)"
-       d="M 531.71,813.3959 640.05417,732"
-       id="path7791"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-start="#g62320" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
        d="m 479.01841,900.00001 0,37.85222"
@@ -1128,11 +1112,35 @@
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
-       d="M 528,516 360,684"
+       d="M 400,516 344,684"
        id="path10499"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
        inkscape:connection-start="#a4402"
        inkscape:connection-end="#a3603" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Empty)"
+       d="M 479.33674,805.9632 479.83751,732"
+       id="path1299"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#a3451"
+       inkscape:connection-end="#a1526" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
+       d="m 416,516 56,168"
+       id="path1325"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#a4402"
+       inkscape:connection-end="#a1526" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
+       d="m 492,492 -24,0"
+       id="path1636"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#a1737"
+       inkscape:connection-end="#a4402" />
   </g>
 </svg>
