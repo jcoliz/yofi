@@ -27,9 +27,9 @@
      inkscape:pagecheckerboard="1"
      inkscape:document-units="in"
      showgrid="true"
-     inkscape:zoom="4.0000001"
-     inkscape:cx="288.99999"
-     inkscape:cy="473.12499"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="721.2489"
+     inkscape:cy="508.05621"
      inkscape:window-width="3840"
      inkscape:window-height="2066"
      inkscape:window-x="-11"
@@ -183,6 +183,22 @@
        x="0"
        y="0"
        ry="24" />
+    <text
+       xml:space="preserve"
+       style="font-size:16px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;fill:#50632a;fill-opacity:1"
+       x="146.58594"
+       y="389.71484"
+       id="text3073-6"><tspan
+         sodipodi:role="line"
+         x="146.58594"
+         y="389.71484"
+         style="font-size:16px;text-align:center;text-anchor:middle;fill:#50632a;fill-opacity:1"
+         id="tspan3071-5">UI-Facing</tspan><tspan
+         sodipodi:role="line"
+         x="146.58594"
+         y="409.71484"
+         style="font-size:16px;text-align:center;text-anchor:middle;fill:#50632a;fill-opacity:1"
+         id="tspan13384">Interfaces</tspan></text>
     <a
        id="a4199"
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Core/Reports"
@@ -394,9 +410,9 @@
     <rect
        style="fill:none;fill-opacity:1;stroke:#50632a;stroke-width:2.112;stroke-linecap:butt;stroke-miterlimit:3;stroke-dasharray:6.336, 2.112;stroke-dashoffset:0;stroke-opacity:1"
        id="rect42243"
-       width="600"
+       width="684"
        height="96"
-       x="180"
+       x="96"
        y="348"
        ry="12" />
     <a
@@ -519,7 +535,8 @@
        id="a2803"
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Pages"
        target="_blank"
-       xlink:title="Pages">
+       xlink:title="Pages"
+       transform="translate(-5e-6,-12)">
       <g
          id="g36626"
          transform="translate(5e-6,-12)">
@@ -686,7 +703,7 @@
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Views"
        target="_blank"
        xlink:title="Views"
-       transform="translate(-12,-48)">
+       transform="translate(-12,-60)">
       <g
          id="g36631"
          transform="translate(12,36)">
@@ -715,7 +732,7 @@
        xlink:href="https://github.com/jcoliz/yofi/tree/master/YoFi.AspNet/Controllers"
        target="_blank"
        xlink:title="Controllers"
-       transform="translate(-12,-48)">
+       transform="translate(-12,-60)">
       <g
          id="g36636"
          transform="translate(12,36)">
@@ -741,7 +758,7 @@
     </a>
     <path
        style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:18, 3;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 24,324 H 792"
+       d="M 24,300 H 792"
        id="path74220" />
     <path
        style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:18, 3;stroke-dashoffset:0;stroke-opacity:1"
@@ -754,37 +771,27 @@
     <text
        xml:space="preserve"
        style="font-size:21.3347px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;stroke-width:1.00007"
-       x="23.769207"
-       y="310.15829"
+       x="25.36009"
+       y="282.93286"
        id="text80498"
        transform="scale(1.0000672,0.99993281)"><tspan
          sodipodi:role="line"
          id="tspan80496"
-         x="23.769207"
-         y="310.15829"
+         x="25.36009"
+         y="282.93286"
          style="font-size:21.3347px;stroke-width:1.00007">Asp.Net (UI)</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:21.3347px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;stroke-width:1.00007"
-       x="23.019157"
-       y="354.11749"
+       x="23.372686"
+       y="325.29578"
        id="text84068"
        transform="scale(1.0000672,0.99993281)"><tspan
          sodipodi:role="line"
-         id="tspan84066"
-         x="23.019157"
-         y="354.11749"
-         style="font-size:21.3347px;stroke-width:1.00007">Core</tspan><tspan
-         sodipodi:role="line"
-         x="23.019157"
-         y="380.78586"
+         x="23.372686"
+         y="325.29578"
          style="font-size:21.3347px;stroke-width:1.00007"
-         id="tspan2083">(Business</tspan><tspan
-         sodipodi:role="line"
-         x="23.019157"
-         y="407.45425"
-         style="font-size:21.3347px;stroke-width:1.00007"
-         id="tspan2085">Logic)</tspan></text>
+         id="tspan2085">Core (Business Logic)</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:21.3347px;line-height:1.25;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Normal';font-variant-ligatures:none;stroke-width:1.00007"
@@ -1053,7 +1060,7 @@
        inkscape:connection-end="#g5962" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
-       d="M 544.00102,204 496.00709,348"
+       d="M 540.00113,192 462.00844,348"
        id="path6568"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1332,14 +1339,14 @@
        inkscape:connection-start="#a3451-7" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
-       d="m 279,276 45,72"
+       d="M 277.33333,264 324,348"
        id="path6421"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
        inkscape:connection-start="#a3018" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Filled)"
-       d="m 264,204 v 24"
+       d="m 264,192 v 24"
        id="path6445"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
