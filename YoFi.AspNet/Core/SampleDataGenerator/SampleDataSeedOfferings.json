@@ -3,7 +3,6 @@
     "ID": "today",
     "Name": "Today",
     "Description": "Transactions through {today}, plus payee matching rules, and a budget.",
-    "Condition": "Empty",
     "Rules": [
       "Today",
       "Payee",
@@ -14,7 +13,6 @@
     "ID": "all",
     "Name": "Full Year Sample Data",
     "Description": "Includes 12 months of transactions, payee matching rules, and a budget.",
-    "Condition": "Empty",
     "Rules": [
       "Transaction",
       "Payee",
@@ -25,7 +23,6 @@
     "ID": "txtoday",
     "Name": "Transactions to Today",
     "Description": "Transactions only up to {today}. No payees or budget.",
-    "Condition": "MoreTransactionsReady",
     "Rules": [
       "Today"
     ]
@@ -34,7 +31,6 @@
     "ID": "txyear",
     "Name": "Full Year Transactions",
     "Description": "Complete year of transactions only. No payees or budget.",
-    "Condition": "NoTransactions",
     "Rules": [
       "Transaction"
     ]
@@ -43,7 +39,6 @@
     "ID": "budget",
     "Name": "Budget Only",
     "Description": "A single year's budget line items, which correspond to the sample transactions.",
-    "Condition": "NoBudgetTxs",
     "Rules": [
       "BudgetTx"
     ]
@@ -52,7 +47,6 @@
     "ID": "payee",
     "Name": "Payee Matching Rules Only",
     "Description": "Only payee matching rules. Helpful to see how payee matching works with OFX import.",
-    "Condition": "NoPayees",
     "Rules": [
       "Payee"
     ]

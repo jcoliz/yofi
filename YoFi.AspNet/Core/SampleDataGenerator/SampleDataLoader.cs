@@ -165,6 +165,8 @@ namespace YoFi.Core.SampleGen
             foreach (var offering in result)
                 offering.IsAvailable = RulesOK(offering.Rules);
 
+            result.First().IsRecommended = true;
+
             return result;
         }
 

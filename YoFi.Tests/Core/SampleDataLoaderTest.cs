@@ -169,7 +169,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task BogusSampleDataFails()
         {
             // When: Requesting download with a bogus ID
-            var result = await loader.DownloadSampleDataAsync("Bogus");
+            await loader.DownloadSampleDataAsync("Bogus");
 
             // Then: Exception is thrown
         }
@@ -179,7 +179,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task BogusSampleDataFileTypeFails()
         {
             // When: Requesting download with a bogus ID
-            var result = await loader.DownloadSampleDataAsync("Bogus-1");
+            await loader.DownloadSampleDataAsync("Bogus-1");
 
             // Then: Exception is thrown
         }
@@ -189,7 +189,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task SampleDataFileTypeNoneFails()
         {
             // When: Requesting download with a bogus ID
-            var result = await loader.DownloadSampleDataAsync("None-1");
+            await loader.DownloadSampleDataAsync("None-1");
 
             // Then: Exception is thrown
         }

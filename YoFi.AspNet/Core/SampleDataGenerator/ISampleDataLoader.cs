@@ -75,8 +75,12 @@ namespace YoFi.Core.SampleGen
         /// </summary>
         bool IsAvailable { get; }
 
-        SampleDataSeedOfferingCondition Condition { get; }
-
+        /// <summary>
+        /// Describes the features of this seeding offering
+        /// </summary>
+        /// <remarks>
+        /// Each rule gives one kind of sample data that's included in this seeding
+        /// </remarks>
         IEnumerable<string> Rules { get; }
     }
 
