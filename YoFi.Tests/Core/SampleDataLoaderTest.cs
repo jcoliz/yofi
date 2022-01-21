@@ -220,8 +220,58 @@ namespace YoFi.Tests.Core.SampleGen
             var offerings = await loader.GetSeedOfferingsAsync();
 
             // Then: correct number are returned
-            Assert.AreEqual(2, offerings.Count(x => x.IsAvailable));
+            Assert.AreEqual(3, offerings.Count(x => x.IsAvailable));
         }
 
+        [DataRow("payee")]
+        [DataRow("budget")]
+        [DataRow("txyear")]
+        [DataRow("all")]
+        [DataTestMethod]
+        public async Task ApplySeedOffering(string id)
+        {
+            // Given: Empty Database
+            //...
+
+            // When: Seeding with the chosen offering {id}
+            await loader.SeedAsync(id);
+
+            // Then: That item is no longer allowed
+            var offerings = await loader.GetSeedOfferingsAsync();
+            var chosen = offerings.Where(x => x.ID == id).Single();
+            Assert.IsFalse(chosen.IsAvailable);
+
+            // And: The correct number and type of items are in the database
+            if (chosen.Rules.Contains(nameof(Transaction)))
+                Assert.AreEqual(889, context.Transactions.Count());
+            if (chosen.Rules.Contains(nameof(Payee)))
+                Assert.AreEqual(40, context.Payees.Count());
+            if (chosen.Rules.Contains(nameof(BudgetTx)))
+                Assert.AreEqual(46, context.BudgetTxs.Count());
+        }
+
+        [ExpectedException(typeof(ApplicationException))]
+        [TestMethod]
+        public async Task IDNotFound()
+        {
+            // When: Seeding with a bogus ID
+            await loader.SeedAsync("bogus");
+
+            // Then: Throws exception
+        }
+
+        [ExpectedException(typeof(ApplicationException))]
+        [TestMethod]
+        public async Task NotAvailable()
+        {
+            // Given: Already seeded with the chosen offering {id}
+            var id = "payee";
+            await loader.SeedAsync(id);
+
+            // When: Seeding with it again
+            await loader.SeedAsync(id);
+
+            // Then: Throws exception
+        }
     }
 }

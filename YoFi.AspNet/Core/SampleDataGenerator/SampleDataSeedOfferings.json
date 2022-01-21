@@ -28,9 +28,7 @@
     "Description": "Transactions only up to {today}. No payees or budget.",
     "Condition": "MoreTransactionsReady",
     "Rules": [
-      "Today",
-      "Payee",
-      "BudgetTx"
+      "Today"
     ]
   },
   {
@@ -45,7 +43,7 @@
   {
     "ID": "budget",
     "Name": "Budget Only",
-    "Description": "Transactions only up to {today}. No payees or budget.",
+    "Description": "A single year's budget line items, which correspond to the sample transactions.",
     "Condition": "NoBudgetTxs",
     "Rules": [
       "BudgetTx"

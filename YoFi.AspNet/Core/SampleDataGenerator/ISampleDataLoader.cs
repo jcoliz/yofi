@@ -25,8 +25,8 @@ namespace YoFi.Core.SampleGen
         /// Add sample data to the runtime database
         /// </summary>
         /// <param name="id">Unique identifier for which offering to seed</param>
-        /// <returns></returns>
-        Task SeedAsync(string id);
+        /// <returns>Result message described what happened</returns>
+        Task<string> SeedAsync(string id);
 
         /// <summary>
         /// Discover the available sample data download offerings

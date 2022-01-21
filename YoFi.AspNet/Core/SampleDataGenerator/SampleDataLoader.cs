@@ -1,4 +1,5 @@
 ﻿using Common.DotNet;
+using Common.NET.Data;
 using jcoliz.OfficeOpenXml.Serializer;
 using System;
 using System.Collections.Generic;
@@ -167,9 +168,49 @@ namespace YoFi.Core.SampleGen
             return result;
         }
 
-        public Task SeedAsync(string id)
+        public async Task<string> SeedAsync(string id)
         {
-            throw new NotImplementedException();
+            var results = new List<string>();
+
+            // First, get info about the offering
+            var offerings = await GetSeedOfferingsAsync();
+            var found = offerings.Where(x => x.ID == id);
+            if (!found.Any())
+                throw new ApplicationException($"Not found seed ID {id}");
+            var offering = found.Single();
+
+            // Ensure this is available
+            if (!offering.IsAvailable)
+                throw new ApplicationException($"This data type is unavailable: {offering.Description}");
+
+            // Load sample data
+            var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
+            var generator = new SampleDataGenerator();
+            generator.LoadDefinitions(instream);
+            SampleDataPattern.Year = _clock.Now.Year;
+
+            // Add the kinds of data based on the rules
+            if (offering.Rules.Contains(nameof(Transaction)))
+            {
+                generator.GenerateTransactions(addids: false);
+                _context.AddRange(generator.Transactions);
+                results.Add($"{generator.Transactions.Count()} transactions");
+            }
+            if (offering.Rules.Contains(nameof(BudgetTx)))
+            {
+                generator.GenerateBudget();
+                _context.AddRange(generator.BudgetTxs);
+                results.Add($"{generator.BudgetTxs.Count()} budget line items");
+            }
+            if (offering.Rules.Contains(nameof(Payee)))
+            {
+                generator.GeneratePayees();
+                _context.AddRange(generator.Payees);
+                results.Add($"{generator.Payees.Count()} payee matching rules");
+            }
+
+            await _context.SaveChangesAsync();
+            return "OK: Added " + string.Join(", ", results);
         }
 
         /// <summary>
