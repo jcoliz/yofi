@@ -27,13 +27,15 @@ namespace YoFi.AspNet.Pages
 
         public bool isDemo { get; private set; }
 
-        public void OnGet([FromServices] IDataContext context)
+        public async Task OnGetAsync([FromServices] IAdministrative dbadmin)
         {
             // Task 1270: Tie Admin page into Home page flow
             //
             // The "get started" button should go to the admin page IF the database is empty AND (either the current user is not logged in OR current user is admin)
 
-            var isempty = !context.Transactions.Any();
+            var status = await dbadmin.GetDatabaseStatus();
+
+            var isempty = status.NumTransactions == 0;
             var loggedin = User.Identity.IsAuthenticated;
             var isadmin = User.IsInRole("Admin");
 
