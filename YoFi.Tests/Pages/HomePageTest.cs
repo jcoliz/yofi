@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
+using System.Threading.Tasks;
 using YoFi.AspNet.Pages;
 using YoFi.Core;
 using YoFi.Core.Models;
@@ -19,8 +20,10 @@ namespace YoFi.Tests.Pages
     [TestClass]
     public class HomePageTest
     {
-        [TestMethod]
-        public void OnGet()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task OnGet(bool empty)
         {
             // Given: A blank model page
             var page = new HomeModel(new DemoConfig());
@@ -31,9 +34,11 @@ namespace YoFi.Tests.Pages
             identity.Setup(x => x.IsAuthenticated).Returns(false);
             page.PageContext.HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(identity.Object) };
 
-            var datacontext = new Mock<IDataContext>();
-            datacontext.Setup(x => x.Transactions).Returns(Enumerable.Empty<Transaction>().AsQueryable());
-            page.OnGet(datacontext.Object);
+            var dbadmin = new Mock<IDatabaseAdministration>();
+            var dbstatus = new Mock<IDatabaseStatus>();
+            dbstatus.Setup(x => x.NumTransactions).Returns(empty ? 0 : 100);
+            dbadmin.Setup(x => x.GetDatabaseStatus()).Returns(Task.FromResult(dbstatus.Object));
+            await page.OnGetAsync(dbadmin.Object);
 
             // Then: Nothing goes wrong
         }

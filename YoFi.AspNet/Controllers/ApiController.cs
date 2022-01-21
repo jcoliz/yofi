@@ -64,7 +64,7 @@ namespace YoFi.AspNet.Controllers
         [ApiBasicAuthorization]
         public async Task<IActionResult> ClearTestData(string id, [FromServices] IDatabaseAdministration dbadmin)
         {
-            await dbadmin.ClearDatabaseAsync(id);
+            await dbadmin.ClearTestDataAsync(id);
             return new OkResult();
         }
     }

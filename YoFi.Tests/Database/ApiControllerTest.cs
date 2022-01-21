@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
+using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
@@ -258,13 +259,13 @@ namespace YoFi.Tests.Database
             int nummoditems = 3;
             var items = TransactionControllerTest.TransactionItems.Take(numitems);
             foreach (var moditem in items.Take(nummoditems))
-                moditem.Category += ApiController.TestMarker;
+                moditem.Category += DatabaseAdministration.TestMarker;
 
             context.AddRange(items);
             await context.SaveChangesAsync();
 
             // When: Calling ClearTestData with id="trx"
-            var actionresult = await controller.ClearTestData("trx", context);
+            var actionresult = await controller.ClearTestData("trx", new DatabaseAdministration(context));
 
             // Then: Result is OK
             Assert.That.IsOfType<OkResult>(actionresult);
@@ -281,12 +282,12 @@ namespace YoFi.Tests.Database
             int numitems = 5;
             int nummoditems = numitems / 2;
             foreach (var moditem in context.BudgetTxs.Take(nummoditems))
-                moditem.Category += ApiController.TestMarker;
+                moditem.Category += DatabaseAdministration.TestMarker;
 
             await context.SaveChangesAsync();
 
             // When: Calling ClearTestData with id="budgettx"
-            var actionresult = await controller.ClearTestData("budgettx", context);
+            var actionresult = await controller.ClearTestData("budgettx", new DatabaseAdministration(context));
 
             // Then: Result is OK
             Assert.That.IsOfType<OkResult>(actionresult);
@@ -303,13 +304,13 @@ namespace YoFi.Tests.Database
             var items = TransactionControllerTest.PayeeItems.Take(numitems);
             int nummoditems = numitems / 2;
             foreach (var moditem in items.Take(nummoditems))
-                moditem.Category += ApiController.TestMarker;
+                moditem.Category += DatabaseAdministration.TestMarker;
 
             context.AddRange(items);
             await context.SaveChangesAsync();
 
             // When: Calling ClearTestData with id="payee"
-            var actionresult = await controller.ClearTestData("payee", context);
+            var actionresult = await controller.ClearTestData("payee", new DatabaseAdministration(context));
 
             // Then: Result is OK
             Assert.That.IsOfType<OkResult>(actionresult);
