@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace YoFi.Core
 {
-    public class DatabaseAdministration : IAdministrative
+    public class DatabaseAdministration : IDatabaseAdministration
     {
         public const string TestMarker = "__test__";
 

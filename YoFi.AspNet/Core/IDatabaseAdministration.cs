@@ -11,7 +11,7 @@ namespace YoFi.Core
     /// <remarks>
     /// Note that this is a wire interface, so no properties, everything is async
     /// </remarks>
-    public interface IAdministrative
+    public interface IDatabaseAdministration
     {
         /// <summary>
         /// Discover information about the current state of the database

@@ -85,7 +85,7 @@ namespace YoFi.AspNet.Main
             services.AddScoped<IDataContext, ApplicationDbContext>();
             services.AddScoped<ISampleDataLoader, SampleDataLoader>();
             services.AddScoped<ISampleDataConfiguration, SampleDataConfiguration>();
-            services.AddScoped<IAdministrative, DatabaseAdministration>();
+            services.AddScoped<IDatabaseAdministration, DatabaseAdministration>();
 
             if (Configuration.GetSection(SendGridEmailOptions.Section).Exists())
             {

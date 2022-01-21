@@ -19,7 +19,7 @@ namespace YoFi.AspNet.Pages
         public IEnumerable<ISampleDataSeedOffering> Offerings { get; private set; }
         public IDatabaseStatus DatabaseStatus { get; private set; }
 
-        private readonly IAdministrative _dbadmin;
+        private readonly IDatabaseAdministration _dbadmin;
         private readonly ISampleDataLoader _loader;
 
         public class PageConfig
@@ -29,7 +29,7 @@ namespace YoFi.AspNet.Pages
             public bool NoDelete { get; set; }
         }
 
-        public AdminModel(IAdministrative dbadmin, IOptions<PageConfig> config, ISampleDataLoader loader)
+        public AdminModel(IDatabaseAdministration dbadmin, IOptions<PageConfig> config, ISampleDataLoader loader)
         {
             _dbadmin = dbadmin;
             Config = config.Value;

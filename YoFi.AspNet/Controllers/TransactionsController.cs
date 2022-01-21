@@ -330,7 +330,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DatabaseDelete(string id, [FromServices] IAdministrative dbadmin)
+        public async Task<IActionResult> DatabaseDelete(string id, [FromServices] IDatabaseAdministration dbadmin)
         {
             await dbadmin.ClearDatabaseAsync(id);
 
