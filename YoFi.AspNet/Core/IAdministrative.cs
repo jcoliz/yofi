@@ -11,7 +11,7 @@ namespace YoFi.Core
     /// <remarks>
     /// Note that this is a wire interface, so no properties, everything is async
     /// </remarks>
-    interface IAdministrative
+    public interface IAdministrative
     {
         /// <summary>
         /// Discover information about the current state of the database
@@ -27,7 +27,7 @@ namespace YoFi.Core
         /// </remarks>
         /// <param name="id">Which data to clear (budgettx,payee,trx,all)</param>
         /// <returns></returns>
-        Task ClearTestDataAsync(int id);
+        Task ClearTestDataAsync(string id);
 
         /// <summary>
         /// Remove all items of the given type
@@ -36,14 +36,14 @@ namespace YoFi.Core
         /// Used by functional tests to clean up after themselves
         /// </remarks>
         /// <param name="id">Which data to clear (budgettx,payee,tx)</param>
-        Task ClearDatabaseAsync(int id);
+        Task ClearDatabaseAsync(string id);
     }
 
-    interface IDatabaseStatus
+    public interface IDatabaseStatus
     {
         bool IsEmpty { get; }
         int NumTransactions { get; }
-        int NumBudgetTx { get; }
+        int NumBudgetTxs { get; }
         int NumPayees { get; }
     }
 }

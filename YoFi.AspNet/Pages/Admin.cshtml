@@ -31,7 +31,22 @@
     </div>
 </nav>
 
-@if (Model.HasSomeData)
+@if (Model.DatabaseStatus.IsEmpty)
+{
+    <h2>Welcome!</h2>
+
+    <h4>Thanks for deploying YoFi</h4>
+
+    <p>I appreciate you taking the time to try out YoFi. Find problems? Have questions? Please <a href="https://github.com/jcoliz/yofi/issues" target="_blank">open an issue</a> or <a href="https://github.com/jcoliz/yofi/discussions" target="_blank">start a discussion</a> on GitHub.</p>
+
+    <h4>Database Status: Empty</h4>
+
+    <p>You can import your own data in OFX or XLSX files on the <a asp-page="/Import">Import</a> page. There you'll also find some sample data files you can download to see how they should be formatted. You could turn around and upload those files to get some sample data.</p>
+
+    <p>You can inject sample data into the database here now, or add some later using the "Admin" link on the site navigation bar.</p>
+
+}
+else
 {
     <h2>Database Status</h2>
 
@@ -46,7 +61,7 @@
             </tr>
         </thead>
         <tr>
-            <td data-test-id="num-tx">@Model.NumTransactions</td>
+            <td data-test-id="num-tx">@Model.DatabaseStatus.NumTransactions</td>
             <td>Transactions</td>
             <td>
                 <div class="float-end">
@@ -59,7 +74,7 @@
             </td>
         </tr>
         <tr>
-            <td data-test-id="num-budget">@Model.NumBudgetTxs</td>
+            <td data-test-id="num-budget">@Model.DatabaseStatus.NumBudgetTxs</td>
             <td>Budget Line Items</td>
             <td>
                 <div class="float-end">
@@ -72,7 +87,7 @@
             </td>
         </tr>
         <tr>
-            <td data-test-id="num-payee">@Model.NumPayees</td>
+            <td data-test-id="num-payee">@Model.DatabaseStatus.NumPayees</td>
             <td>Payee Matching Rules</td>
             <td>
                 <div class="float-end">
@@ -93,21 +108,7 @@
         <p>Note: You can disable deleting of data from this screen by setting the ADMIN__NODELETE environment variable in your web app configuration.</p>
     }
 }
-else
-{
-    <h2>Welcome!</h2>
 
-    <h4>Thanks for deploying YoFi</h4>
-
-    <p>I appreciate you taking the time to try out YoFi. Find problems? Have questions? Please <a href="https://github.com/jcoliz/yofi/issues" target="_blank">open an issue</a> or <a href="https://github.com/jcoliz/yofi/discussions" target="_blank">start a discussion</a> on GitHub.</p>
-
-    <h4>Database Status: Empty</h4>
-
-    <p>You can import your own data in OFX or XLSX files on the <a asp-page="/Import">Import</a> page. There you'll also find some sample data files you can download to see how they should be formatted. You could turn around and upload those files to get some sample data.</p>
-
-    <p>You can inject sample data into the database here now, or add some later using the "Admin" link on the site navigation bar.</p>
-
-}
 
 @if (Model.Offerings.Any())
 {
