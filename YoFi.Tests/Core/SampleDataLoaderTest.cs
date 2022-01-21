@@ -163,5 +163,18 @@ namespace YoFi.Tests.Core.SampleGen
                 Assert.IsTrue(count > 20);
             }
         }
+
+        [TestMethod]
+        public async Task GetSingleSeedOffering()
+        {
+            // When: Requesting download offerings
+            var offerings = await loader.GetSeedOfferingsAsync();
+
+            // Then: At least one is returned
+            Assert.IsTrue(offerings.Count() > 0);
+
+            // And: its ID is as expected
+            Assert.AreEqual(1, offerings.Count(x => x.ID == "today"));
+        }
     }
 }

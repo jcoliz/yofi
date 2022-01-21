@@ -153,9 +153,14 @@ namespace YoFi.Core.SampleGen
             return result;
         }
 
-        public Task<IEnumerable<ISampleDataSeedOffering>> GetSeedOfferingsAsync()
+        public async Task<IEnumerable<ISampleDataSeedOffering>> GetSeedOfferingsAsync()
         {
-            throw new NotImplementedException();
+            using var stream = Common.NET.Data.SampleData.Open("SampleDataSeedOfferings.json");
+
+            var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
+            var result = await JsonSerializer.DeserializeAsync<List<SeedOffering>>(stream, options);
+
+            return result;
         }
 
         public Task SeedAsync(string id)
@@ -173,5 +178,18 @@ namespace YoFi.Core.SampleGen
         public string Description { get; set; }
 
         public SampleDataDownloadOfferingKind Kind { get; set; }
+    }
+
+    internal class SeedOffering : ISampleDataSeedOffering
+    {
+        public string ID { get; set; }
+
+        public string Title { get; set; }
+
+        public string Description { get; set; }
+
+        public bool IsRecommended { get; set; }
+
+        public bool IsAvailable { get; set; }
     }
 }
