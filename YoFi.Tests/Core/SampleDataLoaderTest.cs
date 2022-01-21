@@ -41,7 +41,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task GetSingleOffering()
         {
             // When: Requesting download offerings
-            var offerings = await loader.GetDownloadOfferingsAsync();
+            var offerings = await loader.ListDownloadOfferingsAsync();
 
             // Then: At least one is returned
             Assert.IsTrue(offerings.Count() > 0);
@@ -54,7 +54,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task GetPrimaryOfferings()
         {
             // When: Requesting download offerings
-            var offerings = await loader.GetDownloadOfferingsAsync();
+            var offerings = await loader.ListDownloadOfferingsAsync();
 
             // Then: At least one is returned
             Assert.IsTrue(offerings.Count() >= 3);
@@ -67,7 +67,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task GetMonthlyOfferings()
         {
             // When: Requesting download offerings
-            var offerings = await loader.GetDownloadOfferingsAsync();
+            var offerings = await loader.ListDownloadOfferingsAsync();
 
             // Then: Many are returned
             Assert.AreEqual(24, offerings.Count(x => x.Kind == SampleDataDownloadOfferingKind.Monthly));
@@ -114,7 +114,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task DownloadMontlhyXLSXOfferings()
         {
             // Given: Known set of monthly XLSX offerings
-            var offerings = await loader.GetDownloadOfferingsAsync();
+            var offerings = await loader.ListDownloadOfferingsAsync();
             var desired = offerings.Where(x => x.Kind == SampleDataDownloadOfferingKind.Monthly && x.FileType == SampleDataDownloadFileType.XLSX);
 
             // For: Each offering
@@ -144,7 +144,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task DownloadMontlhyOFXOfferings()
         {
             // Given: Known set of monthly OFX offerings
-            var offerings = await loader.GetDownloadOfferingsAsync();
+            var offerings = await loader.ListDownloadOfferingsAsync();
             var desired = offerings.Where(x => x.Kind == SampleDataDownloadOfferingKind.Monthly && x.FileType == SampleDataDownloadFileType.OFX);
 
             // For: Each offering
@@ -198,7 +198,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task GetSingleSeedOffering()
         {
             // When: Requesting download offerings
-            var offerings = await loader.GetSeedOfferingsAsync();
+            var offerings = await loader.ListSeedOfferingsAsync();
 
             // Then: At least one is returned
             Assert.IsTrue(offerings.Count() > 0);
@@ -211,7 +211,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task GetAllSeedOffering()
         {
             // When: Requesting download offerings
-            var offerings = await loader.GetSeedOfferingsAsync();
+            var offerings = await loader.ListSeedOfferingsAsync();
 
             // Then: At least one is returned
             Assert.IsTrue(offerings.Count() >= 6);
@@ -221,7 +221,7 @@ namespace YoFi.Tests.Core.SampleGen
         public async Task AllSeedOfferingAvailable()
         {
             // When: Requesting download offerings
-            var offerings = await loader.GetSeedOfferingsAsync();
+            var offerings = await loader.ListSeedOfferingsAsync();
 
             // Then: All are returned
             Assert.AreEqual(6,offerings.Count(x=>x.IsAvailable));
@@ -234,7 +234,7 @@ namespace YoFi.Tests.Core.SampleGen
             context.Add(new Transaction());
 
             // When: Requesting download offerings
-            var offerings = await loader.GetSeedOfferingsAsync();
+            var offerings = await loader.ListSeedOfferingsAsync();
 
             // Then: correct number are returned
             Assert.AreEqual(4, offerings.Count(x => x.IsAvailable));
@@ -247,7 +247,7 @@ namespace YoFi.Tests.Core.SampleGen
             context.Add(new Payee());
 
             // When: Requesting download offerings
-            var offerings = await loader.GetSeedOfferingsAsync();
+            var offerings = await loader.ListSeedOfferingsAsync();
 
             // Then: correct number are returned
             Assert.AreEqual(3, offerings.Count(x => x.IsAvailable));
@@ -273,7 +273,7 @@ namespace YoFi.Tests.Core.SampleGen
             await loader.SeedAsync(id);
 
             // Then: That item is no longer allowed
-            var offerings = await loader.GetSeedOfferingsAsync();
+            var offerings = await loader.ListSeedOfferingsAsync();
             var chosen = offerings.Where(x => x.ID == id).Single();
             Assert.IsFalse(chosen.IsAvailable);
 

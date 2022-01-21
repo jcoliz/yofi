@@ -31,6 +31,11 @@ namespace YoFi.Core.SampleGen
             _config = config;
         }
 
+        /// <summary>
+        /// Retrieve a sample data download offering
+        /// </summary>
+        /// <param name="id">Unique identifier for which offering to download</param>
+        /// <returns>Stream containing the desired file</returns>
         public Task<Stream> DownloadSampleDataAsync(string id)
         {
             Stream stream;
@@ -121,7 +126,11 @@ namespace YoFi.Core.SampleGen
             return Task.FromResult(stream);
         }
 
-        public async Task<IEnumerable<ISampleDataDownloadOffering>> GetDownloadOfferingsAsync()
+        /// <summary>
+        /// Discover the available sample data download offerings
+        /// </summary>
+        /// <returns>All known offerings</returns>
+        public async Task<IEnumerable<ISampleDataDownloadOffering>> ListDownloadOfferingsAsync()
         {
             using var stream = Common.NET.Data.SampleData.Open("SampleDataDownloadOfferings.json");
 
@@ -154,7 +163,17 @@ namespace YoFi.Core.SampleGen
             return result;
         }
 
-        public async Task<IEnumerable<ISampleDataSeedOffering>> GetSeedOfferingsAsync()
+        /// <summary>
+        /// Discover the known sample data offerings which can be seeded into
+        /// the database
+        /// </summary>
+        /// <remarks>
+        /// Notice the 'available' field. Some offerings are not available if there
+        /// is already overlapping data, yet this will return them anyway, but set
+        /// the 'available' property to false.
+        /// </remarks>
+        /// <returns>All known seed offerings</returns>
+        public async Task<IEnumerable<ISampleDataSeedOffering>> ListSeedOfferingsAsync()
         {
             using var stream = Common.NET.Data.SampleData.Open("SampleDataSeedOfferings.json");
 
@@ -168,12 +187,17 @@ namespace YoFi.Core.SampleGen
             return result;
         }
 
+        /// <summary>
+        /// Add sample data to the runtime database
+        /// </summary>
+        /// <param name="id">Unique identifier for which offering to seed</param>
+        /// <returns>Result message described what happened</returns>
         public async Task<string> SeedAsync(string id)
         {
             var results = new List<string>();
 
             // First, get info about the offering
-            var offerings = await GetSeedOfferingsAsync();
+            var offerings = await ListSeedOfferingsAsync();
             var found = offerings.Where(x => x.ID == id);
             if (!found.Any())
                 throw new ApplicationException($"Not found seed ID {id}");

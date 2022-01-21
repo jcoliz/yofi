@@ -10,7 +10,7 @@ namespace YoFi.Core.SampleGen
     public interface ISampleDataLoader
     {
         /// <summary>
-        /// Discover the available sample data offerings which can be seeded into
+        /// Discover the known sample data offerings which can be seeded into
         /// the database
         /// </summary>
         /// <remarks>
@@ -18,8 +18,8 @@ namespace YoFi.Core.SampleGen
         /// is already overlapping data, yet this will return them anyway, but set
         /// the 'available' property to false.
         /// </remarks>
-        /// <returns></returns>
-        Task<IEnumerable<ISampleDataSeedOffering>> GetSeedOfferingsAsync();
+        /// <returns>All known seed offerings</returns>
+        Task<IEnumerable<ISampleDataSeedOffering>> ListSeedOfferingsAsync();
 
         /// <summary>
         /// Add sample data to the runtime database
@@ -31,14 +31,14 @@ namespace YoFi.Core.SampleGen
         /// <summary>
         /// Discover the available sample data download offerings
         /// </summary>
-        /// <returns></returns>
-        Task<IEnumerable<ISampleDataDownloadOffering>> GetDownloadOfferingsAsync();
+        /// <returns>All known offerings</returns>
+        Task<IEnumerable<ISampleDataDownloadOffering>> ListDownloadOfferingsAsync();
 
         /// <summary>
         /// Retrieve a sample data download offering
         /// </summary>
         /// <param name="id">Unique identifier for which offering to download</param>
-        /// <returns></returns>
+        /// <returns>Stream containing the desired file</returns>
         Task<Stream> DownloadSampleDataAsync(string id);
     }
 

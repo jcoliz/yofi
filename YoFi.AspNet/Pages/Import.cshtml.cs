@@ -52,7 +52,7 @@ namespace YoFi.AspNet.Pages
             // TODO: Should add a DTO here
             Transactions = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = "i=1", Page = p, View = "h" } );
 
-            Offerings = await _loader.GetDownloadOfferingsAsync();
+            Offerings = await _loader.ListDownloadOfferingsAsync();
 
             return Page();
         }
@@ -147,7 +147,7 @@ namespace YoFi.AspNet.Pages
             IActionResult result = NotFound();
             try
             {
-                var offerings = await _loader.GetDownloadOfferingsAsync();
+                var offerings = await _loader.ListDownloadOfferingsAsync();
 
                 var offering = offerings.Where(x => x.ID == what).Single();
                 if (null != offering)

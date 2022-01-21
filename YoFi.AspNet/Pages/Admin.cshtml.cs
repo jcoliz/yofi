@@ -49,7 +49,7 @@ namespace YoFi.AspNet.Pages
 
         public async Task OnGetAsync()
         {
-            Offerings = (await _loader.GetSeedOfferingsAsync()).Where(x => x.IsAvailable).ToList();
+            Offerings = (await _loader.ListSeedOfferingsAsync()).Where(x => x.IsAvailable).ToList();
 
             // TODO: CountAsync()
             NumTransactions = _context.Transactions.Count();
