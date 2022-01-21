@@ -176,6 +176,7 @@ namespace YoFi.Tests.Core.SampleGen
             // And: its ID is as expected
             Assert.AreEqual(1, offerings.Count(x => x.ID == "today"));
         }
+
         [TestMethod]
         public async Task GetAllSeedOffering()
         {
@@ -185,5 +186,16 @@ namespace YoFi.Tests.Core.SampleGen
             // Then: At least one is returned
             Assert.IsTrue(offerings.Count() >= 6);
         }
+
+        [TestMethod]
+        public async Task AllSeedOfferingAvailable()
+        {
+            // When: Requesting download offerings
+            var offerings = await loader.GetSeedOfferingsAsync();
+
+            // Then: At least one is returned
+            Assert.AreEqual(6,offerings.Count(x=>x.IsAvailable));
+        }
+
     }
 }

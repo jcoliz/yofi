@@ -76,6 +76,8 @@ namespace YoFi.Core.SampleGen
         bool IsAvailable { get; }
 
         SampleDataSeedOfferingCondition Condition { get; }
+
+        IEnumerable<string> Rules { get; }
     }
 
     public enum SampleDataDownloadOfferingKind { None = 0, Primary, Monthly }

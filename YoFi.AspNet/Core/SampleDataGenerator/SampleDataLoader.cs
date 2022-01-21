@@ -161,12 +161,50 @@ namespace YoFi.Core.SampleGen
             options.Converters.Add(new JsonStringEnumConverter());
             var result = await JsonSerializer.DeserializeAsync<List<SeedOffering>>(stream, options);
 
+            foreach (var offering in result)
+                offering.IsAvailable = RulesOK(offering.Rules);
+
             return result;
         }
 
         public Task SeedAsync(string id)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Whether the given seed <paramref name="rules"/> are allowed given the current
+        /// state of the database
+        /// </summary>
+        /// <param name="rules"></param>
+        /// <returns></returns>
+        private bool RulesOK(IEnumerable<string> rules)
+        {
+            foreach(var rule in rules)
+            {
+                if (nameof(BudgetTx) == rule)
+                {
+                    if (_context.BudgetTxs.Any())
+                        return false;
+                }
+                if (nameof(Payee) == rule)
+                {
+                    if (_context.Payees.Any())
+                        return false;
+                }
+                if (nameof(Transaction) == rule)
+                {
+                    if (_context.Transactions.Any())
+                        return false;
+                }
+                if ("Today" == rule)
+                {
+                    // We'll come back to this
+                }
+            }
+
+            return true;
+
         }
     }
 
@@ -194,5 +232,7 @@ namespace YoFi.Core.SampleGen
         public bool IsAvailable { get; set; }
 
         public SampleDataSeedOfferingCondition Condition { get; set; }
+
+        public IEnumerable<string> Rules { get; set; }
     }
 }
