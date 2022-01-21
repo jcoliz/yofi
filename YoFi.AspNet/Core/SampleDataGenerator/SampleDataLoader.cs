@@ -35,7 +35,7 @@ namespace YoFi.Core.SampleGen
         {
             Stream stream;
 
-            var instream = System.IO.File.OpenRead($"{_config.Directory}/SampleData-Full.xlsx");
+            var instream = File.OpenRead($"{_config.Directory}/SampleData-Full.xlsx");
 
             if ("full" == id)
             {
@@ -184,29 +184,42 @@ namespace YoFi.Core.SampleGen
                 throw new ApplicationException($"This data type is unavailable: {offering.Description}");
 
             // Load sample data
-            var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
-            var generator = new SampleDataGenerator();
-            generator.LoadDefinitions(instream);
-            SampleDataPattern.Year = _clock.Now.Year;
+            var instream = File.OpenRead($"{_config.Directory}/SampleData-Full.xlsx");
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(instream);
 
             // Add the kinds of data based on the rules
             if (offering.Rules.Contains(nameof(Transaction)))
             {
-                generator.GenerateTransactions(addids: false);
-                _context.AddRange(generator.Transactions);
-                results.Add($"{generator.Transactions.Count()} transactions");
+                var added = ssr.Deserialize<Transaction>();
+                _context.AddRange(added);
+                results.Add($"{added.Count()} transactions");
+            }
+            if (offering.Rules.Contains("Today"))
+            {
+                var txs = ssr.Deserialize<Transaction>();
+
+                DateTime last = DateTime.MinValue;
+                var lastq = _context.Transactions.OrderByDescending(x => x.Timestamp).Select(x => x.Timestamp);
+                if (lastq.Any())
+                    last = lastq.First();
+
+                var added = txs.Where(x => x.Timestamp > last && x.Timestamp <= _clock.Now);
+                _context.AddRange(added);
+
+                results.Add($"{added.Count()} transactions");
             }
             if (offering.Rules.Contains(nameof(BudgetTx)))
             {
-                generator.GenerateBudget();
-                _context.AddRange(generator.BudgetTxs);
-                results.Add($"{generator.BudgetTxs.Count()} budget line items");
+                var added = ssr.Deserialize<BudgetTx>();
+                _context.AddRange(added);
+                results.Add($"{added.Count()} budget line items");
             }
             if (offering.Rules.Contains(nameof(Payee)))
             {
-                generator.GeneratePayees();
-                _context.AddRange(generator.Payees);
-                results.Add($"{generator.Payees.Count()} payee matching rules");
+                var added = ssr.Deserialize<Payee>();
+                _context.AddRange(added);
+                results.Add($"{added.Count()} payee matching rules");
             }
 
             await _context.SaveChangesAsync();

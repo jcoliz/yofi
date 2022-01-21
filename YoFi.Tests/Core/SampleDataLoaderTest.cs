@@ -250,6 +250,41 @@ namespace YoFi.Tests.Core.SampleGen
                 Assert.AreEqual(46, context.BudgetTxs.Count());
         }
 
+        [TestMethod]
+        public async Task ApplySeedOfferingTxToday()
+        {
+            // Given: It's 3 months into the year
+            clock.Now = new DateTime(clock.Now.Year, 4, 1);
+
+            // When: Seeding with the offering id "txtoday"
+            await loader.SeedAsync("txtoday");
+
+            // Then: One third of transactions are added
+            var count = context.Transactions.Count();
+            Assert.IsTrue(count > 200);
+            Assert.IsTrue(count < 400);
+
+            // And: None are after today
+            Assert.IsFalse(context.Transactions.Any(x=>x.Timestamp > clock.Now));
+        }
+
+        [TestMethod]
+        public async Task ApplySeedOfferingTxTodayTwice()
+        {
+            // Given: Already seeded months into the year
+            clock.Now = new DateTime(clock.Now.Year, 4, 1);
+            await loader.SeedAsync("txtoday");
+
+            // And: Now it's the end of the year
+            clock.Now = new DateTime(clock.Now.Year, 12, 31);
+
+            // When: Seeding again with the offering id "txtoday"
+            await loader.SeedAsync("txtoday");
+
+            // Then: The correct number and type of items are in the database
+            Assert.AreEqual(889, context.Transactions.Count());
+        }
+
         [ExpectedException(typeof(ApplicationException))]
         [TestMethod]
         public async Task IDNotFound()
