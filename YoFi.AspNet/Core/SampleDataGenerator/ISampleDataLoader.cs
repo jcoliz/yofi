@@ -65,12 +65,6 @@ namespace YoFi.Core.SampleGen
         string Description { get; }
 
         /// <summary>
-        /// Whether this is the recommended choice among the currently
-        /// available offerings
-        /// </summary>
-        bool IsRecommended { get; }
-
-        /// <summary>
         /// Whether this offering can be seeded, given the current state of the DB
         /// </summary>
         bool IsAvailable { get; }

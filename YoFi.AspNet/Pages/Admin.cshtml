@@ -103,67 +103,30 @@ else
 
     <h4>Database Status: Empty</h4>
 
-    <p>You can import your own data in OFX or XLSX files on the <a asp-controller="Transactions" asp-action="Import">Import</a> page. There you'll also find some sample data files you can download to see how they should be formatted. You could turn around and upload those files to get some sample data.</p>
+    <p>You can import your own data in OFX or XLSX files on the <a asp-page="/Import">Import</a> page. There you'll also find some sample data files you can download to see how they should be formatted. You could turn around and upload those files to get some sample data.</p>
 
     <p>You can inject sample data into the database here now, or add some later using the "Admin" link on the site navigation bar.</p>
 
 }
 
-@if (!Model.HasAllData)
+@if (Model.Offerings.Any())
 {
+    var first = Model.Offerings.First().ID;
+
     <h4>Sample Data</h4>
 
     <p>Please choose any of the following options to inject sample data into your database. You can always delete it later on this page.</p>
     <div class="row mb-2">
-        @if (!Model.HasSomeData)
+        @foreach (var offering in Model.Offerings)
         {
             <div class="col-xxl-2 col-lg-4 col-md-6 p-2 d-flex">
-                <div class="btn flex-fill" style="background-color:lightblue" data-id="today" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-                    <h4>Today</h4>
-                    <p>Transactions through @Model.Clock.Now.ToString("MMM yyyy"), plus payee matching rules, and a budget.</p>
-                    <p><i class="fas fa-star"></i> Recommended <i class="fas fa-star"></i></p>
-                </div>
-            </div>
-            <div class="col-xxl-2 col-lg-4 col-md-6 p-2 d-flex">
-                <div class="btn flex-fill" style="background-color:lightblue" data-id="all" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-                    <h4>Full Year Sample Data</h4>
-                    <p>Includes 12 months of transactions, payee matching rules, and a budget.</p>
-                </div>
-            </div>
-        }
-        @if (Model.MoreTransactionsReady)
-        {
-            <div class="col-xxl-2 col-lg-4 col-md-6 p-2 d-flex">
-                <div class="btn flex-fill " style="background-color:lightblue" data-id="txtoday" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-                    <h4>Transactions to Today</h4>
-                    <p>Transactions only up to @Model.Clock.Now.ToString("MMM yyyy"). No payees or budget.</p>
-                </div>
-            </div>
-        }
-        @if (0 == Model.NumTransactions)
-        {
-            <div class="col-xxl-2 col-lg-4 col-md-6 p-2 d-flex">
-                <div class="btn flex-fill " style="background-color:lightblue" data-id="txyear" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-                    <h4>Full Year Transactions</h4>
-                    <p>Complete year of transactions only. No payees or budget.</p>
-                </div>
-            </div>
-        }
-        @if (0 == Model.NumBudgetTxs)
-        {
-            <div class="col-xxl-2 col-lg-4 col-md-6 p-2 d-flex">
-                <div class="btn flex-fill" style="background-color:lightblue" data-id="budget" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-                    <h4>Budget Only</h4>
-                    <p>A single year's budget line items, which correspond to the sample transactions</p>
-                </div>
-            </div>
-        }
-        @if (0 == Model.NumPayees)
-        {
-            <div class="col-xxl-2 col-lg-4 col-md-6 p-2 d-flex">
-                <div class="btn flex-fill " style="background-color:lightblue" data-id="payee" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
-                    <h4>Payee Matching Rules Only</h4>
-                    <p>Only payee matching rules. Helpful to see how payee matching works with OFX import</p>
+                <div class="btn flex-fill" style="background-color:lightblue" data-id="@offering.ID" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
+                    <h4>@offering.Title</h4>
+                    <p>@offering.Description</p>
+                    @if (first == offering.ID)
+                    {
+                        <p><i class="fas fa-star"></i> Recommended <i class="fas fa-star"></i></p>
+                    }
                 </div>
             </div>
         }

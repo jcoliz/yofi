@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using YoFi.Core;
+using YoFi.Core.SampleGen;
 
 namespace YoFi.AspNet.Pages
 {
@@ -21,7 +22,12 @@ namespace YoFi.AspNet.Pages
         public int NumBudgetTxs { get; set; }
         public int NumPayees { get; set; }
         public PageConfig Config { get; private set; }
+
+        private readonly ISampleDataLoader _loader;
+
         public IClock Clock { get; private set; }
+
+        public IEnumerable<ISampleDataSeedOffering> Offerings { get; private set; }
 
         private readonly IDataContext _context;
 
@@ -33,30 +39,24 @@ namespace YoFi.AspNet.Pages
             public bool NoDelete { get; set; }
         }
 
-        public AdminModel(IDataContext context, IOptions<PageConfig> config, IClock clock)
+        public AdminModel(IDataContext context, IOptions<PageConfig> config, IClock clock, ISampleDataLoader loader)
         {
             _context = context;
             Clock = clock;
             Config = config.Value;
+            _loader = loader;
         }
 
-        public void OnGetAsync()
+        public async Task OnGetAsync()
         {
+            Offerings = (await _loader.GetSeedOfferingsAsync()).Where(x => x.IsAvailable).ToList();
+
             // TODO: CountAsync()
             NumTransactions = _context.Transactions.Count();
             NumBudgetTxs = _context.BudgetTxs.Count();
             NumPayees = _context.Payees.Count();
 
-            if (NumTransactions > 0)
-            {
-                var latest = _context.Transactions.OrderByDescending(x => x.Timestamp).Select(x => x.Timestamp).First();
-                MoreTransactionsReady = Clock.Now - latest > TimeSpan.FromDays(7);
-            }
-            else
-                MoreTransactionsReady = true;
-
             HasSomeData = NumTransactions > 0 || NumBudgetTxs > 0 || NumPayees > 0;
-            HasAllData = NumTransactions > 0 && NumBudgetTxs > 0 && NumPayees > 0 && ! MoreTransactionsReady;
         }
     }
 }

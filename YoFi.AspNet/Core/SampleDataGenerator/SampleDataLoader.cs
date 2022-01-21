@@ -165,8 +165,6 @@ namespace YoFi.Core.SampleGen
             foreach (var offering in result)
                 offering.IsAvailable = RulesOK(offering.Rules);
 
-            result.First().IsRecommended = true;
-
             return result;
         }
 
@@ -193,9 +191,32 @@ namespace YoFi.Core.SampleGen
             // Add the kinds of data based on the rules
             if (offering.Rules.Contains(nameof(Transaction)))
             {
-                var added = ssr.Deserialize<Transaction>();
-                _context.AddRange(added);
-                results.Add($"{added.Count()} transactions");
+                var txs = ssr.Deserialize<Transaction>().ToList();
+
+                // Apply splits
+                if (ssr.SheetNames.Contains("Split"))
+                {
+                    var splits = ssr.Deserialize<Split>().ToLookup(x => x.TransactionID);
+                    foreach(var item in txs.Where(x=>x.ID > 0))
+                    {
+                        var mysplits = splits.Where(x => x.Key == item.ID).SelectMany(x => x);
+                        if (mysplits.Any())
+                        {
+                            item.Splits = mysplits.ToList();
+                            item.Category = null;
+                            foreach (var split in item.Splits)
+                            {
+                                // Clear any imported IDs
+                                split.ID = 0;
+                                split.TransactionID = 0;
+                            }
+                        }
+                        item.ID = 0;
+                    }
+                }
+
+                _context.AddRange(txs);
+                results.Add($"{txs.Count()} transactions");
             }
             if (offering.Rules.Contains("Today"))
             {
@@ -206,7 +227,30 @@ namespace YoFi.Core.SampleGen
                 if (lastq.Any())
                     last = lastq.First();
 
-                var added = txs.Where(x => x.Timestamp > last && x.Timestamp <= _clock.Now);
+                var added = txs.Where(x => x.Timestamp > last && x.Timestamp <= _clock.Now).ToList();
+
+                // Apply splits
+                if (ssr.SheetNames.Contains("Split"))
+                {
+                    var splits = ssr.Deserialize<Split>().ToLookup(x => x.TransactionID);
+                    foreach (var item in added.Where(x => x.ID > 0))
+                    {
+                        var mysplits = splits.Where(x => x.Key == item.ID).SelectMany(x => x);
+                        if (mysplits.Any())
+                        {
+                            item.Splits = mysplits.ToList();
+                            item.Category = null;
+                            foreach (var split in item.Splits)
+                            {
+                                // Clear any imported IDs
+                                split.ID = 0;
+                                split.TransactionID = 0;
+                            }
+                        }
+                        item.ID = 0;
+                    }
+                }
+
                 _context.AddRange(added);
 
                 results.Add($"{added.Count()} transactions");
@@ -225,7 +269,7 @@ namespace YoFi.Core.SampleGen
             }
 
             await _context.SaveChangesAsync();
-            return "OK: Added " + string.Join(", ", results);
+            return "Added " + string.Join(", ", results);
         }
 
         /// <summary>
@@ -283,8 +327,6 @@ namespace YoFi.Core.SampleGen
         public string Title { get; set; }
 
         public string Description { get; set; }
-
-        public bool IsRecommended { get; set; }
 
         public bool IsAvailable { get; set; }
 
