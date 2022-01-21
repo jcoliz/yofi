@@ -62,26 +62,10 @@ namespace YoFi.AspNet.Controllers
         /// <returns></returns>
         [HttpPost("ClearTestData/{id}")]
         [ApiBasicAuthorization]
-        public async Task<IActionResult> ClearTestData(string id, [FromServices] IDataContext context)
+        public async Task<IActionResult> ClearTestData(string id, [FromServices] IAdministrative dbadmin)
         {
-            if (id.Contains("payee") || "all" == id)
-                context.RemoveRange(context.Payees.Where(x => x.Category.Contains(TestMarker)));
-
-            if (id.Contains("budgettx") || "all" == id)
-                context.RemoveRange(context.BudgetTxs.Where(x => x.Category.Contains(TestMarker)));
-
-            if (id.Contains("trx") || "all" == id)
-            {
-                context.RemoveRange(context.Transactions.Where(x => x.Category.Contains(TestMarker) || x.Memo.Contains(TestMarker) || x.Payee.Contains(TestMarker)));
-                context.RemoveRange(context.Splits.Where(x => x.Category.Contains(TestMarker)));
-            }
-
-            await context.SaveChangesAsync();
-
+            await dbadmin.ClearDatabaseAsync(id);
             return new OkResult();
         }
-
-        public const string TestMarker = "__test__";
-
     }
 }
