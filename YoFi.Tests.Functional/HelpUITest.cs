@@ -139,6 +139,12 @@ namespace YoFi.Tests.Functional
             Then: User is given a help prompt on the next page explaining this is a demo
             */
 
+            // Given: Is a demo site
+            if (TestContext.Properties.Contains("demo"))
+                if (bool.TryParse(TestContext.Properties["demo"] as string, out var demo))
+                    if (!demo)
+                        return;
+               
             // Given: We are already logged in and starting at the root of the site
             // (Logged in needed so we can actually get to transactions page)
             await GivenLoggedIn();
