@@ -167,14 +167,12 @@ namespace YoFi.Core.Repositories
             // transactions in the system.
 
             var needbankrefs = All.Where(x => null == x.BankReference);
-
-            // TODO: AnyAsync()
-            if (needbankrefs.Any())
+            var any = await _context.AnyAsync(needbankrefs);
+            if (any)
             {
                 foreach (var tx in needbankrefs)
-                {
                     tx.GenerateBankReference();
-                }
+
                 await UpdateRangeAsync(needbankrefs);
             }
         }

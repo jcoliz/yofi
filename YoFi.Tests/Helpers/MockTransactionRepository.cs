@@ -22,7 +22,7 @@ namespace YoFi.Tests.Helpers
         {
             var needbankrefs = All.Where(x => null == x.BankReference);
 
-            // TODO: AnyAsync()
+            // Doesn't need anyasync, this is a mock!!
             if (needbankrefs.Any())
             {
                 foreach (var tx in needbankrefs)

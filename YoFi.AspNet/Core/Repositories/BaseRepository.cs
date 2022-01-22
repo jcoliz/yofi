@@ -67,8 +67,7 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <param name="id">Identifier of desired item</param>
         /// <returns>True if desired item exists</returns>
-        public Task<bool> TestExistsByIdAsync(int id) => Task.FromResult(_context.Get<T>().Any(x => x.ID == id));
-        // TODO: QueryExec AnyAsync()
+        public Task<bool> TestExistsByIdAsync(int id) => _context.AnyAsync(_context.Get<T>().Where(x => x.ID == id));
 
         /// <summary>
         /// Add <paramref name="item"/> to the repository

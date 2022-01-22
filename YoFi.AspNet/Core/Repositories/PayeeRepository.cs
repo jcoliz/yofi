@@ -82,15 +82,12 @@ namespace YoFi.Core.Repositories
         /// I am wondering if it's really worth it to keep this
         /// </remarks>
         /// <returns></returns>
-        public Task LoadCacheAsync()
+        public async Task LoadCacheAsync()
         {
             // Load all payees into memory. This is an optimization. Rather than run a separate payee query for every 
             // transaction, we'll pull it all into memory. This assumes the # of payees is not out of control.
 
-            // TODO: QueryExec ToListAsync();
-            payeecache = All.ToList();
-
-            return Task.CompletedTask;
+            payeecache = await _context.ToListNoTrackingAsync(All);
         }
 
         /// <summary>
