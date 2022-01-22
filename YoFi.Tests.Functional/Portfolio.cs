@@ -192,8 +192,8 @@ namespace YoFi.Tests.Functional
 
             // Select a file from your computer to upload. 
             // For best results, use the sample file from GitHub 
-            // https://github.com/jcoliz/yofi/blob/3c89902051fd34a3eb43ed2ea2dfa86f2b04d393/YoFi.Tests.Functional/SampleData/Test-Generator-GenerateUploadSampleData.xlsx
-            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            // https://github.com/jcoliz/yofi/blob/3c89902051fd34a3eb43ed2ea2dfa86f2b04d393/YoFi.Tests.Functional/SampleData/Test-Generator-GenerateUploadSampleData-Transactions.xlsx
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData-Transactions.xlsx" });
 
             // Click the "Upload" button
             // (Note that this requires a validated account to accomplish)

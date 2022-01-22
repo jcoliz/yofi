@@ -18,7 +18,7 @@ namespace YoFi.Tests.Functional
 
         public override BrowserNewContextOptions ContextOptions => _ContextOptions;
 
-        private static readonly ViewportSize iPadLandscapeViewport = new ViewportSize() { Width = 1080, Height = 810 };
+        protected static readonly ViewportSize iPadLandscapeViewport = new ViewportSize() { Width = 1080, Height = 810 };
 
         private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions { AcceptDownloads = true, ViewportSize = iPadLandscapeViewport };
 

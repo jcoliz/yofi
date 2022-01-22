@@ -1,4 +1,5 @@
-﻿using Microsoft.Playwright.MSTest;
+﻿using Microsoft.Playwright;
+using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
@@ -7,6 +8,9 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class NotLoggedInUITest: FunctionalUITest
     {
+        // We need to override the browser new context options here so we can NOT have the cookies file, and ergo NOT be logged in.
+        public override BrowserNewContextOptions ContextOptions => new BrowserNewContextOptions { ViewportSize = iPadLandscapeViewport };
+
         [TestMethod]
         public async Task HomePage()
         {
@@ -20,8 +24,7 @@ namespace YoFi.Tests.Functional
             await Page.ThenIsOnPageAsync("Home");
         }
 
-        // TODO: When run as part of the larger group, user is already logged in! I need to ensure you're NOT logged in
-        //[TestMethod]
+        [TestMethod]
         public async Task LoginPage()
         {
             // Given: Starting at the home page, not logged in
