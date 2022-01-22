@@ -43,7 +43,7 @@
     "storage-name": "[concat('storage',uniqueString(resourceGroup().id))]",
     "sql-user": "sql-user",
     "app-sku": "F1",
-    "packageUri": "https://github.com/jcoliz/yofi/releases/download/0.9.5/yofi-0.9.5.zip"
+    "packageUri": "https://github.com/jcoliz/yofi/releases/download/0.9.6/yofi-0.9.6.zip"
   },
   "resources": [
     {
