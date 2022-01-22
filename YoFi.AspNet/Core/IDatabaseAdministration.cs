@@ -37,6 +37,15 @@ namespace YoFi.Core
         /// </remarks>
         /// <param name="id">Which data to clear (budgettx,payee,tx)</param>
         Task ClearDatabaseAsync(string id);
+
+        /// <summary>
+        /// Mark all hidden transactions on or before today as unhidden
+        /// </summary>
+        /// <remarks>
+        /// Useful for demo if you want to reveal them over time for a demo
+        /// </remarks>
+        /// <returns></returns>
+        Task UnhideTransactionsToToday();
     }
 
     public interface IDatabaseStatus

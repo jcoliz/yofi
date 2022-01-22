@@ -265,7 +265,7 @@ namespace YoFi.Tests.Database
             await context.SaveChangesAsync();
 
             // When: Calling ClearTestData with id="trx"
-            var actionresult = await controller.ClearTestData("trx", new DatabaseAdministration(context));
+            var actionresult = await controller.ClearTestData("trx", new DatabaseAdministration(context,clock));
 
             // Then: Result is OK
             Assert.That.IsOfType<OkResult>(actionresult);
@@ -287,7 +287,7 @@ namespace YoFi.Tests.Database
             await context.SaveChangesAsync();
 
             // When: Calling ClearTestData with id="budgettx"
-            var actionresult = await controller.ClearTestData("budgettx", new DatabaseAdministration(context));
+            var actionresult = await controller.ClearTestData("budgettx", new DatabaseAdministration(context,clock));
 
             // Then: Result is OK
             Assert.That.IsOfType<OkResult>(actionresult);
@@ -310,7 +310,7 @@ namespace YoFi.Tests.Database
             await context.SaveChangesAsync();
 
             // When: Calling ClearTestData with id="payee"
-            var actionresult = await controller.ClearTestData("payee", new DatabaseAdministration(context));
+            var actionresult = await controller.ClearTestData("payee", new DatabaseAdministration(context,clock));
 
             // Then: Result is OK
             Assert.That.IsOfType<OkResult>(actionresult);

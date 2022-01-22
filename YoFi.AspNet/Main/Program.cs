@@ -16,6 +16,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using Common.DotNet;
 using Microsoft.Extensions.Options;
+using YoFi.Core.SampleGen;
+using YoFi.Core;
 
 namespace YoFi.AspNet.Main
 {
@@ -24,7 +26,7 @@ namespace YoFi.AspNet.Main
     {
         private static readonly Queue<string> logme = new Queue<string>();
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var host = BuildWebHost(args);
 
@@ -79,10 +81,13 @@ namespace YoFi.AspNet.Main
 
                 try
                 {
-                    var context = services.GetRequiredService<ApplicationDbContext>();
                     var democonfig = services.GetRequiredService<DemoConfig>();
-                    var clock = services.GetRequiredService<IClock>();
-                    Data.Seed.AddSampleData(context, isDemo:democonfig.IsEnabled, clock);
+                    if (democonfig.IsEnabled)
+                    {
+                        var loader = services.GetRequiredService<ISampleDataLoader>();
+                        var dbadmin = services.GetRequiredService<IDatabaseAdministration>();
+                        await Seed.ManageSampleData(loader, dbadmin);
+                    }
                 }
                 catch (Exception ex)
                 {

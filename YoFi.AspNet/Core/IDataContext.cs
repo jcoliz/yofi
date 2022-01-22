@@ -96,5 +96,7 @@ namespace YoFi.Core
         Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class;
 
         Task<int> CountAsync<T>(IQueryable<T> query) where T : class;
+
+        Task<bool> AnyAsync<T>(IQueryable<T> query) where T : class;
     }
 }

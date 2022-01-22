@@ -195,8 +195,10 @@ namespace YoFi.Core.SampleGen
         /// Add sample data to the runtime database
         /// </summary>
         /// <param name="id">Unique identifier for which offering to seed</param>
+        /// <param name="hidden">Whether to hide the transactions. Useful if you want
+        /// to reveal them over time</param>
         /// <returns>Result message described what happened</returns>
-        public async Task<string> SeedAsync(string id)
+        public async Task<string> SeedAsync(string id, bool hidden = false)
         {
             var results = new List<string>();
 
@@ -221,6 +223,10 @@ namespace YoFi.Core.SampleGen
             if (offering.Rules.Contains(nameof(Transaction)))
             {
                 var txs = ssr.Deserialize<Transaction>().ToList();
+
+                if (hidden)
+                    foreach (var tx in txs)
+                        tx.Hidden = true;
 
                 // Apply splits
                 // TODO: DRY. Created a function for this repeated code
@@ -258,6 +264,10 @@ namespace YoFi.Core.SampleGen
                     last = lastq.First();
 
                 var added = txs.Where(x => x.Timestamp > last && x.Timestamp <= _clock.Now).ToList();
+
+                if (hidden)
+                    foreach (var tx in added)
+                        tx.Hidden = true;
 
                 // Apply splits
                 if (ssr.SheetNames.Contains("Split"))

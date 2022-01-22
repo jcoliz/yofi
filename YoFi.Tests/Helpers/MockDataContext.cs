@@ -198,5 +198,7 @@ namespace YoFi.Tests.Helpers
         Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) => Task.FromResult(query.ToList());
 
         Task<int> IDataContext.CountAsync<T>(IQueryable<T> query) => Task.FromResult(query.Count());
+
+        Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) => Task.FromResult(query.Any());
     }
 }

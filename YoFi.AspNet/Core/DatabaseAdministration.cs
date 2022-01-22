@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.DotNet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,10 +11,12 @@ namespace YoFi.Core
         public const string TestMarker = "__test__";
 
         private readonly IDataContext _context;
+        private readonly IClock _clock;
 
-        public DatabaseAdministration(IDataContext context)
+        public DatabaseAdministration(IDataContext context, IClock clock)
         {
-            this._context = context;
+            _context = context;
+            _clock = clock;
         }
 
         public async Task ClearDatabaseAsync(string id)
@@ -66,6 +69,18 @@ namespace YoFi.Core
             result.IsEmpty = result.NumTransactions == 0 && result.NumBudgetTxs == 0 && result.NumPayees == 0;
 
             return result;
+        }
+
+        public async Task UnhideTransactionsToToday()
+        {
+            var unhideme = _context.Transactions.Where(x => x.Timestamp <= _clock.Now && x.Hidden == true);
+            var any = await _context.AnyAsync(unhideme);
+            if (any)
+            {
+                foreach (var t in unhideme)
+                    t.Hidden = false;
+                await _context.SaveChangesAsync();
+            }
         }
     }
 

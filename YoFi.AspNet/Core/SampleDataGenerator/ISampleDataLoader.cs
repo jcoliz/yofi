@@ -25,8 +25,10 @@ namespace YoFi.Core.SampleGen
         /// Add sample data to the runtime database
         /// </summary>
         /// <param name="id">Unique identifier for which offering to seed</param>
+        /// <param name="hidden">Whether to hide the transactions. Useful if you want
+        /// to reveal them over time</param>
         /// <returns>Result message described what happened</returns>
-        Task<string> SeedAsync(string id);
+        Task<string> SeedAsync(string id, bool hidden = false);
 
         /// <summary>
         /// Discover the available sample data download offerings

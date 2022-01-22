@@ -11,6 +11,7 @@ using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core.SampleGen;
 using Common.NET.Data;
 using Common.DotNet;
+using YoFi.Core;
 
 namespace YoFi.AspNet.Data
 {
@@ -68,42 +69,13 @@ namespace YoFi.AspNet.Data
         /// ONLY IF: The demo is enabled, AND there is no data of any time already there
         /// </remarks>
         /// <returns></returns>
-        public static void AddSampleData(ApplicationDbContext context, bool isDemo, IClock clock)
+        public static async Task ManageSampleData(ISampleDataLoader loader, IDatabaseAdministration dbadmin)
         {
-            if (isDemo)
-            {
-                if (! context.Transactions.Any() && ! context.Payees.Any() && ! context.BudgetTxs.Any() )
-                {
-                    SampleDataPattern.Year = clock.Now.Year;
+            var status = await dbadmin.GetDatabaseStatus();
+            if (status.IsEmpty)
+                await loader.SeedAsync("all", hidden: true);
 
-                    // Load sample data
-                    var instream = SampleData.Open("FullSampleDataDefinition.xlsx");
-                    var generator = new SampleDataGenerator();
-                    generator.LoadDefinitions(instream);
-                    generator.GenerateTransactions(addids: false);
-                    generator.GeneratePayees();
-                    generator.GenerateBudget();
-
-                    // Make all the transactions hidden
-                    foreach (var t in generator.Transactions)
-                        t.Hidden = true;
-
-                    // Insert into database
-                    context.Transactions.AddRange(generator.Transactions);
-                    context.Payees.AddRange(generator.Payees);
-                    context.BudgetTxs.AddRange(generator.BudgetTxs);
-                    context.SaveChanges();
-                }
-
-                // Un-hide any transactions which are up until today
-                var unhideme = context.Transactions.Where(x => x.Timestamp <= clock.Now && x.Hidden == true);
-                if (unhideme.Any())
-                {
-                    foreach (var t in unhideme)
-                        t.Hidden = false;
-                    context.SaveChanges();
-                }
-            }
+            await dbadmin.UnhideTransactionsToToday();
         }
     }
 }
