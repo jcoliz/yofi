@@ -34,7 +34,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [ValidateModel]
         [ValidateSplitExists]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,TransactionID,Amount,Category,SubCategory,Memo")] Split split)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,TransactionID,Amount,Category,Memo")] Split split)
         {
             await _repository.UpdateAsync(split);
             return RedirectToAction("Edit","Transactions", new { id = split.TransactionID });

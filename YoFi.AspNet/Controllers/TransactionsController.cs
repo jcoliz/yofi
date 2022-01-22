@@ -72,7 +72,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
-        public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
+        public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,BankReference")] Transaction transaction)
         {
             await _repository.AddAsync(transaction);
             return RedirectToAction(nameof(Index));
@@ -154,43 +154,12 @@ namespace YoFi.AspNet.Controllers
 
         }
 
-        // I believe this is never used. Instead, API Controller ApplyPayee is used.
-#if false
-        public async Task<IActionResult> ApplyPayee(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var transaction = await _context.Transactions.SingleOrDefaultAsync(m => m.ID == id);
-            if (transaction == null)
-            {
-                return NotFound();
-            }
-
-            // Handle payee auto-assignment
-
-            // See if the payee exists
-            var payee = await _context.Payees.FirstOrDefaultAsync(x => transaction.Payee.Contains(x.Name));
-
-            if (payee != null)
-            {
-                transaction.Category = payee.Category;
-                transaction.SubCategory = payee.SubCategory;
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-#endif
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
         [ValidateTransactionExists]
-        public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,SubCategory,BankReference")] Transaction transaction)
+        public async Task<IActionResult> Edit(int id, bool? duplicate, [Bind("ID,Timestamp,Amount,Memo,Payee,Category,BankReference")] Transaction transaction)
         {
             if (duplicate == true)
             {

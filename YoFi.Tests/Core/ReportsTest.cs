@@ -1133,53 +1133,5 @@ namespace YoFi.Tests.Core
 
             Assert.AreEqual(0, sw.ToString().Length);
         }
-
-#if false
-        [TestMethod]
-        public void Splits()
-        {
-            int year = DateTime.Now.Year;
-            var ex1 = SplitItems[0];
-            var ex2 = SplitItems[1];
-
-            if (usesplits)
-            {
-                var item = new Transaction() { Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
-
-                context.Transactions.Add(item);
-            }
-            else
-            {
-                var items = new List<Transaction>();
-                items.Add(new Transaction() { Category = ex1.Category, SubCategory = ex1.SubCategory, Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = ex1.Amount });
-                items.Add(new Transaction() { Category = ex2.Category, SubCategory = ex2.SubCategory, Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = ex2.Amount });
-                context.Transactions.AddRange(items);
-            }
-
-            context.SaveChanges();
-
-            var result = await controller.Pivot("all", null, null, year, null);
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as Table<Label, Label, decimal>;
-
-            var row_AB = model.RowLabels.Where(x => x.Key1 == "A" && x.Key2 == "B").Single();
-            var col = model.ColumnLabels.First();
-            var actual_AB = model[col, row_AB];
-
-            Assert.AreEqual(ex1.Amount, actual_AB);
-
-            var row_CD = model.RowLabels.Where(x => x.Key1 == "C" && x.Key2 == "D").Single();
-            var actual_CD = model[col, row_CD];
-
-            Assert.AreEqual(ex2.Amount, actual_CD);
-
-            // Make sure the total is correct as well, no extra stuff in there.
-            var row_total = model.RowLabels.Where(x => x.Value == "TOTAL").Single();
-            var actual_total = model[col, row_total];
-
-            Assert.AreEqual(ex1.Amount + ex2.Amount, actual_total);
-        }
-#endif
-
     }
 }

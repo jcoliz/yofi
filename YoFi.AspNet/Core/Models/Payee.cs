@@ -12,7 +12,7 @@ namespace YoFi.Core.Models
     /// </summary>
     /// <remarks>
     /// If a transaction's matches our Name, then it should have this
-    /// Category and SubCategory
+    /// Category
     /// </remarks>
     public class Payee: IModelItem<Payee>, IImportDuplicateComparable
     {

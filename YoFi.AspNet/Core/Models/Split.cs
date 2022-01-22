@@ -32,15 +32,6 @@ namespace YoFi.Core.Models
         public string Category { get; set; }
 
         /// <summary>
-        /// SubCategory for this amount
-        /// </summary>        
-        /// <remarks>
-        /// This property is obsolete. Category can now take multiple
-        /// levels of information separated with colons.
-        /// </remarks>
-        public string SubCategory { get; set; }
-
-        /// <summary>
         /// Optional commentary about this split
         /// </summary>
         public string Memo { get; set; }

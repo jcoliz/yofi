@@ -93,7 +93,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
-        public async Task<IActionResult> Create([Bind("ID,Name,Category,SubCategory")] Payee payee)
+        public async Task<IActionResult> Create([Bind("ID,Name,Category")] Payee payee)
         {
             await _repository.AddAsync(payee);
 
@@ -114,7 +114,7 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
         [ValidatePayeeExists]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category,SubCategory")] Payee item)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category")] Payee item)
         {
             try
             {
