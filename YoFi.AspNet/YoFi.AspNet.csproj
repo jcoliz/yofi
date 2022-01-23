@@ -29,10 +29,14 @@
     <None Remove="Data\FullSampleDataDefinition.xlsx" />
     <None Remove="Data\ofx-footer.txt" />
     <None Remove="Data\ofx-header.txt" />
+    <None Remove="release.txt" />
     <None Remove="version.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="release.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="version.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -88,6 +92,7 @@
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="git describe --long --always --abbrev=8 &gt; &quot;$(ProjectDir)\version.txt&quot;" />
+    <Exec Command="git describe --tags &gt; &quot;$(ProjectDir)\release.txt&quot;" />
   </Target>
 
 </Project>
