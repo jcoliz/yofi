@@ -18,8 +18,14 @@ steps:
   submodules: true
 
 - task: CmdLine@2
+  displayName: 'Create version.txt'
   inputs:
     script: 'git describe --long --always --abbrev=8 > $(application)/version.txt'
+
+- task: CmdLine@2
+  displayName: 'Create release.txt'
+  inputs:
+    script: 'git describe --tags > $(application)/release.txt'
 
 - task: DotNetCoreCLI@2
   inputs:
