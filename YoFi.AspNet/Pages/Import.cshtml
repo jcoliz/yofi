@@ -118,7 +118,7 @@ else
                 <tr class="@highlight">
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/api/Select/@item.ID">
+                        <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID">
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Timestamp)
