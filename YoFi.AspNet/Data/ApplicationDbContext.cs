@@ -112,7 +112,10 @@ namespace YoFi.AspNet.Data
 
         Task IDataContext.BulkInsertAsync<T>(IList<T> items)
         {
-            return this.BulkInsertAsync(items);
+            // Note "IncludeGraph" locks to SQL Server.
+            // For more complex but portable alternative, see
+            // https://github.com/borisdj/EFCore.BulkExtensions
+            return this.BulkInsertAsync(items, b => b.IncludeGraph = true);
         }
 
         Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)
