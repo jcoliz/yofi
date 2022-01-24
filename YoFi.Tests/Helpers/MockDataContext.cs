@@ -216,5 +216,10 @@ namespace YoFi.Tests.Helpers
             RemoveRange(items);
             return Task.CompletedTask;
         }
+
+        Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

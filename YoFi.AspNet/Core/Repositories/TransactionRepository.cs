@@ -317,7 +317,7 @@ namespace YoFi.Core.Repositories
             var accepted = All.Where(x => x.Imported == true && x.Selected == true);
             await _context.BulkUpdateAsync(accepted, new Transaction() { Hidden = false, Imported = false, Selected = false }, new List<string>() { "Hidden", "Imported", "Selected" });
 
-            var rejected = All.Where(x => x.Imported == true && x.Selected == false);
+            var rejected = All.Where(x => x.Imported == true && x.Selected != true);
             await _context.BulkDeleteAsync(rejected);
         }
 

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.Core;
+using YoFi.Core.Models;
 
 namespace YoFi.Tests.Helpers
 {
@@ -31,6 +32,30 @@ namespace YoFi.Tests.Helpers
         {
             this.RemoveRange(items);
             return this.SaveChangesAsync();
+        }
+
+        async Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
+        {
+            // We support ONLY a very limited range of possibilities, which is where this
+            // method is actually called.
+            if (typeof(T) != typeof(Transaction))
+                throw new NotImplementedException("Bulk Update on in-memory DB is only implemented for transactions");
+
+            var txvalues = newvalues as Transaction;
+            var txitems = items as IQueryable<Transaction>;
+            var txlist = await txitems.ToListAsync();
+            foreach (var item in txlist)
+            {
+                if (columns.Contains("Imported"))
+                    item.Imported = txvalues.Imported;
+                if (columns.Contains("Hidden"))
+                    item.Hidden = txvalues.Hidden;
+                if (columns.Contains("Selected"))
+                    item.Selected = txvalues.Selected;
+            }
+            UpdateRange(txlist);
+
+            await SaveChangesAsync();
         }
     }
 }
