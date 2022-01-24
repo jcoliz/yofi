@@ -107,5 +107,6 @@ namespace YoFi.Core
         Task<int> ClearAsync<T>() where T : class;
 
         Task BulkInsertAsync<T>(IList<T> items) where T : class;
+        Task BulkDeleteAsync<T>(IQueryable<T> items) where T : class;
     }
 }

@@ -109,8 +109,28 @@ namespace YoFi.AspNet.Data
             return result;
         }
 
-        Task IDataContext.BulkInsertAsync<T>(IList<T> items) =>
-            this.BulkInsertAsync(items);
+        async Task IDataContext.BulkInsertAsync<T>(IList<T> items)
+        {
+            // Some things we just can't do with an inmemory database!
+            if (Database.ProviderName.Contains("InMemory"))
+            {
+                await this.AddRangeAsync(items);
+                await this.SaveChangesAsync();
+            }
+            else
+                await this.BulkInsertAsync(items);
+        }
 
+        Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)
+        {
+            // Some things we just can't do with an inmemory database!
+            if (Database.ProviderName.Contains("InMemory"))
+            {
+                this.RemoveRange(items);
+                return this.SaveChangesAsync();
+            }
+            else
+                return items.BatchDeleteAsync();
+        }
     }
 }

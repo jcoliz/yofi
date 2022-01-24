@@ -210,5 +210,11 @@ namespace YoFi.Tests.Helpers
         {
             return AddRangeAsync(items);
         }
+
+        public Task BulkDeleteAsync<T>(IQueryable<T> items) where T : class
+        {
+            RemoveRange(items);
+            return Task.CompletedTask;
+        }
     }
 }

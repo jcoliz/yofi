@@ -330,7 +330,8 @@ namespace YoFi.Core.Repositories
         public Task CancelImportAsync()
         {
             IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
-            return RemoveRangeAsync(allimported);
+
+            return _context.BulkDeleteAsync(allimported);
         }
 
         // Based on https://gist.github.com/pies/4166888
