@@ -58,7 +58,7 @@ namespace YoFi.Core.Importers
             var result = _importing.Except(_repository.All).ToList();
 
             // Add remaining items
-            await _repository.AddRangeAsync(result);
+            await _repository.BulkInsertAsync(result);
 
             // Clear import queue for next time
             _importing.Clear();

@@ -82,6 +82,12 @@ namespace YoFi.Core.Repositories
         Task AddRangeAsync(IEnumerable<T> items);
 
         /// <summary>
+        /// Add <paramref name="items"/> to the repository
+        /// </summary>
+        /// <param name="items">Items we wish to add</param>
+        Task BulkInsertAsync(IList<T> items);
+
+        /// <summary>
         /// Update <paramref name="item"/> with new details
         /// </summary>
         /// <remarks>

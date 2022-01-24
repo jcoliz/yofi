@@ -90,6 +90,15 @@ namespace YoFi.Core.Repositories
         }
 
         /// <summary>
+        /// Add <paramref name="items"/> to the repository
+        /// </summary>
+        /// <param name="items">Items we wish to add</param>
+        public Task BulkInsertAsync(IList<T> items)
+        {
+            return _context.BulkInsertAsync(items);
+        }
+
+        /// <summary>
         /// Update <paramref name="item"/> with new details
         /// </summary>
         /// <remarks>
