@@ -11,6 +11,7 @@ using YoFi.AspNet.Data;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;
+using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Database
 {
@@ -20,7 +21,7 @@ namespace YoFi.Tests.Database
         private ControllerTestHelper<Payee, PayeesController> helper = null;
 
         PayeesController controller => helper.controller;
-        ApplicationDbContext context => helper.context;
+        ApplicationDbContextInMemory context => helper.context;
         List<Payee> Items => helper.Items;
         DbSet<Payee> dbset => helper.dbset;
 

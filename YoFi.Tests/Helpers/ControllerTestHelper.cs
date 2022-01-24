@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.Core.Models;
+using YoFi.Tests.Helpers;
 
 namespace Common.AspNet.Test
 {
@@ -35,7 +36,7 @@ namespace Common.AspNet.Test
     {
         public C controller { set; get; } = default;
 
-        public ApplicationDbContext context = null;
+        public ApplicationDbContextInMemory context = null;
 
         /// <summary>
         /// List of test items which we will use for our test. Needs to be supplied by the user
@@ -67,7 +68,7 @@ namespace Common.AspNet.Test
                 .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
                 .Options;
 
-            context = new ApplicationDbContext(options);
+            context = new ApplicationDbContextInMemory(options);
 
             //controller = new C();
 

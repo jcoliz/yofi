@@ -23,6 +23,7 @@ using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Core.SampleGen;
+using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Database
 {
@@ -43,7 +44,7 @@ namespace YoFi.Tests.Database
                 .UseInMemoryDatabase(databaseName: "ApplicationDbContext")
                 .Options;
 
-            context = new ApplicationDbContext(options);
+            context = new ApplicationDbContextInMemory(options);
             dbset = context.Transactions;
 
             // By default it's 2021, which is the year all our sample data is generated for
