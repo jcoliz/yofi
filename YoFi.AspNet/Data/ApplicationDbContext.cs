@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using YoFi.Core.Models;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core;
+using EFCore.BulkExtensions;
 
 namespace YoFi.AspNet.Data
 {
@@ -83,5 +84,29 @@ namespace YoFi.AspNet.Data
 
         Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) => query.AnyAsync();
 
+        async Task<int> IDataContext.ClearAsync<T>()
+        {
+            int result = default;
+            if (typeof(T) == typeof(Transaction))
+            {
+                result = await Transactions.BatchDeleteAsync();
+            }
+            else if (typeof(T) == typeof(Payee))
+            {
+                result = await Payees.BatchDeleteAsync();
+            }
+            else if (typeof(T) == typeof(Split))
+            {
+                result = await Splits.BatchDeleteAsync();
+            }
+            else if (typeof(T) == typeof(BudgetTx))
+            {
+                result = await BudgetTxs.BatchDeleteAsync();
+            }
+            else
+                throw new NotImplementedException();
+
+            return result;
+        }
     }
 }

@@ -200,5 +200,10 @@ namespace YoFi.Tests.Helpers
         Task<int> IDataContext.CountAsync<T>(IQueryable<T> query) => Task.FromResult(query.Count());
 
         Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) => Task.FromResult(query.Any());
+
+        public Task<int> ClearAsync<T>() where T : class
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core.Models;
 
 namespace YoFi.Core
 {
@@ -23,19 +24,15 @@ namespace YoFi.Core
         {
             if ("budget" == id)
             {
-                // TODO: Async() ??
-                _context.RemoveRange(_context.BudgetTxs);
-                await _context.SaveChangesAsync();
+                await _context.ClearAsync<BudgetTx>();
             }
             else if ("tx" == id)
             {
-                _context.RemoveRange(_context.TransactionsWithSplits);
-                await _context.SaveChangesAsync();
+                await _context.ClearAsync<Transaction>();
             }
             else if ("payee" == id)
             {
-                _context.RemoveRange(_context.Payees);
-                await _context.SaveChangesAsync();
+                await _context.ClearAsync<Payee>();
             }
             else
             {

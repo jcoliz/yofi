@@ -98,5 +98,12 @@ namespace YoFi.Core
         Task<int> CountAsync<T>(IQueryable<T> query) where T : class;
 
         Task<bool> AnyAsync<T>(IQueryable<T> query) where T : class;
+
+        /// <summary>
+        /// Clear all items from a particular table
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Task<int> ClearAsync<T>() where T : class;
     }
 }
