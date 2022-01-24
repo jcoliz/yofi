@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 
@@ -108,5 +109,6 @@ namespace YoFi.Core
 
         Task BulkInsertAsync<T>(IList<T> items) where T : class;
         Task BulkDeleteAsync<T>(IQueryable<T> items) where T : class;
+        Task BulkUpdateAsync<T>(IQueryable<T> items) where T : class;
     }
 }

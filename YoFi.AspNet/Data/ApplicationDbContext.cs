@@ -9,6 +9,7 @@ using YoFi.Core.Models;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core;
 using EFCore.BulkExtensions;
+using System.Linq.Expressions;
 
 namespace YoFi.AspNet.Data
 {
@@ -109,14 +110,19 @@ namespace YoFi.AspNet.Data
             return result;
         }
 
-        async Task IDataContext.BulkInsertAsync<T>(IList<T> items)
+        Task IDataContext.BulkInsertAsync<T>(IList<T> items)
         {
-            await this.BulkInsertAsync(items);
+            return this.BulkInsertAsync(items);
         }
 
         Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)
         {
             return items.BatchDeleteAsync();
+        }
+
+        Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items)
+        {
+            return items.BatchUpdateAsync(new Transaction() { Hidden = false, Imported = false, Selected = false }, new List<string>() { "Hidden", "Imported", "Selected" });
         }
     }
 }

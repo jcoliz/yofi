@@ -312,16 +312,13 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// Finally merge in all selected imported items into the live data set
         /// </summary>
-        public Task FinalizeImportAsync()
+        public async Task FinalizeImportAsync()
         {
-            IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
+            var accepted = All.Where(x => x.Imported == true && x.Selected == true);
+            await _context.BulkUpdateAsync(accepted);
 
-            var selected = allimported.ToLookup(x => x.Selected == true);
-            foreach (var item in selected[true])
-                item.Imported = item.Hidden = item.Selected = false;
-
-            // This will implicitly save the changes from the previous line
-            return RemoveRangeAsync(selected[false]);
+            var rejected = All.Where(x => x.Imported == true && x.Selected == false);
+            await _context.BulkDeleteAsync(rejected);
         }
 
         /// <summary>
