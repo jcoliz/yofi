@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Data;
@@ -92,6 +93,14 @@ namespace YoFi.AspNet.Main
                 services.Configure<SendGridEmailOptions>(Configuration.GetSection(SendGridEmailOptions.Section));
                 services.AddTransient<IEmailSender, SendGridEmailService>();
             }
+
+            var release = "Unknown";
+            if (File.Exists("release.txt"))
+            {
+                using var sr = File.OpenText("release.txt");
+                release = sr.ReadLine();
+            }
+            Configuration["Codebase:Release"] = release;
 
             services.Configure<CodebaseConfig>(Configuration.GetSection(CodebaseConfig.Section));
             services.Configure<BrandConfig>(Configuration.GetSection(BrandConfig.Section));

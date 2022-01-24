@@ -51,7 +51,6 @@ namespace YoFi.AspNet.Main
                     }
                     else
                         logger.LogInformation(" Unable to locate version info.");
-
                 }
                 catch (Exception ex)
                 {

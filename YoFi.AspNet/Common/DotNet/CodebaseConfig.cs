@@ -10,5 +10,6 @@
         public string LicenseLink { get; set; }
         public string Link { get; set; }
         public string Tagline { get; set; }
+        public string Release { get; set; }
     }
 }
