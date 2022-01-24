@@ -87,7 +87,7 @@ namespace YoFi.AspNet.Data
 
         async Task<int> IDataContext.ClearAsync<T>()
         {
-            int result = default;
+            int result;
             if (typeof(T) == typeof(Transaction))
             {
                 result = await Transactions.BatchDeleteAsync();
@@ -120,9 +120,9 @@ namespace YoFi.AspNet.Data
             return items.BatchDeleteAsync();
         }
 
-        Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items)
+        Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
         {
-            return items.BatchUpdateAsync(new Transaction() { Hidden = false, Imported = false, Selected = false }, new List<string>() { "Hidden", "Imported", "Selected" });
+            return items.BatchUpdateAsync(newvalues,columns);
         }
     }
 }

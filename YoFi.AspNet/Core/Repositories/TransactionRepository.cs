@@ -315,7 +315,7 @@ namespace YoFi.Core.Repositories
         public async Task FinalizeImportAsync()
         {
             var accepted = All.Where(x => x.Imported == true && x.Selected == true);
-            await _context.BulkUpdateAsync(accepted);
+            await _context.BulkUpdateAsync(accepted, new Transaction() { Hidden = false, Imported = false, Selected = false }, new List<string>() { "Hidden", "Imported", "Selected" });
 
             var rejected = All.Where(x => x.Imported == true && x.Selected == false);
             await _context.BulkDeleteAsync(rejected);
