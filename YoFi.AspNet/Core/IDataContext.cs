@@ -105,5 +105,7 @@ namespace YoFi.Core
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         Task<int> ClearAsync<T>() where T : class;
+
+        Task BulkInsertAsync<T>(IList<T> items) where T : class;
     }
 }

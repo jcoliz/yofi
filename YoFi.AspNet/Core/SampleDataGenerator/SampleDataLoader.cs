@@ -251,7 +251,7 @@ namespace YoFi.Core.SampleGen
                     }
                 }
 
-                _context.AddRange(txs);
+                await _context.BulkInsertAsync(txs);
                 results.Add($"{txs.Count()} transactions");
             }
             if (offering.Rules.Contains("Today"))
@@ -291,24 +291,23 @@ namespace YoFi.Core.SampleGen
                     }
                 }
 
-                _context.AddRange(added);
+                await _context.BulkInsertAsync(added);
 
                 results.Add($"{added.Count()} transactions");
             }
             if (offering.Rules.Contains(nameof(BudgetTx)))
             {
-                var added = ssr.Deserialize<BudgetTx>();
-                _context.AddRange(added);
-                results.Add($"{added.Count()} budget line items");
+                var added = ssr.Deserialize<BudgetTx>().ToList();
+                await _context.BulkInsertAsync(added);
+                results.Add($"{added.Count} budget line items");
             }
             if (offering.Rules.Contains(nameof(Payee)))
             {
-                var added = ssr.Deserialize<Payee>();
-                _context.AddRange(added);
-                results.Add($"{added.Count()} payee matching rules");
+                var added = ssr.Deserialize<Payee>().ToList();
+                await _context.BulkInsertAsync(added);
+                results.Add($"{added.Count} payee matching rules");
             }
 
-            await _context.SaveChangesAsync();
             return "Added " + string.Join(", ", results);
         }
 

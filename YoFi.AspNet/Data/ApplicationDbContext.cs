@@ -108,5 +108,9 @@ namespace YoFi.AspNet.Data
 
             return result;
         }
+
+        Task IDataContext.BulkInsertAsync<T>(IList<T> items) =>
+            this.BulkInsertAsync(items);
+
     }
 }

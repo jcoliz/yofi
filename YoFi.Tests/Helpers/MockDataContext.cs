@@ -205,5 +205,10 @@ namespace YoFi.Tests.Helpers
         {
             throw new NotImplementedException();
         }
+
+        public Task BulkInsertAsync<T>(IList<T> items) where T : class
+        {
+            return AddRangeAsync(items);
+        }
     }
 }
