@@ -186,6 +186,7 @@ namespace YoFi.Tests.Functional
 
             // Dismiss the help text, if appears
             await DismissHelpTest();
+            await Page.SaveScreenshotToAsync(TestContext, "Ready");
 
             // Click the "Browse" button on the file control
             await Page.ClickAsync("[aria-label=\"Upload\"]");
@@ -194,12 +195,13 @@ namespace YoFi.Tests.Functional
             // For best results, use the sample file from GitHub 
             // https://github.com/jcoliz/yofi/blob/3c89902051fd34a3eb43ed2ea2dfa86f2b04d393/YoFi.Tests.Functional/SampleData/Test-Generator-GenerateUploadSampleData-Transactions.xlsx
             await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData-Transactions.xlsx" });
+            await Page.SaveScreenshotToAsync(TestContext, "Set Files");
 
             // Click the "Upload" button
             // (Note that this requires a validated account to accomplish)
             await Page.ClickAsync("text=\"Upload\"");
 
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Final");
 
             // To clean up, click the "Delete" button
             await Page.ClickAsync("data-test-id=btn-delete");
