@@ -254,3 +254,12 @@ body.iscarousel {
 .highlight {
     background-color: var(--color-3);
 }
+
+.page-item.active .page-link {
+    background-color: var(--color-1);
+    border-color: var(--color-1);
+}
+
+.page-link {
+    color: var(--color-1);
+}
