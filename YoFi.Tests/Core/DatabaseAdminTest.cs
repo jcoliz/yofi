@@ -23,6 +23,9 @@ namespace YoFi.Tests.Core
             context.Setup(x=>x.ClearAsync<BudgetTx>());
             context.Setup(x=>x.ClearAsync<Transaction>());
             context.Setup(x=>x.ClearAsync<Payee>());
+            context.Setup(x=>x.Transactions).Returns(Enumerable.Empty<Transaction>().AsQueryable());
+            context.Setup(x=>x.Payees).Returns(Enumerable.Empty<Payee>().AsQueryable());
+            context.Setup(x=>x.BudgetTxs).Returns(Enumerable.Empty<BudgetTx>().AsQueryable());
             clock = new Mock<IClock>();
             dbadmin  = new DatabaseAdministration(context.Object,clock.Object);
         }
@@ -80,5 +83,48 @@ namespace YoFi.Tests.Core
             context.Verify(x=>x.ClearAsync<Payee>(), Times.Never());
             context.Verify(x=>x.ClearAsync<BudgetTx>(), Times.Never());
         } 
+
+        [TestMethod]
+        public async Task GetDatabaseStatus_NotEmpty()
+        {
+            // Given: Database is not empty
+            context.Setup(x=>x.CountAsync<Transaction>(It.IsAny<IQueryable<Transaction>>())).Returns(Task.FromResult(10));
+            context.Setup(x=>x.CountAsync<Payee>(It.IsAny<IQueryable<Payee>>())).Returns(Task.FromResult(20));
+            context.Setup(x=>x.CountAsync<BudgetTx>(It.IsAny<IQueryable<BudgetTx>>())).Returns(Task.FromResult(30));
+            dbadmin  = new DatabaseAdministration(context.Object,clock.Object);
+
+            // When: Asking for database status
+            var status = await dbadmin.GetDatabaseStatus();
+
+            // Then: The values are as expected
+            Assert.AreEqual(10,status.NumTransactions);
+            Assert.AreEqual(20,status.NumPayees);
+            Assert.AreEqual(30,status.NumBudgetTxs);
+
+            // And: Database is shown to be non-empty
+            Assert.IsFalse(status.IsEmpty);
+        }
+
+        [TestMethod]
+        public async Task GetDatabaseStatus_Empty()
+        {
+            // Given: Database is not empty
+            context.Setup(x=>x.CountAsync<Transaction>(It.IsAny<IQueryable<Transaction>>())).Returns(Task.FromResult(0));
+            context.Setup(x=>x.CountAsync<Payee>(It.IsAny<IQueryable<Payee>>())).Returns(Task.FromResult(0));
+            context.Setup(x=>x.CountAsync<BudgetTx>(It.IsAny<IQueryable<BudgetTx>>())).Returns(Task.FromResult(0));
+            dbadmin  = new DatabaseAdministration(context.Object,clock.Object);
+
+            // When: Asking for database status
+            var status = await dbadmin.GetDatabaseStatus();
+
+            // Then: The values are as expected
+            Assert.AreEqual(0,status.NumTransactions);
+            Assert.AreEqual(0,status.NumPayees);
+            Assert.AreEqual(0,status.NumBudgetTxs);
+
+            // And: Database is shown to be empty
+            Assert.IsTrue(status.IsEmpty);
+        }
+
     }
 }
