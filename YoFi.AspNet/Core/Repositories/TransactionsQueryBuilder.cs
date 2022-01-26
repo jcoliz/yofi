@@ -346,6 +346,9 @@ namespace YoFi.Core.Repositories
 
     }
 
+#if false
+    // Currently not using DTO's. Do need to bring it back though
+
     /// <summary>
     /// The transaction data for Index page
     /// </summary>
@@ -383,5 +386,5 @@ namespace YoFi.Core.Repositories
             return string.Equals(Payee, other.Payee) && Amount == other.Amount && Timestamp.Date == other.Timestamp.Date;
         }
     }
-
+#endif
 }
