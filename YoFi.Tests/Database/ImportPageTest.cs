@@ -37,6 +37,8 @@ namespace YoFi.Tests.Database
         private DbSet<Transaction> dbset;
         private UniversalImporter importer;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void SetUp()
         {
@@ -591,5 +593,32 @@ namespace YoFi.Tests.Database
             // Then: There are the expected amount of sample offerings
             Assert.IsTrue(page.Offerings.Count() >= 27);
         }
+
+        [TestMethod]
+        public async Task DownloadAllSamples()
+        {
+            // Given: Already got the page, so we have the offerings populated
+            await page.OnGetAsync();
+
+            foreach(var offering in page.Offerings)
+            {
+                // When: Downloading each offering
+                var actionresult = await page.OnGetSampleAsync(offering.ID);
+                var fsresult = Assert.That.IsOfType<FileStreamResult>(actionresult);
+                Assert.IsTrue(fsresult.FileStream.Length > 1000);
+
+                // Then: The file downloads successfully
+                var dir = TestContext.FullyQualifiedTestClassName + "." + TestContext.TestName;
+                Directory.CreateDirectory(dir);
+                var filename = dir + "/" + fsresult.FileDownloadName;
+                File.Delete(filename);
+                using (var outstream = File.OpenWrite(filename))
+                {
+                    await fsresult.FileStream.CopyToAsync(outstream);
+                }
+                TestContext.AddResultFile(filename);
+            }
+        }
+
     }
 }
