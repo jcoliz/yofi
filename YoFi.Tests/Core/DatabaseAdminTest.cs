@@ -126,5 +126,31 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(status.IsEmpty);
         }
 
+        [TestMethod]
+        public async Task UnHide()
+        {
+            // Given: A set of transactions of varying dates
+            var transactions = Enumerable.Range(1,10).Select(x=>new Transaction() { Timestamp = new System.DateTime(2022,1,x), Hidden = x > 3 }).ToList();
+            context.Setup(x=>x.Transactions).Returns(transactions.AsQueryable());
+            context.Setup(x=>x.AnyAsync<Transaction>(It.IsAny<IQueryable<Transaction>>())).Returns(Task.FromResult(true));
+
+            // And: Current time is in the middle of those
+            clock = new Mock<IClock>();
+            clock.Setup(x=>x.Now).Returns(new System.DateTime(2022,1,8));
+            dbadmin  = new DatabaseAdministration(context.Object,clock.Object);
+
+            // When: Unhiding up to today
+            await dbadmin.UnhideTransactionsToToday();
+
+            // Then: The correct items were changed
+            Assert.IsFalse(transactions[3].Hidden); // Jan 4
+            Assert.IsFalse(transactions[4].Hidden); // Jan 5
+            Assert.IsFalse(transactions[5].Hidden); // Jan 6
+            Assert.IsFalse(transactions[6].Hidden); // Jan 7
+            Assert.IsFalse(transactions[7].Hidden); // Jan 8
+            Assert.IsTrue(transactions[8].Hidden); // Jan 9
+            Assert.IsTrue(transactions[9].Hidden); // Jan 10
+        }
+
     }
 }
