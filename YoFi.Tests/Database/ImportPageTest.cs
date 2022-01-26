@@ -581,5 +581,15 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(3, context.Payees.Count());
             Assert.AreEqual(4, context.BudgetTxs.Count());
         }
+
+        [TestMethod]
+        public async Task GetSampleOfferings()
+        {
+            // When: Getting the page
+            var actionresult = await page.OnGetAsync();
+
+            // Then: There are the expected amount of sample offerings
+            Assert.IsTrue(page.Offerings.Count() >= 27);
+        }
     }
 }
