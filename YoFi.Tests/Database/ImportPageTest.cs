@@ -36,6 +36,7 @@ namespace YoFi.Tests.Database
         private TransactionRepository repository;
         private DbSet<Transaction> dbset;
         private UniversalImporter importer;
+        private Mock<IAuthorizationService> authservice;
 
         public TestContext TestContext { get; set; }
 
@@ -57,7 +58,7 @@ namespace YoFi.Tests.Database
             repository = new TransactionRepository(context, storage: storage);
             importer = new UniversalImporter(new AllRepositories(repository, new BudgetTxRepository(context), new PayeeRepository(context)));
 
-            var authservice = new Mock<IAuthorizationService>();
+            authservice = new Mock<IAuthorizationService>();
             AuthorizationResult result = AuthorizationResult.Success();
             authservice.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>())).Returns(Task.FromResult(result));
 
@@ -145,6 +146,16 @@ namespace YoFi.Tests.Database
             // Now check the state of the DB
             Assert.AreEqual(Items.Count, dbset.Count());
         }
+
+        [TestMethod]
+        public async Task UploadError()
+        {
+            var actionresult = await page.OnPostUploadAsync(null, null);
+            Assert.That.IsOfType<PageResult>(actionresult);
+
+            Assert.IsNotNull(page.Error);
+        }
+
 
         [TestMethod]
         public async Task Import()
@@ -620,5 +631,34 @@ namespace YoFi.Tests.Database
             }
         }
 
+        [TestMethod]
+        public async Task DownloadBogusSample_BadRequest()
+        {
+            // When: Trying to download an offering that doesn't exist
+            var actionresult = await page.OnGetSampleAsync("bogus-1234");
+            Assert.That.IsOfType<BadRequestResult>(actionresult);
+        }
+
+        [TestMethod]
+        public async Task PostGo_AccessDenied()
+        {
+            AuthorizationResult result = AuthorizationResult.Failed();
+            authservice.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>())).Returns(Task.FromResult(result));
+
+            var actionresult = await page.OnPostGoAsync("ok");
+            var rdresult = Assert.That.IsOfType<RedirectToPageResult>(actionresult);
+            Assert.AreEqual("/Account/AccessDenied", rdresult.PageName);
+        }
+
+        [TestMethod]
+        public async Task PostUpload_AccessDenied()
+        {
+            AuthorizationResult result = AuthorizationResult.Failed();
+            authservice.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>())).Returns(Task.FromResult(result));
+
+            var actionresult = await page.OnPostUploadAsync(null, null);
+            var rdresult = Assert.That.IsOfType<RedirectToPageResult>(actionresult);
+            Assert.AreEqual("/Account/AccessDenied", rdresult.PageName);
+        }
     }
 }
