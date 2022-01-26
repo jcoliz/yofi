@@ -1,9 +1,9 @@
 ﻿:root {
-    --color-1: #120a66;
-    --color-1-darker: #0A0638;
-    --color-1-lighter: #6458EE;
-    --color-2: #CECCE0;
-    --color-3: lightblue;
+    --color-1: #290661; /* $indigo-800 */
+    --color-1-darker: #140330; /* $indigo-900 */
+    --color-1-lighter: #c29ffa; /* $indigo-200 */
+    --color-2: #c29ffa; /* $indigo-200 */
+    --color-3: #e0cffc; /* $indigo-100 */
 }
 /* Lighter/darker is using coolors.co shades */
 
