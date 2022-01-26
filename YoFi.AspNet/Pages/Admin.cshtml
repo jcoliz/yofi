@@ -121,7 +121,7 @@ else
         @foreach (var offering in Model.Offerings)
         {
             <div class="col-xxl-2 col-lg-4 col-md-6 p-2 d-flex">
-                <div class="btn flex-fill" style="background-color:lightblue" data-id="@offering.ID" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
+                <div class="btn flex-fill highlight" data-id="@offering.ID" data-method="POST" data-bs-toggle="modal" data-bs-target="#seedModal">
                     <h4>@offering.Title</h4>
                     <p>@offering.Description</p>
                     @if (first == offering.ID)

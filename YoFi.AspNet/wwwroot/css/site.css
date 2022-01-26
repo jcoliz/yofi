@@ -3,6 +3,7 @@
     --color-1-darker: #0A0638;
     --color-1-lighter: #6458EE;
     --color-2: #CECCE0;
+    --color-3: lightblue;
 }
 /* Lighter/darker is using coolors.co shades */
 
@@ -248,4 +249,8 @@ body.iscarousel {
     color: #fff;
     background-color: var(--color-1-lighter);
     border-color: var(--color-1-lighter);
+}
+
+.highlight {
+    background-color: var(--color-3);
 }
