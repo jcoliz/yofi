@@ -57,7 +57,60 @@ namespace YoFi.Tests.Controllers.Slim
             var pvresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
             (var result, var details) = ((string, string))pvresult.Model;
             Assert.AreEqual("Completed", result);
+        }
 
+        [TestMethod]
+        public async Task SeedAppException()
+        {
+            // Given: A mock data loader which will produce an ApplicationException
+            var loader = new Mock<ISampleDataLoader>();
+            var message = "words";
+            loader.Setup(x => x.SeedAsync(It.IsAny<string>(), It.IsAny<bool>())).Throws(new ApplicationException(message));
+
+            // When: Seeding with a given ID
+            var id = "hello";
+            var actionresult = await controller.Seed(id, loader.Object);
+
+            // Then: The data loader was called with that ID
+            loader.Verify(x => x.SeedAsync(id, false), Times.Once);
+
+            // And: The actionresult is "Sorry"
+            var pvresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
+            (var result, var details) = ((string, string))pvresult.Model;
+            Assert.AreEqual("Sorry", result);
+
+            // And: Details contains {message}
+            Assert.IsTrue(details.Contains(message));
+
+            // And: Details contains "E1"
+            Assert.IsTrue(details.Contains("E1"));
+        }
+
+        [TestMethod]
+        public async Task SeedAnyException()
+        {
+            // Given: A mock data loader which will produce a strangeException
+            var loader = new Mock<ISampleDataLoader>();
+            var message = "words";
+            loader.Setup(x => x.SeedAsync(It.IsAny<string>(), It.IsAny<bool>())).Throws(new AppDomainUnloadedException(message));
+
+            // When: Seeding with a given ID
+            var id = "hello";
+            var actionresult = await controller.Seed(id, loader.Object);
+
+            // Then: The data loader was called with that ID
+            loader.Verify(x => x.SeedAsync(id, false), Times.Once);
+
+            // And: The actionresult is "Sorry"
+            var pvresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
+            (var result, var details) = ((string, string))pvresult.Model;
+            Assert.AreEqual("Sorry", result);
+
+            // And: Details contains {message}
+            Assert.IsTrue(details.Contains(message));
+
+            // And: Details contains "E2"
+            Assert.IsTrue(details.Contains("E2"));
         }
     }
 }
