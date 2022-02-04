@@ -119,5 +119,21 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(interest, splits.Where(x => x.Category == "Mortgage Interest").Single().Amount);
             Assert.AreEqual(principal, splits.Where(x => x.Category == "Mortgage Principal").Single().Amount);
         }
+
+        [TestMethod]
+        public async Task AssignBankReferences()
+        {
+            // Given: Many transactions in the repository, some with a bankref, others not
+            await repository.AddRangeAsync(Items.Take(20));
+
+            // When: Calling AssignBankReferences()
+            await transactionRepository.AssignBankReferences();
+
+            // Then: All transactions have a bankref now
+            Assert.IsFalse(repository.All.Any(x=>string.IsNullOrEmpty(x.BankReference)));
+
+            // And: Those which already had a bankref did not have theirs changed
+            Assert.AreEqual(10, repository.All.Count(x => x.BankReference.Length == 1));
+        }
     }
 }
