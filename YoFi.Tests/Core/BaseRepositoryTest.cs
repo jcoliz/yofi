@@ -233,6 +233,19 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(expected.SequenceEqual(actual));
         }
 
+        [TestMethod]
+        public async Task SetpageSize()
+        {
+            // When: Setting the pagesize
+            var currentsize = await repository.GetPageSizeAsync();
+            var newsize = currentsize * 10;
+            await repository.SetPageSizeAsync(newsize);
+            
+            // Then: The page size was set properly
+            var actual = await repository.GetPageSizeAsync();
+            Assert.AreEqual(newsize, actual);
+        }
+
 
     }
 }
