@@ -196,6 +196,24 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public async Task RemoveRange()
+        {
+            // Given: Five items in the data set
+            var items = Items.Take(5);
+            context.AddRange(items);
+
+            // When: Removing multiple items
+            var expected = items.Skip(3);
+            await repository.RemoveRangeAsync(expected);
+
+            // Then: Only three items remain
+            Assert.AreEqual(3, context.Get<T>().Count());
+
+            // And: Removed items are not there
+            Assert.IsFalse(context.Get<T>().Any(x => expected.Any(y=> CompareKeys(x, y) == 0)));
+        }
+
+        [TestMethod]
         public void Download()
         {
             // Given: Five items in the data set

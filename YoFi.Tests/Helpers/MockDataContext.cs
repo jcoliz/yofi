@@ -185,6 +185,11 @@ namespace YoFi.Tests.Helpers
                 var theseitems = items as IEnumerable<BudgetTx>;
                 BudgetTxData.RemoveAll(x => theseitems.Contains(x));
             }
+            else if (t == typeof(Transaction))
+            {
+                var theseitems = items as IEnumerable<Transaction>;
+                TransactionData.RemoveAll(x => theseitems.Contains(x));
+            }
             else
                 throw new NotImplementedException();
         }
