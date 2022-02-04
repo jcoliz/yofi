@@ -1,5 +1,6 @@
 ﻿namespace Common.DotNet
 {
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class CodebaseConfig
     {
         public const string Section = "Codebase";

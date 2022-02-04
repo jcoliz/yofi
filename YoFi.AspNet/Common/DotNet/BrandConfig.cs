@@ -1,5 +1,6 @@
 ﻿namespace Common.DotNet
 {
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class BrandConfig
     {
         public const string Section = "Brand";
