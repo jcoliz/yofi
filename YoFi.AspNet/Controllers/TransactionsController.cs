@@ -285,12 +285,12 @@ namespace YoFi.AspNet.Controllers
             catch (ApplicationException ex)
             {
                 result = "Sorry";
-                resultdetails = ex.Message;
+                resultdetails = ex.Message + " (E1)";
             }
             catch (Exception ex)
             {
                 result = "Sorry";
-                resultdetails = $"The operation failed. Please file an issue on GitHub. {ex.GetType().Name}: {ex.Message}";
+                resultdetails = $"The operation failed. Please file an issue on GitHub. {ex.GetType().Name}: {ex.Message} (E2)";
             }
 
             return PartialView("Seed",(result,resultdetails));
