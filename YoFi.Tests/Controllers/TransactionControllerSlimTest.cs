@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
+using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Core.SampleGen;
@@ -111,6 +112,25 @@ namespace YoFi.Tests.Controllers.Slim
 
             // And: Details contains "E2"
             Assert.IsTrue(details.Contains("E2"));
+        }
+
+        [TestMethod]
+        public async Task DatabaseDelete()
+        {
+            // Given: A mock database administration
+            var dbadmin = new Mock<IDatabaseAdministration>();
+            dbadmin.Setup(x => x.ClearDatabaseAsync(It.IsAny<string>()));
+
+            // When: Calling DatabaseDelete with a given ID
+            var id = "hello";
+            var actionresult = await controller.DatabaseDelete(id, dbadmin.Object);
+
+            // Then: The database administration was called with that ID
+            dbadmin.Verify(x => x.ClearDatabaseAsync(id), Times.Once);
+
+            // And: The actionresult is redirect to "/Admin"
+            var rpresult = Assert.That.IsOfType<RedirectToPageResult>(actionresult);
+            Assert.AreEqual("/Admin", rpresult.PageName);
         }
     }
 }
