@@ -28,7 +28,7 @@ namespace YoFi.AspNet.Main
 
         public static async Task Main(string[] args)
         {
-            var host = BuildWebHost(args);
+            var host = CreateWebHostBuilder(args).Build();
 
             using (var scope = host.Services.CreateScope())
             {
@@ -101,7 +101,7 @@ namespace YoFi.AspNet.Main
                 host.Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
             .UseStartup<Startup>()
             .ConfigureAppConfiguration((context, config) => 
@@ -127,8 +127,7 @@ namespace YoFi.AspNet.Main
                     {
                         logme.Enqueue($"*** ERROR with KeyVault: {ex.Message}");
                     }
-                })
-                .Build();
+                });
 
         // https://github.com/dotnet/AspNetCore.Docs/blob/main/aspnetcore/security/key-vault-configuration/samples/3.x/SampleApp/Program.cs
     }
