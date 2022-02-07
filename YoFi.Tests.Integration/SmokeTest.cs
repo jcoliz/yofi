@@ -5,7 +5,7 @@ using YoFi.Tests.Integration.Helpers;
 namespace YoFi.Tests.Integration
 {
     [TestClass]
-    public class BasicTests: IntegrationTest
+    public class SmokeTest: IntegrationTest
     {
         [ClassInitialize]
         public static void InitialSetup(TestContext tcontext)
