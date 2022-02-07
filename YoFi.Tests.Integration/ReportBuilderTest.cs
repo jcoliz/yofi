@@ -176,14 +176,10 @@ namespace YoFi.Tests.Integration
             // (Assembled on Initialize)
 
             // When: Getting the report
-            var report = "all";
-            await WhenGettingReport($"/Report/{report}?year=2020&showmonths=true&level={level}");
+            await WhenGettingReport(new ReportParameters() { id = "all", year = 2020, showmonths = true, level = level });
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
-
-            // And: Showing the correct report
-            Assert.AreEqual($"report-{report}", testid);
 
             // And: Report has the correct total
             Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0", culture), total);
@@ -222,7 +218,7 @@ namespace YoFi.Tests.Integration
 
             // When: Building the 'All' report for the correct year, with level at '{level}'
             var report = "all";
-            await WhenGettingReport($"/Report/{report}?year=2020&showmonths=true&month={month}");
+            await WhenGettingReport(new ReportParameters() { id = "all", year = 2020, showmonths = true, month = month });
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
@@ -258,8 +254,7 @@ namespace YoFi.Tests.Integration
             // (Assembled on Initialize)
 
             // When: Building the '{Category}' report for the correct year
-            var report = category.ToLowerInvariant();
-            await WhenGettingReport($"/Report/{report}?year=2020");
+            await WhenGettingReport(new ReportParameters() { id = category.ToLowerInvariant(), year = 2020 });
 
             // Then: Report has the correct total
             var expected = SumOfTopCategory(category);
@@ -280,9 +275,8 @@ namespace YoFi.Tests.Integration
             // Given: A large database of transactions
             // (Assembled on Initialize)
 
-            // When: Building the '{Category}' report for the correct year
-            var report = "expenses-detail";
-            await WhenGettingReport($"/Report/{report}?year=2020&showmonths={showmonths}");
+            // When: Building the 'expenses-detail' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths });
 
             // Then: Report has the correct total
             var expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
@@ -302,8 +296,7 @@ namespace YoFi.Tests.Integration
             // (Assembled on Initialize)
 
             // When: Building the 'budget' report for the correct year
-            var report = "budget";
-            await WhenGettingReport($"/Report/{report}?year=2020");
+            await WhenGettingReport(new ReportParameters() { id = "budget", year = 2020 });
 
             // Then: Report has the correct total
             var expected = BudgetTxs.Sum(x => x.Amount);
