@@ -38,8 +38,17 @@ namespace YoFi.Tests.Integration
             integrationcontext.Dispose();
         }
 
+        [TestCleanup]
+        public void Cleanup()
+        {
+            // Remove ephemeral items
+            context.BudgetTxs.RemoveRange(context.BudgetTxs.Where(x=>x.Memo == "__TEST__"));
+            context.SaveChanges();
+        }
+
         static IEnumerable<Transaction> Transactions1000;
         static IEnumerable<BudgetTx> BudgetTxs;
+        IEnumerable<BudgetTx> ManagedBudgetTxs;
 
         static readonly CultureInfo culture = new CultureInfo("en-US");
 
@@ -77,6 +86,23 @@ namespace YoFi.Tests.Integration
             return BudgetTxs;
         }
 
+        public IEnumerable<BudgetTx> GivenSampleManagedBudgetTxs()
+        {
+            if (ManagedBudgetTxs is null)
+            {
+                string json;
+
+                using (var stream = SampleData.Open("BudgetTxsManaged.json"))
+                using (var reader = new StreamReader(stream))
+                    json = reader.ReadToEnd();
+
+                var txs = System.Text.Json.JsonSerializer.Deserialize<List<BudgetTx>>(json);
+
+                ManagedBudgetTxs = txs;
+            }
+            return ManagedBudgetTxs;
+        }
+
         [TestMethod]
         public void Empty()
         {
@@ -106,7 +132,7 @@ namespace YoFi.Tests.Integration
             table = document.QuerySelector("table");
             testid = table.GetAttribute("data-test-id").Trim();
             total = table.QuerySelector("tr.report-row-total td.report-col-total")?.TextContent.Trim();
-            cols = table.QuerySelectorAll("tr.report-row-total td.report-col-amount");
+            cols = table.QuerySelectorAll("th").Skip(1);
             rows = table.QuerySelectorAll("tbody tr");
         }
 
@@ -138,7 +164,7 @@ namespace YoFi.Tests.Integration
         private IElement table = default;
         private string testid;
         private string total = default;
-        private IHtmlCollection<IElement> cols;
+        private IEnumerable<IElement> cols;
         private IHtmlCollection<IElement> rows;
 
         [DataRow(false)]
@@ -248,6 +274,12 @@ namespace YoFi.Tests.Integration
         {
             return
                 BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        decimal SumOfManagedBudgetTxsTopCategory(string category)
+        {
+            return
+                ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
         [DataRow("Income")]
@@ -385,6 +417,51 @@ namespace YoFi.Tests.Integration
 
             // And: Report has the correct # rows
             Assert.AreEqual(22, rows.Count());
+        }
+
+        private string GetCell(string col, string row)
+        {
+            // Note that finding an arbitrary cell in the table is more involved. I didn't want
+            // to mark up EVERY cell with a data-test-id. Instead I marked up the headers. So I
+            // need to figure out which column## has the data I want, and then look for it in
+            // the row cols
+
+            var index = cols.Index(cols.Where(x => x.GetAttribute("data-test-id") == $"col-{col}").Single());
+            var result = table.QuerySelectorAll($"tr[data-test-id=row-{row}] td.report-col-amount")[index].TextContent.Trim();
+
+            return result;
+        }
+
+        [TestMethod]
+        public async Task ManagedBudget()
+        {
+            // Given: A large database of transactions and budgettxs, including a mix of monthly and yearly budget txs
+            // Most are Assembled on Initialize, but we need to add managed txs
+            context.BudgetTxs.AddRange(GivenSampleManagedBudgetTxs());
+            context.SaveChanges();
+
+            // When: Building the 'managed-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "managed-budget", year = 2020 });
+
+            // Then: Report has the correct values 
+
+            var expected = SumOfManagedBudgetTxsTopCategory("Income");
+            Assert.AreEqual(expected.ToString("C0", culture), GetCell("Budget","Income"));
+
+            expected = SumOfManagedBudgetTxsTopCategory("J");
+            Assert.AreEqual(expected.ToString("C0", culture), GetCell("Budget", "J"));
+
+            expected = SumOfTopCategory("Income");
+            Assert.AreEqual(expected.ToString("C0", culture), GetCell("Actual", "Income"));
+
+            expected = SumOfTopCategory("J");
+            Assert.AreEqual(expected.ToString("C0", culture), GetCell("Actual", "J"));
+
+            // And: Report has the correct # displayed columns: budget, actual, progress, remaining
+            Assert.AreEqual(4, cols.Count());
+
+            // And: Report has the correct # rows: just the 2 managed budgets
+            Assert.AreEqual(2, rows.Count());
         }
     }
 }

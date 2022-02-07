@@ -1,0 +1,18 @@
+[
+  {
+    "ID": 0,
+    "Amount": -100000.00,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "J",
+    "Frequency": 12,
+    "Memo": "__TEST__"
+  },
+  {
+    "ID": 0,
+    "Amount": -24000.00,
+    "Timestamp": "2020-01-01T00:00:00",
+    "Category": "Income",
+    "Frequency": 12,
+    "Memo": "__TEST__"
+  }
+]

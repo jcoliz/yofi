@@ -9,7 +9,8 @@
             <th>@Model.Name</th>
             @foreach (var column in Model.ColumnLabelsFiltered)
             {
-                <th class="report-col-amount">
+                var coltestid = (!string.IsNullOrEmpty(column.UniqueID)) ? $"data-test-id=col-{column.UniqueID}" : string.Empty;
+                <th class="report-col-amount" @coltestid>
                     @(column.IsTotal ? "$ Total" : column.Name)
                 </th>
             }
@@ -19,7 +20,8 @@
         @foreach (var row in Model.RowLabelsOrdered)
         {
             var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level + Model.DisplayLevelAdjustment}";
-            <tr class="@rowformat">
+            var rowtestid = (!string.IsNullOrEmpty(row.UniqueID)) ? $"data-test-id=row-{row.UniqueID}" : string.Empty;
+            <tr class="@rowformat" @rowtestid>
 
                 <td class="report-col-name">
                     @{
