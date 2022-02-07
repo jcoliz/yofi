@@ -20,37 +20,23 @@ namespace YoFi.Tests.Integration
     [TestClass]
     public class ReportBuilderTest: IntegrationTest
     {
-        [ClassInitialize]
-        public static void InitialSetup(TestContext tcontext)
-        {
-            integrationcontext = new IntegrationContext(tcontext.FullyQualifiedTestClassName);
-
-            var txs = Given1000Transactions();
-            context.Transactions.AddRange(txs);
-            var btxs = GivenSampleBudgetTxs();
-            context.BudgetTxs.AddRange(btxs);
-            context.SaveChanges();
-        }
-
-        [ClassCleanup]
-        public static void FinalCleanup()
-        {
-            integrationcontext.Dispose();
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-            // Remove ephemeral items
-            context.BudgetTxs.RemoveRange(context.BudgetTxs.Where(x=>x.Memo == "__TEST__"));
-            context.SaveChanges();
-        }
+        #region Fields
 
         static IEnumerable<Transaction> Transactions1000;
         static IEnumerable<BudgetTx> BudgetTxs;
         IEnumerable<BudgetTx> ManagedBudgetTxs;
-
         static readonly CultureInfo culture = new CultureInfo("en-US");
+
+        private string h2 = default;
+        private IElement table = default;
+        private string testid;
+        private string total = default;
+        private IEnumerable<IElement> cols;
+        private IHtmlCollection<IElement> rows;
+
+        #endregion
+
+        #region Helpers
 
         protected static IEnumerable<Transaction> Given1000Transactions()
         {
@@ -103,11 +89,6 @@ namespace YoFi.Tests.Integration
             return ManagedBudgetTxs;
         }
 
-        [TestMethod]
-        public void Empty()
-        {
-
-        }
 
         private async Task WhenGettingReport(string url)
         {
@@ -160,12 +141,77 @@ namespace YoFi.Tests.Integration
             // And: Return to the caller for futher checks
         }
 
-        private string h2 = default;
-        private IElement table = default;
-        private string testid;
-        private string total = default;
-        private IEnumerable<IElement> cols;
-        private IHtmlCollection<IElement> rows;
+        decimal SumOfTopCategory(string category)
+        {
+            return
+                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
+                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        decimal SumOfBudgetTxsTopCategory(string category)
+        {
+            return
+                BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        decimal SumOfManagedBudgetTxsTopCategory(string category)
+        {
+            return
+                ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        private string GetCell(string col, string row)
+        {
+            // Note that finding an arbitrary cell in the table is more involved. I didn't want
+            // to mark up EVERY cell with a data-test-id. Instead I marked up the headers. So I
+            // need to figure out which column## has the data I want, and then look for it in
+            // the row cols
+
+            var index = cols.Index(cols.Where(x => x.GetAttribute("data-test-id") == $"col-{col}").Single());
+            var result = table.QuerySelectorAll($"tr[data-test-id=row-{row}] td.report-col-amount")[index].TextContent.Trim();
+
+            return result;
+        }
+
+        #endregion
+
+        #region Init/Cleanup
+
+        [ClassInitialize]
+        public static void InitialSetup(TestContext tcontext)
+        {
+            integrationcontext = new IntegrationContext(tcontext.FullyQualifiedTestClassName);
+
+            var txs = Given1000Transactions();
+            context.Transactions.AddRange(txs);
+            var btxs = GivenSampleBudgetTxs();
+            context.BudgetTxs.AddRange(btxs);
+            context.SaveChanges();
+        }
+
+        [ClassCleanup]
+        public static void FinalCleanup()
+        {
+            integrationcontext.Dispose();
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            // Remove ephemeral items
+            context.BudgetTxs.RemoveRange(context.BudgetTxs.Where(x=>x.Memo == "__TEST__"));
+            context.SaveChanges();
+        }
+
+        #endregion
+
+        #region Tests
+
+        [TestMethod]
+        public void Empty()
+        {
+
+        }
 
         [DataRow(false)]
         [DataRow(true)]
@@ -261,25 +307,6 @@ namespace YoFi.Tests.Integration
 
             // And: Report has the correct # rows
             Assert.AreEqual(21, rows.Count());
-        }
-
-        decimal SumOfTopCategory(string category)
-        {
-            return
-                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
-                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
-        }
-
-        decimal SumOfBudgetTxsTopCategory(string category)
-        {
-            return
-                BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
-        }
-
-        decimal SumOfManagedBudgetTxsTopCategory(string category)
-        {
-            return
-                ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
         [DataRow("Income")]
@@ -419,19 +446,6 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(22, rows.Count());
         }
 
-        private string GetCell(string col, string row)
-        {
-            // Note that finding an arbitrary cell in the table is more involved. I didn't want
-            // to mark up EVERY cell with a data-test-id. Instead I marked up the headers. So I
-            // need to figure out which column## has the data I want, and then look for it in
-            // the row cols
-
-            var index = cols.Index(cols.Where(x => x.GetAttribute("data-test-id") == $"col-{col}").Single());
-            var result = table.QuerySelectorAll($"tr[data-test-id=row-{row}] td.report-col-amount")[index].TextContent.Trim();
-
-            return result;
-        }
-
         [TestMethod]
         public async Task ManagedBudget()
         {
@@ -463,5 +477,7 @@ namespace YoFi.Tests.Integration
             // And: Report has the correct # rows: just the 2 managed budgets
             Assert.AreEqual(2, rows.Count());
         }
+
+        #endregion
     }
 }
