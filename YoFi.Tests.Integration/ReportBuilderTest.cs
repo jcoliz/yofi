@@ -62,7 +62,7 @@ namespace YoFi.Tests.Integration
 
         }
 
-        private async Task<IHtmlDocument> WhenGettingReport(string url)
+        private async Task WhenGettingReport(string url)
         {
             // First get the outer layout
             var response = await client.GetAsync(url);
@@ -87,8 +87,6 @@ namespace YoFi.Tests.Integration
             total = table.QuerySelector("tr.report-row-total td.report-col-total").TextContent.Trim();
             cols = table.QuerySelectorAll("tr.report-row-total td.report-col-amount");
             rows = table.QuerySelectorAll("tbody tr");
-
-            return document;
         }
 
         private string h2 = default;
@@ -108,7 +106,7 @@ namespace YoFi.Tests.Integration
 
             // When: Getting the report
             var report = "all";
-            var document = await WhenGettingReport($"/Report/{report}?year=2020&showmonths={showmonths}");
+            await WhenGettingReport($"/Report/{report}?year=2020&showmonths={showmonths}");
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
@@ -138,7 +136,7 @@ namespace YoFi.Tests.Integration
 
             // When: Getting the report
             var report = "all";
-            var document = await WhenGettingReport($"/Report/{report}?year=2020&showmonths=true&level={level}");
+            await WhenGettingReport($"/Report/{report}?year=2020&showmonths=true&level={level}");
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
@@ -183,7 +181,7 @@ namespace YoFi.Tests.Integration
 
             // When: Building the 'All' report for the correct year, with level at '{level}'
             var report = "all";
-            var document = await WhenGettingReport($"/Report/{report}?year=2020&showmonths=true&month={month}");
+            await WhenGettingReport($"/Report/{report}?year=2020&showmonths=true&month={month}");
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
@@ -220,7 +218,7 @@ namespace YoFi.Tests.Integration
 
             // When: Building the '{Category}' report for the correct year
             var report = category.ToLowerInvariant();
-            _ = await WhenGettingReport($"/Report/{report}?year=2020");
+            await WhenGettingReport($"/Report/{report}?year=2020");
 
             // Then: Report has the correct total
             var expected = SumOfTopCategory(category);
