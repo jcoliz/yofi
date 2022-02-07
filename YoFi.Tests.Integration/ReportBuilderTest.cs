@@ -93,11 +93,16 @@ namespace YoFi.Tests.Integration
         private IHtmlCollection<IElement> cols;
         private IHtmlCollection<IElement> rows;
 
-        [TestMethod]
-        public async Task All()
+        [DataRow(false)]
+        [DataRow(true)]
+        [DataTestMethod]
+        public async Task All(bool showmonths)
         {
+            // Given: A large database of transactions
+            // (Assembled on ClassInitialize)
+
             // When: Getting the report
-            var document = await WhenGettingReport("/Report/all?year=2020");
+            var document = await WhenGettingReport($"/Report/all?year=2020&showmonths={showmonths}");
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
@@ -109,7 +114,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0"), total);
 
             // And: Report has the correct # columns (One for each month plus total)
-            Assert.AreEqual(13, cols.Count());
+            Assert.AreEqual(showmonths?13:1, cols.Count());
 
             // And: Report has the correct # rows
             Assert.AreEqual(21, rows.Count());
