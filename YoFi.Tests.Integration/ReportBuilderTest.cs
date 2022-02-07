@@ -230,5 +230,29 @@ namespace YoFi.Tests.Integration
             // And: Report has the correct # rows
             Assert.AreEqual(3, rows.Count());
         }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task ExpensesDetail(bool showmonths)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the '{Category}' report for the correct year
+            var report = "expenses-detail";
+            await WhenGettingReport($"/Report/{report}?year=2020&showmonths={showmonths}");
+
+            // Then: Report has the correct total
+            var expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
+            Assert.AreEqual(expected.ToString("C0", culture), total);
+
+            // And: Report has the correct # columns (12 months, plus Total & pct total)
+            Assert.AreEqual(showmonths ? 14 : 2, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(12, rows.Count());
+        }
+
     }
 }
