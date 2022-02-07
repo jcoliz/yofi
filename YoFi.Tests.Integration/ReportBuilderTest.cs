@@ -201,5 +201,36 @@ namespace YoFi.Tests.Integration
             // And: Report has the correct # rows
             Assert.AreEqual(21, rows.Count());
         }
+
+        decimal SumOfTopCategory(string category)
+        {
+            return
+                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
+                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        [DataRow("Income")]
+        [DataRow("Taxes")]
+        [DataRow("Savings")]
+        [DataTestMethod]
+        public async Task SingleTop(string category)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the '{Category}' report for the correct year
+            var report = category.ToLowerInvariant();
+            _ = await WhenGettingReport($"/Report/{report}?year=2020");
+
+            // Then: Report has the correct total
+            var expected = SumOfTopCategory(category);
+            Assert.AreEqual(expected.ToString("C0", culture), total);
+
+            // And: Report has the correct # columns (Total & pct total)
+            Assert.AreEqual(2, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(3, rows.Count());
+        }
     }
 }
