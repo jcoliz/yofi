@@ -14,7 +14,7 @@
 
 @if (!Model.Report.RowLabelsOrdered.Any(x=>!x.IsTotal))
 {
-    <p>No data found for selected timeframe.</p>
+    <p data-test-id="no-data">No data found for selected timeframe.</p>
 }
 else
 { 

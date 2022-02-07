@@ -33,6 +33,7 @@ namespace YoFi.Tests.Integration
         private string total = default;
         private IEnumerable<IElement> cols;
         private IHtmlCollection<IElement> rows;
+        private IHtmlDocument document;
 
         #endregion
 
@@ -97,7 +98,7 @@ namespace YoFi.Tests.Integration
             response.EnsureSuccessStatusCode();
 
             // Then find the url to the inner report
-            var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
+            document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
             var element = document.QuerySelector("div.loadr");
             var endpoint = element.GetAttribute("data-endpoint")?.Trim();
 
@@ -109,12 +110,15 @@ namespace YoFi.Tests.Integration
 
             document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
 
-            h2 = document.QuerySelector("H2").TextContent.Trim();
+            h2 = document.QuerySelector("H2")?.TextContent.Trim();
             table = document.QuerySelector("table");
-            testid = table.GetAttribute("data-test-id").Trim();
-            total = table.QuerySelector("tr.report-row-total td.report-col-total")?.TextContent.Trim();
-            cols = table.QuerySelectorAll("th").Skip(1);
-            rows = table.QuerySelectorAll("tbody tr");
+            if (!(table is null))
+            {
+                testid = table.GetAttribute("data-test-id").Trim();
+                total = table.QuerySelector("tr.report-row-total td.report-col-total")?.TextContent.Trim();
+                cols = table.QuerySelectorAll("th").Skip(1);
+                rows = table.QuerySelectorAll("tbody tr");
+            }
         }
 
         private async Task WhenGettingReport(ReportParameters parameters)
@@ -136,7 +140,8 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(url);
 
             // Then: Is showing the correct report
-            Assert.AreEqual($"report-{parameters.id}", testid);
+            if (table != null)
+                Assert.AreEqual($"report-{parameters.id}", testid);
 
             // And: Return to the caller for futher checks
         }
@@ -476,6 +481,26 @@ namespace YoFi.Tests.Integration
 
             // And: Report has the correct # rows: just the 2 managed budgets
             Assert.AreEqual(2, rows.Count());
+        }
+
+        [TestMethod]
+        public async Task Bug1185()
+        {
+            // Bug 1185: Managed budget report looks crazy if no monthly transactions
+
+            // Given: A database of transactions and budgettx, but
+            // CRITICALLY no monthly items
+            // So we can use the setup assembled on Initialize
+
+            // When: Building the 'managed-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "managed-budget", year = 2020 });
+
+            // Then: The report is totally blank
+            Assert.IsNull(table);
+
+            // And: The "There is no data" message is present
+            var nodata = document.QuerySelector("[data-test-id=no-data]");
+            Assert.IsNotNull(nodata);
         }
 
         #endregion
