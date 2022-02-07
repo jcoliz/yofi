@@ -1,4 +1,6 @@
 ﻿@model YoFi.Core.Reports.IDisplayReport
+@using System.Text.RegularExpressions;
+
 @{
     var datatestid = $"report-{Model.Definition}";
 }
@@ -20,7 +22,8 @@
         @foreach (var row in Model.RowLabelsOrdered)
         {
             var rowformat = row.IsTotal ? "report-row-total" : $"report-row-{row.Level + Model.DisplayLevelAdjustment}";
-            var rowtestid = (!string.IsNullOrEmpty(row.UniqueID)) ? $"data-test-id=row-{row.UniqueID}" : string.Empty;
+            var rowid = Regex.Replace(row.UniqueID, "[^\\w]+", "-");
+            var rowtestid = (!string.IsNullOrEmpty(rowid)) ? $"data-test-id=row-{rowid}" : string.Empty;
             <tr class="@rowformat" @rowtestid>
 
                 <td class="report-col-name">
