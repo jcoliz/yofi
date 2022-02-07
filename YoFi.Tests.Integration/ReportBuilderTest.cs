@@ -244,6 +244,12 @@ namespace YoFi.Tests.Integration
                 Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
+        decimal SumOfBudgetTxsTopCategory(string category)
+        {
+            return
+                BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
         [DataRow("Income")]
         [DataRow("Taxes")]
         [DataRow("Savings")]
@@ -308,5 +314,27 @@ namespace YoFi.Tests.Integration
             // And: Report has the correct # rows
             Assert.AreEqual(13, rows.Count());
         }
+
+        [TestMethod]
+        public async Task ExpensesBudget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'expenses-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "expenses-budget", year = 2020 });
+
+            // Then: Report has the correct total
+            var expected = BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
+            Assert.AreEqual(expected.ToString("C0", culture), total);
+
+            // And: Report has the correct # columns, just 1 the budget itself
+            Assert.AreEqual(1, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(7, rows.Count());
+
+        }
+
     }
 }
