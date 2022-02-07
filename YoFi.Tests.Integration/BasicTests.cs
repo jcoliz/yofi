@@ -39,12 +39,15 @@ namespace YoFi.Tests.Integration
         }
 
         /// <summary>
-        /// Just testing that all the pages we know about load OK on direct load
+        /// Just testing that the top-level pages load OK on direct load
         /// </summary>
         /// <param name="url"></param>
-        /// <returns></returns>
         [DataRow("/Identity/Account/Register")]
         [DataRow("/Home")]
+        [DataRow("/Import")]
+        [DataRow("/Reports")]
+        [DataRow("/Budget")]
+        [DataRow("/Help")]
         [DataTestMethod]
         public async Task GetOK(string url)
         {
