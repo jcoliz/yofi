@@ -4,9 +4,11 @@ using AngleSharp.Html.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -34,6 +36,8 @@ namespace YoFi.Tests.Integration
         }
 
         static IEnumerable<Transaction> Transactions1000;
+
+        static readonly CultureInfo culture = new CultureInfo("en-US");
 
         protected static IEnumerable<Transaction> LoadTransactions()
         {
@@ -99,8 +103,6 @@ namespace YoFi.Tests.Integration
         [DataTestMethod]
         public async Task All(bool showmonths)
         {
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
-
             // Given: A large database of transactions
             // (Assembled on ClassInitialize)
 
@@ -114,13 +116,58 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual("report-all",testid);
 
             // Then: Report has the correct total
-            Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0"), total);
+            Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0",culture), total);
 
             // And: Report has the correct # columns (One for each month plus total)
             Assert.AreEqual(showmonths?13:1, cols.Count());
 
             // And: Report has the correct # rows
             Assert.AreEqual(21, rows.Count());
+        }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataTestMethod]
+        public async Task AllLevels(int level)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Getting the report
+            var document = await WhenGettingReport($"/Report/all?year=2020&showmonths=true&level={level}");
+
+            // Then: On the expected page
+            Assert.AreEqual("All Transactions", h2);
+
+            // And: Showing the correct report
+            Assert.AreEqual("report-all", testid);
+
+            // Then: Report has the correct total
+            Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0", culture), total);
+
+            // And: Report has the correct # columns (One for each month plus total)
+            Assert.AreEqual(13, cols.Count());
+
+            // And: Report has the correct # rows
+            var rowset = new int[] { 9, 21, 24, 26 };
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(rowset[level - 1], rows.Count());
+
+            // And: Report has the right levels
+            // Note that we are using the report-row-x class
+            var regex = new Regex("report-row-([0-9]+)");
+            var levels = rows
+                    .SelectMany(row => row.ClassList)
+                    .Select(@class => regex.Match(@class))
+                    .Where(match => match.Success)
+                    .Select(match => match.Groups.Values.Last().Value)
+                    .Select(value => int.Parse(value))
+                    .Distinct();
+
+            Assert.AreEqual(level, levels.Count());
         }
     }
 }
