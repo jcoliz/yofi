@@ -107,15 +107,16 @@ namespace YoFi.Tests.Integration
             // (Assembled on ClassInitialize)
 
             // When: Getting the report
-            var document = await WhenGettingReport($"/Report/all?year=2020&showmonths={showmonths}");
+            var report = "all";
+            var document = await WhenGettingReport($"/Report/{report}?year=2020&showmonths={showmonths}");
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
 
             // And: Showing the correct report
-            Assert.AreEqual("report-all",testid);
+            Assert.AreEqual($"report-{report}", testid);
 
-            // Then: Report has the correct total
+            // And: Report has the correct total
             Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0",culture), total);
 
             // And: Report has the correct # columns (One for each month plus total)
@@ -136,15 +137,16 @@ namespace YoFi.Tests.Integration
             // (Assembled on Initialize)
 
             // When: Getting the report
-            var document = await WhenGettingReport($"/Report/all?year=2020&showmonths=true&level={level}");
+            var report = "all";
+            var document = await WhenGettingReport($"/Report/{report}?year=2020&showmonths=true&level={level}");
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
 
             // And: Showing the correct report
-            Assert.AreEqual("report-all", testid);
+            Assert.AreEqual($"report-{report}", testid);
 
-            // Then: Report has the correct total
+            // And: Report has the correct total
             Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0", culture), total);
 
             // And: Report has the correct # columns (One for each month plus total)
@@ -152,8 +154,6 @@ namespace YoFi.Tests.Integration
 
             // And: Report has the correct # rows
             var rowset = new int[] { 9, 21, 24, 26 };
-
-            // And: Report has the correct # rows
             Assert.AreEqual(rowset[level - 1], rows.Count());
 
             // And: Report has the right levels
@@ -168,6 +168,38 @@ namespace YoFi.Tests.Integration
                     .Distinct();
 
             Assert.AreEqual(level, levels.Count());
+        }
+
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(6)]
+        [DataRow(9)]
+        [DataRow(12)]
+        [DataTestMethod]
+        public async Task AllMonths(int month)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the 'All' report for the correct year, with level at '{level}'
+            var report = "all";
+            var document = await WhenGettingReport($"/Report/{report}?year=2020&showmonths=true&month={month}");
+
+            // Then: On the expected page
+            Assert.AreEqual("All Transactions", h2);
+
+            // And: Showing the correct report
+            Assert.AreEqual($"report-{report}", testid);
+
+            // And: Report has the correct total
+            var expected = Transactions1000.Where(x => x.Timestamp.Month <= month).Sum(x => x.Amount);
+            Assert.AreEqual(expected.ToString("C0", culture), total);
+
+            // And: Report has the correct # columns (One for each month plus total)
+            Assert.AreEqual(month + 1, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(21, rows.Count());
         }
     }
 }
