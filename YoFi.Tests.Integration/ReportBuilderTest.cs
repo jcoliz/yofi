@@ -1,4 +1,6 @@
-﻿using AngleSharp.Html.Parser;
+﻿using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -15,14 +17,13 @@ namespace YoFi.Tests.Integration
     public class ReportBuilderTest: IntegrationTest
     {
         [ClassInitialize]
-        public static async Task InitialSetup(TestContext tcontext)
+        public static void InitialSetup(TestContext tcontext)
         {
             integrationcontext = new IntegrationContext(tcontext.FullyQualifiedTestClassName);
 
             var txs = LoadTransactions();
             context.Transactions.AddRange(txs);
             context.SaveChanges();
-
         }
 
         [ClassCleanup]
@@ -56,13 +57,10 @@ namespace YoFi.Tests.Integration
 
         }
 
-        [TestMethod]
-        public async Task All()
+        private async Task<IHtmlDocument> WhenGettingReport(string url)
         {
-            // When: Getting the report
-
             // First get the outer layout
-            var response = await client.GetAsync("/Report/all?year=2020");
+            var response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             // Then find the url to the inner report
@@ -76,28 +74,44 @@ namespace YoFi.Tests.Integration
             // Then: It's OK
             response.EnsureSuccessStatusCode();
 
-            // And: On the expected page
-            var expected = "All Transactions";
             document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
-            var h2 = document.QuerySelector("H2");
-            Assert.AreEqual(expected, h2.TextContent.Trim());
+
+            h2 = document.QuerySelector("H2").TextContent.Trim();
+            table = document.QuerySelector("table");
+            testid = table.GetAttribute("data-test-id").Trim();
+            total = table.QuerySelector("tr.report-row-total td.report-col-total").TextContent.Trim();
+            cols = table.QuerySelectorAll("tr.report-row-total td.report-col-amount");
+            rows = table.QuerySelectorAll("tbody tr");
+
+            return document;
+        }
+
+        private string h2 = default;
+        private IElement table = default;
+        private string testid;
+        private string total = default;
+        private IHtmlCollection<IElement> cols;
+        private IHtmlCollection<IElement> rows;
+
+        [TestMethod]
+        public async Task All()
+        {
+            // When: Getting the report
+            var document = await WhenGettingReport("/Report/all?year=2020");
+
+            // Then: On the expected page
+            Assert.AreEqual("All Transactions", h2);
 
             // And: Showing the correct report
-            var table = document.QuerySelector("table");
-            var testid = table.GetAttribute("data-test-id").Trim();
             Assert.AreEqual("report-all",testid);
 
             // Then: Report has the correct total
-            var sum = Transactions1000.Sum(x => x.Amount);
-            var total = table.QuerySelector("tr.report-row-total td.report-col-total").TextContent.Trim();
-            Assert.AreEqual(sum.ToString("C0"), total);
+            Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0"), total);
 
             // And: Report has the correct # columns (One for each month plus total)
-            var cols = table.QuerySelectorAll("tr.report-row-total td.report-col-amount");
             Assert.AreEqual(13, cols.Count());
 
             // And: Report has the correct # rows
-            var rows = table.QuerySelectorAll("tbody tr");
             Assert.AreEqual(21, rows.Count());
         }
     }
