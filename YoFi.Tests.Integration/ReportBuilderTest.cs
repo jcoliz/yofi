@@ -24,8 +24,10 @@ namespace YoFi.Tests.Integration
         {
             integrationcontext = new IntegrationContext(tcontext.FullyQualifiedTestClassName);
 
-            var txs = LoadTransactions();
+            var txs = Given1000Transactions();
             context.Transactions.AddRange(txs);
+            var btxs = GivenSampleBudgetTxs();
+            context.BudgetTxs.AddRange(btxs);
             context.SaveChanges();
         }
 
@@ -36,12 +38,13 @@ namespace YoFi.Tests.Integration
         }
 
         static IEnumerable<Transaction> Transactions1000;
+        static IEnumerable<BudgetTx> BudgetTxs;
 
         static readonly CultureInfo culture = new CultureInfo("en-US");
 
-        protected static IEnumerable<Transaction> LoadTransactions()
+        protected static IEnumerable<Transaction> Given1000Transactions()
         {
-            if (null == Transactions1000)
+            if (Transactions1000 is null)
             {
                 string json;
 
@@ -54,6 +57,23 @@ namespace YoFi.Tests.Integration
                 Transactions1000 = txs;
             }
             return Transactions1000;
+        }
+
+        protected static IEnumerable<BudgetTx> GivenSampleBudgetTxs()
+        {
+            if (BudgetTxs is null)
+            {
+                string json;
+
+                using (var stream = SampleData.Open("BudgetTxs.json"))
+                using (var reader = new StreamReader(stream))
+                    json = reader.ReadToEnd();
+
+                var txs = System.Text.Json.JsonSerializer.Deserialize<List<BudgetTx>>(json);
+
+                BudgetTxs = txs;
+            }
+            return BudgetTxs;
         }
 
         [TestMethod]
@@ -254,5 +274,25 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(12, rows.Count());
         }
 
+        [TestMethod]
+        public async Task Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'budget' report for the correct year
+            var report = "budget";
+            await WhenGettingReport($"/Report/{report}?year=2020");
+
+            // Then: Report has the correct total
+            var expected = BudgetTxs.Sum(x => x.Amount);
+            Assert.AreEqual(expected.ToString("C0", culture), total);
+
+            // And: Report has the correct # columns, just 1 the budget itself
+            Assert.AreEqual(1, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(13, rows.Count());
+        }
     }
 }
