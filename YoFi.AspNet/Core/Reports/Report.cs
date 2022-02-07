@@ -610,7 +610,7 @@ namespace YoFi.Core.Reports
                     var id = string.Join(':', keys) + (!oquery.LeafRowsOnly ? ":" : string.Empty);
 
                     // Leaf-rows reports use the ID as a name.
-                    var name = oquery.LeafRowsOnly ? id.Split(':').Last() : null;
+                    var name = oquery.LeafRowsOnly ? id : null;
 
                     // Does this row already exist?
                     var row = RowLabels.Where(x => x.UniqueID == id).SingleOrDefault();

@@ -667,7 +667,7 @@ namespace YoFi.Tests.Core
 
             var Name = GetRow(x => x.Name == "Name" && x.Level == 0);
             var Other = GetRow(x => x.Name == "Other" && x.Level == 0);
-            var Else = GetRow(x => x.Name == "Else" && x.Level == 0);
+            var Else = GetRow(x => x.Name == "Other:Else" && x.Level == 0);
 
             Assert.AreEqual(7, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
@@ -1084,7 +1084,7 @@ namespace YoFi.Tests.Core
 
             var Row = report.RowLabels.First();
 
-            Assert.AreEqual("A:B:G", Row.UniqueID);
+            Assert.AreEqual("A:B:G", Row.Name);
         }
 
         [TestMethod]
