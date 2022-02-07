@@ -361,6 +361,30 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(12, rows.Count());
         }
 
+        [TestMethod]
+        public async Task All_V_Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
 
+            // When: Building the 'all-v-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "all-v-budget", year = 2020 });
+
+            // Then: Report has the correct total budget
+            var expected = BudgetTxs.Sum(x => x.Amount);
+            var budgettotal = table.QuerySelector("td[data-test-id=total-Budget]").TextContent.Trim();
+            Assert.AreEqual(expected.ToString("C0", culture), budgettotal);
+
+            // And: Report has the correct actual total
+            expected = Transactions1000.Sum(x => x.Amount);
+            var actualtotal = table.QuerySelector("td[data-test-id=total-Actual]").TextContent.Trim();
+            Assert.AreEqual(expected.ToString("C0", culture), actualtotal);
+
+            // And: Report has the correct # visible columns, budget, actual, progress
+            Assert.AreEqual(3, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(22, rows.Count());
+        }
     }
 }

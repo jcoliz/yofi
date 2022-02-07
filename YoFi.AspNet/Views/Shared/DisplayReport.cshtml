@@ -45,7 +45,7 @@
 
                     var cellformat = column.DisplayAsPercent ? "P0" : "C0";
 
-                    var testid = (row.IsTotal && !(column.UniqueID is null)) ? $"data-test-id=total-{column.UniqueID}" : string.Empty;
+                    var testid = (row.IsTotal && !string.IsNullOrEmpty(column.UniqueID)) ? $"data-test-id=total-{column.UniqueID}" : string.Empty;
 
                     <td class="@colformat" @testid>
                         @cell.ToString(cellformat)
