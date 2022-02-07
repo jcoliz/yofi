@@ -18,168 +18,8 @@ using YoFi.Tests.Integration.Helpers;
 namespace YoFi.Tests.Integration
 {
     [TestClass]
-    public class ReportBuilderTest: IntegrationTest
+    public class ReportBuilderTest : ReportBuilderTestBase
     {
-        #region Fields
-
-        static IEnumerable<Transaction> Transactions1000;
-        static IEnumerable<BudgetTx> BudgetTxs;
-        IEnumerable<BudgetTx> ManagedBudgetTxs;
-        static readonly CultureInfo culture = new CultureInfo("en-US");
-
-        private string h2 = default;
-        private IElement table = default;
-        private string testid;
-        private string total = default;
-        private IEnumerable<IElement> cols;
-        private IHtmlCollection<IElement> rows;
-        private IHtmlDocument document;
-
-        #endregion
-
-        #region Helpers
-
-        protected static IEnumerable<Transaction> Given1000Transactions()
-        {
-            if (Transactions1000 is null)
-            {
-                string json;
-
-                using (var stream = SampleData.Open("Transactions1000.json"))
-                using (var reader = new StreamReader(stream))
-                    json = reader.ReadToEnd();
-
-                var txs = System.Text.Json.JsonSerializer.Deserialize<List<Transaction>>(json);
-
-                Transactions1000 = txs;
-            }
-            return Transactions1000;
-        }
-
-        protected static IEnumerable<BudgetTx> GivenSampleBudgetTxs()
-        {
-            if (BudgetTxs is null)
-            {
-                string json;
-
-                using (var stream = SampleData.Open("BudgetTxs.json"))
-                using (var reader = new StreamReader(stream))
-                    json = reader.ReadToEnd();
-
-                var txs = System.Text.Json.JsonSerializer.Deserialize<List<BudgetTx>>(json);
-
-                BudgetTxs = txs;
-            }
-            return BudgetTxs;
-        }
-
-        public IEnumerable<BudgetTx> GivenSampleManagedBudgetTxs()
-        {
-            if (ManagedBudgetTxs is null)
-            {
-                string json;
-
-                using (var stream = SampleData.Open("BudgetTxsManaged.json"))
-                using (var reader = new StreamReader(stream))
-                    json = reader.ReadToEnd();
-
-                var txs = System.Text.Json.JsonSerializer.Deserialize<List<BudgetTx>>(json);
-
-                ManagedBudgetTxs = txs;
-            }
-            return ManagedBudgetTxs;
-        }
-
-
-        private async Task WhenGettingReport(string url)
-        {
-            // First get the outer layout
-            var response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-
-            // Then find the url to the inner report
-            document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
-            var element = document.QuerySelector("div.loadr");
-            var endpoint = element.GetAttribute("data-endpoint")?.Trim();
-
-            // Finally, get the inner report
-            response = await client.GetAsync(endpoint);
-
-            // Then: It's OK
-            response.EnsureSuccessStatusCode();
-
-            document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
-
-            h2 = document.QuerySelector("H2")?.TextContent.Trim();
-            table = document.QuerySelector("table");
-            if (!(table is null))
-            {
-                testid = table.GetAttribute("data-test-id").Trim();
-                total = table.QuerySelector("tr.report-row-total td.report-col-total")?.TextContent.Trim();
-                cols = table.QuerySelectorAll("th").Skip(1);
-                rows = table.QuerySelectorAll("tbody tr");
-            }
-        }
-
-        private async Task WhenGettingReport(ReportParameters parameters)
-        {
-            // Given: A URL which encodes these report parameters
-
-            var builder = new StringBuilder($"/Report/{parameters.id}?year={parameters.year}");
-
-            if (parameters.showmonths.HasValue)
-                builder.Append($"&showmonths={parameters.showmonths}");
-            if (parameters.month.HasValue)
-                builder.Append($"&month={parameters.month}");
-            if (parameters.level.HasValue)
-                builder.Append($"&level={parameters.level}");
-
-            var url = builder.ToString();
-
-            // When: Getting a report at that URL from the system
-            await WhenGettingReport(url);
-
-            // Then: Is showing the correct report
-            if (table != null)
-                Assert.AreEqual($"report-{parameters.id}", testid);
-
-            // And: Return to the caller for futher checks
-        }
-
-        decimal SumOfTopCategory(string category)
-        {
-            return
-                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
-                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
-        }
-
-        decimal SumOfBudgetTxsTopCategory(string category)
-        {
-            return
-                BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
-        }
-
-        decimal SumOfManagedBudgetTxsTopCategory(string category)
-        {
-            return
-                ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
-        }
-
-        private string GetCell(string col, string row)
-        {
-            // Note that finding an arbitrary cell in the table is more involved. I didn't want
-            // to mark up EVERY cell with a data-test-id. Instead I marked up the headers. So I
-            // need to figure out which column## has the data I want, and then look for it in
-            // the row cols
-
-            var index = cols.Index(cols.Where(x => x.GetAttribute("data-test-id") == $"col-{col}").Single());
-            var result = table.QuerySelectorAll($"tr[data-test-id=row-{row}] td.report-col-amount")[index].TextContent.Trim();
-
-            return result;
-        }
-
-        #endregion
-
         #region Init/Cleanup
 
         [ClassInitialize]
@@ -272,12 +112,12 @@ namespace YoFi.Tests.Integration
             // Note that we are using the report-row-x class
             var regex = new Regex("report-row-([0-9]+)");
             var levels = rows
-                    .SelectMany(row => row.ClassList)
-                    .Select(@class => regex.Match(@class))
-                    .Where(match => match.Success)
-                    .Select(match => match.Groups.Values.Last().Value)
-                    .Select(value => int.Parse(value))
-                    .Distinct();
+                    .SelectMany(row => row.ClassList)       // Extract all the classes
+                    .Select(@class => regex.Match(@class))  // Look for the classes which match our pattern
+                    .Where(match => match.Success)          // Take only the successful matches
+                    .Select(match => match.Groups.Values.Last().Value)  // Extract the ([0-9]+) group out of the class name
+                    .Select(value => int.Parse(value))      // Turn it into an int (probably not needed now)
+                    .Distinct();                            // Boil down to only unique values
 
             Assert.AreEqual(level, levels.Count());
         }
