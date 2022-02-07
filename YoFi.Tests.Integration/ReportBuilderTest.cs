@@ -105,7 +105,7 @@ namespace YoFi.Tests.Integration
             h2 = document.QuerySelector("H2").TextContent.Trim();
             table = document.QuerySelector("table");
             testid = table.GetAttribute("data-test-id").Trim();
-            total = table.QuerySelector("tr.report-row-total td.report-col-total").TextContent.Trim();
+            total = table.QuerySelector("tr.report-row-total td.report-col-total")?.TextContent.Trim();
             cols = table.QuerySelectorAll("tr.report-row-total td.report-col-amount");
             rows = table.QuerySelectorAll("tbody tr");
         }
@@ -333,8 +333,34 @@ namespace YoFi.Tests.Integration
 
             // And: Report has the correct # rows
             Assert.AreEqual(7, rows.Count());
-
         }
+
+        [TestMethod]
+        public async Task Expenses_V_Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'expenses-v-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "expenses-v-budget", year = 2020 });
+
+            // Then: Report has the correct total budget
+            var expected = BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
+            var budgettotal = table.QuerySelector("td[data-test-id=total-Budget]").TextContent.Trim();
+            Assert.AreEqual(expected.ToString("C0", culture), budgettotal);
+
+            // And: Report has the correct actual total
+            expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
+            var actualtotal = table.QuerySelector("td[data-test-id=total-Actual]").TextContent.Trim();
+            Assert.AreEqual(expected.ToString("C0", culture), actualtotal);
+
+            // And: Report has the correct # visible columns, budget, actual, progress
+            Assert.AreEqual(4, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(12, rows.Count());
+        }
+
 
     }
 }
