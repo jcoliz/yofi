@@ -18,11 +18,11 @@
     <div class="container">
         <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
         <form class="d-flex" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.Parameters.Order" method="post">
-            <input class="form-control me-2 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" data-test-id="q" value="@Model.Parameters.Query]" autocomplete="off">
+            <input class="form-control me-2 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" data-test-id="q" value="@Model.Parameters.Query" autocomplete="off">
             <button type="submit" class="btn btn-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Search" data-test-id="btn-search">
                 <i class="fas fa-search"></i>
             </button>
-            <a asp-route-o="@Model.Parameters.Order" asp-route-v="@Model.Parameters.View"]" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
+            <a asp-route-o="@Model.Parameters.Order" asp-route-v="@Model.Parameters.View" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
         </form>
         <div class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
