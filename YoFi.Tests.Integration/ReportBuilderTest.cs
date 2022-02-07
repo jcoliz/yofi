@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
@@ -98,6 +99,8 @@ namespace YoFi.Tests.Integration
         [DataTestMethod]
         public async Task All(bool showmonths)
         {
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
             // Given: A large database of transactions
             // (Assembled on ClassInitialize)
 
