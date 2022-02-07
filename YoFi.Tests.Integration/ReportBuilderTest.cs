@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Reports;
 using YoFi.Tests.Integration.Helpers;
 
 namespace YoFi.Tests.Integration
@@ -109,6 +110,30 @@ namespace YoFi.Tests.Integration
             rows = table.QuerySelectorAll("tbody tr");
         }
 
+        private async Task WhenGettingReport(ReportParameters parameters)
+        {
+            // Given: A URL which encodes these report parameters
+
+            var builder = new StringBuilder($"/Report/{parameters.id}?year={parameters.year}");
+
+            if (parameters.showmonths.HasValue)
+                builder.Append($"&showmonths={parameters.showmonths}");
+            if (parameters.month.HasValue)
+                builder.Append($"&month={parameters.month}");
+            if (parameters.level.HasValue)
+                builder.Append($"&level={parameters.level}");
+
+            var url = builder.ToString();
+
+            // When: Getting a report at that URL from the system
+            await WhenGettingReport(url);
+
+            // Then: Is showing the correct report
+            Assert.AreEqual($"report-{parameters.id}", testid);
+
+            // And: Return to the caller for futher checks
+        }
+
         private string h2 = default;
         private IElement table = default;
         private string testid;
@@ -125,14 +150,10 @@ namespace YoFi.Tests.Integration
             // (Assembled on ClassInitialize)
 
             // When: Getting the report
-            var report = "all";
-            await WhenGettingReport($"/Report/{report}?year=2020&showmonths={showmonths}");
+            await WhenGettingReport( new ReportParameters() { id = "all", year = 2020, showmonths = showmonths } );
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
-
-            // And: Showing the correct report
-            Assert.AreEqual($"report-{report}", testid);
 
             // And: Report has the correct total
             Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0",culture), total);
