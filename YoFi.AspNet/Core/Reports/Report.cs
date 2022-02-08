@@ -664,9 +664,9 @@ namespace YoFi.Core.Reports
                 // Find the actual parent ROW, given that ID. Or create if not exists
                 var parentid = string.Join(':', parentsplit);
 
-                var parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };                
-                if (Table.RowLabels.TryGetValue(parentrow,out var foundrow))
-                    parentrow = foundrow;
+                var parentrow = RowLabels.Where(x => x.UniqueID == parentid).SingleOrDefault();
+                if (parentrow is null)
+                    parentrow = new RowLabel() { Name = parentsplit.Last(), UniqueID = parentid };
                 row.Parent = parentrow;
 
                 // Do the accumlation of values into the parent row
