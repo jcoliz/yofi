@@ -882,10 +882,17 @@ namespace YoFi.Core.Reports
         /// <returns>True if this instance is the same as the specified object</returns>
         public override bool Equals(object obj)
         {
-            return obj is BaseLabel label &&
+            if (obj is BaseLabel label)
+            {
+                var eq =
                    UniqueID == label.UniqueID &&
                    Name == label.Name &&
                    IsTotal == label.IsTotal;
+
+                return eq;
+            }
+            else 
+                return false;
         }
 
         /// <summary>
@@ -918,15 +925,22 @@ namespace YoFi.Core.Reports
         /// <returns></returns>
         int IComparable<BaseLabel>.CompareTo(BaseLabel other)
         {
+            bool thisidnull = string.IsNullOrEmpty(UniqueID);
+            bool otheridnull = string.IsNullOrEmpty(other.UniqueID);
+            bool thisnamenull = string.IsNullOrEmpty(Name);
+            bool othernamenull = string.IsNullOrEmpty(other.Name);
+
             int result = IsSortingAfterTotal.CompareTo(other.IsSortingAfterTotal);
             if (result == 0)
                 result = IsTotal.CompareTo(other.IsTotal);
             if (result == 0) // Empty orders sort at the END
-                result = string.IsNullOrEmpty(UniqueID).CompareTo(string.IsNullOrEmpty(other.UniqueID));
-            if (result == 0)
-                result = UniqueID?.CompareTo(other.UniqueID) ?? -1;
-            if (result == 0)
-                result = Name?.CompareTo(other.Name) ?? -1;
+                result = thisidnull.CompareTo(otheridnull);
+            if (result == 0 && !thisidnull)
+                result = UniqueID.CompareTo(other.UniqueID);
+            if (result == 0) 
+                result = thisnamenull.CompareTo(othernamenull);
+            if (result == 0 && !thisnamenull)
+                result = Name.CompareTo(other.Name);
 
             return result;
         }
