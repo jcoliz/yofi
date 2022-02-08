@@ -56,6 +56,7 @@ steps:
   inputs:
     command: 'test'
     projects: '$(inttests)/$(inttests).csproj'
+    arguments: '--collect:"XPlat Code Coverage" --settings:$(tests)/coverlet.runsettings'
 
 - task: PublishCodeCoverageResults@1
   displayName: 'Publish code coverage'
