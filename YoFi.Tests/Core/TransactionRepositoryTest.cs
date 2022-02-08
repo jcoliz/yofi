@@ -149,7 +149,7 @@ namespace YoFi.Tests.Core
             await transactionRepository.BulkEditAsync(newcategory);
 
             // Then: All previously-selected items are now correctly matching the expected category
-            CollectionAssert.AreEqual(categories.Select(x => x.Replace("Second", "New Category")).ToList(), repository.All.Select(x => x.Category).ToList());
+            Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
         }
     }
 }

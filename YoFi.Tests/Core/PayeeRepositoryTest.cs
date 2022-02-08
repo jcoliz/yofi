@@ -180,5 +180,21 @@ namespace YoFi.Tests.Core
             importer.QueueImportFromXlsx(stream);
             return await importer.ProcessImportAsync();
         }
+
+        [TestMethod]
+        public async Task BulkEditParts()
+        {
+            // Given: A list of items with varying categories, some of which match the pattern *:B:*
+
+            var categories = new string[] { "AB:Second:E", "AB:Second:E:F", "AB:Second:A:B:C", "G H:Second:KLM NOP" };
+            await repository.AddRangeAsync(categories.Select(x => new Payee() { Category = x, Name = x, Selected = true }));
+
+            // When: Calling Bulk Edit with a new category which includes positional wildcards
+            var newcategory = "(1):New Category:(3+)";
+            await itemRepository.BulkEditAsync(newcategory);
+
+            // Then: All previously-selected items are now correctly matching the expected category
+            Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
+        }
     }
 }

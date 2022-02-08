@@ -38,10 +38,43 @@ namespace YoFi.Core.Repositories
         {
             foreach (var item in All.Where(x => x.Selected == true))
             {
-                if (!string.IsNullOrEmpty(category))
-                    item.Category = category;
-
                 item.Selected = false;
+                if (!string.IsNullOrEmpty(category))
+                {
+                    // This may be a pattern-matching search, treat it like one
+                    // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
+                    // matching one, it's just slower.
+                    if (category.Contains("("))
+                    {
+                        var originals = item.Category?.Split(":") ?? default;
+                        var result = new List<string>();
+                        foreach (var component in category.Split(":"))
+                        {
+                            if (component.StartsWith("(") && component.EndsWith("+)"))
+                            {
+                                if (Int32.TryParse(component[1..^2], out var position))
+                                    if (originals.Count() >= position)
+                                        result.AddRange(originals.Skip(position - 1));
+                            }
+                            else if (component.StartsWith("(") && component.EndsWith(")"))
+                            {
+                                if (Int32.TryParse(component[1..^1], out var position))
+                                    if (originals.Count() >= position)
+                                        result.AddRange(originals.Skip(position - 1).Take(1));
+                            }
+                            else
+                                result.Add(component);
+                        }
+
+                        if (result.Any())
+                            item.Category = string.Join(":", result);
+                    }
+                    // It's just a simple replacement
+                    else
+                    {
+                        item.Category = category;
+                    }
+                }
             }
             await _context.SaveChangesAsync();
         }
