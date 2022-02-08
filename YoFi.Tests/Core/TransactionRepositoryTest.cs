@@ -135,5 +135,21 @@ namespace YoFi.Tests.Core
             // And: Those which already had a bankref did not have theirs changed
             Assert.AreEqual(10, repository.All.Count(x => x.BankReference.Length == 1));
         }
+
+        [TestMethod]
+        public async Task BulkEditParts()
+        {
+            // Given: A list of items with varying categories, some of which match the pattern *:B:*
+
+            var categories = new string[] { "AB:Second:E", "AB:Second:E:F", "AB:Second:A:B:C", "G H:Second:KLM NOP" };
+            await repository.AddRangeAsync(categories.Select(x => new Transaction() { Category = x, Amount = 100m, Timestamp = new DateTime(2001, 1, 1), Selected = true }));
+
+            // When: Calling Bulk Edit with a new category which includes positional wildcards
+            var newcategory = "(1):New Category:(3+)";
+            await transactionRepository.BulkEditAsync(newcategory);
+
+            // Then: All previously-selected items are now correctly matching the expected category
+            CollectionAssert.AreEqual(categories.Select(x => x.Replace("Second", "New Category")).ToList(), repository.All.Select(x => x.Category).ToList());
+        }
     }
 }
