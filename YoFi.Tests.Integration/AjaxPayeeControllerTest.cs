@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
@@ -138,38 +139,33 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        #endregion
-
-#if false
-
-
         [TestMethod]
         public async Task Edit()
         {
-            await AddFive();
-            var take1 = repository.All.Take(1);
-            var original = take1.First();
-            var id = original.ID;
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase(5, 1);
+            var id = chosen.Single().ID;
 
-            // Keep a deep copy for later comparison
-            var copy = (await DeepCopy.MakeDuplicateOf(take1)).First();
+            // And: When posting changed values to /Ajax/Payee/Edit/
+            var expected = new Payee() { Category = "Edited Category", Name = "Edited Name" };
+            var formData = new Dictionary<string, string>()
+            {
+                { "ID", id.ToString() },
+                { "Name", expected.Name },
+                { "Category", expected.Category },
+            };
+            var response = await WhenGettingAndPostingForm("/Payees/Index/", d => $"/ajax/payee/edit/{id}", formData);
+            response.EnsureSuccessStatusCode();
 
-            // detach the original. in real life we won't have another tracked object hanging around like this
-            context.Entry(original).State = EntityState.Detached;
+            // Then: The result is what we expect (ApiItemResult in JSON with the item returned to us)
+            var apiresult = await JsonSerializer.DeserializeAsync<Payee>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            Assert.AreEqual(expected, apiresult);
 
-            var newitem = new Payee() { ID = id, Name = "I have edited you!", Category = original.Category };
-
-            var actionresult = await controller.Edit(id, newitem);
-
-            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
-            Assert.AreEqual(newitem, objresult.Value);
-            Assert.AreNotEqual(original, objresult.Value);
-
-            var actual = await repository.All.Where(x => x.ID == id).SingleAsync();
-            Assert.AreEqual(newitem, actual);
-            Assert.AreNotEqual(copy, actual);
+            // And: The item was changed
+            var actual = context.Payees.Where(x => x.ID == id).AsNoTracking().Single();
+            Assert.AreEqual(expected, actual);
         }
 
-#endif
+        #endregion
     }
 }
