@@ -106,7 +106,7 @@ namespace YoFi.Tests.Integration
             (var items, var chosen) = await GivenFakeDataInDatabase(5, 1, (x => { x.Selected = !value; return x; }));
             var id = chosen.Single().ID;
 
-            // When: Selecting the item
+            // When: Selecting the item via AJAX
             var formData = new Dictionary<string, string>()
             {
                 { "value", value.ToString() },
@@ -118,21 +118,30 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(value,actual.Selected);
         }
 
+        [TestMethod]
+        public async Task Add()
+        {
+            // When: Adding a new item via AJAX
+            var expected = new Payee() { Category = "B", Name = "3" };
+            var formData = new Dictionary<string, string>()
+            {
+                { "Category", expected.Category },
+                { "Name", expected.Name },
+            };
+            var response = await WhenGettingAndPostingForm("/Payees/Index/", d => $"/ajax/payee/add", formData);
+
+            // Then: There is one payee in the database
+            Assert.AreEqual(1, context.Payees.Count());
+
+            // And: It matches what we sent in
+            var actual = context.Payees.Single();
+            Assert.AreEqual(expected, actual);
+        }
+
         #endregion
 
 #if false
 
-        [TestMethod]
-        public async Task Add()
-        {
-            var expected = new Payee() { Category = "B", Name = "3" };
-
-            var actionresult = await controller.Add(expected);
-
-            var objresult = Assert.That.IsOfType<ObjectResult>(actionresult);
-            Assert.AreEqual(expected, objresult.Value);
-            Assert.AreEqual(1, repository.All.Count());
-        }
 
         [TestMethod]
         public async Task Edit()
