@@ -97,44 +97,30 @@ namespace YoFi.Tests.Integration
 
         #region Tests
 
-        [TestMethod]
-        public async Task Select()
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task Select(bool value)
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase(5, 1);
+            (var items, var chosen) = await GivenFakeDataInDatabase(5, 1, (x => { x.Selected = !value; return x; }));
             var id = chosen.Single().ID;
 
             // When: Selecting the item
-            var value = true;
             var formData = new Dictionary<string, string>()
             {
                 { "value", value.ToString() },
             };
             var response = await WhenGettingAndPostingForm("/Payees/Index/", d => $"/ajax/payee/select/{id}", formData);
 
-            // Then: Item is selected
+            // Then: Item selection matches value
             var actual = context.Payees.Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.IsTrue(actual.Selected);
+            Assert.AreEqual(value,actual.Selected);
         }
 
         #endregion
 
 #if false
-
-        [TestMethod]
-        public async Task Deselect()
-        {
-            await AddFive();
-            var expected = repository.All.First();
-            expected.Selected = true;
-            await repository.UpdateAsync(expected);
-
-            var actionresult = await controller.Select(expected.ID, false);
-
-            Assert.That.IsOfType<OkResult>(actionresult);
-
-            Assert.IsTrue(false == expected.Selected);
-        }
 
         [TestMethod]
         public async Task Add()
