@@ -882,17 +882,8 @@ namespace YoFi.Core.Reports
         /// <returns>True if this instance is the same as the specified object</returns>
         public override bool Equals(object obj)
         {
-            if (obj is BaseLabel label)
-            {
-                var eq =
-                   UniqueID == label.UniqueID &&
-                   Name == label.Name &&
-                   IsTotal == label.IsTotal;
-
-                return eq;
-            }
-            else 
-                return false;
+            return obj is BaseLabel label
+                && CompareTo(label) == 0;
         }
 
         /// <summary>
@@ -901,7 +892,7 @@ namespace YoFi.Core.Reports
         /// <returns>A 32-bit integer hash code</returns>
         public override int GetHashCode()
         {
-            return HashCode.Combine(UniqueID, Name, IsTotal);
+            return HashCode.Combine(ToString());
         }
 
         /// <summary>
@@ -914,8 +905,9 @@ namespace YoFi.Core.Reports
                 return "TOTAL";
             if (!string.IsNullOrEmpty(UniqueID))
                 return $"ID:{UniqueID}";
-            else
+            if (!string.IsNullOrEmpty(Name))
                 return $"Name:{Name}";
+            return "-";
         }
 
         /// <summary>
@@ -923,7 +915,7 @@ namespace YoFi.Core.Reports
         /// </summary>
         /// <param name="other">Another base label for comparison</param>
         /// <returns></returns>
-        int IComparable<BaseLabel>.CompareTo(BaseLabel other)
+        public int CompareTo(BaseLabel other)
         {
             bool thisidnull = string.IsNullOrEmpty(UniqueID);
             bool otheridnull = string.IsNullOrEmpty(other.UniqueID);
@@ -943,7 +935,7 @@ namespace YoFi.Core.Reports
                 result = Name.CompareTo(other.Name);
 
             return result;
-        }
+        }       
     }
 
     /// <summary>
