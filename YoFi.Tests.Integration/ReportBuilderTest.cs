@@ -344,5 +344,100 @@ namespace YoFi.Tests.Integration
         }
 
         #endregion
+
+        #region Utilities
+
+        // Only enable this if need to generate more sample data
+        //[TestMethod]
+        public void GenerateData()
+        {
+            // Generates a large dataset of transactions
+
+            const int numtx = 1000;
+            var year = 2020;
+            var random = new Random();
+
+            string[] categories = new string[] { "A", "A:B:C", "A:B:C:D", "E", "E:F", "E:F:G", "H", "H:I", "J", "Income:K", "Income:L", "Taxes:M", "Taxes:N", "Savings:O", "Savings:P", string.Empty };
+
+            var transactions = new List<Transaction>();
+            int i = numtx;
+            while (i-- > 0)
+            {
+                var month = random.Next(1, 13);
+                var day = random.Next(1, 1 + DateTime.DaysInMonth(year, month));
+
+                var tx = new Transaction() { Timestamp = new DateTime(year, month, day), Payee = i.ToString() };
+
+                // Half the transactions will have splits
+                if (random.Next(0, 2) == 1)
+                {
+                    tx.Amount = nextamount(1000);
+                    tx.Category = categories[random.Next(0, categories.Length)];
+                }
+                else
+                {
+                    tx.Splits = Enumerable.Range(0, random.Next(2, 7)).Select(x => new Split()
+                    {
+                        Amount = nextamount(1000),
+                        Category = categories[random.Next(0, categories.Length)],
+                        Memo = x.ToString()
+                    })
+                    .ToList();
+                    tx.Amount = tx.Splits.Sum(x => x.Amount);
+                }
+
+                transactions.Add(tx);
+            }
+
+            // Serialize to JSON
+
+            {
+                using var stream = File.OpenWrite("Transactions1000.json");
+                Console.WriteLine($"Writing {stream.Name}...");
+                using var writer = new StreamWriter(stream);
+                var output = System.Text.Json.JsonSerializer.Serialize(transactions, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
+                writer.Write(output);
+            }
+
+            // Generate annual budget txs
+
+            string[] budgetcategories = new string[] { "A:B", "E:F", "H:I", "Taxes", "Taxes:N", "Savings:O", "Savings:P" };
+
+            var budgettxs = budgetcategories.Select(x => new BudgetTx() { Timestamp = new DateTime(year, 1, 1), Amount = nextamount(100000), Category = x });
+
+            // Serialize to JSON
+
+            {
+                using var stream = File.OpenWrite("BudgetTxs.json");
+                Console.WriteLine($"Writing {stream.Name}...");
+                using var writer = new StreamWriter(stream);
+                var output = System.Text.Json.JsonSerializer.Serialize(budgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
+                writer.Write(output);
+            }
+
+            // Generate managed budget txs
+
+            string[] managedbudgetcategories = new string[] { "J", "Income" };
+
+            var managedbudgettxs = managedbudgetcategories.SelectMany(
+                c => Enumerable.Range(1, 12).Select(
+                    mo => new BudgetTx() { Timestamp = new DateTime(year, mo, 1), Amount = nextamount(10000), Category = c }
+                    )
+            );
+
+            // Serialize to JSON
+
+            {
+                using var stream = File.OpenWrite("BudgetTxsManaged.json");
+                Console.WriteLine($"Writing {stream.Name}...");
+                using var writer = new StreamWriter(stream);
+                var output = System.Text.Json.JsonSerializer.Serialize(managedbudgettxs, options: new System.Text.Json.JsonSerializerOptions() { PropertyNamingPolicy = null, WriteIndented = true });
+                writer.Write(output);
+            }
+
+            decimal nextamount(decimal x) => ((decimal)random.Next(-(int)(x * 100m), 0)) / 100m;
+        }
+        #endregion
+
     }
 }
