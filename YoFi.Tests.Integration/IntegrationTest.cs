@@ -32,9 +32,38 @@ namespace YoFi.Tests.Integration
 
         #region Helpers
 
-        protected virtual IEnumerable<T> GivenFakeItems<T>(int num) => throw new NotImplementedException();
+        protected virtual IEnumerable<T> GivenFakeItems<T>(int num) where T: class, new()
+        {
+            return Enumerable.Range(1, num).Select(x => GivenFakeItem<T>(x));
+        }
 
-        protected async Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<T>(int total, int selected, Func<T, T> func = null) where T : class
+        protected virtual T GivenFakeItem<T>(int index) where T: class, new()
+        {
+            var result = new T();
+            var properties = typeof(T).GetProperties();
+            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(YoFi.Core.Models.Attributes.EditableAttribute)));
+
+            foreach(var property in chosen)
+            {
+                var t = property.PropertyType;
+                object o = default;
+
+                if (t == typeof(string))
+                    o = $"{property.Name} {index}";
+                else if (t == typeof(decimal))
+                    o = index * 100m;
+                else if (t == typeof(DateTime))
+                    o = new DateTime(2000, 1, 1) + TimeSpan.FromDays(index);
+                else
+                    throw new NotImplementedException();
+
+                property.SetValue(result,o);
+            }
+
+            return result;
+        }
+
+        protected async Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<T>(int total, int selected, Func<T, T> func = null) where T : class, new()
         {
             var all = GivenFakeItems<T>(total);
             var needed = all.Skip(total - selected).Take(selected).Select(func ?? (x => x));
@@ -47,7 +76,7 @@ namespace YoFi.Tests.Integration
             return (items, wasneeded);
         }
 
-        protected async Task<IEnumerable<T>> GivenFakeDataInDatabase<T>(int total) where T : class
+        protected async Task<IEnumerable<T>> GivenFakeDataInDatabase<T>(int total) where T : class, new()
         {
             (var result, _) = await GivenFakeDataInDatabase<T>(total, 0);
             return result;
