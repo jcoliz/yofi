@@ -12,7 +12,7 @@ using YoFi.Core.Repositories;
 namespace YoFi.AspNet.Controllers
 {
     [Authorize(Policy = "CanRead")]
-    public class SplitsController : Controller, IController<Split>
+    public class SplitsController : Controller
     {
         private readonly IRepository<Split> _repository;
 
@@ -67,26 +67,5 @@ namespace YoFi.AspNet.Controllers
 
             return RedirectToAction("Edit", "Transactions", new { id = txid });
         }
-
-        Task<IActionResult> IController<Split>.Download() =>
-            throw new NotImplementedException();
-
-        Task<IActionResult> IController<Split>.Upload(List<IFormFile> files) =>
-            throw new NotImplementedException();
-
-        Task<IActionResult> IController<Split>.Index() =>
-            throw new NotImplementedException();
-
-        Task<IActionResult> IController<Split>.Details(int? id) =>
-            throw new NotImplementedException();
-
-        Task<IActionResult> IController<Split>.Create(Split item) =>
-            throw new NotImplementedException();
-
-        Task<IActionResult> IController<Split>.Create() =>
-            throw new NotImplementedException();
-
-        Task<IActionResult> IController<Split>.DeleteConfirmed(int id) =>
-            throw new NotImplementedException();
     }
 }

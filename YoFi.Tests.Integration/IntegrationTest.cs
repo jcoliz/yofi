@@ -81,6 +81,13 @@ namespace YoFi.Tests.Integration
             return outresponse;
         }
 
+        protected void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector)
+        {
+            // Then: The expected items are returned
+            var results = document.QuerySelectorAll("table[data-test-id=results] tbody tr");
+            var names = results.Select(x => x.QuerySelector(selector).TextContent.Trim());
+            Assert.IsTrue(chosen.SequenceEqual(names));
+        }
 
         #endregion
     }
