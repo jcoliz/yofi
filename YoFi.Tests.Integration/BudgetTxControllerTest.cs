@@ -88,6 +88,22 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
+        public async Task Details()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<BudgetTx>(5, 1);
+            var expected = chosen.Single();
+            var id = chosen.Single().ID;
+
+            // When: Getting details for the chosen item
+            var document = await WhenGetAsync($"{urlroot}/Details/{id}");
+
+            // Then: That item is shown
+            var actual = document.QuerySelector("[data-test-id=memo]").TextContent.Trim();
+            Assert.AreEqual(expected.Memo, actual);
+        }
+
+        [TestMethod]
         public async Task Edit()
         {
             // Given: There are 5 items in the database, one of which we care about
