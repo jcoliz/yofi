@@ -32,9 +32,6 @@ namespace YoFi.Tests.Integration
 
         #endregion
 
-        #region Helpers
-        #endregion
-
         #region Tests
 
         [TestMethod]
@@ -51,6 +48,20 @@ namespace YoFi.Tests.Integration
             ThenReportHasTotal(report: "taxes", expected: -31872m);
             ThenReportHasTotal(report: "expenses", expected: -64619.77m);
             ThenReportHasTotal(report: "savings", expected: -32600.16m);
+        }
+
+        [TestMethod]
+        public async Task ReportsGetNewYear()
+        {
+            // Given: A complete sample data set
+            // (Done in ClassInitialize)
+
+            // When: Getting the "Reports" Page for the NEXT year, where there is no data
+            await WhenGettingReport(new ReportParameters() { id = "summary", year = 2022 });
+
+            // Then: All the totals are zero
+            ThenReportHasTotal(report: "Net-Income", expected: 0);
+            ThenReportHasTotal(report: "Net-Savings", expected: 0);
         }
 
         #endregion
