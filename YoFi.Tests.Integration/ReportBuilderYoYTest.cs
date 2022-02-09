@@ -1,13 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Tests.Integration.Helpers;
 
@@ -23,18 +19,27 @@ namespace YoFi.Tests.Integration
     [TestClass]
     public class ReportBuilderYoYTest: ReportBuilderTestBase
     {
+        #region Fields
+
+        protected static SampleDataStore data;
+
+        #endregion
+
         #region Init/Cleanup
 
         [ClassInitialize]
-        public static void InitialSetup(TestContext tcontext)
+        public static async Task InitialSetup(TestContext tcontext)
         {
             integrationcontext = new IntegrationContext(tcontext.FullyQualifiedTestClassName);
 
-            // Construct a 10-year dataset by spreading out the transactions over that timeframe
+            // Given: A large database of transactions, over many years
 
-            // Transform into a 10-year timespan
-            var txs = Given1000Transactions();
-            context.Transactions.AddRange(txs.Select(x =>
+            // Load the partial data set in the usual way
+            await SampleDataStore.LoadPartialAsync();
+            data = SampleDataStore.Single;
+
+            // Construct a 10-year dataset by spreading out the transactions over that timeframe
+            context.Transactions.AddRange(data.Transactions.Select(x =>
             {
                 var index = Convert.ToInt32(x.Payee);
                 var adjust = index % 10;
@@ -67,7 +72,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "yoy", level = level });
 
             // Then: Report has the correct total
-            Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0", culture), total);
+            Assert.AreEqual(data.Transactions.Sum(x => x.Amount).ToString("C0", culture), total);
 
             // And: Report has the correct # columns: 10 years plus total
             Assert.AreEqual(11, cols.Count());

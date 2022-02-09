@@ -20,17 +20,24 @@ namespace YoFi.Tests.Integration
     [TestClass]
     public class ReportBuilderTest : ReportBuilderTestBase
     {
+        #region Fields
+
+        protected static SampleDataStore data;
+
+        #endregion
+
         #region Init/Cleanup
 
         [ClassInitialize]
-        public static void InitialSetup(TestContext tcontext)
+        public static async Task InitialSetup(TestContext tcontext)
         {
             integrationcontext = new IntegrationContext(tcontext.FullyQualifiedTestClassName);
 
-            var txs = Given1000Transactions();
-            context.Transactions.AddRange(txs);
-            var btxs = GivenSampleBudgetTxs();
-            context.BudgetTxs.AddRange(btxs);
+            await SampleDataStore.LoadPartialAsync();
+            data = SampleDataStore.Single;
+
+            context.Transactions.AddRange(data.Transactions);
+            context.BudgetTxs.AddRange(data.BudgetTxs);
             context.SaveChanges();
         }
 
@@ -41,11 +48,37 @@ namespace YoFi.Tests.Integration
         }
 
         [TestCleanup]
-        public void Cleanup()
+        public new void Cleanup()
         {
+            // Reset base class
+            base.Cleanup();
+
             // Remove ephemeral items
             context.BudgetTxs.RemoveRange(context.BudgetTxs.Where(x=>x.Memo == "__TEST__"));
             context.SaveChanges();
+        }
+
+        #endregion
+
+        #region Helpers
+
+        protected decimal SumOfTopCategory(string category)
+        {
+            return
+                data.Transactions.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
+                data.Transactions.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        protected decimal SumOfBudgetTxsTopCategory(string category)
+        {
+            return
+                data.BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        protected decimal SumOfManagedBudgetTxsTopCategory(string category)
+        {
+            return
+                data.ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
         #endregion
@@ -73,7 +106,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual("All Transactions", h2);
 
             // And: Report has the correct total
-            ThenReportHasTotal(Transactions1000.Sum(x => x.Amount));
+            ThenReportHasTotal(data.Transactions.Sum(x => x.Amount));
 
             // And: Report has the correct # columns (One for each month plus total)
             Assert.AreEqual(showmonths?13:1, cols.Count());
@@ -99,7 +132,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual("All Transactions", h2);
 
             // And: Report has the correct total
-            ThenReportHasTotal(Transactions1000.Sum(x => x.Amount));
+            ThenReportHasTotal(data.Transactions.Sum(x => x.Amount));
 
             // And: Report has the correct # columns (One for each month plus total)
             Assert.AreEqual(13, cols.Count());
@@ -144,7 +177,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual($"report-{report}", testid);
 
             // And: Report has the correct total
-            var expected = Transactions1000.Where(x => x.Timestamp.Month <= month).Sum(x => x.Amount);
+            var expected = data.Transactions.Where(x => x.Timestamp.Month <= month).Sum(x => x.Amount);
             ThenReportHasTotal(expected);
 
             // And: Report has the correct # columns (One for each month plus total)
@@ -188,7 +221,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths });
 
             // Then: Report has the correct total
-            ThenReportHasTotal(Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income"));
+            ThenReportHasTotal(data.Transactions.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income"));
 
             // And: Report has the correct # columns (12 months, plus Total & pct total)
             Assert.AreEqual(showmonths ? 14 : 2, cols.Count());
@@ -207,7 +240,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "budget", year = 2020 });
 
             // Then: Report has the correct total
-            ThenReportHasTotal(BudgetTxs.Sum(x => x.Amount));
+            ThenReportHasTotal(data.BudgetTxs.Sum(x => x.Amount));
 
             // And: Report has the correct # columns, just 1 the budget itself
             Assert.AreEqual(1, cols.Count());
@@ -226,7 +259,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "expenses-budget", year = 2020 });
 
             // Then: Report has the correct total
-            ThenReportHasTotal(BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income"));
+            ThenReportHasTotal(data.BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income"));
 
             // And: Report has the correct # columns, just 1 the budget itself
             Assert.AreEqual(1, cols.Count());
@@ -245,12 +278,12 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "expenses-v-budget", year = 2020 });
 
             // Then: Report has the correct total budget
-            var expected = BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
+            var expected = data.BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
             var budgettotal = table.QuerySelector("td[data-test-id=total-Budget]").TextContent.Trim();
             Assert.AreEqual(expected.ToString("C0", culture), budgettotal);
 
             // And: Report has the correct actual total
-            expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
+            expected = data.Transactions.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
             var actualtotal = table.QuerySelector("td[data-test-id=total-Actual]").TextContent.Trim();
             Assert.AreEqual(expected.ToString("C0", culture), actualtotal);
 
@@ -271,12 +304,12 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "all-v-budget", year = 2020 });
 
             // Then: Report has the correct total budget
-            var expected = BudgetTxs.Sum(x => x.Amount);
+            var expected = data.BudgetTxs.Sum(x => x.Amount);
             var budgettotal = table.QuerySelector("td[data-test-id=total-Budget]").TextContent.Trim();
             Assert.AreEqual(expected.ToString("C0", culture), budgettotal);
 
             // And: Report has the correct actual total
-            expected = Transactions1000.Sum(x => x.Amount);
+            expected = data.Transactions.Sum(x => x.Amount);
             var actualtotal = table.QuerySelector("td[data-test-id=total-Actual]").TextContent.Trim();
             Assert.AreEqual(expected.ToString("C0", culture), actualtotal);
 
@@ -292,7 +325,7 @@ namespace YoFi.Tests.Integration
         {
             // Given: A large database of transactions and budgettxs, including a mix of monthly and yearly budget txs
             // Most are Assembled on Initialize, but we need to add managed txs
-            context.BudgetTxs.AddRange(GivenSampleManagedBudgetTxs());
+            context.BudgetTxs.AddRange(data.ManagedBudgetTxs);
             context.SaveChanges();
 
             // When: Building the 'managed-budget' report for the correct year

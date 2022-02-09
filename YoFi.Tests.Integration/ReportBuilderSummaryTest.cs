@@ -19,7 +19,7 @@ namespace YoFi.Tests.Integration
             integrationcontext = new IntegrationContext(tcontext.FullyQualifiedTestClassName);
 
             // Given: A complete sample data set
-            await SampleDataStore.LoadSingleAsync();
+            await SampleDataStore.LoadFullAsync();
             context.Transactions.AddRange(SampleDataStore.Single.Transactions);
             context.SaveChanges();
         }

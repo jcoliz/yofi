@@ -19,9 +19,6 @@ namespace YoFi.Tests.Integration
     {
         #region Fields
 
-        protected static IEnumerable<Transaction> Transactions1000;
-        protected static IEnumerable<BudgetTx> BudgetTxs;
-        protected IEnumerable<BudgetTx> ManagedBudgetTxs;
         protected static readonly CultureInfo culture = new CultureInfo("en-US");
 
         protected IHtmlDocument document;
@@ -36,59 +33,17 @@ namespace YoFi.Tests.Integration
 
         #endregion
 
+        #region Init/Cleanup
+
+        protected void Cleanup()
+        {
+            tables = null;
+            testid = null;
+        }
+
+        #endregion
+
         #region Helpers
-
-        protected static IEnumerable<Transaction> Given1000Transactions()
-        {
-            if (Transactions1000 is null)
-            {
-                string json;
-
-                using (var stream = SampleData.Open("Transactions1000.json"))
-                using (var reader = new StreamReader(stream))
-                    json = reader.ReadToEnd();
-
-                var txs = System.Text.Json.JsonSerializer.Deserialize<List<Transaction>>(json);
-
-                Transactions1000 = txs;
-            }
-            return Transactions1000;
-        }
-
-        protected static IEnumerable<BudgetTx> GivenSampleBudgetTxs()
-        {
-            if (BudgetTxs is null)
-            {
-                string json;
-
-                using (var stream = SampleData.Open("BudgetTxs.json"))
-                using (var reader = new StreamReader(stream))
-                    json = reader.ReadToEnd();
-
-                var txs = System.Text.Json.JsonSerializer.Deserialize<List<BudgetTx>>(json);
-
-                BudgetTxs = txs;
-            }
-            return BudgetTxs;
-        }
-
-        protected IEnumerable<BudgetTx> GivenSampleManagedBudgetTxs()
-        {
-            if (ManagedBudgetTxs is null)
-            {
-                string json;
-
-                using (var stream = SampleData.Open("BudgetTxsManaged.json"))
-                using (var reader = new StreamReader(stream))
-                    json = reader.ReadToEnd();
-
-                var txs = System.Text.Json.JsonSerializer.Deserialize<List<BudgetTx>>(json);
-
-                ManagedBudgetTxs = txs;
-            }
-            return ManagedBudgetTxs;
-        }
-
 
         protected async Task WhenGettingReport(string url)
         {
@@ -158,25 +113,6 @@ namespace YoFi.Tests.Integration
                 testid = $"report-{report}";
 
             Assert.AreEqual(expected.ToString("C0", culture), total);
-        }
-
-        protected decimal SumOfTopCategory(string category)
-        {
-            return
-                Transactions1000.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
-                Transactions1000.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
-        }
-
-        protected decimal SumOfBudgetTxsTopCategory(string category)
-        {
-            return
-                BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
-        }
-
-        protected decimal SumOfManagedBudgetTxsTopCategory(string category)
-        {
-            return
-                ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
         protected string GetCell(string col, string row)
