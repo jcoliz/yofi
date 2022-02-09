@@ -95,7 +95,7 @@ namespace YoFi.Tests.Integration
             var id = chosen.Single().ID;
 
             // When: Editing the chosen item
-            var expected = GivenFakeItems<BudgetTx>(100).Last();
+            var expected = GivenFakeItem<BudgetTx>(100);
             var formData = new Dictionary<string, string>(FormDataFromObject(expected))
             {
                 { "ID", id.ToString() },
@@ -166,7 +166,7 @@ namespace YoFi.Tests.Integration
             _ = await GivenFakeDataInDatabase<BudgetTx>(1);
 
             // When: Creating a new item
-            var expected = GivenFakeItems<BudgetTx>(70).Last();
+            var expected = GivenFakeItem<BudgetTx>(70);
             var formData = new Dictionary<string, string>(FormDataFromObject(expected));
             var response = await WhenGettingAndPostingForm($"{urlroot}/Create", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
 

@@ -54,7 +54,7 @@ namespace YoFi.Tests.Integration
             var id = chosen.Single().ID;
 
             // When: Editing the chosen item
-            var expected = GivenFakeItems<Split>(100).Last();
+            var expected = GivenFakeItem<Split>(100);
             var formData = new Dictionary<string, string>(FormDataFromObject(expected))
             {
                 { "ID", id.ToString() },
@@ -94,7 +94,7 @@ namespace YoFi.Tests.Integration
             // And: Now is only one item in database
             Assert.AreEqual(1, context.Set<Split>().Count());
 
-            // And: The deleted item cannot be found;
+            // And: The deleted item cannot be found
             Assert.IsFalse(context.Set<Split>().Any(x => x.ID == id));
         }
 
