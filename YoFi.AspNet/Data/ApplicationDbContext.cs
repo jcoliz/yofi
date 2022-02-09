@@ -15,9 +15,14 @@ namespace YoFi.AspNet.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataContext
     {
+        private readonly bool inmemory;
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+            // Bulk operations cannot be completed on an in-memory database
+            // TODO: I wish there was a cleaner way to do this.
+            inmemory = Database.ProviderName.Contains("InMemory");
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -112,10 +117,13 @@ namespace YoFi.AspNet.Data
 
         Task IDataContext.BulkInsertAsync<T>(IList<T> items)
         {
-            // Note "IncludeGraph" locks to SQL Server.
-            // For more complex but portable alternative, see
-            // https://github.com/borisdj/EFCore.BulkExtensions
-            return this.BulkInsertAsync(items, b => b.IncludeGraph = true);
+            if (inmemory)
+                return this.Set<T>().AddRangeAsync(items);
+            else
+                // Note "IncludeGraph" locks to SQL Server.
+                // For more complex but portable alternative, see
+                // https://github.com/borisdj/EFCore.BulkExtensions
+                return this.BulkInsertAsync(items, b => b.IncludeGraph = true);
         }
 
         Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)

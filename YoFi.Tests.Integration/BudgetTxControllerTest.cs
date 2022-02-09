@@ -153,6 +153,22 @@ namespace YoFi.Tests.Integration
             Assert.IsFalse(context.Set<BudgetTx>().Any(x => x.ID == id));
         }
 
+        [TestMethod]
+        public async Task Upload()
+        {
+            // Given: A spreadsheet of items
+            var items = GivenFakeItems<BudgetTx>(15).OrderBy(x => x.Memo);
+            var stream = GivenSpreadsheetOf(items);
+
+            // When: Uploading it
+            var document = await WhenUploadingSpreadsheet(stream,$"{urlroot}/",$"{urlroot}/Upload");
+
+            // Then: The uploaded items are returned
+            ThenResultsAreEqualByMemo(document, items);
+
+            // And: The database now contains the items
+            items.SequenceEqual(context.Set<BudgetTx>().OrderBy(x => x.Memo));
+        }
 
         #endregion
     }

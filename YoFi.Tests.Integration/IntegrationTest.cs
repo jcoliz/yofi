@@ -1,8 +1,10 @@
 ﻿using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -51,6 +53,19 @@ namespace YoFi.Tests.Integration
             return result;
         }
 
+        protected Stream GivenSpreadsheetOf<T>(IEnumerable<T> items) where T : class
+        {
+            var stream = new MemoryStream();
+            using (var ssw = new SpreadsheetWriter())
+            {
+                ssw.Open(stream);
+                ssw.Serialize<T>(items);
+            }
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return stream;
+        }
+
         protected async Task<IHtmlDocument> WhenGetAsync(string url)
         {
             var response = await client.GetAsync(url);
@@ -79,6 +94,32 @@ namespace YoFi.Tests.Integration
             var outresponse = await client.SendAsync(postRequest);
 
             return outresponse;
+        }
+
+        protected async Task<IHtmlDocument> WhenUploadingSpreadsheet(Stream stream, string fromurl, string tourl)
+        {
+            // First, we have to "get" the page we upload "from"
+            var getresponse = await client.GetAsync(fromurl);
+
+            // Pull out the antiforgery values
+            var getdocument = await parser.ParseDocumentAsync(await getresponse.Content.ReadAsStreamAsync());
+            var token = AntiForgeryTokenExtractor.ExtractAntiForgeryToken(getdocument);
+            var cookie = AntiForgeryTokenExtractor.ExtractAntiForgeryCookieValueFrom(getresponse);
+
+            var content = new MultipartFormDataContent
+            {
+                { new StreamContent(stream), "files", "Items.xlsx" },
+                { new StringContent(token.Value), token.Key }
+            };
+            var postRequest = new HttpRequestMessage(HttpMethod.Post, tourl);
+            postRequest.Headers.Add("Cookie", cookie.ToString());
+            postRequest.Content = content;
+            var response = await client.SendAsync(postRequest);
+
+            response.EnsureSuccessStatusCode();
+            var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
+
+            return document;
         }
 
         protected void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector)
