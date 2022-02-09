@@ -1,8 +1,10 @@
 ﻿using AngleSharp.Html.Dom;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -13,6 +15,12 @@ namespace YoFi.Tests.Integration
     [TestClass]
     public class BudgetTxControllerTest: IntegrationTest
     {
+        #region Fields
+
+        protected const string urlroot = "/BudgetTxs";
+
+        #endregion
+
         #region Init/Cleanup
 
         [ClassInitialize]
@@ -56,7 +64,7 @@ namespace YoFi.Tests.Integration
             // Given: Empty database
 
             // When: Getting the index
-            var document = await WhenGetAsync("/BudgetTxs/");
+            var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: No items are returned
             ThenResultsAreEqualByMemo(document, Enumerable.Empty<BudgetTx>());
@@ -69,7 +77,7 @@ namespace YoFi.Tests.Integration
             var items = await GivenFakeDataInDatabase<BudgetTx>(20);
 
             // When: Getting the index
-            var document = await WhenGetAsync("/BudgetTxs/");
+            var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: The expected items are returned
             ThenResultsAreEqualByMemo(document, items);
@@ -82,10 +90,67 @@ namespace YoFi.Tests.Integration
             var items = await GivenFakeDataInDatabase<BudgetTx>(1);
 
             // When: Getting the index
-            var document = await WhenGetAsync("/BudgetTxs/");
+            var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: The expected items are returned
             ThenResultsAreEqualByMemo(document, items);
+        }
+
+
+        [TestMethod]
+        public async Task Edit()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<BudgetTx>(5, 1);
+            var id = chosen.Single().ID;
+
+            // When: Editing the chosen item
+            var expected = GivenFakeItems<BudgetTx>(100).Last();
+            var formData = new Dictionary<string, string>()
+            {
+                { "ID", id.ToString() },
+                { "Amount", expected.Amount.ToString() },
+                { "Category", expected.Category },
+                { "Timestamp", expected.Timestamp.ToString("MM/dd/yyyy") },
+                { "Memo", expected.Memo }
+            };
+
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+
+            // Then: Redirected to index
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: The item was changed
+            var actual = context.Set<BudgetTx>().Where(x => x.ID == id).AsNoTracking().Single();
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task Delete()
+        {
+            // Given: There are two items in the database, one of which we care about
+            (var items, var selected) = await GivenFakeDataInDatabase<BudgetTx>(2, 1);
+            var id = selected.Single().ID;
+
+            // When: Deleting the selected item
+            var formData = new Dictionary<string, string>()
+            {
+                { "ID", id.ToString() }
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Delete/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+
+            // Then: Redirected to index
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: Now is only one item in database
+            Assert.AreEqual(1, context.Set<BudgetTx>().Count());
+
+            // And: The deleted item cannot be found;
+            Assert.IsFalse(context.Set<BudgetTx>().Any(x => x.ID == id));
         }
 
 
