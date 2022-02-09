@@ -154,6 +154,26 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
+        public async Task DeleteNoIdFails()
+        {
+            // When: Calling delete without sending an ID
+            var response = await client.GetAsync($"{urlroot}/Delete/");
+
+            // Then: Bad Request
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task DeleteTextIdFails()
+        {
+            // When: Calling delete with a text id
+            var response = await client.GetAsync($"{urlroot}/Delete/BOGUS");
+
+            // Then: Bad Request
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [TestMethod]
         public async Task Upload()
         {
             // Given: A spreadsheet of items

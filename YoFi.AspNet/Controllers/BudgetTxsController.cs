@@ -98,6 +98,7 @@ namespace YoFi.AspNet.Controllers
         }
 
         // GET: BudgetTxs/Delete/5
+        [ValidateBudgetTxExists]
         public async Task<IActionResult> Delete(int? id) => await Details(id);
 
         // POST: BudgetTxs/Delete/5
