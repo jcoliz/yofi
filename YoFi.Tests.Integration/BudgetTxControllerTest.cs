@@ -49,7 +49,7 @@ namespace YoFi.Tests.Integration
 
         #region Helpers
 
-        private void ThenResultsAreEqualByMemo(IHtmlDocument document, IEnumerable<BudgetTx> chosen)
+        private void ThenResultsAreEqualByTestKey(IHtmlDocument document, IEnumerable<BudgetTx> chosen)
         {
             ThenResultsAreEqual(document, chosen.Select(i => i.Memo).OrderBy(n => n), "[data-test-id=memo]");
         }
@@ -67,7 +67,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: No items are returned
-            ThenResultsAreEqualByMemo(document, Enumerable.Empty<BudgetTx>());
+            ThenResultsAreEqualByTestKey(document, Enumerable.Empty<BudgetTx>());
         }
 
         [TestMethod]
@@ -80,7 +80,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: The expected items are returned
-            ThenResultsAreEqualByMemo(document, items);
+            ThenResultsAreEqualByTestKey(document, items);
         }
 
         [TestMethod]
@@ -93,9 +93,8 @@ namespace YoFi.Tests.Integration
             var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: The expected items are returned
-            ThenResultsAreEqualByMemo(document, items);
+            ThenResultsAreEqualByTestKey(document, items);
         }
-
 
         [TestMethod]
         public async Task Edit()
@@ -106,13 +105,9 @@ namespace YoFi.Tests.Integration
 
             // When: Editing the chosen item
             var expected = GivenFakeItems<BudgetTx>(100).Last();
-            var formData = new Dictionary<string, string>()
+            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
             {
                 { "ID", id.ToString() },
-                { "Amount", expected.Amount.ToString() },
-                { "Category", expected.Category },
-                { "Timestamp", expected.Timestamp.ToString("MM/dd/yyyy") },
-                { "Memo", expected.Memo }
             };
 
             var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
@@ -181,13 +176,7 @@ namespace YoFi.Tests.Integration
 
             // When: Creating a new item
             var expected = GivenFakeItems<BudgetTx>(70).Last();
-            var formData = new Dictionary<string, string>()
-            {
-                { "Amount", expected.Amount.ToString() },
-                { "Category", expected.Category },
-                { "Timestamp", expected.Timestamp.ToString("MM/dd/yyyy") },
-                { "Memo", expected.Memo }
-            };
+            var formData = new Dictionary<string, string>(FormDataFromObject(expected));
             var response = await WhenGettingAndPostingForm($"{urlroot}/Create", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
 
             // Then: Redirected to index
@@ -213,7 +202,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenUploadingSpreadsheet(stream,$"{urlroot}/",$"{urlroot}/Upload");
 
             // Then: The uploaded items are returned
-            ThenResultsAreEqualByMemo(document, items);
+            ThenResultsAreEqualByTestKey(document, items);
 
             // And: The database now contains the items
             items.SequenceEqual(context.Set<BudgetTx>().OrderBy(x => x.Memo));

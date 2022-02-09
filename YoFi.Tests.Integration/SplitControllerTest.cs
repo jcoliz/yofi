@@ -62,12 +62,9 @@ namespace YoFi.Tests.Integration
 
             // When: Editing the chosen item
             var expected = GivenFakeItems<Split>(100).Last();
-            var formData = new Dictionary<string, string>()
+            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
             {
                 { "ID", id.ToString() },
-                { "Amount", expected.Amount.ToString() },
-                { "Category", expected.Category },
-                { "Memo", expected.Memo }
             };
 
             var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);

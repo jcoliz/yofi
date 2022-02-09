@@ -64,11 +64,7 @@ namespace YoFi.Tests.Integration
         {
             // When: Adding a new item via AJAX
             var expected = GivenFakeItems<Payee>(100).Last();
-            var formData = new Dictionary<string, string>()
-            {
-                { "Category", expected.Category },
-                { "Name", expected.Name },
-            };
+            var formData = new Dictionary<string, string>(FormDataFromObject(expected));
             var response = await WhenGettingAndPostingForm("/Payees/Index/", d => $"/ajax/payee/add", formData);
 
             // Then: There is one payee in the database
@@ -88,11 +84,9 @@ namespace YoFi.Tests.Integration
 
             // And: When posting changed values to /Ajax/Payee/Edit/
             var expected = GivenFakeItems<Payee>(90).Last();
-            var formData = new Dictionary<string, string>()
+            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
             {
                 { "ID", id.ToString() },
-                { "Name", expected.Name },
-                { "Category", expected.Category },
             };
             var response = await WhenGettingAndPostingForm("/Payees/Index/", d => $"/ajax/payee/edit/{id}", formData);
             response.EnsureSuccessStatusCode();
