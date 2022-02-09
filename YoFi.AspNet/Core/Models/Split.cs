@@ -24,16 +24,19 @@ namespace YoFi.Core.Models
         /// </summary>
         [DisplayFormat(DataFormatString = "{0:C2}")]
         [Column(TypeName = "decimal(18,2)")]
+        [Attributes.Editable]
         public decimal Amount { get; set; }
-        
+
         /// <summary>
         /// Category for this amount
         /// </summary>        
+        [Attributes.Editable]
         public string Category { get; set; }
 
         /// <summary>
         /// Optional commentary about this split
         /// </summary>
+        [Attributes.Editable]
         public string Memo { get; set; }
 
         /// <summary>

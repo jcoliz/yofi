@@ -14,6 +14,12 @@ namespace YoFi.Tests.Integration
     [TestClass]
     public class SplitControllerTest: IntegrationTest
     {
+        #region Fields
+
+        protected const string urlroot = "/Splits";
+
+        #endregion
+
         #region Init/Cleanup
 
         [ClassInitialize]
@@ -64,7 +70,7 @@ namespace YoFi.Tests.Integration
                 { "Memo", expected.Memo }
             };
 
-            var response = await WhenGettingAndPostingForm($"/Splits/Edit/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
 
             // Then: Redirected to "/Transactions/Edit"
@@ -88,7 +94,7 @@ namespace YoFi.Tests.Integration
             {
                 { "ID", id.ToString() }
             };
-            var response = await WhenGettingAndPostingForm($"/Splits/Delete/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Delete/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
 
             // Then: Redirected to "/Transactions/Edit"

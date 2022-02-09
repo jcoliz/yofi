@@ -1,10 +1,12 @@
 ﻿using AngleSharp.Html.Dom;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -217,6 +219,31 @@ namespace YoFi.Tests.Integration
 
             // And: The database now contains the items
             items.SequenceEqual(context.Set<BudgetTx>().OrderBy(x => x.Memo));
+        }
+
+        [TestMethod]
+        public async Task Download()
+        {
+            // Given: Many items in the database
+            var items = await GivenFakeDataInDatabase<BudgetTx>(20);
+
+            // When: Downloading them
+            var response = await client.GetAsync($"{urlroot}/Download");
+
+            // Then: Response is OK
+            response.EnsureSuccessStatusCode();
+
+            // And: It's a stream
+            Assert.IsInstanceOfType(response.Content, typeof(StreamContent));
+            var streamcontent = response.Content as StreamContent;
+
+            // And: The stream contains a spreadsheet
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(await streamcontent.ReadAsStreamAsync());
+
+            // And: The spreadsheet contains all our items
+            var actual = ssr.Deserialize<BudgetTx>();
+            Assert.IsTrue(items.OrderBy(x => x.Memo).SequenceEqual(actual.OrderBy(x => x.Memo)));
         }
 
         #endregion

@@ -26,6 +26,7 @@ namespace YoFi.Core.Models
         /// </summary>
         [DisplayFormat(DataFormatString = "{0:C2}")]
         [Column(TypeName = "decimal(18,2)")]
+        [Attributes.Editable]
         public decimal Amount { get; set; }
 
         /// <summary>
@@ -39,11 +40,13 @@ namespace YoFi.Core.Models
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         [Display(Name = "Date")]
         [DataType(DataType.Date)]
+        [Attributes.Editable]
         public DateTime Timestamp { get; set; }
 
         /// <summary>
         /// Category of expected outlay
         /// </summary>
+        [Attributes.Editable]
         public string Category { get; set; }
 
         /// <summary>
@@ -88,6 +91,7 @@ namespace YoFi.Core.Models
         /// <summary>
         /// Additional information about this budget line item for reference
         /// </summary>
+        [Attributes.Editable]
         public string Memo { get; set; }
 
         /// <summary>
