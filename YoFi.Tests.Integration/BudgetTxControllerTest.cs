@@ -174,6 +174,35 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
+        public async Task Create()
+        {
+            // Given: There is one item in the database
+            _ = await GivenFakeDataInDatabase<BudgetTx>(1);
+
+            // When: Creating a new item
+            var expected = GivenFakeItems<BudgetTx>(70).Last();
+            var formData = new Dictionary<string, string>()
+            {
+                { "Amount", expected.Amount.ToString() },
+                { "Category", expected.Category },
+                { "Timestamp", expected.Timestamp.ToString("MM/dd/yyyy") },
+                { "Memo", expected.Memo }
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Create", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
+
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: Now are two items in database
+            Assert.AreEqual(2, context.Set<BudgetTx>().Count());
+
+            var actual = context.Set<BudgetTx>().Where(x => x.Memo == expected.Memo).AsNoTracking().Single();
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
         public async Task Upload()
         {
             // Given: A spreadsheet of items
