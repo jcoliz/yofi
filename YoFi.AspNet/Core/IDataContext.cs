@@ -46,7 +46,7 @@ namespace YoFi.Core
         /// </summary>
         /// <typeparam name="T">Which type of entitites to get</typeparam>
         /// <returns></returns>
-        IQueryable<T> Get<T>();
+        IQueryable<T> Get<T>() where T : class;
         #endregion
 
         /// <summary>

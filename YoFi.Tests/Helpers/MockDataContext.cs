@@ -30,7 +30,7 @@ namespace YoFi.Tests.Helpers
 
         public IQueryable<Split> SplitsWithTransactions => throw new NotImplementedException();
 
-        public IQueryable<T> Get<T>()
+        public IQueryable<T> Get<T>() where T: class
         {
             if (typeof(T) == typeof(BudgetTx))
             {

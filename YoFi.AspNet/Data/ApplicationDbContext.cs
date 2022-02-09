@@ -55,27 +55,11 @@ namespace YoFi.AspNet.Data
 
         IQueryable<Split> IDataContext.SplitsWithTransactions => Splits.Include(x => x.Transaction);
 
-        IQueryable<T> IDataContext.Get<T>()
+        IQueryable<T> IDataContext.Get<T>() where T : class
         {
-            if (typeof(T) == typeof(Transaction))
-            {
-                return Transactions as IQueryable<T>;
-            }
-            if (typeof(T) == typeof(Payee))
-            {
-                return Payees as IQueryable<T>;
-            }
-            if (typeof(T) == typeof(Split))
-            {
-                return Splits as IQueryable<T>;
-            }
-            if (typeof(T) == typeof(BudgetTx))
-            {
-                return BudgetTxs as IQueryable<T>;
-            }
-            throw new NotImplementedException();
+            return Set<T>();
         }
-       
+
         void IDataContext.Add(object item) => base.Add(item);
 
         void IDataContext.Update(object item) => base.Update(item);
