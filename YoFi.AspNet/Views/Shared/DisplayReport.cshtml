@@ -2,7 +2,7 @@
 @using System.Text.RegularExpressions;
 
 @{
-    var datatestid = $"report-{Model.Definition}";
+    var datatestid = $"report-{Model.Definition ?? Regex.Replace(Model.Name, "[^\\w]+", "-")}";
 }
 <table class="table report" data-test-id="@datatestid">
     <thead>
