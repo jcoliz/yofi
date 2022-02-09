@@ -55,10 +55,7 @@ namespace YoFi.AspNet.Data
 
         IQueryable<Split> IDataContext.SplitsWithTransactions => Splits.Include(x => x.Transaction);
 
-        IQueryable<T> IDataContext.Get<T>() where T : class
-        {
-            return Set<T>();
-        }
+        IQueryable<T> IDataContext.Get<T>() where T : class => Set<T>();
 
         void IDataContext.Add(object item) => base.Add(item);
 
@@ -74,30 +71,7 @@ namespace YoFi.AspNet.Data
 
         Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) => query.AnyAsync();
 
-        async Task<int> IDataContext.ClearAsync<T>()
-        {
-            int result;
-            if (typeof(T) == typeof(Transaction))
-            {
-                result = await Transactions.BatchDeleteAsync();
-            }
-            else if (typeof(T) == typeof(Payee))
-            {
-                result = await Payees.BatchDeleteAsync();
-            }
-            else if (typeof(T) == typeof(Split))
-            {
-                result = await Splits.BatchDeleteAsync();
-            }
-            else if (typeof(T) == typeof(BudgetTx))
-            {
-                result = await BudgetTxs.BatchDeleteAsync();
-            }
-            else
-                throw new NotImplementedException();
-
-            return result;
-        }
+        Task<int> IDataContext.ClearAsync<T>() where T : class => Set<T>().BatchDeleteAsync();
 
         Task IDataContext.BulkInsertAsync<T>(IList<T> items)
         {
