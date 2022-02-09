@@ -141,6 +141,8 @@ namespace YoFi.Tests.Database
             Assert.AreNotEqual(original.Payee, actual.Payee);
         }
 
+// TODO: Bring these back to life when porting to new system.
+#if false
         [TestMethod]
         public async Task ApplyPayeeNotFound()
         {
@@ -175,7 +177,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(expectedpayee.Category, itemresult);
             Assert.AreEqual(expectedpayee.Category, expected.Category);
         }
-
+#endif
         [TestMethod]
         public async Task ApplyPayeeLoanMatch()
         {
