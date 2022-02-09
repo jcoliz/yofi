@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.Tests.Integration.Helpers;
@@ -186,6 +187,45 @@ namespace YoFi.Tests.Integration
             var names = results.Select(x => x.QuerySelector(selector).TextContent.Trim());
             Assert.IsTrue(chosen.SequenceEqual(names));
         }
+
+        protected void ThenResultsAreEqualByTestKey<T>(IHtmlDocument document, IEnumerable<T> expected)
+        {
+            var property = FindTestKey<T>();
+            var testid = $"[data-test-id={property.Name.ToLowerInvariant()}]";
+
+            ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)).OrderBy(n => n), testid);
+        }
+
+        protected async Task ThenIsSpreadsheetContaining<T>(HttpContent content, IEnumerable<T> items) where T: class, new()
+        {
+            // Then: It's a stream
+            Assert.IsInstanceOfType(content, typeof(StreamContent));
+            var streamcontent = content as StreamContent;
+
+            // And: The stream contains a spreadsheet
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(await streamcontent.ReadAsStreamAsync());
+
+            // And: The spreadsheet contains all our items
+            var actual = ssr.Deserialize<T>();
+            var property = FindTestKey<T>();
+            Assert.IsTrue(items.OrderBy(x => property.GetValue(x)).SequenceEqual(actual.OrderBy(x => property.GetValue(x))));
+        }
+
+        private PropertyInfo FindTestKey<T>()
+        {
+            // Find the test key on the object
+            var properties = typeof(T).GetProperties();
+            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(Core.Models.Attributes.TestKeyAttribute)));
+            if (!chosen.Any())
+                throw new ApplicationException("Test Key not found");
+            if (chosen.Skip(1).Any())
+                throw new ApplicationException("More than one Test Key found");
+            var property = chosen.Single();
+
+            return property;
+        }
+
 
         #endregion
     }

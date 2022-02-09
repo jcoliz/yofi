@@ -92,6 +92,7 @@ namespace YoFi.Core.Models
         /// Additional information about this budget line item for reference
         /// </summary>
         [Attributes.Editable]
+        [Attributes.TestKey]
         public string Memo { get; set; }
 
         /// <summary>

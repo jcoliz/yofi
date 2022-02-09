@@ -47,15 +47,6 @@ namespace YoFi.Tests.Integration
 
         #endregion
 
-        #region Helpers
-
-        private void ThenResultsAreEqualByTestKey(IHtmlDocument document, IEnumerable<BudgetTx> chosen)
-        {
-            ThenResultsAreEqual(document, chosen.Select(i => i.Memo).OrderBy(n => n), "[data-test-id=memo]");
-        }
-
-        #endregion
-
         #region Tests
 
         [TestMethod]
@@ -220,17 +211,8 @@ namespace YoFi.Tests.Integration
             // Then: Response is OK
             response.EnsureSuccessStatusCode();
 
-            // And: It's a stream
-            Assert.IsInstanceOfType(response.Content, typeof(StreamContent));
-            var streamcontent = response.Content as StreamContent;
-
-            // And: The stream contains a spreadsheet
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(await streamcontent.ReadAsStreamAsync());
-
-            // And: The spreadsheet contains all our items
-            var actual = ssr.Deserialize<BudgetTx>();
-            Assert.IsTrue(items.OrderBy(x => x.Memo).SequenceEqual(actual.OrderBy(x => x.Memo)));
+            // And: It's a spreadsheet containing our items
+            await ThenIsSpreadsheetContaining(response.Content, items);
         }
 
         #endregion

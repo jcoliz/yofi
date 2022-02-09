@@ -44,13 +44,6 @@ namespace YoFi.Tests.Integration
 
         #endregion
 
-        #region Helpers
-
-        //protected override IEnumerable<T> GivenFakeItems<T>(int num) =>
-        //    Enumerable.Range(1, num).Select(x => new Split() { Amount = x * 100m, Memo = $"Memo {x}", Category = $"Category:{x}" }) as IEnumerable<T>;
-
-        #endregion
-
         #region Tests
 
         [TestMethod]
