@@ -124,7 +124,11 @@ namespace YoFi.Tests.Integration
         {
             // Given: A URL which encodes these report parameters
 
-            var builder = new StringBuilder($"/Report/{parameters.id}?year={parameters.year}");
+            var start = (parameters.id == "summary")
+                ? $"/Reports/?year={parameters.year}"
+                : $"/Report/{parameters.id}?year={parameters.year}";
+
+            var builder = new StringBuilder(start);
 
             if (parameters.showmonths.HasValue)
                 builder.Append($"&showmonths={parameters.showmonths}");
