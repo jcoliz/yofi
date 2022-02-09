@@ -108,10 +108,12 @@ namespace YoFi.Tests.Integration
             document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
 
             h2 = document.QuerySelector("H2")?.TextContent.Trim();
-            table = document.QuerySelector("table");
-            if (!(table is null))
+            var tables = document.QuerySelectorAll("table").ToDictionary(x=>x.GetAttribute("data-test-id").Trim(),x=>x);
+            if (tables.Count() == 1)
             {
-                testid = table.GetAttribute("data-test-id").Trim();
+                var item = tables.Single();
+                table = item.Value;
+                testid = item.Key;
                 total = table.QuerySelector("tr.report-row-total td.report-col-total")?.TextContent.Trim();
                 cols = table.QuerySelectorAll("th").Skip(1);
                 rows = table.QuerySelectorAll("tbody tr");
