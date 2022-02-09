@@ -152,6 +152,14 @@ namespace YoFi.Tests.Integration
             // And: Return to the caller for futher checks
         }
 
+        protected void ThenReportHasTotal(decimal expected, string report = null)
+        {
+            if (!(report is null))
+                testid = $"report-{report}";
+
+            Assert.AreEqual(expected.ToString("C0", culture), total);
+        }
+
         protected decimal SumOfTopCategory(string category)
         {
             return

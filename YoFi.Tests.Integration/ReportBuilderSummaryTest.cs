@@ -33,15 +33,6 @@ namespace YoFi.Tests.Integration
         #endregion
 
         #region Helpers
-
-        protected void ThenReportHasTotal(decimal expected, string report = null)
-        {
-            if (!(report is null))
-                testid = $"report-{report}";
-
-            Assert.AreEqual(expected.ToString("C0", culture), total);
-        }
-
         #endregion
 
         #region Tests

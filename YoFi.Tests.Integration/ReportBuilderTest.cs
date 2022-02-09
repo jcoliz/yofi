@@ -73,7 +73,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual("All Transactions", h2);
 
             // And: Report has the correct total
-            Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0",culture), total);
+            ThenReportHasTotal(Transactions1000.Sum(x => x.Amount));
 
             // And: Report has the correct # columns (One for each month plus total)
             Assert.AreEqual(showmonths?13:1, cols.Count());
@@ -99,7 +99,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual("All Transactions", h2);
 
             // And: Report has the correct total
-            Assert.AreEqual(Transactions1000.Sum(x => x.Amount).ToString("C0", culture), total);
+            ThenReportHasTotal(Transactions1000.Sum(x => x.Amount));
 
             // And: Report has the correct # columns (One for each month plus total)
             Assert.AreEqual(13, cols.Count());
@@ -145,7 +145,7 @@ namespace YoFi.Tests.Integration
 
             // And: Report has the correct total
             var expected = Transactions1000.Where(x => x.Timestamp.Month <= month).Sum(x => x.Amount);
-            Assert.AreEqual(expected.ToString("C0", culture), total);
+            ThenReportHasTotal(expected);
 
             // And: Report has the correct # columns (One for each month plus total)
             Assert.AreEqual(month + 1, cols.Count());
@@ -167,8 +167,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = category.ToLowerInvariant(), year = 2020 });
 
             // Then: Report has the correct total
-            var expected = SumOfTopCategory(category);
-            Assert.AreEqual(expected.ToString("C0", culture), total);
+            ThenReportHasTotal(SumOfTopCategory(category));
 
             // And: Report has the correct # columns (Total & pct total)
             Assert.AreEqual(2, cols.Count());
@@ -189,8 +188,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths });
 
             // Then: Report has the correct total
-            var expected = Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
-            Assert.AreEqual(expected.ToString("C0", culture), total);
+            ThenReportHasTotal(Transactions1000.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income"));
 
             // And: Report has the correct # columns (12 months, plus Total & pct total)
             Assert.AreEqual(showmonths ? 14 : 2, cols.Count());
@@ -209,8 +207,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "budget", year = 2020 });
 
             // Then: Report has the correct total
-            var expected = BudgetTxs.Sum(x => x.Amount);
-            Assert.AreEqual(expected.ToString("C0", culture), total);
+            ThenReportHasTotal(BudgetTxs.Sum(x => x.Amount));
 
             // And: Report has the correct # columns, just 1 the budget itself
             Assert.AreEqual(1, cols.Count());
@@ -229,8 +226,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "expenses-budget", year = 2020 });
 
             // Then: Report has the correct total
-            var expected = BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
-            Assert.AreEqual(expected.ToString("C0", culture), total);
+            ThenReportHasTotal(BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income"));
 
             // And: Report has the correct # columns, just 1 the budget itself
             Assert.AreEqual(1, cols.Count());
