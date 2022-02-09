@@ -336,7 +336,7 @@ namespace YoFi.Tests.Integration
             await WhenGettingReport(new ReportParameters() { id = "managed-budget", year = 2020 });
 
             // Then: The report is totally blank
-            Assert.IsNull(table);
+            Assert.IsFalse(tables.Any());
 
             // And: The "There is no data" message is present
             var nodata = document.QuerySelector("[data-test-id=no-data]");

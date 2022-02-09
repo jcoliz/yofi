@@ -24,13 +24,15 @@ namespace YoFi.Tests.Integration
         protected IEnumerable<BudgetTx> ManagedBudgetTxs;
         protected static readonly CultureInfo culture = new CultureInfo("en-US");
 
-        protected string h2 = default;
-        protected IElement table = default;
-        protected string testid;
-        protected string total = default;
-        protected IEnumerable<IElement> cols;
-        protected IHtmlCollection<IElement> rows;
         protected IHtmlDocument document;
+        protected string h2 = default;
+        protected IDictionary<string,IElement> tables;
+
+        protected string testid { get; set; }
+        protected IElement table => tables[testid];
+        protected string total => table.QuerySelector("tr.report-row-total td.report-col-total")?.TextContent.Trim();
+        protected IEnumerable<IElement> cols => table.QuerySelectorAll("th").Skip(1);
+        protected IHtmlCollection<IElement> rows => table.QuerySelectorAll("tbody tr");
 
         #endregion
 
@@ -100,24 +102,22 @@ namespace YoFi.Tests.Integration
             var endpoint = element.GetAttribute("data-endpoint")?.Trim();
 
             // Finally, get the inner report
-            response = await client.GetAsync(endpoint);
+            await WhenGettingReportDirectly(endpoint);
+        }
+
+        protected async Task WhenGettingReportDirectly(string url)
+        {
+            var response = await client.GetAsync(url);
 
             // Then: It's OK
             response.EnsureSuccessStatusCode();
 
+            // And: Parse it into components
             document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
-
             h2 = document.QuerySelector("H2")?.TextContent.Trim();
-            var tables = document.QuerySelectorAll("table").ToDictionary(x=>x.GetAttribute("data-test-id").Trim(),x=>x);
+            tables = document.QuerySelectorAll("table").ToDictionary(x => x.GetAttribute("data-test-id").Trim(), x => x);
             if (tables.Count() == 1)
-            {
-                var item = tables.Single();
-                table = item.Value;
-                testid = item.Key;
-                total = table.QuerySelector("tr.report-row-total td.report-col-total")?.TextContent.Trim();
-                cols = table.QuerySelectorAll("th").Skip(1);
-                rows = table.QuerySelectorAll("tbody tr");
-            }
+                testid = tables.Single().Key;
         }
 
         protected async Task WhenGettingReport(ReportParameters parameters)
@@ -140,10 +140,13 @@ namespace YoFi.Tests.Integration
             var url = builder.ToString();
 
             // When: Getting a report at that URL from the system
-            await WhenGettingReport(url);
+            if (parameters.id == "summary")
+                await WhenGettingReportDirectly(url);
+            else
+                await WhenGettingReport(url);
 
             // Then: Is showing the correct report
-            if (table != null)
+            if (tables.Count() == 1)
                 Assert.AreEqual($"report-{parameters.id}", testid);
 
             // And: Return to the caller for futher checks

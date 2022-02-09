@@ -9,12 +9,14 @@
   <ItemGroup>
     <None Remove="SampleData\BudgetTxs.json" />
     <None Remove="SampleData\BudgetTxsManaged.json" />
+    <None Remove="SampleData\FullSampleData.json" />
     <None Remove="SampleData\Transactions1000.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="SampleData\BudgetTxs.json" />
     <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
+    <EmbeddedResource Include="SampleData\FullSampleData.json" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
   </ItemGroup>
 
