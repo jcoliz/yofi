@@ -36,13 +36,6 @@ namespace YoFi.Tests.Integration
 
         #endregion
 
-        #region Helpers
-
-        protected override IEnumerable<T> GivenFakeItems<T>(int num) =>
-            Enumerable.Range(1, num).Select(x => new BudgetTx() { Timestamp = new DateTime(2000,1,1) + TimeSpan.FromDays(x), Amount = x*100m, Memo = $"Memo {x}", Category = $"Category:{x}" }) as IEnumerable<T>;
-
-        #endregion
-
         #region Tests
 
         [DataRow(true)]

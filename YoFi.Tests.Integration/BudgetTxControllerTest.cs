@@ -49,13 +49,11 @@ namespace YoFi.Tests.Integration
 
         #region Helpers
 
-        protected override IEnumerable<T> GivenFakeItems<T>(int num) =>
-            Enumerable.Range(1, num).Select(x => new BudgetTx() { Timestamp = new DateTime(2000, 1, 1) + TimeSpan.FromDays(x), Amount = x * 100m, Memo = $"Memo {x}", Category = $"Category:{x}" }) as IEnumerable<T>;
-
         private void ThenResultsAreEqualByMemo(IHtmlDocument document, IEnumerable<BudgetTx> chosen)
         {
             ThenResultsAreEqual(document, chosen.Select(i => i.Memo).OrderBy(n => n), "[data-test-id=memo]");
         }
+
         #endregion
 
         #region Tests
