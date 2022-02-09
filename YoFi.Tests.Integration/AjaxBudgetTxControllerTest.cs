@@ -1,12 +1,8 @@
-﻿using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
@@ -34,7 +30,7 @@ namespace YoFi.Tests.Integration
         public void Cleanup()
         {
             // Clean out database
-            context.BudgetTxs.RemoveRange(context.BudgetTxs);
+            context.Set<BudgetTx>().RemoveRange(context.Set<BudgetTx>());
             context.SaveChanges();
         }
 

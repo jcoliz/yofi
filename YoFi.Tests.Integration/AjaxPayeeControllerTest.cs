@@ -30,7 +30,7 @@ namespace YoFi.Tests.Integration
         public void Cleanup()
         {
             // Clean out database
-            context.Payees.RemoveRange(context.Payees);
+            context.Set<Payee>().RemoveRange(context.Set<Payee>());
             context.SaveChanges();
         }
 
@@ -70,7 +70,7 @@ namespace YoFi.Tests.Integration
         public async Task Add()
         {
             // When: Adding a new item via AJAX
-            var expected = new Payee() { Category = "B", Name = "3" };
+            var expected = GivenFakeItems<Payee>(100).Last();
             var formData = new Dictionary<string, string>()
             {
                 { "Category", expected.Category },
@@ -94,7 +94,7 @@ namespace YoFi.Tests.Integration
             var id = chosen.Single().ID;
 
             // And: When posting changed values to /Ajax/Payee/Edit/
-            var expected = new Payee() { Category = "Edited Category", Name = "Edited Name" };
+            var expected = GivenFakeItems<Payee>(90).Last();
             var formData = new Dictionary<string, string>()
             {
                 { "ID", id.ToString() },
