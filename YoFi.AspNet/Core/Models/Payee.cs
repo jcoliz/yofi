@@ -25,6 +25,7 @@ namespace YoFi.Core.Models
         /// Name of payee, or regex rule
         /// </summary>
         [Attributes.Editable]
+        [Attributes.TestKey]
         public string Name { get; set; }
 
         /// <summary>

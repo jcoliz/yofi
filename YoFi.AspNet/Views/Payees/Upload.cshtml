@@ -11,7 +11,7 @@
     </div>
 </nav>
 
-<table class="table">
+<table class="table" data-test-id="results">
     <thead>
         <tr>
             <th>
@@ -29,7 +29,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Category)
                 </td>
-                <td>
+                <td data-test-id="name">
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
             </tr>

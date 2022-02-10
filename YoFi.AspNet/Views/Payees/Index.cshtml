@@ -76,7 +76,7 @@
 }
 else
 {
-    <table class="table">
+    <table class="table" data-test-id="results">
         <thead>
             <tr>
                 @if ((bool)(ViewData["ShowSelected"]))
@@ -111,7 +111,7 @@ else
                     <td class="display-category">
                         @Html.DisplayFor(modelItem => item.Category)
                     </td>
-                    <td class="display-payee">
+                    <td class="display-payee" data-test-id="name">
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
                     <td>
