@@ -184,7 +184,7 @@ namespace YoFi.Tests.Integration
         {
             // Then: The expected items are returned
             var results = document.QuerySelectorAll("table[data-test-id=results] tbody tr");
-            var names = results.Select(x => x.QuerySelector(selector).TextContent.Trim());
+            var names = results.Select(x => x.QuerySelector(selector).TextContent.Trim()).OrderBy(x=>x);
             Assert.IsTrue(chosen.SequenceEqual(names));
         }
 

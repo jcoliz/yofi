@@ -68,7 +68,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: The expected items are returned
-            ThenResultsAreEqual(document, items.OrderByDescending(x => x.Timestamp).Select(x => x.Memo), "[data-test-id=memo]");
+            ThenResultsAreEqualByTestKey(document, items);
         }
 
         [TestMethod]
@@ -109,7 +109,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: Only one page of items returned, which are the LAST group, cuz it's sorted by time
-            ThenResultsAreEqual(document, p1.OrderByDescending(x => x.Timestamp).Select(x => x.Memo), "[data-test-id=memo]");
+            ThenResultsAreEqualByTestKey(document, p1);
         }
 
         [TestMethod]
@@ -123,7 +123,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenGetAsync($"{urlroot}/?p=2");
 
             // Then: Only 2nd page items returned
-            ThenResultsAreEqual(document, items.Except(p1).OrderByDescending(x => x.Timestamp).Select(x => x.Memo), "[data-test-id=memo]");
+            ThenResultsAreEqualByTestKey(document, items.Except(p1));
         }
 
         [TestMethod]
@@ -248,7 +248,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenUploadingSpreadsheet(stream,$"{urlroot}/",$"{urlroot}/Upload");
 
             // Then: The uploaded items are returned
-            ThenResultsAreEqual(document, items.OrderByDescending(x => x.Timestamp).Select(x => x.Memo), "[data-test-id=memo]");
+            ThenResultsAreEqualByTestKey(document, items);
 
             // And: The database now contains the items
             items.SequenceEqual(context.Set<BudgetTx>().OrderBy(x => x.Memo));
