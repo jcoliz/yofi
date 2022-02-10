@@ -262,7 +262,7 @@ namespace YoFi.Tests.Core
 
             // Then: Only the expected items are returned
             var expected = repository.All.Where(x => x.Category.Contains(word));
-            Assert.IsTrue(expected.SequenceEqual(result.Items));
+            Assert.IsTrue(expected.OrderByDescending(x=>x.Timestamp).SequenceEqual(result.Items));
         }
 
         #endregion
