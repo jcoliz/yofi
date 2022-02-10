@@ -111,7 +111,7 @@
 else
 {
 
-    <table class="table">
+    <table class="table" data-test-id="results">
         <thead>
             <tr>
                 @if (Model.ShowHidden)
@@ -191,7 +191,7 @@ else
                             @Html.DisplayFor(modelItem => item.Category)
                         }
                     </td>
-                    <td class="display-memo">
+                    <td class="display-memo" data-test-id="memo">
                         @Html.DisplayFor(modelItem => item.Memo)
                     </td>
                     @if (Model.ShowHidden)

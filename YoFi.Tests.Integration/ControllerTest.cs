@@ -218,7 +218,7 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
-        public async Task Upload()
+        public virtual async Task Upload()
         {
             // Given: A spreadsheet of items
             var items = GivenFakeItems<T>(15).OrderBy(TestKeyOrder<T>());
@@ -235,7 +235,7 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
-        public async Task UploadDuplicate()
+        public virtual async Task UploadDuplicate()
         {
             // Given: One item in the database
             var initial = await GivenFakeDataInDatabase<T>(1);
@@ -256,7 +256,7 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
-        public async Task UploadFailsNoFile()
+        public virtual async Task UploadFailsNoFile()
         {
             // When: Calling upload with no files
             _ = await WhenUploadingSpreadsheet(null, $"{urlroot}/", $"{urlroot}/Upload");
@@ -266,7 +266,7 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
-        public async Task Download()
+        public virtual async Task Download()
         {
             // Given: Many items in the database
             var items = await GivenFakeDataInDatabase<T>(20);
