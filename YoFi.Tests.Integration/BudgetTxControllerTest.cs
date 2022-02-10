@@ -255,6 +255,27 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
+        public async Task UploadDuplicate()
+        {
+            // Given: One item in the database
+            var initial = await GivenFakeDataInDatabase<BudgetTx>(1);
+
+            // And: A spreadsheet containing 5 items, including a duplicate of the item in the database
+            var items = GivenFakeItems<BudgetTx>(5).OrderBy(x => x.Memo);
+            var stream = GivenSpreadsheetOf(items);
+            // Note that "GivenFakeItems" will restart at 1, so item Name 01 is the dupe
+
+            // When: Uploading the spreadsheet
+            var document = await WhenUploadingSpreadsheet(stream, $"{urlroot}/", $"{urlroot}/Upload");
+
+            // Then: Only the non-duplicate items were returned
+            ThenResultsAreEqualByTestKey(document, items.Skip(1));
+
+            // And: The database now contains the items
+            items.SequenceEqual(context.Set<BudgetTx>().OrderBy(x => x.Memo));
+        }
+
+        [TestMethod]
         public async Task Download()
         {
             // Given: Many items in the database
