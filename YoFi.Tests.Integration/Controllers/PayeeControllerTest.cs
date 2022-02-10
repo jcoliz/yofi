@@ -35,5 +35,94 @@ namespace YoFi.Tests.Integration
         }
 
         #endregion
+
+        #region Tests
+
+#if false
+
+        [TestMethod]
+        public async Task EditModal()
+        {
+            await helper.AddFiveItems();
+            var expected = Items[3];
+            var result = await controller.EditModal(expected.ID);
+            var actual = result as PartialViewResult;
+            var model = actual.Model as Payee;
+
+            Assert.AreEqual("EditPartial", actual.ViewName);
+            Assert.AreEqual(expected, model);
+        }
+        [TestMethod]
+        public async Task BulkEdit()
+        {
+            await helper.AddFiveItems();
+            Items[2].Selected = true;
+            Items[4].Selected = true;
+            await context.SaveChangesAsync();
+
+            var result = await controller.BulkEdit("Category");
+            var actual = result as RedirectToActionResult;
+
+            Assert.AreEqual("Index", actual.ActionName);
+
+            // Note that we can still use the 'items' objects here because they are tracking the DB
+
+            var lookup = Items.ToLookup(x => x.Category, x => x);
+
+            var changeditems = lookup["Category"];
+
+            Assert.AreEqual(2, changeditems.Count());
+
+            Assert.AreEqual("Category", Items[2].Category);
+            Assert.AreEqual("Category", Items[4].Category);
+        }
+        [TestMethod]
+        public async Task CreateFromTx()
+        {
+            var tx = new Transaction() { Payee = "A", Category = "C" };
+            context.Add(tx);
+            await context.SaveChangesAsync();
+
+            var result = await controller.Create(tx.ID);
+            var actual = result as ViewResult;
+            var model = actual.Model as Payee;
+
+            Assert.AreEqual(tx.Payee, model.Name);
+            Assert.AreEqual(tx.Category, model.Category);
+        }
+
+        [TestMethod]
+        public async Task CreateModalFromTx()
+        {
+            var tx = new Transaction() { Payee = "A", Category = "C" };
+            context.Add(tx);
+            await context.SaveChangesAsync();
+
+            var result = await controller.CreateModal(tx.ID);
+            var actual = result as PartialViewResult;
+            var model = actual.Model as Payee;
+
+            Assert.AreEqual("CreatePartial", actual.ViewName);
+            Assert.AreEqual(tx.Payee, model.Name);
+            Assert.AreEqual(tx.Category, model.Category);
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexShowSelected(bool isselected)
+        {
+            // When: Calling index with view set to 'selected'
+            var searchterm = isselected ? "S" : null;
+            await controller.Index(v: searchterm);
+
+            // Then: The "show selected" state is transmitted through to the view in the view data
+            Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
+        }
+
+#endif
+
+
+        #endregion
     }
 }
