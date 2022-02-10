@@ -153,7 +153,7 @@ namespace YoFi.Core.Models
 
         public IQueryable<BudgetTx> InDefaultOrder(IQueryable<BudgetTx> original)
         {
-            return original.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenBy(x => x.Category);
+            return original.OrderByDescending(x => x.Timestamp.Year).ThenByDescending(x => x.Timestamp.Month).ThenByDescending(x => x.Timestamp.Day).ThenBy(x => x.Category);
         }
 
         int IImportDuplicateComparable.GetImportHashCode() =>

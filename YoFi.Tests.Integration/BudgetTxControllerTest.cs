@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 using YoFi.Tests.Integration.Helpers;
 
 namespace YoFi.Tests.Integration
@@ -67,7 +68,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: The expected items are returned
-            ThenResultsAreEqualByTestKey(document, items);
+            ThenResultsAreEqual(document, items.OrderByDescending(x => x.Timestamp).Select(x => x.Memo), "[data-test-id=memo]");
         }
 
         [TestMethod]
@@ -81,6 +82,48 @@ namespace YoFi.Tests.Integration
 
             // Then: The expected items are returned
             ThenResultsAreEqualByTestKey(document, items);
+        }
+
+
+        [TestMethod]
+        public async Task IndexSearch()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<BudgetTx>(5, 1);
+
+            // When: Searching the index for the focused item's name
+            var document = await WhenGetAsync($"{urlroot}/?q={chosen.Single().Category}");
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexPage1()
+        {
+            // Given: A long set of items, which is longer than one page, but not as long as two pages 
+            var pagesize = BaseRepository<BudgetTx>.DefaultPageSize;
+            (var items, var p1) = await GivenFakeDataInDatabase<BudgetTx>(pagesize * 3 / 2, pagesize);
+
+            // When: Getting the Index
+            var document = await WhenGetAsync($"{urlroot}/");
+
+            // Then: Only one page of items returned, which are the LAST group, cuz it's sorted by time
+            ThenResultsAreEqual(document, p1.OrderByDescending(x => x.Timestamp).Select(x => x.Memo), "[data-test-id=memo]");
+        }
+
+        [TestMethod]
+        public async Task IndexPage2()
+        {
+            // Given: A long set of items, which is longer than one page, but not as long as two pages 
+            var pagesize = BaseRepository<BudgetTx>.DefaultPageSize;
+            (var items, var p1) = await GivenFakeDataInDatabase<BudgetTx>(pagesize * 3 / 2, pagesize);
+
+            // When: Getting the Index for page 2
+            var document = await WhenGetAsync($"{urlroot}/?p=2");
+
+            // Then: Only 2nd page items returned
+            ThenResultsAreEqual(document, items.Except(p1).OrderByDescending(x => x.Timestamp).Select(x => x.Memo), "[data-test-id=memo]");
         }
 
         [TestMethod]
@@ -205,7 +248,7 @@ namespace YoFi.Tests.Integration
             var document = await WhenUploadingSpreadsheet(stream,$"{urlroot}/",$"{urlroot}/Upload");
 
             // Then: The uploaded items are returned
-            ThenResultsAreEqualByTestKey(document, items);
+            ThenResultsAreEqual(document, items.OrderByDescending(x => x.Timestamp).Select(x => x.Memo), "[data-test-id=memo]");
 
             // And: The database now contains the items
             items.SequenceEqual(context.Set<BudgetTx>().OrderBy(x => x.Memo));
