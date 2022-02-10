@@ -90,6 +90,20 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
+        public async Task IndexSearch()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<T>(5, 1);
+
+            // When: Searching the index for the focused item's testkey
+            var q = TestKeyOrder<T>()(chosen.Single());
+            var document = await WhenGetAsync($"{urlroot}/?q={q}");
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
         public async Task Details()
         {
             // Given: There are 5 items in the database, one of which we care about

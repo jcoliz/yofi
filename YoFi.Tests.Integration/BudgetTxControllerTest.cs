@@ -49,19 +49,6 @@ namespace YoFi.Tests.Integration
         #region Tests
 
         [TestMethod]
-        public async Task IndexSearch()
-        {
-            // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<BudgetTx>(5, 1);
-
-            // When: Searching the index for the focused item's name
-            var document = await WhenGetAsync($"{urlroot}/?q={chosen.Single().Category}");
-
-            // Then: The expected items are returned
-            ThenResultsAreEqualByTestKey(document, chosen);
-        }
-
-        [TestMethod]
         public async Task UploadAlmostDuplicate()
         {
             // This tests the difference between Equals() and ImportEquals(). We will pass in
