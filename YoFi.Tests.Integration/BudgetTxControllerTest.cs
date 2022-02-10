@@ -234,7 +234,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(2, context.Set<BudgetTx>().Count());
 
             // And: The last one is the one we just added
-            var actual = context.Set<BudgetTx>().Last();
+            var actual = context.Set<BudgetTx>().OrderBy(x=>x.ID).Last();
             Assert.AreEqual(expected, actual);
         }
 
