@@ -14,11 +14,11 @@ using YoFi.Tests.Integration.Helpers;
 namespace YoFi.Tests.Integration
 {
     [TestClass]
-    public class BudgetTxControllerTest: IntegrationTest
+    public class BudgetTxControllerTest: ControllerTest<BudgetTx>
     {
         #region Fields
 
-        protected const string urlroot = "/BudgetTxs";
+        protected override string urlroot => "/BudgetTxs";
 
         #endregion
 
@@ -47,18 +47,6 @@ namespace YoFi.Tests.Integration
         #endregion
 
         #region Tests
-
-        [TestMethod]
-        public async Task IndexEmpty()
-        {
-            // Given: Empty database
-
-            // When: Getting the index
-            var document = await WhenGetAsync($"{urlroot}/");
-
-            // Then: No items are returned
-            ThenResultsAreEqualByTestKey(document, Enumerable.Empty<BudgetTx>());
-        }
 
         [TestMethod]
         public async Task IndexMany()
