@@ -212,7 +212,7 @@ namespace YoFi.Tests.Integration
             Assert.IsTrue(items.OrderBy(x => property.GetValue(x)).SequenceEqual(actual.OrderBy(x => property.GetValue(x))));
         }
 
-        private PropertyInfo FindTestKey<T>()
+        protected PropertyInfo FindTestKey<T>()
         {
             // Find the test key on the object
             var properties = typeof(T).GetProperties();

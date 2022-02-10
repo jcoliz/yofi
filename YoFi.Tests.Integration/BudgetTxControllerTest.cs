@@ -140,7 +140,8 @@ namespace YoFi.Tests.Integration
             var document = await WhenGetAsync($"{urlroot}/Details/{id}");
 
             // Then: That item is shown
-            var actual = document.QuerySelector("[data-test-id=memo]").TextContent.Trim();
+            var testkey = FindTestKey<BudgetTx>().Name.ToLowerInvariant();
+            var actual = document.QuerySelector($"[data-test-id={testkey}]").TextContent.Trim();
             Assert.AreEqual(TestKeyOrder<BudgetTx>()(expected), actual);
         }
 
@@ -351,7 +352,6 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-
         [TestMethod]
         public async Task Download()
         {
@@ -366,6 +366,11 @@ namespace YoFi.Tests.Integration
 
             // And: It's a spreadsheet containing our items
             await ThenIsSpreadsheetContaining(response.Content, items);
+        }
+
+        public async Task BulkDelete()
+        {
+
         }
 
         #endregion
