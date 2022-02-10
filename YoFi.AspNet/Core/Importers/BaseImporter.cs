@@ -55,16 +55,17 @@ namespace YoFi.Core.Importers
         {
             // Remove duplicate items
             // TODO: This seems like it could have some performance problems. Is it loading the whole dataset into memory??
-            var result = _importing.Except(_repository.All).ToList();
+            _importing.ExceptWith(_repository.All);
 
             // Add remaining items
-            await _repository.BulkInsertAsync(result);
+            var imported = _importing.ToList();
+            await _repository.BulkInsertAsync(imported);
 
             // Clear import queue for next time
             _importing.Clear();
 
             // Return those items for display
-            return new T().InDefaultOrder(result.AsQueryable());
+            return new T().InDefaultOrder(imported.AsQueryable());
         }
 
         bool IEqualityComparer<T>.Equals(T x, T y)

@@ -157,11 +157,13 @@ namespace YoFi.Tests.Core
             var upload = Items.Skip(5).Take(2).Concat(await DeepCopy.MakeDuplicateOf(expected.Take(1)));
             var actual = await WhenImportingItemsAsSpreadsheet(upload);
 
-            // Then: Only two items were imported, because one exists
-            Assert.AreEqual(2, actual.Count());
+            // Then: Only ONE items were imported, because one fully exists, and also Items.Skip(5).Take(1) is
+            // a import duplicate because it has the same NAME as an existing item.
+            Assert.AreEqual(1, actual.Count());
 
-            // And: The data set now includes seven (not eight) items
-            Assert.AreEqual(7, context.Get<Payee>().Count());
+            // And: The data set now includes six (not eight) items, because 6 is the total set of unique
+            // names
+            Assert.AreEqual(6, context.Get<Payee>().Count());
         }
 
         protected async Task<IEnumerable<Payee>> WhenImportingItemsAsSpreadsheet(IEnumerable<Payee> expected)

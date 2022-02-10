@@ -275,6 +275,28 @@ namespace YoFi.Tests.Integration
             // And: The database now contains the items
             items.SequenceEqual(context.Set<BudgetTx>().OrderBy(TestKeyOrder<BudgetTx>()));
         }
+        [TestMethod]
+        public async Task UploadAlmostDuplicate()
+        {
+            // This tests the difference between Equals() and ImportEquals(). We will pass in
+            // duplicate items which will pass ImportEquals but fail Equals().
+
+            // The duplicates should NOT be imported.
+
+            // Given: 5 items in the database
+            var initial = await GivenFakeDataInDatabase<BudgetTx>(5);
+
+            // When: Upload 8 items, the first 5 of which are slight variations of the initial
+            // items in the db
+            var items = GivenFakeItems<BudgetTx>(8).ToList();
+            foreach (var item in items)
+                item.Timestamp += TimeSpan.FromDays(1);
+            var stream = GivenSpreadsheetOf(items);
+            var document = await WhenUploadingSpreadsheet(stream, $"{urlroot}/", $"{urlroot}/Upload");
+
+            // Then: Only the non-duplicate items were returned, which are the last 3
+            ThenResultsAreEqualByTestKey(document, items.Skip(5));
+        }
 
         [TestMethod]
         public async Task Download()
