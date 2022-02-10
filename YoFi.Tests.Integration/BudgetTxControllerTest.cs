@@ -86,7 +86,6 @@ namespace YoFi.Tests.Integration
             ThenResultsAreEqualByTestKey(document, items);
         }
 
-
         [TestMethod]
         public async Task IndexSearch()
         {
@@ -105,13 +104,13 @@ namespace YoFi.Tests.Integration
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             var pagesize = BaseRepository<BudgetTx>.DefaultPageSize;
-            (var items, var p1) = await GivenFakeDataInDatabase<BudgetTx>(pagesize * 3 / 2, pagesize);
+            (var items, var p2) = await GivenFakeDataInDatabase<BudgetTx>(pagesize * 3 / 2, pagesize / 2);
 
             // When: Getting the Index
             var document = await WhenGetAsync($"{urlroot}/");
 
             // Then: Only one page of items returned, which are the LAST group, cuz it's sorted by time
-            ThenResultsAreEqualByTestKey(document, p1);
+            ThenResultsAreEqualByTestKey(document, items.Except(p2));
         }
 
         [TestMethod]
@@ -119,13 +118,13 @@ namespace YoFi.Tests.Integration
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             var pagesize = BaseRepository<BudgetTx>.DefaultPageSize;
-            (var items, var p1) = await GivenFakeDataInDatabase<BudgetTx>(pagesize * 3 / 2, pagesize);
+            (var items, var p2) = await GivenFakeDataInDatabase<BudgetTx>(pagesize * 3 / 2, pagesize / 2);
 
             // When: Getting the Index for page 2
             var document = await WhenGetAsync($"{urlroot}/?p=2");
 
             // Then: Only 2nd page items returned
-            ThenResultsAreEqualByTestKey(document, items.Except(p1));
+            ThenResultsAreEqualByTestKey(document, p2);
         }
 
         [TestMethod]
@@ -159,10 +158,10 @@ namespace YoFi.Tests.Integration
                 { "ID", id.ToString() },
             };
 
-            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
-            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", FormAction, formData);
 
             // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
             var redirect = response.Headers.GetValues("Location").Single();
             Assert.AreEqual($"{urlroot}", redirect);
 
@@ -226,7 +225,7 @@ namespace YoFi.Tests.Integration
             // When: Creating a new item
             var expected = GivenFakeItem<BudgetTx>(70);
             var formData = new Dictionary<string, string>(FormDataFromObject(expected));
-            var response = await WhenGettingAndPostingForm($"{urlroot}/Create", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Create", FormAction, formData);
 
             // Then: Redirected to index
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
@@ -328,28 +327,10 @@ namespace YoFi.Tests.Integration
         public async Task UploadFailsNoFile()
         {
             // When: Calling upload with no files
-
-            // First, we have to "get" the page we upload "from"
-            var fromurl = $"{urlroot}/";
-            var tourl = $"{urlroot}/Upload";
-            var getresponse = await client.GetAsync(fromurl);
-
-            // Pull out the antiforgery values
-            var getdocument = await parser.ParseDocumentAsync(await getresponse.Content.ReadAsStreamAsync());
-            var token = AntiForgeryTokenExtractor.ExtractAntiForgeryToken(getdocument);
-            var cookie = AntiForgeryTokenExtractor.ExtractAntiForgeryCookieValueFrom(getresponse);
-
-            var content = new MultipartFormDataContent
-            {
-                { new StringContent(token.Value), token.Key }
-            };
-            var postRequest = new HttpRequestMessage(HttpMethod.Post, tourl);
-            postRequest.Headers.Add("Cookie", cookie.ToString());
-            postRequest.Content = content;
-            var response = await client.SendAsync(postRequest);
+            _ = await WhenUploadingSpreadsheet(null, $"{urlroot}/", $"{urlroot}/Upload");
 
             // Then: Bad Request
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            // (Tested by WhenUploadingSpreadsheet)
         }
 
         [TestMethod]
@@ -368,9 +349,23 @@ namespace YoFi.Tests.Integration
             await ThenIsSpreadsheetContaining(response.Content, items);
         }
 
+        [TestMethod]
         public async Task BulkDelete()
         {
+            // Given: 10 items in the database, 7 of which are marked "selected"
+            (var items, var selected) = await GivenFakeDataInDatabase<BudgetTx>(10, 7, x => { x.Selected = true; return x; });
 
+            // When: Calling BulkDelete
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/BulkDelete", new Dictionary<string, string>());
+
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: Only the unselected items remain
+            var actual = context.Set<BudgetTx>().AsNoTracking().ToList();
+            Assert.IsTrue(actual.SequenceEqual(items.Except(selected)));
         }
 
         #endregion

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace YoFi.Tests.Integration
         protected static HtmlParser parser => integrationcontext.parser;
         protected static HttpClient client => integrationcontext.client;
         protected static ApplicationDbContext context => integrationcontext.context;
+
+        protected readonly Func<IHtmlDocument, string> FormAction = d => d.QuerySelector("form").Attributes["action"].TextContent;
 
         #endregion
 
@@ -50,11 +53,13 @@ namespace YoFi.Tests.Integration
                 object o = default;
 
                 if (t == typeof(string))
-                    o = $"{property.Name} {index}";
+                    o = $"{property.Name} {index:D5}";
                 else if (t == typeof(decimal))
                     o = index * 100m;
                 else if (t == typeof(DateTime))
-                    o = new DateTime(2000, 1, 1) + TimeSpan.FromDays(index);
+                    // Note that datetimes should descend, because anything which sorts by a datetime
+                    // will typically sort descending
+                    o = new DateTime(2001, 12, 31) - TimeSpan.FromDays(index);
                 else
                     throw new NotImplementedException();
 
@@ -136,6 +141,7 @@ namespace YoFi.Tests.Integration
         {
             // First, we have to "get" the page
             var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
 
             // Pull out the antiforgery values
             var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
@@ -166,18 +172,29 @@ namespace YoFi.Tests.Integration
 
             var content = new MultipartFormDataContent
             {
-                { new StreamContent(stream), "files", "Items.xlsx" },
                 { new StringContent(token.Value), token.Key }
             };
+    
+            if (!(stream is null))
+                content.Add(new StreamContent(stream), "files", "Items.xlsx");
+
             var postRequest = new HttpRequestMessage(HttpMethod.Post, tourl);
             postRequest.Headers.Add("Cookie", cookie.ToString());
             postRequest.Content = content;
             var response = await client.SendAsync(postRequest);
 
-            response.EnsureSuccessStatusCode();
-            var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
+            if (stream is null)
+            {
+                Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+                return null;
+            }
+            else
+            {
+                response.EnsureSuccessStatusCode();
+                var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
 
-            return document;
+                return document;
+            }
         }
 
         protected void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector)
@@ -193,7 +210,7 @@ namespace YoFi.Tests.Integration
             var property = FindTestKey<T>();
             var testid = $"[data-test-id={property.Name.ToLowerInvariant()}]";
 
-            ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)).OrderBy(n => n), testid);
+            ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)), testid);
         }
 
         protected async Task ThenIsSpreadsheetContaining<T>(HttpContent content, IEnumerable<T> items) where T: class, new()
