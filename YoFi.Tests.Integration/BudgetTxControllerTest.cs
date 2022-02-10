@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AngleSharp.Html.Parser;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
@@ -297,6 +299,58 @@ namespace YoFi.Tests.Integration
             // Then: Only the non-duplicate items were returned, which are the last 3
             ThenResultsAreEqualByTestKey(document, items.Skip(5));
         }
+
+        [TestMethod]
+        public async Task UploadSmallAmountDiff_Bug890()
+        {
+            // Bug 890: BudgetTxs upload fails to filter duplicates when source data has >2 digits
+            // Hah, this is fixed by getting UploadMinmallyDuplicate() test to properly pass.
+
+            // Given: 5 items in the database
+            var initial = await GivenFakeDataInDatabase<BudgetTx>(5);
+
+            // When: Uploading an item which differs in only a small amount from an otherwise
+            // overlapping item
+            var items = GivenFakeItems<BudgetTx>(1).ToList();
+            items[0].Amount += 0.001m;
+            var stream = GivenSpreadsheetOf(items);
+            var document = await WhenUploadingSpreadsheet(stream, $"{urlroot}/", $"{urlroot}/Upload");
+
+            // Then: No items were accepted
+            ThenResultsAreEqualByTestKey(document, Enumerable.Empty<BudgetTx>());
+
+            // And: The db still has 5 items
+            Assert.AreEqual(5, context.Set<BudgetTx>().Count());
+        }
+
+        [TestMethod]
+        public async Task UploadFailsNoFile()
+        {
+            // When: Calling upload with no files
+
+            // First, we have to "get" the page we upload "from"
+            var fromurl = $"{urlroot}/";
+            var tourl = $"{urlroot}/Upload";
+            var getresponse = await client.GetAsync(fromurl);
+
+            // Pull out the antiforgery values
+            var getdocument = await parser.ParseDocumentAsync(await getresponse.Content.ReadAsStreamAsync());
+            var token = AntiForgeryTokenExtractor.ExtractAntiForgeryToken(getdocument);
+            var cookie = AntiForgeryTokenExtractor.ExtractAntiForgeryCookieValueFrom(getresponse);
+
+            var content = new MultipartFormDataContent
+            {
+                { new StringContent(token.Value), token.Key }
+            };
+            var postRequest = new HttpRequestMessage(HttpMethod.Post, tourl);
+            postRequest.Headers.Add("Cookie", cookie.ToString());
+            postRequest.Content = content;
+            var response = await client.SendAsync(postRequest);
+
+            // Then: Bad Request
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
 
         [TestMethod]
         public async Task Download()
