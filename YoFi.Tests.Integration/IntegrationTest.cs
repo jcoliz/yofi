@@ -226,6 +226,10 @@ namespace YoFi.Tests.Integration
             return property;
         }
 
+        protected Func<T,object> TestKeyOrder<T>()
+        {
+            return x => FindTestKey<T>().GetValue(x);
+        }
 
         #endregion
     }

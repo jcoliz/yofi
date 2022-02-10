@@ -139,7 +139,7 @@ namespace YoFi.Tests.Integration
 
             // Then: That item is shown
             var actual = document.QuerySelector("[data-test-id=memo]").TextContent.Trim();
-            Assert.AreEqual(expected.Memo, actual);
+            Assert.AreEqual(TestKeyOrder<BudgetTx>()(expected), actual);
         }
 
         [TestMethod]
@@ -233,7 +233,8 @@ namespace YoFi.Tests.Integration
             // And: Now are two items in database
             Assert.AreEqual(2, context.Set<BudgetTx>().Count());
 
-            var actual = context.Set<BudgetTx>().Where(x => x.Memo == expected.Memo).AsNoTracking().Single();
+            // And: The last one is the one we just added
+            var actual = context.Set<BudgetTx>().Last();
             Assert.AreEqual(expected, actual);
         }
 
@@ -241,7 +242,7 @@ namespace YoFi.Tests.Integration
         public async Task Upload()
         {
             // Given: A spreadsheet of items
-            var items = GivenFakeItems<BudgetTx>(15).OrderBy(x => x.Memo);
+            var items = GivenFakeItems<BudgetTx>(15).OrderBy(TestKeyOrder<BudgetTx>());
             var stream = GivenSpreadsheetOf(items);
 
             // When: Uploading it
@@ -251,7 +252,7 @@ namespace YoFi.Tests.Integration
             ThenResultsAreEqualByTestKey(document, items);
 
             // And: The database now contains the items
-            items.SequenceEqual(context.Set<BudgetTx>().OrderBy(x => x.Memo));
+            items.SequenceEqual(context.Set<BudgetTx>().OrderBy(TestKeyOrder<BudgetTx>()));
         }
 
         [TestMethod]
@@ -261,7 +262,7 @@ namespace YoFi.Tests.Integration
             var initial = await GivenFakeDataInDatabase<BudgetTx>(1);
 
             // And: A spreadsheet containing 5 items, including a duplicate of the item in the database
-            var items = GivenFakeItems<BudgetTx>(5).OrderBy(x => x.Memo);
+            var items = GivenFakeItems<BudgetTx>(5).OrderBy(TestKeyOrder<BudgetTx>());
             var stream = GivenSpreadsheetOf(items);
             // Note that "GivenFakeItems" will restart at 1, so item Name 01 is the dupe
 
@@ -272,7 +273,7 @@ namespace YoFi.Tests.Integration
             ThenResultsAreEqualByTestKey(document, items.Skip(1));
 
             // And: The database now contains the items
-            items.SequenceEqual(context.Set<BudgetTx>().OrderBy(x => x.Memo));
+            items.SequenceEqual(context.Set<BudgetTx>().OrderBy(TestKeyOrder<BudgetTx>()));
         }
 
         [TestMethod]
