@@ -160,7 +160,7 @@ namespace YoFi.Tests.Integration
             return outresponse;
         }
 
-        private async Task<HttpResponseMessage> WhenUploading(MultipartFormDataContent content, string fromurl, string tourl)
+        protected async Task<HttpResponseMessage> WhenUploading(MultipartFormDataContent content, string fromurl, string tourl)
         {
             // First, we have to "get" the page we upload "from"
             var getresponse = await client.GetAsync(fromurl);

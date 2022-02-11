@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -259,10 +260,14 @@ namespace YoFi.Tests.Integration
 
             // When: Uploading it as a receipt for this ID uprcpt
             var filename = "img.png";
-            var document = await WhenUploadingFile(stream, "file", filename, $"/Transactions/Index/", $"/ajax/tx/uprcpt/{id}");
+            var content = new MultipartFormDataContent
+            {
+                { new StreamContent(stream), "file", filename }
+            };
+            var response = await WhenUploading(content, $"/Transactions/Index/", $"/ajax/tx/uprcpt/{id}");
 
             // Then: The request is successful
-            // (Tested by WhenUploadingFile)
+            response.EnsureSuccessStatusCode();
 
             // And: The receipt was uploaded to storage
             Assert.AreEqual(1, integrationcontext.storage.BlobItems.Count);
@@ -271,6 +276,33 @@ namespace YoFi.Tests.Integration
             // And: The database was updated with a receipt url
             var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
             Assert.AreEqual(id.ToString(), actual.ReceiptUrl);
+        }
+
+        [TestMethod]
+        public async Task UpReceiptAgainFails()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var id = chosen.Single().ID;
+
+            // And: An image file
+            var length = 25;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
+
+            // And: It has already been uploaded
+            var filename = "img.png";
+            var content = new MultipartFormDataContent
+            {
+                { new StreamContent(stream), "file", filename }
+            };
+            var response = await WhenUploading(content, $"/Transactions/Index/", $"/ajax/tx/uprcpt/{id}");
+            response.EnsureSuccessStatusCode();
+
+            // When: Uploading it again
+            response = await WhenUploading(content, $"/Transactions/Index/", $"/ajax/tx/uprcpt/{id}");
+
+            // Then: Bad request
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
         #endregion
     }
