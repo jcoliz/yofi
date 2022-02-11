@@ -34,7 +34,7 @@ namespace YoFi.Tests.Integration
 
         #endregion
 
-        #region
+        #region Hiding Tests
 
         // Need to hide download test. Works differently for transactions
         public override Task Download()

@@ -200,10 +200,10 @@ namespace YoFi.Tests.Integration
             return WhenUploadingFile(stream, "files", "Items.xlsx", fromurl, tourl);
         }
 
-        protected async Task WhenUploadingEmpty(string fromurl, string tourl)
+        protected async Task<HttpResponseMessage> WhenUploadingEmpty(string fromurl, string tourl)
         {
             var response = await WhenUploading(new MultipartFormDataContent(), fromurl, tourl);
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            return response;
         }
 
         protected void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector)

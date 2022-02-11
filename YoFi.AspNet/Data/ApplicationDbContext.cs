@@ -77,7 +77,7 @@ namespace YoFi.AspNet.Data
         {
             if (inmemory)
             {
-                await base.Set<T>().AddRangeAsync(items);
+                base.Set<T>().AddRange(items);
                 await base.SaveChangesAsync();
             }
             else
@@ -89,14 +89,44 @@ namespace YoFi.AspNet.Data
             }
         }
 
-        Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)
+        async Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)
         {
-            return items.BatchDeleteAsync();
+            if (inmemory)
+            {
+                base.Set<T>().RemoveRange(items);
+                await base.SaveChangesAsync();
+            }
+            else
+                await items.BatchDeleteAsync();
         }
 
-        Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
+        async Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
         {
-            return items.BatchUpdateAsync(newvalues,columns);
+            if (inmemory)
+            {
+                // We support ONLY a very limited range of possibilities, which is where this
+                // method is actually called.
+                if (typeof(T) != typeof(Transaction))
+                    throw new NotImplementedException("Bulk Update on in-memory DB is only implemented for transactions");
+
+                var txvalues = newvalues as Transaction;
+                var txitems = items as IQueryable<Transaction>;
+                var txlist = await txitems.ToListAsync();
+                foreach (var item in txlist)
+                {
+                    if (columns.Contains("Imported"))
+                        item.Imported = txvalues.Imported;
+                    if (columns.Contains("Hidden"))
+                        item.Hidden = txvalues.Hidden;
+                    if (columns.Contains("Selected"))
+                        item.Selected = txvalues.Selected;
+                }
+                UpdateRange(txlist);
+
+                await SaveChangesAsync();
+            }
+            else
+                await items.BatchUpdateAsync(newvalues,columns);
         }
     }
 }
