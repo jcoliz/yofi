@@ -139,6 +139,80 @@ namespace YoFi.Tests.Integration
         }
 
         [TestMethod]
+        public async Task ApplyPayeeLoanMatch()
+        {
+            // Given: A set of loan details
+            var inmonth = 133;
+            var interest = -359.32m;
+            var principal = -1328.39m;
+            var payment = -1687.71m;
+            var year = 2000 + (inmonth - 1) / 12;
+            var month = 1 + (inmonth - 1) % 12;
+            var principalcategory = "Mortgage Principal";
+            var interestcategory = "Mortgage Interest";
+            var rule = $"{principalcategory} [Loan] {{ \"interest\": \"{interestcategory}\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" }} ";
+            var payeename = "Mortgage Lender";
+
+            // Given: A test transaction in the database which is a payment for that loan
+            var transaction = new Transaction() { Payee = payeename, Amount = payment, Timestamp = new DateTime(year, month, 1) };
+            context.Set<Transaction>().Add(transaction);
+
+            // And: A payee matching rule for that loan
+            var payee = new Payee() { Name = payeename, Category = rule };
+            context.Set<Payee>().Add(payee);
+            context.SaveChanges();
+
+            // When: Applying the payee to the transaction's ID
+            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{transaction.ID}", new Dictionary<string, string>());
+
+            // Then: The request succeeds
+            response.EnsureSuccessStatusCode();
+
+            // And: The returned text is "SPLIT"
+            var apiresult = await JsonSerializer.DeserializeAsync<string>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            Assert.AreEqual("SPLIT", apiresult);
+
+            // And: The item now has 2 splits which match the expected loan details
+            var actual = context.Set<Transaction>().Include(x=>x.Splits).Where(x => x.ID == transaction.ID).AsNoTracking().Single();
+            Assert.IsNull(actual.Category);
+            Assert.AreEqual(2, actual.Splits.Count);
+            Assert.AreEqual(interest, actual.Splits.Where(x => x.Category == interestcategory).Single().Amount);
+            Assert.AreEqual(principal, actual.Splits.Where(x => x.Category == principalcategory).Single().Amount);
+        }
+
+        [DataTestMethod]
+        [DataRow("1234567 Bobby XN April 2021 5 wks")]
+        [DataRow("1234567 Bobby MAR XN")]
+        [DataRow("1234567 Jan XN ")]
+        public async Task ApplyPayeeRegex_Pbi871(string name)
+        {
+            // Product Backlog Item 871: Match payee on regex, optionally
+
+            // Given: A payee with a regex for its name
+            var expectedpayee = new Payee() { Category = "Y", Name = "/1234567.*XN/" };
+            context.Set<Payee>().Add(expectedpayee);
+
+            // And: A transaction which should match it
+            var expected = new Transaction() { Payee = name, Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+            context.Set<Transaction>().Add(expected);
+            context.SaveChanges();
+
+            // When: Applying the payee to the transaction's ID
+            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{expected.ID}", new Dictionary<string, string>());
+
+            // Then: The request succeeds
+            response.EnsureSuccessStatusCode();
+
+            // Then: The result is the applied category
+            var apiresult = await JsonSerializer.DeserializeAsync<string>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            Assert.AreEqual(expectedpayee.Category, apiresult);
+
+            // And: The chosen transaction has the chosen payee's category
+            var actual = context.Set<Transaction>().Where(x => x.ID == expected.ID).AsNoTracking().Single();
+            Assert.AreEqual(expectedpayee.Category, actual.Category);
+        }
+
+        [TestMethod]
         public async Task ApplyPayeeNotFound()
         {
             // Given: Many payees
@@ -168,7 +242,7 @@ namespace YoFi.Tests.Integration
 
             // Then: All of the categories from given items which contain '{word}' are returned
             var apiresult = await JsonSerializer.DeserializeAsync<List<string>>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            Assert.IsTrue(apiresult.SequenceEqual(chosen.Select(x=>x.Category)));
+            Assert.IsTrue(apiresult.OrderBy(x=>x).SequenceEqual(chosen.Select(x=>x.Category).OrderBy(x=>x)));
         }
 
         #endregion
