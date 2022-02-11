@@ -262,6 +262,7 @@ function applyPayee(tr)
     $.ajax({
         url: "/ajax/tx/applypayee/" + id,
         type: "POST",
+        beforeSend: xsrf,
         success: function (result) {
             tr.find(".display-category").text(result);
         },
