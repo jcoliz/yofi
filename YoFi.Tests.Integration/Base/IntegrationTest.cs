@@ -36,18 +36,18 @@ namespace YoFi.Tests.Integration
 
         #region Helpers
 
-        protected virtual IEnumerable<T> GivenFakeItems<T>(int num) where T: class, new()
+        protected virtual IEnumerable<T> GivenFakeItems<T>(int num) where T : class, new()
         {
             return Enumerable.Range(1, num).Select(x => GivenFakeItem<T>(x));
         }
 
-        protected virtual T GivenFakeItem<T>(int index) where T: class, new()
+        protected virtual T GivenFakeItem<T>(int index) where T : class, new()
         {
             var result = new T();
             var properties = typeof(T).GetProperties();
             var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(YoFi.Core.Models.Attributes.EditableAttribute)));
 
-            foreach(var property in chosen)
+            foreach (var property in chosen)
             {
                 var t = property.PropertyType;
                 object o = default;
@@ -63,7 +63,7 @@ namespace YoFi.Tests.Integration
                 else
                     throw new NotImplementedException();
 
-                property.SetValue(result,o);
+                property.SetValue(result, o);
             }
 
             return result;
@@ -101,7 +101,7 @@ namespace YoFi.Tests.Integration
             return stream;
         }
 
-        protected Dictionary<string,string> FormDataFromObject<T>(T item)
+        protected Dictionary<string, string> FormDataFromObject<T>(T item)
         {
             var result = new Dictionary<string, string>();
 
@@ -160,7 +160,7 @@ namespace YoFi.Tests.Integration
             return outresponse;
         }
 
-        protected async Task<IHtmlDocument> WhenUploadingSpreadsheet(Stream stream, string fromurl, string tourl)
+        private async Task<HttpResponseMessage> WhenUploading(MultipartFormDataContent content, string fromurl, string tourl)
         {
             // First, we have to "get" the page we upload "from"
             var getresponse = await client.GetAsync(fromurl);
@@ -170,31 +170,40 @@ namespace YoFi.Tests.Integration
             var token = AntiForgeryTokenExtractor.ExtractAntiForgeryToken(getdocument);
             var cookie = AntiForgeryTokenExtractor.ExtractAntiForgeryCookieValueFrom(getresponse);
 
-            var content = new MultipartFormDataContent
-            {
-                { new StringContent(token.Value), token.Key }
-            };
-    
-            if (!(stream is null))
-                content.Add(new StreamContent(stream), "files", "Items.xlsx");
+            content.Add(new StringContent(token.Value), token.Key);
 
             var postRequest = new HttpRequestMessage(HttpMethod.Post, tourl);
             postRequest.Headers.Add("Cookie", cookie.ToString());
             postRequest.Content = content;
             var response = await client.SendAsync(postRequest);
 
-            if (stream is null)
-            {
-                Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
-                return null;
-            }
-            else
-            {
-                response.EnsureSuccessStatusCode();
-                var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
+            return response;
+        }
 
-                return document;
-            }
+        protected async Task<IHtmlDocument> WhenUploadingFile(Stream stream, string filename, string fromurl, string tourl)
+        {
+            var content = new MultipartFormDataContent
+            {
+                { new StreamContent(stream), "files", filename }
+            };
+
+            var response = await WhenUploading(content, fromurl, tourl);
+
+            response.EnsureSuccessStatusCode();
+            var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
+
+            return document;
+        }
+
+        protected Task<IHtmlDocument> WhenUploadingSpreadsheet(Stream stream, string fromurl, string tourl)
+        {
+            return WhenUploadingFile(stream, "Items.xlsx", fromurl, tourl);
+        }
+
+        protected async Task WhenUploadingEmpty(string fromurl, string tourl)
+        {
+            var response = await WhenUploading(new MultipartFormDataContent(), fromurl, tourl);
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         protected void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector)

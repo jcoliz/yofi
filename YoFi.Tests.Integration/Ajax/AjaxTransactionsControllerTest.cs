@@ -244,7 +244,37 @@ namespace YoFi.Tests.Integration
             var apiresult = await JsonSerializer.DeserializeAsync<List<string>>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
             Assert.IsTrue(apiresult.OrderBy(x=>x).SequenceEqual(chosen.Select(x=>x.Category).OrderBy(x=>x)));
         }
+#if false
+        [TestMethod]
+        public async Task UpReceipt()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var id = chosen.Single().ID;
 
+            // And: An image file
+
+            // When: Uploading it as a receipt for this ID uprcpt
+            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/uprcpt/{id}", new Dictionary<string, string>());
+
+            // Then: The request is successful
+
+            // And: The receipt was uploaded to storage
+
+            // And: The database was updated with a receipt url
+
+            // Create a formfile with it
+            var contenttype = "text/html";
+            var count = 10;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
+            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
+
+            var actionresult = await controller.UpReceipt(original.ID, file);
+
+            Assert.That.IsOfType<OkResult>(actionresult);
+            Assert.AreEqual(original.ID.ToString(), original.ReceiptUrl);
+        }
+#endif
         #endregion
     }
 }

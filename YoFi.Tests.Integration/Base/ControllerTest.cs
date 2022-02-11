@@ -259,10 +259,10 @@ namespace YoFi.Tests.Integration
         public virtual async Task UploadFailsNoFile()
         {
             // When: Calling upload with no files
-            _ = await WhenUploadingSpreadsheet(null, $"{urlroot}/", $"{urlroot}/Upload");
+            await WhenUploadingEmpty($"{urlroot}/", $"{urlroot}/Upload");
 
             // Then: Bad Request
-            // (Tested by WhenUploadingSpreadsheet)
+            // (Tested by WhenUploadingEmpty)
         }
 
         [TestMethod]
