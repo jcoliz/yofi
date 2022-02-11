@@ -87,7 +87,7 @@ else
         <button type="submit" name="command" value="cancel" class="btn btn-outline-secondary mb-3" data-test-id="btn-delete">Delete</button>
     </form>
 
-    <table class="table">
+    <table class="table" data-test-id="results">
         <thead>
             <tr>
                 <th>Import?</th>
@@ -132,7 +132,7 @@ else
                     <td>
                         @Html.DisplayFor(modelItem => item.Category)
                     </td>
-                    <td>
+                    <td data-test-id="memo">
                         @Html.DisplayFor(modelItem => item.Memo)
                     </td>
                     <td>
