@@ -1,7 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -33,6 +35,7 @@ namespace YoFi.Tests.Integration
         {
             // Clean out database
             context.Set<Payee>().RemoveRange(context.Set<Payee>());
+            context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
             context.SaveChanges();
         }
 
@@ -57,61 +60,52 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(TestKeyOrder<Payee>()(expected), actual);
         }
 
-#if false
-
         [TestMethod]
         public async Task BulkEdit()
         {
-            await helper.AddFiveItems();
-            Items[2].Selected = true;
-            Items[4].Selected = true;
-            await context.SaveChangesAsync();
+            // Given: 10 items in the database, 7 of which are marked "selected"
+            (var items, var selected) = await GivenFakeDataInDatabase<Payee>(10, 7, x => { x.Selected = true; return x; });
+            var ids = selected.Select(x => x.ID).ToList();
 
-            var result = await controller.BulkEdit("Category");
-            var actual = result as RedirectToActionResult;
+            // When: Calling BulkEdit with a new category
+            var category = "Edited Category";
+            var formData = new Dictionary<string, string>()
+            {
+                { "Category", category },
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/BulkEdit", formData);
 
-            Assert.AreEqual("Index", actual.ActionName);
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
 
-            // Note that we can still use the 'items' objects here because they are tracking the DB
+            // And: All of the edited items have the new category
+            var edited = context.Set<BudgetTx>().Where(x => ids.Contains(x.ID)).AsNoTracking().ToList();
+            Assert.IsTrue(edited.All(x=>x.Category == category));
 
-            var lookup = Items.ToLookup(x => x.Category, x => x);
-
-            var changeditems = lookup["Category"];
-
-            Assert.AreEqual(2, changeditems.Count());
-
-            Assert.AreEqual("Category", Items[2].Category);
-            Assert.AreEqual("Category", Items[4].Category);
-        }
-        [TestMethod]
-        public async Task CreateFromTx()
-        {
-            var tx = new Transaction() { Payee = "A", Category = "C" };
-            context.Add(tx);
-            await context.SaveChangesAsync();
-
-            var result = await controller.Create(tx.ID);
-            var actual = result as ViewResult;
-            var model = actual.Model as Payee;
-
-            Assert.AreEqual(tx.Payee, model.Name);
-            Assert.AreEqual(tx.Category, model.Category);
+            // And: None of the un-edited items have the new category
+            var unedited = context.Set<BudgetTx>().Where(x => !ids.Contains(x.ID)).AsNoTracking().ToList();
+            Assert.IsTrue(edited.All(x => x.Category != category));
         }
 
-        [TestMethod]
-        public async Task CreateModalFromTx()
+        [DataRow("Create/?txid")]
+        [DataRow("CreateModal/?id")]
+        [DataTestMethod]
+        public async Task CreateFromTx(string endpoint)
         {
-            var tx = new Transaction() { Payee = "A", Category = "C" };
-            context.Add(tx);
-            await context.SaveChangesAsync();
+            // Given: There are 5 transactions in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var expected = chosen.Single();
 
-            var result = await controller.CreateModal(tx.ID);
-            var actual = result as PartialViewResult;
-            var model = actual.Model as Payee;
+            // When: Asking for the "create" page or modal given the chosen ID
+            var document = await WhenGetAsync($"{urlroot}/{endpoint}={expected.ID}");
 
-            Assert.AreEqual("CreatePartial", actual.ViewName);
-            Assert.AreEqual(tx.Payee, model.Name);
-            Assert.AreEqual(tx.Category, model.Category);
+            // Then: The page is filled with the correct name and category
+            var category = document.QuerySelector($"input[name=Category]").GetAttribute("value").Trim();
+            Assert.AreEqual(expected.Category, category);
+            var name = document.QuerySelector($"input[name=Name]").GetAttribute("value").Trim();
+            Assert.AreEqual(expected.Payee, name);
         }
 
         [DataRow(true)]
@@ -119,16 +113,17 @@ namespace YoFi.Tests.Integration
         [DataTestMethod]
         public async Task IndexShowSelected(bool isselected)
         {
-            // When: Calling index with view set to 'selected'
-            var searchterm = isselected ? "S" : null;
-            await controller.Index(v: searchterm);
+            // Given: Many items in the database
+            var items = await GivenFakeDataInDatabase<Payee>(20);
 
-            // Then: The "show selected" state is transmitted through to the view in the view data
-            Assert.AreEqual(isselected, controller.ViewData["ShowSelected"]);
+            // When: Getting the index with or without the "selected" view
+            var searchterm = isselected ? "?v=S" : string.Empty;
+            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+
+            // Then: The selection checkbox is available
+            var selectionshown = ! (document.QuerySelector($"th[data-test-id=select]") is null);
+            Assert.AreEqual(isselected, selectionshown);
         }
-
-#endif
-
 
         #endregion
     }
