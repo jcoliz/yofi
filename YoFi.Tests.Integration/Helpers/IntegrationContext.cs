@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.AspNet.Main;
+using YoFi.Core;
 
 namespace YoFi.Tests.Integration.Helpers
 {
@@ -21,6 +22,7 @@ namespace YoFi.Tests.Integration.Helpers
         private CustomWebApplicationFactory<Startup> factory;
         private TestServer server;
         private IServiceScope scope;
+        private TestAzureStorage storage;
 
         public HtmlParser parser { get; private set; }
         public HttpClient client { get; private set; }
@@ -43,6 +45,7 @@ namespace YoFi.Tests.Integration.Helpers
                         options.AddPolicy("CanWrite", policy => policy.AddRequirements(new AnonymousAuth()));
                     });
                     services.AddScoped<IAuthorizationHandler, AnonymousAuthHandler>();
+                    services.AddSingleton<IStorageService>(storage = new TestAzureStorage());
                 });
             }).Server;
             parser = new HtmlParser();
