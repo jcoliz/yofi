@@ -168,31 +168,6 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual(expected, actual);
         }
 
-
-        [TestMethod]
-        public async Task EditObjectValuesDontMatch()
-        {
-            // Given: Five items in the respository
-            repository.AddItems(5);
-
-            // When: Changing details for a selected item
-            var selected = repository.All.Skip(1).First();
-            var expected = repository.MakeItem(6);
-            var id = expected.ID = selected.ID;
-            var badid = id + 1;
-            var actionresult = await controller.Edit(badid, expected);
-
-            // Then: Returns bad request
-            Assert.That.IsOfType<BadRequestResult>(actionresult);
-
-            // And: Item has NOT been updated
-            var actual = await repository.GetByIdAsync(id);
-            var actualbadid = await repository.GetByIdAsync(badid);
-            Assert.AreEqual(selected, actual);
-            Assert.AreNotEqual(expected, actual);
-            Assert.AreNotEqual(expected, actualbadid);
-        }
-
         [TestMethod]
         public async Task DeleteDetailsFound()
         {

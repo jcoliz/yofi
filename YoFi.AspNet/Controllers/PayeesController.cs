@@ -116,19 +116,9 @@ namespace YoFi.AspNet.Controllers
         [ValidatePayeeExists]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Category")] Payee item)
         {
-            try
-            {
-                if (id != item.ID)
-                    throw new ArgumentException();
+            await _repository.UpdateAsync(item);
 
-                await _repository.UpdateAsync(item);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest();
-            }
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
