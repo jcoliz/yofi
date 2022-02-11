@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
@@ -38,20 +40,25 @@ namespace YoFi.Tests.Integration
 
         #region Tests
 
-#if false
-
         [TestMethod]
         public async Task EditModal()
         {
-            await helper.AddFiveItems();
-            var expected = Items[3];
-            var result = await controller.EditModal(expected.ID);
-            var actual = result as PartialViewResult;
-            var model = actual.Model as Payee;
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Payee>(5, 1);
+            var expected = chosen.Single();
+            var id = expected.ID;
 
-            Assert.AreEqual("EditPartial", actual.ViewName);
-            Assert.AreEqual(expected, model);
+            // When: Asking for the modal edit partial view
+            var document = await WhenGetAsync($"{urlroot}/EditModal/{id}");
+
+            // Then: That item is shown
+            var testkey = FindTestKey<Payee>().Name;
+            var actual = document.QuerySelector($"input[name={testkey}]").GetAttribute("value").Trim();
+            Assert.AreEqual(TestKeyOrder<Payee>()(expected), actual);
         }
+
+#if false
+
         [TestMethod]
         public async Task BulkEdit()
         {
