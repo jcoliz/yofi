@@ -125,6 +125,25 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(isselected, selectionshown);
         }
 
+        [TestMethod]
+        public async Task BulkDelete()
+        {
+            // Given: 10 items in the database, 7 of which are marked "selected"
+            (var items, var selected) = await GivenFakeDataInDatabase<Payee>(10, 7, x => { x.Selected = true; return x; });
+
+            // When: Calling BulkDelete
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/BulkDelete", new Dictionary<string, string>());
+
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: Only the unselected items remain
+            var actual = context.Set<Payee>().AsQueryable().OrderBy(TestKeyOrder<Payee>()).ToList();
+            Assert.IsTrue(actual.SequenceEqual(items.Except(selected)));
+        }
+
         #endregion
     }
 }
