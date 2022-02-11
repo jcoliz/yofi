@@ -62,31 +62,19 @@ namespace YoFi.AspNet.Controllers
             }
             catch (InvalidOperationException)
             {
-                // NewFromTransaction will throw this if txid no exists
-                // Once I have a transactions repository, I can use ValidateTransactionExists here
+                // Note that I can't use [ValidateTransactionExists] because calling this with
+                // null is valid.
+
                 return NotFound();
             }
         }
 
+        [ValidateTransactionExists]
         public async Task<IActionResult> CreateModal(int id)
         {
-            try
-            {
-                if (id <= 0)
-                    throw new ArgumentException("Transaction ID needed", nameof(id));
+            ViewData["TXID"] = id;
 
-                ViewData["TXID"] = id;
-
-                return PartialView("CreatePartial", await _repository.NewFromTransactionAsync(id));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest($"Bad Request: {ex.Message}");
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
+            return PartialView("CreatePartial", await _repository.NewFromTransactionAsync(id));
         }
 
         [HttpPost]
