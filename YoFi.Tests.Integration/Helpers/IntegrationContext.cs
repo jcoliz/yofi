@@ -22,11 +22,11 @@ namespace YoFi.Tests.Integration.Helpers
         private CustomWebApplicationFactory<Startup> factory;
         private TestServer server;
         private IServiceScope scope;
-        private TestAzureStorage storage;
 
         public HtmlParser parser { get; private set; }
         public HttpClient client { get; private set; }
         public ApplicationDbContext context { get; private set; }
+        public TestAzureStorage storage { get; private set; }
 
         public IntegrationContext(string name)
         {

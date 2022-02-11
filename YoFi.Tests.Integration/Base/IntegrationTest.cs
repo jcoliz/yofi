@@ -180,11 +180,11 @@ namespace YoFi.Tests.Integration
             return response;
         }
 
-        protected async Task<IHtmlDocument> WhenUploadingFile(Stream stream, string filename, string fromurl, string tourl)
+        protected async Task<IHtmlDocument> WhenUploadingFile(Stream stream, string name, string filename, string fromurl, string tourl)
         {
             var content = new MultipartFormDataContent
             {
-                { new StreamContent(stream), "files", filename }
+                { new StreamContent(stream), name, filename }
             };
 
             var response = await WhenUploading(content, fromurl, tourl);
@@ -197,7 +197,7 @@ namespace YoFi.Tests.Integration
 
         protected Task<IHtmlDocument> WhenUploadingSpreadsheet(Stream stream, string fromurl, string tourl)
         {
-            return WhenUploadingFile(stream, "Items.xlsx", fromurl, tourl);
+            return WhenUploadingFile(stream, "files", "Items.xlsx", fromurl, tourl);
         }
 
         protected async Task WhenUploadingEmpty(string fromurl, string tourl)

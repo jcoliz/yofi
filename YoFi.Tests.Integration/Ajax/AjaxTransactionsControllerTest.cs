@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -244,7 +245,7 @@ namespace YoFi.Tests.Integration
             var apiresult = await JsonSerializer.DeserializeAsync<List<string>>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
             Assert.IsTrue(apiresult.OrderBy(x=>x).SequenceEqual(chosen.Select(x=>x.Category).OrderBy(x=>x)));
         }
-#if false
+
         [TestMethod]
         public async Task UpReceipt()
         {
@@ -253,28 +254,24 @@ namespace YoFi.Tests.Integration
             var id = chosen.Single().ID;
 
             // And: An image file
+            var length = 25;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
 
             // When: Uploading it as a receipt for this ID uprcpt
-            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/uprcpt/{id}", new Dictionary<string, string>());
+            var filename = "img.png";
+            var document = await WhenUploadingFile(stream, "file", filename, $"/Transactions/Index/", $"/ajax/tx/uprcpt/{id}");
 
             // Then: The request is successful
+            // (Tested by WhenUploadingFile)
 
             // And: The receipt was uploaded to storage
+            Assert.AreEqual(1, integrationcontext.storage.BlobItems.Count);
+            Assert.AreEqual(id.ToString(), integrationcontext.storage.BlobItems.Single().FileName);
 
             // And: The database was updated with a receipt url
-
-            // Create a formfile with it
-            var contenttype = "text/html";
-            var count = 10;
-            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, count).ToArray());
-            var file = new FormFile(stream, 0, count, "Index", $"Index.html") { Headers = new HeaderDictionary(), ContentType = contenttype };
-
-            var actionresult = await controller.UpReceipt(original.ID, file);
-
-            Assert.That.IsOfType<OkResult>(actionresult);
-            Assert.AreEqual(original.ID.ToString(), original.ReceiptUrl);
+            var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
+            Assert.AreEqual(id.ToString(), actual.ReceiptUrl);
         }
-#endif
         #endregion
     }
 }
