@@ -248,25 +248,5 @@ namespace YoFi.Tests.Controllers.Slim
             // And: All the items are in the repository
             Assert.IsTrue(expected.SequenceEqual(repository.All));
         }
-
-        [TestMethod]
-        public async Task UploadEmptyFails()
-        {
-            // When: Uploading an empty list
-            var actionresult = await controller.Upload(new List<IFormFile>());
-
-            // Then: Returns bad request object result
-            Assert.That.IsOfType<BadRequestObjectResult>(actionresult);
-        }
-
-        [TestMethod]
-        public async Task UploadNullFails()
-        {
-            // When: Uploading null paramter
-            var actionresult = await controller.Upload(null);
-
-            // Then: Returns bad request object result
-            Assert.That.IsOfType<BadRequestObjectResult>(actionresult);
-        }
     }
 }
