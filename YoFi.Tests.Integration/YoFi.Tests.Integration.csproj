@@ -42,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Ajax\" />
     <Folder Include="Controllers\" />
     <Folder Include="Base\" />
     <Folder Include="Reports\" />
