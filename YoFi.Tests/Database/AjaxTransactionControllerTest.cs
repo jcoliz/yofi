@@ -141,43 +141,6 @@ namespace YoFi.Tests.Database
             Assert.AreNotEqual(original.Payee, actual.Payee);
         }
 
-// TODO: Bring these back to life when porting to new system.
-#if false
-        [TestMethod]
-        public async Task ApplyPayeeNotFound()
-        {
-            await repository.AddAsync
-            (
-                new Transaction() { Category = "BB:AA", Payee = "notfound", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m }
-            );
-
-            var payeeRepository = new PayeeRepository(context);
-            await AjaxPayeeControllerTest.AddFive(payeeRepository);
-            var expected = repository.All.Last();
-
-            var actionresult = await controller.ApplyPayee(expected.ID, payeeRepository);
-
-            Assert.That.IsOfType<NotFoundObjectResult>(actionresult);
-        }
-
-        [TestMethod]
-        public async Task ApplyPayee()
-        {
-            await AddFive();
-            var payeeRepository = new PayeeRepository(context);
-            await AjaxPayeeControllerTest.AddFive(payeeRepository);
-            var expected = repository.All.Last();
-            var expectedpayee = payeeRepository.All.Where(x => x.Name == expected.Payee).Single();
-
-            var actionresult = await controller.ApplyPayee(expected.ID, payeeRepository);
-
-            var objresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
-            var itemresult = Assert.That.IsOfType<string>(objresult.Value);
-
-            Assert.AreEqual(expectedpayee.Category, itemresult);
-            Assert.AreEqual(expectedpayee.Category, expected.Category);
-        }
-#endif
         [TestMethod]
         public async Task ApplyPayeeLoanMatch()
         {

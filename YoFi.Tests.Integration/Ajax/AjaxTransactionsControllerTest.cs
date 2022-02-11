@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -33,6 +34,7 @@ namespace YoFi.Tests.Integration
         {
             // Clean out database
             context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
+            context.Set<Payee>().RemoveRange(context.Set<Payee>());
             context.SaveChanges();
         }
 
@@ -134,6 +136,23 @@ namespace YoFi.Tests.Integration
             // And: The chosen transaction has the chosen payee's category
             var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
             Assert.AreEqual(payee.Category, actual.Category);
+        }
+
+        [TestMethod]
+        public async Task ApplyPayeeNotFound()
+        {
+            // Given: Many payees
+            _ = await GivenFakeDataInDatabase<Payee>(15);
+
+            // Given: Five transactions, one of which has no category, and has "payee" matching NONE of the payees in the DB
+            (_, var txchosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x => { x.Category = null; x.Payee = "notfound"; return x; });
+            var id = txchosen.Single().ID;
+
+            // When: Applying the payee to the transaction's ID
+            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{id}", new Dictionary<string, string>());
+
+            // Then: 404
+            Assert.AreEqual(HttpStatusCode.NotFound,response.StatusCode);
         }
 
         #endregion
