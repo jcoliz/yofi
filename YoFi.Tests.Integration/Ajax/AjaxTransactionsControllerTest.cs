@@ -155,6 +155,22 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(HttpStatusCode.NotFound,response.StatusCode);
         }
 
+        [TestMethod]
+        public async Task CategoryAutocomplete()
+        {
+            // Given: Many recent transactions, some with {word} in their category, some not
+            var word = "WORD";
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(15, 5, (x => { x.Category += word; x.Timestamp = DateTime.Now; return x; }));
+
+            // When: Calling CategoryAutocomplete with '{word}'
+            var response = await client.GetAsync($"/ajax/tx/cat-ac?q={word}");
+            response.EnsureSuccessStatusCode();
+
+            // Then: All of the categories from given items which contain '{word}' are returned
+            var apiresult = await JsonSerializer.DeserializeAsync<List<string>>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            Assert.IsTrue(apiresult.SequenceEqual(chosen.Select(x=>x.Category)));
+        }
+
         #endregion
     }
 }
