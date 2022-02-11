@@ -60,6 +60,27 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(value, actual.Selected);
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task Hide(bool value)
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, (x => { x.Hidden = !value; return x; }));
+            var id = chosen.Single().ID;
+
+            // When: Selecting the item via AJAX
+            var formData = new Dictionary<string, string>()
+            {
+                { "value", value.ToString() },
+            };
+            var response = await WhenGettingAndPostingForm("/Transactions/Index/", d => $"/ajax/tx/hide/{id}", formData);
+
+            // Then: Item hidden matches value
+            var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
+            Assert.AreEqual(value, actual.Hidden);
+        }
+
         #endregion
 
     }
