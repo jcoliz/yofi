@@ -109,7 +109,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual($"{urlroot}", redirect);
 
             // And: Only the unselected items remain
-            var actual = context.Set<BudgetTx>().AsNoTracking().ToList();
+            var actual = context.Set<BudgetTx>().AsQueryable().OrderBy(TestKeyOrder<BudgetTx>()).ToList();
             Assert.IsTrue(actual.SequenceEqual(items.Except(selected)));
         }
 
