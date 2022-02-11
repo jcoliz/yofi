@@ -66,6 +66,7 @@ namespace YoFi.AspNet.Controllers
 
         [HttpPost("applypayee/{id}")]
         [Authorize(Policy = "CanWrite")]
+        [ValidateAntiForgeryToken]
         [ValidateTransactionExists]
         public async Task<IActionResult> ApplyPayee(int id, [FromServices] IPayeeRepository payeeRepository)
         {

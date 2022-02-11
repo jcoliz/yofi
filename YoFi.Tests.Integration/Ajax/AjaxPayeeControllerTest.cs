@@ -71,7 +71,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(1, context.Payees.Count());
 
             // And: It matches what we sent in
-            var actual = context.Payees.Single();
+            var actual = context.Set<Payee>().Single();
             Assert.AreEqual(expected, actual);
         }
 
@@ -83,7 +83,7 @@ namespace YoFi.Tests.Integration
             var id = chosen.Single().ID;
 
             // And: When posting changed values to /Ajax/Payee/Edit/
-            var expected = GivenFakeItems<Payee>(90).Last();
+            var expected = GivenFakeItem<Payee>(90);
             var formData = new Dictionary<string, string>(FormDataFromObject(expected))
             {
                 { "ID", id.ToString() },
@@ -96,7 +96,7 @@ namespace YoFi.Tests.Integration
             Assert.AreEqual(expected, apiresult);
 
             // And: The item was changed
-            var actual = context.Payees.Where(x => x.ID == id).AsNoTracking().Single();
+            var actual = context.Set<Payee>().Where(x => x.ID == id).AsNoTracking().Single();
             Assert.AreEqual(expected, actual);
         }
 
