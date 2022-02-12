@@ -250,40 +250,6 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task DownloadAllSamples()
-        {
-            // Given: Already got the page, so we have the offerings populated
-            await page.OnGetAsync();
-
-            foreach(var offering in page.Offerings)
-            {
-                // When: Downloading each offering
-                var actionresult = await page.OnGetSampleAsync(offering.ID);
-                var fsresult = Assert.That.IsOfType<FileStreamResult>(actionresult);
-                Assert.IsTrue(fsresult.FileStream.Length > 1000);
-
-                // Then: The file downloads successfully
-                var dir = TestContext.FullyQualifiedTestClassName + "." + TestContext.TestName;
-                Directory.CreateDirectory(dir);
-                var filename = dir + "/" + fsresult.FileDownloadName;
-                File.Delete(filename);
-                using (var outstream = File.OpenWrite(filename))
-                {
-                    await fsresult.FileStream.CopyToAsync(outstream);
-                }
-                TestContext.AddResultFile(filename);
-            }
-        }
-
-        [TestMethod]
-        public async Task DownloadBogusSample_BadRequest()
-        {
-            // When: Trying to download an offering that doesn't exist
-            var actionresult = await page.OnGetSampleAsync("bogus-1234");
-            Assert.That.IsOfType<BadRequestResult>(actionresult);
-        }
-
-        [TestMethod]
         public async Task PostGo_AccessDenied()
         {
             AuthorizationResult result = AuthorizationResult.Failed();

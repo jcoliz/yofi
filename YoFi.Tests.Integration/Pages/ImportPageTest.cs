@@ -409,8 +409,53 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(4, context.Set<BudgetTx>().Count());
         }
 
+        //
+        // Sample Data Downloads
+        //
 
-        #endregion
+        [TestMethod]
+        public async Task DownloadAllSamples()
+        {
+            // Given: Already got the page, so we have the offerings populated
+            var getdocument = await WhenGetAsync("/Import/");
+            var offerings = getdocument.QuerySelectorAll("a[data-test-id=offering]");
+
+            foreach (var offering in offerings)
+            {
+                // When: Downloading each offering
+                var a = offering as IHtmlAnchorElement;
+                var response = await client.GetAsync(a.Href.Replace("about://",string.Empty));
+
+                // Then: It's a stream
+                Assert.IsInstanceOfType(response.Content, typeof(StreamContent));
+                var streamcontent = response.Content as StreamContent;
+
+                // And: It's long
+                Assert.IsTrue(streamcontent.Headers.ContentLength > 1000);
+
+                // Then: The file downloads successfully
+                var dir = TestContext.FullyQualifiedTestClassName + "." + TestContext.TestName;
+                Directory.CreateDirectory(dir);
+                var filename = dir + "/" + streamcontent.Headers.ContentDisposition.FileNameStar;
+                File.Delete(filename);
+                using (var outstream = File.OpenWrite(filename))
+                {
+                    await streamcontent.CopyToAsync(outstream);
+                }
+                TestContext.AddResultFile(filename);
+            }
+        }
+#if false
+        [TestMethod]
+        public async Task DownloadBogusSample_BadRequest()
+        {
+            // When: Trying to download an offering that doesn't exist
+            var actionresult = await page.OnGetSampleAsync("bogus-1234");
+            Assert.That.IsOfType<BadRequestResult>(actionresult);
+        }
+#endif
+
+#endregion
 
     }
 }
