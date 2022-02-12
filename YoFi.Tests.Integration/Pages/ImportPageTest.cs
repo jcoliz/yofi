@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Html.Parser;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -101,6 +102,158 @@ namespace YoFi.Tests.Integration.Pages
             // Then: All items remain, none have imported flag
             Assert.AreEqual(10, context.Set<Transaction>().Count());
             Assert.AreEqual(0, context.Set<Transaction>().Where(x => x.Imported == true).Count());
+        }
+
+        [TestMethod]
+        public async Task ImportOkSelected()
+        {
+            // Given: As set of items, all of which have imported flags, some of which have selected flags
+            (var _, var imported) = await GivenFakeDataInDatabase<Transaction>(10, 10, (x => { x.Imported = true; x.Selected = (x.Amount % 200) == 0; return x; }));
+            var selected = imported.Where(x => x.Selected == true).ToList();
+
+            // When: Approving the import
+            var formData = new Dictionary<string, string>()
+            {
+                { "command", "ok" }
+            };
+            var response = await WhenGettingAndPostingForm($"/Import/", FormAction, formData);
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+
+            // Then: Only selected items remain
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(selected.SequenceEqual(actual));
+        }
+
+        [TestMethod]
+        public async Task ImportCancel()
+        {
+            // Given: A mix of transactions, some flagged as imported, some as not
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
+            var expected = items.Except(chosen).ToList();
+
+            // When: Cancelling the import
+            var formData = new Dictionary<string, string>()
+            {
+                { "command", "cancel" }
+            };
+            var response = await WhenGettingAndPostingForm($"/Import/", FormAction, formData);
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+
+            // Then: Only items without imported flag remain
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(expected.SequenceEqual(actual));
+        }
+
+        [DataRow(null)]
+        [DataRow("Bogus")]
+        [DataTestMethod]
+        public async Task ImportWrong(string command)
+        {
+            // Given: A mix of transactions, some flagged as imported, some as not
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
+            var expected = items.Except(chosen).ToList();
+
+            // When: Sending the import an incorrect command
+            var formData = new Dictionary<string, string>()
+            {
+                { "command", command }
+            };
+            var response = await WhenGettingAndPostingForm($"/Import/", FormAction, formData);
+
+            // Then: Bad request
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+
+            // Then: Bad request
+
+            // Then: No change to db
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.AreEqual(10, actual.Count());
+            Assert.AreEqual(4, actual.Where(x => x.Imported == true).Count());
+        }
+
+        [TestMethod]
+        public async Task ImportOk_NotSelected_Bug839()
+        {
+            //
+            // Bug 839: Imported items are selected automatically :(
+            //
+
+            // When: Uploading items and approving the import
+            await ImportOk();
+
+            // Then: No items remain selected
+            Assert.IsFalse(context.Set<Transaction>().Any(x => x.Selected == true));
+        }
+
+        [TestMethod]
+        public async Task UploadTwins_Bug883()
+        {
+            //
+            // Bug 883: Apparantly duplicate transactions in import are (incorrectly) coalesced to single transaction for input
+            //
+
+            // Given: Two transactions, which are the same
+            var item = GivenFakeItems<Transaction>(1);
+            var items = item.Concat(item);
+
+            // And: A spreadsheet of those items
+            var stream = GivenSpreadsheetOf(items);
+
+            // When: Uploading it
+            var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
+
+            // Then: There are two items in db
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(items.SequenceEqual(actual));
+        }
+
+        [TestMethod]
+        public async Task UploadMatchPayees()
+        {
+            // Given : More than five payees, one of which matches the name of the transaction we care about
+            (_, var payeeschosen) = await GivenFakeDataInDatabase<Payee>(15, 1);
+            var payee = payeeschosen.Single();
+
+            // Given: Five transactions, all of which have no category, and have "payee" matching name of chosen payee
+            var items = GivenFakeItems<Transaction>(5, x => { x.Category = null; x.Payee = payee.Name; return x; });
+
+            // And: A spreadsheet of those items
+            var stream = GivenSpreadsheetOf(items);
+
+            // When: Uploading it
+            var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
+
+            // Then: All the items in the DB have category matching the payee
+            Assert.IsTrue(context.Set<Transaction>().All(x => x.Category == payee.Category));
+        }
+
+        [TestMethod]
+        public async Task UploadMatchPayees_RegexFirst_Bug880()
+        {
+            //
+            // Bug 880: Import applies substring matches (incorrectly) before regex matches
+            //
+
+            // Given: Two payee matching rules, with differing payees, one with a regex one without (ergo it's a substring match)
+            // And: A transaction which could match either
+            var regexpayee = new Payee() { Category = "Y", Name = "/DOG.*123/" };
+            var substrpayee = new Payee() { Category = "X", Name = "BIGDOG" };
+            var tx = new Transaction() { Payee = "BIGDOG SAYS 1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+
+            context.Payees.Add(regexpayee);
+            context.Payees.Add(substrpayee);
+            await context.SaveChangesAsync();
+
+            // And: A spreadsheet of those items
+            var stream = GivenSpreadsheetOf(new List<Transaction>() { tx });
+
+            // When: Uploading it
+            var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
+
+            // Then: The transaction will be mapped to the payee which specifies a regex
+            // (Because the regex is a more precise specification of what we want.)
+            var actual = context.Transactions.AsNoTracking().Single();
+            Assert.AreEqual(regexpayee.Category, actual.Category);
         }
 
         #endregion
