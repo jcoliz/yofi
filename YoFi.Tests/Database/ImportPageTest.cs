@@ -132,51 +132,12 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task Upload()
-        {
-            // Can't use the helper's upload bevause Transaction upload does not return the uploaded items.
-            var result = await DoUpload(Items);
-
-            // Test the status
-            Assert.That.IsOfType<PageResult>(result);
-
-            // Check the items on the page
-            Assert.AreEqual(Items.Count, page.Transactions.Items.Count());
-
-            // Now check the state of the DB
-            Assert.AreEqual(Items.Count, dbset.Count());
-        }
-
-        [TestMethod]
         public async Task UploadError()
         {
             var actionresult = await page.OnPostUploadAsync(null, null);
             Assert.That.IsOfType<PageResult>(actionresult);
 
             Assert.IsNotNull(page.Error);
-        }
-
-
-        [TestMethod]
-        public async Task Import()
-        {
-            // Given: A mix of transactions, some flagged as imported, some as not
-            var noimportitems = TransactionItems.Take(10);
-            var importitems = TransactionItems.Skip(10).Take(5).ToList();
-            foreach (var item in importitems)
-                item.Imported = true;
-
-            context.Transactions.AddRange(noimportitems.Concat(importitems));
-            context.SaveChanges();
-
-            // When: Calling Import
-            var result = await page.OnGetAsync();
-
-            // Then: Page result
-            Assert.That.IsOfType<PageResult>(result);
-
-            // Then: Only the imported transactions are shown
-            Assert.IsTrue(importitems.SequenceEqual(page.Transactions.Items));
         }
 
         [TestMethod]
@@ -204,114 +165,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(5, page.Highlights.Count);
         }
 
-        [TestMethod]
-        public async Task ImportOk()
-        {
-            // Given: As set of items, some with imported & selected flags, some with not
-            var notimported = 1; // How many should remain?
-            var items = Items.Take(5);
-            foreach (var item in items.Skip(notimported))
-                item.Imported = item.Selected = true;
-            await Add(items);
-
-            // When: Approving the import
-            var result = await page.OnPostGoAsync("ok");
-            Assert.That.IsOfType<RedirectToActionResult>(result);
-
-            // Then: All items remain, none have imported flag
-            Assert.AreEqual(5, dbset.Count());
-            Assert.AreEqual(0, dbset.Where(x => x.Imported == true).Count());
-        }
-
-        [TestMethod]
-        public async Task ImportOkSelected()
-        {
-            // Given: As set of items, all with imported some selected, some not
-            var items = Items.Take(5);
-            foreach (var item in items)
-                item.Imported = true;
-
-            var imported = 2; // How many should remain?
-            foreach (var item in items.Take(imported))
-                item.Selected = true;
-
-            await Add(items);
-
-            // When: Approving the import
-            await page.OnPostGoAsync("ok");
-
-            // Then: Only selected items remain
-            Assert.AreEqual(imported, dbset.Count());
-        }
-
-        [TestMethod]
-        public async Task ImportCancel()
-        {
-            // Given: As set of items, some with imported flag, some with not
-            var expected = 1; // How many should remain?
-            var items = Items.Take(5);
-            foreach (var item in items.Skip(expected))
-                item.Imported = true;
-            await Add(items);
-
-            // When: Cancelling the import
-            var result = await page.OnPostGoAsync("cancel");
-            Assert.That.IsOfType<RedirectToPageResult>(result);
-
-            // Then: Only items without imported flag remain
-            Assert.AreEqual(expected, dbset.Count());
-        }
-
-        [DataRow(null)]
-        [DataRow("Bogus")]
-        [DataTestMethod]
-        public async Task ImportWrong(string command)
-        {
-            // Given: As set of items, some with imported & selected flags, some with not
-            var notimported = 1; // How many should remain?
-            var items = Items.Take(5);
-            foreach (var item in items.Skip(notimported))
-                item.Imported = item.Selected = true;
-            await Add(items);
-
-            // When: Sending the import an empty command
-            var result = await page.OnPostGoAsync(command);
-
-            // Then: Bad request
-            Assert.That.IsOfType<BadRequestResult>(result);
-
-            // Then: No change to db
-            Assert.AreEqual(5, dbset.Count());
-            Assert.AreEqual(4, dbset.Where(x => x.Imported == true).Count());
-        }
-
-        [TestMethod]
-        public async Task Bug839()
-        {
-            // Bug 839: Imported items are selected automatically :(
-            await DoUpload(Items);
-
-            await page.OnPostGoAsync("ok");
-
-            var numimported = await dbset.Where(x => x.Imported == true).CountAsync();
-            var numselected = await dbset.Where(x => x.Selected == true).CountAsync();
-
-            Assert.AreEqual(0, numimported);
-            Assert.AreEqual(0, numselected);
-        }
-
-        [TestMethod]
-        public async Task Bug883()
-        {
-            // Bug 883: Apparantly duplicate transactions in import are (incorrectly) coalesced to single transaction for input
-
-            var uploadme = new List<Transaction>() { Items[0], Items[0] };
-
-            // Then upload that
-            await DoUpload(uploadme);
-
-            Assert.AreEqual(2, dbset.Count());
-        }
 
         [TestMethod]
         public async Task UploadDuplicate()
@@ -382,51 +235,6 @@ namespace YoFi.Tests.Database
 
             // Test that the resulting items are in the same order
             Assert.IsTrue(indexmany.SequenceEqual(items));
-        }
-
-        [TestMethod]
-        public async Task UploadMatchPayees()
-        {
-            context.Payees.AddRange(PayeeItems.Take(5));
-            await context.SaveChangesAsync();
-
-            // Strip off the categories, so they'll match on input
-            var uploadme = Items.Select(x => { x.Category = null; return x; }).ToList();
-
-            // Then upload that
-            await DoUpload(uploadme);
-
-            // This should have matched ALL the payees
-
-            foreach (var tx in context.Transactions)
-            {
-                var expectedpayee = context.Payees.Where(x => x.Name == tx.Payee).Single();
-                Assert.AreEqual(expectedpayee.Category, tx.Category);
-            }
-        }
-
-        [TestMethod]
-        public async Task Bug880()
-        {
-            // Bug 880: Import applies substring matches (incorrectly) before regex matches
-
-            // Given: Two payee matching rules, with differing payees, one with a regex one without (ergo it's a substring match)
-            // And: A transaction which could match either
-            var regexpayee = new Payee() { Category = "Y", Name = "/DOG.*123/" };
-            var substrpayee = new Payee() { Category = "X", Name = "BIGDOG" };
-            var tx = new Transaction() { Payee = "BIGDOG SAYS 1234", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-
-            context.Payees.Add(regexpayee);
-            context.Payees.Add(substrpayee);
-            await context.SaveChangesAsync();
-
-            // When: Uploading the transaction
-            await DoUpload(new List<Transaction>() { tx });
-
-            // Then: The transaction will be mapped to the payee which specifies a regex
-            // (Because the regex is a more precise specification of what we want.)
-            var actual = context.Transactions.Single();
-            Assert.AreEqual(regexpayee.Category, actual.Category);
         }
 
 
