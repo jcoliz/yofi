@@ -306,6 +306,38 @@ namespace YoFi.Tests.Integration.Pages
             Assert.IsNull(actual.Category);
         }
 
+        [TestMethod]
+        public async Task OfxUploadLoanSplit_Story802()
+        {
+            // Given: A payee with {loan details} in the category and {name} in the name
+            // See TransactionRepositoryTest.CalculateLoanSplits for where we are getting this data from. This is
+            // payment #53, made on 5/1/2004 for this loan.
+            var principalcategory = "Principal __TEST__";
+            var interestcategory = "Interest __TEST__";
+            var rule = $"{principalcategory} [Loan] {{ \"interest\": \"{interestcategory}\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" }} ";
+            var payee = "AA__TEST__ Loan Payment";
+            context.Set<Payee>().Add(new Payee() { Name = payee, Category = rule });
+            await context.SaveChangesAsync();
+
+            // When: Importing an OFX file containing a transaction with payee {name}
+            var filename = "User-Story-802.ofx";
+            var stream = SampleData.Open(filename);
+            _ = await WhenUploadingFile(stream, "files", filename, $"/Import/", $"/Import?handler=Upload");
+
+            // Then: All transactions are imported successfully
+            Assert.AreEqual(1, context.Set<Transaction>().Count());
+
+            // And: The transaction is imported as a split
+            var actual = context.Set<Transaction>().Include(x => x.Splits).AsNoTracking().Single();
+            Assert.AreEqual(2, actual.Splits.Count);
+
+            // And: The splits match the categories and amounts as expected from the {loan details} 
+            var principal = -891.34m;
+            var interest = -796.37m;
+            Assert.AreEqual(principal, actual.Splits.Where(x => x.Category == principalcategory).Single().Amount);
+            Assert.AreEqual(interest, actual.Splits.Where(x => x.Category == interestcategory).Single().Amount);
+        }
+
         #endregion
 
     }
