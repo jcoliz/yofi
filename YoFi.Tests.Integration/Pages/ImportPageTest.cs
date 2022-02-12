@@ -1,4 +1,5 @@
-﻿using AngleSharp.Html.Parser;
+﻿using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -40,17 +41,31 @@ namespace YoFi.Tests.Integration.Pages
 
         #endregion
 
+        #region Helpers
+
+        protected async Task<IHtmlDocument> WhenImportingAsSpreadsheet<T>(IEnumerable<T> items) where T: class
+        {
+            // Given: A spreadsheet of the supplied items
+            var stream = GivenSpreadsheetOf(items);
+
+            // When: Uploading it
+            var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
+
+            return document;
+        }
+
+        #endregion
+
         #region Tests
 
         [TestMethod]
         public async Task UploadTransactionsXlsx()
         {
-            // Given: A spreadsheet of items
+            // Given: A many items
             var items = GivenFakeItems<Transaction>(15).OrderBy(TestKeyOrder<Transaction>());
-            var stream = GivenSpreadsheetOf(items);
 
-            // When: Uploading it
-            var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
+            // When: Uploading them as a spreadsheet
+            var document = await WhenImportingAsSpreadsheet(items);
 
             // Then: The uploaded items are returned
             ThenResultsAreEqualByTestKey(document, items);
@@ -196,11 +211,8 @@ namespace YoFi.Tests.Integration.Pages
             var item = GivenFakeItems<Transaction>(1);
             var items = item.Concat(item);
 
-            // And: A spreadsheet of those items
-            var stream = GivenSpreadsheetOf(items);
-
-            // When: Uploading it
-            var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
+            // When: Uploading them as a spreadsheet
+            _ = await WhenImportingAsSpreadsheet(items);
 
             // Then: There are two items in db
             var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
@@ -217,11 +229,8 @@ namespace YoFi.Tests.Integration.Pages
             // Given: Five transactions, all of which have no category, and have "payee" matching name of chosen payee
             var items = GivenFakeItems<Transaction>(5, x => { x.Category = null; x.Payee = payee.Name; return x; });
 
-            // And: A spreadsheet of those items
-            var stream = GivenSpreadsheetOf(items);
-
-            // When: Uploading it
-            var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
+            // When: Uploading them as a spreadsheet
+            _ = await WhenImportingAsSpreadsheet(items);
 
             // Then: All the items in the DB have category matching the payee
             Assert.IsTrue(context.Set<Transaction>().All(x => x.Category == payee.Category));
@@ -244,11 +253,8 @@ namespace YoFi.Tests.Integration.Pages
             context.Payees.Add(substrpayee);
             await context.SaveChangesAsync();
 
-            // And: A spreadsheet of those items
-            var stream = GivenSpreadsheetOf(new List<Transaction>() { tx });
-
-            // When: Uploading it
-            var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
+            // When: Uploading them as a spreadsheet
+            _ = await WhenImportingAsSpreadsheet(new[] { tx });
 
             // Then: The transaction will be mapped to the payee which specifies a regex
             // (Because the regex is a more precise specification of what we want.)
