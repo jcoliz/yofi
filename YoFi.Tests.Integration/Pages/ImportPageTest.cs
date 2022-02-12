@@ -338,6 +338,21 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(interest, actual.Splits.Where(x => x.Category == interestcategory).Single().Amount);
         }
 
+        [TestMethod]
+        public async Task OfxUploadNoBankRef()
+        {
+            // Given: An OFX file containing transactions with no bank reference
+            var filename = "FullSampleData-Month02.ofx";
+            var expected = 74;
+            var stream = SampleData.Open(filename);
+
+            // When: Uploading that file
+            _ = await WhenUploadingFile(stream, "files", filename, $"/Import/", $"/Import?handler=Upload");
+
+            // Then: All transactions are imported successfully
+            Assert.AreEqual(expected, context.Set<Transaction>().Count());
+        }
+
         #endregion
 
     }

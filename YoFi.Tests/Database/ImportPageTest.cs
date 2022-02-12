@@ -237,24 +237,6 @@ namespace YoFi.Tests.Database
             Assert.IsTrue(indexmany.SequenceEqual(items));
         }
 
-        [TestMethod]
-        public async Task OfxUploadNoBankRef()
-        {
-            // Given: An OFX file containing transactions with no bank reference
-            var filename = "FullSampleData-Month02.ofx";
-            var expected = 74;
-            var stream = SampleData.Open(filename);
-            var length = stream.Length;
-            IFormFile file = new FormFile(stream, 0, length, filename, filename);
-
-            // When: Uploading that file
-            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
-
-            // Then: All transactions are imported successfully
-            Assert.That.IsOfType<PageResult>(actionresult);
-
-            Assert.AreEqual(expected, dbset.Count());
-        }
 
         //
         // User Story 1177: [User Can] Import Payees or BudgetTx from main Import page
