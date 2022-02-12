@@ -239,46 +239,6 @@ namespace YoFi.Tests.Database
 
 
         //
-        // User Story 1177: [User Can] Import Payees or BudgetTx from main Import page
-        //
-
-        [TestMethod]
-        public async Task BudgetImportLots()
-        {
-            // Given: An XLSX file with TOO MANY budget transactions in a sheet called "BudgetTx"
-            var howmany = 50;
-            var lotsofbtx = Enumerable.Range(1, howmany).Select(x => new BudgetTx() { Timestamp = clock.Now + TimeSpan.FromDays(x), Category = x.ToString() });
-            var file = PrepareUpload(lotsofbtx);
-
-            // When: Uploading it
-            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
-
-            // Then: All items are imported successfully
-            Assert.AreEqual(ImportModel.MaxOtherItemsToShow, page.BudgetTxs.Count());
-
-            // And: There is an indicator that more are available
-            Assert.AreEqual(howmany, page.NumBudgetTxsUploaded);
-        }
-
-        [TestMethod]
-        public async Task PayeeImportLots()
-        {
-            // Given: An XLSX file with TOO MANY payees in a sheet called "payees"
-            var howmany = 50;
-            var lotsofpayees = Enumerable.Range(1, howmany).Select(x => new Payee() { Name = x.ToString(), Category = x.ToString() });
-            var file = PrepareUpload(lotsofpayees);
-
-            // When: Uploading it
-            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
-
-            // Then: Only the first few are shown
-            Assert.AreEqual(ImportModel.MaxOtherItemsToShow, page.Payees.Count());
-
-            // And: There is an indicator that more are available
-            Assert.AreEqual(howmany, page.NumPayeesUploaded);
-        }
-
-        //
         // User Story 1178: [User Can] Import spreadsheets with all data types in a single spreadsheet from the main Import page
         //
 

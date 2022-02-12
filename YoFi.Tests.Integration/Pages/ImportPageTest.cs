@@ -353,6 +353,41 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(expected, context.Set<Transaction>().Count());
         }
 
+
+        //
+        // User Story 1177: [User Can] Import Payees or BudgetTx from main Import page
+        //
+
+        [TestMethod]
+        public async Task BudgetImportLots()
+        {
+            // Given: Many budget transactions
+            var howmany = 50;
+            var items = GivenFakeItems<BudgetTx>(howmany);
+
+            // When: Uploading them as a spreadsheet
+            var document = await WhenImportingAsSpreadsheet(items);
+
+            // Then: All items are imported successfully
+            var NumBudgetTxsUploaded = document.QuerySelector("[data-test-id=NumBudgetTxsUploaded]").TextContent.Trim();
+            Assert.AreEqual(howmany.ToString(), NumBudgetTxsUploaded);
+        }
+
+        [TestMethod]
+        public async Task PayeeImportLots()
+        {
+            // Given: Many payees
+            var howmany = 50;
+            var items = GivenFakeItems<Payee>(howmany);
+
+            // When: Uploading them as a spreadsheet
+            var document = await WhenImportingAsSpreadsheet(items);
+
+            // Then: All items are imported successfully
+            var NumPayeesUploaded = document.QuerySelector("[data-test-id=NumPayeesUploaded]").TextContent.Trim();
+            Assert.AreEqual(howmany.ToString(), NumPayeesUploaded);
+        }
+
         #endregion
 
     }

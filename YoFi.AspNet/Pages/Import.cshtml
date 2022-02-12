@@ -150,7 +150,7 @@ else
 {
     var morecomments = (Model.NumBudgetTxsUploaded > ImportModel.MaxOtherItemsToShow) ? $" You'll find the first {ImportModel.MaxOtherItemsToShow} items shown below." : string.Empty;
     <h2>Imported Budget Line Items</h2>
-    <p>@Model.NumBudgetTxsUploaded items have been imported to your budget. You can review your entire set of budget line items on the Edit Budget page.@morecomments</p>
+    <p><span data-test-id="NumBudgetTxsUploaded">@Model.NumBudgetTxsUploaded</span> items have been imported to your budget. You can review your entire set of budget line items on the Edit Budget page.@morecomments</p>
     <a asp-controller="BudgetTxs" asp-action="Index" class="btn btn-primary">Edit Budget &raquo;</a>
 
     <table class="table">
@@ -196,7 +196,7 @@ else
     var morecomments = (Model.NumPayeesUploaded > ImportModel.MaxOtherItemsToShow) ? $" You'll find the first {ImportModel.MaxOtherItemsToShow} items shown below." : string.Empty;
 
     <h2>Imported Payee Matching Rules</h2>
-    <p>@Model.NumPayeesUploaded items have been imported to your payee matching rules. You can review your entire set on the Payees page.@morecomments</p>
+    <p><span data-test-id="NumPayeesUploaded">@Model.NumPayeesUploaded</span> items have been imported to your payee matching rules. You can review your entire set on the Payees page.@morecomments</p>
     <a asp-controller="Payees" asp-action="Index" class="btn btn-primary">Payees &raquo;</a>
 
     <table class="table">
