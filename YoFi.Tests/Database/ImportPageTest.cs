@@ -237,53 +237,6 @@ namespace YoFi.Tests.Database
             Assert.IsTrue(indexmany.SequenceEqual(items));
         }
 
-
-        [TestMethod]
-        public async Task UploadSplitsWithTransactions()
-        {
-            // This is the correlary to SplitsShownDownload(). The question is, now that we've
-            // DOWNLOADED transactions and splits, can we UPLOAD them and get the splits?
-
-            // Here's the test data set. Note that "Transaction ID" in this case is used just
-            // as a matching ID for the current spreadsheet. It should be discarded.
-            var transactions = new List<Transaction>();
-            var splits = new List<Split>()
-            {
-                new Split() { Amount = 25m, Category = "A", TransactionID = 1000 },
-                new Split() { Amount = 75m, Category = "C", TransactionID = 1000 },
-                new Split() { Amount = 175m, Category = "X", TransactionID = 12000 } // Not going to be matched!
-            };
-
-            var item = new Transaction() { ID = 1000, Payee = "3", Category = "RemoveMe", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = splits };
-            transactions.Add(item);
-
-            // Build a spreadsheet with the chosen number of items
-            // Note that we are not disposing the stream. User of the file will do so later.
-            var stream = new MemoryStream();
-            using (var ssr = new SpreadsheetWriter())
-            {
-                ssr.Open(stream);
-                ssr.Serialize(transactions);
-                ssr.Serialize(splits);
-            }
-
-            // Create a formfile with it
-            var filename = "Transactions";
-            stream.Seek(0, SeekOrigin.Begin);
-            IFormFile file = new FormFile(stream, 0, stream.Length, filename, $"{filename}.xlsx");
-
-            // Upload it!
-            var result = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
-            Assert.That.IsOfType<PageResult>(result);
-
-            // Did the transaction and splits find each other?
-            var actual = context.Transactions.Include(x => x.Splits).Single();
-            Assert.AreEqual(2, actual.Splits.Count);
-
-            // The transaction should NOT have a category anymore, even if it had one to begin with
-            Assert.IsNull(actual.Category);
-        }
-
         [TestMethod]
         public async Task OfxUploadLoanSplit_Story802()
         {
