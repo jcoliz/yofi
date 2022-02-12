@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -52,6 +53,17 @@ namespace YoFi.Tests.Integration.Pages
             var document = await WhenUploadingSpreadsheet(stream, $"/Import/", $"/Import?handler=Upload");
 
             return document;
+        }
+
+        protected async Task<HttpResponseMessage> WhenPostingImportCommand(string command)
+        {
+            var formData = new Dictionary<string, string>()
+            {
+                { "command", command }
+            };
+            var response = await WhenGettingAndPostingForm($"/Import/", FormAction, formData);
+
+            return response;
         }
 
         #endregion
@@ -107,11 +119,7 @@ namespace YoFi.Tests.Integration.Pages
             (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = x.Selected = true; return x; }));
 
             // When: Approving the import
-            var formData = new Dictionary<string, string>()
-            {
-                { "command", "ok" }
-            };
-            var response = await WhenGettingAndPostingForm($"/Import/", FormAction, formData);
+            var response = await WhenPostingImportCommand("ok");
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
 
             // Then: All items remain, none have imported flag
@@ -127,11 +135,7 @@ namespace YoFi.Tests.Integration.Pages
             var selected = imported.Where(x => x.Selected == true).ToList();
 
             // When: Approving the import
-            var formData = new Dictionary<string, string>()
-            {
-                { "command", "ok" }
-            };
-            var response = await WhenGettingAndPostingForm($"/Import/", FormAction, formData);
+            var response = await WhenPostingImportCommand("ok");
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
 
             // Then: Only selected items remain
@@ -147,11 +151,7 @@ namespace YoFi.Tests.Integration.Pages
             var expected = items.Except(chosen).ToList();
 
             // When: Cancelling the import
-            var formData = new Dictionary<string, string>()
-            {
-                { "command", "cancel" }
-            };
-            var response = await WhenGettingAndPostingForm($"/Import/", FormAction, formData);
+            var response = await WhenPostingImportCommand("cancel");
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
 
             // Then: Only items without imported flag remain
@@ -169,11 +169,7 @@ namespace YoFi.Tests.Integration.Pages
             var expected = items.Except(chosen).ToList();
 
             // When: Sending the import an incorrect command
-            var formData = new Dictionary<string, string>()
-            {
-                { "command", command }
-            };
-            var response = await WhenGettingAndPostingForm($"/Import/", FormAction, formData);
+            var response = await WhenPostingImportCommand(command);
 
             // Then: Bad request
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
