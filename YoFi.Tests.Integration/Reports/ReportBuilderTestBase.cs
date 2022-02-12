@@ -13,7 +13,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration
+namespace YoFi.Tests.Integration.Reports
 {
     public abstract class ReportBuilderTestBase: IntegrationTest
     {

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 
-namespace YoFi.Tests.Integration
+namespace YoFi.Tests.Integration.Controllers
 {
     [TestClass]
 

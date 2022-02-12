@@ -11,7 +11,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration
+namespace YoFi.Tests.Integration.Controllers
 {
     [TestClass]
     public class BudgetTxControllerTest: ControllerTest<BudgetTx>
