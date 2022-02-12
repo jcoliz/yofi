@@ -238,29 +238,6 @@ namespace YoFi.Tests.Database
         }
 
 
-        //
-        // User Story 1178: [User Can] Import spreadsheets with all data types in a single spreadsheet from the main Import page
-        //
-
-        [TestMethod]
-        public async Task AllDataTypes()
-        {
-            // Given: An XLSX file with all four types of data in sheets named for their type
-            var filename = "Test-Generator-GenerateUploadSampleData.xlsx";
-            var stream = SampleData.Open(filename);
-            var length = stream.Length;
-            IFormFile file = new FormFile(stream, 0, length, filename, filename);
-
-            // When: Uploading it
-            var actionresult = await page.OnPostUploadAsync(new List<IFormFile>() { file }, importer);
-
-            // Then: All items are imported successfully
-            Assert.AreEqual(25, dbset.Count());
-            Assert.AreEqual(12, dbset.Count(x=>x.Splits.Count > 0));
-
-            Assert.AreEqual(3, context.Payees.Count());
-            Assert.AreEqual(4, context.BudgetTxs.Count());
-        }
 
         [TestMethod]
         public async Task GetSampleOfferings()

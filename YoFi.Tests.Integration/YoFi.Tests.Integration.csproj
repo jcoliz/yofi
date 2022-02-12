@@ -11,6 +11,7 @@
     <None Remove="SampleData\BudgetTxsManaged.json" />
     <None Remove="SampleData\FullSampleData-Month02.ofx" />
     <None Remove="SampleData\FullSampleData.json" />
+    <None Remove="SampleData\Test-Generator-GenerateUploadSampleData.xlsx" />
     <None Remove="SampleData\Transactions1000.json" />
     <None Remove="SampleData\User-Story-802.ofx" />
   </ItemGroup>
@@ -20,6 +21,7 @@
     <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
     <EmbeddedResource Include="SampleData\FullSampleData-Month02.ofx" />
     <EmbeddedResource Include="SampleData\FullSampleData.json" />
+    <EmbeddedResource Include="SampleData\Test-Generator-GenerateUploadSampleData.xlsx" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
     <EmbeddedResource Include="SampleData\User-Story-802.ofx" />
   </ItemGroup>

@@ -38,6 +38,7 @@ namespace YoFi.Tests.Integration.Pages
         {
             // Clean out database
             context.Set<Payee>().RemoveRange(context.Set<Payee>());
+            context.Set<BudgetTx>().RemoveRange(context.Set<BudgetTx>());
             context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
             context.SaveChanges();
         }
@@ -353,7 +354,6 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(expected, context.Set<Transaction>().Count());
         }
 
-
         //
         // User Story 1177: [User Can] Import Payees or BudgetTx from main Import page
         //
@@ -387,6 +387,28 @@ namespace YoFi.Tests.Integration.Pages
             var NumPayeesUploaded = document.QuerySelector("[data-test-id=NumPayeesUploaded]").TextContent.Trim();
             Assert.AreEqual(howmany.ToString(), NumPayeesUploaded);
         }
+
+        //
+        // User Story 1178: [User Can] Import spreadsheets with all data types in a single spreadsheet from the main Import page
+        //
+
+        [TestMethod]
+        public async Task AllDataTypes()
+        {
+            // Given: An XLSX file with all four types of data in sheets named for their type
+            var filename = "Test-Generator-GenerateUploadSampleData.xlsx";
+            var stream = SampleData.Open(filename);
+
+            // When: Uploading that file
+            _ = await WhenUploadingFile(stream, "files", filename, $"/Import/", $"/Import?handler=Upload");
+
+            // Then: All items are imported successfully
+            Assert.AreEqual(25, context.Set<Transaction>().Count());
+            Assert.AreEqual(12, context.Set<Transaction>().Count(x => x.Splits.Count > 0));
+            Assert.AreEqual(3, context.Set<Payee>().Count());
+            Assert.AreEqual(4, context.Set<BudgetTx>().Count());
+        }
+
 
         #endregion
 
