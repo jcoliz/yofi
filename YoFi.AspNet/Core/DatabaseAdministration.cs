@@ -59,10 +59,12 @@ namespace YoFi.Core
 
         public async Task<IDatabaseStatus> GetDatabaseStatus()
         {
-            var result = new DatabaseStatus();
-            result.NumTransactions = await _context.CountAsync(_context.Transactions);
-            result.NumBudgetTxs = await _context.CountAsync(_context.BudgetTxs);
-            result.NumPayees = await _context.CountAsync(_context.Payees);
+            var result = new DatabaseStatus()
+            {
+                NumTransactions = await _context.CountAsync(_context.Transactions),
+                NumBudgetTxs = await _context.CountAsync(_context.BudgetTxs),
+                NumPayees = await _context.CountAsync(_context.Payees),
+            };
             result.IsEmpty = result.NumTransactions == 0 && result.NumBudgetTxs == 0 && result.NumPayees == 0;
 
             return result;
