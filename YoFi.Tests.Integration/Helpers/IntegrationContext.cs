@@ -1,9 +1,11 @@
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
+using Common.DotNet;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -29,6 +31,7 @@ namespace YoFi.Tests.Integration.Helpers
         public TestAzureStorage storage { get; private set; }
         public AnonymousAuth canwrite { get; private set; }
         public AnonymousAuth canread { get; private set; }
+        public ApiConfig apiconfig { get; private set; }
 
         public IntegrationContext(string name)
         {
@@ -57,6 +60,8 @@ namespace YoFi.Tests.Integration.Helpers
             scope = server.Services.CreateScope();
             var scopedServices = scope.ServiceProvider;
             context = scopedServices.GetRequiredService<ApplicationDbContext>();
+            var apioptions = scopedServices.GetService(typeof(IOptions<ApiConfig>)) as IOptions<ApiConfig>;
+            apiconfig = apioptions.Value;
         }
 
         public void Dispose()

@@ -93,18 +93,7 @@ namespace YoFi.Tests.Database
             Assert.IsNotNull(controller);
         }
 
-        [TestMethod]
-        public async Task GetId()
-        {
-            await AddFiveTransactions();
-            var expected = await context.Transactions.FirstAsync();
 
-            var actionresult = await controller.Get(expected.ID, new TransactionRepository(context));
-
-            var okresult = Assert.That.IsOfType<OkObjectResult>(actionresult);
-            var actual = Assert.That.IsOfType<Transaction>(okresult.Value);
-            Assert.AreEqual(expected, actual);
-        }
 
         [TestMethod]
         public async Task ReportV2()
