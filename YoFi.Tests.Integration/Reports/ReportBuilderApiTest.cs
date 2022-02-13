@@ -17,6 +17,9 @@ namespace YoFi.Tests.Integration.Reports
         #region Fields
 
         protected static SampleDataStore data;
+        private JsonElement.ArrayEnumerator rows;
+        private JsonElement totalrow;
+        private IEnumerable<JsonProperty> cols;
 
         #endregion
 
@@ -60,6 +63,47 @@ namespace YoFi.Tests.Integration.Reports
 
         #endregion
 
+        #region Helpers
+
+        protected async Task WhenGettingReport(ReportParameters parameters)
+        {
+            // Given: A URL which encodes these report parameters
+
+            var start = $"/api/ReportV2/{parameters.id}?year={parameters.year}";
+            var builder = new StringBuilder(start);
+
+            if (parameters.showmonths.HasValue)
+                builder.Append($"&showmonths={parameters.showmonths}");
+            if (parameters.month.HasValue)
+                builder.Append($"&month={parameters.month}");
+            if (parameters.level.HasValue)
+                builder.Append($"&level={parameters.level}");
+
+            var url = builder.ToString();
+
+            // When: Getting the report
+            var response = await client.GetAsync(url);
+
+            // Then: Response is OK
+            response.EnsureSuccessStatusCode();
+
+            // And: Parse for further checking
+            var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            var root = doc.RootElement;
+            rows = root.EnumerateArray();
+            totalrow = rows.Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
+            cols = totalrow.EnumerateObject().Where(x => x.Name.StartsWith("ID:") || x.Name == "TOTAL");
+        }
+
+        private void ThenReportHasTotal(decimal expected)
+        {
+            var totalvalue = totalrow.GetProperty("TOTAL").GetDecimal();
+            Assert.AreEqual(expected, totalvalue);
+        }
+
+
+        #endregion
+
         #region Tests
 
         [DataRow(false)]
@@ -71,21 +115,12 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on ClassInitialize)
 
             // When: Getting the report
-            var parms = new ReportParameters() { id = "all", year = 2020, showmonths = showmonths };
-            var response = await client.GetAsync($"/api/ReportV2/{parms.id}?year={parms.year}&showmonths={parms.showmonths}");
-            response.EnsureSuccessStatusCode();
-            var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
-            var root = doc.RootElement;
-            var rows = root.EnumerateArray();
+            await WhenGettingReport(new ReportParameters() { id = "all", year = 2020, showmonths = showmonths });
 
             // And: Report has the correct total
-            var TotalRow = rows.Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
-            var expected = data.Transactions.Sum(x => x.Amount);
-            var totalvalue = TotalRow.GetProperty("TOTAL").GetDecimal();
-            Assert.AreEqual(expected, totalvalue);
+            ThenReportHasTotal(data.Transactions.Sum(x => x.Amount));
 
             // And: Report has the correct # columns (One for each month plus total)
-            var cols = TotalRow.EnumerateObject().Where(x => x.Name.StartsWith("ID:") || x.Name == "TOTAL");
             Assert.AreEqual(showmonths ? 13 : 1, cols.Count());
 
             // And: Report has the correct # rows
