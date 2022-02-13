@@ -50,7 +50,6 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Base\" />
-    <Folder Include="Reports\" />
   </ItemGroup>
 
 </Project>

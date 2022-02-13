@@ -48,16 +48,6 @@ namespace YoFi.Tests.Integration.Api
 
         #endregion
 
-        #region Helpers
-
-        protected async Task<T> DeserializeAsync<T>(HttpResponseMessage response)
-        {
-            var apiresult = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            return apiresult;
-        }
-
-        #endregion
-
         #region Tests
 
         [TestMethod]
