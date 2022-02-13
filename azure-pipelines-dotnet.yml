@@ -14,6 +14,7 @@ variables:
   tests: YoFi.Tests
   inttests: YoFi.Tests.Integration
   functests: YoFi.Tests.Functional
+  api__key: APITESTKEYVALUE
 
 steps:
 - checkout: self
