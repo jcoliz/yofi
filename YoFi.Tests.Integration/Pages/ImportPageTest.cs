@@ -41,6 +41,9 @@ namespace YoFi.Tests.Integration.Pages
             context.Set<BudgetTx>().RemoveRange(context.Set<BudgetTx>());
             context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
             context.SaveChanges();
+
+            // Reset auth overrides
+            integrationcontext.canwrite.Ok = true;
         }
 
         #endregion
@@ -76,7 +79,7 @@ namespace YoFi.Tests.Integration.Pages
         [TestMethod]
         public async Task UploadTransactionsXlsx()
         {
-            // Given: A many items
+            // Given: Many items
             var items = GivenFakeItems<Transaction>(15).OrderBy(TestKeyOrder<Transaction>());
 
             // When: Uploading them as a spreadsheet
@@ -87,6 +90,52 @@ namespace YoFi.Tests.Integration.Pages
 
             // And: The database now contains the items
             items.SequenceEqual(context.Set<Transaction>().OrderBy(TestKeyOrder<Transaction>()));
+        }
+
+        [TestMethod]
+        public async Task UploadDuplicate()
+        {
+            // Given: One item in the database
+            var initial = await GivenFakeDataInDatabase<Transaction>(1);
+
+            // And: A list of many items, one of which is a duplicate of the one item already in the database
+            // (Item 1 in this list naturally overlaps item 1 in the previous list.
+            var items = GivenFakeItems<Transaction>(15).OrderBy(TestKeyOrder<Transaction>());
+
+            // When: Uploading them as a spreadsheet
+            var document = await WhenImportingAsSpreadsheet(items);
+
+            // Then: All items are in the database
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.AreEqual(initial.Count() + items.Count(), actual.Count());
+
+            // And: All the uploaded item are imported
+            var imported = context.Set<Transaction>().Where(x=>x.Imported == true).AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(imported.SequenceEqual(items));
+
+            // And: Only the non-overlapping items are selected
+            var selected = context.Set<Transaction>().Where(x => x.Selected == true).AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(imported.SequenceEqual(items));
+        }
+
+        [TestMethod]
+        public async Task UploadWithID()
+        {
+            // Given: One item in the database
+            var initial = await GivenFakeDataInDatabase<Transaction>(1);
+
+            // And: A list of many items, NONE of which is a duplicate of the one item already in the database
+            var items = GivenFakeItems<Transaction>(15).Skip(1).OrderBy(TestKeyOrder<Transaction>()).ToList();
+
+            // And: One of those items has the same ID as the existing item
+            items[0].ID = initial.First().ID;
+
+            // When: Uploading them as a spreadsheet
+            var document = await WhenImportingAsSpreadsheet(items);
+
+            // Then: All items are in the database
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(actual.SequenceEqual(initial.Concat(items)));
         }
 
         [TestMethod]
@@ -102,6 +151,37 @@ namespace YoFi.Tests.Integration.Pages
             Assert.IsFalse(context.Set<Transaction>().Any());
         }
 
+#if false
+        // This test is failing
+        [TestMethod]
+        public async Task UploadHighlights()
+        {
+            // Given: A large set of transactions
+            var items = GivenFakeItems<Transaction>(15).OrderBy(TestKeyOrder<Transaction>());
+
+            // And: Having uploaded some of them initially (and approved it)
+            var uploaded = items.Skip(10);
+            _ = await WhenImportingAsSpreadsheet(uploaded);
+            _= await WhenPostingImportCommand("ok");
+
+            // And: Having made subtle changes to the transactions
+            foreach (var t in context.Set<Transaction>())
+                t.Timestamp += TimeSpan.FromDays(10);
+            await context.SaveChangesAsync();
+
+            // When: Uploading all the transactions, which includes re-uploading the already-uploaded transactions
+            var document = await WhenImportingAsSpreadsheet(items);
+
+            // Then: Only the non-overlapping items are selected
+            var selected = context.Set<Transaction>().Where(x => x.Selected == true).AsNoTracking().OrderBy(TestKeyOrder<Transaction>()).ToList();
+            Assert.IsTrue(selected.SequenceEqual(items.Except(uploaded)));
+
+            // And: The overlapping new transactions are highlighted and deselected, indicating that they
+            // are probably duplicates
+            var highlights = document.QuerySelectorAll("table[data-test-id=results] tbody tr.alert");
+            Assert.AreEqual(uploaded.Count(), highlights.Count());
+        }
+#endif
         [TestMethod]
         public async Task Import()
         {
@@ -197,6 +277,36 @@ namespace YoFi.Tests.Integration.Pages
 
             // Then: No items remain selected
             Assert.IsFalse(context.Set<Transaction>().Any(x => x.Selected == true));
+        }
+
+        [TestMethod]
+        public async Task Import_AccessDenied()
+        {
+            // Given: User doesn't have CanWrite permissions
+            integrationcontext.canwrite.Ok = false;
+
+            // When: Attempting to approve the import
+            var response = await WhenPostingImportCommand("ok");
+
+            // Then: Redirected to access denied page
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual("/Identity/Account/AccessDenied", redirect);
+        }
+
+        [TestMethod]
+        public async Task Upload_AccessDenied()
+        {
+            // Given: User doesn't have CanWrite permissions
+            integrationcontext.canwrite.Ok = false;
+
+            // When: Calling upload with no files
+            var response = await WhenUploadingEmpty($"/Import/", $"/Import?handler=Upload");
+
+            // Then: Redirected to access denied page
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual("/Identity/Account/AccessDenied", redirect);
         }
 
         [TestMethod]
@@ -412,6 +522,17 @@ namespace YoFi.Tests.Integration.Pages
         //
         // Sample Data Downloads
         //
+
+        [TestMethod]
+        public async Task GetSampleOfferings()
+        {
+            // When: Getting the page
+            var getdocument = await WhenGetAsync("/Import/");
+
+            // Then: There are the expected amount of sample offerings
+            var offerings = getdocument.QuerySelectorAll("a[data-test-id=offering]");
+            Assert.IsTrue(offerings.Count() >= 27);
+        }
 
         [TestMethod]
         public async Task DownloadAllSamples()
