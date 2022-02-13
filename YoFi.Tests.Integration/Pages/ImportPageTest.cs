@@ -590,15 +590,16 @@ namespace YoFi.Tests.Integration.Pages
                 TestContext.AddResultFile(filename);
             }
         }
-#if false
+
         [TestMethod]
         public async Task DownloadBogusSample_BadRequest()
         {
             // When: Trying to download an offering that doesn't exist
-            var actionresult = await page.OnGetSampleAsync("bogus-1234");
-            Assert.That.IsOfType<BadRequestResult>(actionresult);
+            var response = await client.GetAsync("/Import?what=bogus-1234&handler=Sample");
+
+            // Then: Bad request
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         }
-#endif
 
         #endregion
 
