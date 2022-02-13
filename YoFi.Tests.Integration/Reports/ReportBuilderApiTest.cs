@@ -105,6 +105,13 @@ namespace YoFi.Tests.Integration.Reports
             Assert.AreEqual(expected, totalvalue);
         }
 
+        protected decimal SumOfCategory(string category)
+        {
+            return
+                data.Transactions.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category == category).Sum(x => x.Amount) +
+                data.Transactions.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category == category).Sum(x => x.Amount);
+        }
+
         protected decimal SumOfTopCategory(string category)
         {
             return
@@ -392,6 +399,36 @@ namespace YoFi.Tests.Integration.Reports
             Assert.IsFalse(rows.Any());
         }
 
+        [TestMethod]
+        public async Task ReportV2export()
+        {
+            // When: Building the export report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "export", year = 2020 });
+
+            // Then: Selected totals match
+            var expected = (double)SumOfCategory("Income:K");
+            Assert.AreEqual(expected, GetCell("Actual", "Income:K"), 1e-5);
+
+            expected = (double)SumOfCategory("J");
+            Assert.AreEqual(expected, GetCell("Actual", "J"), 1e-5);
+
+            // And: Report has the correct # displayed columns: budget, actual
+            Assert.AreEqual(2, cols.Count());
+
+            // And: Report has the correct # rows: all the categories
+            Assert.AreEqual(18, rows.Count());
+        }
+
+        [TestMethod]
+        public async Task ReportV2exportEmpty()
+        {
+            // When: Building the export report for a year when we have no data
+            await WhenGettingReport(new ReportParameters() { id = "export", year = 2023 });
+
+            // Then: The report is totally blank
+            Assert.IsFalse(rows.Any());
+
+        }
 
         #endregion
     }
