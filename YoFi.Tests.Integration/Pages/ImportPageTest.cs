@@ -151,8 +151,6 @@ namespace YoFi.Tests.Integration.Pages
             Assert.IsFalse(context.Set<Transaction>().Any());
         }
 
-#if false
-        // This test is failing
         [TestMethod]
         public async Task UploadHighlights()
         {
@@ -178,10 +176,15 @@ namespace YoFi.Tests.Integration.Pages
 
             // And: The overlapping new transactions are highlighted and deselected, indicating that they
             // are probably duplicates
-            var highlights = document.QuerySelectorAll("table[data-test-id=results] tbody tr.alert");
-            Assert.AreEqual(uploaded.Count(), highlights.Count());
+            var highlights = document
+                .QuerySelectorAll("table[data-test-id=results] tbody tr.alert td[data-test-id=memo]")
+                .Select(x=>x.TextContent.Trim())
+                .OrderBy(x=>x);
+            var expected = uploaded
+                .Select(TestKeyOrder<Transaction>());
+            Assert.IsTrue(expected.SequenceEqual(highlights));
         }
-#endif
+
         [TestMethod]
         public async Task Import()
         {

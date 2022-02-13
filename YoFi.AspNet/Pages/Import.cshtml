@@ -114,7 +114,7 @@ else
         <tbody>
             @foreach (var item in Model.Transactions.Items)
             {
-                var highlight = ((ViewData["Highlight"] as HashSet<int>)?.Contains(item.ID) ?? false) ? "alert alert-warning" : string.Empty;
+                var highlight = Model.Highlights.Contains(item.ID) ? "alert alert-warning" : string.Empty;
                 <tr class="@highlight">
                     <td>
                         @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
