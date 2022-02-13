@@ -74,7 +74,7 @@ namespace YoFi.Tests.Integration.Pages
 
         #endregion
 
-        #region Tests
+        #region Upload Tests
 
         [TestMethod]
         public async Task UploadTransactionsXlsx()
@@ -185,117 +185,6 @@ namespace YoFi.Tests.Integration.Pages
             Assert.IsTrue(expected.SequenceEqual(highlights));
         }
 
-        [TestMethod]
-        public async Task Import()
-        {
-            // Given: A mix of transactions, some flagged as imported, some as not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
-
-            // When: Loading the import page
-            var document = await WhenGetAsync($"/Import/");
-
-            // Then: The expected items are returned
-            ThenResultsAreEqualByTestKey(document, chosen);
-        }
-
-        [TestMethod]
-        public async Task ImportOk()
-        {
-            // Given: As set of items, some with imported & selected flags, some with not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = x.Selected = true; return x; }));
-
-            // When: Approving the import
-            var response = await WhenPostingImportCommand("ok");
-            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
-
-            // Then: All items remain, none have imported flag
-            Assert.AreEqual(10, context.Set<Transaction>().Count());
-            Assert.AreEqual(0, context.Set<Transaction>().Where(x => x.Imported == true).Count());
-        }
-
-        [TestMethod]
-        public async Task ImportOkSelected()
-        {
-            // Given: As set of items, all of which have imported flags, some of which have selected flags
-            (var _, var imported) = await GivenFakeDataInDatabase<Transaction>(10, 10, (x => { x.Imported = true; x.Selected = (x.Amount % 200) == 0; return x; }));
-            var selected = imported.Where(x => x.Selected == true).ToList();
-
-            // When: Approving the import
-            var response = await WhenPostingImportCommand("ok");
-            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
-
-            // Then: Only selected items remain
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
-            Assert.IsTrue(selected.SequenceEqual(actual));
-        }
-
-        [TestMethod]
-        public async Task ImportCancel()
-        {
-            // Given: A mix of transactions, some flagged as imported, some as not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
-            var expected = items.Except(chosen).ToList();
-
-            // When: Cancelling the import
-            var response = await WhenPostingImportCommand("cancel");
-            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
-
-            // Then: Only items without imported flag remain
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
-            Assert.IsTrue(expected.SequenceEqual(actual));
-        }
-
-        [DataRow(null)]
-        [DataRow("Bogus")]
-        [DataTestMethod]
-        public async Task ImportWrong(string command)
-        {
-            // Given: A mix of transactions, some flagged as imported, some as not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
-            var expected = items.Except(chosen).ToList();
-
-            // When: Sending the import an incorrect command
-            var response = await WhenPostingImportCommand(command);
-
-            // Then: Bad request
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
-
-            // Then: Bad request
-
-            // Then: No change to db
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
-            Assert.AreEqual(10, actual.Count());
-            Assert.AreEqual(4, actual.Where(x => x.Imported == true).Count());
-        }
-
-        [TestMethod]
-        public async Task ImportOk_NotSelected_Bug839()
-        {
-            //
-            // Bug 839: Imported items are selected automatically :(
-            //
-
-            // When: Uploading items and approving the import
-            await ImportOk();
-
-            // Then: No items remain selected
-            Assert.IsFalse(context.Set<Transaction>().Any(x => x.Selected == true));
-        }
-
-        [TestMethod]
-        public async Task Import_AccessDenied()
-        {
-            // Given: User doesn't have CanWrite permissions
-            integrationcontext.canwrite.Ok = false;
-
-            // When: Attempting to approve the import
-            var response = await WhenPostingImportCommand("ok");
-
-            // Then: Redirected to access denied page
-            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
-            var redirect = response.Headers.GetValues("Location").Single();
-            Assert.AreEqual("/Identity/Account/AccessDenied", redirect);
-        }
 
         [TestMethod]
         public async Task Upload_AccessDenied()
@@ -420,6 +309,126 @@ namespace YoFi.Tests.Integration.Pages
             Assert.IsNull(actual.Category);
         }
 
+        #endregion
+
+        #region Import Tests
+
+        [TestMethod]
+        public async Task Import()
+        {
+            // Given: A mix of transactions, some flagged as imported, some as not
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
+
+            // When: Loading the import page
+            var document = await WhenGetAsync($"/Import/");
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task ImportOk()
+        {
+            // Given: As set of items, some with imported & selected flags, some with not
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = x.Selected = true; return x; }));
+
+            // When: Approving the import
+            var response = await WhenPostingImportCommand("ok");
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+
+            // Then: All items remain, none have imported flag
+            Assert.AreEqual(10, context.Set<Transaction>().Count());
+            Assert.AreEqual(0, context.Set<Transaction>().Where(x => x.Imported == true).Count());
+        }
+
+        [TestMethod]
+        public async Task ImportOkSelected()
+        {
+            // Given: As set of items, all of which have imported flags, some of which have selected flags
+            (var _, var imported) = await GivenFakeDataInDatabase<Transaction>(10, 10, (x => { x.Imported = true; x.Selected = (x.Amount % 200) == 0; return x; }));
+            var selected = imported.Where(x => x.Selected == true).ToList();
+
+            // When: Approving the import
+            var response = await WhenPostingImportCommand("ok");
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+
+            // Then: Only selected items remain
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(selected.SequenceEqual(actual));
+        }
+
+        [TestMethod]
+        public async Task ImportCancel()
+        {
+            // Given: A mix of transactions, some flagged as imported, some as not
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
+            var expected = items.Except(chosen).ToList();
+
+            // When: Cancelling the import
+            var response = await WhenPostingImportCommand("cancel");
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+
+            // Then: Only items without imported flag remain
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(expected.SequenceEqual(actual));
+        }
+
+        [DataRow(null)]
+        [DataRow("Bogus")]
+        [DataTestMethod]
+        public async Task ImportWrong(string command)
+        {
+            // Given: A mix of transactions, some flagged as imported, some as not
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
+            var expected = items.Except(chosen).ToList();
+
+            // When: Sending the import an incorrect command
+            var response = await WhenPostingImportCommand(command);
+
+            // Then: Bad request
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+
+            // Then: Bad request
+
+            // Then: No change to db
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.AreEqual(10, actual.Count());
+            Assert.AreEqual(4, actual.Where(x => x.Imported == true).Count());
+        }
+
+        [TestMethod]
+        public async Task ImportOk_NotSelected_Bug839()
+        {
+            //
+            // Bug 839: Imported items are selected automatically :(
+            //
+
+            // When: Uploading items and approving the import
+            await ImportOk();
+
+            // Then: No items remain selected
+            Assert.IsFalse(context.Set<Transaction>().Any(x => x.Selected == true));
+        }
+
+        [TestMethod]
+        public async Task Import_AccessDenied()
+        {
+            // Given: User doesn't have CanWrite permissions
+            integrationcontext.canwrite.Ok = false;
+
+            // When: Attempting to approve the import
+            var response = await WhenPostingImportCommand("ok");
+
+            // Then: Redirected to access denied page
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual("/Identity/Account/AccessDenied", redirect);
+        }
+
+        #endregion
+
+        #region OFX
+
         [TestMethod]
         public async Task OfxUploadLoanSplit_Story802()
         {
@@ -467,6 +476,10 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(expected, context.Set<Transaction>().Count());
         }
 
+        #endregion
+
+        #region AB#1177 Import payees & budgettx
+
         //
         // User Story 1177: [User Can] Import Payees or BudgetTx from main Import page
         //
@@ -501,6 +514,10 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(howmany.ToString(), NumPayeesUploaded);
         }
 
+        #endregion
+
+        #region AB#1178 Import all data types
+
         //
         // User Story 1178: [User Can] Import spreadsheets with all data types in a single spreadsheet from the main Import page
         //
@@ -521,6 +538,10 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(3, context.Set<Payee>().Count());
             Assert.AreEqual(4, context.Set<BudgetTx>().Count());
         }
+
+        #endregion
+
+        #region Sample Data
 
         //
         // Sample Data Downloads
@@ -579,7 +600,7 @@ namespace YoFi.Tests.Integration.Pages
         }
 #endif
 
-#endregion
+        #endregion
 
     }
 }
