@@ -21,9 +21,9 @@ namespace YoFi.Tests.Integration.Helpers
 {
     public class IntegrationContext: IDisposable
     {
-        private CustomWebApplicationFactory<Startup> factory;
-        private TestServer server;
-        private IServiceScope scope;
+        private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly TestServer server;
+        private readonly IServiceScope scope;
 
         public HtmlParser parser { get; private set; }
         public HttpClient client { get; private set; }

@@ -75,9 +75,9 @@ namespace YoFi.Tests.Integration.Api
             // Given: A mix of transactions, some with '{word}' in their {property}
             var word = "CAF";
             Func<Transaction,Transaction> func = property switch {
-                "category" => (x => { x.Category = x.Category + $":{word}"; return x; }),
-                "memo" => (x => { x.Memo = x.Memo + $":{word}"; return x; }),
-                "payee" => (x => { x.Payee = x.Payee + $":{word}"; return x; }),
+                "category" => (x => { x.Category += $":{word}"; return x; }),
+                "memo" => (x => { x.Memo += $":{word}"; return x; }),
+                "payee" => (x => { x.Payee += $":{word}"; return x; }),
                 _ => null
             };
             (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(100, 15, func);
