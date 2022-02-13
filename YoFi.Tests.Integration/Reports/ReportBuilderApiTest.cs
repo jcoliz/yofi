@@ -91,8 +91,12 @@ namespace YoFi.Tests.Integration.Reports
             var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
             var root = doc.RootElement;
             rows = root.EnumerateArray();
-            totalrow = rows.Where(x => x.GetProperty("IsTotal").GetBoolean()).Single();
-            cols = totalrow.EnumerateObject().Where(x => x.Name.StartsWith("ID:") || x.Name == "TOTAL");
+            totalrow = rows.Where(x => x.GetProperty("IsTotal").GetBoolean()).SingleOrDefault();
+            var lookrow = (totalrow.ValueKind == JsonValueKind.Object) ? totalrow : rows.FirstOrDefault();
+            cols = 
+                (lookrow.ValueKind == JsonValueKind.Object)
+                ? lookrow.EnumerateObject().Where(x => x.Name.StartsWith("ID:") || x.Name.StartsWith("Name:") || x.Name == "TOTAL") 
+                : default;
         }
 
         private void ThenReportHasTotal(decimal expected)
@@ -101,6 +105,32 @@ namespace YoFi.Tests.Integration.Reports
             Assert.AreEqual(expected, totalvalue);
         }
 
+        protected decimal SumOfTopCategory(string category)
+        {
+            return
+                data.Transactions.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
+                data.Transactions.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        protected decimal SumOfBudgetTxsTopCategory(string category)
+        {
+            return
+                data.BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        protected decimal SumOfManagedBudgetTxsTopCategory(string category)
+        {
+            return
+                data.ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
+        }
+
+        protected double GetCell(string colname, string rowname)
+        {
+            var row = rows.Where(x => x.GetProperty("Name").GetString() == rowname).Single();
+            var col = row.EnumerateObject().Where(x => x.Name.EndsWith(colname)).Single().Value.GetDouble();
+
+            return col;
+        }
 
         #endregion
 
@@ -126,6 +156,242 @@ namespace YoFi.Tests.Integration.Reports
             // And: Report has the correct # rows
             Assert.AreEqual(21, rows.Count());
         }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataTestMethod]
+        public async Task AllLevels(int level)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Getting the report
+            await WhenGettingReport(new ReportParameters() { id = "all", year = 2020, showmonths = true, level = level });
+
+            // And: Report has the correct total
+            ThenReportHasTotal(data.Transactions.Sum(x => x.Amount));
+
+            // And: Report has the correct # columns (One for each month plus total)
+            Assert.AreEqual(13, cols.Count());
+
+            // And: Report has the correct # rows
+            var rowset = new int[] { 9, 21, 24, 26 };
+            Assert.AreEqual(rowset[level - 1], rows.Count());
+
+            // And: Report has the right levels
+            var levels = rows.Select(x => x.GetProperty("Level").GetInt32()).Distinct();
+            Assert.AreEqual(level, levels.Count());
+        }
+
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(6)]
+        [DataRow(9)]
+        [DataRow(12)]
+        [DataTestMethod]
+        public async Task AllMonths(int month)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the 'All' report for the correct year, with level at '{level}'
+            await WhenGettingReport(new ReportParameters() { id = "all", year = 2020, showmonths = true, month = month });
+
+            // And: Report has the correct total
+            var expected = data.Transactions.Where(x => x.Timestamp.Month <= month).Sum(x => x.Amount);
+            ThenReportHasTotal(expected);
+
+            // And: Report has the correct # columns (One for each month plus total)
+            Assert.AreEqual(month + 1, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(21, rows.Count());
+        }
+
+        [DataRow("Income")]
+        [DataRow("Taxes")]
+        [DataRow("Savings")]
+        [DataTestMethod]
+        public async Task SingleTop(string category)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the '{Category}' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = category.ToLowerInvariant(), year = 2020 });
+
+            // Then: Report has the correct total
+            ThenReportHasTotal(SumOfTopCategory(category));
+
+            // And: Report has the correct # columns (Total & pct total)
+            Assert.AreEqual(2, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(3, rows.Count());
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task ExpensesDetail(bool showmonths)
+        {
+            // Given: A large database of transactions
+            // (Assembled on Initialize)
+
+            // When: Building the 'expenses-detail' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths });
+
+            // Then: Report has the correct total
+            ThenReportHasTotal(data.Transactions.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income"));
+
+            // And: Report has the correct # columns (12 months, plus Total & pct total)
+            Assert.AreEqual(showmonths ? 14 : 2, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(12, rows.Count());
+        }
+
+        [TestMethod]
+        public async Task Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "budget", year = 2020 });
+
+            // Then: Report has the correct total
+            ThenReportHasTotal(data.BudgetTxs.Sum(x => x.Amount));
+
+            // And: Report has the correct # columns, just 1 the budget itself
+            Assert.AreEqual(1, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(13, rows.Count());
+        }
+
+        [TestMethod]
+        public async Task ExpensesBudget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'expenses-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "expenses-budget", year = 2020 });
+
+            // Then: Report has the correct total
+            ThenReportHasTotal(data.BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income"));
+
+            // And: Report has the correct # columns, just 1 the budget itself
+            Assert.AreEqual(1, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(7, rows.Count());
+        }
+
+        [TestMethod]
+        public async Task Expenses_V_Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'expenses-v-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "expenses-v-budget", year = 2020 });
+
+            // Then: Report has the correct total budget
+            var expected = data.BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
+            var budgettotal = totalrow.GetProperty("ID:Budget").GetDecimal();
+            Assert.AreEqual(expected, budgettotal);
+
+            // And: Report has the correct actual total
+            expected = data.Transactions.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income");
+            var actualtotal = totalrow.GetProperty("ID:Actual").GetDecimal();
+            Assert.AreEqual(expected, actualtotal);
+
+            // And: Report has the correct # visible columns, budget, actual, progress
+            Assert.AreEqual(4, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(12, rows.Count());
+        }
+
+        [TestMethod]
+        public async Task All_V_Budget()
+        {
+            // Given: A large database of transactions and budgettxs
+            // (Assembled on Initialize)
+
+            // When: Building the 'all-v-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "all-v-budget", year = 2020 });
+
+            // Then: Report has the correct total budget
+            var expected = data.BudgetTxs.Sum(x => x.Amount);
+            var budgettotal = totalrow.GetProperty("ID:Budget").GetDecimal();
+            Assert.AreEqual(expected, budgettotal);
+
+            // And: Report has the correct actual total
+            expected = data.Transactions.Sum(x => x.Amount);
+            var actualtotal = totalrow.GetProperty("ID:Actual").GetDecimal();
+            Assert.AreEqual(expected, actualtotal);
+
+            // And: Report has the correct # visible columns, budget, actual, progress
+            Assert.AreEqual(3, cols.Count());
+
+            // And: Report has the correct # rows
+            Assert.AreEqual(22, rows.Count());
+        }
+
+
+        [TestMethod]
+        public async Task ManagedBudget()
+        {
+            // Given: A large database of transactions and budgettxs, including a mix of monthly and yearly budget txs
+            // Most are Assembled on Initialize, but we need to add managed txs
+            context.BudgetTxs.AddRange(data.ManagedBudgetTxs);
+            context.SaveChanges();
+
+            // When: Building the 'managed-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "managed-budget", year = 2020 });
+
+            // Then: Report has the correct values 
+
+            var expected = (double)SumOfManagedBudgetTxsTopCategory("Income");
+            Assert.AreEqual(expected, GetCell("Budget", "Income"),1e-5);
+
+            expected = (double)SumOfManagedBudgetTxsTopCategory("J");
+            Assert.AreEqual(expected, GetCell("Budget", "J"), 1e-5);
+
+            expected = (double)SumOfTopCategory("Income");
+            Assert.AreEqual(expected, GetCell("Actual", "Income"), 1e-5);
+
+            expected = (double)SumOfTopCategory("J");
+            Assert.AreEqual(expected, GetCell("Actual", "J"), 1e-5);
+
+            // And: Report has the correct # displayed columns: budget, actual, progress, remaining
+            Assert.AreEqual(4, cols.Count());
+
+            // And: Report has the correct # rows: just the 2 managed budgets
+            Assert.AreEqual(2, rows.Count());
+        }
+
+        [TestMethod]
+        public async Task Bug1185()
+        {
+            // Bug 1185: Managed budget report looks crazy if no monthly transactions
+
+            // Given: A database of transactions and budgettx, but
+            // CRITICALLY no monthly items
+            // So we can use the setup assembled on Initialize
+
+            // When: Building the 'managed-budget' report for the correct year
+            await WhenGettingReport(new ReportParameters() { id = "managed-budget", year = 2020 });
+
+            // Then: The report is totally blank
+            Assert.IsFalse(rows.Any());
+        }
+
 
         #endregion
     }
