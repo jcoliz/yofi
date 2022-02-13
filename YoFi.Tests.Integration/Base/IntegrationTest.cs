@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
 using YoFi.Tests.Integration.Helpers;
@@ -258,6 +259,12 @@ namespace YoFi.Tests.Integration
         protected Func<T,object> TestKeyOrder<T>()
         {
             return x => FindTestKey<T>().GetValue(x);
+        }
+
+        protected async Task<T> DeserializeAsync<T>(HttpResponseMessage response)
+        {
+            var apiresult = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            return apiresult;
         }
 
         #endregion
