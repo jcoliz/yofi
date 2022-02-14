@@ -834,50 +834,6 @@ namespace YoFi.Tests.Database
         }
 
 
-        [TestMethod]
-        public async Task IndexQMemo()
-        {
-            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
-            var items = TransactionItems.Take(19);
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling index q='m={word}'
-            var word = "CAF";
-            var model = await WhenCallingIndexWithQ($"M={word}");
-
-            // Then: Only the transactions with '{word}' in their memo are returned
-            ThenOnlyReturnedTxWith(items, model, x => x.Memo, word);
-        }
-
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task IndexQReceipt(bool with)
-        {
-            // Given: A mix of transactions, some with receipts, some without
-            GivenItemsWithAndWithoutReceipt(context, out var items, out var moditems);
-
-            // When: Calling index q='r=1' (or r=0)
-            var model = await WhenCallingIndexWithQ($"R={(with?'1':'0')}");
-
-            // Then: Only the transactions with (or without) receipts are returned
-            if (with)
-                Assert.AreEqual(moditems.Count(),model.Count());
-            else
-                Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
-        }
-
-        [TestMethod]
-        public async Task IndexQReceiptWrong()
-        {
-            // Given: A mix of transactions, some with receipts, some without
-            GivenItemsWithAndWithoutReceipt(context, out var _, out var _);
-
-            // When: Calling index with q='r=text'
-            // Then: Bad request returned
-            await WhenCallingIndexWithQThenBadRequest($"R=text");
-        }
 
 
         [DataTestMethod]
@@ -906,66 +862,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(items.Count() - moditems.Count(), model.Count());
         }
 
-        [TestMethod]
-        public async Task IndexQYear()
-        {
-            // Given: A mix of transactions, in differing years
-            int year = 2000;
-            GivenItemsInYearAndNot(out _, out var moditems, year);
-
-            // When: Calling index q='y={year}'
-            var model = await WhenCallingIndexWithQ($"Y={year}");
-
-            // Then: Only the transactions in {year} are returned
-            Assert.AreEqual(moditems.Count(), model.Count());
-        }
-
-        [TestMethod]
-        public async Task IndexQAmountText()
-        {
-            // Given: A mix of transactions, with differing amounts
-            var items = TransactionItems.Take(22);
-            context.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling index with q='a=text'
-            // Then: Bad request returned
-            await WhenCallingIndexWithQThenBadRequest($"A=text");
-        }
-
-        [TestMethod]
-        public async Task IndexQAmountInteger()
-        {
-            // Given: A mix of transactions, with differing amounts
-            var items = TransactionItems.Take(22);
-            context.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling index with q='a=###'
-            var model = await WhenCallingIndexWithQ($"A=123");
-
-            // Then: Only transactions with amounts #.## and ###.00 are returned
-            var expected = items.Count(x => x.Amount == 1.23m || x.Amount == 123m);
-            Assert.AreEqual(expected, model.Count());
-            Assert.IsTrue(model.All(x => x.Amount == 1.23m || x.Amount == 123m));
-        }
-
-        [TestMethod]
-        public async Task IndexQAmountDouble()
-        {
-            // Given: A mix of transactions, with differing amounts
-            var items = TransactionItems.Take(22);
-            context.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling index with q='a=#.##'
-            var model = await WhenCallingIndexWithQ($"A=1.23");
-
-            // Then: Only transactions with amounts #.## are returned
-            var expected = items.Count(x => x.Amount == 1.23m);
-            Assert.AreEqual(expected, model.Count());
-            Assert.IsTrue(model.All(x => x.Amount == 1.23m));
-        }
 
         [DataRow(1)]
         [DataRow(2)]

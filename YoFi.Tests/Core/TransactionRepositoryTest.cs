@@ -283,5 +283,117 @@ namespace YoFi.Tests.Core
             // Then: The expected items are returned
             ThenResultsAreEqualByTestKey(document, chosen);
         }
+
+        [TestMethod]
+        public async Task IndexQMemo()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var word = "CAF";
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
+                x =>
+                {
+                    int index = (int)(x.Amount / 100m);
+                    if (index % 3 == 0)
+                        x.Category += word;
+                    if (index % 3 == 1)
+                        x.Memo += word;
+                    if (index % 3 == 2)
+                        x.Payee += word;
+                    return x;
+                });
+
+            // When: Calling index q='m={word}'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"M={word}" });
+
+            // Then: Only the transactions with '{word}' in their memo are returned
+            ThenResultsAreEqualByTestKey(document, chosen.Where(x=>x.Memo.Contains(word)));
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexQReceipt(bool with)
+        {
+            // Given: A mix of transactions, some with receipts, some without
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.ReceiptUrl = "Has receipt"; return x; });
+
+            // When: Calling index q='r=1' (or r=0)
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"R={(with ? '1' : '0')}" });
+
+            // Then: Only the transactions with (or without) receipts are returned
+            if (with)
+                ThenResultsAreEqualByTestKey(document, chosen);
+            else
+                ThenResultsAreEqualByTestKey(document, items.Except(chosen));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task IndexQReceiptWrong()
+        {
+            // Given: A mix of transactions, some with receipts, some without
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.ReceiptUrl = "Has receipt"; return x; });
+
+            // When: Calling index with q='r=text'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = "R=bogus" });
+
+            // Then: Throws exception
+        }
+
+        [TestMethod]
+        public async Task IndexQYear()
+        {
+            // Given: A mix of transactions, in differing years
+            int year = 1992;
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Timestamp = new DateTime(year,1,1); return x; });
+
+            // When: Calling index q='y={year}'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"Y={year}" });
+
+            // Then: Only the transactions in {year} are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task IndexQAmountText()
+        {
+            // Given: A mix of transactions, with differing amounts
+            await GivenFakeDataInDatabase<Transaction>(10);
+
+            // When: Calling index with q='a=text'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = "A=text" });
+
+            // Then: Throws exception
+        }
+
+        [TestMethod]
+        public async Task IndexQAmountInteger()
+        {
+            // Given: A mix of transactions, some with a certain amount, others not
+            var amount = 123m;
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Amount = amount; return x; });
+            // TODO: Also need to add some which are amount/100
+
+            // When: Calling index with q='a=###'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"A={amount:0}" });
+
+            // Then: Only transactions with amounts #.## and ###.00 are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexQAmountDouble()
+        {
+            // Given: A mix of transactions, some with a certain amount, others not
+            var amount = 1.23m;
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Amount = amount; return x; });
+
+            // When: Calling index with q='a=#.##'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"A={amount:0.00}" });
+
+            // Then: Only transactions with amounts #.## are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
     }
 }
