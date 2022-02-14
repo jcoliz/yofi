@@ -201,18 +201,10 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
             var word = "CAF";
-            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
-                x =>
-                {
-                    int index = (int)(x.Amount / 100m);
-                    if (index % 3 == 0)
-                        x.Category += word;
-                    if (index % 3 == 1)
-                        x.Memo += word;
-                    if (index % 3 == 2)
-                        x.Payee += word;
-                    return x;
-                });
+            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
+            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
+            (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
+            var chosen = c1.Concat(c2).Concat(c3);
 
             // When: Calling index q={word}
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
@@ -226,24 +218,15 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
             var word = "CAF";
-            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
-                x =>
-                {
-                    int index = (int)(x.Amount / 100m);
-                    if (index % 3 == 0)
-                        x.Category += word;
-                    if (index % 3 == 1)
-                        x.Memo += word;
-                    if (index % 3 == 2)
-                        x.Payee += word;
-                    return x;
-                });
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
+            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
+            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
 
             // When: Calling index q='p={word}'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"P={word}" });
 
             // Then: The expected items are returned
-            ThenResultsAreEqualByTestKey(document, chosen.Where(x=>x.Payee.Contains(word)));
+            ThenResultsAreEqualByTestKey(document, chosen);
         }
 
         [TestMethod]
@@ -251,24 +234,15 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
             var word = "CAF";
-            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
-                x =>
-                {
-                    int index = (int)(x.Amount / 100m);
-                    if (index % 3 == 0)
-                        x.Category += word;
-                    if (index % 3 == 1)
-                        x.Memo += word;
-                    if (index % 3 == 2)
-                        x.Payee += word;
-                    return x;
-                });
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
+            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
+            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
 
             // When: Calling index q='c={word}'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"C={word}" });
 
             // Then: Only the transactions with '{word}' in their category are returned
-            ThenResultsAreEqualByTestKey(document, chosen.Where(x => x.Category.Contains(word)));
+            ThenResultsAreEqualByTestKey(document, chosen);
         }
 
         [TestMethod]
@@ -289,24 +263,15 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
             var word = "CAF";
-            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
-                x =>
-                {
-                    int index = (int)(x.Amount / 100m);
-                    if (index % 3 == 0)
-                        x.Category += word;
-                    if (index % 3 == 1)
-                        x.Memo += word;
-                    if (index % 3 == 2)
-                        x.Payee += word;
-                    return x;
-                });
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
+            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
+            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
 
             // When: Calling index q='m={word}'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"M={word}" });
 
             // Then: Only the transactions with '{word}' in their memo are returned
-            ThenResultsAreEqualByTestKey(document, chosen.Where(x=>x.Memo.Contains(word)));
+            ThenResultsAreEqualByTestKey(document, chosen);
         }
 
         [DataRow(true)]

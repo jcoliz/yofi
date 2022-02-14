@@ -104,7 +104,7 @@ namespace YoFi.Tests.Core
         {
             var firstitem = repository.All.Count() + 1;
             var numunchanged = total - selected;
-            var items = GivenFakeItems<T>(numunchanged,null,from:firstitem).Concat(GivenFakeItems<T>(selected,func,from:numunchanged + 1)).ToList();
+            var items = GivenFakeItems<T>(numunchanged,null,from:firstitem).Concat(GivenFakeItems<T>(selected,func,from:numunchanged + firstitem)).ToList();
             var wasneeded = items.Skip(numunchanged).Take(selected);
 
             await repository.AddRangeAsync(items);
