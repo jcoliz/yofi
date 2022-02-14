@@ -43,38 +43,7 @@ namespace YoFi.Tests.Integration.Controllers
 
         #endregion
 
-        #region Helpers
-
-        protected Task<IHtmlDocument> WhenGettingIndex(IWireQueryParameters parms)
-        {
-            var terms = new List<string>();
-
-            if (!string.IsNullOrEmpty(parms.Query))
-            {
-                terms.Add($"q={HttpUtility.UrlEncode(parms.Query)}");
-            }
-            if (!string.IsNullOrEmpty(parms.Order))
-            {
-                terms.Add($"o={HttpUtility.UrlEncode(parms.Order)}");
-            }
-            if (!string.IsNullOrEmpty(parms.View))
-            {
-                terms.Add($"v={HttpUtility.UrlEncode(parms.View)}");
-            }
-            if (parms.Page.HasValue)
-            {
-                terms.Add($"p={parms.Page.Value}");
-            }
-
-            var urladd = (terms.Any()) ? "?" + string.Join("&", terms) : string.Empty;
-
-            return WhenGetAsync($"{urlroot}/{urladd}");
-        }
-
-        #endregion
-
         #region Index Tests
-
 
         public static IEnumerable<object[]> IndexSortOrderTestData
         {

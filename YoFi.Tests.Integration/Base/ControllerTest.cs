@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AngleSharp.Html.Dom;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Integration.Controllers
 {
@@ -17,7 +20,37 @@ namespace YoFi.Tests.Integration.Controllers
         #region Properties
 
         protected abstract string urlroot { get; }
-        
+
+        #endregion
+
+        #region Helpers
+
+        protected Task<IHtmlDocument> WhenGettingIndex(IWireQueryParameters parms)
+        {
+            var terms = new List<string>();
+
+            if (!string.IsNullOrEmpty(parms.Query))
+            {
+                terms.Add($"q={HttpUtility.UrlEncode(parms.Query)}");
+            }
+            if (!string.IsNullOrEmpty(parms.Order))
+            {
+                terms.Add($"o={HttpUtility.UrlEncode(parms.Order)}");
+            }
+            if (!string.IsNullOrEmpty(parms.View))
+            {
+                terms.Add($"v={HttpUtility.UrlEncode(parms.View)}");
+            }
+            if (parms.Page.HasValue)
+            {
+                terms.Add($"p={parms.Page.Value}");
+            }
+
+            var urladd = (terms.Any()) ? "?" + string.Join("&", terms) : string.Empty;
+
+            return WhenGetAsync($"{urlroot}/{urladd}");
+        }
+
         #endregion
 
         #region Tests
@@ -28,7 +61,7 @@ namespace YoFi.Tests.Integration.Controllers
             // Given: Empty database
 
             // When: Getting the index
-            var document = await WhenGetAsync($"{urlroot}/");
+            var document = await WhenGettingIndex(new WireQueryParameters());
 
             // Then: No items are returned
             ThenResultsAreEqualByTestKey(document, Enumerable.Empty<T>());
@@ -42,7 +75,7 @@ namespace YoFi.Tests.Integration.Controllers
             var items = await GivenFakeDataInDatabase<T>(20);
 
             // When: Getting the index
-            var document = await WhenGetAsync($"{urlroot}/");
+            var document = await WhenGettingIndex(new WireQueryParameters());
 
             // Then: The expected items are returned
             ThenResultsAreEqualByTestKey(document, items);
@@ -55,7 +88,7 @@ namespace YoFi.Tests.Integration.Controllers
             var items = await GivenFakeDataInDatabase<T>(1);
 
             // When: Getting the index
-            var document = await WhenGetAsync($"{urlroot}/");
+            var document = await WhenGettingIndex(new WireQueryParameters());
 
             // Then: The expected items are returned
             ThenResultsAreEqualByTestKey(document, items);
@@ -69,7 +102,7 @@ namespace YoFi.Tests.Integration.Controllers
             (var items, var p2) = await GivenFakeDataInDatabase<T>(pagesize * 3 / 2, pagesize / 2);
 
             // When: Getting the Index
-            var document = await WhenGetAsync($"{urlroot}/");
+            var document = await WhenGettingIndex(new WireQueryParameters());
 
             // Then: Only one page of items returned, which are the LAST group, cuz it's sorted by time
             ThenResultsAreEqualByTestKey(document, items.Except(p2));
@@ -83,7 +116,7 @@ namespace YoFi.Tests.Integration.Controllers
             (var items, var p2) = await GivenFakeDataInDatabase<T>(pagesize * 3 / 2, pagesize / 2);
 
             // When: Getting the Index for page 2
-            var document = await WhenGetAsync($"{urlroot}/?p=2");
+            var document = await WhenGettingIndex(new WireQueryParameters() { Page = 2 });
 
             // Then: Only 2nd page items returned
             ThenResultsAreEqualByTestKey(document, p2);
@@ -96,8 +129,8 @@ namespace YoFi.Tests.Integration.Controllers
             (var items, var chosen) = await GivenFakeDataInDatabase<T>(5, 1);
 
             // When: Searching the index for the focused item's testkey
-            var q = TestKeyOrder<T>()(chosen.Single());
-            var document = await WhenGetAsync($"{urlroot}/?q={q}");
+            var q = (string)TestKeyOrder<T>()(chosen.Single());
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = q });
 
             // Then: The expected items are returned
             ThenResultsAreEqualByTestKey(document, chosen);
