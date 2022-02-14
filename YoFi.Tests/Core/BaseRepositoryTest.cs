@@ -25,8 +25,14 @@ namespace YoFi.Tests.Core
     [TestClass]
     public abstract class BaseRepositoryTest<T> where T: class, IModelItem<T>, new()
     {
+        #region Fields
+
         protected IRepository<T> repository;
         protected MockDataContext context;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Sample items to use in test
@@ -48,6 +54,90 @@ namespace YoFi.Tests.Core
         /// <param name="y">Second item</param>
         /// <returns>-1 if <paramref name="x"/> comes before <paramref name="y"/></returns>
         protected abstract int CompareKeys(T x, T y);
+
+        #endregion
+
+        #region Helpers
+
+
+        protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null) where TItem : class, new()
+        {
+            return Enumerable
+                .Range(1, num)
+                .Select(x => GivenFakeItem<TItem>(x))
+                .Select(func ?? (x => x));
+        }
+
+        protected virtual TItem GivenFakeItem<TItem>(int index) where TItem : class, new()
+        {
+            var result = new TItem();
+            var properties = typeof(TItem).GetProperties();
+            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(YoFi.Core.Models.Attributes.EditableAttribute)));
+
+            foreach (var property in chosen)
+            {
+                var t = property.PropertyType;
+                object o = default;
+
+                if (t == typeof(string))
+                    o = $"{property.Name} {index:D5}";
+                else if (t == typeof(decimal))
+                    o = index * 100m;
+                else if (t == typeof(DateTime))
+                    // Note that datetimes should descend, because anything which sorts by a datetime
+                    // will typically sort descending
+                    o = new DateTime(2001, 12, 31) - TimeSpan.FromDays(index);
+                else
+                    throw new NotImplementedException();
+
+                property.SetValue(result, o);
+            }
+
+            // Not sure of a more generic way to handle this
+            if (result is Transaction tx)
+                tx.Splits = new List<Split>();
+
+            return result;
+        }
+
+        protected async Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<TIgnored>(int total, int selected, Func<T, T> func = null)
+        {
+            var all = GivenFakeItems<T>(total);
+            var needed = all.Skip(total - selected).Take(selected).Select(func ?? (x => x));
+            var items = all.Take(total - selected).Concat(needed).ToList();
+            var wasneeded = items.Skip(total - selected).Take(selected);
+
+            await repository.AddRangeAsync(items);
+            await context.SaveChangesAsync();
+
+            return (items, wasneeded);
+        }
+
+        protected async Task<IEnumerable<T>> GivenFakeDataInDatabase<TIgnored>(int total)
+        {
+            (var result, _) = await GivenFakeDataInDatabase<TIgnored>(total, 0);
+            return result;
+        }
+
+        /// <summary>
+        /// Alias for GetByQueryAsync
+        /// </summary>
+        /// <remarks>
+        /// This is to enable copy/paste integration tests
+        /// </remarks>
+        /// <param name="parms"></param>
+        /// <returns></returns>
+        protected Task<IWireQueryResult<T>> WhenGettingIndex(IWireQueryParameters parms)
+            => repository.GetByQueryAsync(parms);
+
+        protected void ThenResultsAreEqualByTestKey(IWireQueryResult<T> result, IEnumerable<T> chosen)
+        {
+            Assert.IsTrue(result.Items.SequenceEqual(chosen));
+        }
+
+        #endregion
+
+        #region Tests
 
         [TestMethod]
         public void Empty()
@@ -246,6 +336,7 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(newsize, actual);
         }
 
+        #endregion
 
     }
 }

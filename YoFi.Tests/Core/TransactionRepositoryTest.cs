@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
@@ -151,5 +152,34 @@ namespace YoFi.Tests.Core
             // Then: All previously-selected items are now correctly matching the expected category
             Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
         }
+
+        [TestMethod]
+        public async Task IndexPayeeSearch()
+        {
+            // Given: A set of items, some of which have a certain payee
+            var word = "Fibbledy-jibbit";
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(7, 2, x => { x.Payee += word; return x; });
+
+            // When: Calling Index with payee search term
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"p={word}" });
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexCategorySearch()
+        {
+            // Given: A set of items, some of which have a certain category
+            var word = "Fibbledy-jibbit";
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category += word; return x; });
+
+            // When: Calling Index with category search term
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={word}" });
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
     }
 }
