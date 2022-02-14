@@ -164,7 +164,6 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual(isselected, checkboxshown);
         }
 
-
         [DataRow(true)]
         [DataRow(false)]
         [DataRow(null)]
@@ -191,7 +190,6 @@ namespace YoFi.Tests.Integration.Controllers
             else
                 ThenResultsAreEqualByTestKey(document, items);
         }
-
 
         [DataRow(true)]
         [DataRow(false)]
@@ -230,6 +228,81 @@ namespace YoFi.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKey(document, expected);
         }
 
+        [TestMethod]
+        public async Task IndexQCategoryAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category and some without
+            var word = "CAF";
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, x => { x.Category += word; return x; });
+
+            // When: Calling index q={word}
+            var document = await WhenGetAsync($"{urlroot}/?q={word}");
+
+            // Then: Only the transactions with '{word}' in their category are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexQCategorySplitsAny()
+        {
+            // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
+            var word = "CAF";
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12, 
+                x => 
+                {
+                    int index = (int)(x.Amount / 100m);
+                    if (index % 4 == 0)
+                        x.Category += word;
+                    if (index % 4 == 1)
+                        x.Memo += word;
+                    if (index % 4 == 2)
+                        x.Payee += word;
+                    if (index % 4 == 3)
+                        x.Splits = GivenFakeItems<Split>(2, x => { x.Category += word; return x; }).ToList();
+                    return x; 
+                });
+
+            // When: Calling index q={word}
+            var document = await WhenGetAsync($"{urlroot}/?q={word}");
+
+            // Then: Only the transactions with '{word}' in their category are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+        [TestMethod]
+        public async Task IndexQMemoAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their memo and some without
+            var word = "CAF";
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, x => { x.Memo += word; return x; });
+
+            // When: Calling index q={word}
+            var document = await WhenGetAsync($"{urlroot}/?q={word}");
+
+            // Then: Only the transactions with '{word}' in their memo are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+        [TestMethod]
+        public async Task IndexQMemoSplitsAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their memo and some without
+            var word = "CAF";
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
+                x =>
+                {
+                    int index = (int)(x.Amount / 100m);
+                    if (index % 2 == 0)
+                        x.Memo += word;
+                    if (index % 2 == 1)
+                        x.Splits = GivenFakeItems<Split>(2, x => { x.Memo += word; return x; }).ToList();
+                    return x;
+                });
+
+            // When: Calling index q={word}
+            var document = await WhenGetAsync($"{urlroot}/?q={word}");
+
+            // Then: Only the transactions with '{word}' in their memo are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
 
         #endregion
 
