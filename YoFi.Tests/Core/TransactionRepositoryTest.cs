@@ -181,5 +181,107 @@ namespace YoFi.Tests.Core
             ThenResultsAreEqualByTestKey(document, chosen);
         }
 
+
+        [TestMethod]
+        public async Task IndexQPayeeAny()
+        {
+            // Given: A set of items, some of which have a certain category
+            var word = "Fibbledy-jibbit";
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category += word; return x; });
+
+            // When: Calling index q={word}
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexQAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var word = "CAF";
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
+                x =>
+                {
+                    int index = (int)(x.Amount / 100m);
+                    if (index % 3 == 0)
+                        x.Category += word;
+                    if (index % 3 == 1)
+                        x.Memo += word;
+                    if (index % 3 == 2)
+                        x.Payee += word;
+                    return x;
+                });
+
+            // When: Calling index q={word}
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexQPayee()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var word = "CAF";
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
+                x =>
+                {
+                    int index = (int)(x.Amount / 100m);
+                    if (index % 3 == 0)
+                        x.Category += word;
+                    if (index % 3 == 1)
+                        x.Memo += word;
+                    if (index % 3 == 2)
+                        x.Payee += word;
+                    return x;
+                });
+
+            // When: Calling index q='p={word}'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"P={word}" });
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen.Where(x=>x.Payee.Contains(word)));
+        }
+
+        [TestMethod]
+        public async Task IndexQCategory()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var word = "CAF";
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12,
+                x =>
+                {
+                    int index = (int)(x.Amount / 100m);
+                    if (index % 3 == 0)
+                        x.Category += word;
+                    if (index % 3 == 1)
+                        x.Memo += word;
+                    if (index % 3 == 2)
+                        x.Payee += word;
+                    return x;
+                });
+
+            // When: Calling index q='c={word}'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"C={word}" });
+
+            // Then: Only the transactions with '{word}' in their category are returned
+            ThenResultsAreEqualByTestKey(document, chosen.Where(x => x.Category.Contains(word)));
+        }
+
+        [TestMethod]
+        public async Task IndexQCategoryBlank()
+        {
+            // Given: A mix of transactions, some with null category
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category = null; return x; });
+
+            // When: Calling index q='c=[blank]'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"C=[blank]" });
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
     }
 }
