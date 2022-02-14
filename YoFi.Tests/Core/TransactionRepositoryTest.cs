@@ -360,5 +360,90 @@ namespace YoFi.Tests.Core
             // Then: Only transactions with amounts #.## are returned
             ThenResultsAreEqualByTestKey(document, chosen);
         }
+
+
+        [TestMethod]
+        public async Task IndexQCategoryAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category and some without
+            var word = "CAF";
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, x => { x.Category += word; return x; });
+
+            // When: Calling index q={word}
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
+
+            // Then: Only the transactions with '{word}' in their category are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexQCategorySplitsAny()
+        {
+            // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
+            var word = "CAF";
+            _               = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
+            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
+            _               = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
+            
+            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2, 
+                                x => 
+                                {
+                                    x.Splits = GivenFakeItems<Split>(2, x => { x.Category += word; return x; }).ToList();
+                                    return x; 
+                                });
+            _               = await GivenFakeDataInDatabase<Transaction>(4, 2,
+                                x =>
+                                {
+                                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                                    return x;
+                                });
+            var chosen = c1.Concat(c2);
+
+            // When: Calling index q={word}
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={word}" });
+
+            // Then: Only the transactions with '{word}' in their category are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+        [TestMethod]
+        public async Task IndexQMemoAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their memo and some without
+            var word = "CAF";
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, x => { x.Memo += word; return x; });
+
+            // When: Calling index q={word}
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
+
+            // Then: Only the transactions with '{word}' in their memo are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+        [TestMethod]
+        public async Task IndexQMemoSplitsAny()
+        {
+            // Given: A mix of transactions, some with '{word}' in their memo and some without
+            var word = "CAF";
+            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
+            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2,
+                                x =>
+                                {
+                                    x.Splits = GivenFakeItems<Split>(2, x => { x.Memo += word; return x; }).ToList();
+                                    return x;
+                                });
+            _ = await GivenFakeDataInDatabase<Transaction>(4, 2,
+                                x =>
+                                {
+                                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                                    return x;
+                                });
+            var chosen = c1.Concat(c2);
+
+            // When: Calling index q={word}
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
+
+            // Then: Only the transactions with '{word}' in their memo are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
     }
 }
