@@ -164,6 +164,73 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual(isselected, checkboxshown);
         }
 
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataRow(null)]
+        [DataTestMethod]
+        public async Task IndexShowHasReceipt(bool? hasreceipt)
+        {
+            // Given: A set of items, some with receipts some not
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.ReceiptUrl = "Has receipt"; return x; });
+
+            // When: Calling Index with receipt search term
+            string searchterm = string.Empty;
+            if (hasreceipt.HasValue)
+                searchterm = hasreceipt.Value ? "?q=R%3d1" : "?q=R%3d0";
+            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+
+            // Then: Only the items with a matching receipt state are returned
+            if (hasreceipt.HasValue)
+            {
+                if (hasreceipt.Value)
+                    ThenResultsAreEqualByTestKey(document, chosen);
+                else
+                    ThenResultsAreEqualByTestKey(document, items.Except(chosen));
+            }
+            else
+                ThenResultsAreEqualByTestKey(document, items);
+        }
+
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataRow(null)]
+        [DataTestMethod]
+        public async Task IndexPayeesWithReceipt(bool? hasreceipt)
+        {
+            // Given: A set of items, with two different payees, some with receipts some not
+            (var _, var items) = await GivenFakeDataInDatabase<Transaction>(6, 6, 
+                x => 
+                { 
+                    x.ReceiptUrl = (x.Amount%200m == 0) ? "Has receipt" : null;
+                    x.Payee = (x.Amount % 300m).ToString("0000");
+                    return x; 
+                });
+
+            // When: Calling Index with combined search term for payee AND with/without a receipt
+            string payee = "0100";
+            string searchterm = $"?q=P%3d{payee}";
+            if (hasreceipt.HasValue)
+                searchterm += hasreceipt.Value ? ",R%3d1" : ",R%3d0";
+            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+
+            // Then: Only the items with a matching payee AND receipt state are returned
+            IEnumerable<Dto> expected;
+            if (hasreceipt.HasValue)
+            {
+                if (hasreceipt.Value)
+                    expected = items.Where(x => x.Payee.Contains(payee) && x.ReceiptUrl != null);
+                else
+                    expected = items.Where(x => x.Payee.Contains(payee) && x.ReceiptUrl == null);
+            }
+            else
+                expected = items.Where(x => x.Payee.Contains(payee));
+
+            ThenResultsAreEqualByTestKey(document, expected);
+        }
+
+
         #endregion
 
         #region Hiding Tests
