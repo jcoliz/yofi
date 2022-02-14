@@ -95,9 +95,38 @@ namespace YoFi.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKeyOrdered(document, expected);
         }
 
-#endregion
 
-#region Hiding Tests
+        [TestMethod]
+        public async Task IndexPayeeSearch()
+        {
+            // Given: A set of items, some of which have a certain payee
+            var word = "Fibbledy-jibbit";
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(7, 2, x => { x.Payee += word; return x; });
+
+            // When: Calling Index with payee search term
+            var document = await WhenGetAsync($"{urlroot}/?q=p%3d{word}");
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexCategorySearch()
+        {
+            // Given: A set of items, some of which have a certain category
+            var word = "Fibbledy-jibbit";
+            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category += word; return x; });
+
+            // When: Calling Index with category search term
+            var document = await WhenGetAsync($"{urlroot}/?q=c%3d{word}");
+
+            // Then: The expected items are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        #endregion
+
+        #region Hiding Tests
 
         // Need to hide download test. Works differently for transactions
         public override Task Download()

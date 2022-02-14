@@ -545,40 +545,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(2, context.Transactions.Count());
         }
 
-        [TestMethod]
-        public async Task IndexPayeeSearch()
-        {
-            // Given: A set of items with various payees
-            context.Transactions.AddRange(TransactionItems.Take(7));
-            context.SaveChanges();
-
-            // When: Calling Index with payee search term
-            IActionResult result;
-            result = await controller.Index(q:"p=4");
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
-
-            // Then: Only the items with a matching payee are returned
-            Assert.AreEqual(3, model.Items.Count());
-        }
-
-        [TestMethod]
-        public async Task IndexCategorySearch()
-        {
-            // Given: A set of items with various categories
-            context.Transactions.AddRange(TransactionItems.Take(10));
-            context.SaveChanges();
-
-            // When: Calling Index with category search term
-            IActionResult result;
-            result = await controller.Index(q:"C=C");
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
-
-            // Then: Only the items with a matching category are returned
-            Assert.AreEqual(4, model.Items.Count());
-        }
-
         [DataRow(true)]
         [DataRow(false)]
         [DataTestMethod]
