@@ -124,6 +124,46 @@ namespace YoFi.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKey(document, chosen);
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexShowHidden(bool ishidden)
+        {
+            // Given: A set of items, some of which are hidden
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Hidden = true; return x; });
+
+            // When: Calling Index with indirect search term for hidden items
+            var searchterm = ishidden ? "?v=H" : string.Empty;
+            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+
+            // Then: Only the items with a matching hidden state are returned
+            if (ishidden)
+                ThenResultsAreEqualByTestKey(document, items);
+            else
+                ThenResultsAreEqualByTestKey(document, items.Except(chosen));
+
+            // And: The hide checkbox is available (or not, as expected)
+            var checkboxshown = !(document.QuerySelector($"th[data-test-id=hide]") is null);
+            Assert.AreEqual(ishidden, checkboxshown);
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexShowSelected(bool isselected)
+        {
+            // Given: There are some items in the database
+            var items = await GivenFakeDataInDatabase<Transaction>(5);
+
+            // When: Calling index with view set to 'selected'
+            var searchterm = isselected ? "?v=S" : string.Empty;
+            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+
+            // Then: The selection checkbox is available (or not, as expected)
+            var checkboxshown = !(document.QuerySelector($"th[data-test-id=select]") is null);
+            Assert.AreEqual(isselected, checkboxshown);
+        }
+
         #endregion
 
         #region Hiding Tests

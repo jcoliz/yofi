@@ -116,13 +116,13 @@ else
             <tr>
                 @if (Model.ShowHidden)
                 {
-                    <th>
+                    <th data-test-id="hide">
                         Hidden
                     </th>
                 }
                 @if (Model.ShowSelected)
                 {
-                    <th>
+                    <th data-test-id="select">
                         Edit
                     </th>
                 }
