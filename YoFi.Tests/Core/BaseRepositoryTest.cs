@@ -60,10 +60,10 @@ namespace YoFi.Tests.Core
         #region Helpers
 
 
-        protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null) where TItem : class, new()
+        protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null, int from = 1) where TItem : class, new()
         {
             return Enumerable
-                .Range(1, num)
+                .Range(from, num)
                 .Select(x => GivenFakeItem<TItem>(x))
                 .Select(func ?? (x => x));
         }
@@ -102,13 +102,12 @@ namespace YoFi.Tests.Core
 
         protected async Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<TIgnored>(int total, int selected, Func<T, T> func = null)
         {
-            var all = GivenFakeItems<T>(total);
-            var needed = all.Skip(total - selected).Take(selected).Select(func ?? (x => x));
-            var items = all.Take(total - selected).Concat(needed).ToList();
-            var wasneeded = items.Skip(total - selected).Take(selected);
+            var firstitem = repository.All.Count() + 1;
+            var numunchanged = total - selected;
+            var items = GivenFakeItems<T>(numunchanged,null,from:firstitem).Concat(GivenFakeItems<T>(selected,func,from:numunchanged + 1)).ToList();
+            var wasneeded = items.Skip(numunchanged).Take(selected);
 
             await repository.AddRangeAsync(items);
-            await context.SaveChangesAsync();
 
             return (items, wasneeded);
         }
