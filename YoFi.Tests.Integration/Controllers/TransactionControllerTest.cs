@@ -250,26 +250,33 @@ namespace YoFi.Tests.Integration.Controllers
         {
             // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
             var word = "CAF";
+            var flag = "__Pickme__";
             (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(24, 12, 
                 x => 
                 {
                     int index = (int)(x.Amount / 100m);
                     if (index % 4 == 0)
+                    {
                         x.Category += word;
+                        x.Memo += flag;
+                    }
                     if (index % 4 == 1)
                         x.Memo += word;
                     if (index % 4 == 2)
                         x.Payee += word;
                     if (index % 4 == 3)
+                    {
+                        x.Memo += flag;
                         x.Splits = GivenFakeItems<Split>(2, x => { x.Category += word; return x; }).ToList();
+                    }
                     return x; 
                 });
 
             // When: Calling index q={word}
-            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={word}" });
 
             // Then: Only the transactions with '{word}' in their category are returned
-            ThenResultsAreEqualByTestKey(document, chosen);
+            ThenResultsAreEqualByTestKey(document, chosen.Where(x=>x.Memo.Contains(flag)));
         }
         [TestMethod]
         public async Task IndexQMemoAny()
