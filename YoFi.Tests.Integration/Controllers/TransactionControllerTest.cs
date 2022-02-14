@@ -1,9 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AngleSharp.Html.Dom;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Integration.Helpers;
 using Dto = YoFi.Core.Models.Transaction; // YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
 using Transaction = YoFi.Core.Models.Transaction;
@@ -35,6 +39,36 @@ namespace YoFi.Tests.Integration.Controllers
             // Clean out database
             context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
             context.SaveChanges();
+        }
+
+        #endregion
+
+        #region Helpers
+
+        protected Task<IHtmlDocument> WhenGettingIndex(IWireQueryParameters parms)
+        {
+            var terms = new List<string>();
+
+            if (!string.IsNullOrEmpty(parms.Query))
+            {
+                terms.Add($"q={HttpUtility.UrlEncode(parms.Query)}");
+            }
+            if (!string.IsNullOrEmpty(parms.Order))
+            {
+                terms.Add($"o={HttpUtility.UrlEncode(parms.Order)}");
+            }
+            if (!string.IsNullOrEmpty(parms.View))
+            {
+                terms.Add($"v={HttpUtility.UrlEncode(parms.View)}");
+            }
+            if (parms.Page.HasValue)
+            {
+                terms.Add($"p={parms.Page.Value}");
+            }
+
+            var urladd = (terms.Any()) ? "?" + string.Join("&", terms) : string.Empty;
+
+            return WhenGetAsync($"{urlroot}/{urladd}");
         }
 
         #endregion
@@ -236,7 +270,7 @@ namespace YoFi.Tests.Integration.Controllers
             (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, x => { x.Category += word; return x; });
 
             // When: Calling index q={word}
-            var document = await WhenGetAsync($"{urlroot}/?q={word}");
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
 
             // Then: Only the transactions with '{word}' in their category are returned
             ThenResultsAreEqualByTestKey(document, chosen);
