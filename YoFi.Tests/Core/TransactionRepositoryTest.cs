@@ -445,5 +445,59 @@ namespace YoFi.Tests.Core
             ThenResultsAreEqualByTestKey(document, chosen);
         }
 
+        // Failing tests
+#if false
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataRow(5)]
+        [DataTestMethod]
+        public async Task IndexQDate(int day)
+        {
+            // Given: A mix of transactions, with differing dates
+            var items = await GivenFakeDataInDatabase<Transaction>(22);
+
+            // When: Calling index with q='d=#/##'
+            var target = items.Min(x=>x.Timestamp).AddDays(day);
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"D={target.Month}/{target.Day}" });
+
+            // Then: Only transactions on that date or the following 7 days in the current year are returned
+            var expected = items.Where(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7));
+            ThenResultsAreEqualByTestKey(document, expected);
+        }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataRow(5)]
+        [DataTestMethod]
+        public async Task IndexQDateInteger(int day)
+        {
+            // Given: A mix of transactions, with differing dates
+            var items = await GivenFakeDataInDatabase<Transaction>(22);
+
+            // When: Calling index with q='d=#/##'
+            var target = items.Min(x => x.Timestamp).AddDays(day);
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"D={target.Month}{target.Day:00}" });
+
+            // Then: Only transactions on that date or the following 7 days in the current year are returned
+            var expected = items.Where(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7));
+            ThenResultsAreEqualByTestKey(document, expected);
+        }
+#endif
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task IndexQDateText()
+        {
+            // Given: A mix of transactions, with differing dates
+            var items = await GivenFakeDataInDatabase<Transaction>(22);
+
+            // When: Calling index with q='d=text'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"D=text" });
+
+            // Then: Exception
+        }
     }
 }

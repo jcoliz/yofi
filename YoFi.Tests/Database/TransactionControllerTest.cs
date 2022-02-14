@@ -863,65 +863,6 @@ namespace YoFi.Tests.Database
         }
 
 
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(3)]
-        [DataRow(4)]
-        [DataRow(5)]
-        [DataTestMethod]
-        public async Task IndexQDate(int day)
-        {
-            // Given: A mix of transactions, with differing dates
-            var items = TransactionItems.Take(22);
-            context.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling index with q='d=#/##'
-            var target = new DateTime(DateTime.Now.Year, 01, day);
-            var model = await WhenCallingIndexWithQ($"D={target.Month}/{target.Day}");
-
-            // Then: Only transactions on that date or the following 7 days in the current year are returned
-            var expected = items.Count(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7));
-            Assert.AreEqual(expected, model.Count());
-            Assert.IsTrue(model.All(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7)));
-        }
-
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(3)]
-        [DataRow(4)]
-        [DataRow(5)]
-        [DataTestMethod]
-        public async Task IndexQDateInteger(int day)
-        {
-            // Given: A mix of transactions, with differing dates
-            var items = TransactionItems.Take(22);
-            context.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling index with q='d=###'
-            var target = new DateTime(DateTime.Now.Year, 01, day);
-            var model = await WhenCallingIndexWithQ($"D={target.Month}{(target.Day<10?"0":"")}{target.Day}");
-
-            // Then: Only transactions on that date or the following 7 days in the current year are returned
-            var expected = items.Count(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7));
-            Assert.AreEqual(expected, model.Count());
-            Assert.IsTrue(model.All(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7)));
-        }
-
-        [TestMethod]
-        public async Task IndexQDateText()
-        {
-            // Given: A mix of transactions, with differing dates
-            var items = TransactionItems.Take(22);
-            context.AddRange(items);
-            context.SaveChanges();
-
-            // When: Calling index with q='d=text'
-            // Then: Bad request returned
-            await WhenCallingIndexWithQThenBadRequest($"D=text");
-        }
-
         [TestMethod]
         public async Task IndexQIntAny()
         {

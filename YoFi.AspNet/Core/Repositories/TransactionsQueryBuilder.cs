@@ -324,6 +324,8 @@ namespace YoFi.Core.Repositories
                 throw new ArgumentException($"Unexpected query parameter {value}", nameof(value));
         }
 
+        // TODO: There is a bug here. Illicit use of "DateTime Now"!! Should consume an ICLOCK instead.
+
         /// <summary>
         /// Translate query on date
         /// </summary>
