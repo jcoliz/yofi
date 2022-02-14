@@ -129,8 +129,8 @@ namespace YoFi.Tests.Database
             helper = new ControllerTestHelper<Transaction, TransactionsController>();
             helper.SetUp();
             storage = new TestAzureStorage();
-            _repository = new TransactionRepository(helper.context, storage: storage);
             clock = new TestClock(); // Use DateTime now for now
+            _repository = new TransactionRepository(helper.context, clock, storage: storage);
             helper.controller = new TransactionsController(_repository, clock);
             helper.Items.AddRange(TransactionItems.Take(5));
             helper.dbset = helper.context.Transactions;

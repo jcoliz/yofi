@@ -1,4 +1,5 @@
-﻿using Common.NET;
+﻿using Common.DotNet;
+using Common.NET;
 using Excel.FinancialFunctions;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Extensions.Configuration;
@@ -26,9 +27,10 @@ namespace YoFi.Core.Repositories
         /// <param name="context">Where to find the data we actually contain</param>
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
-        public TransactionRepository(IDataContext context, IStorageService storage = null) : base(context)
+        public TransactionRepository(IDataContext context, IClock clock, IStorageService storage = null) : base(context)
         {
             _storage = storage;
+            _clock = clock;
         }
 
         #region Read
@@ -44,14 +46,14 @@ namespace YoFi.Core.Repositories
         /// <returns>Query of requested items</returns>
         protected override IQueryable<Transaction> ForQuery(string q)
         {
-            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits));
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits),_clock);
             qbuilder.BuildForQ(q);
             return qbuilder.Query;
         }
 
         protected override IQueryable<Transaction> ForQuery(IWireQueryParameters parms)
         {
-            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits));
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits),_clock);
             qbuilder.BuildForQ(parms.Query);
             qbuilder.ApplyOrderParameter(parms.Order);
             qbuilder.ApplyViewParameter(parms.View);
@@ -423,6 +425,7 @@ namespace YoFi.Core.Repositories
         #region Fields
 
         private readonly IStorageService _storage;
+        private readonly IClock _clock;
 
         #endregion
 

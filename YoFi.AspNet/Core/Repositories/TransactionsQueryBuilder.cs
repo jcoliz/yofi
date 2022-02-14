@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.DotNet;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using YoFi.Core.Models;
@@ -25,15 +26,23 @@ namespace YoFi.Core.Repositories
 
         #endregion
 
+        #region Fields
+
+        private IClock _clock;
+
+
+        #endregion
+
         #region Constructor
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="initial">The starting large set of items which we will further winnow down </param>
-        public TransactionsQueryBuilder(IQueryable<Transaction> initial)
+        public TransactionsQueryBuilder(IQueryable<Transaction> initial, IClock clock)
         {
             Query = initial;
+            _clock = clock;
         }
 
         #endregion
@@ -86,7 +95,7 @@ namespace YoFi.Core.Repositories
                         DateTime? dtval = null;
                         try
                         {
-                            dtval = new DateTime(DateTime.Now.Year, intval / 100, intval % 100);
+                            dtval = new DateTime(_clock.Now.Year, intval / 100, intval % 100);
                         }
                         catch
                         {
@@ -329,14 +338,16 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// Translate query on date
         /// </summary>
-        private static IQueryable<Transaction> TransactionsForQuery_Date(IQueryable<Transaction> result, string value)
+        private IQueryable<Transaction> TransactionsForQuery_Date(IQueryable<Transaction> result, string value)
         {
             DateTime? dtval = null;
 
             if (Int32.TryParse(value, out int ival) && ival >= 101 && ival <= 1231)
-                dtval = new DateTime(DateTime.Now.Year, ival / 100, ival % 100);
+                dtval = new DateTime(_clock.Now.Year, ival / 100, ival % 100);
             else if (DateTime.TryParse(value, out DateTime dtvalout))
-                dtval = dtvalout;
+            {
+                dtval = new DateTime(_clock.Now.Year, dtvalout.Month, dtvalout.Day);
+            }
 
             if (dtval.HasValue)
                 return result.Where(x => x.Timestamp >= dtval.Value && x.Timestamp < dtval.Value.AddDays(7));

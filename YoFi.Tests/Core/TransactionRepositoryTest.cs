@@ -1,4 +1,5 @@
-﻿using Common.NET.Test;
+﻿using Common.DotNet;
+using Common.NET.Test;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,6 +19,8 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class TransactionRepositoryTest : BaseRepositoryTest<Transaction>
     {
+        private TestClock clock;
+
         protected override List<Transaction> Items
         {
             get
@@ -62,7 +65,8 @@ namespace YoFi.Tests.Core
         {
             context = new MockDataContext();
             var storage = new TestAzureStorage();
-            repository = new TransactionRepository(context, storage:storage);            
+            clock = new TestClock();
+            repository = new TransactionRepository(context, clock, storage:storage);            
         }
 
         public static IEnumerable<object[]> CalculateLoanSplits_Data =>
@@ -445,8 +449,6 @@ namespace YoFi.Tests.Core
             ThenResultsAreEqualByTestKey(document, chosen);
         }
 
-        // Failing tests
-#if false
         [DataRow(1)]
         [DataRow(2)]
         [DataRow(3)]
@@ -455,8 +457,9 @@ namespace YoFi.Tests.Core
         [DataTestMethod]
         public async Task IndexQDate(int day)
         {
-            // Given: A mix of transactions, with differing dates
+            // Given: A mix of transactions, with differing dates, within the current year
             var items = await GivenFakeDataInDatabase<Transaction>(22);
+            clock.Now = items.Min(x => x.Timestamp);
 
             // When: Calling index with q='d=#/##'
             var target = items.Min(x=>x.Timestamp).AddDays(day);
@@ -475,8 +478,9 @@ namespace YoFi.Tests.Core
         [DataTestMethod]
         public async Task IndexQDateInteger(int day)
         {
-            // Given: A mix of transactions, with differing dates
+            // Given: A mix of transactions, with differing dates, within the current year
             var items = await GivenFakeDataInDatabase<Transaction>(22);
+            clock.Now = items.Min(x => x.Timestamp);
 
             // When: Calling index with q='d=#/##'
             var target = items.Min(x => x.Timestamp).AddDays(day);
@@ -486,7 +490,7 @@ namespace YoFi.Tests.Core
             var expected = items.Where(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7));
             ThenResultsAreEqualByTestKey(document, expected);
         }
-#endif
+
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public async Task IndexQDateText()
