@@ -116,7 +116,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // When: Calling Index with a defined sort order
             // When: Getting the index
-            var document = await WhenGetAsync($"{urlroot}/?o={item.Key}");
+            var document = await WhenGettingIndex(new WireQueryParameters() { Order = item.Key });
 
             // Then: The items are returned sorted in that order
             var predicate = item.Predicate as Func<Dto, string>;
@@ -138,7 +138,7 @@ namespace YoFi.Tests.Integration.Controllers
             (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(7, 2, x => { x.Payee += word; return x; });
 
             // When: Calling Index with payee search term
-            var document = await WhenGetAsync($"{urlroot}/?q=p%3d{word}");
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"p={word}" });
 
             // Then: The expected items are returned
             ThenResultsAreEqualByTestKey(document, chosen);
@@ -152,7 +152,7 @@ namespace YoFi.Tests.Integration.Controllers
             (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category += word; return x; });
 
             // When: Calling Index with category search term
-            var document = await WhenGetAsync($"{urlroot}/?q=c%3d{word}");
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={word}" });
 
             // Then: The expected items are returned
             ThenResultsAreEqualByTestKey(document, chosen);
@@ -167,8 +167,8 @@ namespace YoFi.Tests.Integration.Controllers
             (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Hidden = true; return x; });
 
             // When: Calling Index with indirect search term for hidden items
-            var searchterm = ishidden ? "?v=H" : string.Empty;
-            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+            var searchterm = ishidden ? "H" : null;
+            var document = await WhenGettingIndex(new WireQueryParameters() { View = searchterm });
 
             // Then: Only the items with a matching hidden state are returned
             if (ishidden)
@@ -190,8 +190,8 @@ namespace YoFi.Tests.Integration.Controllers
             var items = await GivenFakeDataInDatabase<Transaction>(5);
 
             // When: Calling index with view set to 'selected'
-            var searchterm = isselected ? "?v=S" : string.Empty;
-            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+            var searchterm = isselected ? "S" : null;
+            var document = await WhenGettingIndex(new WireQueryParameters() { View = searchterm });
 
             // Then: The selection checkbox is available (or not, as expected)
             var checkboxshown = !(document.QuerySelector($"th[data-test-id=select]") is null);
@@ -208,10 +208,10 @@ namespace YoFi.Tests.Integration.Controllers
             (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.ReceiptUrl = "Has receipt"; return x; });
 
             // When: Calling Index with receipt search term
-            string searchterm = string.Empty;
+            string query = string.Empty;
             if (hasreceipt.HasValue)
-                searchterm = hasreceipt.Value ? "?q=R%3d1" : "?q=R%3d0";
-            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+                query = hasreceipt.Value ? "R=1" : "R=0";
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = query });
 
             // Then: Only the items with a matching receipt state are returned
             if (hasreceipt.HasValue)
@@ -242,10 +242,10 @@ namespace YoFi.Tests.Integration.Controllers
 
             // When: Calling Index with combined search term for payee AND with/without a receipt
             string payee = "0100";
-            string searchterm = $"?q=P%3d{payee}";
+            string query = $"P={payee}";
             if (hasreceipt.HasValue)
-                searchterm += hasreceipt.Value ? ",R%3d1" : ",R%3d0";
-            var document = await WhenGetAsync($"{urlroot}/{searchterm}");
+                query += hasreceipt.Value ? ",R=1" : ",R=0";
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = query });
 
             // Then: Only the items with a matching payee AND receipt state are returned
             IEnumerable<Dto> expected;
@@ -297,7 +297,7 @@ namespace YoFi.Tests.Integration.Controllers
                 });
 
             // When: Calling index q={word}
-            var document = await WhenGetAsync($"{urlroot}/?q={word}");
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
 
             // Then: Only the transactions with '{word}' in their category are returned
             ThenResultsAreEqualByTestKey(document, chosen);
@@ -310,7 +310,7 @@ namespace YoFi.Tests.Integration.Controllers
             (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, x => { x.Memo += word; return x; });
 
             // When: Calling index q={word}
-            var document = await WhenGetAsync($"{urlroot}/?q={word}");
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
 
             // Then: Only the transactions with '{word}' in their memo are returned
             ThenResultsAreEqualByTestKey(document, chosen);
@@ -332,7 +332,7 @@ namespace YoFi.Tests.Integration.Controllers
                 });
 
             // When: Calling index q={word}
-            var document = await WhenGetAsync($"{urlroot}/?q={word}");
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
 
             // Then: Only the transactions with '{word}' in their memo are returned
             ThenResultsAreEqualByTestKey(document, chosen);
