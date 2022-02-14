@@ -210,11 +210,13 @@ namespace YoFi.Tests.Integration
             return response;
         }
 
-        protected void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector)
+        protected void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector, bool ordered = false)
         {
             // Then: The expected items are returned
             var results = document.QuerySelectorAll("table[data-test-id=results] tbody tr");
-            var names = results.Select(x => x.QuerySelector(selector).TextContent.Trim()).OrderBy(x=>x);
+            var names = results.Select(x => x.QuerySelector(selector).TextContent.Trim());
+            if (!ordered)
+                names = names.OrderBy(x => x);
             Assert.IsTrue(chosen.SequenceEqual(names));
         }
 
@@ -224,6 +226,14 @@ namespace YoFi.Tests.Integration
             var testid = $"[data-test-id={property.Name.ToLowerInvariant()}]";
 
             ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)), testid);
+        }
+
+        protected void ThenResultsAreEqualByTestKeyOrdered<T>(IHtmlDocument document, IEnumerable<T> expected)
+        {
+            var property = FindTestKey<T>();
+            var testid = $"[data-test-id={property.Name.ToLowerInvariant()}]";
+
+            ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)), testid, ordered:true);
         }
 
         protected async Task ThenIsSpreadsheetContaining<T>(HttpContent content, IEnumerable<T> items) where T: class, new()

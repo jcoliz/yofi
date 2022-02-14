@@ -545,51 +545,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(2, context.Transactions.Count());
         }
 
-
-        public static IEnumerable<object[]> IndexSortOrderTestData
-        {
-            get
-            {
-                return new[]
-                {
-                    new object[] { new { Key = "pa" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.Payee) } },
-                    new object[] { new { Key = "ca" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.Category) } },
-                    new object[] { new { Key = "da" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
-                    new object[] { new { Key = "aa" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.Amount.ToString()) } },
-                    new object[] { new { Key = "pd" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.Payee) } },
-                    new object[] { new { Key = "cd" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.Category) } },
-                    new object[] { new { Key = "dd" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
-                    new object[] { new { Key = "ad" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.Amount.ToString()) } },
-                    new object[] { new { Key = "ra" , Ascending = true, Predicate = (Func<Dto, string>)(x=>x.BankReference) } },
-                    new object[] { new { Key = "rd" , Ascending = false, Predicate = (Func<Dto, string>)(x=>x.BankReference) } },
-                };
-            }
-        }
-
-        [DynamicData(nameof(IndexSortOrderTestData))]
-        [DataTestMethod]
-        public async Task IndexSortOrder(dynamic item)
-        {
-            // Given: A set of items
-            context.Transactions.AddRange(TransactionItems.Take(10));
-            context.SaveChanges();
-
-            // When: Calling Index with a defined sort order
-            var result = await controller.Index(o:item.Key);
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
-
-            // Then: The items are returned sorted in that order
-            var predicate = item.Predicate as Func<Dto, string>;
-            List<Dto> expected = null;
-            if (item.Ascending)
-                expected = model.Items.OrderBy(predicate).ToList();
-            else
-                expected = model.Items.OrderByDescending(predicate).ToList();
-
-            Assert.IsTrue(expected.SequenceEqual(model.Items));
-        }
-
         [TestMethod]
         public async Task IndexPayeeSearch()
         {
