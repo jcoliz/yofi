@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using YoFi.Core.Models;
 using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Integration.Helpers;
 using Dto = YoFi.Core.Models.Transaction; // YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
@@ -231,7 +232,7 @@ namespace YoFi.Tests.Integration.Controllers
 
         #endregion
 
-        #region Other Tests
+        #region Bulk Edit
 
         [TestMethod]
         public async Task BulkEdit()
@@ -310,6 +311,109 @@ namespace YoFi.Tests.Integration.Controllers
 
             // Then: No items remain selected
             Assert.IsFalse(context.Set<Transaction>().Any(x => x.Selected == true));
+        }
+
+        #endregion
+
+        #region Splits
+
+        [TestMethod]
+        public async Task SplitsShownInIndex()
+        {
+            // Given: Single transaction with balanced splits
+            (var items, _) = await GivenFakeDataInDatabase<Transaction>(1, 1,
+                x =>
+                {
+                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                    x.Amount = x.Splits.Sum(x => x.Amount);
+                    return x;
+                });
+
+            // When: Getting the index
+            var document = await WhenGettingIndex(new WireQueryParameters());
+
+            // Then: Shown as having splits
+            var display_category_span = document.QuerySelector("td.display-category span");
+            Assert.IsNotNull(display_category_span);
+            var category = display_category_span.TextContent.Trim();
+            Assert.AreEqual("SPLIT", category);
+        }
+        [TestMethod]
+        public async Task SplitsShownInIndexSearchCategory()
+        {
+            // Given: Some transactions, one of which has splits
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1,
+                x =>
+                {
+                    x.Splits = GivenFakeItems<Split>(2, x=> { x.Category += " Split"; return x; }).ToList();
+                    x.Amount = x.Splits.Sum(x => x.Amount);
+                    return x;
+                });
+            var expected = chosen.Single();
+
+            // When: Getting the index, searching for the split category
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={expected.Splits.First().Category}" });
+
+            // Then: One item returned, shown as having splits
+            var display_category_span = document.QuerySelectorAll("td.display-category span");
+            Assert.AreEqual(1, display_category_span.Count());
+            var category = display_category_span.Single().TextContent.Trim();
+            Assert.AreEqual("SPLIT", category);
+        }
+
+        [TestMethod]
+        public async Task SplitsShownInEdit()
+        {
+            // Given: Single transaction with balanced splits
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(1, 1,
+                x =>
+                {
+                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                    x.Amount = x.Splits.Sum(x => x.Amount);
+                    return x;
+                });
+            var id = chosen.Single().ID;
+
+            // When: Getting the edit page for the transaction
+            var document = await WhenGetAsync($"{urlroot}/Edit/{id}");
+
+            // Then: Splits are shown
+            var splits = document.QuerySelectorAll("table[data-test-id=splits] tbody tr");
+            Assert.AreEqual(2, splits.Count());
+
+            // And: Amounts are correct
+            var amounts = splits.Select(x => x.QuerySelector("td[data-test-id=split-amount]").TextContent.Trim()).OrderBy(x=>x);
+            var expectedamounts = chosen.Single().Splits.Select(x => x.Amount.ToString()).OrderBy(x=>x);
+            Assert.IsTrue(amounts.SequenceEqual(expectedamounts));
+
+            // And: They're OK (not flagged as problematic)
+            var splits_not_ok = document.QuerySelector("div[data-test-id=splits-not-ok]");
+            Assert.IsNull(splits_not_ok);
+        }
+
+        [TestMethod]
+        public async Task SplitsDontAddUpInEdit()
+        {
+            // Given: Single transaction with NOT balanced splits
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(1, 1,
+                x =>
+                {
+                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                    x.Amount = 2 * x.Splits.Sum(x => x.Amount);
+                    return x;
+                });
+            var id = chosen.Single().ID;
+
+            // When: Getting the edit page for the transaction
+            var document = await WhenGetAsync($"{urlroot}/Edit/{id}");
+
+            // Then: Splits are shown
+            var splits = document.QuerySelectorAll("table[data-test-id=splits] tbody tr");
+            Assert.AreEqual(2, splits.Count());
+
+            // And: They're NOT OK (yes flagged as problematic)
+            var splits_not_ok = document.QuerySelector("div[data-test-id=splits-not-ok]");
+            Assert.IsNotNull(splits_not_ok);
         }
 
         #endregion

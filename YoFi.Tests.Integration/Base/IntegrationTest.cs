@@ -37,11 +37,11 @@ namespace YoFi.Tests.Integration
 
         #region Helpers
 
-        protected virtual IEnumerable<T> GivenFakeItems<T>(int num, Func<T, T> func = null) where T : class, new()
+        protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null, int from = 1) where TItem : class, new()
         {
             return Enumerable
-                .Range(1, num)
-                .Select(x => GivenFakeItem<T>(x))
+                .Range(from, num)
+                .Select(x => GivenFakeItem<TItem>(x))
                 .Select(func ?? (x => x));
         }
 

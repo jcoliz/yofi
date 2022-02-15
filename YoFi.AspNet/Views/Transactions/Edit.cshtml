@@ -84,7 +84,7 @@
 @if (!Model.IsSplitsOK)
 {
     <form asp-action="CreateSplit" asp-route-id="@Model.ID">
-        <div class="alert alert-danger" role="alert">
+        <div class="alert alert-danger" role="alert" data-test-id="splits-not-ok">
             <strong>Incomplete Splits Balance</strong> Please add another split to contain the remaining balance.
             <button type="submit" class="btn btn-danger ms-2" data-test-id="btn-fix-split">Add</button>
         </div>
@@ -97,7 +97,7 @@
         @if (Model.HasSplits)
         {
             var splitorder = (Model.Amount < 0) ? Model.Splits.OrderBy(x => x.Amount) : Model.Splits.OrderByDescending(x => x.Amount);
-            <table class="table">
+            <table class="table" data-test-id="splits">
                 <thead>
                     <tr>
                         <th>
