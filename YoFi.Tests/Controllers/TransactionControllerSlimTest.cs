@@ -132,5 +132,9 @@ namespace YoFi.Tests.Controllers.Slim
             var rpresult = Assert.That.IsOfType<RedirectToPageResult>(actionresult);
             Assert.AreEqual("/Admin", rpresult.PageName);
         }
+
+        [TestMethod]
+        public async Task ReceiptActionOther() =>
+            Assert.IsTrue(await controller.ReceiptAction(1, string.Empty) is RedirectToActionResult);
     }
 }

@@ -328,10 +328,6 @@ namespace YoFi.Tests.Database
         }
 
         [TestMethod]
-        public async Task ReceiptActionOther() =>
-            Assert.IsTrue(await controller.ReceiptAction(1,string.Empty) is RedirectToActionResult);
-
-        [TestMethod]
         public void Error()
         {         
             var expected = "Bah, humbug!";
