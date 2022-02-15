@@ -178,24 +178,7 @@ namespace YoFi.Tests.Database
             Assert.AreEqual("SET", actual.ReceiptUrl);
         }
 
-        [TestMethod]
-        public async Task CreateSplit()
-        {
-            await helper.AddFiveItems();
-            var item = Items[3];
-            var expectedcategory = new String(item.Category);
 
-            var result = await controller.CreateSplit(item.ID);
-            var viewresult = result as RedirectToActionResult;
-            var routes = viewresult.RouteValues;
-            var newid = Convert.ToInt32(routes["id"]);
-            var actual = context.Splits.Where(x => x.ID == newid).Single();
-
-            Assert.AreEqual(item.ID, actual.TransactionID);
-            Assert.AreEqual(item.Amount, actual.Amount);
-            Assert.AreEqual(expectedcategory, actual.Category);
-            Assert.IsNull(actual.Transaction.Category);
-        }
 
         [TestMethod]
         public async Task CreateSecondSplit()

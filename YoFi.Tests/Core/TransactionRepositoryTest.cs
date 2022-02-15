@@ -1,5 +1,6 @@
 ﻿using Common.DotNet;
 using Common.NET.Test;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -64,6 +65,8 @@ namespace YoFi.Tests.Core
             clock = new TestClock();
             repository = new TransactionRepository(context, clock, storage: storage);
         }
+
+        #region Tests
 
         public static IEnumerable<object[]> CalculateLoanSplits_Data =>
             new[]
@@ -152,6 +155,10 @@ namespace YoFi.Tests.Core
             // Then: All previously-selected items are now correctly matching the expected category
             Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
         }
+
+        #endregion
+
+        #region Index Tests
 
         [TestMethod]
         public async Task IndexPayeeSearch()
@@ -659,6 +666,32 @@ namespace YoFi.Tests.Core
             // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are returned
             ThenResultsAreEqualByTestKey(document, chosen);
         }
+
+        #endregion
+
+        #region Splits Tests
+
+        [TestMethod]
+        public async Task CreateSplit()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var expected = chosen.Single();
+            var id = expected.ID;
+            var category = expected.Category;
+
+            // When: Adding a split to that item
+            var newid = await transactionRepository.AddSplitToAsync(id);
+
+            // Then: Split has expected values
+            var actual = transactionRepository.All.SelectMany(x=>x.Splits).Where(x => x.ID == newid).Single();
+
+            Assert.AreEqual(expected.Amount, actual.Amount);
+            Assert.AreEqual(category, actual.Category);
+            Assert.IsNull(expected.Category);
+        }
+
+        #endregion
 
     }
 }

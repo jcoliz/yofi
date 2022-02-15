@@ -132,6 +132,17 @@ namespace YoFi.Tests.Helpers
 
         public Task SaveChangesAsync()
         {
+            // A lot of database tasks expect that items get IDs when committed to the DB.
+            // We should try to mock that behaviour here.
+
+            var nextid = 1 + TransactionData.DefaultIfEmpty().Max(x => x.ID);
+            foreach (var tx in TransactionData.Where(x => x.ID == default))
+                tx.ID += nextid++;
+
+            nextid = 1 + TransactionData.DefaultIfEmpty().Max(x => x.Splits.Any() ? x.Splits.Max(y=>y.ID) : 0);
+            foreach (var split in TransactionData.SelectMany(x => x.Splits).Where(x => x.ID == default))
+                split.ID += nextid++;
+
             return Task.CompletedTask;
         }
 
