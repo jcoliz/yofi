@@ -81,12 +81,12 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual($"{urlroot}", redirect);
 
             // And: All of the edited items have the new category
-            var edited = context.Set<BudgetTx>().Where(x => ids.Contains(x.ID)).AsNoTracking().ToList();
+            var edited = context.Set<Payee>().Where(x => ids.Contains(x.ID)).AsNoTracking().ToList();
             Assert.IsTrue(edited.All(x=>x.Category == category));
 
             // And: None of the un-edited items have the new category
-            var unedited = context.Set<BudgetTx>().Where(x => !ids.Contains(x.ID)).AsNoTracking().ToList();
-            Assert.IsTrue(edited.All(x => x.Category != category));
+            var unedited = context.Set<Payee>().Where(x => !ids.Contains(x.ID)).AsNoTracking().OrderBy(TestKeyOrder<Payee>()).ToList();
+            Assert.IsTrue(items.Except(selected).SequenceEqual(unedited));
         }
 
         [DataRow("Create/?txid")]

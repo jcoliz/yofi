@@ -1,8 +1,10 @@
 ﻿using AngleSharp.Html.Dom;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -229,6 +231,89 @@ namespace YoFi.Tests.Integration.Controllers
                 expected = items.Where(x => x.Payee.Contains(payee));
 
             ThenResultsAreEqualByTestKey(document, expected);
+        }
+
+        #endregion
+
+        #region Other Tests
+
+        [TestMethod]
+        public async Task BulkEdit()
+        {
+            // Given: 10 items in the database, 7 of which are marked "selected"
+            (var items, var selected) = await GivenFakeDataInDatabase<Transaction>(10, 7, x => { x.Selected = true; return x; });
+            var ids = selected.Select(x => x.ID).ToList();
+
+            // When: Calling BulkEdit with a new category
+            var category = "Edited Category";
+            var formData = new Dictionary<string, string>()
+            {
+                { "Category", category },
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/BulkEdit", formData);
+
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: All of the edited items have the new category
+            var edited = context.Set<Transaction>().Where(x => ids.Contains(x.ID)).AsNoTracking().ToList();
+            Assert.IsTrue(edited.All(x => x.Category == category));
+
+            // And: None of the un-edited items have the new category
+            var unedited = context.Set<Transaction>().Where(x => !ids.Contains(x.ID)).AsNoTracking().OrderBy(TestKeyOrder<Transaction>()).ToList();
+            Assert.IsTrue(items.Except(selected).SequenceEqual(unedited));
+
+        }
+
+        [TestMethod]
+        public async Task BulkEditParts()
+        {
+            // Given: A list of items with varying categories, some of which match the pattern *:B:*
+
+            var categories = new string[] { "AB:Second:E", "AB:Second:E:F", "AB:Second:A:B:C", "G H:Second:KLM NOP" };
+            context.Transactions.AddRange(categories.Select(x => new Transaction() { Category = x, Amount = 100m, Timestamp = new DateTime(2001, 1, 1), Selected = true }));
+            context.SaveChanges();
+
+            // When: Calling Bulk Edit with a new category which includes positional wildcards
+            var category = "(1):New Category:(3+)";
+            var formData = new Dictionary<string, string>()
+            {
+                { "Category", category },
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/BulkEdit", formData);
+
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // Then: All previously-selected items are now correctly matching the expected category
+            Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).OrderBy(x=>x).SequenceEqual(context.Set<Transaction>().Select(x => x.Category).OrderBy(x=>x)));
+        }
+
+
+        [TestMethod]
+        public async Task BulkEditCancel()
+        {
+            // Given: 10 items in the database, 7 of which are marked "selected"
+            (var items, var selected) = await GivenFakeDataInDatabase<Transaction>(10, 7, x => { x.Selected = true; return x; });
+
+            // When: Calling Bulk Edit with blank category
+            var formData = new Dictionary<string, string>()
+            {
+                { "Category", string.Empty },
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/BulkEdit", formData);
+
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // Then: No items remain selected
+            Assert.IsFalse(context.Set<Transaction>().Any(x => x.Selected == true));
         }
 
         #endregion
