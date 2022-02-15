@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -16,6 +17,7 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class TransactionRepositoryTest : BaseRepositoryTest<Transaction>
     {
+        private TestAzureStorage storage;
         private TestClock clock;
 
         protected override List<Transaction> Items
@@ -61,9 +63,9 @@ namespace YoFi.Tests.Core
         public void SetUp()
         {
             context = new MockDataContext();
-            var storage = new TestAzureStorage();
+            storage = new TestAzureStorage();
             clock = new TestClock();
-            repository = new TransactionRepository(context, clock, storage: storage);
+            repository = new TransactionRepository(context, clock, storage);
         }
 
         #region Tests
@@ -723,6 +725,58 @@ namespace YoFi.Tests.Core
 
             // And: New split has no category
             Assert.IsNull(expected.Splits.Last().Category);
+        }
+
+        #endregion
+
+
+        #region Receipts
+
+
+        [TestMethod]
+        public async Task UpReceipt()
+        {
+            // Given: A transaction with no receipt
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var expected = chosen.Single();
+            var id = expected.ID;
+
+            // And: An image file
+            var contenttype = "image/png";
+            var length = 25;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
+
+            // When: Uploading it as a receipt
+            await transactionRepository.UploadReceiptAsync(expected, stream, contenttype);
+
+            // Then: The transaction displays as having a receipt
+            Assert.IsFalse(string.IsNullOrEmpty(expected.ReceiptUrl));
+
+            // And: The receipt is contained in storage
+            Assert.AreEqual(1, storage.BlobItems.Count());
+            Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
+            Assert.AreEqual(id.ToString(), storage.BlobItems.Single().FileName);
+        }
+
+
+        [TestMethod]
+        public async Task GetReceipt()
+        {
+            // Given: A transaction with a receipt
+            var filename = "1234";
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x => { x.ReceiptUrl = filename; return x; });
+            var expected = chosen.Single();
+            var id = expected.ID;
+            var contenttype = "image/png";
+
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // When: Getting the receipt
+            var (stream, contenttypeout, name) = await transactionRepository.GetReceiptAsync(expected);
+
+            // Then: The receipt is returned
+            Assert.AreEqual(filename, name);
+            Assert.AreEqual(contenttype, contenttypeout);
         }
 
         #endregion

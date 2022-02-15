@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SampleData\budget-white-60x.png" />
     <None Remove="SampleData\BudgetTxs.json" />
     <None Remove="SampleData\BudgetTxsManaged.json" />
     <None Remove="SampleData\FullSampleData-Month02.ofx" />
@@ -27,6 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="SampleData\budget-white-60x.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <Content Include="SampleData\SampleData-Full.xlsx">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

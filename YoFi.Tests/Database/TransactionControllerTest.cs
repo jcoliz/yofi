@@ -421,67 +421,6 @@ namespace YoFi.Tests.Database
             return new FormFile(stream, 0, length, filename, filename) { Headers = new HeaderDictionary(), ContentType = contenttype };
         }
 
-        [TestMethod]
-        public async Task UpReceipt()
-        {
-            // Given: A transaction with no receipt
-            var tx = TransactionItems.First();
-            context.Transactions.Add(tx);
-            context.SaveChanges();
-
-            // When: Uploading a receipt
-            var contenttype = "application/json";
-            var file = FormFileFromSampleData("BudgetTxs.json", contenttype);
-            var result = await controller.UpReceipt(new List<IFormFile>() { file },tx.ID);
-            Assert.IsTrue(result is RedirectToActionResult);
-
-            // Then: The transaction displays as having a receipt
-            Assert.IsFalse(string.IsNullOrEmpty(tx.ReceiptUrl));
-
-            // And: The receipt is contained in storage
-            Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
-        }
-
-        [TestMethod]
-        public async Task DeleteReceipt()
-        {
-            // Given: A transaction with a receipt
-            var tx = TransactionItems.First();
-            tx.ReceiptUrl = "application/ofx";
-            context.Transactions.Add(tx);
-            context.SaveChanges();
-
-            // When: Deleting the receipt
-            var result = await controller.ReceiptAction(tx.ID,"delete");
-            var rdresult = result as RedirectToActionResult;
-
-            Assert.AreEqual("Edit", rdresult.ActionName);
-
-            // Then: The transaction displays as not having a receipt
-            Assert.IsTrue(string.IsNullOrEmpty(tx.ReceiptUrl));
-        }
-
-        [TestMethod]
-        public async Task GetReceipt()
-        {
-            // Given: A transaction with a receipt
-            var tx = TransactionItems.First();
-            var contenttype = "application/json";
-            tx.ReceiptUrl = contenttype;
-            context.Transactions.Add(tx);
-            context.SaveChanges();
-
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = tx.ID.ToString(), InternalFile = "BudgetTxs.json", ContentType = contenttype });
-
-            // When: Getting the receipt
-            var result = await controller.ReceiptAction(tx.ID,"get");
-            var fsresult = result as FileStreamResult;
-
-            // Then: The receipt is returned
-            Assert.AreEqual(tx.ID.ToString(), fsresult.FileDownloadName);
-            Assert.AreEqual(contenttype, fsresult.ContentType);
-        }
-
         [DataRow("c=B,p=4", 3)]
         [DataRow("p=2,y=2000", 2)]
         [DataRow("c=C,p=2,y=2000", 1)]
