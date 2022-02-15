@@ -468,6 +468,82 @@ namespace YoFi.Tests.Integration.Controllers
 
         #endregion
 
+        #region Download
+
+        [TestMethod]
+        public async Task DownloadAllYears()
+        {
+            // Given: A mix of transactions over many years
+            (var items, _) = await GivenFakeDataInDatabase<Transaction>(30, 30,
+                x =>
+                {
+                    x.Timestamp = new DateTime(2020 - x.Timestamp.Day, x.Timestamp.Month, x.Timestamp.Day);
+                    return x;
+                });
+
+            // When: Downloading ALL YEARS of data
+            var formData = new Dictionary<string, string>()
+            {
+                {  "allyears", "true" }
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/Download", formData);
+
+            // Then: Response is OK
+            response.EnsureSuccessStatusCode();
+
+            // And: It's a stream
+            Assert.IsInstanceOfType(response.Content, typeof(StreamContent));
+            var streamcontent = response.Content as StreamContent;
+
+            // And: The stream contains a spreadsheet
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(await streamcontent.ReadAsStreamAsync());
+
+            // And: Deserializing items from the spreadsheet
+            var ssr_txs = ssr.Deserialize<Transaction>().OrderBy(x=>x.Timestamp);
+
+            // Then: The received items match the expected items
+            Assert.IsTrue(items.SequenceEqual(ssr_txs));
+        }
+
+        [TestMethod]
+        public async Task DownloadNoSplits_Bug895()
+        {
+            // Bug 895: Transaction download appears corrupt if no splits
+
+            // Given: A mix of transactions over many years, with no splits
+            (var items, _) = await GivenFakeDataInDatabase<Transaction>(30, 30,
+                x =>
+                {
+                    x.Timestamp = new DateTime(2020 - x.Timestamp.Day, x.Timestamp.Month, x.Timestamp.Day);
+                    return x;
+                });
+
+            // When: Downloading ALL YEARS of data
+            var formData = new Dictionary<string, string>()
+            {
+                {  "allyears", "true" }
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/Download", formData);
+
+            // Then: Response is OK
+            response.EnsureSuccessStatusCode();
+
+            // And: It's a stream
+            Assert.IsInstanceOfType(response.Content, typeof(StreamContent));
+            var streamcontent = response.Content as StreamContent;
+
+            // And: The stream contains a spreadsheet
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(await streamcontent.ReadAsStreamAsync());
+            var sheetnames = ssr.SheetNames.ToList();
+
+            Assert.AreEqual(1, sheetnames.Count());
+            Assert.AreEqual("Transaction", sheetnames.Single());
+        }
+
+        #endregion
+
         #region Hiding Tests
 
         // Need to hide download test. Works differently for transactions

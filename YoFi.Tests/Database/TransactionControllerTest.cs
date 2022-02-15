@@ -1,8 +1,7 @@
-﻿using Common.AspNet;
-using Common.AspNet.Test;
+﻿using Common.AspNet.Test;
+using Common.DotNet;
 using Common.DotNet.Test;
 using Common.NET.Test;
-using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,19 +9,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxSharp;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Controllers;
 using YoFi.AspNet.Data;
-using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
-using Dto = YoFi.Core.Models.Transaction; // YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
 using Transaction = YoFi.Core.Models.Transaction;
-using Common.DotNet;
-using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Database
 {
@@ -192,51 +186,6 @@ namespace YoFi.Tests.Database
         }
 #endif
 
-
-        [TestMethod]
-        public async Task DownloadAllYears() => await DownloadAllYears_Internal();
-
-        public async Task<FileStreamResult> DownloadAllYears_Internal()
-        {
-            var item_new = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-            var item_old = new Transaction() { Payee = "4", Timestamp = new DateTime(DateTime.Now.Year - 5, 01, 03), Amount = 200m };
-
-            context.Transactions.Add(item_old);
-            context.Transactions.Add(item_new);
-            context.SaveChanges();
-
-            var result = await controller.Download(true);
-            var fcresult = result as FileStreamResult;
-            var stream = fcresult.FileStream;
-            var incoming = helper.ExtractFromSpreadsheet<Transaction>(stream);
-
-            Assert.AreEqual(2, incoming.Count);
-
-            return fcresult;
-        }
-
-        [TestMethod]
-        public async Task Bug895()
-        {
-            // Bug 895: Transaction download appears corrupt if no splits
-
-            // So if there are no SPLITS there should be do splits tab.
-            // For convenience we'll use a different test and just grab those results.
-
-            var fcresult = await DownloadAllYears_Internal();
-            var stream = fcresult.FileStream;
-
-            IEnumerable<Transaction> txitems;
-            IEnumerable<string> sheetnames;
-            using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
-            txitems = ssr.Deserialize<Transaction>();
-            sheetnames = ssr.SheetNames.ToList();
-
-            Assert.AreEqual(1, sheetnames.Count());
-            Assert.AreEqual("Transaction", sheetnames.Single());
-            Assert.IsTrue(txitems.Any());
-        }
 
         [TestMethod]
         public async Task Bug1172()
