@@ -87,14 +87,6 @@ namespace YoFi.Tests.Database
                 };
             }
         }
-            
-        readonly List<Split> SplitItems = new List<Split>()
-        {
-            new Split() { Amount = 25m, Category = "A" },
-            new Split() { Amount = 75m, Category = "C" },
-            new Split() { Amount = 75m, Category = "C", Memo = "CAFES" },
-            new Split() { Amount = 75m, Category = "C", Memo = "WHOCAFD" }
-        };
 
         public static List<Payee> PayeeItems => new List<Payee>()
         {
@@ -200,23 +192,6 @@ namespace YoFi.Tests.Database
         }
 #endif
 
-        [TestMethod]
-        public async Task SplitsShownDownload()
-        {
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
-
-            context.Transactions.Add(item);
-            context.SaveChanges();
-
-            var result = await controller.Download(false);
-            var fcresult = result as FileStreamResult;
-            var stream = fcresult.FileStream;
-            var incoming = helper.ExtractFromSpreadsheet<Split>(stream);
-
-            Assert.AreEqual(2, incoming.Count);
-            Assert.AreEqual(item.ID, incoming.First().TransactionID);
-            Assert.AreEqual(item.ID, incoming.Last().TransactionID);
-        }
 
         [TestMethod]
         public async Task DownloadAllYears() => await DownloadAllYears_Internal();
@@ -339,15 +314,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(2, context.Transactions.Count());
         }
 
-
-        public static FormFile FormFileFromSampleData(string filename, string contenttype)
-        {
-            var stream = SampleData.Open(filename);
-            var length = stream.Length;
-
-            return new FormFile(stream, 0, length, filename, filename) { Headers = new HeaderDictionary(), ContentType = contenttype };
-        }
-
         [DataRow("c=B,p=4", 3)]
         [DataRow("p=2,y=2000", 2)]
         [DataRow("c=C,p=2,y=2000", 1)]
@@ -419,13 +385,6 @@ namespace YoFi.Tests.Database
         public void ReportNotFound() =>
             Assert.IsTrue(controller.Report(new ReportBuilder.Parameters() { id = "notfound" }) is Microsoft.AspNetCore.Mvc.NotFoundObjectResult);
 #endif
-        [TestMethod]
-        public async Task CreateInitial()
-        {
-            var result = await controller.Create(); 
-            var viewresult = result as ViewResult;
-            Assert.IsNull(viewresult.Model);
-        }
 
         [TestMethod]
         public void DownloadPartial()

@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using jcoliz.OfficeOpenXml.Serializer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories.Wire;
@@ -414,6 +416,54 @@ namespace YoFi.Tests.Integration.Controllers
             // And: They're NOT OK (yes flagged as problematic)
             var splits_not_ok = document.QuerySelector("div[data-test-id=splits-not-ok]");
             Assert.IsNotNull(splits_not_ok);
+        }
+
+
+        [TestMethod]
+        public async Task SplitsShownDownload()
+        {
+            // NOTE: This currently cannot be done as a repository test, because it relies on the relational
+            // foreign key mappings that EF Core puts in place.
+
+            // Given: Single transaction with balanced splits
+            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(1, 1,
+                x =>
+                {
+                    x.Timestamp = DateTime.Now;
+                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                    x.Amount = x.Splits.Sum(x => x.Amount);
+                    return x;
+                });
+            var expected = chosen.Single();
+
+            // When: Downloading them
+            var formData = new Dictionary<string, string>()
+            {
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/Download", formData);
+
+            // Then: Response is OK
+            response.EnsureSuccessStatusCode();
+
+            // And: It's a stream
+            Assert.IsInstanceOfType(response.Content, typeof(StreamContent));
+            var streamcontent = response.Content as StreamContent;
+
+            // And: The stream contains a spreadsheet
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(await streamcontent.ReadAsStreamAsync());
+
+            // And: Deserializing items from the spreadsheet
+            var ssr_txs = ssr.Deserialize<Transaction>();
+            var ssr_splits = ssr.Deserialize<Split>().OrderBy(x => x.Category);
+
+            // Then: The received splits match the expected splits
+            Assert.IsTrue(expected.Splits.SequenceEqual(ssr_splits));
+
+            // And: The IDs match
+            var txid = ssr_splits.First().TransactionID;
+            var tx = ssr_txs.Where(x => x.ID == txid).Single();
+            Assert.AreEqual(tx, expected);
         }
 
         #endregion
