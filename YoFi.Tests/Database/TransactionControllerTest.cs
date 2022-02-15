@@ -119,8 +119,6 @@ namespace YoFi.Tests.Database
             return TransactionItemsLong;
         }
 
-
-
         ITransactionRepository _repository;
 
         [TestInitialize]
@@ -178,7 +176,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual("SET", actual.ReceiptUrl);
         }
 
-
         [TestMethod]
         public async Task SplitsShownInEdit()
         {
@@ -233,56 +230,6 @@ namespace YoFi.Tests.Database
             var actual = model.Items.Single();
             Assert.IsTrue(actual.HasSplits);
         }
-
-#if false
-        // TODO: Rewrite for V3 reports
-        [DataTestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task SplitsShownInReport(bool usesplits)
-        {
-            int year = DateTime.Now.Year;
-            var ex1 = SplitItems[0];
-            var ex2 = SplitItems[1];
-
-            if (usesplits)
-            {
-                var item = new Transaction() { Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = 100m, Splits = SplitItems.Take(2).ToList() };
-
-                context.Transactions.Add(item);
-            }
-            else
-            {
-                var items = new List<Transaction>();
-                items.Add(new Transaction() { Category = ex1.Category, SubCategory = ex1.SubCategory, Payee = "3", Timestamp = new DateTime(year, 01, 03), Amount = ex1.Amount });
-                items.Add(new Transaction() { Category = ex2.Category, SubCategory = ex2.SubCategory, Payee = "2", Timestamp = new DateTime(year, 01, 04), Amount = ex2.Amount });
-                context.Transactions.AddRange(items);
-            }
-
-            context.SaveChanges();
-
-            var result = await controller.Pivot("all", null, null, year, null);
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as Table<Label, Label, decimal>;
-
-            var row_AB = model.RowLabels.Where(x => x.Key1 == "A" && x.Key2 == "B").Single();
-            var col = model.ColumnLabels.First();
-            var actual_AB = model[col, row_AB];
-
-            Assert.AreEqual(ex1.Amount, actual_AB);
-
-            var row_CD = model.RowLabels.Where(x => x.Key1 == "C" && x.Key2 == "D").Single();
-            var actual_CD = model[col, row_CD];
-
-            Assert.AreEqual(ex2.Amount, actual_CD);
-
-            // Make sure the total is correct as well, no extra stuff in there.
-            var row_total = model.RowLabels.Where(x => x.Value == "TOTAL").Single();
-            var actual_total = model[col, row_total];
-
-            Assert.AreEqual(ex1.Amount + ex2.Amount, actual_total);
-        }
-#endif
 
         [TestMethod]
         public async Task SplitsDontAddUpInEdit()
@@ -535,99 +482,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(contenttype, fsresult.ContentType);
         }
 
-        // This is public & static so I can share it with other tests.
-        // TODO: There is probably a more elegant way.
-        public static void GivenItemsWithAndWithoutReceipt(ApplicationDbContext _context,out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
-        {
-            items = TransactionItems.Take(10);
-            moditems = items.Take(3);
-            foreach (var i in moditems)
-                i.ReceiptUrl = "I have a receipt!";
-
-            _context.Transactions.AddRange(items);
-            _context.SaveChanges();
-        }
-
-        public static (IEnumerable<Transaction> items, IEnumerable<Transaction> moditems) GivenItems(int numitems, int nummoditems, Action<Transaction> action)
-        {
-            var items = TransactionItems.Take(numitems);
-            var moditems = items.Take(nummoditems);
-            foreach (var i in moditems)
-                action(i);
-
-            return (items, moditems);
-        }
-
-        void GivenItemsHiddenAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems)
-        {
-            items = TransactionItems.Take(10);
-            moditems = items.Take(3);
-            foreach (var i in moditems)
-                i.Hidden = true;
-
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-        }
-
-        void GivenItemsInYearAndNot(out IEnumerable<Transaction> items, out IEnumerable<Transaction> moditems, int year)
-        {
-            items = TransactionItems.Take(10);
-            moditems = items.Take(3);
-            foreach (var i in moditems)
-                i.Timestamp = new DateTime(year, i.Timestamp.Month, i.Timestamp.Day);
-
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-        }
-
-        async Task<IEnumerable<Dto>> WhenCallingIndexEmpty()
-        {
-            var result = await controller.Index();
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
-
-            return model.Items;
-        }
-
-        async Task<IEnumerable<Dto>> WhenCallingIndexWithQ(string q)
-        {
-            var result = await controller.Index(q: q);
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
-
-            return model.Items;
-        }
-
-        async Task WhenCallingIndexWithQThenBadRequest(string q)
-        {
-            var result = await controller.Index(q: q);
-
-            Assert.IsTrue(result is BadRequestResult);
-        }
-
-        async Task<IEnumerable<Dto>> WhenCallingIndexWithV(string v)
-        {
-            var result = await controller.Index(v: v);
-            var viewresult = result as ViewResult;
-            var model = viewresult.Model as TransactionsIndexPresenter;
-
-            return model.Items;
-        }
-
-        void ThenOnlyReturnedTxWith(IEnumerable<Transaction> items, IEnumerable<Dto> model, Func<Transaction, string> predicate, string word)
-        {
-            Assert.AreNotEqual(0, model.Count());
-            Assert.AreEqual(items.Where(x => predicate(x) != null && predicate(x).Contains(word)).Count(), model.Count());
-            Assert.AreEqual(model.Where(x => predicate((Transaction)x).Contains(word)).Count(), model.Count());
-        }
-
-        void ThenTxWithWereReturned(IEnumerable<Transaction> items, IEnumerable<Dto> model, Func<Transaction, string> predicate, string word)
-        {
-            Assert.AreNotEqual(0, model.Count());
-            Assert.AreEqual(items.Where(x => predicate(x) != null && predicate(x).Contains(word)).Count(), model.Count());
-            Assert.AreEqual(model.Where(x => predicate((Transaction)x).Contains(word)).Count(), model.Count());
-        }
-
         [DataRow("c=B,p=4", 3)]
         [DataRow("p=2,y=2000", 2)]
         [DataRow("c=C,p=2,y=2000", 1)]
@@ -656,9 +510,6 @@ namespace YoFi.Tests.Database
             // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are downloaded
             Assert.AreEqual(expected, model.Count());
         }
-
-
-
 
 #if false
         // TODO: Move these to report page tests
