@@ -1,14 +1,10 @@
-﻿using AngleSharp.Html.Dom;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web;
-using YoFi.Core.Models;
 using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Integration.Helpers;
 using Dto = YoFi.Core.Models.Transaction; // YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
