@@ -607,6 +607,24 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.IsTrue(actual.SequenceEqual(selected.Splits));
         }
 
+        [TestMethod]
+        public async Task DownloadPartial()
+        {
+            // Note this test will also test that setting the session year works
+
+            // Given: Having first set the session year with a call to reports
+            var year = 2004;
+            List<string> urls = new List<string>() { $"/Report/all?year={year}" };
+
+            // When: Calling Download Partial (in the same session)
+            urls.Add($"{urlroot}/DownloadPartial");
+            var document = await WhenGetAsyncSession(urls);
+
+            // Then: The year turns up as the default download year
+            var label = document.QuerySelector("label[for=year]").TextContent.Trim();
+            Assert.IsTrue(label.Contains(year.ToString()));
+        }
+
         #endregion
 
         #region Hiding Tests

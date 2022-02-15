@@ -256,17 +256,6 @@ namespace YoFi.Tests.Database
 #endif
 
         [TestMethod]
-        public void DownloadPartial()
-        {
-            // When: Calling Download Partial
-            var result = controller.DownloadPartial();
-
-            // Then: It returns an empty model
-            var viewresult = result as PartialViewResult;
-            Assert.IsInstanceOfType(viewresult.Model,typeof(int));
-        }
-
-        [TestMethod]
         public async Task EditPartial()
         {
             // Given: A transaction with no category

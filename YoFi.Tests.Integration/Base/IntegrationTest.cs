@@ -1,6 +1,7 @@
 ﻿using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using jcoliz.OfficeOpenXml.Serializer;
+using Microsoft.Net.Http.Headers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -137,6 +138,44 @@ namespace YoFi.Tests.Integration
         {
             var response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
+            var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
+            return document;
+        }
+
+        protected async Task<IHtmlDocument> WhenGetAsyncSession(IEnumerable<string> urls)
+        {
+            if (!urls.Any())
+                throw new ArgumentException("URLs are required", nameof(urls));
+
+            // Get the first one
+            var response = await client.GetAsync(urls.First());
+            response.EnsureSuccessStatusCode();
+
+            foreach(var url in urls.Skip(1))
+            {
+                // Extract session cookie
+                CookieHeaderValue sessioncookie = null;
+                var setcookie = response
+                    .Headers
+                    .GetValues("Set-Cookie")
+                    .FirstOrDefault(x => x.Contains("AspNetCore.Session"));
+
+                if (setcookie is null)
+                    throw new ApplicationException("No session cookie found");
+
+                var setcookiehv = SetCookieHeaderValue.Parse(setcookie);
+                sessioncookie = new CookieHeaderValue(setcookiehv.Name, setcookiehv.Value);
+
+                // Get the next one
+                response = await client.GetAsync(urls.First());
+
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("Cookie", sessioncookie.ToString());
+                response = await client.SendAsync(request);
+
+                response.EnsureSuccessStatusCode();
+            }
+
             var document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
             return document;
         }
