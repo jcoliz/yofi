@@ -179,28 +179,6 @@ namespace YoFi.Tests.Database
         }
 
 
-
-        [TestMethod]
-        public async Task CreateSecondSplit()
-        {
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, Splits = SplitItems.Take(1).ToList() };
-
-            context.Transactions.Add(item);
-            context.SaveChanges();
-
-            var result = await controller.CreateSplit(item.ID);
-            var viewresult = result as RedirectToActionResult;
-            var routes = viewresult.RouteValues;
-            var newid = Convert.ToInt32(routes["id"]);
-            var actual = context.Splits.Where(x => x.ID == newid).Single();
-
-            Assert.AreEqual(item.ID, actual.TransactionID);
-            Assert.AreEqual(75m, actual.Amount);
-
-            // Second split shouldn't have a category/subcat
-            Assert.IsNull(actual.Category);
-        }
-
         [TestMethod]
         public async Task SplitsShownInEdit()
         {

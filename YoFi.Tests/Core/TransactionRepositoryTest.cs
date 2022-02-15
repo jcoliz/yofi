@@ -684,11 +684,45 @@ namespace YoFi.Tests.Core
             var newid = await transactionRepository.AddSplitToAsync(id);
 
             // Then: Split has expected values
-            var actual = transactionRepository.All.SelectMany(x=>x.Splits).Where(x => x.ID == newid).Single();
+            var actual = expected.Splits.Single();
 
             Assert.AreEqual(expected.Amount, actual.Amount);
             Assert.AreEqual(category, actual.Category);
             Assert.IsNull(expected.Category);
+        }
+
+        [TestMethod]
+        public async Task CreateSecondSplit()
+        {
+            // Given: There are 5 items in the database, one of which already has a split
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, 
+                x => 
+                {
+                    x.Category = null;
+                    x.Splits = new List<Split>()
+                    {
+                        new Split()
+                        {
+                            Amount = 25m,
+                            Category = "A"
+                        }
+                    };
+
+                    return x; 
+                });
+
+            var expected = chosen.Single();
+            var id = expected.ID;
+
+            // When: Adding a split to that item
+            var newid = await transactionRepository.AddSplitToAsync(id);
+
+            // Then: Splits are now balanced
+            Assert.IsTrue(expected.IsSplitsOK);
+            Assert.AreEqual(2,expected.Splits.Count);
+
+            // And: New split has no category
+            Assert.IsNull(expected.Splits.Last().Category);
         }
 
         #endregion
