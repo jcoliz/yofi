@@ -39,6 +39,7 @@ namespace YoFi.Tests.Integration.Controllers
         {
             // Clean out database
             context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
+            context.Set<Payee>().RemoveRange(context.Set<Payee>());
             context.SaveChanges();
         }
 
@@ -624,6 +625,73 @@ namespace YoFi.Tests.Integration.Controllers
             var label = document.QuerySelector("label[for=year]").TextContent.Trim();
             Assert.IsTrue(label.Contains(year.ToString()));
         }
+
+        #endregion
+
+        #region Edit
+
+        [TestMethod]
+        public async Task EditModal()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var expected = chosen.Single();
+            var id = expected.ID;
+
+            // When: Asking for the modal edit partial view
+            var document = await WhenGetAsync($"{urlroot}/EditModal/{id}");
+
+            // Then: That item is shown
+            var testkey = FindTestKey<Transaction>().Name;
+            var actual = document.QuerySelector($"input[name={testkey}]").GetAttribute("value").Trim();
+            Assert.AreEqual(TestKeyOrder<Transaction>()(expected), actual);
+        }
+
+        [DataRow("Edit")]
+        [DataRow("EditModal")]
+        [DataTestMethod]
+        public async Task EditPayeeMatch(string endpoint)
+        {
+            // Given: A transaction with no category
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x=> { x.Category = null; return x; });
+            var expected = chosen.Single();
+            var id = expected.ID;
+
+            // And: A payee which matches the category payee
+            (_, var payees) = await GivenFakeDataInDatabase<Payee>(1, 1, x => { x.Name = expected.Payee; return x; });
+            var payee = payees.Single();
+
+            // When: Asking for the modal edit partial view
+            var document = await WhenGetAsync($"{urlroot}/{endpoint}/{id}");
+
+            // Then: The transaction gets the matching payee category
+            var actual = document.QuerySelector($"input[name=Category]").GetAttribute("value").Trim();
+            Assert.AreEqual(payee.Category, actual);
+        }
+
+        [DataRow("Edit")]
+        [DataRow("EditModal")]
+        [DataTestMethod]
+        public async Task EditNoPayeeMatch(string endpoint)
+        {
+            // Given: A transaction with an existing category
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var expected = chosen.Single();
+            var id = expected.ID;
+
+            // And: A payee which matches the transaction payee, but has a different category
+            var unexpectedcategory = "Unexpected";
+            (_, var payees) = await GivenFakeDataInDatabase<Payee>(1, 1, x => { x.Name = expected.Payee; x.Category = unexpectedcategory; return x; });
+            var payee = payees.Single();
+
+            // When: Asking for the modal edit partial view
+            var document = await WhenGetAsync($"{urlroot}/{endpoint}/{id}");
+
+            // Then: The transaction DID NOT get the matching payee category
+            var actual = document.QuerySelector($"input[name=Category]").GetAttribute("value").Trim();
+            Assert.AreNotEqual(payee.Category, actual);
+        }
+
 
         #endregion
 
