@@ -187,57 +187,6 @@ namespace YoFi.Tests.Database
 #endif
 
 
-        [TestMethod]
-        public async Task Bug1172()
-        {
-            // Bug 1172: [Production Bug] Download transactions with splits overfetches
-
-            // Transactions Index
-            // Search for "p=mort"
-            // Actions > Export > Current Year
-            // Load downloaded file in Excel
-            // Notice that the transactions page correctly includes only the transactions from the search results
-            // Notice that the splits tab additionally includes paycheck splits too, which are not related to the transactions
-
-            // Originally I thought that this bug can be triggered at the repository level, however, it seems to be tied with
-            // relational DB behaviour of splits in transactions. So moving it here for noe.
-
-            // Given: Two transactions, each with two different splits
-            var transactions = new List<Transaction>()
-            {
-                new Transaction()
-                {
-                    Payee = "One", Amount = 100m, Timestamp = new DateTime(DateTime.Now.Year,1,1), 
-                    Splits = new List<Split>()
-                    {
-                        new Split() { Category = "A:1", Amount = 25m },
-                        new Split() { Category = "A:2", Amount = 75m },
-                    }
-                },
-                new Transaction()
-                {
-                    Payee = "Two", Amount = -500m , Timestamp = new DateTime(DateTime.Now.Year,1,1), 
-                    Splits = new List<Split>()
-                    {
-                        new Split() { Category = "B:1", Amount = -100m, Memo = string.Empty },
-                        new Split() { Category = "B:2", Amount = -400m, Memo = string.Empty },
-                    }
-                },
-            };
-
-            context.Transactions.AddRange(transactions);
-            context.SaveChanges();
-
-            // When: Downloading a spreadsheet for just one of the transactions
-            var selected = transactions.First();
-            var result = await controller.Download(allyears: true, q: selected.Payee);
-            var fcresult = result as FileStreamResult;
-            var stream = fcresult.FileStream;
-            var model = helper.ExtractFromSpreadsheet<Split>(stream);
-
-            // Then: The spreadsheet includes splits for only the selected transaction
-            Assert.AreEqual(2, model.Count());
-        }
 
         [TestMethod]
         public async Task EditObjectValuesDuplicate()

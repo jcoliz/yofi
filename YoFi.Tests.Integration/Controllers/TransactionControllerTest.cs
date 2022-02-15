@@ -542,6 +542,71 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual("Transaction", sheetnames.Single());
         }
 
+        [TestMethod]
+        public async Task DownloadTooMuchSplits_Bug1172()
+        {
+            // Bug 1172: [Production Bug] Download transactions with splits overfetches
+
+            // Transactions Index
+            // Search for "p=mort"
+            // Actions > Export > Current Year
+            // Load downloaded file in Excel
+            // Notice that the transactions page correctly includes only the transactions from the search results
+            // Notice that the splits tab additionally includes paycheck splits too, which are not related to the transactions
+
+            // Originally I thought that this bug can be triggered at the repository level, however, it seems to be tied with
+            // relational DB behaviour of splits in transactions. So moving it here for noe.
+
+            // Given: Two transactions, each with two different splits
+            var transactions = new List<Transaction>()
+            {
+                new Transaction()
+                {
+                    Payee = "One", Amount = 100m, Timestamp = new DateTime(DateTime.Now.Year,1,1),
+                    Splits = new List<Split>()
+                    {
+                        new Split() { Category = "A:1", Amount = 25m },
+                        new Split() { Category = "A:2", Amount = 75m },
+                    }
+                },
+                new Transaction()
+                {
+                    Payee = "Two", Amount = -500m , Timestamp = new DateTime(DateTime.Now.Year,1,1),
+                    Splits = new List<Split>()
+                    {
+                        new Split() { Category = "B:1", Amount = -100m, Memo = string.Empty },
+                        new Split() { Category = "B:2", Amount = -400m, Memo = string.Empty },
+                    }
+                },
+            };
+            context.Transactions.AddRange(transactions);
+            context.SaveChanges();
+
+            // When: Downloading a spreadsheet for just one of the transactions
+            var selected = transactions.First();
+            var formData = new Dictionary<string, string>()
+            {
+                { "allyears", "true" },
+                { "q", selected.Payee }
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/Download", formData);
+
+            // Then: Response is OK
+            response.EnsureSuccessStatusCode();
+
+            // And: It's a stream
+            Assert.IsInstanceOfType(response.Content, typeof(StreamContent));
+            var streamcontent = response.Content as StreamContent;
+
+            // And: The stream contains a spreadsheet
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(await streamcontent.ReadAsStreamAsync());
+
+            // And: The spreadsheet includes splits for only the selected transaction
+            var actual = ssr.Deserialize<Split>().OrderBy(x=>x.Category);
+            Assert.IsTrue(actual.SequenceEqual(selected.Splits));
+        }
+
         #endregion
 
         #region Hiding Tests
