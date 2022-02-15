@@ -20,7 +20,7 @@ namespace YoFi.Tests.Helpers
 
         public IQueryable<Transaction> Transactions => TransactionData.AsQueryable();
 
-        public IQueryable<Split> Splits => throw new NotImplementedException();
+        public IQueryable<Split> Splits => Enumerable.Empty<Split>().AsQueryable();
 
         public IQueryable<Payee> Payees => PayeeData.AsQueryable();
 

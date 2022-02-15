@@ -314,35 +314,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual(2, context.Transactions.Count());
         }
 
-        [DataRow("c=B,p=4", 3)]
-        [DataRow("p=2,y=2000", 2)]
-        [DataRow("c=C,p=2,y=2000", 1)]
-        [DataRow("m=Wut,y=2000", 1)]
-        [DataRow("2,y=2000", 3)]
-        [DataTestMethod]
-        public async Task DownloadQMany(string q, int expected)
-        {
-            // Given: A mix of transactions, in differing years
-            // And: some with '{word}' in their category, memo, or payee and some without
-            // And: some with receipts, some without
-            var items = TransactionItems.Take(19);
-            var yearitems = items.Skip(3).Take(5);
-            int year = 2000;
-            foreach (var i in yearitems)
-                i.Timestamp = new DateTime(year, i.Timestamp.Month, i.Timestamp.Day);
-            context.Transactions.AddRange(items);
-            context.SaveChanges();
-
-            // When: Downloading transactions with q='{word},{key}={value}' in various combinations
-            var result = await controller.Download(allyears:true, q: q);
-            var fcresult = result as FileStreamResult;
-            var stream = fcresult.FileStream;
-            var model = helper.ExtractFromSpreadsheet<Transaction>(stream);
-
-            // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are downloaded
-            Assert.AreEqual(expected, model.Count());
-        }
-
 #if false
         // TODO: Move these to report page tests
         [TestMethod]

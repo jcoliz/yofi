@@ -1,5 +1,6 @@
 ﻿using Common.DotNet;
 using Common.NET.Test;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -58,6 +59,58 @@ namespace YoFi.Tests.Core
         protected override int CompareKeys(Transaction x, Transaction y) => x.Payee.CompareTo(y.Payee);
 
         private ITransactionRepository transactionRepository => repository as ITransactionRepository;
+
+        #region Helpers
+
+        protected async Task<IEnumerable<Transaction>[]> GivenComplexDataInDatabase()
+        {
+            // Given: A mix of transactions, in differing years
+            // And: some with '{word}' in their category, memo, or payee and some without
+            // And: some with receipts, some without
+            (var _, var c0) = await GivenFakeDataInDatabase<Transaction>(4, 2,
+                x =>
+                {
+                    x.Category += "CCC";
+                    x.Payee += "222";
+                    x.Timestamp = new DateTime(2100, 1, 1);
+                    return x;
+                });
+            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2,
+                x =>
+                {
+                    x.Category += "BBB";
+                    x.Payee += "222";
+                    x.Memo += "Wut";
+                    x.Timestamp = new DateTime(2100, 1, 1);
+                    return x;
+                });
+            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2,
+                x =>
+                {
+                    x.Category += "BBB";
+                    x.Payee += "444";
+                    x.Payee += "Wut";
+                    return x;
+                });
+            (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2,
+                x =>
+                {
+                    x.Memo += "Wut";
+                    x.Timestamp = new DateTime(2100, 1, 1);
+                    return x;
+                });
+            (var _, var c4) = await GivenFakeDataInDatabase<Transaction>(4, 2,
+                x =>
+                {
+                    x.Payee += "Wut";
+                    x.Timestamp = new DateTime(2100, 1, 1);
+                    return x;
+                });
+            return new[] { c0, c1, c2, c3, c4 };
+        }
+
+
+        #endregion
 
         [TestInitialize]
         public void SetUp()
@@ -156,6 +209,31 @@ namespace YoFi.Tests.Core
 
             // Then: All previously-selected items are now correctly matching the expected category
             Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
+        }
+
+        [DataRow("c=CCC,p=222,y=2100", new int[] { 0 })]
+        [DataRow("p=222,y=2100", new int[] { 0, 1 })]
+        [DataRow("c=BBB,p=444", new int[] { 2 })]
+        [DataRow("m=Wut,y=2100", new int[] { 1, 3 })]
+        [DataRow("Wut,y=2100", new int[] { 1, 3, 4 })]
+        [DataTestMethod]
+        public async Task DownloadQComplex(string q, int[] expected)
+        {
+            // Given: A mix of transactions, in differing years
+            // And: some with '{word}' in their category, memo, or payee and some without
+            var all = await GivenComplexDataInDatabase();
+            var chosen = expected.SelectMany(x => all[x]).OrderBy(x=>x.ID);
+
+            // When: Downloading transactions with q='{word},{key}={value}' in various combinations
+            var stream = await transactionRepository.AsSpreadsheetAsync(chosen.First().Timestamp.Year, false, q);
+
+            // And: Loading it as a spreadsheet
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            var items = ssr.Deserialize<Transaction>().OrderBy(x=>x.ID);
+
+            // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are returned
+            Assert.IsTrue(items.SequenceEqual(chosen));
         }
 
         #endregion
@@ -615,51 +693,12 @@ namespace YoFi.Tests.Core
         [DataRow("m=Wut,y=2100", new int[] { 1, 3 })]
         [DataRow("Wut,y=2100", new int[] { 1, 3, 4 })]
         [DataTestMethod]
-        public async Task IndexQMany(string q, int[] expected)
+        public async Task IndexQComplex(string q, int[] expected)
         {
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
             // And: some with receipts, some without
-            (var _, var c0) = await GivenFakeDataInDatabase<Transaction>(4, 2, 
-                x => 
-                { 
-                    x.Category += "CCC";
-                    x.Payee += "222";
-                    x.Timestamp = new DateTime(2100,1,1);
-                    return x; 
-                });
-            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
-                {
-                    x.Category += "BBB";
-                    x.Payee += "222";
-                    x.Memo += "Wut";
-                    x.Timestamp = new DateTime(2100, 1, 1);
-                    return x;
-                });
-            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
-                {
-                    x.Category += "BBB";
-                    x.Payee += "444";
-                    x.Payee += "Wut";
-                    return x;
-                });
-            (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
-                {
-                    x.Memo += "Wut";
-                    x.Timestamp = new DateTime(2100, 1, 1);
-                    return x;
-                });
-            (var _, var c4) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
-                {
-                    x.Payee += "Wut";
-                    x.Timestamp = new DateTime(2100, 1, 1);
-                    return x;
-                });
-            var all = new[] { c0, c1, c2, c3, c4 };
+            var all = await GivenComplexDataInDatabase();
             var chosen = expected.SelectMany(x => all[x]);
 
             // When: Calling index q='{word},{key}={value}' in various combinations
