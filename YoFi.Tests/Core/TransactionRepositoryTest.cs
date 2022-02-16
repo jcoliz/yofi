@@ -267,7 +267,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A set of items, some of which have a certain category
             var word = "Fibbledy-jibbit";
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category += word; return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(2, x => x.Category += word).SaveTo(this).Group(1);
 
             // When: Calling Index with category search term
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={word}" });
@@ -276,13 +276,12 @@ namespace YoFi.Tests.Core
             ThenResultsAreEqualByTestKey(document, chosen);
         }
 
-
         [TestMethod]
         public async Task IndexQPayeeAny()
         {
-            // Given: A set of items, some of which have a certain category
+            // Given: A set of items, some of which have a certain payee
             var word = "Fibbledy-jibbit";
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category += word; return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(3, x => x.Payee += word).SaveTo(this).Group(1);
 
             // When: Calling index q={word}
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
@@ -298,16 +297,13 @@ namespace YoFi.Tests.Core
             // (Note, I am prototyping a new way to handle multiple kinds of fake data)
             // (Unfortunately, I feel like this is LESS expressive still)
             var word = "CAF";
-            var fakes = GivenFakeItemGroups<Transaction>(
-                new (int, Func<Transaction, Transaction>)[]
-                {
-                    (2,null),
-                    (2,x => { x.Payee += word; return x; }),
-                    (2,x => { x.Memo += word; return x; }),
-                    (2,x => { x.Category += word; return x; }),
-                });
-            await repository.AddRangeAsync(fakes.SelectMany(x=>x));
-            var chosen = fakes.Skip(1).SelectMany(x => x);
+            var chosen = FakeObjects<Transaction>
+                .Make(2)
+                .Add(2, x => x.Payee += word)
+                .Add(2, x => x.Memo += word)
+                .Add(2, x => x.Category += word)
+                .SaveTo(this)
+                .Groups(1..);
 
             // When: Calling index q={word}
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });

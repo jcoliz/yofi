@@ -31,6 +31,8 @@ namespace YoFi.Tests.Helpers
         /// <returns></returns>
         IEnumerable<T> Group(int index);
 
+        IEnumerable<T> Groups(Range index);
+
         /// <summary>
         /// Total number of items
         /// </summary>
@@ -68,6 +70,24 @@ namespace YoFi.Tests.Helpers
                 throw new IndexOutOfRangeException();
 
             return Items.Skip(index).First();
+        }
+
+        public IEnumerable<T> Groups(Range index)
+        {
+            if (index.Start.IsFromEnd)
+                throw new IndexOutOfRangeException("Start from End not supported");
+
+            var skip = index.Start.Value;
+
+            if (skip >= Items.Count())
+                throw new IndexOutOfRangeException();
+
+            var take = index.End.IsFromEnd ? Items.Count - index.End.Value - skip : index.End.Value - index.Start.Value;
+
+            if (take <= 0)
+                throw new IndexOutOfRangeException("Start must be before end");
+
+            return Items.Skip(skip).Take(take).SelectMany(x=>x);
         }
 
         public IEnumerator GetEnumerator()
