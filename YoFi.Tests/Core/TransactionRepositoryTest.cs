@@ -16,7 +16,7 @@ using YoFi.Tests.Helpers;
 namespace YoFi.Tests.Core
 {
     [TestClass]
-    public class TransactionRepositoryTest : BaseRepositoryTest<Transaction>
+    public class TransactionRepositoryTest : BaseRepositoryTest<Transaction>, IFakeObjectsSaveTarget
     {
         private TestAzureStorage storage;
         private TestClock clock;
@@ -61,6 +61,14 @@ namespace YoFi.Tests.Core
         private ITransactionRepository transactionRepository => repository as ITransactionRepository;
 
         #region Helpers
+
+        public void AddRange(System.Collections.IEnumerable objects)
+        {
+            if (objects is IEnumerable<Transaction> txs)
+            {
+                repository.AddRangeAsync(txs).Wait();
+            }
+        }
 
         protected async Task<IEnumerable<Transaction>[]> GivenComplexDataInDatabase()
         {
@@ -245,7 +253,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A set of items, some of which have a certain payee
             var word = "Fibbledy-jibbit";
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(7, 2, x => { x.Payee += word; return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(2, x => x.Payee += word).SaveTo(this).Group(1);
 
             // When: Calling Index with payee search term
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"p={word}" });
