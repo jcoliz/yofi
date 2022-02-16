@@ -725,6 +725,70 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreNotEqual(payee.Category, actual);
         }
 
+        [TestMethod]
+        public async Task EditDuplicate()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var id = chosen.Single().ID;
+
+            // When: Editing the chosen item, with duplicate = true
+            var expected = GivenFakeItem<Transaction>(9);
+            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
+            {
+                { "ID", id.ToString() },
+                { "duplicate", "true" },
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", FormAction, formData);
+
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: The item was added, so the whole database now is the original items plus the expected
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            Assert.IsTrue(actual.SequenceEqual(items.Concat(new[] { expected })));
+        }
+
+        [TestMethod]
+        public async Task EditReceiptOverride_Bug846()
+        {
+            // Bug 846: Save edited item overwrites uploaded receipt
+
+            // Given: There are 5 items in the database, one of which we care about
+            // Note that this does not have a receipturl, by default
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var original = chosen.Single();
+            var id = original.ID;
+            // Detach so our edits won't show up
+            context.Entry(original).State = EntityState.Detached;
+
+            // And: Separately committing a change to set the receipturl
+            // Note that we have not reflected this change in our in-memory version of the object
+            var newreceipturl = "SET";
+            var dbversion = context.Set<Transaction>().Where(x => x.ID == id).Single();
+            dbversion.ReceiptUrl = newreceipturl;
+            context.SaveChanges();
+            // Detach so the editing operation can work on this item
+            context.Entry(dbversion).State = EntityState.Detached;
+
+            // When: Posting an edit to the chosen item using new edited values
+            // Note also no receipturl in this object
+            var expected = GivenFakeItem<Transaction>(9);
+            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
+            {
+                { "ID", id.ToString() },
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", FormAction, formData);
+
+            // Then: The in-database 
+
+            // What SHOULD happen is that the "blank" recepturl in the updated object does not overwrite
+            // the receitpurl we set above.
+            var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
+            Assert.AreEqual(newreceipturl, actual.ReceiptUrl);
+        }
 
         #endregion
 

@@ -372,6 +372,33 @@ namespace YoFi.Tests.Integration.Reports
             Assert.IsNotNull(nodata);
         }
 
+#if false
+        [TestMethod]
+        public void ReportSetsYear()
+        {
+            // Given: Current time is 1/1/2002
+            var now = new DateTime(2002, 1, 1);
+            controller.Now = now;
+            var year = 2000;
+
+            // And: First calling report with a defined year
+            controller.Report(new ReportBuilder.Parameters() { year = year });
+
+            // When: Later calling report with no year
+            var result = controller.Report(new ReportBuilder.Parameters());
+            var viewresult = result as ViewResult;
+            var model = viewresult.Model as Report;
+
+            // Then: The year from the first call is used
+            Assert.AreEqual(12, viewresult.ViewData["month"]);
+            Assert.IsTrue(model.Description.Contains(year.ToString()));
+        }
+
+        [TestMethod]
+        public void ReportNotFound() =>
+            Assert.IsTrue(controller.Report(new ReportBuilder.Parameters() { id = "notfound" }) is Microsoft.AspNetCore.Mvc.NotFoundObjectResult);
+#endif
+
         #endregion
 
         #region Utilities
@@ -466,6 +493,7 @@ namespace YoFi.Tests.Integration.Reports
 
             decimal nextamount(decimal x) => ((decimal)random.Next(-(int)(x * 100m), 0)) / 100m;
         }
+
         #endregion
 
     }
