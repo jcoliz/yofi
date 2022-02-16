@@ -287,11 +287,19 @@ namespace YoFi.Tests.Core
         public async Task IndexQAny()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            // (Note, I am prototyping a new way to handle multiple kinds of fake data)
+            // (Unfortunately, I feel like this is LESS expressive still)
             var word = "CAF";
-            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
-            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
-            (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
-            var chosen = c1.Concat(c2).Concat(c3);
+            var fakes = GivenFakeItemGroups<Transaction>(
+                new (int, Func<Transaction, Transaction>)[]
+                {
+                    (2,null),
+                    (2,x => { x.Payee += word; return x; }),
+                    (2,x => { x.Memo += word; return x; }),
+                    (2,x => { x.Category += word; return x; }),
+                });
+            await repository.AddRangeAsync(fakes.SelectMany(x=>x));
+            var chosen = fakes.Skip(1).SelectMany(x => x);
 
             // When: Calling index q={word}
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
