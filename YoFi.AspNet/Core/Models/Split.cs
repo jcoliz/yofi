@@ -37,6 +37,7 @@ namespace YoFi.Core.Models
         /// Optional commentary about this split
         /// </summary>
         [Attributes.Editable]
+        [Attributes.TestKey]
         public string Memo { get; set; }
 
         /// <summary>

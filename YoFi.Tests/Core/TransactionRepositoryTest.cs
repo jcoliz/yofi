@@ -768,7 +768,6 @@ namespace YoFi.Tests.Core
 
         #endregion
 
-
         #region Receipts
 
 

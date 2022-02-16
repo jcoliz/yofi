@@ -467,6 +467,39 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual(tx, expected);
         }
 
+        [TestMethod]
+        public async Task UploadSplitsForTransaction()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
+            var expected = chosen.Single();
+            var id = expected.ID;
+
+            // And: A spreadsheet of splits which will break down the details of that transaction
+            var numsplits = 4;
+            var splits = GivenFakeItems<Split>(numsplits, x => { x.Amount = expected.Amount / numsplits; return x; }).OrderBy(TestKeyOrder<Split>());
+            var stream = GivenSpreadsheetOf(splits);
+
+            // When: Uploading the spreadsheet as splits for the chosen transaction
+            var content = new MultipartFormDataContent
+            {
+                { new StreamContent(stream), "files", "Splits.xlsx" },
+                { new StringContent(id.ToString()), "id" }
+            };
+            var response = await WhenUploading(content, $"{urlroot}/Edit/{id}", $"{urlroot}/UpSplits");
+
+            // Then: Redirected to "/Transactions/Edit"
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"/Transactions/Edit/{id}", redirect);
+
+            // And: The splits are now attached to the transaction in the database
+            var actual = context.Set<Transaction>().Include(x=>x.Splits).Where(x => x.ID == id).AsNoTracking().Single();
+            Assert.IsTrue(actual.HasSplits);
+            Assert.IsTrue(actual.IsSplitsOK);
+            Assert.IsTrue(splits.SequenceEqual(actual.Splits.OrderBy(TestKeyOrder<Split>())));
+        }
+
         #endregion
 
         #region Download

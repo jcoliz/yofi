@@ -162,32 +162,6 @@ namespace YoFi.Tests.Database
             Assert.AreEqual("SET", actual.ReceiptUrl);
         }
 
-#if false
-        [TestMethod]
-        public async Task UploadSplitsForTransaction()
-        {
-            // Don't add the splits here, we'll upload them
-            var item = new Transaction() { Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-
-            context.Transactions.Add(item);
-            context.SaveChanges();
-
-            // TODO: Need a new way to prepare an upload of splits
-            // Make an HTML Form file containg a spreadsheet containing those splits
-            var file = ControllerTestHelper<Split, SplitsController>.PrepareUpload(SplitItems.Take(2).ToList());
-
-            // Upload that
-            var result = await controller.UpSplits(new List<IFormFile>() { file }, item.ID, new SplitImporter(_repository));
-            var redir = result as RedirectToActionResult;
-
-            Assert.IsNotNull(redir);
-            Assert.IsTrue(item.HasSplits);
-            Assert.IsTrue(item.IsSplitsOK);
-        }
-#endif
-
-
-
         [TestMethod]
         public async Task EditObjectValuesDuplicate()
         {
