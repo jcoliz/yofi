@@ -228,18 +228,5 @@ namespace YoFi.Tests.Database
         public void ReportNotFound() =>
             Assert.IsTrue(controller.Report(new ReportBuilder.Parameters() { id = "notfound" }) is Microsoft.AspNetCore.Mvc.NotFoundObjectResult);
 #endif
-
-
-        [TestMethod]
-        public void Error()
-        {         
-            var expected = "Bah, humbug!";
-            var httpcontext = new DefaultHttpContext() { TraceIdentifier = expected };
-            controller.ControllerContext.HttpContext = httpcontext;
-            var actionresult = controller.Error();
-            var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
-            var model = Assert.That.IsOfType<ErrorViewModel>(viewresult.Model);
-            Assert.AreEqual(expected, model.RequestId);
-        }
     }
 }

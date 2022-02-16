@@ -1,5 +1,6 @@
 ﻿using Common.DotNet;
 using Common.DotNet.Test;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Controllers;
 using YoFi.Core;
 using YoFi.Core.Models;
@@ -136,5 +138,17 @@ namespace YoFi.Tests.Controllers.Slim
         [TestMethod]
         public async Task ReceiptActionOther() =>
             Assert.IsTrue(await controller.ReceiptAction(1, string.Empty) is RedirectToActionResult);
+
+        [TestMethod]
+        public void Error()
+        {
+            var expected = "Bah, humbug!";
+            var httpcontext = new DefaultHttpContext() { TraceIdentifier = expected };
+            controller.ControllerContext.HttpContext = httpcontext;
+            var actionresult = controller.Error();
+            var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
+            var model = Assert.That.IsOfType<ErrorViewModel>(viewresult.Model);
+            Assert.AreEqual(expected, model.RequestId);
+        }
     }
 }
