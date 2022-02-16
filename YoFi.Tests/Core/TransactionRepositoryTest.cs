@@ -317,9 +317,13 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
             var word = "CAF";
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
-            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
-            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
+            var chosen = FakeObjects<Transaction>
+                .Make(2)
+                .Add(2, x => x.Payee += word)
+                .Add(2, x => x.Memo += word)
+                .Add(2, x => x.Category += word)
+                .SaveTo(this)
+                .Group(1);
 
             // When: Calling index q='p={word}'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"P={word}" });
@@ -333,9 +337,13 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
             var word = "CAF";
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
-            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
-            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
+            var chosen = FakeObjects<Transaction>
+                .Make(2)
+                .Add(2, x => x.Category += word)
+                .Add(2, x => x.Payee += word)
+                .Add(2, x => x.Memo += word)
+                .SaveTo(this)
+                .Group(1);
 
             // When: Calling index q='c={word}'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"C={word}" });
@@ -348,7 +356,7 @@ namespace YoFi.Tests.Core
         public async Task IndexQCategoryBlank()
         {
             // Given: A mix of transactions, some with null category
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category = null; return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(3, x => x.Category = null).SaveTo(this).Group(1);
 
             // When: Calling index q='c=[blank]'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"C=[blank]" });
@@ -362,9 +370,13 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
             var word = "CAF";
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
-            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
-            _ = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
+            var chosen = FakeObjects<Transaction>
+                .Make(2)
+                .Add(2, x => x.Memo += word)
+                .Add(2, x => x.Category += word)
+                .Add(2, x => x.Payee += word)
+                .SaveTo(this)
+                .Group(1);
 
             // When: Calling index q='m={word}'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"M={word}" });
@@ -379,7 +391,8 @@ namespace YoFi.Tests.Core
         public async Task IndexQReceipt(bool with)
         {
             // Given: A mix of transactions, some with receipts, some without
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.ReceiptUrl = "Has receipt"; return x; });
+            var items = FakeObjects<Transaction>.Make(5).Add(3, x => x.ReceiptUrl = "Has receipt").SaveTo(this);
+            var chosen = items.Group(1);
 
             // When: Calling index q='r=1' (or r=0)
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"R={(with ? '1' : '0')}" });
@@ -396,7 +409,7 @@ namespace YoFi.Tests.Core
         public async Task IndexQReceiptWrong()
         {
             // Given: A mix of transactions, some with receipts, some without
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.ReceiptUrl = "Has receipt"; return x; });
+            _ = FakeObjects<Transaction>.Make(5).Add(3, x => x.ReceiptUrl = "Has receipt").SaveTo(this);
 
             // When: Calling index with q='r=text'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = "R=bogus" });
@@ -409,7 +422,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, in differing years
             int year = 1992;
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Timestamp = new DateTime(year, 1, 1); return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(3, x => x.Timestamp = new DateTime(year, 1, 1)).SaveTo(this).Group(1);
 
             // When: Calling index q='y={year}'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"Y={year}" });
@@ -423,7 +436,7 @@ namespace YoFi.Tests.Core
         public async Task IndexQAmountText()
         {
             // Given: A mix of transactions, with differing amounts
-            await GivenFakeDataInDatabase<Transaction>(10);
+            _ = FakeObjects<Transaction>.Make(10).SaveTo(this);
 
             // When: Calling index with q='a=text'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = "A=text" });
@@ -436,8 +449,12 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with a certain amount, others not
             var amount = 123m;
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Amount = amount; return x; });
-            // TODO: Also need to add some which are amount/100
+            var chosen = FakeObjects<Transaction>
+                .Make(2)
+                .Add(3, x => x.Amount = amount)
+                .Add(3, x => x.Amount = amount/100)
+                .SaveTo(this)
+                .Groups(1..);
 
             // When: Calling index with q='a=###'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"A={amount:0}" });
@@ -451,7 +468,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with a certain amount, others not
             var amount = 1.23m;
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Amount = amount; return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(3, x => x.Amount = amount).SaveTo(this).Group(1);
 
             // When: Calling index with q='a=#.##'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"A={amount:0.00}" });
@@ -466,7 +483,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category and some without
             var word = "CAF";
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, x => { x.Category += word; return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(3, x=>x.Category += word).SaveTo(this).Group(1);
 
             // When: Calling index q={word}
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
@@ -486,31 +503,24 @@ namespace YoFi.Tests.Core
 
             // Given: A mix of transactions, some with splits, some without; some with '{word}' in their category, memo, or payee, or splits category and some without
             var word = "CAF";
-            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
 
-            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                                x =>
-                                {
-                                    x.Splits = GivenFakeItems<Split>(2, x => { x.Category += word; return x; }).ToList();
-                                    return x;
-                                });
-            (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
-            (var _, var c4) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
-            (var _, var c5) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                                x =>
-                                {
-                                    x.Splits = GivenFakeItems<Split>(2).ToList();
-                                    return x;
-                                });
+            var items = FakeObjects<Transaction>
+                .Make(5)
+                .Add(2, x => x.Category += word)
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Category += word).ToList())
+                .Add(2, x => x.Payee += word)
+                .Add(2, x => x.Memo += word)
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).ToList())
+                .SaveTo(this);
 
-            var chosen = any ? new[] { c1, c2, c3, c4 } : new[] { c1, c2 };
+            var chosen = any ? items.Groups(1..4) : items.Groups(1..2);
 
             // When: Calling index q={word} OR q=c={word}
             var q = any ? word : $"c={word}";            
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = q });
 
             // Then: Only the transactions with '{word}' in their category (or everywhere) are returned
-            ThenResultsAreEqualByTestKey(document, chosen.SelectMany(x=>x));
+            ThenResultsAreEqualByTestKey(document, chosen);
         }
 
         [TestMethod]
@@ -518,7 +528,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their memo and some without
             var word = "CAF";
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, x => { x.Memo += word; return x; });
+            var chosen = FakeObjects<Transaction>.Make(6).Add(4, x => x.Memo += word).SaveTo(this).Group(1);
 
             // When: Calling index q={word}
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
@@ -526,28 +536,29 @@ namespace YoFi.Tests.Core
             // Then: Only the transactions with '{word}' in their memo are returned
             ThenResultsAreEqualByTestKey(document, chosen);
         }
-        [TestMethod]
-        public async Task IndexQMemoSplitsAny()
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexQMemoSplitsAny(bool any)
         {
             // Given: A mix of transactions, some with '{word}' in their memo and some without
             var word = "CAF";
-            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
-            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                                x =>
-                                {
-                                    x.Splits = GivenFakeItems<Split>(2, x => { x.Memo += word; return x; }).ToList();
-                                    return x;
-                                });
-            _ = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                                x =>
-                                {
-                                    x.Splits = GivenFakeItems<Split>(2).ToList();
-                                    return x;
-                                });
-            var chosen = c1.Concat(c2);
+            var items = FakeObjects<Transaction>
+                .Make(5)
+                .Add(2, x => x.Memo += word)
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Memo += word).ToList())
+                .Add(2, x => x.Category += word)
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Category += word).ToList())
+                .Add(2, x => x.Payee += word)
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).ToList())
+                .SaveTo(this);
+
+            var chosen = any ? items.Groups(1..5) : items.Group(1);
 
             // When: Calling index q={word}
-            var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
+            var q = any ? word : $"m={word}";
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = q });
 
             // Then: Only the transactions with '{word}' in their memo are returned
             ThenResultsAreEqualByTestKey(document, chosen);
