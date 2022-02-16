@@ -59,6 +59,17 @@ namespace YoFi.Tests.Core
 
         #region Helpers
 
+        protected static IEnumerable<TItem>[] GivenFakeItemGroups<TItem>(IEnumerable<(int num, Func<TItem, TItem> func)> groups, int from = 1) where TItem : class, new()
+        {
+            var result = new List<IEnumerable<TItem>>();
+            int starting = from;
+            foreach(var group in groups)
+            {
+                result.Add(GivenFakeItems(group.num, group.func, starting).ToList());
+                starting += group.num;
+            }
+            return result.ToArray();
+        }
 
         protected static IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null, int from = 1) where TItem : class, new()
         {
@@ -104,8 +115,9 @@ namespace YoFi.Tests.Core
         {
             var firstitem = repository.All.Count() + 1;
             var numunchanged = total - selected;
-            var items = GivenFakeItems<T>(numunchanged,null,from:firstitem).Concat(GivenFakeItems<T>(selected,func,from:numunchanged + firstitem)).ToList();
-            var wasneeded = items.Skip(numunchanged).Take(selected);
+            var groups = GivenFakeItemGroups(new (int,Func<T,T>)[] { (numunchanged,null), (selected,func) },firstitem);
+            var items = groups.SelectMany(x => x);
+            var wasneeded = groups[1];
 
             await repository.AddRangeAsync(items);
 
