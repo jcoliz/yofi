@@ -95,23 +95,23 @@ namespace YoFi.Tests.Core
             (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2,
                 x =>
                 {
-                    x.Category += "BBB";
-                    x.Payee += "444";
-                    x.Payee += "Wut";
+                    x.Memo += "Wut";
+                    x.Timestamp = new DateTime(2100, 1, 1);
                     return x;
                 });
             (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2,
                 x =>
                 {
-                    x.Memo += "Wut";
+                    x.Payee += "Wut";
                     x.Timestamp = new DateTime(2100, 1, 1);
                     return x;
                 });
             (var _, var c4) = await GivenFakeDataInDatabase<Transaction>(4, 2,
                 x =>
                 {
+                    x.Category += "BBB";
+                    x.Payee += "444";
                     x.Payee += "Wut";
-                    x.Timestamp = new DateTime(2100, 1, 1);
                     return x;
                 });
             return new[] { c0, c1, c2, c3, c4 };
@@ -219,18 +219,18 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
         }
 
-        [DataRow("c=CCC,p=222,y=2100", new int[] { 0 })]
-        [DataRow("p=222,y=2100", new int[] { 0, 1 })]
-        [DataRow("c=BBB,p=444", new int[] { 2 })]
-        [DataRow("m=Wut,y=2100", new int[] { 1, 3 })]
-        [DataRow("Wut,y=2100", new int[] { 1, 3, 4 })]
+        [DataRow("c=CCC,p=222,y=2100", 0,1)]
+        [DataRow("p=222,y=2100", 0,2)]
+        [DataRow("c=BBB,p=444", 4,5)]
+        [DataRow("m=Wut,y=2100", 1,3)]
+        [DataRow("Wut,y=2100", 1,4)]
         [DataTestMethod]
-        public async Task DownloadQComplex(string q, int[] expected)
+        public async Task DownloadQComplex(string q, int from, int to)
         {
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
             var all = await GivenComplexDataInDatabase();
-            var chosen = expected.SelectMany(x => all[x]).OrderBy(x=>x.ID);
+            var chosen = all[from..to].SelectMany(x => x).OrderBy(x=>x.ID);
 
             // When: Downloading transactions with q='{word},{key}={value}' in various combinations
             var stream = await transactionRepository.AsSpreadsheetAsync(chosen.First().Timestamp.Year, false, q);
@@ -513,7 +513,7 @@ namespace YoFi.Tests.Core
                 .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).ToList())
                 .SaveTo(this);
 
-            var chosen = any ? items.Groups(1..4) : items.Groups(1..2);
+            var chosen = any ? items.Groups(1..5) : items.Groups(1..3);
 
             // When: Calling index q={word} OR q=c={word}
             var q = any ? word : $"c={word}";            
@@ -554,7 +554,7 @@ namespace YoFi.Tests.Core
                 .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).ToList())
                 .SaveTo(this);
 
-            var chosen = any ? items.Groups(1..5) : items.Groups(1..2);
+            var chosen = any ? items.Groups(1..6) : items.Groups(1..3);
 
             // When: Calling index q={word}
             var q = any ? word : $"m={word}";
@@ -573,7 +573,8 @@ namespace YoFi.Tests.Core
         public async Task IndexQDate(int day)
         {
             // Given: A mix of transactions, with differing dates, within the current year
-            var items = await GivenFakeDataInDatabase<Transaction>(22);
+            var items = FakeObjects<Transaction>.Make(22).SaveTo(this);
+
             clock.Now = items.Min(x => x.Timestamp);
 
             // When: Calling index with q='d=#/##'
@@ -594,7 +595,7 @@ namespace YoFi.Tests.Core
         public async Task IndexQDateInteger(int day)
         {
             // Given: A mix of transactions, with differing dates, within the current year
-            var items = await GivenFakeDataInDatabase<Transaction>(22);
+            var items = FakeObjects<Transaction>.Make(22).SaveTo(this);
             clock.Now = items.Min(x => x.Timestamp);
 
             // When: Calling index with q='d=#/##'
@@ -611,7 +612,7 @@ namespace YoFi.Tests.Core
         public async Task IndexQDateText()
         {
             // Given: A mix of transactions, with differing dates
-            var items = await GivenFakeDataInDatabase<Transaction>(22);
+            var items = FakeObjects<Transaction>.Make(22).SaveTo(this);
 
             // When: Calling index with q='d=text'
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"D=text" });
@@ -627,14 +628,18 @@ namespace YoFi.Tests.Core
             var number00 = number / 100m;
             var date = new DateTime(DateTime.Now.Year, (int)(number / 100m), (int)(number % 100m));
             var word = number.ToString("0");
-            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += word; return x; });
-            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += word; return x; });
-            (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += word; return x; });
-            (var _, var c4) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Amount = number; return x; });
-            (var _, var c5) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Amount = number00; return x; });
-            (var _, var c6) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Timestamp = date; return x; });
-            var all = new[] { c1, c2, c3, c4, c5, c6 };
-            var chosen = all.SelectMany(x => x);
+
+            var chosen = FakeObjects<Transaction>
+                .Make(5)
+                .Add(2, x => x.Category += word)
+                .Add(2, x => x.Memo += word)
+                .Add(2, x => x.Payee += word)
+                .Add(2, x => x.Amount = number)
+                .Add(2, x => x.Amount = number00)
+                .Add(2, x => x.Timestamp = date)
+                .SaveTo(this)
+                .Groups(1..)
+                .OrderBy(x => x.Payee);
 
             // When: Calling index q={word}
             // (Note that we are ordering just so we can ensure easy comparison later)
@@ -643,7 +648,7 @@ namespace YoFi.Tests.Core
             // Then: Transactions with {###} in the memo or payee are returned AS WELL AS
             // transactions on or within a week of #/## AS WELL AS transactions with amounts
             // of ###.00 and #.##.
-            ThenResultsAreEqualByTestKey(document, chosen.OrderBy(x => x.Payee));
+            ThenResultsAreEqualByTestKey(document, chosen);
         }
 
         [TestMethod]
@@ -655,23 +660,25 @@ namespace YoFi.Tests.Core
             var number = numbers[0];
             var number00 = number / 100m;
             var dates = numbers.Select(x => new DateTime(DateTime.Now.Year, (int)(x / 100m), (int)(x % 100m))).ToList();
-            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Category += words[0]; return x; });
-            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Memo += words[0]; x.Timestamp = dates[1]; return x; });
-            (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Payee += words[0]; return x; });
-            (var _, var c4) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Amount = number; return x; });
-            (var _, var c5) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Amount = number00; x.Category += words[1]; return x; });
-            (var _, var c6) = await GivenFakeDataInDatabase<Transaction>(4, 2, x => { x.Timestamp = dates[0]; return x; });
 
-            // We only expect the data sets with BOTH factors to be returned
-            var all = new[] { c2, c5, };
-            var chosen = all.SelectMany(x => x);
+            var chosen = FakeObjects<Transaction>
+                .Make(5)
+                .Add(2, x => { x.Memo += words[0]; x.Timestamp = dates[1]; })
+                .Add(2, x => { x.Amount = number00; x.Category += words[1]; })
+                .Add(2, x => x.Category += words[0])
+                .Add(2, x => x.Payee += words[0])
+                .Add(2, x => x.Amount = number)
+                .Add(2, x => x.Timestamp = dates[0])
+                .SaveTo(this)
+                .Groups(1..3)
+                .OrderBy(x => x.Payee);
 
             // When: Calling index q={words}
             // (Note that we are ordering just so we can ensure easy comparison later)
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = string.Join(",", words), Order = "pa" });
 
             // Then: Only the transactions with BOTH '{words}' somewhere in their searchable terms are returned
-            ThenResultsAreEqualByTestKey(document, chosen.OrderBy(x => x.Payee));
+            ThenResultsAreEqualByTestKey(document, chosen);
         }
 
         [TestMethod]
@@ -688,7 +695,7 @@ namespace YoFi.Tests.Core
         public async Task IndexVHidden()
         {
             // Given: A mix of transactions, some hidden, some not
-            (var items, _) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Hidden = true; return x; });
+            var items = FakeObjects<Transaction>.Make(2).Add(3, x => x.Hidden = true).SaveTo(this);
 
             // When: Calling index v='h'
             var document = await WhenGettingIndex(new WireQueryParameters() { View = "H" });
@@ -701,28 +708,29 @@ namespace YoFi.Tests.Core
         public async Task IndexNoHidden()
         {
             // Given: A mix of transactions, some hidden, some not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Hidden = true; return x; });
+            var items = FakeObjects<Transaction>.Make(2).Add(3, x => x.Hidden = true).SaveTo(this);
 
             // When: Calling index without qualifiers
             var document = await WhenGettingIndex(new WireQueryParameters());
 
             // Then: Only non-hidden transactions are returned
-            ThenResultsAreEqualByTestKey(document, items.Except(chosen));
+            ThenResultsAreEqualByTestKey(document, items.Group(0));
         }
 
-        [DataRow("c=CCC,p=222,y=2100", new int[] { 0 })]
-        [DataRow("p=222,y=2100", new int[] { 0, 1 })]
-        [DataRow("c=BBB,p=444", new int[] { 2 })]
-        [DataRow("m=Wut,y=2100", new int[] { 1, 3 })]
-        [DataRow("Wut,y=2100", new int[] { 1, 3, 4 })]
+        [DataRow("c=CCC,p=222,y=2100", 0, 1)]
+        [DataRow("p=222,y=2100", 0, 2 )]
+        [DataRow("c=BBB,p=444", 4, 5 )]
+        [DataRow("m=Wut,y=2100", 1, 3 )]
+        [DataRow("Wut,y=2100", 1, 4)]
         [DataTestMethod]
-        public async Task IndexQComplex(string q, int[] expected)
+        public async Task IndexQComplex(string q, int from, int to)
         {
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
             // And: some with receipts, some without
             var all = await GivenComplexDataInDatabase();
-            var chosen = expected.SelectMany(x => all[x]);
+            var selected = all[from..to];
+            var chosen = selected.SelectMany(x => x);
 
             // When: Calling index q='{word},{key}={value}' in various combinations
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = q });

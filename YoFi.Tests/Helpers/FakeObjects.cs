@@ -82,7 +82,7 @@ namespace YoFi.Tests.Helpers
             if (skip >= Items.Count())
                 throw new IndexOutOfRangeException();
 
-            var take = index.End.IsFromEnd ? Items.Count - index.End.Value - skip : index.End.Value - skip + 1;
+            var take = index.End.IsFromEnd ? Items.Count - index.End.Value - skip : index.End.Value - skip;
 
             if (take <= 0)
                 throw new IndexOutOfRangeException("Start must be before end");
