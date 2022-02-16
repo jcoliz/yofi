@@ -5,35 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Tests.Database;
+using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
 {
     [TestClass]
     public class NewSpreadsheetsTest
     {
-        public class SimpleItem<T>
-        {
-            public T Key { get; set; }
-
-            public override bool Equals(object obj)
-            {
-                return obj is SimpleItem<T> item &&
-                    (
-                        (Key == null && item.Key == null)
-                        ||
-                        (Key?.Equals(item.Key) ?? false)
-                     );
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Key);
-            }
-        }
-
         public TestContext TestContext { get; set; }
 
         void WhenWritingToSpreadsheet<T>(Stream stream,IEnumerable<T> items,bool writetodisk = true) where T: class
@@ -87,14 +66,13 @@ namespace YoFi.Tests.Core
         [TestMethod]
         public void OnePayee()
         {
-            // Given: A single empty transaction
-            // Note that an empty timestamp does not serialize well
-            var Items = new List<Payee>() { new Payee() { ID = 1, Category = "A", Name = "C", Selected = true } };
+            // Given: A single payee
+            var items = FakeObjects<Payee>.Make(1);
 
             // When: Writing it to a spreadsheet 
             // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack(Items);
+            WriteThenReadBack(items);
         }
 
         // TODO: Need to find a new way to get items
@@ -153,41 +131,39 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
-        public async Task TransactionItemsFew()
+        public void TransactionItemsFew()
         {
             // Given: A small number of transactions
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(2) /*.ToList()*/;
+            var items = FakeObjects<Transaction>.Make(2);
 
             // When: Writing it to a spreadsheet 
             // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack(Items);
+            WriteThenReadBack(items);
         }
 
         [TestMethod]
-        public async Task TransactionItems20()
+        public void TransactionItems20()
         {
             // Given: A ton of transactions
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20) /*.ToList()*/;
+            var items = FakeObjects<Transaction>.Make(20);
 
             // When: Writing it to a spreadsheet 
             // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack(Items);
+            WriteThenReadBack(items);
         }
 
-
-        // This is really slow, so not running by default
         [TestMethod]
-        public async Task TransactionItems1000()
+        public void TransactionItems1000()
         {
             // Given: A ton of transactions
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()) /*.ToList()*/;
+            var items = FakeObjects<Transaction>.Make(1000);
 
             // When: Writing it to a spreadsheet 
             // And: Reading it back to a spreadsheet
             // Then: The spreadsheet is valid, and contains the expected item
-            WriteThenReadBack<Transaction>(Items, writetodisk:false);
+            WriteThenReadBack<Transaction>(items, writetodisk:false);
         }
 
 #if false
@@ -256,14 +232,16 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
-        public async Task LoadAnyName()
+        public void LoadAnyName()
         {
+            // TODO: Review this test! Is it actually doing what the comments say??
+
             // User Story 1042: Upload spreadsheet shouldn't be worried about name of sheet
 
             // Given: A file created with an arbitrary non-confirming sheet name
-            var Items = (await TransactionControllerTest.GetTransactionItemsLong()).Take(20) /*.ToList()*/;
+            var items = FakeObjects<Transaction>.Make(20);
             using var stream = new MemoryStream();
-            WhenWritingToSpreadsheet(stream, Items, writetodisk:true);
+            WhenWritingToSpreadsheet(stream, items, writetodisk:true);
 
             // When: Loading the file, without specifying the sheet name
             var actual = new List<Transaction>();
@@ -273,7 +251,7 @@ namespace YoFi.Tests.Core
             actual.AddRange(reader.Deserialize<Transaction>());
 
             // Then: Data is loaded as expected.
-            Assert.IsTrue(actual.SequenceEqual(Items));
+            Assert.IsTrue(actual.SequenceEqual(items));
         }
 
     }
