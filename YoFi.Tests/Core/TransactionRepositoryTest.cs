@@ -554,7 +554,7 @@ namespace YoFi.Tests.Core
                 .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).ToList())
                 .SaveTo(this);
 
-            var chosen = any ? items.Groups(1..5) : items.Group(1);
+            var chosen = any ? items.Groups(1..5) : items.Groups(1..2);
 
             // When: Calling index q={word}
             var q = any ? word : $"m={word}";

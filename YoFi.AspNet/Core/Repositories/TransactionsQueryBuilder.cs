@@ -291,7 +291,7 @@ namespace YoFi.Core.Repositories
         /// Translate query on memo
         /// </summary>
         private static IQueryable<Transaction> TransactionsForQuery_Memo(IQueryable<Transaction> result, string value) =>
-            result.Where(x => x.Memo.Contains(value));
+            result.Where(x => x.Memo.Contains(value) || x.Splits.Any(s=>s.Memo.Contains(value)));
 
         /// <summary>
         /// Transalte query on having receipt
