@@ -60,7 +60,7 @@ namespace YoFi.Tests.Core
         #region Helpers
 
 
-        protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null, int from = 1) where TItem : class, new()
+        protected static IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null, int from = 1) where TItem : class, new()
         {
             return Enumerable
                 .Range(from, num)
@@ -68,7 +68,7 @@ namespace YoFi.Tests.Core
                 .Select(func ?? (x => x));
         }
 
-        protected virtual TItem GivenFakeItem<TItem>(int index) where TItem : class, new()
+        protected static TItem GivenFakeItem<TItem>(int index) where TItem : class, new()
         {
             var result = new TItem();
             var properties = typeof(TItem).GetProperties();
