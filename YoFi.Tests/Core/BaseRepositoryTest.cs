@@ -196,9 +196,10 @@ namespace YoFi.Tests.Core
         [TestMethod]
         public async Task IndexMany()
         {
-            var expected = Items.Take(5).ToList();
-            context.AddRange(expected);
+            // Given: Many items in the data set
+            var expected = FakeObjects<T>.Make(5).SaveTo(this).ToList();
 
+            // When: Querying items from the repository
             var qresult = await repository.GetByQueryAsync(new WireQueryParameters());
 
             // Test that the resulting items are the same as expected items ordered correctly
@@ -210,11 +211,12 @@ namespace YoFi.Tests.Core
         public async Task DetailsFound()
         {
             // Given: Five items in the data set
-            context.AddRange(Items.Take(5));
+            var items = FakeObjects<T>.Make(5).SaveTo(this);
+            var expected = items.Last();
+            var id = expected.ID;
 
             // When: Getting a single item by its ID
-            var expected = Items.Skip(3).First();
-            var model = await repository.GetByIdAsync(expected.ID);
+            var model = await repository.GetByIdAsync(id);
 
             // Then: The expected item is returned
             Assert.AreEqual(expected, model);
@@ -225,7 +227,7 @@ namespace YoFi.Tests.Core
         public async Task DetailsNotFound()
         {
             // Given: A single item
-            context.AddRange(Items.Take(1));
+            _ = FakeObjects<T>.Make(1).SaveTo(this);
 
             // When: Attempting to get an item using an ID that is not in the db
             var maxid = context.Get<BudgetTx>().Max(x => x.ID);
@@ -239,7 +241,7 @@ namespace YoFi.Tests.Core
         public async Task DoesntExist()
         {
             // Given: A single item in the data set
-            context.AddRange(Items.Take(1));
+            _ = FakeObjects<T>.Make(1).SaveTo(this);
 
             // When: Testing whether an item exists using an ID that is not in the db
             var maxid = context.Get<T>().Max(x => x.ID);
@@ -254,10 +256,10 @@ namespace YoFi.Tests.Core
         public async Task Create()
         {
             // Given: A single item in the data set
-            context.AddRange(Items.Take(1));
+            var data = FakeObjects<T>.Make(1).SaveTo(this);
 
             // When: Adding a second item
-            var expected = Items.Skip(1).First();
+            var expected = data.Add(1).Last();
             await repository.AddAsync(expected);
 
             // Then: There are two items in the data set
@@ -268,12 +270,11 @@ namespace YoFi.Tests.Core
         public async Task EditObjectValues()
         {
             // Given: One item in the dataset
-            var items = Items.Skip(3).Take(1);
-            context.AddRange(items);
-            var id = items.First().ID;
+            var data = FakeObjects<T>.Make(1).SaveTo(this);
+            var id = data.First().ID;
 
             // When: Updating it with new values
-            var updated = Items.Skip(1).First();
+            var updated = data.Add(1).Last();
             updated.ID = id;
             await repository.UpdateAsync(updated);
 
@@ -289,44 +290,36 @@ namespace YoFi.Tests.Core
         [TestMethod]
         public async Task DeleteConfirmed()
         {
-            // Given: Five items in the data set
-            context.AddRange(Items.Take(5));
+            // Given: Many items in the data set
+            var data = FakeObjects<T>.Make(4).Add(1).SaveTo(this);
 
             // When: Removing an item
-            var expected = Items.Skip(3).First();
-            await repository.RemoveAsync(expected);
+            var removed = data.Group(1).Single();
+            await repository.RemoveAsync(removed);
 
-            // Then: Only four items remain
-            Assert.AreEqual(4, context.Get<T>().Count());
-
-            // And: Removed item is not there
-            Assert.IsFalse(context.Get<T>().Any(x => CompareKeys(x, expected) == 0));
+            // Then: Only first group of data remains
+            Assert.IsTrue(context.Get<T>().SequenceEqual(data.Group(0)));
         }
 
         [TestMethod]
         public async Task RemoveRange()
         {
-            // Given: Five items in the data set
-            var items = Items.Take(5);
-            context.AddRange(items);
+            // Given: Many items in the data set
+            var data = FakeObjects<T>.Make(5).Add(10).SaveTo(this);
 
             // When: Removing multiple items
-            var expected = items.Skip(3);
-            await repository.RemoveRangeAsync(expected);
+            var removed = data.Group(1);
+            await repository.RemoveRangeAsync(removed);
 
-            // Then: Only three items remain
-            Assert.AreEqual(3, context.Get<T>().Count());
-
-            // And: Removed items are not there
-            Assert.IsFalse(context.Get<T>().Any(x => expected.Any(y=> CompareKeys(x, y) == 0)));
+            // Then: Only first group of data remains
+            Assert.IsTrue(context.Get<T>().SequenceEqual(data.Group(0)));
         }
 
         [TestMethod]
         public void Download()
         {
-            // Given: Five items in the data set
-            var expected = Items.Take(5).ToList();
-            context.AddRange(expected);
+            // Given: Many items in the data set
+            var expected = FakeObjects<T>.Make(5).SaveTo(this).ToList();
 
             // When: Downloading the items as a spreadsheet
             using var stream = repository.AsSpreadsheet();

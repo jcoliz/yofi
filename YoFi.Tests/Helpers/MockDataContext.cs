@@ -146,6 +146,20 @@ namespace YoFi.Tests.Helpers
                     split.ID += nextid++;
             }
 
+            if (PayeeData.Any())
+            {
+                var nextid = 1 + PayeeData.Max(x => x.ID);
+                foreach (var tx in PayeeData.Where(x => x.ID == default))
+                    tx.ID += nextid++;
+            }
+
+            if (BudgetTxData.Any())
+            {
+                var nextid = 1 + BudgetTxData.Max(x => x.ID);
+                foreach (var tx in BudgetTxData.Where(x => x.ID == default))
+                    tx.ID += nextid++;
+            }
+
             return Task.CompletedTask;
         }
 
