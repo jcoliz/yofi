@@ -29,7 +29,7 @@ namespace YoFi.Tests.Helpers
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        IEnumerable<T> Group(int index);
+        IList<T> Group(int index);
 
         IEnumerable<T> Groups(Range index);
 
@@ -64,7 +64,7 @@ namespace YoFi.Tests.Helpers
             return this;
         }
 
-        public IEnumerable<T> Group(int index)
+        public IList<T> Group(int index)
         {
             if (index >= Items.Count())
                 throw new IndexOutOfRangeException();

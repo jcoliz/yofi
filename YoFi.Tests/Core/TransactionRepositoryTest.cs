@@ -70,53 +70,45 @@ namespace YoFi.Tests.Core
             }
         }
 
-        protected async Task<IEnumerable<Transaction>[]> GivenComplexDataInDatabase()
+        protected IFakeObjects<Transaction> GivenComplexDataInDatabase()
         {
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
             // And: some with receipts, some without
-            (var _, var c0) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
+            var chosen = FakeObjects<Transaction>
+                .Make(2, x =>
                 {
                     x.Category += "CCC";
                     x.Payee += "222";
                     x.Timestamp = new DateTime(2100, 1, 1);
-                    return x;
-                });
-            (var _, var c1) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
+                })
+                .Add(2, x => 
                 {
                     x.Category += "BBB";
                     x.Payee += "222";
                     x.Memo += "Wut";
                     x.Timestamp = new DateTime(2100, 1, 1);
-                    return x;
-                });
-            (var _, var c2) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
+                })
+                .Add(2, x => 
                 {
                     x.Memo += "Wut";
                     x.Timestamp = new DateTime(2100, 1, 1);
-                    return x;
-                });
-            (var _, var c3) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
+                })
+                .Add(2, x => 
                 {
                     x.Payee += "Wut";
                     x.Timestamp = new DateTime(2100, 1, 1);
-                    return x;
-                });
-            (var _, var c4) = await GivenFakeDataInDatabase<Transaction>(4, 2,
-                x =>
+                })
+                .Add(2, x => 
                 {
                     x.Category += "BBB";
                     x.Payee += "444";
                     x.Payee += "Wut";
-                    return x;
-                });
-            return new[] { c0, c1, c2, c3, c4 };
-        }
+                })
+                .SaveTo(this);
 
+            return chosen;
+        }
 
         #endregion
 
@@ -229,8 +221,8 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
-            var all = await GivenComplexDataInDatabase();
-            var chosen = all[from..to].SelectMany(x => x).OrderBy(x=>x.ID);
+            var all = GivenComplexDataInDatabase();
+            var chosen = all.Groups(from..to).OrderBy(x=>x.ID);
 
             // When: Downloading transactions with q='{word},{key}={value}' in various combinations
             var stream = await transactionRepository.AsSpreadsheetAsync(chosen.First().Timestamp.Year, false, q);
@@ -507,10 +499,10 @@ namespace YoFi.Tests.Core
             var items = FakeObjects<Transaction>
                 .Make(5)
                 .Add(2, x => x.Category += word)
-                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Category += word).ToList())
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Category += word).Group(0))
                 .Add(2, x => x.Payee += word)
                 .Add(2, x => x.Memo += word)
-                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).ToList())
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).Group(0))
                 .SaveTo(this);
 
             var chosen = any ? items.Groups(1..5) : items.Groups(1..3);
@@ -547,11 +539,11 @@ namespace YoFi.Tests.Core
             var items = FakeObjects<Transaction>
                 .Make(5)
                 .Add(2, x => x.Memo += word)
-                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Memo += word).ToList())
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Memo += word).Group(0))
                 .Add(2, x => x.Category += word)
-                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Category += word).ToList())
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Category += word).Group(0))
                 .Add(2, x => x.Payee += word)
-                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).ToList())
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2).Group(0))
                 .SaveTo(this);
 
             var chosen = any ? items.Groups(1..6) : items.Groups(1..3);
@@ -728,9 +720,8 @@ namespace YoFi.Tests.Core
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
             // And: some with receipts, some without
-            var all = await GivenComplexDataInDatabase();
-            var selected = all[from..to];
-            var chosen = selected.SelectMany(x => x);
+            var all = GivenComplexDataInDatabase();
+            var chosen = all.Groups(from..to);
 
             // When: Calling index q='{word},{key}={value}' in various combinations
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = q });
@@ -747,8 +738,8 @@ namespace YoFi.Tests.Core
         public async Task CreateSplit()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var expected = chosen.Single();
+            var items = FakeObjects<Transaction>.Make(5).SaveTo(this);
+            var expected = items.Last();
             var id = expected.ID;
             var category = expected.Category;
 
@@ -767,8 +758,9 @@ namespace YoFi.Tests.Core
         public async Task CreateSecondSplit()
         {
             // Given: There are 5 items in the database, one of which already has a split
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, 
-                x => 
+            var expected = FakeObjects<Transaction>
+                .Make(4)
+                .Add(1, x => 
                 {
                     x.Category = null;
                     x.Splits = new List<Split>()
@@ -779,11 +771,11 @@ namespace YoFi.Tests.Core
                             Category = "A"
                         }
                     };
+                })
+                .SaveTo(this)
+                .Group(1)
+                .Single();
 
-                    return x; 
-                });
-
-            var expected = chosen.Single();
             var id = expected.ID;
 
             // When: Adding a split to that item
@@ -806,8 +798,8 @@ namespace YoFi.Tests.Core
         public async Task UpReceipt()
         {
             // Given: A transaction with no receipt
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var expected = chosen.Single();
+            var items = FakeObjects<Transaction>.Make(5).SaveTo(this);
+            var expected = items.Last();
             var id = expected.ID;
 
             // And: An image file
@@ -833,8 +825,13 @@ namespace YoFi.Tests.Core
         {
             // Given: A transaction with a receipt
             var filename = "1234";
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x => { x.ReceiptUrl = filename; return x; });
-            var expected = chosen.Single();
+            var expected = FakeObjects<Transaction>
+                .Make(4)
+                .Add(1, x => x.ReceiptUrl = filename )
+                .SaveTo(this)
+                .Group(1)
+                .Single();
+
             var id = expected.ID;
             var contenttype = "image/png";
 
