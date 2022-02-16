@@ -1,7 +1,6 @@
 ﻿using Common.DotNet;
 using Common.NET.Test;
 using jcoliz.OfficeOpenXml.Serializer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
