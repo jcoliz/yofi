@@ -61,7 +61,7 @@ namespace YoFi.Tests.Core
 
         #region Helpers
 
-        public void AddRange(System.Collections.IEnumerable objects)
+        public new void AddRange(System.Collections.IEnumerable objects)
         {
             if (objects is IEnumerable<Transaction> txs)
             {

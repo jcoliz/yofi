@@ -23,7 +23,7 @@ namespace YoFi.Tests.Core
     /// </remarks>
     /// <typeparam name="T">Model type contained in the repository under test</typeparam>
     [TestClass]
-    public abstract class BaseRepositoryTest<T> where T: class, IModelItem<T>, new()
+    public abstract class BaseRepositoryTest<T>: IFakeObjectsSaveTarget where T: class, IModelItem<T>, new()
     {
         #region Fields
 
@@ -58,6 +58,14 @@ namespace YoFi.Tests.Core
         #endregion
 
         #region Helpers
+
+        public void AddRange(System.Collections.IEnumerable objects)
+        {
+            if (objects is IEnumerable<T> items)
+            {
+                repository.AddRangeAsync(items).Wait();
+            }
+        }
 
         protected static IEnumerable<TItem>[] GivenFakeItemGroups<TItem>(IEnumerable<(int num, Func<TItem, TItem> func)> groups, int from = 1) where TItem : class, new()
         {
@@ -176,8 +184,7 @@ namespace YoFi.Tests.Core
         public async Task IndexSingle()
         {
             // Given: A single item in the data set
-            var expected = Items.Take(1);
-            context.AddRange(expected);
+            var expected = FakeObjects<T>.Make(1).SaveTo(this);
 
             // When: Querying items from the repository
             var qresult = await repository.GetByQueryAsync(new WireQueryParameters());
