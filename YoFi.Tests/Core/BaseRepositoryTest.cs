@@ -35,14 +35,6 @@ namespace YoFi.Tests.Core
         #region Properties
 
         /// <summary>
-        /// Sample items to use in test
-        /// </summary>
-        /// <remarks>
-        /// Generally, the first 5 are the most commonly used
-        /// </remarks>
-        protected abstract List<T> Items { get; }
-
-        /// <summary>
         /// Comparison to sort keys
         /// </summary>
         /// <remarks>

@@ -20,41 +20,6 @@ namespace YoFi.Tests.Core
         private TestAzureStorage storage;
         private TestClock clock;
 
-        protected override List<Transaction> Items
-        {
-            get
-            {
-                // Need to make a new one every time we ask for it, because the old items
-                // tracked IDs for a previous test
-                return new List<Transaction>()
-                {
-                    new Transaction() { ID = 1, Category = "B", Payee = "3", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m, BankReference = "C" },
-                    new Transaction() { ID = 2, Category = "A", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m, BankReference = "D" },
-                    new Transaction() { ID = 3, Category = "C", Payee = "5", Timestamp = new DateTime(DateTime.Now.Year, 01, 01), Amount = 300m, BankReference = "B" },
-                    new Transaction() { ID = 4, Category = "B", Payee = "1", Timestamp = new DateTime(DateTime.Now.Year, 01, 05), Amount = 400m, BankReference = "E" },
-                    new Transaction() { ID = 5, Category = "B", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m, BankReference = "A" },
-                    new Transaction() { Category = "B", Payee = "34", Memo = "222", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m, BankReference = "J" },
-                    new Transaction() { Category = "B", Payee = "1234", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 500m, BankReference = "I" },
-                    new Transaction() { Category = "C", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m, BankReference = "G" },
-                    new Transaction() { Category = "ABC", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m, BankReference = "H" },
-                    new Transaction() { Category = "DE:CAF", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m, BankReference = "F" },
-                    new Transaction() { Category = "GH:CAF", Payee = "2", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Category = "DE:RGB", Payee = "2", Memo = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Category = "GH:RGB", Payee = "2", Memo = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Category = "GH:XYZ", Payee = "2", Memo = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Category = "GH:RGB", Payee = "2", Memo = "Wut", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Category = "DE:RGB", Payee = "CAFE", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Category = "GH:RGB", Payee = "CONCACAF", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Category = "GH:XYZ", Payee = "4", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Category = "GH:RGB", Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Timestamp = new DateTime(DateTime.Now.Year, 01, 04), Amount = 200m },
-                    new Transaction() { Amount = 123m },
-                    new Transaction() { Amount = 1.23m },
-                    new Transaction() { Memo = "123" },
-                };
-            }
-        }
-
         protected override int CompareKeys(Transaction x, Transaction y) => x.Payee.CompareTo(y.Payee);
 
         private ITransactionRepository transactionRepository => repository as ITransactionRepository;
@@ -182,7 +147,9 @@ namespace YoFi.Tests.Core
         public async Task AssignBankReferences()
         {
             // Given: Many transactions in the repository, some with a bankref, others not
-            await repository.AddRangeAsync(Items.Take(20));
+            var fakeref = "ABC123";
+            var data = FakeObjects<Transaction>.Make(12, x => x.BankReference = null).Add(8, x => x.BankReference = fakeref).SaveTo(this) ;
+            var hadref = data.Group(1);
 
             // When: Calling AssignBankReferences()
             await transactionRepository.AssignBankReferences();
@@ -191,7 +158,7 @@ namespace YoFi.Tests.Core
             Assert.IsFalse(repository.All.Any(x => string.IsNullOrEmpty(x.BankReference)));
 
             // And: Those which already had a bankref did not have theirs changed
-            Assert.AreEqual(10, repository.All.Count(x => x.BankReference.Length == 1));
+            Assert.AreEqual(hadref.Count, repository.All.Count(x => x.BankReference == fakeref));
         }
 
         [TestMethod]

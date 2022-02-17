@@ -14,23 +14,6 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class BudgetTxRepositoryTest: BaseRepositoryTest<BudgetTx>
     {
-        protected override List<BudgetTx> Items
-        {
-            get
-            {
-                return new List<BudgetTx>()
-                {
-                    new BudgetTx() { ID = 1, Timestamp = new System.DateTime(2020, 06, 01),  Category = "A", Amount = 200m },
-                    new BudgetTx() { ID = 2, Timestamp = new System.DateTime(2020, 06, 01),  Category = "B", Amount = 300m },
-                    new BudgetTx() { ID = 3, Timestamp = new System.DateTime(2020, 05, 01),  Category = "C", Amount = 700m },
-                    new BudgetTx() { ID = 4, Timestamp = new System.DateTime(2020, 05, 01),  Category = "B", Amount = 600m },
-                    new BudgetTx() { ID = 5, Timestamp = new System.DateTime(2020, 05, 01),  Category = "A", Amount = 500m },
-                    new BudgetTx() { Timestamp = new System.DateTime(2020, 06, 01), Category = "C", Amount = 400m },
-                    new BudgetTx() { Timestamp = new System.DateTime(2020, 07, 01), Category = "A", Amount = 100m },
-                };
-            }
-        }
-
         BudgetTxRepository itemRepository => base.repository as BudgetTxRepository;
 
         /// <summary>
