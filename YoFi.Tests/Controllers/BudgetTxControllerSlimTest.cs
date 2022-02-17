@@ -1,9 +1,7 @@
-﻿using Common.AspNet;
-using Common.DotNet.Test;
+﻿using Common.DotNet.Test;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
@@ -38,7 +36,7 @@ namespace YoFi.Tests.Controllers.Slim
         {
             // Given: A very long set of items 
             var numitems = 100;
-            repository.AddItems(numitems);
+            _ = FakeObjects<BudgetTx>.Make(numitems).SaveTo(this);
 
             // When: Calling Index page 1
             var actionresult = await itemController.Index(p: 1);
@@ -65,7 +63,7 @@ namespace YoFi.Tests.Controllers.Slim
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             var pagesize = BaseRepository<BudgetTx>.DefaultPageSize;
             var itemcount = pagesize * 3 / 2;
-            repository.AddItems(itemcount);
+            _ = FakeObjects<BudgetTx>.Make(itemcount).SaveTo(this);
 
             // When: Calling Index page 2
             var actionresult = await itemController.Index(p: 2);
@@ -89,18 +87,18 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task IndexQSubstring()
         {
             // Given: A mix of items, some with '{word}' in their category and some without
-            repository.AddItems(11);
+            var word = "IndexQSubstring";
+            var expected = FakeObjects<BudgetTx>.Make(5).Add(6,x=>x.Category += word).SaveTo(this).Group(1);
 
             // When: Calling index q={word}
-            var word = "1";
             var actionresult = await itemController.Index(q: word);
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<IWireQueryResult<BudgetTx>>(viewresult.Model);
 
             // Then: Only the exoected items are returned
-            var expected = repository.All.Where(x => x.Category.Contains(word));
             Assert.IsTrue(expected.SequenceEqual(model.Items));
         }
+
         [TestMethod]
         public async Task BulkDelete()
         {
