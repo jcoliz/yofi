@@ -149,6 +149,30 @@ namespace YoFi.Tests.Core
         protected Task<IWireQueryResult<T>> WhenGettingIndex(IWireQueryParameters parms)
             => repository.GetByQueryAsync(parms);
 
+        protected async Task<IEnumerable<TItem>> WhenImportingItemsAsSpreadsheet<TItem>(IEnumerable<TItem> expected) where TItem: class, IImportDuplicateComparable, IModelItem<TItem>, new()
+        {
+            // Given: A spreadsheet with items as given
+            using var stream = new MemoryStream();
+            {
+                using var ssw = new SpreadsheetWriter();
+                ssw.Open(stream);
+                ssw.Serialize(expected);
+            }
+            stream.Seek(0, SeekOrigin.Begin);
+
+            // When: Importing it via an importer
+            if (repository is IRepository<TItem> tr)
+            {
+                var importer = new BaseImporter<TItem>(tr);
+                importer.QueueImportFromXlsx(stream);
+                return await importer.ProcessImportAsync();
+            }
+            else
+                throw new NotImplementedException();
+        }
+
+
+
         protected void ThenResultsAreEqualByTestKey(IWireQueryResult<T> result, IEnumerable<T> chosen)
         {
             Assert.IsTrue(result.Items.SequenceEqual(chosen));
