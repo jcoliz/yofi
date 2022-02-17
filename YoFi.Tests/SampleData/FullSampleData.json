@@ -15334,13 +15334,15 @@
       "ID": 0,
       "Amount": -8400,
       "Timestamp": "2021-01-01T00:00:00",
-      "Category": "Housing:Mortgage Interest"
+      "Category": "Housing:Mortgage Interest",
+      "Frequency": 12
     },
     {
       "ID": 0,
       "Amount": -3960,
       "Timestamp": "2021-01-01T00:00:00",
-      "Category": "Housing:Condo Fees"
+      "Category": "Housing:Condo Fees",
+      "Frequency": 12
     },
     {
       "ID": 0,
