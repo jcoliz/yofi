@@ -422,6 +422,31 @@ namespace YoFi.Tests.Integration.Controllers
         #region Splits
 
         [TestMethod]
+        public async Task CreateSplit()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var items = FakeObjects<Transaction>.Make(5).SaveTo(this);
+            var expected = items.Last();
+            var id = expected.ID;
+            var category = expected.Category;
+
+            // When: Adding a split to that item
+            var formData = new Dictionary<string, string>()
+            {
+                { "id", id.ToString() },
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", d => $"{urlroot}/CreateSplit", formData);
+
+            // Then: Split has expected values
+            var actualtx = context.Set<Transaction>().Include(x=>x.Splits).Where(x => x.ID == id).AsNoTracking().Single();
+            var actual = actualtx.Splits.Single();
+
+            Assert.AreEqual(expected.Amount, actual.Amount);
+            Assert.AreEqual(category, actual.Category);
+            Assert.IsNull(actualtx.Category);
+        }
+
+        [TestMethod]
         public async Task SplitsShownInIndex()
         {
             // Given: Single transaction with balanced splits
