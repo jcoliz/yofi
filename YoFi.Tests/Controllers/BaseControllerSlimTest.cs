@@ -23,10 +23,24 @@ namespace YoFi.Tests.Controllers.Slim
     /// Functionality specific to a certain controller can be tested in the inherited class
     /// </remarks>
     /// <typeparam name="T">Underlying Model type</typeparam>
-    public class BaseControllerSlimTest<T> where T: class, IModelItem<T>, new()
+    public class BaseControllerSlimTest<T>: IFakeObjectsSaveTarget where T: class, IModelItem<T>, new()
     {
+        #region Fields
+
         protected IController<T> controller;
         protected IMockRepository<T> repository;
+
+        #endregion
+
+        #region Helpers
+
+        public void AddRange(System.Collections.IEnumerable objects)
+        {
+            if (objects is IEnumerable<T> items)
+            {
+                repository.AddRangeAsync(items).Wait();
+            }
+        }
 
         /// <summary>
         /// Create a test file of a spreadsheet of <typeparamref name="X"/> items
@@ -52,6 +66,10 @@ namespace YoFi.Tests.Controllers.Slim
 
             return file;
         }
+
+        #endregion
+
+        #region Tests
 
         [TestMethod]
         public void Empty()
@@ -81,10 +99,10 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task DetailsFound()
         {
             // Given: Five items in the respository
-            repository.AddItems(5);
+            var data = FakeObjects<T>.Make(5).SaveTo(this);
+            var selected = data.Last();
 
             // When: Retrieving details for a selected item
-            var selected = repository.All.Skip(1).First();
             var actionresult = await controller.Details(selected.ID);
 
             // Then: Returns a viewmodel with an expected item
@@ -248,5 +266,7 @@ namespace YoFi.Tests.Controllers.Slim
             // And: All the items are in the repository
             Assert.IsTrue(expected.SequenceEqual(repository.All));
         }
+
+        #endregion
     }
 }

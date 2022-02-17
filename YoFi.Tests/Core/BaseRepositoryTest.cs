@@ -123,7 +123,7 @@ namespace YoFi.Tests.Core
         public async Task IndexMany()
         {
             // Given: Many items in the data set
-            var expected = FakeObjects<T>.Make(5).SaveTo(this).ToList();
+            var expected = FakeObjects<T>.Make(5).SaveTo(this);
 
             // When: Querying items from the repository
             var qresult = await repository.GetByQueryAsync(new WireQueryParameters());

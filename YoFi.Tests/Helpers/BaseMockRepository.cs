@@ -3,10 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Helpers
@@ -38,6 +36,15 @@ namespace YoFi.Tests.Helpers
         public Task AddRangeAsync(IEnumerable<T> items)
         {
             Items.AddRange(items);
+
+            if (Items.Any() && Items.Any(x=>x.ID == default))
+            {
+                var nextid = Items.Max(x => x.ID) + 1;
+                foreach (var item in Items)
+                    if (item.ID == default)
+                        item.ID = nextid++;
+            }
+
             return Task.CompletedTask;
         }
 
