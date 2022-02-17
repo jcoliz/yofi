@@ -1,11 +1,9 @@
 ﻿using jcoliz.OfficeOpenXml.Serializer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Importers;
 using YoFi.Core.Models;
@@ -27,7 +25,7 @@ namespace YoFi.Tests.Core
             _writer.Open(_stream);
         }
 
-        public void Add<T>(IEnumerable<T> what, string name) where T : class
+        public void Add<T>(IEnumerable<T> what, string name = null) where T : class
         {
             _writer.Serialize(what, name);
         }
@@ -112,7 +110,7 @@ namespace YoFi.Tests.Core
         public async Task BudgetTxNoName()
         {
             // Given: A spreadsheet with budget transactions in a sheet named {Something Random}
-            var items = budgetrepo.MakeItems(5);
+            var items = FakeObjects<BudgetTx>.Make(5);
             using var stream = PrepareSpreadsheet(items, "Random-Budget-Tx");
 
             // When: Importing it
@@ -127,7 +125,7 @@ namespace YoFi.Tests.Core
         public async Task PayeeNoName()
         {
             // Given: A spreadsheet with payees in a sheet named {Something Random}
-            var items = payeerepo.MakeItems(5);
+            var items = FakeObjects<Payee>.Make(5);
             using var stream = PrepareSpreadsheet(items, "Random-Payee-s");
 
             // When: Importing it
@@ -143,9 +141,9 @@ namespace YoFi.Tests.Core
         {
             // Given: A spreadsheet with budget transactions in a sheet named "BudgetTx", and other kinds of data too
             using var helper = new ImportPackageHelper();
-            helper.Add(payeerepo.MakeItems(5),null);
-            var items = budgetrepo.MakeItems(5);
-            helper.Add(items, null);
+            helper.Add(FakeObjects<Payee>.Make(5));
+            var items = FakeObjects<BudgetTx>.Make(5);
+            helper.Add(items);
             var stream = helper.GetFile(TestContext);
 
             // When: Importing it
@@ -161,9 +159,9 @@ namespace YoFi.Tests.Core
         {
             // Given: A spreadsheet with payees in a sheet named "Payee", and all other kinds of data too
             using var helper = new ImportPackageHelper();
-            helper.Add(budgetrepo.MakeItems(5), null);
-            var items = payeerepo.MakeItems(5);
-            helper.Add(items, null);
+            helper.Add(FakeObjects<BudgetTx>.Make(5));
+            var items = FakeObjects<Payee>.Make(5);
+            helper.Add(items);
             var stream = helper.GetFile(TestContext);
 
             // When: Importing it
@@ -179,10 +177,10 @@ namespace YoFi.Tests.Core
         {
             // Given: A spreadsheet with transactions in a sheet named "Transaction", and all other kinds of data too
             using var helper = new ImportPackageHelper();
-            helper.Add(budgetrepo.MakeItems(5), null);
-            helper.Add(payeerepo.MakeItems(5), null);
-            var items = txrepo.MakeItems(5);
-            helper.Add(items, null);
+            helper.Add(FakeObjects<BudgetTx>.Make(5));
+            helper.Add(FakeObjects<Payee>.Make(5));
+            var items = FakeObjects<Transaction>.Make(5);
+            helper.Add(items);
             var stream = helper.GetFile(TestContext);
 
             // When: Importing it
@@ -198,7 +196,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A spreadsheet with transactions in a sheet named "Transaction", and all other kinds of data too
             using var helper = new ImportPackageHelper();
-            var items = txrepo.MakeItems(5);
+            var items = FakeObjects<Transaction>.Make(5);
             helper.Add(items, "Random-Tranxs");
             var stream = helper.GetFile(TestContext);
 
@@ -217,16 +215,16 @@ namespace YoFi.Tests.Core
         {
             // Given: A spreadsheet with transactions in sheet named {Something Random} and splits in "Split"
             using var helper = new ImportPackageHelper();
-            var items = txrepo.MakeItems(5);
+            var items = FakeObjects<Transaction>.Make(5, x => x.ID = (int)(x.Amount / 100m)).Group(0);
             helper.Add(items, name);
             var splits = new List<Split>()
             {
-                new Split() { Amount = 100m, Category = "1", TransactionID = 1 },
-                new Split() { Amount = 200m, Category = "2A", TransactionID = 2 },
-                new Split() { Amount = 200m, Category = "2B", TransactionID = 2 },
-                new Split() { Amount = 300m, Category = "3A", TransactionID = 3 },
-                new Split() { Amount = 300m, Category = "3B", TransactionID = 3 },
-                new Split() { Amount = 300m, Category = "3B", TransactionID = 3 }
+                new Split() { Amount = 100m, Category = "1", TransactionID = items[0].ID },
+                new Split() { Amount = 200m, Category = "2A", TransactionID = items[1].ID },
+                new Split() { Amount = 200m, Category = "2B", TransactionID = items[1].ID },
+                new Split() { Amount = 300m, Category = "3A", TransactionID = items[2].ID },
+                new Split() { Amount = 300m, Category = "3B", TransactionID = items[2].ID },
+                new Split() { Amount = 300m, Category = "3B", TransactionID = items[2].ID }
             };
             helper.Add(splits, null);
             var stream = helper.GetFile(TestContext);
@@ -241,7 +239,7 @@ namespace YoFi.Tests.Core
             int i = 3;
             do
             {
-                var tx = txrepo.Items.Where(x => x.Payee == i.ToString()).Single();
+                var tx = txrepo.Items.Where(x => x.Amount == i * 100m).Single();
                 Assert.AreEqual(i, tx.Splits.Count);
             }
             while (--i > 0);
@@ -253,20 +251,20 @@ namespace YoFi.Tests.Core
         {
             // Given: A spreadsheet with ALL kinds of data in a single sheet
             using var helper = new ImportPackageHelper();
-            var bitems = budgetrepo.MakeItems(4);
+            var bitems = FakeObjects<BudgetTx>.Make(4);
             helper.Add(bitems, null);
-            var pitems = payeerepo.MakeItems(5);
+            var pitems = FakeObjects<Payee>.Make(5);
             helper.Add(pitems, null);
-            var txitems = txrepo.MakeItems(6);
+            var txitems = FakeObjects<Transaction>.Make(6,x=>x.ID = (int)(x.Amount / 100m)).Group(0);
             helper.Add(txitems, null);
             var splits = new List<Split>()
             {
-                new Split() { Amount = 100m, Category = "1", TransactionID = 1 },
-                new Split() { Amount = 200m, Category = "2A", TransactionID = 2 },
-                new Split() { Amount = 200m, Category = "2B", TransactionID = 2 },
-                new Split() { Amount = 300m, Category = "3A", TransactionID = 3 },
-                new Split() { Amount = 300m, Category = "3B", TransactionID = 3 },
-                new Split() { Amount = 300m, Category = "3B", TransactionID = 3 }
+                new Split() { Amount = 100m, Category = "1", TransactionID = txitems[0].ID },
+                new Split() { Amount = 200m, Category = "2A", TransactionID = txitems[1].ID },
+                new Split() { Amount = 200m, Category = "2B", TransactionID = txitems[1].ID },
+                new Split() { Amount = 300m, Category = "3A", TransactionID = txitems[2].ID },
+                new Split() { Amount = 300m, Category = "3B", TransactionID = txitems[2].ID },
+                new Split() { Amount = 300m, Category = "3B", TransactionID = txitems[3].ID }
             };
             helper.Add(splits, null);
             var stream = helper.GetFile(TestContext);
@@ -279,7 +277,14 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(txitems.SequenceEqual(txrepo.Items));
             Assert.IsTrue(pitems.SequenceEqual(payeerepo.Items));
             Assert.IsTrue(bitems.SequenceEqual(budgetrepo.Items));
-            Assert.IsTrue(splits.SequenceEqual(txrepo.Items.SelectMany(x=>x.Splits ?? Enumerable.Empty<Split>())));
+
+            var reposplits = txrepo.Items.Where(x => x.HasSplits).SelectMany(x => x.Splits);
+            Assert.IsTrue(splits.SequenceEqual(reposplits));
+
+            Assert.AreEqual(1, txrepo.Items[0].Splits.Count);
+            Assert.AreEqual(2, txrepo.Items[1].Splits.Count);
+            Assert.AreEqual(2, txrepo.Items[2].Splits.Count);
+            Assert.AreEqual(1, txrepo.Items[3].Splits.Count);
         }
 
         public void TransactionsOfx()

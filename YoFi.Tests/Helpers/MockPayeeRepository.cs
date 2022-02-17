@@ -10,7 +10,6 @@ namespace YoFi.Tests.Helpers
 {
     public class MockPayeeRepository : BaseMockRepository<Payee>, IPayeeRepository
     {
-        public override Payee MakeItem(int x) => new Payee() { ID = x, Category = x.ToString(), Name = x.ToString() };
         public override IQueryable<Payee> ForQuery(string q) => string.IsNullOrEmpty(q) ? All : All.Where(x => x.Category.Contains(q) || x.Name.Contains(q));
 
         public Task BulkEditAsync(string category)

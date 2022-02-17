@@ -15,12 +15,6 @@ namespace YoFi.Tests.Helpers
         {
         }
 
-        public void AddItems(int numitems) => Items.AddRange(MakeItems(numitems));
-
-        public abstract T MakeItem(int x);
-
-        public IEnumerable<T> MakeItems(int numitems) => Enumerable.Range(1, numitems).Select(MakeItem);
-
         public List<T> Items { get; } = new List<T>();
 
         public IQueryable<T> All => Items.AsQueryable();
