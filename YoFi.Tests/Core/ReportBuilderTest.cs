@@ -81,6 +81,20 @@ namespace YoFi.Tests.Core
             Console.WriteLine($"OK");
         }
 
+        [TestMethod]
+        public void BuildSummary()
+        {
+            // When: Building the summary report
+            var summary = builder.BuildSummary(new ReportParameters() { year = year });
+
+            // Then: There are 6 reports
+            var reports = summary.SelectMany(x => x);
+            Assert.AreEqual(6, reports.Count());
+
+            // And: All have a total
+            Assert.IsTrue(reports.All(x => x.GrandTotal != 0));
+        }
+
         #endregion
     }
 }
