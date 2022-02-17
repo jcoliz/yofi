@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using YoFi.Tests.Helpers;
+using YoFi.Tests.Helpers.ReportExtensions;
 using YoFi.Core.Reports;
 
 namespace YoFi.Tests.Core
