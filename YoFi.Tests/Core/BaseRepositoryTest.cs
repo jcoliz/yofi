@@ -59,77 +59,6 @@ namespace YoFi.Tests.Core
             }
         }
 
-        protected static IEnumerable<TItem>[] GivenFakeItemGroups<TItem>(IEnumerable<(int num, Func<TItem, TItem> func)> groups, int from = 1) where TItem : class, new()
-        {
-            var result = new List<IEnumerable<TItem>>();
-            int starting = from;
-            foreach(var group in groups)
-            {
-                result.Add(GivenFakeItems(group.num, group.func, starting).ToList());
-                starting += group.num;
-            }
-            return result.ToArray();
-        }
-
-        protected static IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null, int from = 1) where TItem : class, new()
-        {
-            return Enumerable
-                .Range(from, num)
-                .Select(x => GivenFakeItem<TItem>(x))
-                .Select(func ?? (x => x));
-        }
-
-        protected static TItem GivenFakeItem<TItem>(int index) where TItem : class, new()
-        {
-            var result = new TItem();
-            var properties = typeof(TItem).GetProperties();
-            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(YoFi.Core.Models.Attributes.EditableAttribute)));
-
-            foreach (var property in chosen)
-            {
-                var t = property.PropertyType;
-                object o = default;
-
-                if (t == typeof(string))
-                    o = $"{property.Name} {index:D5}";
-                else if (t == typeof(decimal))
-                    o = index * 100m;
-                else if (t == typeof(DateTime))
-                    // Note that datetimes should descend, because anything which sorts by a datetime
-                    // will typically sort descending
-                    o = new DateTime(2001, 12, 31) - TimeSpan.FromDays(index);
-                else
-                    throw new NotImplementedException();
-
-                property.SetValue(result, o);
-            }
-
-            // Not sure of a more generic way to handle this
-            if (result is Transaction tx)
-                tx.Splits = new List<Split>();
-
-            return result;
-        }
-
-        protected async Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<TIgnored>(int total, int selected, Func<T, T> func = null)
-        {
-            var firstitem = repository.All.Count() + 1;
-            var numunchanged = total - selected;
-            var groups = GivenFakeItemGroups(new (int,Func<T,T>)[] { (numunchanged,null), (selected,func) },firstitem);
-            var items = groups.SelectMany(x => x);
-            var wasneeded = groups[1];
-
-            await repository.AddRangeAsync(items);
-
-            return (items, wasneeded);
-        }
-
-        protected async Task<IEnumerable<T>> GivenFakeDataInDatabase<TIgnored>(int total)
-        {
-            (var result, _) = await GivenFakeDataInDatabase<TIgnored>(total, 0);
-            return result;
-        }
-
         /// <summary>
         /// Alias for GetByQueryAsync
         /// </summary>
@@ -162,8 +91,6 @@ namespace YoFi.Tests.Core
             else
                 throw new NotImplementedException();
         }
-
-
 
         protected void ThenResultsAreEqualByTestKey(IWireQueryResult<T> result, IEnumerable<T> chosen)
         {
