@@ -1,12 +1,9 @@
 ﻿using Common.DotNet.Test;
-using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
@@ -42,43 +39,33 @@ namespace YoFi.Tests.Core
         [TestMethod]
         public async Task BulkEdit()
         {
-            // Given: Five items in the data set
-            var all = Items.Take(5);
-
-            // And: A subset of the items are selected
-            var subset = all.Take(2);
-            foreach (var item in subset)
-                item.Selected = true;
-            context.AddRange(all);
+            // Given: Many items in the data set, some of which are selected
+            var data = FakeObjects<Payee>.Make(5).Add(4, x => x.Selected = true).SaveTo(this);
+            var untouched = data.Group(0);
+            var selected = data.Group(1);
 
             // When: Applying bulk edit to the repository using a new category
             var newcategory = "New Category";
             await itemRepository.BulkEditAsync(newcategory);
 
             // Then: The selected items have the new category
-            Assert.IsTrue(subset.All(x => x.Category == newcategory));
+            Assert.IsTrue(selected.All(x => x.Category == newcategory));
 
             // And: The other items are unchanged
-            Assert.IsTrue(all.Except(subset).All(x => x.Category != newcategory));
+            Assert.IsTrue(untouched.All(x => x.Category != newcategory));
 
             // And: All items are unselected
-            Assert.IsTrue(all.All(x => x.Selected != true));
+            Assert.IsTrue(data.All(x => x.Selected != true));
         }
 
         [TestMethod]
         public async Task BulkEditNoChange()
         {
-            // Given: Five items in the data set
-            var all = Items.Take(5);
+            // Given: Many items in the data set, some of which are selected
+            var data = FakeObjects<Payee>.Make(5).Add(4, x => x.Selected = true).SaveTo(this);
 
             // And: Taking a snapshot of that data for later comparison
-            var expected = await DeepCopy.MakeDuplicateOf(all);
-
-            // And: A subset of the items are selected
-            var subset = all.Take(2);
-            foreach (var item in subset)
-                item.Selected = true;
-            context.AddRange(all);
+            var expected = await DeepCopy.MakeDuplicateOf(data);
 
             // When: Applying bulk edit to the repository using null
             await itemRepository.BulkEditAsync(null);
@@ -87,28 +74,21 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(expected.SequenceEqual(repository.All));
 
             // And: All items are unselected
-            Assert.IsTrue(all.All(x => x.Selected != true));
+            Assert.IsTrue(data.All(x => x.Selected != true));
         }
 
         [TestMethod]
         public async Task BulkDelete()
         {
-            // Given: Five items in the data set
-            var numtotalitems = 5;
-            var all = Items.Take(numtotalitems);
-
-            // And: A subset of the items are selected
-            var numdeleteditems = 2;
-            var subset = all.Take(numdeleteditems);
-            foreach (var item in subset)
-                item.Selected = true;
-            context.AddRange(all);
+            // Given: Many items in the data set, some of which are selected
+            var data = FakeObjects<Payee>.Make(5).Add(4, x => x.Selected = true).SaveTo(this);
+            var expected = data.Group(0);
 
             // When: Bulk deleting the selected items
             await itemRepository.BulkDeleteAsync();
 
-            // Then: The number of items is total minus deleted
-            Assert.AreEqual(numtotalitems-numdeleteditems,repository.All.Count());
+            // Then: Only the expected items remain
+            Assert.IsTrue(repository.All.SequenceEqual(expected));
 
             // And: All repository items are unselected
             Assert.IsTrue(repository.All.All(x => x.Selected != true));
@@ -135,7 +115,7 @@ namespace YoFi.Tests.Core
         public virtual async Task Upload()
         {
             // Given: A spreadsheet with five items
-            var expected = Items.Take(5);
+            var expected = FakeObjects<Payee>.Make(5);
 
             // When: Importing it via an importer
             await WhenImportingItemsAsSpreadsheet(expected);
@@ -147,40 +127,22 @@ namespace YoFi.Tests.Core
         [TestMethod]
         public virtual async Task UploadAddNewDuplicate()
         {
-            // Given: Five items in the data set
-            var expected = Items.Take(5).ToList();
-            context.AddRange(expected);
+            // Given: Five items in the data set, some of which we care about, and two more extra items
+            var data = FakeObjects<Payee>.Make(4).Add(1).SaveTo(this).Add(2);
 
             // When: Uploading three new items, one of which the same as an already existing item
             // NOTE: These items are not EXACTLY duplicates, just duplicate enough to trigger the
             // hashset equality constraint on input.
-            var upload = Items.Skip(5).Take(2).Concat(await DeepCopy.MakeDuplicateOf(expected.Take(1)));
+            var duplicated = data.Group(1);
+            var added = data.Group(2);
+            var upload = added.Concat(await DeepCopy.MakeDuplicateOf(duplicated));
             var actual = await WhenImportingItemsAsSpreadsheet(upload);
 
-            // Then: Only ONE items were imported, because one fully exists, and also Items.Skip(5).Take(1) is
-            // a import duplicate because it has the same NAME as an existing item.
-            Assert.AreEqual(1, actual.Count());
+            // Then: Only two items were imported, because one exists
+            Assert.IsTrue(actual.SequenceEqual(added));
 
-            // And: The data set now includes six (not eight) items, because 6 is the total set of unique
-            // names
-            Assert.AreEqual(6, context.Get<Payee>().Count());
-        }
-
-        protected async Task<IEnumerable<Payee>> WhenImportingItemsAsSpreadsheet(IEnumerable<Payee> expected)
-        {
-            // Given: A spreadsheet with items as given
-            using var stream = new MemoryStream();
-            {
-                using var ssw = new SpreadsheetWriter();
-                ssw.Open(stream);
-                ssw.Serialize(expected);
-            }
-            stream.Seek(0, SeekOrigin.Begin);
-
-            // When: Importing it via an importer
-            var importer = new BaseImporter<Payee>(repository);
-            importer.QueueImportFromXlsx(stream);
-            return await importer.ProcessImportAsync();
+            // And: The data set the entire expected data set, which does not include the duplicated item
+            Assert.IsTrue(context.Get<Payee>().SequenceEqual(data));
         }
 
         [TestMethod]
