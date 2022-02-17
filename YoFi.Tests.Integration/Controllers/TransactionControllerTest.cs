@@ -16,9 +16,22 @@ using Transaction = YoFi.Core.Models.Transaction;
 namespace YoFi.Tests.Integration.Controllers
 {
     [TestClass]
-    public class TransactionControllerTest : ControllerTest<Transaction>
+    public class TransactionControllerTest : ControllerTest<Transaction>, IFakeObjectsSaveTarget
     {
         protected override string urlroot => "/Transactions";
+
+        #region Helpers
+
+        public void AddRange(System.Collections.IEnumerable objects)
+        {
+            if (objects is IEnumerable<Transaction> txs)
+            {
+                context.Set<Transaction>().AddRange(txs);
+                context.SaveChanges();
+            }
+        }
+
+        #endregion
 
         #region Init/Cleanup
 
@@ -231,6 +244,94 @@ namespace YoFi.Tests.Integration.Controllers
                 expected = items.Where(x => x.Payee.Contains(payee));
 
             ThenResultsAreEqualByTestKey(document, expected);
+        }
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataRow(5)]
+        [DataTestMethod]
+        public async Task IndexQDate(int day)
+        {
+            // Given: A mix of transactions, with differing dates, within the current year
+            var items = FakeObjects<Transaction>.Make(22,x=>x.Timestamp = new DateTime(DateTime.Now.Year,x.Timestamp.Month,x.Timestamp.Day)).SaveTo(this);
+
+            // When: Calling index with q='d=#/##'
+            var target = items.Min(x => x.Timestamp).AddDays(day);
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"D={target.Month}/{target.Day}" });
+
+            // Then: Only transactions on that date or the following 7 days in the current year are returned
+            var expected = items.Where(x => x.Timestamp >= target && x.Timestamp < target.AddDays(7));
+            ThenResultsAreEqualByTestKey(document, expected);
+        }
+
+        [TestMethod]
+        public async Task IndexQIntAnyMultiple()
+        {
+            // Given: A mix of transactions, with differing amounts, dates, and payees
+            var numbers = new[] { 123m, 501m };
+            var words = numbers.Select(x => x.ToString("0")).ToList();
+            var number = numbers[0];
+            var number00 = number / 100m;
+            var dates = numbers.Select(x => new DateTime(DateTime.Now.Year, (int)(x / 100m), (int)(x % 100m))).ToList();
+
+            var chosen = FakeObjects<Transaction>
+                .Make(5)
+                .Add(2, x => { x.Memo += words[0]; x.Timestamp = dates[1]; })
+                .Add(2, x => { x.Amount = number00; x.Category += words[1]; })
+                .Add(2, x => x.Category += words[0])
+                .Add(2, x => x.Payee += words[0])
+                .Add(2, x => x.Amount = number)
+                .Add(2, x => x.Timestamp = dates[0])
+                .SaveTo(this)
+                .Groups(1..3)
+                .OrderBy(x => x.Payee);
+
+            // When: Calling index q={words}
+            // (Note that we are ordering just so we can ensure easy comparison later)
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = string.Join(",", words), Order = "pa" });
+
+            // Then: Only the transactions with BOTH '{words}' somewhere in their searchable terms are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexQAmountInteger()
+        {
+            // Given: A mix of transactions, some with a certain amount, others not
+            var amount = 123m;
+            var chosen = FakeObjects<Transaction>
+                .Make(2)
+                .Add(3, x => x.Amount = amount)
+                .Add(3, x => x.Amount = amount / 100)
+                .SaveTo(this)
+                .Groups(1..);
+
+            // When: Calling index with q='a=###'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"A={amount:0}" });
+
+            // Then: Only transactions with amounts #.## and ###.00 are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexQAmountAny()
+        {
+            // Given: A mix of transactions, some with a certain amount, others not
+            var amount = 599m;
+            var chosen = FakeObjects<Transaction>
+                .Make(2)
+                .Add(3, x => x.Amount = amount)
+                .Add(3, x => x.Amount = amount / 100)
+                .SaveTo(this)
+                .Groups(1..);
+
+            // When: Calling index with q='###'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"{amount:0}" });
+
+            // Then: Only transactions with amounts #.## and ###.00 are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
         }
 
         #endregion

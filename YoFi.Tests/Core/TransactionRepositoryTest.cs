@@ -427,6 +427,25 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public async Task IndexQAmountAny()
+        {
+            // Given: A mix of transactions, some with a certain amount, others not
+            var amount = 599m;
+            var chosen = FakeObjects<Transaction>
+                .Make(2)
+                .Add(3, x => x.Amount = amount)
+                .Add(3, x => x.Amount = amount / 100)
+                .SaveTo(this)
+                .Groups(1..);
+
+            // When: Calling index with q='###'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"{amount:0}" });
+
+            // Then: Only transactions with amounts #.## and ###.00 are returned
+            ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
         public async Task IndexQAmountDouble()
         {
             // Given: A mix of transactions, some with a certain amount, others not
