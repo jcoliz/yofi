@@ -65,10 +65,10 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task EditModalDetailsFound()
         {
             // Given: Five items in the respository
-            repository.AddItems(5);
+            var data = FakeObjects<Payee>.Make(5).SaveTo(this);
+            var selected = data.Last();
 
             // When: Retrieving details for a selected item to edit it
-            var selected = repository.All.Skip(1).First();
             var actionresult = await itemController.EditModal(selected.ID);
 
             var viewresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
