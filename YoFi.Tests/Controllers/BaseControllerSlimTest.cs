@@ -129,33 +129,33 @@ namespace YoFi.Tests.Controllers.Slim
         [TestMethod]
         public async Task Create()
         {
-            // Given: Five items in the respository
-            repository.AddItems(5);
+            // Given: Five items in the respository, plus another ready to add
+            var data = FakeObjects<T>.Make(5).SaveTo(this).Add(1);
 
             // When: Adding a new item
-            var expected = repository.MakeItem(6);
-            var actionresult = await controller.Create(expected);
+            var added = data.Group(1).Single();
+            var actionresult = await controller.Create(added);
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
             Assert.AreEqual("Index", redirresult.ActionName);
 
-            // And: There are now 6 items in the repository
-            Assert.AreEqual(6, repository.All.Count());
+            // And: All 6 items in the repository
+            Assert.IsTrue(repository.All.SequenceEqual(data));
 
             // And: The new item is there
-            var found = await repository.GetByIdAsync(expected.ID);
-            Assert.AreEqual(expected, found);
+            var found = await repository.GetByIdAsync(added.ID);
+            Assert.AreEqual(added, found);
         }
 
         [TestMethod]
         public async Task EditDetailsFound()
         {
             // Given: Five items in the respository
-            repository.AddItems(5);
+            var data = FakeObjects<T>.Make(5).SaveTo(this);
+            var selected = data.Last();
 
             // When: Retrieving details for a selected item to edit it
-            var selected = repository.All.Skip(1).First();
             var actionresult = await controller.Edit(selected.ID);
 
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
@@ -168,14 +168,14 @@ namespace YoFi.Tests.Controllers.Slim
         [TestMethod]
         public async Task EditObjectValues()
         {
-            // Given: Five items in the respository
-            repository.AddItems(5);
+            // Given: Five items in the respository, plus another ready to use for editing
+            var data = FakeObjects<T>.Make(5).SaveTo(this).Add(1);
 
             // When: Changing details for a selected item
-            var selected = repository.All.Skip(1).First();
-            var expected = repository.MakeItem(6);
-            var id = expected.ID = selected.ID;
-            var actionresult = await controller.Edit(id, expected);
+            var selected = data.Group(0).Last();
+            var newvalues = data.Group(1).Single();
+            var id = newvalues.ID = selected.ID;
+            var actionresult = await controller.Edit(id, newvalues);
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
@@ -183,17 +183,17 @@ namespace YoFi.Tests.Controllers.Slim
 
             // And: Item has been updated
             var actual = await repository.GetByIdAsync(id);
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(newvalues, actual);
         }
 
         [TestMethod]
         public async Task DeleteDetailsFound()
         {
             // Given: Five items in the respository
-            repository.AddItems(5);
+            var data = FakeObjects<T>.Make(5).SaveTo(this);
+            var selected = data.Last();
 
             // When: Retrieving details for a selected item
-            var selected = repository.All.Skip(1).First();
             var actionresult = await controller.Delete(selected.ID);
 
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
@@ -206,29 +206,30 @@ namespace YoFi.Tests.Controllers.Slim
         [TestMethod]
         public async Task DeleteConfirmed()
         {
-            // Given: Five items in the respository
-            repository.AddItems(5);
+            // Given: Many items in the respository
+            var data = FakeObjects<T>.Make(5).Add(1).SaveTo(this);
+            var remaining = data.Group(0);
+            var deleted = data.Group(1).Single();
 
             // When: Deleting a selected item
-            var selected = repository.All.Skip(1).First();
-            var actionresult = await controller.DeleteConfirmed(selected.ID);
+            var actionresult = await controller.DeleteConfirmed(deleted.ID);
 
             // Then: Returns a redirection to Index
             var redirresult = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
             Assert.AreEqual("Index", redirresult.ActionName);
 
             // And: There are now 4 items in the repository
-            Assert.AreEqual(4, repository.All.Count());
+            Assert.IsTrue(repository.All.SequenceEqual(remaining));
 
             // And: The selected item is not in the repository
-            Assert.IsFalse(repository.All.Any(x => x.ID == selected.ID));
+            Assert.IsFalse(repository.All.Any(x => x.ID == deleted.ID));
         }
 
         [TestMethod]
         public async Task Download()
         {
-            // Given: 20 items in the respository
-            repository.AddItems(20);
+            // Given: Many items in the respository
+            var data = FakeObjects<T>.Make(25).SaveTo(this);
 
             // When: Downloading them as a spreadsheet
             var actionresult = await controller.Download();
@@ -248,7 +249,7 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task Upload()
         {
             // Given: A file with 10 new items
-            var expected = repository.MakeItems(10).ToList();
+            var expected = FakeObjects<T>.Make(10).Group(0);
             var file = GivenAFileOf(expected);
 
             // When: Uploading that
