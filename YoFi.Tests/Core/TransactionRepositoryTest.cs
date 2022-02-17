@@ -17,12 +17,13 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class TransactionRepositoryTest : BaseRepositoryTest<Transaction>, IFakeObjectsSaveTarget
     {
+        #region Fields
+
         private TestAzureStorage storage;
         private TestClock clock;
-
-        protected override int CompareKeys(Transaction x, Transaction y) => x.Payee.CompareTo(y.Payee);
-
         private ITransactionRepository transactionRepository => repository as ITransactionRepository;
+
+        #endregion
 
         #region Helpers
 
@@ -76,6 +77,8 @@ namespace YoFi.Tests.Core
 
         #endregion
 
+        #region Init/Cleanup
+
         [TestInitialize]
         public void SetUp()
         {
@@ -84,6 +87,8 @@ namespace YoFi.Tests.Core
             clock = new TestClock();
             repository = new TransactionRepository(context, clock, storage);
         }
+
+        #endregion
 
         #region Tests
 
@@ -758,7 +763,6 @@ namespace YoFi.Tests.Core
         #endregion
 
         #region Receipts
-
 
         [TestMethod]
         public async Task UpReceipt()

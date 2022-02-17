@@ -32,23 +32,6 @@ namespace YoFi.Tests.Core
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        /// Comparison to sort keys
-        /// </summary>
-        /// <remarks>
-        /// The idea here is that we order our sample data according to the method described
-        /// here, so that if we sort it by this comparer, it equals the sort order given in
-        /// IRepository(T).InDefaultOrder()
-        /// </remarks>
-        /// <param name="x">First item</param>
-        /// <param name="y">Second item</param>
-        /// <returns>-1 if <paramref name="x"/> comes before <paramref name="y"/></returns>
-        protected abstract int CompareKeys(T x, T y);
-
-        #endregion
-
         #region Helpers
 
         public void AddRange(System.Collections.IEnumerable objects)
@@ -145,8 +128,8 @@ namespace YoFi.Tests.Core
             // When: Querying items from the repository
             var qresult = await repository.GetByQueryAsync(new WireQueryParameters());
 
-            // Test that the resulting items are the same as expected items ordered correctly
-            expected.Sort(CompareKeys);
+            // Test that the resulting items are the same as expected items
+            // (Note that FakeObjects makes items in the correct order. If that wasn't the case, we'd need to order before comparing)
             Assert.IsTrue(qresult.Items.SequenceEqual(expected));
         }
 
@@ -227,7 +210,6 @@ namespace YoFi.Tests.Core
             // And: it's equal to our new one
             var actual = context.Get<T>().Single();
             Assert.AreEqual(updated, actual);
-            Assert.AreEqual(0, CompareKeys(updated, actual));
         }
 
         [TestMethod]
@@ -272,8 +254,7 @@ namespace YoFi.Tests.Core
             ssr.Open(stream);
             var actual = ssr.Deserialize<T>();
 
-            // Then: The received items match the data set (sorted)
-            expected.Sort(CompareKeys);
+            // Then: The received items match the data set
             Assert.IsTrue(expected.SequenceEqual(actual));
         }
 

@@ -1,7 +1,6 @@
 ﻿using Common.DotNet.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -13,9 +12,13 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class PayeeRepositoryTest : BaseRepositoryTest<Payee>
     {
-        protected override int CompareKeys(Payee x, Payee y) => x.Name.CompareTo(y.Name);
+        #region Fields
 
         PayeeRepository itemRepository => base.repository as PayeeRepository;
+
+        #endregion
+
+        #region Init/Cleanup
 
         [TestInitialize]
         public void SetUp()
@@ -23,6 +26,10 @@ namespace YoFi.Tests.Core
             context = new MockDataContext();
             repository = new PayeeRepository(context);
         }
+
+        #endregion
+
+        #region Tests
 
         [TestMethod]
         public async Task BulkEdit()
@@ -148,5 +155,7 @@ namespace YoFi.Tests.Core
             // Then: All previously-selected items are now correctly matching the expected category
             Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
         }
+
+        #endregion
     }
 }

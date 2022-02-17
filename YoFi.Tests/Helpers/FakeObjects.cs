@@ -2,10 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using YoFi.Core.Models;
-using YoFi.Tests.Core;
 
 namespace YoFi.Tests.Helpers
 {
@@ -150,6 +148,28 @@ namespace YoFi.Tests.Helpers
             target.AddRange(this);
 
             return this;
+        }
+    }
+
+    public static class TestKey<T>
+    {
+        public static PropertyInfo Find()
+        {
+            // Find the test key on the object
+            var properties = typeof(T).GetProperties();
+            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(YoFi.Core.Models.Attributes.TestKeyAttribute)));
+            if (!chosen.Any())
+                throw new ApplicationException("Test Key not found");
+            if (chosen.Skip(1).Any())
+                throw new ApplicationException("More than one Test Key found");
+            var property = chosen.Single();
+
+            return property;
+        }
+
+        public static Func<T, object> Order()
+        {
+            return x => Find().GetValue(x);
         }
     }
 }

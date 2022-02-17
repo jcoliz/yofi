@@ -16,23 +16,6 @@ namespace YoFi.Tests.Core
     {
         BudgetTxRepository itemRepository => base.repository as BudgetTxRepository;
 
-        /// <summary>
-        /// Compares two items based on their test sort key, returning a comparison
-        ///     of their relative values.
-        /// </summary>
-        /// <remarks>
-        /// Test keys are an intern notation, a way for us to independently indicate our expectations for how
-        /// the data should be correctly sorted. This is a choice we made when creating our sample data,
-        /// so can't be inferred from the structure of the class.
-        /// </remarks>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns>
-        ///     A signed number indicating the relative values of the two items. Return
-        ///     value Meaning Less than zero <paramref name="x"/>is less than <paramref name="y"/>. 
-        ///     Zero the instances are equal.
-        protected override int CompareKeys(BudgetTx x, BudgetTx y) => x.Amount.CompareTo(y.Amount);
-
         [TestInitialize]
         public void SetUp()
         {
