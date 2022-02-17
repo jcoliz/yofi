@@ -5,11 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;
 
 namespace YoFi.Tests.Helpers
 {
-    public abstract class BaseMockRepository<T>: IMockRepository<T> where T: class, IModelItem<T>, new()
+    public abstract class BaseMockRepository<T>: IRepository<T> where T: class, IModelItem<T>, new()
     {
         protected BaseMockRepository()
         {

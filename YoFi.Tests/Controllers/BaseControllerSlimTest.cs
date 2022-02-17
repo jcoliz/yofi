@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Helpers;
 
@@ -28,7 +29,7 @@ namespace YoFi.Tests.Controllers.Slim
         #region Fields
 
         protected IController<T> controller;
-        protected IMockRepository<T> repository;
+        protected IRepository<T> repository;
 
         #endregion
 
