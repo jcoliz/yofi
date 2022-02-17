@@ -918,6 +918,43 @@ namespace YoFi.Tests.Integration.Controllers
 
         #endregion
 
+        #region Receipts
+
+        [TestMethod]
+        public async Task GetReceipt()
+        {
+            // Given: A transaction with a receipt
+            var filename = "1234";
+            var expected = FakeObjects<Transaction>
+                .Make(4)
+                .Add(1, x => x.ReceiptUrl = filename)
+                .SaveTo(this)
+                .Group(1)
+                .Single();
+
+            var id = expected.ID;
+            var contenttype = "image/png";
+
+            integrationcontext.storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // When: Getting the receipt
+            var response = await client.GetAsync($"{urlroot}/GetReceipt/{id}");
+            response.EnsureSuccessStatusCode();
+
+            // Then: Response is OK
+            response.EnsureSuccessStatusCode();
+
+            // And: It's a stream
+            Assert.IsInstanceOfType(response.Content, typeof(StreamContent));
+            var streamcontent = response.Content as StreamContent;
+
+            // Then: The receipt is returned
+            Assert.AreEqual(filename, streamcontent.Headers.ContentDisposition.FileNameStar);
+            Assert.AreEqual(contenttype, streamcontent.Headers.ContentType.ToString());
+        }
+
+        #endregion
+
         #region Hiding Tests
 
         // Need to hide download test. Works differently for transactions

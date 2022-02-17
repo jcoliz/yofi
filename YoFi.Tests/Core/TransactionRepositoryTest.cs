@@ -808,7 +808,6 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(id.ToString(), storage.BlobItems.Single().FileName);
         }
 
-
         [TestMethod]
         public async Task GetReceipt()
         {
