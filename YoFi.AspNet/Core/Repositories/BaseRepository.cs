@@ -52,6 +52,7 @@ namespace YoFi.Core.Repositories
 
         protected virtual IQueryable<T> ForQuery(IWireQueryParameters parms) => ForQuery(parms.Query);
 
+        /// <summary>
         /// Retrieve a single item by <paramref name="id"/>
         /// </summary>
         /// <remarks>
@@ -59,7 +60,11 @@ namespace YoFi.Core.Repositories
         /// </remarks>
         /// <param name="id">Identifier of desired item</param>
         /// <returns>Desired item</returns>
-        public Task<T> GetByIdAsync(int? id) => Task.FromResult(_context.Get<T>().Single(x => x.ID == id.Value));
+        public async Task<T> GetByIdAsync(int? id) 
+        {
+            var list = await _context.ToListNoTrackingAsync(_context.Get<T>().Where(x => x.ID == id.Value));
+            return list.Single();
+        }
         // TODO: QueryExec SingleAsync()
 
         /// <summary>
