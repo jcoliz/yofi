@@ -178,6 +178,25 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(expected, actual);
         }
 
+        [TestMethod]
+        public async Task PayeeCache()
+        {
+            // Given: A payee which maps a known name to a known payee
+            FakeObjects<Payee>
+                .Make(5)
+                .Add(1, x => { x.Name = "NameXX"; x.Category = "CategoryXX"; })
+                .Add(1, x => { x.Name = "/Regex[0-9][0-9]/"; x.Category = "CategoryRegex"; })
+                .SaveTo(this);
+
+            // When: Caching the payees
+            await itemRepository.LoadCacheAsync();
+
+            // And: Looking for a match
+            await GetCategoryMatchingPayee("Regex11", "CategoryRegex");
+
+            // Then: No problems
+        }
+
         #endregion
     }
 }
