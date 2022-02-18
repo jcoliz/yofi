@@ -47,24 +47,24 @@ namespace YoFi.Tests.Core
                     x.Payee += "222";
                     x.Timestamp = new DateTime(2100, 1, 1);
                 })
-                .Add(2, x => 
+                .Add(2, x =>
                 {
                     x.Category += "BBB";
                     x.Payee += "222";
                     x.Memo += "Wut";
                     x.Timestamp = new DateTime(2100, 1, 1);
                 })
-                .Add(2, x => 
+                .Add(2, x =>
                 {
                     x.Memo += "Wut";
                     x.Timestamp = new DateTime(2100, 1, 1);
                 })
-                .Add(2, x => 
+                .Add(2, x =>
                 {
                     x.Payee += "Wut";
                     x.Timestamp = new DateTime(2100, 1, 1);
                 })
-                .Add(2, x => 
+                .Add(2, x =>
                 {
                     x.Category += "BBB";
                     x.Payee += "444";
@@ -170,7 +170,7 @@ namespace YoFi.Tests.Core
         {
             // Given: Many transactions in the repository, some with a bankref, others not
             var fakeref = "ABC123";
-            var data = FakeObjects<Transaction>.Make(12, x => x.BankReference = null).Add(8, x => x.BankReference = fakeref).SaveTo(this) ;
+            var data = FakeObjects<Transaction>.Make(12, x => x.BankReference = null).Add(8, x => x.BankReference = fakeref).SaveTo(this);
             var hadref = data.Group(1);
 
             // When: Calling AssignBankReferences()
@@ -199,18 +199,18 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
         }
 
-        [DataRow("c=CCC,p=222,y=2100", 0,1)]
-        [DataRow("p=222,y=2100", 0,2)]
-        [DataRow("c=BBB,p=444", 4,5)]
-        [DataRow("m=Wut,y=2100", 1,3)]
-        [DataRow("Wut,y=2100", 1,4)]
+        [DataRow("c=CCC,p=222,y=2100", 0, 1)]
+        [DataRow("p=222,y=2100", 0, 2)]
+        [DataRow("c=BBB,p=444", 4, 5)]
+        [DataRow("m=Wut,y=2100", 1, 3)]
+        [DataRow("Wut,y=2100", 1, 4)]
         [DataTestMethod]
         public async Task DownloadQComplex(string q, int from, int to)
         {
             // Given: A mix of transactions, in differing years
             // And: some with '{word}' in their category, memo, or payee and some without
             var all = GivenComplexDataInDatabase();
-            var chosen = all.Groups(from..to).OrderBy(x=>x.ID);
+            var chosen = all.Groups(from..to).OrderBy(x => x.ID);
 
             // When: Downloading transactions with q='{word},{key}={value}' in various combinations
             var stream = await transactionRepository.AsSpreadsheetAsync(chosen.First().Timestamp.Year, false, q);
@@ -218,7 +218,7 @@ namespace YoFi.Tests.Core
             // And: Loading it as a spreadsheet
             using var ssr = new SpreadsheetReader();
             ssr.Open(stream);
-            var items = ssr.Deserialize<Transaction>().OrderBy(x=>x.ID);
+            var items = ssr.Deserialize<Transaction>().OrderBy(x => x.ID);
 
             // Then: Only the transactions with '{word}' in their category, memo, or payee AND matching the supplied {key}={value} are returned
             Assert.IsTrue(items.SequenceEqual(chosen));
@@ -574,7 +574,7 @@ namespace YoFi.Tests.Core
             var chosen = FakeObjects<Transaction>
                 .Make(2)
                 .Add(3, x => x.Amount = amount)
-                .Add(3, x => x.Amount = amount/100)
+                .Add(3, x => x.Amount = amount / 100)
                 .SaveTo(this)
                 .Groups(1..);
 
@@ -624,7 +624,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A mix of transactions, some with '{word}' in their category and some without
             var word = "CAF";
-            var chosen = FakeObjects<Transaction>.Make(5).Add(3, x=>x.Category += word).SaveTo(this).Group(1);
+            var chosen = FakeObjects<Transaction>.Make(5).Add(3, x => x.Category += word).SaveTo(this).Group(1);
 
             // When: Calling index q={word}
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = word });
@@ -657,7 +657,7 @@ namespace YoFi.Tests.Core
             var chosen = any ? items.Groups(1..5) : items.Groups(1..3);
 
             // When: Calling index q={word} OR q=c={word}
-            var q = any ? word : $"c={word}";            
+            var q = any ? word : $"c={word}";
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = q });
 
             // Then: Only the transactions with '{word}' in their category (or everywhere) are returned
@@ -859,9 +859,9 @@ namespace YoFi.Tests.Core
         }
 
         [DataRow("c=CCC,p=222,y=2100", 0, 1)]
-        [DataRow("p=222,y=2100", 0, 2 )]
-        [DataRow("c=BBB,p=444", 4, 5 )]
-        [DataRow("m=Wut,y=2100", 1, 3 )]
+        [DataRow("p=222,y=2100", 0, 2)]
+        [DataRow("c=BBB,p=444", 4, 5)]
+        [DataRow("m=Wut,y=2100", 1, 3)]
         [DataRow("Wut,y=2100", 1, 4)]
         [DataTestMethod]
         public async Task IndexQComplex(string q, int from, int to)
@@ -909,7 +909,7 @@ namespace YoFi.Tests.Core
             // Given: There are 5 items in the database, one of which already has a split
             var expected = FakeObjects<Transaction>
                 .Make(4)
-                .Add(1, x => 
+                .Add(1, x =>
                 {
                     x.Category = null;
                     x.Splits = new List<Split>()
@@ -932,7 +932,7 @@ namespace YoFi.Tests.Core
 
             // Then: Splits are now balanced
             Assert.IsTrue(expected.IsSplitsOK);
-            Assert.AreEqual(2,expected.Splits.Count);
+            Assert.AreEqual(2, expected.Splits.Count);
 
             // And: New split has no category
             Assert.IsNull(expected.Splits.Last().Category);
@@ -974,7 +974,7 @@ namespace YoFi.Tests.Core
             var filename = "1234";
             var expected = FakeObjects<Transaction>
                 .Make(4)
-                .Add(1, x => x.ReceiptUrl = filename )
+                .Add(1, x => x.ReceiptUrl = filename)
                 .SaveTo(this)
                 .Group(1)
                 .Single();
@@ -991,6 +991,92 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(filename, name);
             Assert.AreEqual(contenttype, contenttypeout);
         }
+
+        [TestMethod]
+        public async Task GetReceiptAsPdfNow()
+        {
+            // Given: A transaction with a receipt
+            var filename = "1234";
+            var expected = FakeObjects<Transaction>
+                .Make(4)
+                .Add(1, x => x.ReceiptUrl = filename)
+                .SaveTo(this)
+                .Group(1)
+                .Single();
+
+            var id = expected.ID;
+
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = "application/octet-stream" });
+
+            // When: Getting the receipt
+            var (stream, contenttypeout, name) = await transactionRepository.GetReceiptAsync(expected);
+
+            // Then: The receipt is returned
+            Assert.AreEqual(filename, name);
+            Assert.AreEqual("application/pdf", contenttypeout);
+        }
+
+        [TestMethod]
+        public async Task GetReceiptNoReceipt()
+        {
+            // Given: A transaction without a receipt
+            var expected = FakeObjects<Transaction>
+                .Make(5)
+                .SaveTo(this)
+                .Last();
+
+            // When: Getting the receipt
+            var result = await transactionRepository.GetReceiptAsync(expected);
+
+            // Then: Result is all nulls
+            Assert.AreEqual((null,null,null),result);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public async Task GetReceiptNoStorage()
+        {
+            // Given: A transaction with a receipt
+            var filename = "1234";
+            var expected = FakeObjects<Transaction>
+                .Make(4)
+                .Add(1, x => x.ReceiptUrl = filename)
+                .SaveTo(this)
+                .Group(1)
+                .Single();
+
+            // And: An error-generating setup
+            repository = new TransactionRepository(null, null, null);
+
+            // When: Getting the receipt
+            _ = await transactionRepository.GetReceiptAsync(expected);
+
+            // Then: Exception
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public async Task UpReceiptNoStorage()
+        {
+            // Given: A transaction with no receipt
+            var items = FakeObjects<Transaction>.Make(5).SaveTo(this);
+            var expected = items.Last();
+            var id = expected.ID;
+
+            // And: An image file
+            var contenttype = "image/png";
+            var length = 25;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
+
+            // And: An error-generating setup
+            repository = new TransactionRepository(null, null, null);
+
+            // When: Uploading it as a receipt
+            await transactionRepository.UploadReceiptAsync(expected, stream, contenttype);
+
+            // Then: Exception
+        }
+
 
         #endregion
 
