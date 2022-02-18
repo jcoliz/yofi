@@ -134,6 +134,20 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public async Task IndexPage1()
+        {
+            // Given: A long set of items, which is longer than one page, but not as long as two pages 
+            var pagesize = 25; // BaseRepository<T>.DefaultPageSize;
+            var data = FakeObjects<T>.Make(pagesize).Add(pagesize/2).SaveTo(this);
+
+            // When: Getting the Index
+            var document = await WhenGettingIndex(new WireQueryParameters());
+
+            // Then: Only one page of items returned, which are the LAST group, cuz it's sorted by time
+            ThenResultsAreEqualByTestKey(document, data.Group(0));
+        }
+
+        [TestMethod]
         public async Task DetailsFound()
         {
             // Given: Five items in the data set
