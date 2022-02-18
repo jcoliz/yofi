@@ -28,7 +28,24 @@ namespace YoFi.Tests.Helpers
 
         public IQueryable<Transaction> TransactionsWithSplits => TransactionData.AsQueryable();
 
-        public IQueryable<Split> SplitsWithTransactions => throw new NotImplementedException();
+        public IQueryable<Split> SplitsWithTransactions
+        {
+            get
+            {
+                var result = new List<Split>();
+                var txs = Transactions.Where(x => x.HasSplits);
+                foreach (var tx in txs)
+                {
+                    foreach (var split in tx.Splits)
+                    {
+                        split.Transaction = tx;
+                        result.Add(split);
+                    }
+                }
+
+                return result.AsQueryable();
+            }
+        }
 
         public IQueryable<T> Get<T>() where T: class
         {

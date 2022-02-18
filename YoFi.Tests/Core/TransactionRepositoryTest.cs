@@ -249,6 +249,40 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(transactionRepository.All.All(x => x.Selected != true && x.Imported != true));
         }
 
+        [TestMethod]
+        public async Task CategoryAutoComplete()
+        {
+            // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
+            var word = "CategoryAutoComplete";
+            var data = FakeObjects<Transaction>
+                .Make(2)
+                .Add(2, x => x.Category += word)
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Category += word).Group(0))
+                .Add(2, x => x.Memo += word)
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(2, s => s.Memo += word).Group(0))
+                .Add(2, x => x.Payee += word)
+                .SaveTo(this);
+
+            // And: Current day is latest of data
+            clock.Now = data.Max(x => x.Timestamp);
+
+            // When: Asking for the category autocomplete for {word}
+            var list = await transactionRepository.CategoryAutocompleteAsync(word);
+
+            var expected = data
+                .Group(1)
+                .Select(x => x.Category)
+                .Concat(
+                    data
+                        .Group(2)
+                        .SelectMany(x => x.Splits)
+                        .Select(x => x.Category)
+                )
+                .Distinct()
+                .OrderBy(x => x);
+            Assert.IsTrue(list.SequenceEqual(expected));
+        }
+
         #endregion
 
         #region Index Tests
@@ -341,7 +375,7 @@ namespace YoFi.Tests.Core
         public async Task IndexQCategory()
         {
             // Given: A mix of transactions, some with '{word}' in their category, memo, or payee and some without
-            var word = "CAF";
+            var word = "IndexQCategory";
             var chosen = FakeObjects<Transaction>
                 .Make(2)
                 .Add(2, x => x.Category += word)

@@ -398,10 +398,10 @@ namespace YoFi.Core.Repositories
                 const int numresults = 10;
 
                 // Look for top N recent categories in transactions, first.
-                var txd = All.Where(x => x.Timestamp > DateTime.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
+                var txd = All.Where(x => x.Timestamp > _clock.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
 
                 // There are also some categories in splits. Get the top N there too.
-                var spd = Splits.Where(x => x.Transaction.Timestamp > DateTime.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
+                var spd = Splits.Where(x => x.Transaction.Timestamp > _clock.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
 
                 // Merge the results
 
