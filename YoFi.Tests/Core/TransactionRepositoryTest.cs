@@ -207,6 +207,27 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(items.SequenceEqual(chosen));
         }
 
+        [TestMethod]
+        public async Task FinalizeImport()
+        {
+            // Given: A mix of transactions, some are not imported, some imported are not selected, some imported are selected
+            var chosen = FakeObjects<Transaction>
+                .Make(5)
+                .Add(6, x => x.Imported = x.Selected = true)
+                .Add(7, x => x.Imported = true)
+                .SaveTo(this)
+                .Groups(0..2);
+
+            // When: Finalizing the import
+            await transactionRepository.FinalizeImportAsync();
+
+            // Then: The remaining items are the not imported plus imported selected items
+            Assert.IsTrue(transactionRepository.All.SequenceEqual(chosen));
+
+            // And: None are imported or selected
+            Assert.IsTrue(transactionRepository.All.All(x => x.Selected != true && x.Imported != true));
+        }
+
         #endregion
 
         #region Index Tests
