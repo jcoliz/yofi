@@ -1,8 +1,5 @@
 ﻿using Common.DotNet;
-using Common.DotNet;
-using Excel.FinancialFunctions;
 using jcoliz.OfficeOpenXml.Serializer;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -360,7 +357,7 @@ namespace YoFi.Core.Repositories
                 var category = split[0].Trim();
 
                 var loan = JsonSerializer.Deserialize<Loan>(split[1], new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                if (loan == null || loan.OriginationDate == default)
+                if (loan.Origination is null)
                     throw new ArgumentException();
 
                 if (string.IsNullOrEmpty(loan.Principal))

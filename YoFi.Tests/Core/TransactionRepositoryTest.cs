@@ -148,6 +148,23 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(principal, splits.Where(x => x.Category == "Mortgage Principal").Single().Amount);
         }
 
+        [DataRow("")]
+        [DataRow("Bogus")]
+        [DataRow("Bogus [Loan]")]
+        [DataRow("Bogus [Loan] More Bogus [Loan] Even More")]
+        [DataRow("Bogus [Loan] Very Bogus")]
+        [DataRow("Bogus [Loan] {}")]
+        [DataRow("Mortgage Interest [Loan] { \"principal\": \"Mortgage Interest\", \"origination\": \"1/1/2000\" } ")]
+        [DataRow("Mortgage Interest [Loan] { \"principal\": \"Mortgage Interest\" } ")]
+        [DataTestMethod]
+        public void CalculateLoanSplitsError(string rule)
+        {
+            var item = FakeObjects<Transaction>.Make(1).Single();
+            var result = transactionRepository.CalculateCustomSplitRules(item, rule);
+
+            Assert.IsFalse(result.Any());
+        }
+
         [TestMethod]
         public async Task AssignBankReferences()
         {
@@ -281,6 +298,35 @@ namespace YoFi.Tests.Core
                 .Distinct()
                 .OrderBy(x => x);
             Assert.IsTrue(list.SequenceEqual(expected));
+        }
+
+        [TestMethod]
+        public async Task CategoryAutoCompleteNotFound()
+        {
+            // Given: A mix of transactions, NONE of which have '{word}' in their category
+            var word = "CategoryAutoComplete";
+            _ = FakeObjects<Transaction>
+                .Make(5)
+                .SaveTo(this);
+
+            // When: Asking for the category autocomplete for {word}
+            var list = await transactionRepository.CategoryAutocompleteAsync(word);
+
+            // Then: Empty set returned
+            Assert.IsFalse(list.Any());
+        }
+
+        [TestMethod]
+        public async Task CategoryAutoCompleteError()
+        {
+            // Given: An error-generating setup
+            repository = new TransactionRepository(null, null, null);
+
+            // When: Asking for the category autocomplete for anything
+            var list = await transactionRepository.CategoryAutocompleteAsync("anything");
+
+            // Then: Empty set returned
+            Assert.IsFalse(list.Any());
         }
 
         #endregion
