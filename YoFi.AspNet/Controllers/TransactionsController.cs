@@ -123,7 +123,7 @@ namespace YoFi.AspNet.Controllers
         public async Task<IActionResult> Edit(int? id, [FromServices] IPayeeRepository payeeRepository)
         {
             var transaction = await _repository.GetWithSplitsByIdAsync(id);
-            if (string.IsNullOrEmpty(transaction.Category))
+            if (string.IsNullOrEmpty(transaction.Category) && payeeRepository != null)
             {
                 var category = await payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
                 if (category != null)
@@ -173,8 +173,7 @@ namespace YoFi.AspNet.Controllers
 
                 // Note that we need an as no tracking query here, or we'll have problems shortly when we query with one
                 // object but update another.
-                var oresult = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = $"x={id}" } );
-                var oldtransaction = oresult.Items.Single();
+                var oldtransaction = await _repository.GetByIdAsync(id);
                 var oldreceipturl = oldtransaction.ReceiptUrl;
 
                 transaction.ReceiptUrl = oldreceipturl;
@@ -404,7 +403,7 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Transaction>.Edit(int id, Transaction item) => Edit(id, false, item);
         Task<IActionResult> IController<Transaction>.Download() => Download(false);
         Task<IActionResult> IController<Transaction>.Upload(List<IFormFile> files) => throw new NotImplementedException();
-        Task<IActionResult> IController<Transaction>.Edit(int? id) => throw new NotImplementedException();
+        Task<IActionResult> IController<Transaction>.Edit(int? id) => Edit(id, null);
         #endregion
     }
 }

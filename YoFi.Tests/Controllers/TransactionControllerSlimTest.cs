@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Controllers;
@@ -19,14 +17,14 @@ using YoFi.Tests.Helpers;
 namespace YoFi.Tests.Controllers.Slim
 {
     [TestClass]
-    public class TransactionControllerSlimTest //: BaseControllerSlimTest<Transaction>
+    public class TransactionControllerSlimTest: BaseControllerSlimTest<Transaction>
     {
         // Note that I would like to derive from BaseControllerSlimTest, however it will mean implementing
         // a bunch of stuff in mock transaction repository. Task for a later date!
 
         private TestClock clock;
-        private MockTransactionRepository repository;
-        private TransactionsController controller;
+        private TransactionsController itemController => base.controller as TransactionsController;
+        private MockTransactionRepository itemRepository => base.repository as MockTransactionRepository;
 
         [TestInitialize]
         public void SetUp()
@@ -34,12 +32,6 @@ namespace YoFi.Tests.Controllers.Slim
             clock = new TestClock() { Now = new DateTime(2022, 1, 1) };
             repository = new MockTransactionRepository();
             controller = new TransactionsController(repository as ITransactionRepository, clock);
-        }
-
-        [TestMethod]
-        public void Empty()
-        {
-            Assert.IsNotNull(controller);
         }
 
         [TestMethod]
@@ -51,7 +43,7 @@ namespace YoFi.Tests.Controllers.Slim
 
             // When: Seeding with a given ID
             var id = "hello";
-            var actionresult = await controller.Seed(id,loader.Object);
+            var actionresult = await itemController.Seed(id,loader.Object);
 
             // Then: The data loader was called with that ID
             loader.Verify(x => x.SeedAsync(id,false), Times.Once);
@@ -72,7 +64,7 @@ namespace YoFi.Tests.Controllers.Slim
 
             // When: Seeding with a given ID
             var id = "hello";
-            var actionresult = await controller.Seed(id, loader.Object);
+            var actionresult = await itemController.Seed(id, loader.Object);
 
             // Then: The data loader was called with that ID
             loader.Verify(x => x.SeedAsync(id, false), Times.Once);
@@ -99,7 +91,7 @@ namespace YoFi.Tests.Controllers.Slim
 
             // When: Seeding with a given ID
             var id = "hello";
-            var actionresult = await controller.Seed(id, loader.Object);
+            var actionresult = await itemController.Seed(id, loader.Object);
 
             // Then: The data loader was called with that ID
             loader.Verify(x => x.SeedAsync(id, false), Times.Once);
@@ -125,7 +117,7 @@ namespace YoFi.Tests.Controllers.Slim
 
             // When: Calling DatabaseDelete with a given ID
             var id = "hello";
-            var actionresult = await controller.DatabaseDelete(id, dbadmin.Object);
+            var actionresult = await itemController.DatabaseDelete(id, dbadmin.Object);
 
             // Then: The database administration was called with that ID
             dbadmin.Verify(x => x.ClearDatabaseAsync(id), Times.Once);
@@ -137,18 +129,40 @@ namespace YoFi.Tests.Controllers.Slim
 
         [TestMethod]
         public async Task ReceiptActionOther() =>
-            Assert.IsTrue(await controller.ReceiptAction(1, string.Empty) is RedirectToActionResult);
+            Assert.IsTrue(await itemController.ReceiptAction(1, string.Empty) is RedirectToActionResult);
 
         [TestMethod]
         public void Error()
         {
             var expected = "Bah, humbug!";
             var httpcontext = new DefaultHttpContext() { TraceIdentifier = expected };
-            controller.ControllerContext.HttpContext = httpcontext;
-            var actionresult = controller.Error();
+            itemController.ControllerContext.HttpContext = httpcontext;
+            var actionresult = itemController.Error();
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
             var model = Assert.That.IsOfType<ErrorViewModel>(viewresult.Model);
             Assert.AreEqual(expected, model.RequestId);
         }
+
+        [TestMethod]
+        public async Task CreateSplit()
+        {
+            // Given: A mocked repository
+            var repo = new Mock<ITransactionRepository>();
+            repo.Setup(x => x.AddSplitToAsync(98)).Returns(Task.FromResult(99));
+            controller = new TransactionsController(repo.Object, clock);
+
+            // When: Creating a split
+            var actionresult = await itemController.CreateSplit(98);
+
+            // Then: Redirected to edit page for that
+            var redirect = Assert.That.IsOfType<RedirectToActionResult>(actionresult);
+            Assert.AreEqual("Edit", redirect.ActionName);
+            Assert.AreEqual("Splits", redirect.ControllerName);
+            Assert.AreEqual(99, redirect.RouteValues["id"]);
+        }
+
+        // Upload from transactions controller is not done. All transaction upload is via importer page now.
+        public override Task Upload() => Task.CompletedTask;
+
     }
 }

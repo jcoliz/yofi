@@ -33,10 +33,7 @@ namespace YoFi.Tests.Helpers
             }
         }
 
-        public Task<Stream> AsSpreadsheetAsync(int year, bool allyears, string q)
-        {
-            throw new NotImplementedException();
-        }
+        public Task<Stream> AsSpreadsheetAsync(int year, bool allyears, string q) => Task.FromResult(base.AsSpreadsheet());
 
         public Task BulkEditAsync(string category)
         {
@@ -63,20 +60,14 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
-        public override IQueryable<Transaction> ForQuery(string q)
-        {
-            throw new NotImplementedException();
-        }
+        public override IQueryable<Transaction> ForQuery(string q) => All.AsQueryable();
 
         public Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Transaction> GetWithSplitsByIdAsync(int? id)
-        {
-            throw new NotImplementedException();
-        }
+        public Task<Transaction> GetWithSplitsByIdAsync(int? id) => base.GetByIdAsync(id);
 
         public Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype)
         {

@@ -247,7 +247,7 @@ namespace YoFi.Tests.Controllers.Slim
         }
 
         [TestMethod]
-        public async Task Upload()
+        public virtual async Task Upload()
         {
             // Given: A file with 10 new items
             var expected = FakeObjects<T>.Make(10).Group(0);
