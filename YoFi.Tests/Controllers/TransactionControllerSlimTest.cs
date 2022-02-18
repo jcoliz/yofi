@@ -11,6 +11,7 @@ using YoFi.AspNet.Controllers;
 using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
+using YoFi.Core.Repositories.Wire;
 using YoFi.Core.SampleGen;
 using YoFi.Tests.Helpers;
 
@@ -159,6 +160,69 @@ namespace YoFi.Tests.Controllers.Slim
             Assert.AreEqual("Edit", redirect.ActionName);
             Assert.AreEqual("Splits", redirect.ControllerName);
             Assert.AreEqual(99, redirect.RouteValues["id"]);
+        }
+        [TestMethod]
+        public async Task IndexBadArgs()
+        {
+            // Given: A mocked repository
+            var repo = new Mock<ITransactionRepository>();
+            repo.Setup(x => x.GetByQueryAsync(It.IsAny<IWireQueryParameters>())).Throws(new ArgumentException());
+            controller = new TransactionsController(repo.Object, clock);
+
+            // When: Calling Index with bad arguments
+            var actionresult = await itemController.Index();
+
+            // Then: Badrequest
+            var redirect = Assert.That.IsOfType<BadRequestResult>(actionresult);
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task EditPayeeMatch(bool modal)
+        {
+            // Given: Mocked repositories
+            var txrepo = new Mock<ITransactionRepository>();
+            txrepo.Setup(x => x.GetWithSplitsByIdAsync(99)).Returns(Task.FromResult(new Transaction() { Payee = "PayeeName" } ));
+            controller = new TransactionsController(txrepo.Object, clock);
+
+            var payrepo = new Mock<IPayeeRepository>();
+            payrepo.Setup(x => x.GetCategoryMatchingPayeeAsync("PayeeName")).Returns(Task.FromResult("PayeeCategory"));
+
+            // When: Calling Edit with a category that should match
+            Transaction model;
+            if (modal)
+            {
+                var actionresult = await itemController.EditModal(99, payrepo.Object);
+                var viewresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
+                model = Assert.That.IsOfType<Transaction>(viewresult.Model);
+            }
+            else
+            {
+                var actionresult = await itemController.Edit(99, payrepo.Object);
+                var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
+                model = Assert.That.IsOfType<Transaction>(viewresult.Model);
+            }
+
+            // Then: Resulting transaction has expected category
+            Assert.AreEqual("PayeeCategory", model.Category);
+        }
+
+        [TestMethod]
+        public async Task BulkEdit()
+        {
+            // Given: Mocked repositories
+            var category = "BulkEdit";
+            var txrepo = new Mock<ITransactionRepository>();
+            txrepo.Setup(x => x.BulkEditAsync(category));
+            controller = new TransactionsController(txrepo.Object, clock);
+
+            // When: BulkEdit with a chosen category
+            var actionresult = await itemController.BulkEdit(category);
+
+            // Then: BulkEdit operation was taken
+            txrepo.Verify(x => x.BulkEditAsync(category), Times.Once());
+            Assert.IsTrue(true);
         }
 
         // Upload from transactions controller is not done. All transaction upload is via importer page now.
