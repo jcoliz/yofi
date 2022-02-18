@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core.SampleGen;
-using Common.NET.Data;
+using Common.DotNet.Data;
 using Common.DotNet;
 using YoFi.Core;
 

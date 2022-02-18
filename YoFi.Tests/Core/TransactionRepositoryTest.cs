@@ -1,5 +1,5 @@
 ﻿using Common.DotNet;
-using Common.NET.Test;
+using Common.DotNet.Test;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;

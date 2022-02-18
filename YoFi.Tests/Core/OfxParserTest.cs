@@ -1,4 +1,4 @@
-using Common.NET.Test;
+using Common.DotNet.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfxSharp;
 using System;

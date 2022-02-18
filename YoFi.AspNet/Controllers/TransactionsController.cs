@@ -1,7 +1,7 @@
 ﻿using Ardalis.Filters;
 using Common.AspNet;
 using Common.DotNet;
-using Common.NET.Data;
+using Common.DotNet.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

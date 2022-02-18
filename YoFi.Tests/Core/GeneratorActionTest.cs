@@ -1,4 +1,4 @@
-﻿using Common.NET.Test;
+﻿using Common.DotNet.Test;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core.SampleGen;
 using YoFi.Tests.Helpers;
-using CNDSampleData = Common.NET.Data.SampleData;
+using CNDSampleData = Common.DotNet.Data.SampleData;
 
 namespace YoFi.Tests.Core.SampleGen
 {

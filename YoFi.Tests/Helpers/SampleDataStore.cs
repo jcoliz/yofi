@@ -1,4 +1,4 @@
-﻿using Common.NET.Test;
+﻿using Common.DotNet.Test;
 using System;
 using System.Collections.Generic;
 using System.IO;

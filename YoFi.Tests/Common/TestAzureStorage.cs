@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core;
 
-namespace Common.NET.Test
+namespace Common.DotNet.Test
 {
     public class TestAzureStorage : IStorageService
     {

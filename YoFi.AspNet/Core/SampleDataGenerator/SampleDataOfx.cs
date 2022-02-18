@@ -16,7 +16,7 @@ namespace YoFi.Core.SampleGen
 
             // Write header
 
-            using var header = Common.NET.Data.SampleData.Open("ofx-header.txt");
+            using var header = Common.DotNet.Data.SampleData.Open("ofx-header.txt");
             using var headerreader = new StreamReader(header);
             writer.Write(headerreader.ReadToEnd());
 
@@ -68,7 +68,7 @@ namespace YoFi.Core.SampleGen
 
             // Write footer
             writer.Flush();
-            using var footer = Common.NET.Data.SampleData.Open("ofx-footer.txt");
+            using var footer = Common.DotNet.Data.SampleData.Open("ofx-footer.txt");
             using var footerreader = new StreamReader(footer);
             writer.Write(footerreader.ReadToEnd());
             writer.Flush();

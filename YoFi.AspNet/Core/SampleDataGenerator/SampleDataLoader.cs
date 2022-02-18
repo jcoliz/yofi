@@ -1,5 +1,5 @@
 ﻿using Common.DotNet;
-using Common.NET.Data;
+using Common.DotNet.Data;
 using jcoliz.OfficeOpenXml.Serializer;
 using System;
 using System.Collections.Generic;
@@ -132,7 +132,7 @@ namespace YoFi.Core.SampleGen
         /// <returns>All known offerings</returns>
         public async Task<IEnumerable<ISampleDataDownloadOffering>> ListDownloadOfferingsAsync()
         {
-            using var stream = Common.NET.Data.SampleData.Open("SampleDataDownloadOfferings.json");
+            using var stream = Common.DotNet.Data.SampleData.Open("SampleDataDownloadOfferings.json");
 
             var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
             options.Converters.Add(new JsonStringEnumConverter());
@@ -176,7 +176,7 @@ namespace YoFi.Core.SampleGen
         /// <returns>All known seed offerings</returns>
         public async Task<IEnumerable<ISampleDataSeedOffering>> ListSeedOfferingsAsync()
         {
-            using var stream = Common.NET.Data.SampleData.Open("SampleDataSeedOfferings.json");
+            using var stream = Common.DotNet.Data.SampleData.Open("SampleDataSeedOfferings.json");
 
             var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
             options.Converters.Add(new JsonStringEnumConverter());

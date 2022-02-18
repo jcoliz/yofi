@@ -1,5 +1,5 @@
 ﻿using Common.DotNet;
-using Common.NET;
+using Common.DotNet;
 using Excel.FinancialFunctions;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Extensions.Configuration;

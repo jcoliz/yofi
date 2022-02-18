@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 
-namespace Common.NET.Data
+namespace Common.DotNet.Data
 {
     public static class SampleData
     {
