@@ -938,6 +938,32 @@ namespace YoFi.Tests.Core
             Assert.IsNull(expected.Splits.Last().Category);
         }
 
+        [TestMethod]
+        public async Task DownloadSplits()
+        {
+            // Given: Many items in the data set, some of which have splits
+            var data = FakeObjects<Transaction>
+                .Make(5)
+                .Add(2, x => x.Splits = FakeObjects<Split>.Make(5).Group(0))
+                .SaveTo(this);
+
+            var expected = data
+                .Group(1)
+                .SelectMany(x => x.Splits);
+
+            // When: Downloading the items as a spreadsheet
+            using var stream = await transactionRepository.AsSpreadsheetAsync(2000,true,null);
+
+            // And: Deserializing SPLITS from the spreadsheet
+            using var ssr = new SpreadsheetReader();
+            ssr.Open(stream);
+            var actual = ssr.Deserialize<Split>("Split");
+
+            // Then: The received items match the data set
+            Assert.IsTrue(expected.SequenceEqual(actual));
+        }
+
+
         #endregion
 
         #region Receipts

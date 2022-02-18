@@ -213,7 +213,7 @@ namespace YoFi.Core.Repositories
             // Which splits?
 
             // Product Backlog Item 870: Export & import transactions with splits
-            var splitsquery = _context.Splits.Where(x => transactionsquery.Contains(x.Transaction)).OrderByDescending(x => x.Transaction.Timestamp);
+            var splitsquery = _context.SplitsWithTransactions.Where(x => transactionsquery.Contains(x.Transaction)).OrderByDescending(x => x.Transaction.Timestamp);
             var splits = await _context.ToListNoTrackingAsync(splitsquery);
 
             // Create the spreadsheet result
