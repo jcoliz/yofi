@@ -343,6 +343,29 @@ namespace YoFi.Tests.Core
             Assert.IsFalse(list.Any());
         }
 
+        [TestMethod]
+        public async Task BulkEdit()
+        {
+            // Given: Many items in the data set, some of which are selected
+            var data = FakeObjects<Transaction>.Make(5).Add(4, x => x.Selected = true).SaveTo(this);
+            var untouched = data.Group(0);
+            var selected = data.Group(1);
+
+            // When: Applying bulk edit to the repository using a new category
+            var newcategory = "New Category";
+            await transactionRepository.BulkEditAsync(newcategory);
+
+            // Then: The selected items have the new category
+            Assert.IsTrue(selected.All(x => x.Category == newcategory));
+
+            // And: The other items are unchanged
+            Assert.IsTrue(untouched.All(x => x.Category != newcategory));
+
+            // And: All items are unselected
+            Assert.IsTrue(data.All(x => x.Selected != true));
+        }
+
+
         #endregion
 
         #region Index Tests

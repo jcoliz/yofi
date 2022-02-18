@@ -156,7 +156,7 @@ namespace YoFi.Tests.Core
             _ = FakeObjects<T>.Make(1).SaveTo(this);
 
             // When: Attempting to get an item using an ID that is not in the db
-            var maxid = context.Get<BudgetTx>().Max(x => x.ID);
+            var maxid = context.Get<T>().Max(x => x.ID);
             var badid = maxid + 1;
             var model = await repository.GetByIdAsync(badid);
 
