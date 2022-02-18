@@ -315,6 +315,20 @@ namespace YoFi.Tests.Core
             // Then: Empty set returned
             Assert.IsFalse(list.Any());
         }
+        [TestMethod]
+        public async Task CategoryAutoCompleteEmpty()
+        {
+            // Given: A mix of transactions, NONE of which have '{word}' in their category
+            _ = FakeObjects<Transaction>
+                .Make(5)
+                .SaveTo(this);
+
+            // When: Asking for the category autocomplete for empty string
+            var list = await transactionRepository.CategoryAutocompleteAsync(string.Empty);
+
+            // Then: Empty set returned
+            Assert.IsFalse(list.Any());
+        }
 
         [TestMethod]
         public async Task CategoryAutoCompleteError()
