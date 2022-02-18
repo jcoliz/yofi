@@ -156,6 +156,28 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(categories.Select(x => x.Replace("Second", "New Category")).SequenceEqual(repository.All.Select(x => x.Category)));
         }
 
+        [DataRow("", null)]
+        [DataRow("Bogus", null)]
+        [DataRow("NameXX","CategoryXX")]
+        [DataRow("Regex11", "CategoryRegex")]
+        [DataRow("Regex1A", null)]
+        [DataTestMethod]
+        public async Task GetCategoryMatchingPayee(string name, string expected)
+        {
+            // Given: A payee which maps a known name to a known payee
+            FakeObjects<Payee>
+                .Make(5)
+                .Add(1, x => { x.Name = "NameXX"; x.Category = "CategoryXX"; } )
+                .Add(1, x => { x.Name = "/Regex[0-9][0-9]/"; x.Category = "CategoryRegex"; })
+                .SaveTo(this);
+
+            // When: Looking for a match
+            var actual = await itemRepository.GetCategoryMatchingPayeeAsync(name);
+
+            // Then: Expected result found
+            Assert.AreEqual(expected, actual);
+        }
+
         #endregion
     }
 }

@@ -140,7 +140,7 @@ namespace YoFi.Core.Repositories
                 // Product Backlog Item 871: Match payee on regex, optionally
                 Payee payee = null;
                 foreach (var regexpayee in regexpayees)
-                    if (new Regex(regexpayee.Name[1..^2]).Match(Name).Success)
+                    if (new Regex(regexpayee.Name[1..^1]).Match(Name).Success)
                     {
                         payee = regexpayee;
                         break;
