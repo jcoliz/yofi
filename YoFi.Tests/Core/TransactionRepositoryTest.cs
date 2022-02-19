@@ -895,6 +895,59 @@ namespace YoFi.Tests.Core
             ThenResultsAreEqualByTestKey(document, chosen);
         }
 
+        public static IEnumerable<object[]> IndexSortOrderTestData
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { new { Key = "aa" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Amount.ToString("0000000.00")) } },
+                    new object[] { new { Key = "ad" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Amount.ToString("0000000.00")) } },
+                    new object[] { new { Key = "pa" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Payee) } },
+                    new object[] { new { Key = "ca" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Category) } },
+                    new object[] { new { Key = "da" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
+                    new object[] { new { Key = "pd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Payee) } },
+                    new object[] { new { Key = "cd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Category) } },
+                    new object[] { new { Key = "dd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.Timestamp.ToOADate().ToString()) } },
+                    new object[] { new { Key = "ra" , Ascending = true, Predicate = (Func<Transaction, string>)(x=>x.BankReference) } },
+                    new object[] { new { Key = "rd" , Ascending = false, Predicate = (Func<Transaction, string>)(x=>x.BankReference) } },
+                };
+            }
+        }
+
+        [DynamicData(nameof(IndexSortOrderTestData))]
+        [DataTestMethod]
+        public async Task IndexSortOrder(dynamic item)
+        {
+            // Given: A set of items, where the data set produces a different composition
+            // when ordered by each property.
+            // Note that this is NOT the usual way fake data is made.
+            var items = FakeObjects<Transaction>.Make(20,
+                x =>
+                {
+                    int index = (int)(x.Amount / 100m);
+                    x.Payee = (index % 2).ToString() + x.Payee;
+                    x.Category = (index % 3).ToString() + x.Category;
+                    x.Amount += (index % 4) * 10000m;
+                    x.BankReference = (index % 5).ToString() + index.ToString();
+                })
+                .SaveTo(this);
+
+            // When: Calling Index with a defined sort order
+            // When: Getting the index
+            var document = await WhenGettingIndex(new WireQueryParameters() { Order = item.Key });
+
+            // Then: The items are returned sorted in that order
+            var predicate = item.Predicate as Func<Transaction, string>;
+            List<Transaction> expected = null;
+            if (item.Ascending)
+                expected = items.OrderBy(predicate).ToList();
+            else
+                expected = items.OrderByDescending(predicate).ToList();
+
+            Assert.IsTrue(document.Items.SequenceEqual(expected));
+        }
+
         #endregion
 
         #region Splits Tests
