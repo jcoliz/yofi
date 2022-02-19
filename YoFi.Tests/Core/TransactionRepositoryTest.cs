@@ -848,6 +848,27 @@ namespace YoFi.Tests.Core
             // Then: Exception
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task IndexQImportedUnknown()
+        {
+            // When: Calling index with an unknown query key q='i=2'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = "i=2" });
+
+            // Then: Exception
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task IndexOrderUnknown()
+        {
+            // When: Calling index with an unknown order key o='xyz'
+            var document = await WhenGettingIndex(new WireQueryParameters() { Order = "xyz" });
+
+            // Then: Exception
+        }
+
+
         [DataTestMethod]
         public async Task IndexVHidden()
         {

@@ -187,7 +187,7 @@ namespace YoFi.Core.Repositories
                 "da" => Query.OrderBy(s => s.Timestamp).ThenBy(s => s.Payee),
                 "dd" => Query.OrderByDescending(s => s.Timestamp).ThenBy(s => s.Payee),
                 null => Query.OrderByDescending(s => s.Timestamp).ThenBy(s => s.Payee),
-                _ => Query
+                _ => throw new ArgumentException($"Unexpected order parameter {o}", nameof(o))
             };
         }
 
