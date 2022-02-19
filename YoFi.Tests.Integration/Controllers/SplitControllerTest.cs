@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
@@ -50,12 +48,13 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task Edit()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Split>(5, 1);
-            var id = chosen.Single().ID;
+            // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
+            var data = FakeObjects<Split>.Make(4).SaveTo(this).Add(1);
+            var id = data.Group(0).Last().ID;
+            var newvalues = data.Group(1).Single();
 
             // When: Editing the chosen item
-            var expected = GivenFakeItem<Split>(100);
-            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
+            var formData = new Dictionary<string, string>(FormDataFromObject(newvalues))
             {
                 { "ID", id.ToString() },
             };
@@ -69,7 +68,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // And: The item was changed
             var actual = context.Set<Split>().Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(newvalues, actual);
         }
 
         [TestMethod]

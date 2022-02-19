@@ -840,13 +840,13 @@ namespace YoFi.Tests.Integration.Controllers
         [TestMethod]
         public async Task EditDuplicate()
         {
-            // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var id = chosen.Single().ID;
+            // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
+            var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
+            var id = data.Group(0).Last().ID;
+            var newvalues = data.Group(1).Single();
 
             // When: Editing the chosen item, with duplicate = true
-            var expected = GivenFakeItem<Transaction>(9);
-            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
+            var formData = new Dictionary<string, string>(FormDataFromObject(newvalues))
             {
                 { "ID", id.ToString() },
                 { "duplicate", "true" },
@@ -860,7 +860,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // And: The item was added, so the whole database now is the original items plus the expected
             var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
-            Assert.IsTrue(actual.SequenceEqual(items.Concat(new[] { expected })));
+            Assert.IsTrue(actual.SequenceEqual(data));
         }
 
         [TestMethod]
@@ -870,9 +870,11 @@ namespace YoFi.Tests.Integration.Controllers
 
             // Given: There are 5 items in the database, one of which we care about
             // Note that this does not have a receipturl, by default
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var original = chosen.Single();
+            var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
+            var original = data.Group(0).Last();
             var id = original.ID;
+            var newvalues = data.Group(1).Single();
+
             // Detach so our edits won't show up
             context.Entry(original).State = EntityState.Detached;
 
@@ -887,8 +889,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // When: Posting an edit to the chosen item using new edited values
             // Note also no receipturl in this object
-            var expected = GivenFakeItem<Transaction>(9);
-            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
+            var formData = new Dictionary<string, string>(FormDataFromObject(newvalues))
             {
                 { "ID", id.ToString() },
             };

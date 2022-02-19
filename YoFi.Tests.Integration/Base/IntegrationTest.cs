@@ -47,6 +47,8 @@ namespace YoFi.Tests.Integration
                 context.AddRange(p);
             if (objects is IEnumerable<Transaction> t)
                 context.AddRange(t);
+            if (objects is IEnumerable<Split> s)
+                context.AddRange(s);
             if (objects is IEnumerable<BudgetTx> b)
                 context.AddRange(b);
 

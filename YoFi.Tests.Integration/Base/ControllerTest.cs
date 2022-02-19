@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories.Wire;
+using YoFi.Tests.Integration.Helpers;
 
 namespace YoFi.Tests.Integration.Controllers
 {
@@ -157,12 +158,13 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task Edit()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<T>(5, 1);
-            var id = chosen.Single().ID;
+            // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
+            var data = FakeObjects<T>.Make(4).SaveTo(this).Add(1);
+            var id = data.Group(0).Last().ID;
+            var newvalues = data.Group(1).Single();
 
             // When: Editing the chosen item
-            var expected = GivenFakeItem<T>(100);
-            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
+            var formData = new Dictionary<string, string>(FormDataFromObject(newvalues))
             {
                 { "ID", id.ToString() },
             };
@@ -176,7 +178,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // And: The item was changed
             var actual = context.Set<T>().Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(newvalues, actual);
         }
 
         [TestMethod]
@@ -229,11 +231,10 @@ namespace YoFi.Tests.Integration.Controllers
         [TestMethod]
         public async Task Create()
         {
-            // Given: There is one item in the database
-            _ = await GivenFakeDataInDatabase<T>(1);
+            // Given: There is one item in the database, and another one waiting to be created
+            var expected = FakeObjects<T>.Make(1).SaveTo(this).Add(1).Last();
 
             // When: Creating a new item
-            var expected = GivenFakeItem<T>(70);
             var formData = new Dictionary<string, string>(FormDataFromObject(expected));
             var response = await WhenGettingAndPostingForm($"{urlroot}/Create", FormAction, formData);
 

@@ -89,7 +89,6 @@ namespace YoFi.Tests.Integration.Ajax
         [TestMethod]
         public async Task Edit()
         {
-            // Given: There are 5 items in the database, one of which we care about
             // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
             var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
             var id = data.Group(0).Last().ID;
