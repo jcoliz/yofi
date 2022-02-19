@@ -71,9 +71,6 @@ namespace YoFi.Tests.Integration
             return Task.FromResult( (data as IEnumerable<T>, data.Group(1) as IEnumerable<T>) );
         }
 
-        protected Task<IEnumerable<T>> GivenFakeDataInDatabase<T>(int total) where T : class, new()
-            => Task.FromResult( FakeObjects<T>.Make(total).SaveTo(this) as IEnumerable<T> );
-
         protected Stream GivenSpreadsheetOf<T>(IEnumerable<T> items) where T : class
         {
             var stream = new MemoryStream();

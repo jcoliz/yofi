@@ -73,7 +73,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexMany()
         {
             // Given: Many items in the database
-            var items = await GivenFakeDataInDatabase<T>(20);
+            var items = FakeObjects<T>.Make(20).SaveTo(this);
 
             // When: Getting the index
             var document = await WhenGettingIndex(new WireQueryParameters());
@@ -86,7 +86,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexSingle()
         {
             // Given: There is one item in the database
-            var items = await GivenFakeDataInDatabase<T>(1);
+            var items = FakeObjects<T>.Make(1).SaveTo(this);
 
             // When: Getting the index
             var document = await WhenGettingIndex(new WireQueryParameters());
@@ -272,7 +272,7 @@ namespace YoFi.Tests.Integration.Controllers
         public virtual async Task UploadDuplicate()
         {
             // Given: One item in the database
-            var initial = await GivenFakeDataInDatabase<T>(1);
+            var initial = FakeObjects<T>.Make(1).SaveTo(this);
 
             // And: A spreadsheet containing 5 items, including a duplicate of the item in the database
             var items = GivenFakeItems<T>(5).OrderBy(TestKeyOrder<T>());
@@ -303,7 +303,7 @@ namespace YoFi.Tests.Integration.Controllers
         public virtual async Task Download()
         {
             // Given: Many items in the database
-            var items = await GivenFakeDataInDatabase<T>(20);
+            var items = FakeObjects<T>.Make(20).SaveTo(this);
 
             // When: Downloading them
             var response = await client.GetAsync($"{urlroot}/Download");

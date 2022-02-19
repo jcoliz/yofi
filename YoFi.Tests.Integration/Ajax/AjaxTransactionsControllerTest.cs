@@ -218,7 +218,7 @@ namespace YoFi.Tests.Integration.Ajax
         public async Task ApplyPayeeNotFound()
         {
             // Given: Many payees
-            _ = await GivenFakeDataInDatabase<Payee>(15);
+            _ = FakeObjects<Payee>.Make(15).SaveTo(this);
 
             // Given: Five transactions, one of which has no category, and has "payee" matching NONE of the payees in the DB
             (_, var txchosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x => { x.Category = null; x.Payee = "notfound"; return x; });

@@ -54,7 +54,7 @@ namespace YoFi.Tests.Integration.Api
         public async Task GetId()
         {
             // Given: Many items in the database
-            var items = await GivenFakeDataInDatabase<Transaction>(20);
+            var items = FakeObjects<Transaction>.Make(20).SaveTo(this);
             var expected = items.First();
 
             // When: Calling Get with '{id}'

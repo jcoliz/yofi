@@ -96,7 +96,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task UploadDuplicate()
         {
             // Given: One item in the database
-            var initial = await GivenFakeDataInDatabase<Transaction>(1);
+            var initial = FakeObjects<Transaction>.Make(1).SaveTo(this);
 
             // And: A list of many items, one of which is a duplicate of the one item already in the database
             // (Item 1 in this list naturally overlaps item 1 in the previous list.
@@ -122,7 +122,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task UploadWithID()
         {
             // Given: One item in the database
-            var initial = await GivenFakeDataInDatabase<Transaction>(1);
+            var initial = FakeObjects<Transaction>.Make(1).SaveTo(this);
 
             // And: A list of many items, NONE of which is a duplicate of the one item already in the database
             var items = GivenFakeItems<Transaction>(15).Skip(1).OrderBy(TestKeyOrder<Transaction>()).ToList();

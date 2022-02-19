@@ -57,7 +57,7 @@ namespace YoFi.Tests.Integration.Controllers
             // The duplicates should NOT be imported.
 
             // Given: 5 items in the database
-            var initial = await GivenFakeDataInDatabase<BudgetTx>(5);
+            var initial = FakeObjects<BudgetTx>.Make(5).SaveTo(this);
 
             // When: Upload 8 items, the first 5 of which are slight variations of the initial
             // items in the db
@@ -78,7 +78,7 @@ namespace YoFi.Tests.Integration.Controllers
             // Hah, this is fixed by getting UploadMinmallyDuplicate() test to properly pass.
 
             // Given: 5 items in the database
-            var initial = await GivenFakeDataInDatabase<BudgetTx>(5);
+            var initial = FakeObjects<BudgetTx>.Make(5).SaveTo(this);
 
             // When: Uploading an item which differs in only a small amount from an otherwise
             // overlapping item

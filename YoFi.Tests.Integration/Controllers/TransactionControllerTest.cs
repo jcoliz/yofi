@@ -158,7 +158,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexShowSelected(bool isselected)
         {
             // Given: There are some items in the database
-            var items = await GivenFakeDataInDatabase<Transaction>(5);
+            var items = FakeObjects<Transaction>.Make(5).SaveTo(this);
 
             // When: Calling index with view set to 'selected'
             var searchterm = isselected ? "S" : null;
