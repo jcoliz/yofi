@@ -185,7 +185,6 @@ namespace YoFi.Tests.Integration.Pages
             Assert.IsTrue(expected.SequenceEqual(highlights));
         }
 
-
         [TestMethod]
         public async Task Upload_AccessDenied()
         {

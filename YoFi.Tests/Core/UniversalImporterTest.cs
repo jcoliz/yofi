@@ -55,14 +55,34 @@ namespace YoFi.Tests.Core
     }
 
     [TestClass]
-    public class UniversalImporterTest
+    public class UniversalImporterTest: IFakeObjectsSaveTarget
     {
+        #region Properties
+
         public TestContext TestContext { get; set; }
+
+        #endregion
+
+        #region Fields
 
         private UniversalImporter importer;
         private MockBudgetTxRepository budgetrepo;
         private MockPayeeRepository payeerepo;
         private MockTransactionRepository txrepo;
+
+        #endregion
+
+        #region Helpers
+
+        public void AddRange(System.Collections.IEnumerable objects)
+        {
+            if (objects is IEnumerable<Transaction> txs)
+            {
+                txrepo.AddRangeAsync(txs).Wait();
+            }
+            else
+                throw new NotImplementedException();
+        }
 
         private MemoryStream PrepareSpreadsheet<T>(IEnumerable<T> what, string name) where T: class
         {
@@ -84,6 +104,8 @@ namespace YoFi.Tests.Core
 
             return stream;
         }
+
+        #endregion
 
         [TestInitialize]
         public void SetUp()
@@ -304,5 +326,45 @@ namespace YoFi.Tests.Core
             // And: Spot check facts we know about the items
             Assert.IsTrue(txrepo.Items.All(x => x.Timestamp.Month == 2));
         }
+
+        [TestMethod]
+        public async Task UploadHighlights()
+        {
+            // Given: Two chunks of transactions
+            var original = FakeObjects<Transaction>.Make(10);
+
+            // And: First chunk has assigned bankrefs
+            // And: Having made subtle changes to the transactions AFTER generating the bankref
+            foreach (var item in original.Group(0))
+            {
+                item.GenerateBankReference();
+                item.Timestamp -= TimeSpan.FromDays(10);
+            }
+
+            // And: Is in the DB
+            await txrepo.AddRangeAsync(original.Group(0));
+
+            // And: A spreadsheet of all the items, which overlaps the originally-uploaded items
+            var upload = FakeObjects<Transaction>.Make(15);
+            using var helper = new ImportPackageHelper();
+            helper.Add(upload);
+            var stream = helper.GetFile(TestContext);
+
+            // When: Importing it
+            importer.QueueImportFromXlsx(stream);
+            await importer.ProcessImportAsync();
+
+            // Then: Only the non-overlapping items are selected
+            var selected = txrepo.All.Where(x => x.Selected == true).OrderBy(TestKey<Transaction>.Order()).ToList();
+            Assert.IsTrue(selected.SequenceEqual(upload.Skip(10)));
+
+            // And: The overlapping new transactions are highlighted and deselected, indicating that they
+            // are probably duplicates
+            var highlights = importer.HighlightIDs.ToHashSet();
+            var highlighted = txrepo.All.Where(x => highlights.Contains(x.ID)).ToList();
+            var expected = upload.Take(10);
+            Assert.IsTrue(expected.SequenceEqual(highlighted));
+        }
+
     }
 }

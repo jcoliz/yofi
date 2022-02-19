@@ -20,7 +20,7 @@ namespace YoFi.Tests.Helpers
 
         public async Task AssignBankReferences()
         {
-            var needbankrefs = All.Where(x => null == x.BankReference);
+            var needbankrefs = All.Where(x => null == x.BankReference).ToList();
 
             // Doesn't need anyasync, this is a mock!!
             if (needbankrefs.Any())

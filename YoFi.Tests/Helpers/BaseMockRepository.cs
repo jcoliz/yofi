@@ -98,7 +98,9 @@ namespace YoFi.Tests.Helpers
 
         public Task UpdateRangeAsync(IEnumerable<T> items)
         {
-            throw new NotImplementedException();
+            // POssible that we can just do nothing, because caller probably operated ON the
+            // item we are already maintaining in memory
+            return Task.CompletedTask;
         }
 
         public Task<IWireQueryResult<T>> GetByQueryAsync(IWireQueryParameters parms)
