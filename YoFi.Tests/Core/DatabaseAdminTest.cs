@@ -152,5 +152,44 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(transactions[9].Hidden); // Jan 10
         }
 
+        [DataRow("payee","p")]
+        [DataRow("budgettx", "b")]
+        [DataRow("trx", "t")]
+        [DataRow("all", "tbp")]
+        [DataTestMethod]
+        public async Task ClearTestData(string id, string expected)
+        {
+            // Given: A fresh dbadmin using a mock data context
+            var mycontext = new MockDataContext();
+            dbadmin = new DatabaseAdministration(mycontext, clock.Object);
+
+            // Given: A mix of transactions, payees, and budgettx with and without the testmarker, in the database
+            var tdata = FakeObjects<Transaction>
+                .Make(5)
+                .Add(6, x => x.Category += DatabaseAdministration.TestMarker)
+                .SaveTo(mycontext);
+            var bdata = FakeObjects<BudgetTx>.Make(5).Add(6, x => x.Category += DatabaseAdministration.TestMarker).SaveTo(mycontext);
+            var pdata = FakeObjects<Payee>.Make(5).Add(6, x => x.Category += DatabaseAdministration.TestMarker).SaveTo(mycontext);
+
+            // When: Clearing test data using the selected {id}
+            await dbadmin.ClearTestDataAsync(id);
+
+            // Then: The {expected} data has been removed of testdata
+            if (expected.Contains("t"))
+                Assert.IsTrue(mycontext.Get<Transaction>().SequenceEqual(tdata.Group(0)));
+            else
+                Assert.IsTrue(mycontext.Get<Transaction>().SequenceEqual(tdata));
+
+            if (expected.Contains("b"))
+                Assert.IsTrue(mycontext.Get<BudgetTx>().SequenceEqual(bdata.Group(0)));
+            else
+                Assert.IsTrue(mycontext.Get<BudgetTx>().SequenceEqual(bdata));
+
+            if (expected.Contains("p"))
+                Assert.IsTrue(mycontext.Get<Payee>().SequenceEqual(pdata.Group(0)));
+            else
+                Assert.IsTrue(mycontext.Get<Payee>().SequenceEqual(pdata));
+
+        }
     }
 }

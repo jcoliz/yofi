@@ -10,7 +10,7 @@ namespace YoFi.Tests.Helpers
     /// <summary>
     /// Provides an IDataContext which can be totally controlled and inspected
     /// </summary>
-    public class MockDataContext : IDataContext
+    public class MockDataContext : IDataContext, IFakeObjectsSaveTarget
     {
         public List<BudgetTx> BudgetTxData { get; } = new List<BudgetTx>();
 
@@ -289,6 +289,12 @@ namespace YoFi.Tests.Helpers
             UpdateRange(txlist);
 
             return Task.CompletedTask;
+        }
+
+        void IFakeObjectsSaveTarget.AddRange(System.Collections.IEnumerable objects)
+        {
+            var items = objects as IEnumerable<object>;
+            this.AddRange(items);
         }
     }
 }
