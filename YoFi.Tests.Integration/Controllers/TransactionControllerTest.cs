@@ -16,22 +16,9 @@ using Transaction = YoFi.Core.Models.Transaction;
 namespace YoFi.Tests.Integration.Controllers
 {
     [TestClass]
-    public class TransactionControllerTest : ControllerTest<Transaction>, IFakeObjectsSaveTarget
+    public class TransactionControllerTest : ControllerTest<Transaction>
     {
         protected override string urlroot => "/Transactions";
-
-        #region Helpers
-
-        public void AddRange(System.Collections.IEnumerable objects)
-        {
-            if (objects is IEnumerable<Transaction> txs)
-            {
-                context.Set<Transaction>().AddRange(txs);
-                context.SaveChanges();
-            }
-        }
-
-        #endregion
 
         #region Init/Cleanup
 

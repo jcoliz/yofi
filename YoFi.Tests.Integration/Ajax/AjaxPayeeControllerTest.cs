@@ -78,13 +78,13 @@ namespace YoFi.Tests.Integration.Ajax
         [TestMethod]
         public async Task Edit()
         {
-            // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Payee>(5, 1);
-            var id = chosen.Single().ID;
+            // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
+            var data = FakeObjects<Payee>.Make(4).SaveTo(this).Add(1);
+            var id = data.Group(0).Last().ID;
+            var newvalues = data.Group(1).Single();
 
             // And: When posting changed values to /Ajax/Payee/Edit/
-            var expected = GivenFakeItem<Payee>(90);
-            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
+            var formData = new Dictionary<string, string>(FormDataFromObject(newvalues))
             {
                 { "ID", id.ToString() },
             };
@@ -93,11 +93,11 @@ namespace YoFi.Tests.Integration.Ajax
 
             // Then: The result is what we expect (ApiItemResult in JSON with the item returned to us)
             var apiresult = await JsonSerializer.DeserializeAsync<Payee>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            Assert.AreEqual(expected, apiresult);
+            Assert.AreEqual(newvalues, apiresult);
 
             // And: The item was changed
             var actual = context.Set<Payee>().Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(newvalues, actual);
         }
 
         #endregion

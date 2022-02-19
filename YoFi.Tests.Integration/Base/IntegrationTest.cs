@@ -13,11 +13,12 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
+using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
 namespace YoFi.Tests.Integration
 {
-    public abstract class IntegrationTest
+    public abstract class IntegrationTest: IFakeObjectsSaveTarget
     {
         #region Fields
 
@@ -37,6 +38,22 @@ namespace YoFi.Tests.Integration
         #endregion
 
         #region Helpers
+
+        #region Helpers
+
+        public void AddRange(System.Collections.IEnumerable objects)
+        {
+            if (objects is IEnumerable<Payee> p)
+                context.AddRange(p);
+            if (objects is IEnumerable<Transaction> t)
+                context.AddRange(t);
+            if (objects is IEnumerable<BudgetTx> b)
+                context.AddRange(b);
+
+            context.SaveChanges();
+        }
+
+        #endregion
 
         protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null, int from = 1) where TItem : class, new()
         {
