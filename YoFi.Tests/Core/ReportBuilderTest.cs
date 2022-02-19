@@ -2,11 +2,13 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Reports;
 using YoFi.Tests.Helpers;
+using YoFi.Tests.Helpers.ReportExtensions;
 
 namespace YoFi.Tests.Core
 {
@@ -14,11 +16,32 @@ namespace YoFi.Tests.Core
     public class ReportBuilderTest
     {
 
+        #region Properties
+
+        public TestContext TestContext { get; set; }
+
+        #endregion
+
         #region Fields
 
         protected static SampleDataStore data;
         private IReportEngine builder;
         private int year;
+
+        #endregion
+
+        #region Helpers
+
+        private void WriteReportToContext(Report report)
+        {
+            var filename = $"Report-{TestContext.TestName}.txt";
+            File.Delete(filename);
+            using var outstream = File.OpenWrite(filename);
+            using var writer = new StreamWriter(outstream);
+            report.Write(writer, sorted:true);
+            writer.Close();
+            TestContext.AddResultFile(filename);
+        }
 
         #endregion
 
@@ -66,6 +89,7 @@ namespace YoFi.Tests.Core
             // When: Running each w/ no parameters
             Console.WriteLine($"{id}...");
             var report = builder.Build(new ReportParameters() { id = id, year = year });
+            WriteReportToContext(report);
 
             // Then: There is data, except for reports we know will be empty
             if (empties.Contains(id))
@@ -86,6 +110,7 @@ namespace YoFi.Tests.Core
         {
             // When: Building the summary report
             var summary = builder.BuildSummary(new ReportParameters() { year = year });
+
 
             // Then: There are 6 reports
             var reports = summary.SelectMany(x => x);
