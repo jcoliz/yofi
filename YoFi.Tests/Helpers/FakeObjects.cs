@@ -131,14 +131,31 @@ namespace YoFi.Tests.Helpers
                     // will typically sort descending
                     o = new DateTime(2001, 12, 31) - TimeSpan.FromDays(index);
                 else
-                    throw new NotImplementedException();
+                {
+                    // We're looking for IEnumerable<>, for which we'll create a new List<> of
+                    // the matching type
+                    var ok = false;
+                    foreach (var ti in t.GetInterfaces())
+                    {
+                        if (ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                        {
+                            var containedtype = ti.GetGenericArguments()[0];
+
+                            var listType = typeof(List<>);
+                            var constructedListType = listType.MakeGenericType(containedtype);
+
+                            o = Activator.CreateInstance(constructedListType);
+                            ok = true;
+                            break;
+                        }
+                    }
+
+                    if (!ok)
+                        throw new NotImplementedException();
+                }
 
                 property.SetValue(result, o);
             }
-
-            // Not sure of a more generic way to handle this
-            if (result is Transaction tx)
-                tx.Splits = new List<Split>();
 
             return result;
         }
