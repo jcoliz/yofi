@@ -90,12 +90,13 @@ namespace YoFi.Tests.Integration.Ajax
         public async Task Edit()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var id = chosen.Single().ID;
+            // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
+            var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
+            var id = data.Group(0).Last().ID;
+            var newvalues = data.Group(1).Single();
 
             // And: When posting changed values to /Ajax/Payee/Edit/
-            var expected = GivenFakeItem<Transaction>(90);
-            var formData = new Dictionary<string, string>(FormDataFromObject(expected))
+            var formData = new Dictionary<string, string>(FormDataFromObject(newvalues))
             {
                 { "ID", id.ToString() },
             };
@@ -105,15 +106,15 @@ namespace YoFi.Tests.Integration.Ajax
             // Then: The result is what we expect (ApiItemResult in JSON with the item returned to us)
             // Note that AjaxEdit ONLY allows changes to Memo,Payee,Category, so that's all we can verify
             var apiresult = await JsonSerializer.DeserializeAsync<Transaction>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            Assert.AreEqual(expected.Memo, apiresult.Memo);
-            Assert.AreEqual(expected.Category, apiresult.Category);
-            Assert.AreEqual(expected.Payee, apiresult.Payee);
+            Assert.AreEqual(newvalues.Memo, apiresult.Memo);
+            Assert.AreEqual(newvalues.Category, apiresult.Category);
+            Assert.AreEqual(newvalues.Payee, apiresult.Payee);
 
             // And: The item was changed
             var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.AreEqual(expected.Memo, actual.Memo);
-            Assert.AreEqual(expected.Category, actual.Category);
-            Assert.AreEqual(expected.Payee, actual.Payee);
+            Assert.AreEqual(newvalues.Memo, actual.Memo);
+            Assert.AreEqual(newvalues.Category, actual.Category);
+            Assert.AreEqual(newvalues.Payee, actual.Payee);
         }
 
         [TestMethod]

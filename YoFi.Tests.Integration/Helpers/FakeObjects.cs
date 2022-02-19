@@ -136,9 +136,26 @@ namespace YoFi.Tests.Integration.Helpers
                 property.SetValue(result, o);
             }
 
-            // Not sure of a more generic way to handle this
-            if (result is Transaction tx)
-                tx.Splits = new List<Split>();
+            // Also fill in any IEnumerables whether or not they're flagged
+            // We're looking for IEnumerable<>, for which we'll create a new List<> of
+            // the matching type
+            foreach (var property in properties)
+            {
+                var t = property.PropertyType;
+                if (t != typeof(string))
+                    foreach (var ti in t.GetInterfaces())
+                        if (ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                        {
+                            var containedtype = ti.GetGenericArguments()[0];
+
+                            var listType = typeof(List<>);
+                            var constructedListType = listType.MakeGenericType(containedtype);
+
+                            var o = Activator.CreateInstance(constructedListType);
+                            property.SetValue(result, o);
+                            break;
+                        }
+            }
 
             return result;
         }

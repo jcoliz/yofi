@@ -131,12 +131,22 @@ namespace YoFi.Tests.Helpers
                     // will typically sort descending
                     o = new DateTime(2001, 12, 31) - TimeSpan.FromDays(index);
                 else
-                {
-                    // We're looking for IEnumerable<>, for which we'll create a new List<> of
-                    // the matching type
-                    var ok = false;
+                    throw new NotImplementedException();
+
+
+
+
+                property.SetValue(result, o);
+            }
+
+            // Also fill in any IEnumerables whether or not they're flagged
+            // We're looking for IEnumerable<>, for which we'll create a new List<> of
+            // the matching type
+            foreach (var property in properties)
+            {
+                var t = property.PropertyType;
+                if (t != typeof(string))
                     foreach (var ti in t.GetInterfaces())
-                    {
                         if (ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                         {
                             var containedtype = ti.GetGenericArguments()[0];
@@ -144,17 +154,10 @@ namespace YoFi.Tests.Helpers
                             var listType = typeof(List<>);
                             var constructedListType = listType.MakeGenericType(containedtype);
 
-                            o = Activator.CreateInstance(constructedListType);
-                            ok = true;
+                            var o = Activator.CreateInstance(constructedListType);
+                            property.SetValue(result, o);
                             break;
                         }
-                    }
-
-                    if (!ok)
-                        throw new NotImplementedException();
-                }
-
-                property.SetValue(result, o);
             }
 
             return result;

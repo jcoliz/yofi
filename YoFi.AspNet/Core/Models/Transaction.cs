@@ -101,7 +101,6 @@ namespace YoFi.Core.Models
         /// For transactions with multiple categories, the detail on how much $$ goes in
         /// each category
         /// </summary>
-        [Attributes.Editable]
         public ICollection<Split> Splits { get; set; }
 
         /// <summary>
