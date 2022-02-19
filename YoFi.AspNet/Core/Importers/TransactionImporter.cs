@@ -60,14 +60,7 @@ namespace YoFi.Core.Importers
         /// <summary>
         /// Load transactions from an XLSX file, and hold them in a queue for further processing
         /// </summary>
-        /// <param name="stream">Source of data</param>
-        public void QueueImportFromXlsx(Stream stream)
-        {
-            using var reader = new SpreadsheetReader();
-            reader.Open(stream);
-            QueueImportFromXlsx(reader);
-        }
-
+        /// <param name="reader">Source of data</param>
         public void QueueImportFromXlsx(ISpreadsheetReader reader)
         {
             var items = reader.Deserialize<Transaction>();
