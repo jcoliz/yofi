@@ -822,6 +822,22 @@ namespace YoFi.Tests.Core
             ThenResultsAreEqualByTestKey(document, chosen);
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task IndexQImported(bool i)
+        {
+            // Given: A mix of transactions, some imported others not
+            var data = FakeObjects<Transaction>.Make(6).Add(4, x => x.Imported = true).SaveTo(this);
+
+            // When: Calling index q=i={i}
+            var intvalue = i ? 1 : 0;
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"i={intvalue}" });
+
+            // Then: Only imported (or not) items shown
+            ThenResultsAreEqualByTestKey(document, data.Group(intvalue));
+        }
+
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public async Task IndexQUnknown()
