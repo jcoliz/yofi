@@ -1,4 +1,5 @@
-﻿using jcoliz.OfficeOpenXml.Serializer;
+﻿using Common.DotNet.Test;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -287,11 +288,21 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(1, txrepo.Items[3].Splits.Count);
         }
 
-        public void TransactionsOfx()
+        [TestMethod]
+        public async Task TransactionsOfx()
         {
             // Given: An OFX file with transactions
+            var stream = SampleData.Open("FullSampleData-Month02.ofx");
+
             // When: Importing it
+            await importer.QueueImportFromOfxAsync(stream);
+            await importer.ProcessImportAsync();
+
             // Then: All items imported
+            Assert.AreEqual(74, txrepo.Items.Count);
+
+            // And: Spot check facts we know about the items
+            Assert.IsTrue(txrepo.Items.All(x => x.Timestamp.Month == 2));
         }
     }
 }

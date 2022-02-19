@@ -42,7 +42,7 @@ namespace YoFi.Tests.Helpers
 
         public IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string json)
         {
-            throw new NotImplementedException();
+            return Enumerable.Empty<Split>();
         }
 
         public Task CancelImportAsync()
