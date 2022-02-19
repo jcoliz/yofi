@@ -366,5 +366,22 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(expected.SequenceEqual(highlighted));
         }
 
+        [TestMethod]
+        public async Task UploadCreateSplits()
+        {
+            // Given: One transaction which matches the special hard-coded payee, and has no category (which will allow payee matching)
+            var items = FakeObjects<Transaction>.Make(1, x => { x.Payee = "NameMatch"; x.Category = null; });
+            using var helper = new ImportPackageHelper();
+            helper.Add(items);
+            var stream = helper.GetFile(TestContext);
+
+            // When: Importing it
+            importer.QueueImportFromXlsx(stream);
+            await importer.ProcessImportAsync();
+
+            // Then: Splits were generated for the item
+            Assert.AreEqual(3, txrepo.All.Single().Splits.Count());
+        }
+
     }
 }

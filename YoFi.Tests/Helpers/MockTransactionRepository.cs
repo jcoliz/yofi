@@ -42,7 +42,11 @@ namespace YoFi.Tests.Helpers
 
         public IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string json)
         {
-            return Enumerable.Empty<Split>();
+            // We make splits for only one rule!
+            if ("CategoryMatch" == json)
+                return FakeObjects<Split>.Make(3);
+            else
+                return Enumerable.Empty<Split>();
         }
 
         public Task CancelImportAsync()

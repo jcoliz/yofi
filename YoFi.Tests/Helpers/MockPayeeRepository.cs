@@ -45,8 +45,12 @@ namespace YoFi.Tests.Helpers
 
         public Task<string> GetCategoryMatchingPayeeAsync(string Name)
         {
-            // Mock payee repository doesn't support payee matching
-            return Task.FromResult((string)null);
+            // Only one category we match!
+            string result = null;
+            if ("NameMatch" == Name)
+                result = "CategoryMatch";
+
+            return Task.FromResult(result);
         }
     }
 }
