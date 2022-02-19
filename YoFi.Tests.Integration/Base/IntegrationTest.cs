@@ -39,8 +39,6 @@ namespace YoFi.Tests.Integration
 
         #region Helpers
 
-        #region Helpers
-
         public void AddRange(System.Collections.IEnumerable objects)
         {
             if (objects is IEnumerable<Payee> p)
@@ -55,62 +53,26 @@ namespace YoFi.Tests.Integration
             context.SaveChanges();
         }
 
-        #endregion
-
-        protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null, int from = 1) where TItem : class, new()
+        protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null) where TItem : class, new()
         {
-            return Enumerable
-                .Range(from, num)
-                .Select(x => GivenFakeItem<TItem>(x))
-                .Select(func ?? (x => x));
+            if (func is null)
+                return FakeObjects<TItem>.Make(num);
+            else
+                return FakeObjects<TItem>.Make(num, x => x = func(x));
         }
 
-        protected virtual T GivenFakeItem<T>(int index) where T : class, new()
+        protected Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<T>(int total, int selected, Func<T, T> func = null) where T : class, new()
         {
-            var result = new T();
-            var properties = typeof(T).GetProperties();
-            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(YoFi.Core.Models.Attributes.EditableAttribute)));
+            Action<T> action = null;
+            if (!(func is null) )
+                action = (x => x = func(x));
+            var data = FakeObjects<T>.Make(total - selected).Add(selected, action).SaveTo(this);
 
-            foreach (var property in chosen)
-            {
-                var t = property.PropertyType;
-                object o = default;
-
-                if (t == typeof(string))
-                    o = $"{property.Name} {index:D5}";
-                else if (t == typeof(decimal))
-                    o = index * 100m;
-                else if (t == typeof(DateTime))
-                    // Note that datetimes should descend, because anything which sorts by a datetime
-                    // will typically sort descending
-                    o = new DateTime(2001, 12, 31) - TimeSpan.FromDays(index);
-                else
-                    throw new NotImplementedException();
-
-                property.SetValue(result, o);
-            }
-
-            return result;
+            return Task.FromResult( (data as IEnumerable<T>, data.Group(1) as IEnumerable<T>) );
         }
 
-        protected async Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<T>(int total, int selected, Func<T, T> func = null) where T : class, new()
-        {
-            var all = GivenFakeItems<T>(total);
-            var needed = all.Skip(total - selected).Take(selected).Select(func ?? (x => x));
-            var items = all.Take(total - selected).Concat(needed).ToList();
-            var wasneeded = items.Skip(total - selected).Take(selected);
-
-            context.Set<T>().AddRange(items);
-            await context.SaveChangesAsync();
-
-            return (items, wasneeded);
-        }
-
-        protected async Task<IEnumerable<T>> GivenFakeDataInDatabase<T>(int total) where T : class, new()
-        {
-            (var result, _) = await GivenFakeDataInDatabase<T>(total, 0);
-            return result;
-        }
+        protected Task<IEnumerable<T>> GivenFakeDataInDatabase<T>(int total) where T : class, new()
+            => Task.FromResult( FakeObjects<T>.Make(total).SaveTo(this) as IEnumerable<T> );
 
         protected Stream GivenSpreadsheetOf<T>(IEnumerable<T> items) where T : class
         {
