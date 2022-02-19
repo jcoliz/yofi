@@ -383,5 +383,35 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(3, txrepo.All.Single().Splits.Count());
         }
 
+        [TestMethod]
+        public async Task UploadSplitsForTransaction()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
+            var id = expected.ID;
+
+            // And: A spreadsheet of splits which will break down the details of that transaction
+            var numsplits = 4;
+            var splits = FakeObjects<Split>.Make(numsplits, x => x.Amount = expected.Amount / numsplits ).OrderBy(TestKey<Split>.Order());
+            using var helper = new ImportPackageHelper();
+            helper.Add(splits);
+            var stream = helper.GetFile(TestContext);
+
+            // And: A split importer targeting this txrepo
+            var splitimporter = new SplitImporter(txrepo);
+
+            // When: Uploading the spreadsheet for the transaction
+            splitimporter.Target = expected;
+            splitimporter.QueueImportFromXlsx(stream);
+            await splitimporter.ProcessImportAsync();
+
+            // Then : The splits are now attached to the transaction in the database
+            var actual = txrepo.All.Where(x => x.ID == id).Single();
+            Assert.IsTrue(actual.HasSplits);
+            Assert.IsTrue(actual.IsSplitsOK);
+            Assert.IsTrue(splits.SequenceEqual(actual.Splits.OrderBy(TestKey<Split>.Order())));
+        }
+
+
     }
 }

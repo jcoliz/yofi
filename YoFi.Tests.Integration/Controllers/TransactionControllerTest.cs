@@ -597,8 +597,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task UploadSplitsForTransaction()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var expected = chosen.Single();
+            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
             var id = expected.ID;
 
             // And: A spreadsheet of splits which will break down the details of that transaction
