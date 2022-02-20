@@ -26,7 +26,7 @@ namespace YoFi.Core.Importers
             _payeeImporter = new BaseImporter<Payee>(repos.Payees);
         }
 
-        public new void QueueImportFromXlsx(Stream stream)
+        public void QueueImportFromXlsx(Stream stream)
         {
             // Universal importer supports extracting data types from spreadsheets which are
             // explicitly named.
