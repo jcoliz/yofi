@@ -81,7 +81,7 @@ namespace YoFi.Tests.Integration
             var result = new Dictionary<string, string>();
 
             var properties = typeof(T).GetProperties();
-            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(YoFi.Core.Models.Attributes.EditableAttribute)));
+            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(System.ComponentModel.DataAnnotations.EditableAttribute)));
 
             foreach (var property in chosen)
             {

@@ -24,14 +24,14 @@ namespace YoFi.Core.Models
         /// <summary>
         /// Name of payee, or regex rule
         /// </summary>
-        [Attributes.Editable]
+        [Editable(true)]
         [Attributes.TestKey]
         public string Name { get; set; }
 
         /// <summary>
         /// Category to assign to matching transactions
         /// </summary>
-        [Attributes.Editable]
+        [Editable(true)]
         public string Category { get; set; }
 
         /// <summary>

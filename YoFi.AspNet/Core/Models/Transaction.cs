@@ -29,13 +29,13 @@ namespace YoFi.Core.Models
         [Display(Name = "Date")]
         [DataType(DataType.Date)]
         [Column(TypeName = "date")]
-        [Attributes.Editable]
+        [Editable(true)]
         public DateTime Timestamp { get; set; }
 
         /// <summary>
         /// Who got this money, or gave it to use?
         /// </summary>
-        [Attributes.Editable]
+        [Editable(true)]
         public string Payee { get; set; }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace YoFi.Core.Models
         /// </summary>
         [DisplayFormat(DataFormatString = "{0:C2}")]
         [Column(TypeName = "decimal(18,2)")]
-        [Attributes.Editable]
+        [Editable(true)]
         public decimal Amount { get; set; }
 
         /// <summary>
@@ -52,13 +52,13 @@ namespace YoFi.Core.Models
         /// <remarks>
         /// Separate successive levels of depth with a colon, e.g. "Housing:Mortgage"
         /// </remarks>
-        [Attributes.Editable]
+        [Editable(true)]
         public string Category { get; set; }
 
         /// <summary>
         /// Optional commentary about this transaction
         /// </summary>
-        [Attributes.Editable]
+        [Editable(true)]
         [Attributes.TestKey]
         public string Memo { get; set; }
 
