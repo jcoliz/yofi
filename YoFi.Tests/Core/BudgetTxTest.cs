@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using YoFi.Core.Models;
+using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
 {
@@ -50,6 +51,21 @@ namespace YoFi.Tests.Core
 
             // This evenly divides on months, so should always be on the same day of week
             Assert.IsTrue(reportables.All(x => x.Timestamp.DayOfWeek == reportables.First().Timestamp.DayOfWeek));
+        }
+
+        [TestMethod]
+        public void ReportableDays()
+        {
+            var frequency = 365;
+            var amount = frequency * 10;
+            var tx = new BudgetTx() { Amount = amount, Frequency = frequency, Timestamp = new DateTime(2021, 1, 1), Category = "A:B" };
+
+            var reportables = tx.Reportables;
+
+            Assert.AreEqual(365, reportables.Count());
+            Assert.IsTrue(reportables.All(x => x.Amount == amount / frequency));
+            Assert.IsTrue(reportables.All(x => x.Category == tx.Category));
+            Assert.AreEqual(366 * (364 / 2) + 366/2, reportables.Sum(x => x.Timestamp.DayOfYear));
         }
 
         [DataRow(-1, "Invalid")]
@@ -105,6 +121,21 @@ namespace YoFi.Tests.Core
                 var e = (BudgetTx.FrequencyEnum)o;
                 StringToFrequency(e.ToString(), (int)e);
             }
+        }
+
+        [DataRow(365)]
+        [DataTestMethod]
+        public void FrequencyToReportables(int frequency)
+        {
+            // Given: An item with this frequency
+            var item = FakeObjects<BudgetTx>.Make(1, x => x.Frequency = frequency).Single();
+
+            // When: Getting the reportables
+            var reportables = item.Reportables;
+
+            // Then: Has the correct # of results
+            Assert.AreEqual(frequency, reportables.Count());
+
         }
 
         // NOTE: There is not a great way to test ImportEquals indirectly, because its only
@@ -175,5 +206,19 @@ namespace YoFi.Tests.Core
                 new BudgetTx() { Timestamp = new DateTime(2020,2,1), Category = "A", Memo = "M1" },
                 new BudgetTx() { Timestamp = new DateTime(2019,1,1), Category = "A", Memo = "M1" },
             };
+
+        [TestMethod]
+        public void HashEquals()
+        {
+            // Given: Two memberwise identical items
+            var one = FakeObjects<BudgetTx>.Make(1).Single();
+            var two = FakeObjects<BudgetTx>.Make(1).Single();
+
+            // When: Adding both to a hashset of payees
+            var hashset = new HashSet<BudgetTx>() { one, two };
+
+            // Then: Only one added, because they're functionally duplicates
+            Assert.AreEqual(1, hashset.Count);
+        }
     }
 }

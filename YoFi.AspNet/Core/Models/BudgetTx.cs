@@ -128,7 +128,7 @@ namespace YoFi.Core.Models
         /// <param name="which"></param>
         private DateTime Period(int which)
         {
-            if (Frequency <= 1 || Frequency >= 365)
+            if (Frequency <= 1 || Frequency > 365)
                 return Timestamp;
             if (Frequency == 365)
                 return Timestamp + TimeSpan.FromDays(which);
