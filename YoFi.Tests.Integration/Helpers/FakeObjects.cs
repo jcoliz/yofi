@@ -174,7 +174,7 @@ namespace YoFi.Tests.Integration.Helpers
         {
             // Find the test key on the object
             var properties = typeof(T).GetProperties();
-            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(YoFi.Core.Models.Attributes.TestKeyAttribute)));
+            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(System.ComponentModel.CategoryAttribute)));
             if (!chosen.Any())
                 throw new ApplicationException("Test Key not found");
             if (chosen.Skip(1).Any())

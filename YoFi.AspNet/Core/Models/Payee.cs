@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -25,7 +26,7 @@ namespace YoFi.Core.Models
         /// Name of payee, or regex rule
         /// </summary>
         [Editable(true)]
-        [Attributes.TestKey]
+        [Category("TestKey")]
         public string Name { get; set; }
 
         /// <summary>

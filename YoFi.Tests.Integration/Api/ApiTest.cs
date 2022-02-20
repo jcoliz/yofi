@@ -123,7 +123,7 @@ namespace YoFi.Tests.Integration.Api
             response.EnsureSuccessStatusCode();
 
             // ANd: Only the transactions without __test__ remain
-            var actual = context.Set<Transaction>().AsNoTracking().ToList().OrderBy(TestKeyOrder<Transaction>());
+            var actual = context.Set<Transaction>().AsNoTracking().ToList().OrderBy(TestKey<Transaction>.Order());
             Assert.IsTrue(actual.SequenceEqual(items.Except(chosen)));
         }
 
@@ -138,7 +138,7 @@ namespace YoFi.Tests.Integration.Api
             response.EnsureSuccessStatusCode();
 
             // ANd: Only the transactions without __test__ remain
-            var actual = context.Set<BudgetTx>().AsNoTracking().ToList().OrderBy(TestKeyOrder<BudgetTx>());
+            var actual = context.Set<BudgetTx>().AsNoTracking().ToList().OrderBy(TestKey<BudgetTx>.Order());
             Assert.IsTrue(actual.SequenceEqual(items.Except(chosen)));
         }
 
@@ -153,7 +153,7 @@ namespace YoFi.Tests.Integration.Api
             response.EnsureSuccessStatusCode();
 
             // ANd: Only the transactions without __test__ remain
-            var actual = context.Set<Payee>().AsNoTracking().ToList().OrderBy(TestKeyOrder<Payee>());
+            var actual = context.Set<Payee>().AsNoTracking().ToList().OrderBy(TestKey<Payee>.Order());
             Assert.IsTrue(actual.SequenceEqual(items.Except(chosen)));
         }
 

@@ -263,21 +263,12 @@ namespace YoFi.Tests.Integration
 
         protected PropertyInfo FindTestKey<T>()
         {
-            // Find the test key on the object
-            var properties = typeof(T).GetProperties();
-            var chosen = properties.Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(Core.Models.Attributes.TestKeyAttribute)));
-            if (!chosen.Any())
-                throw new ApplicationException("Test Key not found");
-            if (chosen.Skip(1).Any())
-                throw new ApplicationException("More than one Test Key found");
-            var property = chosen.Single();
-
-            return property;
+            return TestKey<T>.Find();
         }
 
         protected Func<T,object> TestKeyOrder<T>()
         {
-            return x => FindTestKey<T>().GetValue(x);
+            return TestKey<T>.Order();
         }
 
         protected async Task<T> DeserializeAsync<T>(HttpResponseMessage response)

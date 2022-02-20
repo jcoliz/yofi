@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -92,7 +93,7 @@ namespace YoFi.Core.Models
         /// Additional information about this budget line item for reference
         /// </summary>
         [Editable(true)]
-        [Attributes.TestKey]
+        [Category("TestKey")]
         public string Memo { get; set; }
 
         /// <summary>

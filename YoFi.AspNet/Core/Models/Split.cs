@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace YoFi.Core.Models
         /// Optional commentary about this split
         /// </summary>
         [Editable(true)]
-        [Attributes.TestKey]
+        [Category("TestKey")]
         public string Memo { get; set; }
 
         /// <summary>
