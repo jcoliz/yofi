@@ -440,7 +440,7 @@ namespace YoFi.Tests.Integration.Controllers
             (var items, _) = await GivenFakeDataInDatabase<Transaction>(1, 1,
                 x =>
                 {
-                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                    x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = x.Splits.Sum(x => x.Amount);
                     return x;
                 });
@@ -458,14 +458,16 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task SplitsShownInIndexSearchCategory()
         {
             // Given: Some transactions, one of which has splits
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1,
-                x =>
-                {
-                    x.Splits = GivenFakeItems<Split>(2, x=> { x.Category += " Split"; return x; }).ToList();
-                    x.Amount = x.Splits.Sum(x => x.Amount);
-                    return x;
-                });
-            var expected = chosen.Single();
+            var expected = FakeObjects<Transaction>
+                .Make(5)
+                .Add(1,
+                    x =>
+                    {
+                        x.Splits = FakeObjects<Split>.Make(2, s => { s.Category += " Split"; }).Group(0);
+                        x.Amount = x.Splits.Sum(s => s.Amount);
+                    })
+                .SaveTo(this)
+                .Last();
 
             // When: Getting the index, searching for the split category
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={expected.Splits.First().Category}" });
@@ -484,7 +486,7 @@ namespace YoFi.Tests.Integration.Controllers
             (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(1, 1,
                 x =>
                 {
-                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                    x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = x.Splits.Sum(x => x.Amount);
                     return x;
                 });
@@ -514,7 +516,7 @@ namespace YoFi.Tests.Integration.Controllers
             (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(1, 1,
                 x =>
                 {
-                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                    x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = 2 * x.Splits.Sum(x => x.Amount);
                     return x;
                 });
@@ -544,7 +546,7 @@ namespace YoFi.Tests.Integration.Controllers
                 x =>
                 {
                     x.Timestamp = DateTime.Now;
-                    x.Splits = GivenFakeItems<Split>(2).ToList();
+                    x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = x.Splits.Sum(x => x.Amount);
                     return x;
                 });
@@ -589,7 +591,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // And: A spreadsheet of splits which will break down the details of that transaction
             var numsplits = 4;
-            var splits = GivenFakeItems<Split>(numsplits, x => { x.Amount = expected.Amount / numsplits; return x; }).OrderBy(TestKeyOrder<Split>());
+            var splits = FakeObjects<Split>.Make(numsplits, x => { x.Amount = expected.Amount / numsplits; });
             var stream = GivenSpreadsheetOf(splits);
 
             // When: Uploading the spreadsheet as splits for the chosen transaction

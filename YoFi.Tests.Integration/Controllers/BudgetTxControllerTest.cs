@@ -61,7 +61,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // When: Upload 8 items, the first 5 of which are slight variations of the initial
             // items in the db
-            var items = GivenFakeItems<BudgetTx>(8).ToList();
+            var items = FakeObjects<BudgetTx>.Make(8).Group(0);
             foreach (var item in items)
                 item.Timestamp += TimeSpan.FromDays(1);
             var stream = GivenSpreadsheetOf(items);
@@ -82,7 +82,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // When: Uploading an item which differs in only a small amount from an otherwise
             // overlapping item
-            var items = GivenFakeItems<BudgetTx>(1).ToList();
+            var items = FakeObjects<BudgetTx>.Make(1).Group(0);
             items[0].Amount += 0.001m;
             var stream = GivenSpreadsheetOf(items);
             var document = await WhenUploadingSpreadsheet(stream, $"{urlroot}/", $"{urlroot}/Upload");

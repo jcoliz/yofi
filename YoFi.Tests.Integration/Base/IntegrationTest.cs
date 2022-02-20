@@ -53,14 +53,6 @@ namespace YoFi.Tests.Integration
             context.SaveChanges();
         }
 
-        protected virtual IEnumerable<TItem> GivenFakeItems<TItem>(int num, Func<TItem, TItem> func = null) where TItem : class, new()
-        {
-            if (func is null)
-                return FakeObjects<TItem>.Make(num);
-            else
-                return FakeObjects<TItem>.Make(num, x => x = func(x));
-        }
-
         protected Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<T>(int total, int selected, Func<T, T> func = null) where T : class, new()
         {
             Action<T> action = null;

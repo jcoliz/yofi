@@ -63,7 +63,7 @@ namespace YoFi.Tests.Integration.Ajax
         public async Task Add()
         {
             // When: Adding a new item via AJAX
-            var expected = GivenFakeItems<Payee>(100).Last();
+            var expected = FakeObjects<Payee>.Make(1).Single();
             var formData = new Dictionary<string, string>(FormDataFromObject(expected));
             var response = await WhenGettingAndPostingForm("/Payees/Index/", d => $"/ajax/payee/add", formData);
 

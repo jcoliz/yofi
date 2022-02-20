@@ -255,7 +255,8 @@ namespace YoFi.Tests.Integration.Controllers
         public virtual async Task Upload()
         {
             // Given: A spreadsheet of items
-            var items = GivenFakeItems<T>(15).OrderBy(TestKeyOrder<T>());
+            var items = FakeObjects<T>.Make(15);
+
             var stream = GivenSpreadsheetOf(items);
 
             // When: Uploading it
@@ -272,10 +273,10 @@ namespace YoFi.Tests.Integration.Controllers
         public virtual async Task UploadDuplicate()
         {
             // Given: One item in the database
-            var initial = FakeObjects<T>.Make(1).SaveTo(this);
-
             // And: A spreadsheet containing 5 items, including a duplicate of the item in the database
-            var items = GivenFakeItems<T>(5).OrderBy(TestKeyOrder<T>());
+            var data = FakeObjects<T>.Make(1).SaveTo(this).Add(4);
+            var initial = data.Group(0);
+            var items = data;
             var stream = GivenSpreadsheetOf(items);
             // Note that "GivenFakeItems" will restart at 1, so item Name 01 is the dupe
 

@@ -80,7 +80,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task UploadTransactionsXlsx()
         {
             // Given: Many items
-            var items = GivenFakeItems<Transaction>(15).OrderBy(TestKeyOrder<Transaction>());
+            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKeyOrder<Transaction>());
 
             // When: Uploading them as a spreadsheet
             var document = await WhenImportingAsSpreadsheet(items);
@@ -100,7 +100,7 @@ namespace YoFi.Tests.Integration.Pages
 
             // And: A list of many items, one of which is a duplicate of the one item already in the database
             // (Item 1 in this list naturally overlaps item 1 in the previous list.
-            var items = GivenFakeItems<Transaction>(15).OrderBy(TestKeyOrder<Transaction>());
+            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKeyOrder<Transaction>());
 
             // When: Uploading them as a spreadsheet
             var document = await WhenImportingAsSpreadsheet(items);
@@ -122,10 +122,10 @@ namespace YoFi.Tests.Integration.Pages
         public async Task UploadWithID()
         {
             // Given: One item in the database
-            var initial = FakeObjects<Transaction>.Make(1).SaveTo(this);
-
             // And: A list of many items, NONE of which is a duplicate of the one item already in the database
-            var items = GivenFakeItems<Transaction>(15).Skip(1).OrderBy(TestKeyOrder<Transaction>()).ToList();
+            var data = FakeObjects<Transaction>.Make(1).SaveTo(this).Add(14);
+            var initial = data.Group(0);
+            var items = data.Group(1);
 
             // And: One of those items has the same ID as the existing item
             items[0].ID = initial.First().ID;
@@ -155,7 +155,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task UploadHighlights()
         {
             // Given: A large set of transactions
-            var items = GivenFakeItems<Transaction>(15).OrderBy(TestKeyOrder<Transaction>());
+            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKeyOrder<Transaction>());
 
             // And: Having uploaded some of them initially (and approved it)
             var uploaded = items.Skip(10);
@@ -208,7 +208,7 @@ namespace YoFi.Tests.Integration.Pages
             //
 
             // Given: Two transactions, which are the same
-            var item = GivenFakeItems<Transaction>(1);
+            var item = FakeObjects<Transaction>.Make(1);
             var items = item.Concat(item);
 
             // When: Uploading them as a spreadsheet
@@ -222,12 +222,11 @@ namespace YoFi.Tests.Integration.Pages
         [TestMethod]
         public async Task UploadMatchPayees()
         {
-            // Given : More than five payees, one of which matches the name of the transaction we care about
-            (_, var payeeschosen) = await GivenFakeDataInDatabase<Payee>(15, 1);
-            var payee = payeeschosen.Single();
+            // Given : More than five payees in the DB, one of which matches the name of the transaction we care about
+            var payee = FakeObjects<Payee>.Make(15).SaveTo(this).Last();
 
             // Given: Five transactions, all of which have no category, and have "payee" matching name of chosen payee
-            var items = GivenFakeItems<Transaction>(5, x => { x.Category = null; x.Payee = payee.Name; return x; });
+            var items = FakeObjects<Transaction>.Make(5, x => { x.Category = null; x.Payee = payee.Name; });
 
             // When: Uploading them as a spreadsheet
             _ = await WhenImportingAsSpreadsheet(items);
@@ -488,7 +487,7 @@ namespace YoFi.Tests.Integration.Pages
         {
             // Given: Many budget transactions
             var howmany = 50;
-            var items = GivenFakeItems<BudgetTx>(howmany);
+            var items = FakeObjects<BudgetTx>.Make(howmany);
 
             // When: Uploading them as a spreadsheet
             var document = await WhenImportingAsSpreadsheet(items);
@@ -503,7 +502,7 @@ namespace YoFi.Tests.Integration.Pages
         {
             // Given: Many payees
             var howmany = 50;
-            var items = GivenFakeItems<Payee>(howmany);
+            var items = FakeObjects<Payee>.Make(howmany);
 
             // When: Uploading them as a spreadsheet
             var document = await WhenImportingAsSpreadsheet(items);
