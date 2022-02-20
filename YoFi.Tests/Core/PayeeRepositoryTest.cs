@@ -1,6 +1,7 @@
 ﻿using Common.DotNet.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -195,6 +196,24 @@ namespace YoFi.Tests.Core
             await GetCategoryMatchingPayee("Regex11", "CategoryRegex");
 
             // Then: No problems
+        }
+
+        #endregion
+
+        #region Payee Object Test(s)
+
+        [TestMethod]
+        public void PayeeHashEquals()
+        {
+            // Given: Two memberwise identical payees
+            var one = FakeObjects<Payee>.Make(1).Single();
+            var two = FakeObjects<Payee>.Make(1).Single();
+
+            // When: Adding both to a hashset of payees
+            var hashset = new HashSet<Payee>() { one, two };
+
+            // Then: Only one added, because they're functionally duplicates
+            Assert.AreEqual(1, hashset.Count);
         }
 
         #endregion
