@@ -31,6 +31,7 @@ namespace YoFi.Tests.Core
 
             // This evenly divides on months, so should always be on the 1st of the month.
             Assert.IsTrue(reportables.All(x => x.Timestamp.Day == 1));
+            Assert.AreEqual(13-12/frequency,reportables.Last().Timestamp.Month);
             Assert.IsTrue(reportables.All(x => x.Timestamp.Year == tx.Timestamp.Year));
         }
 
@@ -51,6 +52,9 @@ namespace YoFi.Tests.Core
 
             // This evenly divides on months, so should always be on the same day of week
             Assert.IsTrue(reportables.All(x => x.Timestamp.DayOfWeek == reportables.First().Timestamp.DayOfWeek));
+
+            // There is reasonable entropy of days
+            Assert.IsTrue(reportables.Select(x => x.Timestamp.Day).Distinct().Count() > frequency / 2);
         }
 
         [TestMethod]

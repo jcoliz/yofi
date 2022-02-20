@@ -134,7 +134,7 @@ namespace YoFi.Core.Models
             if (Frequency == 365)
                 return Timestamp + TimeSpan.FromDays(which);
             if (12 % Frequency == 0)
-                return new DateTime(Timestamp.Year, which + 1, 1);
+                return new DateTime(Timestamp.Year, 1 + which * (12/Frequency), 1);
             return Timestamp + TimeSpan.FromDays((364 / Frequency) * which);
         }
 
