@@ -43,9 +43,8 @@ namespace YoFi.Tests.Integration.Ajax
         [DataTestMethod]
         public async Task Select(bool value)
         {
-            // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Payee>(5, 1, (x => { x.Selected = !value; return x; }));
-            var id = chosen.Single().ID;
+            // Given: There are 5 items in the database, one of which we care about, which has the given selected value
+            var id = FakeObjects<Payee>.Make(4).Add(1, (x => x.Selected = !value)).SaveTo(this).Last().ID;
 
             // When: Selecting the item via AJAX
             var formData = new Dictionary<string, string>()

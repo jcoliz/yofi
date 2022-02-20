@@ -75,8 +75,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task Delete()
         {
             // Given: There are two items in the database, one of which we care about
-            (var items, var selected) = await GivenFakeDataInDatabase<Split>(2, 1);
-            var id = selected.Single().ID;
+            var id = FakeObjects<Split>.Make(2).SaveTo(this).Last().ID;
 
             // When: Deleting the selected item
             var formData = new Dictionary<string, string>()

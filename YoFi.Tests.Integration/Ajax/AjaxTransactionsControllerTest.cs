@@ -50,8 +50,7 @@ namespace YoFi.Tests.Integration.Ajax
         public async Task Select(bool value)
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, (x => { x.Selected = !value; return x; }));
-            var id = chosen.Single().ID;
+            var id = FakeObjects<Transaction>.Make(4).Add(1, (x => x.Selected = !value)).SaveTo(this).Last().ID;
 
             // When: Selecting the item via AJAX
             var formData = new Dictionary<string, string>()
@@ -71,8 +70,7 @@ namespace YoFi.Tests.Integration.Ajax
         public async Task Hide(bool value)
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, (x => { x.Hidden = !value; return x; }));
-            var id = chosen.Single().ID;
+            var id = FakeObjects<Transaction>.Make(4).Add(1, (x => x.Hidden = !value)).SaveTo(this).Last().ID;
 
             // When: Selecting the item via AJAX
             var formData = new Dictionary<string, string>()
@@ -120,8 +118,7 @@ namespace YoFi.Tests.Integration.Ajax
         public async Task ApplyPayee()
         {
             // Given : More than five payees, one of which matches the name of the transaction we care about
-            (_, var payeeschosen) = await GivenFakeDataInDatabase<Payee>(15, 1);
-            var payee = payeeschosen.Single();
+            var payee = FakeObjects<Payee>.Make(15).SaveTo(this).Last();
 
             // Given: Five transactions, one of which has no category, and has "payee" matching name of chosen payee
             (_, var txchosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x => { x.Category = null; x.Payee = payee.Name; return x; });
@@ -251,8 +248,7 @@ namespace YoFi.Tests.Integration.Ajax
         public async Task UpReceipt()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var id = chosen.Single().ID;
+            var id = FakeObjects<Transaction>.Make(5).SaveTo(this).Last().ID;
 
             // And: An image file
             var length = 25;
@@ -282,8 +278,7 @@ namespace YoFi.Tests.Integration.Ajax
         public async Task UpReceiptAgainFails()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var id = chosen.Single().ID;
+            var id = FakeObjects<Transaction>.Make(5).SaveTo(this).Last().ID;
 
             // And: An image file
             var length = 25;

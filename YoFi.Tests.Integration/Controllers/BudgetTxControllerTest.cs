@@ -98,7 +98,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task BulkDelete()
         {
             // Given: 10 items in the database, 7 of which are marked "selected"
-            (var items, var selected) = await GivenFakeDataInDatabase<BudgetTx>(10, 7, x => { x.Selected = true; return x; });
+            var data = FakeObjects<BudgetTx>.Make(3).Add(5, x => x.Selected = true).SaveTo(this);
 
             // When: Calling BulkDelete
             var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/BulkDelete", new Dictionary<string, string>());
@@ -110,7 +110,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // And: Only the unselected items remain
             var actual = context.Set<BudgetTx>().AsQueryable().OrderBy(TestKeyOrder<BudgetTx>()).ToList();
-            Assert.IsTrue(actual.SequenceEqual(items.Except(selected)));
+            Assert.IsTrue(actual.SequenceEqual(data.Group(0)));
         }
 
         #endregion

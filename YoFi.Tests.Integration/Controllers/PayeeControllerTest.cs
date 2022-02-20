@@ -47,8 +47,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task EditModal()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Payee>(5, 1);
-            var expected = chosen.Single();
+            var expected = FakeObjects<Payee>.Make(5).SaveTo(this).Last();
             var id = expected.ID;
 
             // When: Asking for the modal edit partial view
@@ -64,8 +63,8 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task BulkEdit()
         {
             // Given: 10 items in the database, 7 of which are marked "selected"
-            (var items, var selected) = await GivenFakeDataInDatabase<Payee>(10, 7, x => { x.Selected = true; return x; });
-            var ids = selected.Select(x => x.ID).ToList();
+            var data = FakeObjects<Payee>.Make(3).Add(7, x => x.Selected = true).SaveTo(this);
+            var ids = data.Group(1).Select(x => x.ID);
 
             // When: Calling BulkEdit with a new category
             var category = "Edited Category";
@@ -86,7 +85,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // And: None of the un-edited items have the new category
             var unedited = context.Set<Payee>().Where(x => !ids.Contains(x.ID)).AsNoTracking().OrderBy(TestKeyOrder<Payee>()).ToList();
-            Assert.IsTrue(items.Except(selected).SequenceEqual(unedited));
+            Assert.IsTrue(data.Group(0).SequenceEqual(unedited));
         }
 
         [DataRow("Create/?txid")]
@@ -95,8 +94,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task CreateFromTx(string endpoint)
         {
             // Given: There are 5 transactions in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var expected = chosen.Single();
+            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
 
             // When: Asking for the "create" page or modal given the chosen ID
             var document = await WhenGetAsync($"{urlroot}/{endpoint}={expected.ID}");
@@ -129,7 +127,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task BulkDelete()
         {
             // Given: 10 items in the database, 7 of which are marked "selected"
-            (var items, var selected) = await GivenFakeDataInDatabase<Payee>(10, 7, x => { x.Selected = true; return x; });
+            var data = FakeObjects<Payee>.Make(3).Add(7, x => x.Selected = true).SaveTo(this);
 
             // When: Calling BulkDelete
             var response = await WhenGettingAndPostingForm($"{urlroot}/Index/", d => $"{urlroot}/BulkDelete", new Dictionary<string, string>());
@@ -141,7 +139,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // And: Only the unselected items remain
             var actual = context.Set<Payee>().AsQueryable().OrderBy(TestKeyOrder<Payee>()).ToList();
-            Assert.IsTrue(actual.SequenceEqual(items.Except(selected)));
+            Assert.IsTrue(actual.SequenceEqual(data.Group(0)));
         }
 
         #endregion

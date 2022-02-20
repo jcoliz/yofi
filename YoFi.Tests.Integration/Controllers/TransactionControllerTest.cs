@@ -329,8 +329,8 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task BulkEdit()
         {
             // Given: 10 items in the database, 7 of which are marked "selected"
-            (var items, var selected) = await GivenFakeDataInDatabase<Transaction>(10, 7, x => { x.Selected = true; return x; });
-            var ids = selected.Select(x => x.ID).ToList();
+            var data = FakeObjects<Transaction>.Make(3).Add(7, x => x.Selected = true).SaveTo(this);
+            var ids = data.Group(1).Select(x => x.ID);
 
             // When: Calling BulkEdit with a new category
             var category = "Edited Category";
@@ -351,7 +351,7 @@ namespace YoFi.Tests.Integration.Controllers
 
             // And: None of the un-edited items have the new category
             var unedited = context.Set<Transaction>().Where(x => !ids.Contains(x.ID)).AsNoTracking().OrderBy(TestKeyOrder<Transaction>()).ToList();
-            Assert.IsTrue(items.Except(selected).SequenceEqual(unedited));
+            Assert.IsTrue(data.Group(0).SequenceEqual(unedited));
 
         }
 
@@ -386,7 +386,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task BulkEditCancel()
         {
             // Given: 10 items in the database, 7 of which are marked "selected"
-            (var items, var selected) = await GivenFakeDataInDatabase<Transaction>(10, 7, x => { x.Selected = true; return x; });
+            _ = FakeObjects<Transaction>.Make(3).Add(7, x => x.Selected = true).SaveTo(this);
 
             // When: Calling Bulk Edit with blank category
             var formData = new Dictionary<string, string>()
@@ -437,13 +437,13 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task SplitsShownInIndex()
         {
             // Given: Single transaction with balanced splits
-            (var items, _) = await GivenFakeDataInDatabase<Transaction>(1, 1,
-                x =>
+            _ = FakeObjects<Transaction>
+                .Make(1, x =>
                 {
                     x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = x.Splits.Sum(x => x.Amount);
-                    return x;
-                });
+                })
+                .SaveTo(this);
 
             // When: Getting the index
             var document = await WhenGettingIndex(new WireQueryParameters());
@@ -483,13 +483,13 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task SplitsShownInEdit()
         {
             // Given: Single transaction with balanced splits
-            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(1, 1,
-                x =>
+            var chosen = FakeObjects<Transaction>
+                .Make(1, x =>
                 {
                     x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = x.Splits.Sum(x => x.Amount);
-                    return x;
-                });
+                })
+                .SaveTo(this);
             var id = chosen.Single().ID;
 
             // When: Getting the edit page for the transaction
@@ -781,8 +781,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task EditModal()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var expected = chosen.Single();
+            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
             var id = expected.ID;
 
             // When: Asking for the modal edit partial view
@@ -822,8 +821,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task EditNoPayeeMatch(string endpoint)
         {
             // Given: A transaction with an existing category
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1);
-            var expected = chosen.Single();
+            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
             var id = expected.ID;
 
             // And: A payee which matches the transaction payee, but has a different category

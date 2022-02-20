@@ -127,7 +127,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexSearch()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<T>(5, 1);
+            var chosen = FakeObjects<T>.Make(5).SaveTo(this).Take(1);
 
             // When: Searching the index for the focused item's testkey
             var q = (string)TestKeyOrder<T>()(chosen.Single());
@@ -141,9 +141,8 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task Details()
         {
             // Given: There are 5 items in the database, one of which we care about
-            (var items, var chosen) = await GivenFakeDataInDatabase<T>(5, 1);
-            var expected = chosen.Single();
-            var id = chosen.Single().ID;
+            var expected = FakeObjects<T>.Make(5).SaveTo(this).Last();
+            var id = expected.ID;
 
             // When: Getting details for the chosen item
             var document = await WhenGetAsync($"{urlroot}/Details/{id}");
@@ -185,8 +184,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task Delete()
         {
             // Given: There are two items in the database, one of which we care about
-            (var items, var selected) = await GivenFakeDataInDatabase<T>(2, 1);
-            var id = selected.Single().ID;
+            var id = FakeObjects<T>.Make(2).SaveTo(this).Last().ID;
 
             // When: Deleting the selected item
             var formData = new Dictionary<string, string>()
