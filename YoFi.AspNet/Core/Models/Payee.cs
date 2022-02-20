@@ -39,15 +39,6 @@ namespace YoFi.Core.Models
         /// </summary>
         public bool? Selected { get; set; }
 
-        /// <summary>
-        /// Remove all characters from payee which are not whitespace or alpha-numeric
-        /// </summary>
-        public void RemoveWhitespaceFromName()
-        {
-            Regex rx = new Regex(@"[^\s\w\d]+");
-            Name = rx.Replace(Name, new MatchEvaluator(x => string.Empty));
-        }
-
         public override bool Equals(object obj)
         {
             return obj is Payee payee &&
