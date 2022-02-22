@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace YoFi.Core.Models
 {
@@ -59,8 +60,30 @@ namespace YoFi.Core.Models
         /// <returns></returns>
         public static Receipt FromFilename(string filename)
         {
+            var result = new Receipt() { Filename = filename };
+
             var given = Path.GetFileNameWithoutExtension(filename);
-            return new Receipt() { Name = given, Filename = filename };
+
+            // Break the given name down into components
+            var words = given.Split(' ');
+
+            var unmatched = new List<string>();
+
+            // Look for amount
+            var amount_r = new Regex("^\\$([0-9]+(?:\\.[0-9][0-9])?)");
+            foreach(var word in words)
+            {
+                var match = amount_r.Match(word);
+                if (match.Success)
+                    result.Amount = decimal.Parse(match.Groups[1].Value);
+                else
+                    unmatched.Add(word);
+            }
+
+            // Assign name based on the unmatched items
+            result.Name = String.Join(" ", unmatched);
+
+            return result;
         }
     }
 }
