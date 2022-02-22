@@ -119,8 +119,8 @@ namespace YoFi.Tests.Core
 
             // Then: The timestamp is set with correct month & date values
             var expected = DateTime.Parse(date).Date;
-            Assert.AreEqual(expected.Month, receipt.Timestamp.Month);
-            Assert.AreEqual(expected.Day, receipt.Timestamp.Day);
+            Assert.AreEqual(expected.Month, receipt.Timestamp.Value.Month);
+            Assert.AreEqual(expected.Day, receipt.Timestamp.Value.Day);
         }
 
         [DataRow("1-1","1-1-2010")]
@@ -140,7 +140,7 @@ namespace YoFi.Tests.Core
 
             // Then: The timestamp is set with correct month & date values
             var expected = DateTime.Parse(expectedstr);
-            Assert.AreEqual(expected.Date, receipt.Timestamp.Date);
+            Assert.AreEqual(expected.Date, receipt.Timestamp.Value.Date);
         }
 
         [TestMethod]
@@ -216,8 +216,8 @@ namespace YoFi.Tests.Core
             // Then: Components set as expected
             if (date.HasValue)
             {
-                Assert.AreEqual(date.Value.Month, receipt.Timestamp.Month);
-                Assert.AreEqual(date.Value.Day, receipt.Timestamp.Day);
+                Assert.AreEqual(date.Value.Month, receipt.Timestamp.Value.Month);
+                Assert.AreEqual(date.Value.Day, receipt.Timestamp.Value.Day);
             }
             if (amount.HasValue)
                 Assert.AreEqual(amount, receipt.Amount);
@@ -279,6 +279,53 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(200, match);
         }
 
+        [TestMethod]
+        public void MatchDateOnlyFailes()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which matches the date
+            var receipt = new Receipt() { Timestamp = item.Timestamp };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is not a match
+            Assert.AreEqual(0, match);
+        }
+
+        [TestMethod]
+        public void MatchDateAndAmount()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which matches the date and amount
+            var receipt = new Receipt() { Timestamp = item.Timestamp, Amount = item.Amount };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 200 point match
+            Assert.AreEqual(200, match);
+        }
+
+        [TestMethod]
+        public void MatchDateAndAlmostAmount()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which matches the date with a week and amount
+            var receipt = new Receipt() { Timestamp = item.Timestamp + TimeSpan.FromDays(7), Amount = item.Amount };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 193 point match
+            Assert.AreEqual(193, match);
+        }
 
         #endregion
     }

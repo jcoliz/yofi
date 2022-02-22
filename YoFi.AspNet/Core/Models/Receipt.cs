@@ -31,7 +31,7 @@ namespace YoFi.Core.Models
         [DataType(DataType.Date)]
         [Column(TypeName = "date")]
         [Editable(true)]
-        public DateTime Timestamp { get; set; }
+        public DateTime? Timestamp { get; set; }
 
         /// <summary>
         /// Name of the underlying file
@@ -76,6 +76,9 @@ namespace YoFi.Core.Models
             // For a partial match... Which is better? A 2-item
             // partial match or a 2-item exact match? Hard to say, so
             // I am going to treat them the SAME for now
+            //
+            // Also note that date ONLY is not a match
+            //
 
             var result = 0;
 
@@ -92,6 +95,13 @@ namespace YoFi.Core.Models
             {
                 if (Amount.Value == transaction.Amount)
                     result += 100;
+            }
+
+            if (Timestamp.HasValue)
+            {
+                var margin = TimeSpan.FromDays(14);
+                if (transaction.Timestamp > Timestamp.Value - margin && transaction.Timestamp < Timestamp.Value + margin && result > 0)
+                    result += 100 - (int)Math.Abs((transaction.Timestamp - Timestamp.Value).TotalDays);
             }
 
             return result;
