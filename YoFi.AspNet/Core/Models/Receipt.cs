@@ -68,29 +68,53 @@ namespace YoFi.Core.Models
             // Break the given name down into components
             var words = given.Split(' ').ToList();
 
+            // Set of currently unmatched words
+            var unmatchedwords = new List<string>();
+            var unmatchedterms = new Queue<string>();
+
             var amount_r = new Regex("^\\$([0-9]+(?:\\.[0-9][0-9])?)");
             var date_r = new Regex("^[0-9][0-9]?-[0-9][0-9]?$");
-            for (int i = 0; i < words.Count; i++)
+            foreach(var word in words)
             {
-                var word = words[i];
                 var match = amount_r.Match(word);
                 if (match.Success)
                 {
                     result.Amount = decimal.Parse(match.Groups[1].Value);
-                    words.RemoveAt(i);
-                    i--;
+                    if (unmatchedwords.Any())
+                    {
+                        unmatchedterms.Enqueue(String.Join(' ',unmatchedwords));
+                        unmatchedwords.Clear();
+                    }
                 }
-                match = date_r.Match(word);
-                if (match.Success)
+                else
                 {
-                    result.Timestamp = DateTime.Parse(match.Groups[0].Value);
-                    words.RemoveAt(i);
-                    i--;
+                    match = date_r.Match(word);
+                    if (match.Success)
+                    {
+                        result.Timestamp = DateTime.Parse(match.Groups[0].Value);
+                        if (unmatchedwords.Any())
+                        {
+                            unmatchedterms.Enqueue(String.Join(' ', unmatchedwords));
+                            unmatchedwords.Clear();
+                        }
+                    }
+                    else
+                        unmatchedwords.Add(word);
                 }
             }
+            if (unmatchedwords.Any())
+            {
+                unmatchedterms.Enqueue(String.Join(' ', unmatchedwords));
+                unmatchedwords.Clear();
+            }
 
-            // Assign name based on the unmatched items
-            result.Name = String.Join(" ", words);
+            // Assign name based on the first unmatched items
+            if (unmatchedterms.Any())
+                result.Name = unmatchedterms.Dequeue();
+
+            // Assign memo based on the second unmatched items
+            if (unmatchedterms.Any())
+                result.Memo = unmatchedterms.Dequeue();
 
             return result;
         }

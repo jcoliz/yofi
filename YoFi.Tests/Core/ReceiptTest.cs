@@ -78,10 +78,35 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(expected.Date, receipt.Timestamp.Date);
         }
 
+        [TestMethod]
+        public void MatchNameAmountAndMemo()
+        {
+            // Given: A filename with a name and amount in it
+            var name = "Multiplex Cable Services";
+            var memo = "Dog F00ds";
+            var amount = 1234.56m;
+            var filename = $"{name} ${amount} {memo}.pdf";
+
+            // When: Constructing a receipt object from it
+            var receipt = Receipt.FromFilename(filename);
+
+            // Then: The name is set
+            Assert.AreEqual(name, receipt.Name);
+
+            // Then: The memo is set
+            Assert.AreEqual(memo, receipt.Memo);
+
+            // Then: The amount is set
+            Assert.AreEqual(amount, receipt.Amount);
+        }
+
         [DataRow("a=1000.01,d=10-1,n=Some Name")]
         [DataRow("a=1000.01,d=10-1")]
         [DataRow("n=Your Name Here,d=10-1")]
         [DataRow("n=Your Name Here,a=1")]
+        [DataRow("a=1000.01,n=Some Name,d=10-1,m=Take a memo")]
+        [DataRow("n=Your Name Here,d=10-1,m=Take a memo")]
+        [DataRow("n=Your Name Here,a=1,m=Take a memo")]
         [DataTestMethod]
         public void MatchMany(string input)
         {
@@ -90,6 +115,7 @@ namespace YoFi.Tests.Core
             var filename = new List<string>();
 
             string name = null;
+            string memo = null;
             decimal? amount = null;
             DateTime? date = null;
 
@@ -105,6 +131,11 @@ namespace YoFi.Tests.Core
                 {
                     name = kv[1];
                     filename.Add(name);
+                }
+                if (kv[0] == "m")
+                {
+                    memo = kv[1];
+                    filename.Add(memo);
                 }
                 if (kv[0] == "d")
                 {
@@ -127,6 +158,8 @@ namespace YoFi.Tests.Core
                 Assert.AreEqual(amount, receipt.Amount);
             if (name != null)
                 Assert.AreEqual(name, receipt.Name);
+            if (memo != null)
+                Assert.AreEqual(memo, receipt.Memo);
         }
     }
 }
