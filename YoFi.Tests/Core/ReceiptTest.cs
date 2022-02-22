@@ -23,6 +23,38 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(name, receipt.Name);
         }
 
+        [TestMethod]
+        public void MatchMemoOnly()
+        {
+            // Given: A filename with only a payee name in it
+            var memo = "Hello,there";
+            var filename = $"({memo}).pdf";
+
+            // When: Constructing a receipt object from it
+            var receipt = Receipt.FromFilename(filename);
+
+            // Then: The memo is set
+            Assert.AreEqual(memo, receipt.Memo);
+        }
+
+        [TestMethod]
+        public void MatchMemoAndAmount()
+        {
+            // Given: A filename with only a payee name in it
+            var memo = "Hello,there";
+            var amount = 1234.56m;
+            var filename = $"${amount} ({memo}).pdf";
+
+            // When: Constructing a receipt object from it
+            var receipt = Receipt.FromFilename(filename);
+
+            // Then: The memo is set
+            Assert.AreEqual(memo, receipt.Memo);
+
+            // Then: The amount is set
+            Assert.AreEqual(amount, receipt.Amount);
+        }
+
         [DataRow("0.01")]
         [DataRow("0")]
         [DataRow("1234")]

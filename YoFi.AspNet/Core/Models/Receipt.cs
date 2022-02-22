@@ -57,6 +57,17 @@ namespace YoFi.Core.Models
         /// <summary>
         /// Generate a new receipt based on this filenname
         /// </summary>
+        /// <remarks>
+        /// Examples:
+        ///     {name}.pdf
+        ///     ${amount}.pdf
+        ///     {mm}-{dd}.pdf
+        ///     ${amount} {mm}-{dd}.pdf
+        ///     {name} ${amount}.pdf
+        ///     {name} ${amount} {mm}-{dd}.pdf
+        ///     {name} ${amount} {mm}-{dd} {memo}.pdf
+        ///     ${amount} ({singlewordmemo}).pdf
+        /// </remarks>
         /// <param name="filename"></param>
         /// <returns></returns>
         public static Receipt FromFilename(string filename)
@@ -74,7 +85,8 @@ namespace YoFi.Core.Models
 
             var amount_r = new Regex("^\\$([0-9]+(?:\\.[0-9][0-9])?)");
             var date_r = new Regex("^[0-9][0-9]?-[0-9][0-9]?$");
-            foreach(var word in words)
+            var memo_r = new Regex("^\\((.+?)\\)$");
+            foreach (var word in words)
             {
                 var match = amount_r.Match(word);
                 if (match.Success)
@@ -99,7 +111,22 @@ namespace YoFi.Core.Models
                         }
                     }
                     else
-                        unmatchedwords.Add(word);
+                    {
+                        match = memo_r.Match(word);
+                        if (match.Success)
+                        {
+                            result.Memo = match.Groups[1].Value;
+                            if (unmatchedwords.Any())
+                            {
+                                unmatchedterms.Enqueue(String.Join(' ', unmatchedwords));
+                                unmatchedwords.Clear();
+                            }
+                        }
+                        else
+                        {
+                            unmatchedwords.Add(word);
+                        }
+                    }
                 }
             }
             if (unmatchedwords.Any())
@@ -113,7 +140,7 @@ namespace YoFi.Core.Models
                 result.Name = unmatchedterms.Dequeue();
 
             // Assign memo based on the second unmatched items
-            if (unmatchedterms.Any())
+            if (unmatchedterms.Any() && result.Memo is null)
                 result.Memo = unmatchedterms.Dequeue();
 
             return result;
