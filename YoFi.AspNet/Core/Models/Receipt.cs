@@ -15,10 +15,10 @@ namespace YoFi.Core.Models
     /// </summary>
     public class Receipt : IID
     {
-        public int ID { get; set ; }
+        public int ID { get; set; }
 
         [Editable(true)]
-        public string Name { get; set ; }
+        public string Name { get; set; }
 
         [Editable(true)]
         public decimal? Amount { get; set; }
@@ -102,6 +102,35 @@ namespace YoFi.Core.Models
                 var margin = TimeSpan.FromDays(14);
                 if (transaction.Timestamp > Timestamp.Value - margin && transaction.Timestamp < Timestamp.Value + margin && result > 0)
                     result += 100 - (int)Math.Abs((transaction.Timestamp - Timestamp.Value).TotalDays);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Constructs a query which can be used to narrow transactions to then consider individually
+        /// </summary>
+        /// <param name="initial"></param>
+        /// <param name="receipts"></param>
+        /// <returns></returns>
+        public static IQueryable<Transaction> TransactionsForReceipts(IQueryable<Transaction> initial, IEnumerable<Receipt> receipts)
+        {
+            var result = initial;
+
+            // Can narrow date range if all have dates
+            if (receipts.All(x=>x.Timestamp.HasValue))
+            {
+                var from = receipts.Min(x => x.Timestamp.Value);
+                var to = receipts.Max(x => x.Timestamp.Value);
+
+                result = result.Where(x=>x.Timestamp >= from && x.Timestamp <= to);
+            }
+
+            // Can narrow amount if all have amounts
+            if (receipts.All(x=>x.Amount.HasValue))
+            {
+                var amounts = receipts.Select(x=>x.Amount.Value).ToList();
+                result = result.Where(x=>amounts.Contains(x.Amount));
             }
 
             return result;

@@ -327,6 +327,68 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(193, match);
         }
 
+        [TestMethod]
+        public void MatchDateAndNameAndAlmostAmount()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which matches the date with a week and amount and the name
+            var receipt = new Receipt() { Name = item.Payee[0..7], Timestamp = item.Timestamp + TimeSpan.FromDays(7), Amount = item.Amount };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 293 point match
+            Assert.AreEqual(293, match);
+        }
+
+        [TestMethod]
+        public void NarrowByDate()
+        {
+            // Given: Many items with a range of dates
+            var items = FakeObjects<Transaction>.Make(100).Group(0);
+
+            // And: A small number of receipts which each will match one of those transactions
+            var receipts = new List<Receipt>()
+            {
+                new Receipt() { Name = items[50].Payee, Timestamp = items[50].Timestamp },
+                new Receipt() { Name = items[60].Payee, Timestamp = items[60].Timestamp },
+            };
+
+            // When: Narrowing the transactions
+            var narrow = Receipt.TransactionsForReceipts(items.AsQueryable(), receipts).ToList();
+
+            // Then: List was narrowed to 11 transactions
+            Assert.AreEqual(11,narrow.Count);
+
+            // And: They match
+            Assert.IsTrue(receipts.Select(x => narrow.Any(y => x.MatchesTransaction(y) > 100)).All(x=>x));
+        }
+
+        [TestMethod]
+        public void NarrowByAmount()
+        {
+            // Given: Many items with a range of dates
+            var items = FakeObjects<Transaction>.Make(100).Group(0);
+
+            // And: A small number of receipts which each will match one of those transactions
+            var receipts = new List<Receipt>()
+            {
+                new Receipt() { Name = items[50].Payee, Amount = items[50].Amount },
+                new Receipt() { Name = items[60].Payee, Amount = items[60].Amount },
+            };
+
+            // When: Narrowing the transactions
+            var narrow = Receipt.TransactionsForReceipts(items.AsQueryable(), receipts).ToList();
+
+            // Then: List was narrowed to 2 transactions
+            Assert.AreEqual(2, narrow.Count);
+
+            // And: They match
+            Assert.IsTrue(receipts.Select(x => narrow.Any(y => x.MatchesTransaction(y) > 100)).All(x => x));
+        }
+
         #endregion
     }
 }
