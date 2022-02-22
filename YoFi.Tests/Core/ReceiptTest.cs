@@ -2,8 +2,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using YoFi.Core.Models;
+using YoFi.Tests.Helpers;
 
 namespace YoFi.Tests.Core
 {
@@ -17,6 +19,8 @@ namespace YoFi.Tests.Core
         {
             clock = new TestClock() { Now = new DateTime(2010, 6, 1) };
         }
+
+        #region From Filename
 
         [TestMethod]
         public void MatchNameOnly()
@@ -222,5 +226,27 @@ namespace YoFi.Tests.Core
             if (memo != null)
                 Assert.AreEqual(memo, receipt.Memo);
         }
+
+        #endregion
+
+        #region Match Transaction
+
+        [TestMethod]
+        public void MatchTxNameOnly()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which substring matches the name
+            var receipt = new Receipt() { Name = item.Payee[0..7] };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 100-point match
+            Assert.AreEqual(100, match);
+        }
+
+        #endregion
     }
 }

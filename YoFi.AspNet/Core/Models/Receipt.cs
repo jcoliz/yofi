@@ -56,6 +56,41 @@ namespace YoFi.Core.Models
             return HashCode.Combine(Name, Amount, Timestamp);
         }
 
+        public int MatchesTransaction(Transaction transaction)
+        {
+            //
+            // What does it mean to "match" a transaction?
+            //
+            // For anything that we DO have set, an "exact" match is
+            //  * Date +/- 2 weeks either way
+            //  * Receipt name is an exact substr of transaction name
+            //  * Amount exactly matches
+            //
+            // A "partial" match is a match where we WOULD HAVE matched
+            // if one of our set items was unset.
+            //
+            // Therefore, this method will return the QUALITY of the
+            // match. In the case of exact match, it is 100 for each
+            // matching property minus one point for each day different
+            //
+            // For a partial match... Which is better? A 2-item
+            // partial match or a 2-item exact match? Hard to say, so
+            // I am going to treat them the SAME for now
+
+            var result = 0;
+
+            if (transaction is null)
+                return 0;
+
+            if (!string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(transaction.Payee))
+            {
+                if (transaction.Payee.Contains(Name))
+                    result += 100;
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Generate a new receipt based on this filenname
         /// </summary>
