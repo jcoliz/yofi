@@ -21,7 +21,7 @@ namespace YoFi.Core.Models
         public string Name { get; set ; }
 
         [Editable(true)]
-        public decimal Amount { get; set; }
+        public decimal? Amount { get; set; }
 
         [Editable(true)]
         public string Memo { get; set; }
@@ -85,6 +85,12 @@ namespace YoFi.Core.Models
             if (!string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(transaction.Payee))
             {
                 if (transaction.Payee.Contains(Name))
+                    result += 100;
+            }
+
+            if (Amount.HasValue)
+            {
+                if (Amount.Value == transaction.Amount)
                     result += 100;
             }
 

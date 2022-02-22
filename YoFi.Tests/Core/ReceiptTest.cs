@@ -247,6 +247,39 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(100, match);
         }
 
+        [TestMethod]
+        public void MatchTxAmountOnly()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which exactly matches the amount
+            var receipt = new Receipt() { Amount = item.Amount };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 100-point match
+            Assert.AreEqual(100, match);
+        }
+
+        [TestMethod]
+        public void MatchTxAmountAndName()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which substring matches the name and matches the amount
+            var receipt = new Receipt() { Name = item.Payee[0..7], Amount = item.Amount };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 200-point match
+            Assert.AreEqual(200, match);
+        }
+
+
         #endregion
     }
 }
