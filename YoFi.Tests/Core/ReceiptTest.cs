@@ -77,5 +77,56 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(expected.Month, receipt.Timestamp.Month);
             Assert.AreEqual(expected.Date, receipt.Timestamp.Date);
         }
+
+        [DataRow("a=1000.01,d=10-1,n=Some Name")]
+        [DataRow("a=1000.01,d=10-1")]
+        [DataRow("n=Your Name Here,d=10-1")]
+        [DataRow("n=Your Name Here,a=1")]
+        [DataTestMethod]
+        public void MatchMany(string input)
+        {
+            // Given: A filename from varied inputs
+            var terms = input.Split(",");
+            var filename = new List<string>();
+
+            string name = null;
+            decimal? amount = null;
+            DateTime? date = null;
+
+            foreach(var term in terms)
+            {
+                var kv = term.Split('=');
+                if (kv[0] == "a")
+                {
+                    amount = decimal.Parse(kv[1]);
+                    filename.Add($"${amount}");
+                }
+                if (kv[0] == "n")
+                {
+                    name = kv[1];
+                    filename.Add(name);
+                }
+                if (kv[0] == "d")
+                {
+                    date = DateTime.Parse(kv[1]);
+                    filename.Add($"{date.Value.Month}-{date.Value.Day}");
+                }
+            }
+
+            // When: Constructing a receipt object from it
+            var pdf = String.Join(' ', filename) + ".pdf";
+            var receipt = Receipt.FromFilename(pdf);
+
+            // Then: Components set as expected
+            if (date.HasValue)
+            {
+                Assert.AreEqual(date.Value.Month, receipt.Timestamp.Month);
+                Assert.AreEqual(date.Value.Date, receipt.Timestamp.Date);
+            }
+            if (amount.HasValue)
+                Assert.AreEqual(amount, receipt.Amount);
+            if (name != null)
+                Assert.AreEqual(name, receipt.Name);
+        }
     }
 }
