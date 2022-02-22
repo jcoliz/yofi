@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace YoFi.Core.Models
@@ -65,23 +66,31 @@ namespace YoFi.Core.Models
             var given = Path.GetFileNameWithoutExtension(filename);
 
             // Break the given name down into components
-            var words = given.Split(' ');
+            var words = given.Split(' ').ToList();
 
-            var unmatched = new List<string>();
-
-            // Look for amount
             var amount_r = new Regex("^\\$([0-9]+(?:\\.[0-9][0-9])?)");
-            foreach(var word in words)
+            var date_r = new Regex("^[0-9][0-9]?-[0-9][0-9]?$");
+            for (int i = 0; i < words.Count; i++)
             {
+                var word = words[i];
                 var match = amount_r.Match(word);
                 if (match.Success)
+                {
                     result.Amount = decimal.Parse(match.Groups[1].Value);
-                else
-                    unmatched.Add(word);
+                    words.RemoveAt(i);
+                    i--;
+                }
+                match = date_r.Match(word);
+                if (match.Success)
+                {
+                    result.Timestamp = DateTime.Parse(match.Groups[0].Value);
+                    words.RemoveAt(i);
+                    i--;
+                }
             }
 
             // Assign name based on the unmatched items
-            result.Name = String.Join(" ", unmatched);
+            result.Name = String.Join(" ", words);
 
             return result;
         }

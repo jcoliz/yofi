@@ -58,5 +58,24 @@ namespace YoFi.Tests.Core
             // Then: The amount is set
             Assert.AreEqual(amount, receipt.Amount);
         }
+
+        [DataRow("1-1")]
+        [DataRow("12-1")]
+        [DataRow("9-30")]
+        [DataRow("12-10")]
+        [TestMethod]
+        public void MatchDate(string date)
+        {
+            // Given: A filename with a date in it
+            var filename = $"{date}.pdf";
+
+            // When: Constructing a receipt object from it
+            var receipt = Receipt.FromFilename(filename);
+
+            // Then: The timestamp is set with correct month & date values
+            var expected = DateTime.Parse(date).Date;
+            Assert.AreEqual(expected.Month, receipt.Timestamp.Month);
+            Assert.AreEqual(expected.Date, receipt.Timestamp.Date);
+        }
     }
 }
