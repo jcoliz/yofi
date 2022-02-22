@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Common.DotNet;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -70,7 +72,7 @@ namespace YoFi.Core.Models
         /// </remarks>
         /// <param name="filename"></param>
         /// <returns></returns>
-        public static Receipt FromFilename(string filename)
+        public static Receipt FromFilename(string filename, IClock clock)
         {
             var result = new Receipt() { Filename = filename };
 
@@ -103,7 +105,12 @@ namespace YoFi.Core.Models
                     match = date_r.Match(word);
                     if (match.Success)
                     {
-                        result.Timestamp = DateTime.Parse(match.Groups[0].Value);
+                        var parsed = DateTime.Parse(match.Groups[0].Value);
+                        result.Timestamp = new DateTime(clock.Now.Year,parsed.Month,parsed.Day);
+                        if (result.Timestamp > clock.Now)
+                        {
+                            result.Timestamp = new DateTime(clock.Now.Year - 1, parsed.Month, parsed.Day);
+                        }
                         if (unmatchedwords.Any())
                         {
                             unmatchedterms.Enqueue(String.Join(' ', unmatchedwords));

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Common.DotNet;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,14 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class ReceiptTest
     {
+        private TestClock clock;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            clock = new TestClock() { Now = new DateTime(2010, 6, 1) };
+        }
+
         [TestMethod]
         public void MatchNameOnly()
         {
@@ -17,7 +26,7 @@ namespace YoFi.Tests.Core
             var filename = $"{name}.pdf";
 
             // When: Constructing a receipt object from it
-            var receipt = Receipt.FromFilename(filename);
+            var receipt = Receipt.FromFilename(filename, clock);
 
             // Then: The name is set
             Assert.AreEqual(name, receipt.Name);
@@ -31,7 +40,7 @@ namespace YoFi.Tests.Core
             var filename = $"({memo}).pdf";
 
             // When: Constructing a receipt object from it
-            var receipt = Receipt.FromFilename(filename);
+            var receipt = Receipt.FromFilename(filename, clock);
 
             // Then: The memo is set
             Assert.AreEqual(memo, receipt.Memo);
@@ -46,7 +55,7 @@ namespace YoFi.Tests.Core
             var filename = $"${amount} ({memo}).pdf";
 
             // When: Constructing a receipt object from it
-            var receipt = Receipt.FromFilename(filename);
+            var receipt = Receipt.FromFilename(filename, clock);
 
             // Then: The memo is set
             Assert.AreEqual(memo, receipt.Memo);
@@ -67,7 +76,7 @@ namespace YoFi.Tests.Core
             var filename = $"${amount}.pdf";
 
             // When: Constructing a receipt object from it
-            var receipt = Receipt.FromFilename(filename);
+            var receipt = Receipt.FromFilename(filename, clock);
 
             // Then: The amount is set
             Assert.AreEqual(amount, receipt.Amount);
@@ -82,7 +91,7 @@ namespace YoFi.Tests.Core
             var filename = $"{name} ${amount}.pdf";
 
             // When: Constructing a receipt object from it
-            var receipt = Receipt.FromFilename(filename);
+            var receipt = Receipt.FromFilename(filename, clock);
 
             // Then: The name is set
             Assert.AreEqual(name, receipt.Name);
@@ -102,11 +111,31 @@ namespace YoFi.Tests.Core
             var filename = $"{date}.pdf";
 
             // When: Constructing a receipt object from it
-            var receipt = Receipt.FromFilename(filename);
+            var receipt = Receipt.FromFilename(filename, clock);
 
             // Then: The timestamp is set with correct month & date values
             var expected = DateTime.Parse(date).Date;
             Assert.AreEqual(expected.Month, receipt.Timestamp.Month);
+            Assert.AreEqual(expected.Day, receipt.Timestamp.Day);
+        }
+
+        [DataRow("1-1","1-1-2010")]
+        [DataRow("6-1", "6-1-2010")]
+        [DataRow("6-2", "6-2-2009")]
+        [DataRow("12-1","12-1-2009")]
+        [DataRow("9-30","9-30-2009")]
+        [DataRow("12-10","12-10-2009")]
+        [TestMethod]
+        public void MatchDatePrecise(string date, string expectedstr)
+        {
+            // Given: A filename with a date in it
+            var filename = $"{date}.pdf";
+
+            // When: Constructing a receipt object from it
+            var receipt = Receipt.FromFilename(filename, clock);
+
+            // Then: The timestamp is set with correct month & date values
+            var expected = DateTime.Parse(expectedstr);
             Assert.AreEqual(expected.Date, receipt.Timestamp.Date);
         }
 
@@ -120,7 +149,7 @@ namespace YoFi.Tests.Core
             var filename = $"{name} ${amount} {memo}.pdf";
 
             // When: Constructing a receipt object from it
-            var receipt = Receipt.FromFilename(filename);
+            var receipt = Receipt.FromFilename(filename, clock);
 
             // Then: The name is set
             Assert.AreEqual(name, receipt.Name);
@@ -178,13 +207,13 @@ namespace YoFi.Tests.Core
 
             // When: Constructing a receipt object from it
             var pdf = String.Join(' ', filename) + ".pdf";
-            var receipt = Receipt.FromFilename(pdf);
+            var receipt = Receipt.FromFilename(pdf, clock);
 
             // Then: Components set as expected
             if (date.HasValue)
             {
                 Assert.AreEqual(date.Value.Month, receipt.Timestamp.Month);
-                Assert.AreEqual(date.Value.Date, receipt.Timestamp.Date);
+                Assert.AreEqual(date.Value.Day, receipt.Timestamp.Day);
             }
             if (amount.HasValue)
                 Assert.AreEqual(amount, receipt.Amount);
