@@ -121,7 +121,7 @@ namespace YoFi.Tests.Core
             // Given: One transaction
             var tx = FakeObjects<Transaction>.Make(1).SaveTo(txrepo).Single();
 
-            // And: One receipt in storage
+            // And: One receipt in storage which will match that
             var filename = $"{tx.Payee} {tx.Timestamp.ToString("MM-dd")}.png";
             var contenttype = "image/png";
             storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
@@ -133,5 +133,28 @@ namespace YoFi.Tests.Core
             var actual = items.Single();
             Assert.AreEqual(tx, actual.Matches.Single());
         }
+
+        [TestMethod]
+        public async Task GetManyTransactions()
+        {
+            // TODO: This test makes me realize that TransactionsForReceipts narrower is also wrong
+            // regarding dates. It needs to employ the same +/- rangefinfer that "transactionmatches" uses
+
+            // Given: Many transactions
+            var txs = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Group(0);
+
+            // And: One receipt in storage which will match ALL of those
+            var filename = $"Payee {txs[5].Timestamp.ToString("MM-dd")}.png";
+            var contenttype = "image/png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // When: Getting All
+            var items = await repository.GetAllAsync();
+
+            // Then: Alls transactions are listed among the matches
+            var actual = items.Single();
+            Assert.IsTrue(actual.Matches.OrderBy(TestKey<Transaction>.Order()).SequenceEqual(txs));
+        }
+
     }
 }

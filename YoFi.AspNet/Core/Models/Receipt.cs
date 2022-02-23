@@ -120,10 +120,12 @@ namespace YoFi.Core.Models
             // Can narrow date range if all have dates
             if (receipts.All(x=>x.Timestamp.HasValue))
             {
+                var margin = TimeSpan.FromDays(14);
+
                 var from = receipts.Min(x => x.Timestamp.Value);
                 var to = receipts.Max(x => x.Timestamp.Value);
 
-                result = result.Where(x=>x.Timestamp >= from && x.Timestamp <= to);
+                result = result.Where(x=>x.Timestamp >= from-margin && x.Timestamp <= to+margin);
             }
 
             // Can narrow amount if all have amounts
