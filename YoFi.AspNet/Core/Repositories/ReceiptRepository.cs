@@ -6,7 +6,7 @@ using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 
-namespace YoFi.AspNet.Core.Repositories
+namespace YoFi.Core.Repositories
 {
     /// <summary>
     /// Contains a queue of unmatched transactions, awaiting a transaction to be matched with
@@ -17,9 +17,26 @@ namespace YoFi.AspNet.Core.Repositories
     /// </remarks>
     public class ReceiptRepository : IReceiptRepository
     {
+        #region Fields
+
+        private readonly ITransactionRepository _txrepo;
+        private readonly IStorageService _storage;
+        private readonly IClock _clock;
+
+        #endregion
+
+        #region Constructor
+
         public ReceiptRepository(ITransactionRepository txrepo, IStorageService storage, IClock clock)
         {
+            _txrepo = txrepo;
+            _storage = storage;
+            _clock = clock;
         }
+
+        #endregion
+
+        #region Public Interface
 
         /// <summary>
         /// Assign the give <paramref name="receipt"/> to the given <paramref name="tx"/>
@@ -37,12 +54,12 @@ namespace YoFi.AspNet.Core.Repositories
         }
 
         /// <summary>
-        /// Remove the specified transaction from the system
+        /// Remove the specified receipt from the system
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task DeleteAsync(string filename)
+        public Task DeleteAsync(Receipt receipt)
         {
             throw new System.NotImplementedException();
         }
@@ -82,5 +99,8 @@ namespace YoFi.AspNet.Core.Repositories
         {
             throw new System.NotImplementedException();
         }
+
+        #endregion
+
     }
 }
