@@ -54,6 +54,18 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public async Task GetNone()
+        {
+            // Given: Empty storage
+
+            // When: Getting All
+            var items = await repository.GetAllAsync();
+
+            // Then: Nothing returned
+            Assert.IsFalse(items.Any());
+        }
+
+        [TestMethod]
         public async Task GetOne()
         {
             // Given: One receipt in storage
@@ -71,6 +83,27 @@ namespace YoFi.Tests.Core
             var actual = items.Single();
             Assert.AreEqual("Uptown Espresso", actual.Name);
             Assert.AreEqual(new DateTime(2022,1,2), actual.Timestamp);
+        }
+
+        [TestMethod]
+        public async Task GetMany()
+        {
+            // Given: Many receipts in storage
+            var contenttype = "image/png";
+            for(int i=1; i<10; i++ )
+            {
+                var filename = $"Uptown Espresso $5.11 1-{i}.png";
+                storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            }
+
+            // When: Getting All
+            var items = await repository.GetAllAsync();
+
+            // Then: Nine items returned
+            Assert.AreEqual(9, items.Count());
+
+            // And: Names matched correctly
+            Assert.IsTrue(items.All(x=>x.Name =="Uptown Espresso"));
         }
     }
 }
