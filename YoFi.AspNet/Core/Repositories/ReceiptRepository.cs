@@ -1,6 +1,7 @@
 ﻿using Common.DotNet;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core;
 using YoFi.Core.Models;
@@ -71,9 +72,11 @@ namespace YoFi.Core.Repositories
         /// Note that this does tranaction matching here, and will fill in all the matching transactions
         /// </remarks>
         /// <returns></returns>
-        public Task<IEnumerable<Receipt>> GetAllAsync()
+        public async Task<IEnumerable<Receipt>> GetAllAsync()
         {
-            throw new System.NotImplementedException();
+            var filenames = await _storage.GetBlobNamesAsync();
+            var result = filenames.Select(x => Receipt.FromFilename(x,_clock));
+            return result;
         }
 
         /// <summary>
@@ -95,9 +98,9 @@ namespace YoFi.Core.Repositories
         /// <param name="contenttype"></param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task UploadReceiptAsync(Stream stream, string filename, string contenttype)
+        public async Task UploadReceiptAsync(string filename, Stream stream, string contenttype)
         {
-            throw new System.NotImplementedException();
+            await _storage.UploadBlobAsync(filename, stream, contenttype);
         }
 
         #endregion

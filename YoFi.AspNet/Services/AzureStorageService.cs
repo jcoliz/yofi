@@ -1,6 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
@@ -77,6 +78,21 @@ namespace YoFi.Services
 
             await blobClient.UploadAsync(stream, options);
             return blobClient.Uri;
+        }
+
+        public async Task<IEnumerable<string>> GetBlobNamesAsync()
+        {
+            BlobServiceClient blobServiceClient = new BlobServiceClient(_connection);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(ContainerName);
+            await containerClient.CreateIfNotExistsAsync();
+
+            var blobs = containerClient.GetBlobsAsync();
+
+            var result = new List<string>();
+            await foreach(var blob in blobs)
+                result.Add(blob.Name);
+
+            return result;
         }
 
         /// <summary>

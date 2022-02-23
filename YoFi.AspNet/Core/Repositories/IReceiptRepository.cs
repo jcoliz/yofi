@@ -7,7 +7,7 @@ namespace YoFi.Core.Repositories
 {
     public interface IReceiptRepository
     {
-        Task UploadReceiptAsync(Stream stream, string filename, string contenttype);
+        Task UploadReceiptAsync(string filename, Stream stream, string contenttype);
         Task<IEnumerable<Receipt>> GetAllAsync();
         Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx);
         Task DeleteAsync(Receipt receipt);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -31,6 +32,8 @@ namespace YoFi.Core
         /// <param name="stream">Target for the bits</param>
         /// <returns>type of the content</returns>
         Task<string> DownloadBlobAsync(string filename, Stream stream);
+
+        Task<IEnumerable<string>> GetBlobNamesAsync();
 
         /// <summary>
         /// Name of the blob storage container we store in

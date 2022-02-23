@@ -74,6 +74,11 @@ namespace Common.DotNet.Test
 
         Task<string> IStorageService.DownloadBlobAsync(string filename, Stream stream) => DownloadBlob("Default", filename, stream);
 
+        public Task<IEnumerable<string>> GetBlobNamesAsync()
+        {
+            return Task.FromResult(BlobItems.Select(x => x.FileName));
+        }
+
         public class Table: List<IReadOnlyDictionary<string, string>>
         {
         }
