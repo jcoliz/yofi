@@ -118,7 +118,7 @@ namespace YoFi.Core.Models
             var result = initial;
 
             // Can narrow date range if all have dates
-            if (receipts.All(x=>x.Timestamp.HasValue))
+            if (receipts.Any() && receipts.All(x=>x.Timestamp.HasValue))
             {
                 var margin = TimeSpan.FromDays(14);
 

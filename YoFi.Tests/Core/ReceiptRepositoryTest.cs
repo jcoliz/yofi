@@ -86,7 +86,7 @@ namespace YoFi.Tests.Core
             // And: It was matched correctly
             var actual = items.Single();
             Assert.AreEqual("Uptown Espresso", actual.Name);
-            Assert.AreEqual(new DateTime(2022,1,2), actual.Timestamp);
+            Assert.AreEqual(new DateTime(2001,1,2), actual.Timestamp);
         }
 
         [TestMethod]

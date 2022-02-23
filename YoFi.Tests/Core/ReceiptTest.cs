@@ -359,8 +359,8 @@ namespace YoFi.Tests.Core
             // When: Narrowing the transactions
             var narrow = Receipt.TransactionsForReceipts(items.AsQueryable(), receipts).ToList();
 
-            // Then: List was narrowed to 11 transactions
-            Assert.AreEqual(11,narrow.Count);
+            // Then: List was narrowed to 11 transactions. The original 11 in the window, plus 14 on either side (28 total)
+            Assert.AreEqual(39,narrow.Count);
 
             // And: They match
             Assert.IsTrue(receipts.Select(x => narrow.Any(y => x.MatchesTransaction(y) > 100)).All(x=>x));
