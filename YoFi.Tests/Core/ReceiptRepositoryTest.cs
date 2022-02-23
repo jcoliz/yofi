@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
 
@@ -24,7 +25,10 @@ namespace YoFi.Tests.Core
         public void SetUp()
         {
             txrepo = new MockTransactionRepository();
-            clock = new TestClock() { Now = new DateTime(2022, 6, 1) };
+            
+            // Match clock with fakeobjectsmaker
+            
+            clock = new TestClock() { Now = new DateTime(2001, 12, 31) }; 
             storage = new TestAzureStorage();
             repository = new ReceiptRepository(txrepo,storage,clock);
         }
@@ -104,6 +108,30 @@ namespace YoFi.Tests.Core
 
             // And: Names matched correctly
             Assert.IsTrue(items.All(x=>x.Name =="Uptown Espresso"));
+        }
+
+        [TestMethod]
+        public async Task GetOneTransaction()
+        {
+            // TODO: This make me realize that the TransactionsForReceipts narrower may be incorrect.
+            // If there is an amount in the receipt, then it will REQUIRE the receipt to have that amount
+            // That's probably not right, because it's still possible to match, with a lesser match score,
+            // even if the amounts are wrong.
+
+            // Given: One transaction
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(txrepo).Single();
+
+            // And: One receipt in storage
+            var filename = $"{tx.Payee} {tx.Timestamp.ToString("MM-dd")}.png";
+            var contenttype = "image/png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // When: Getting All
+            var items = await repository.GetAllAsync();
+
+            // Then: The transaction is listed among the matches
+            var actual = items.Single();
+            Assert.AreEqual(tx, actual.Matches.Single());
         }
     }
 }

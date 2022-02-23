@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,9 +10,14 @@ using YoFi.Core.Repositories;
 
 namespace YoFi.Tests.Helpers
 {
-    public class MockTransactionRepository : BaseMockRepository<Transaction>, ITransactionRepository
+    public class MockTransactionRepository : BaseMockRepository<Transaction>, ITransactionRepository, IFakeObjectsSaveTarget
     {
         public IQueryable<Split> Splits => throw new NotImplementedException();
+
+        public void AddRange(IEnumerable objects)
+        {
+            base.AddRangeAsync(objects as IEnumerable<Transaction>).Wait();
+        }
 
         public Task<int> AddSplitToAsync(int id)
         {

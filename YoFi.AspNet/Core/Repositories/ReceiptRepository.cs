@@ -75,7 +75,27 @@ namespace YoFi.Core.Repositories
         public async Task<IEnumerable<Receipt>> GetAllAsync()
         {
             var filenames = await _storage.GetBlobNamesAsync();
-            var result = filenames.Select(x => Receipt.FromFilename(x,_clock));
+            var result = filenames.Select(x => Receipt.FromFilename(x,_clock)).ToList();
+
+            // Now, need to match transactions for each
+
+            // Narrow down the universe of possible transactions
+            var txs = Receipt.TransactionsForReceipts(_txrepo.All, result).ToList();
+            // TODO: ToListAsync();
+
+            foreach(var receipt in result)
+            {
+                var m = txs
+                        .Select(t => (receipt.MatchesTransaction(t), t));
+
+                receipt.Matches = txs
+                                    .Select(t => (receipt.MatchesTransaction(t),t))
+                                    .Where(x=>x.Item1 > 0)
+                                    .OrderByDescending(x=>x.Item1)
+                                    .Select(x=>x.t)
+                                    .ToList();
+            }
+
             return result;
         }
 
