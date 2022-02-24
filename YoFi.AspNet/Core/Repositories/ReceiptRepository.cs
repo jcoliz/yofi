@@ -94,9 +94,12 @@ namespace YoFi.Core.Repositories
         /// <param name="filename"></param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task DeleteAsync(Receipt receipt)
+        public async Task DeleteAsync(Receipt receipt)
         {
-            throw new System.NotImplementedException();
+            // Question: Will this fail silently if there IS none??
+
+            // Remove it from our purview
+            await _storage.RemoveBlobAsync("receipt/" + receipt.Filename);
         }
 
         /// <summary>

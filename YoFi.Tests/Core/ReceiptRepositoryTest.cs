@@ -289,5 +289,39 @@ namespace YoFi.Tests.Core
             var items = await repository.GetAllAsync();
             Assert.AreEqual(2, items.Count());
         }
+
+        [TestMethod]
+        public async Task Delete()
+        {
+            // Given: One receipt in storage
+            var filename = "Uptown Espresso $5.11 1-2.png";
+            var contenttype = "image/png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // And: Getting All
+            var items = await repository.GetAllAsync();
+
+            // When: Deleting it
+            await repository.DeleteAsync(items.Single());
+
+            // And: Getting All again
+            items = await repository.GetAllAsync();
+
+            // Then: Nothing returned
+            Assert.IsFalse(items.Any());
+        }
+
+        [TestMethod]
+        public async Task DeleteFromNone()
+        {
+            // Given: No receipts
+
+            // When: Deleting a nonexistent receipt
+            var filename = "Uptown Espresso $5.11 1-2.png";
+            await repository.DeleteAsync(new Receipt() { Filename = "receipt/" + filename });
+
+            // Then: Fails silently
+        }
+
     }
 }
