@@ -165,6 +165,50 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(amount, receipt.Amount);
         }
 
+        [TestMethod]
+        public void MatchNameAmountAndMemoFirst()
+        {
+            // Given: A filename with a name and amount in it
+            var name = "Multiplex Cable Services";
+            var memo = "DogF00ds";
+            var amount = 1234.56m;
+            var filename = $"({memo}) {name} ${amount}.pdf";
+
+            // When: Constructing a receipt object from it
+            var receipt = Receipt.FromFilename(filename, clock);
+
+            // Then: The name is set
+            Assert.AreEqual(name, receipt.Name);
+
+            // Then: The memo is set
+            Assert.AreEqual(memo, receipt.Memo);
+
+            // Then: The amount is set
+            Assert.AreEqual(amount, receipt.Amount);
+        }
+
+        [TestMethod]
+        public void MatchNameAmountAndMemoNextToName()
+        {
+            // Given: A filename with a name and amount in it
+            var name = "Multiplex Cable Services";
+            var memo = "DogF00ds";
+            var amount = 1234.56m;
+            var filename = $"{name} ({memo}) ${amount}.pdf";
+
+            // When: Constructing a receipt object from it
+            var receipt = Receipt.FromFilename(filename, clock);
+
+            // Then: The name is set
+            Assert.AreEqual(name, receipt.Name);
+
+            // Then: The memo is set
+            Assert.AreEqual(memo, receipt.Memo);
+
+            // Then: The amount is set
+            Assert.AreEqual(amount, receipt.Amount);
+        }
+
         [DataRow("a=1000.01,d=10-1,n=Some Name")]
         [DataRow("a=1000.01,d=10-1")]
         [DataRow("n=Your Name Here,d=10-1")]
@@ -280,6 +324,19 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public void MatchTxNull()
+        {
+            // Given: A receipt
+            var receipt = new Receipt();
+
+            // When: Testing for a match against null transaction
+            var match = receipt.MatchesTransaction(null);
+
+            // Then: This is a 0-point match
+            Assert.AreEqual(0, match);
+        }
+
+        [TestMethod]
         public void MatchDateOnlyFailes()
         {
             // Given: A transaction
@@ -387,6 +444,40 @@ namespace YoFi.Tests.Core
 
             // And: They match
             Assert.IsTrue(receipts.Select(x => narrow.Any(y => x.MatchesTransaction(y) > 100)).All(x => x));
+        }
+
+        [TestMethod]
+        public void HashSet()
+        {
+            // Given: Three sets of receipts
+            var data = FakeObjects<Receipt>.Make(10).Add(20).Add(30);
+
+            // When: Creating a hash table of sets 1 & 2
+            var hashset1 = new HashSet<Receipt>(data.Groups(0..2));
+
+            // And: Adding sets 2 and 3
+            var hashset2 = new HashSet<Receipt>(data.Groups(1..3));
+            hashset1.UnionWith(hashset2);
+
+            // Then: Hashtable has all three sets now exactly
+            Assert.AreEqual(data.Count(), hashset1.Count);
+            Assert.IsTrue(hashset1.ToList().OrderBy(x => x.Name).SequenceEqual(data));
+        }
+
+        [TestMethod]
+        public void IDs()
+        {
+            // Given: Some receipts with IDs, one of which we care about
+            int id = 1;
+            var data = FakeObjects<Receipt>.Make(10,x=>x.ID = id++);
+            var expected = data.Last();
+
+            // When: Making a dictionary by IDs
+            var dict = data.ToDictionary(x => x.ID, x => x);
+
+            // Then: Can find by ID
+            var actual = dict[expected.ID];
+            Assert.AreSame(expected, actual);
         }
 
         #endregion
