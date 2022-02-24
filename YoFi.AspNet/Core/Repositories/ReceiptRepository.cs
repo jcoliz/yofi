@@ -140,11 +140,21 @@ namespace YoFi.Core.Repositories
         /// Find all the receipts which match this transaction
         /// </summary>
         /// <param name="tx"></param>
-        /// <returns>Matching receipts ordered by better match</returns>
+        /// <returns>Matching receipts ordered by better match first</returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx)
+        public async Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx)
         {
-            throw new System.NotImplementedException();
+            var filenames = await _storage.GetBlobNamesAsync("receipt/");
+            var receipts = filenames.Select(x => Receipt.FromFilename(x[8..], _clock)).ToList();
+
+            var result = receipts
+                    .Select(r => (r.MatchesTransaction(tx), r))
+                    .Where(x => x.Item1 > 0)
+                    .OrderByDescending(x => x.Item1)
+                    .Select(x => x.r)
+                    .ToList();
+
+            return result;
         }
 
         /// <summary>

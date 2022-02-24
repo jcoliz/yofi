@@ -220,7 +220,7 @@ namespace YoFi.Tests.Core
         public async Task AssignAllNoMatch()
         {
             // Given: Several transactions
-            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+            _ = FakeObjects<Transaction>.Make(10).SaveTo(txrepo);
 
             // And: One receipt in storage, which will NOT MATCH ANY transactions
             var filename = $"Totally not matching.png";
@@ -242,7 +242,7 @@ namespace YoFi.Tests.Core
         public async Task AssignAllManyMatch()
         {
             // Given: Several transactions
-            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+            _ = FakeObjects<Transaction>.Make(10).SaveTo(txrepo);
 
             // And: One receipt in storage, which will match MANY transactions
             var filename = $"Payee.png";
@@ -260,12 +260,8 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(1, items.Count());
         }
 
-        [TestMethod]
-        public async Task AssignAllVariousMatch()
+        private void GivenMultipleReceipts(Transaction t)
         {
-            // Given: Several transactions, one of which we care about
-            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
-
             // And: One receipt in storage, which will match the transaction we care about
             var filename = $"{t.Payee} ${t.Amount}.png";
             var contenttype = "image/png";
@@ -276,8 +272,18 @@ namespace YoFi.Tests.Core
             storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
 
             // And: One receipt in storage, which will NOT MATCH ANY transactions
-            filename = $"Totally not matching.png";            
+            filename = $"Totally not matching.png";
             storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+        }
+
+        [TestMethod]
+        public async Task AssignAllVariousMatch()
+        {
+            // Given: Several transactions, one of which we care about
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+
+            // And: Multiple receipts, one matches this transaction, one matches all, one matches none
+            GivenMultipleReceipts(t);
 
             // When: Assigning the receipt to its best match
             var matched = await repository.AssignAll();
@@ -323,5 +329,24 @@ namespace YoFi.Tests.Core
             // Then: Fails silently
         }
 
+        [TestMethod]
+        public async Task GetMatchingOne()
+        {
+            // Given: Several transactions, one of which we care about
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+
+            // And: Multiple receipts, one matches this transaction, one matches all, one matches none
+            GivenMultipleReceipts(t);
+
+            // When: Asking for the receipt(s) that matches THIS transaction
+            var matches = await repository.GetMatchingAsync(t);
+
+            // Then: There are two matches
+            Assert.AreEqual(2,matches.Count());
+
+            // And: The first one is the best one
+            var best = matches.First();
+            Assert.AreEqual(t.Payee, best.Name);
+        }
     }
 }
