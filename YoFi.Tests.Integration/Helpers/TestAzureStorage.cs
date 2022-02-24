@@ -74,6 +74,16 @@ namespace YoFi.Tests.Integration.Helpers
 
         Task<string> IStorageService.DownloadBlobAsync(string filename, Stream stream) => DownloadBlob("Default", filename, stream);
 
+        public Task<IEnumerable<string>> GetBlobNamesAsync(string prefix = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveBlobAsync(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
         public class Table: List<IReadOnlyDictionary<string, string>>
         {
         }

@@ -80,19 +80,27 @@ namespace YoFi.Services
             return blobClient.Uri;
         }
 
-        public async Task<IEnumerable<string>> GetBlobNamesAsync()
+        public async Task<IEnumerable<string>> GetBlobNamesAsync(string prefix = null)
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(_connection);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(ContainerName);
             await containerClient.CreateIfNotExistsAsync();
 
-            var blobs = containerClient.GetBlobsAsync();
+            var blobs = containerClient.GetBlobsAsync(prefix:prefix);
 
             var result = new List<string>();
             await foreach(var blob in blobs)
                 result.Add(blob.Name);
 
             return result;
+        }
+        public async Task RemoveBlobAsync(string filename)
+        {
+            BlobServiceClient blobServiceClient = new BlobServiceClient(_connection);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(ContainerName);
+            await containerClient.CreateIfNotExistsAsync();
+
+            await containerClient.DeleteBlobIfExistsAsync(filename);
         }
 
         /// <summary>

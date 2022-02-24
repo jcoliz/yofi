@@ -1,4 +1,5 @@
 ﻿using Common.DotNet;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -46,12 +47,45 @@ namespace YoFi.Core.Repositories
         /// Note that this also removes it from the repository, as its now owned by the transaction
         /// </remarks>
         /// <param name="receipt"></param>
-        /// <param name="tx">If null, will assign to the top match</param>
+        /// <param name="tx"></param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task AssignReceipt(Receipt receipt, Transaction tx = null)
+        public async Task AssignReceipt(Receipt receipt, Transaction tx)
         {
-            throw new System.NotImplementedException();
+            // Which transaction will own the receipt now?
+            // Get the receipt
+            var stream = new MemoryStream();
+            var contenttype = await _storage.DownloadBlobAsync("receipt/" + receipt.Filename, stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            // Add to the transaction
+            await _txrepo.UploadReceiptAsync(tx, stream, contenttype);
+
+            // Remove it from our purview
+            await _storage.RemoveBlobAsync("receipt/" + receipt.Filename);
+        }
+
+        /// <summary>
+        /// Assigned all receipts to their matching transaction, only if the receipt
+        /// matches just a single transaction
+        /// </summary>
+        /// <returns>The number of matched receipts</returns>
+        public async Task<int> AssignAll()
+        {
+            int result = 0;
+            var receipts = await GetAllAsync();
+            foreach(var receipt in receipts)
+            {
+                // If this receipt has ONLY ONE match
+                if (receipt.Matches.Any() && ! receipt.Matches.Skip(1).Any())
+                {
+                    var tx = receipt.Matches.Single();
+                    await AssignReceipt(receipt, tx);
+                    ++result;
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -74,8 +108,8 @@ namespace YoFi.Core.Repositories
         /// <returns></returns>
         public async Task<IEnumerable<Receipt>> GetAllAsync()
         {
-            var filenames = await _storage.GetBlobNamesAsync();
-            var result = filenames.Select(x => Receipt.FromFilename(x,_clock)).ToList();
+            var filenames = await _storage.GetBlobNamesAsync("receipt/");
+            var result = filenames.Select(x => Receipt.FromFilename(x[8..],_clock)).ToList();
 
             // Now, need to match transactions for each
 
@@ -120,7 +154,7 @@ namespace YoFi.Core.Repositories
         /// <exception cref="System.NotImplementedException"></exception>
         public async Task UploadReceiptAsync(string filename, Stream stream, string contenttype)
         {
-            await _storage.UploadBlobAsync(filename, stream, contenttype);
+            await _storage.UploadBlobAsync("receipt/" + filename, stream, contenttype);
         }
 
         #endregion

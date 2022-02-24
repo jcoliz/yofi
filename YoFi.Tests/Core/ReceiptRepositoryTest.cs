@@ -24,12 +24,12 @@ namespace YoFi.Tests.Core
         [TestInitialize]
         public void SetUp()
         {
-            txrepo = new MockTransactionRepository();
+            storage = new TestAzureStorage();
+            txrepo = new MockTransactionRepository() { Storage = storage };
             
             // Match clock with fakeobjectsmaker
             
             clock = new TestClock() { Now = new DateTime(2001, 12, 31) }; 
-            storage = new TestAzureStorage();
             repository = new ReceiptRepository(txrepo,storage,clock);
         }
 
@@ -54,7 +54,7 @@ namespace YoFi.Tests.Core
             // Then: The receipt is contained in storage
             Assert.AreEqual(1, storage.BlobItems.Count());
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
-            Assert.AreEqual(filename, storage.BlobItems.Single().FileName);
+            Assert.AreEqual("receipt/"+filename, storage.BlobItems.Single().FileName);
         }
 
         [TestMethod]
@@ -75,7 +75,7 @@ namespace YoFi.Tests.Core
             // Given: One receipt in storage
             var filename = "Uptown Espresso $5.11 1-2.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -97,7 +97,7 @@ namespace YoFi.Tests.Core
             for(int i=1; i<10; i++ )
             {
                 var filename = $"Uptown Espresso $5.11 1-{i}.png";
-                storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+                storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
             }
 
             // When: Getting All
@@ -124,7 +124,7 @@ namespace YoFi.Tests.Core
             // And: One receipt in storage which will match that
             var filename = $"{tx.Payee} {tx.Timestamp.ToString("MM-dd")}.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -146,7 +146,7 @@ namespace YoFi.Tests.Core
             // And: One receipt in storage which will match ALL of those
             var filename = $"Payee {txs[5].Timestamp.ToString("MM-dd")}.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -156,5 +156,138 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(actual.Matches.OrderBy(TestKey<Transaction>.Order()).SequenceEqual(txs));
         }
 
+        [TestMethod]
+        public async Task AssignReceipt()
+        {
+            // Given: One receipt in storage
+            var filename = "Uptown Espresso $5.11 1-2.png";
+            var contenttype = "image/png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // And: Getting it
+            var items = await repository.GetAllAsync();
+            var r = items.Single();
+
+            // And: A transaction (doesn't matter if it's matching
+            var t = FakeObjects<Transaction>.Make(1).SaveTo(txrepo).Single();
+
+            // When: Assigning the receipt to the transaction
+            
+            await repository.AssignReceipt(r, t);
+
+            // Then: The transaction displays as having a receipt
+            Assert.IsFalse(string.IsNullOrEmpty(t.ReceiptUrl));
+
+            // And: The receipt is contained in storage as expected
+            var blob = storage.BlobItems.Where(x=>x.FileName == t.ID.ToString()).Single();
+            Assert.AreEqual(contenttype,blob.ContentType);
+
+            // And: There are no more (unassigned) receipts now
+            items = await repository.GetAllAsync();
+            Assert.IsFalse(items.Any());
+        }
+
+        [TestMethod]
+        public async Task AssignReceiptAllMatch()
+        {
+            // Given: Several transactions, one of which we care about
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+
+            // And: One receipt in storage, which will match the transaction we care about
+            var filename = $"{t.Payee} ${t.Amount}.png";
+            var contenttype = "image/png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // When: Assigning the receipt to its best match
+            var matched = await repository.AssignAll();
+
+            // Then: One receipt was matched
+            Assert.AreEqual(1, matched);
+
+            // Then: The selected transaction displays as having a receipt
+            Assert.IsFalse(string.IsNullOrEmpty(t.ReceiptUrl));
+
+            // And: The receipt is contained in storage as expected
+            var blob = storage.BlobItems.Where(x => x.FileName == t.ID.ToString()).Single();
+            Assert.AreEqual(contenttype, blob.ContentType);
+
+            // And: There are no more (unassigned) receipts now
+            var items = await repository.GetAllAsync();
+            Assert.IsFalse(items.Any());
+        }
+
+        [TestMethod]
+        public async Task AssignAllNoMatch()
+        {
+            // Given: Several transactions
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+
+            // And: One receipt in storage, which will NOT MATCH ANY transactions
+            var filename = $"Totally not matching.png";
+            var contenttype = "image/png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // When: Assigning the receipt to its best match
+            var matched = await repository.AssignAll();
+
+            // Then: No receipts were matched
+            Assert.AreEqual(0, matched);
+
+            // And: There is still just one (unassigned) receipt now
+            var items = await repository.GetAllAsync();
+            Assert.AreEqual(1,items.Count());
+        }
+
+        [TestMethod]
+        public async Task AssignAllManyMatch()
+        {
+            // Given: Several transactions
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+
+            // And: One receipt in storage, which will match MANY transactions
+            var filename = $"Payee.png";
+            var contenttype = "image/png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // When: Assigning the receipt to its best match
+            var matched = await repository.AssignAll();
+
+            // Then: No receipts were matched
+            Assert.AreEqual(0, matched);
+
+            // And: There is still just one (unassigned) receipt now
+            var items = await repository.GetAllAsync();
+            Assert.AreEqual(1, items.Count());
+        }
+
+        [TestMethod]
+        public async Task AssignAllVariousMatch()
+        {
+            // Given: Several transactions, one of which we care about
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+
+            // And: One receipt in storage, which will match the transaction we care about
+            var filename = $"{t.Payee} ${t.Amount}.png";
+            var contenttype = "image/png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // And: One receipt in storage, which will match MANY transactions
+            filename = $"Payee.png";
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // And: One receipt in storage, which will NOT MATCH ANY transactions
+            filename = $"Totally not matching.png";            
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            // When: Assigning the receipt to its best match
+            var matched = await repository.AssignAll();
+
+            // Then: One receipt was matched
+            Assert.AreEqual(1, matched);
+
+            // And: There are two (unassigned) receipts now
+            var items = await repository.GetAllAsync();
+            Assert.AreEqual(2, items.Count());
+        }
     }
 }

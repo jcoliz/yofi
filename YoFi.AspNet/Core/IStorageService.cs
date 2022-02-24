@@ -33,7 +33,9 @@ namespace YoFi.Core
         /// <returns>type of the content</returns>
         Task<string> DownloadBlobAsync(string filename, Stream stream);
 
-        Task<IEnumerable<string>> GetBlobNamesAsync();
+        Task<IEnumerable<string>> GetBlobNamesAsync(string prefix = null);
+
+        Task RemoveBlobAsync(string filename);
 
         /// <summary>
         /// Name of the blob storage container we store in

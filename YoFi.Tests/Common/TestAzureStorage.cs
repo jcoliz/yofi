@@ -74,9 +74,18 @@ namespace Common.DotNet.Test
 
         Task<string> IStorageService.DownloadBlobAsync(string filename, Stream stream) => DownloadBlob("Default", filename, stream);
 
-        public Task<IEnumerable<string>> GetBlobNamesAsync()
+        public Task<IEnumerable<string>> GetBlobNamesAsync(string prefix = null)
         {
-            return Task.FromResult(BlobItems.Select(x => x.FileName));
+            if (prefix is null)
+                return Task.FromResult(BlobItems.Select(x => x.FileName));
+            else
+                return Task.FromResult(BlobItems.Select(x => x.FileName).Where(x=>x.StartsWith(prefix)));
+        }
+
+        public Task RemoveBlobAsync(string filename)
+        {
+            BlobItems.Remove(BlobItems.FirstOrDefault(x => x.FileName == filename));
+            return Task.CompletedTask;
         }
 
         public class Table: List<IReadOnlyDictionary<string, string>>
