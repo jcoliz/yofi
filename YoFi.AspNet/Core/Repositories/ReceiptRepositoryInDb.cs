@@ -51,16 +51,13 @@ namespace YoFi.Core.Repositories
         public async Task AssignReceipt(Receipt receipt, Transaction tx)
         {
             // Which transaction will own the receipt now?
-            // Get the receipt
-            var stream = new MemoryStream();
-            var contenttype = await _storage.DownloadBlobAsync("receipt/" + receipt.Filename, stream);
-            stream.Seek(0, SeekOrigin.Begin);
 
             // Add to the transaction
-            await _txrepo.UploadReceiptAsync(tx, stream, contenttype);
+            tx.ReceiptUrl = $"r/{receipt.ID}";
+            await _txrepo.UpdateAsync(tx);
 
             // Remove it from our purview
-            await _storage.RemoveBlobAsync("receipt/" + receipt.Filename);
+            await _storage.RemoveBlobAsync("r/" + receipt.Filename);
             _context.Remove(receipt);
             await _context.SaveChangesAsync();
         }
@@ -116,9 +113,9 @@ namespace YoFi.Core.Repositories
 
         public async Task UploadReceiptAsync(string filename, Stream stream, string contenttype)
         {
-            await _storage.UploadBlobAsync("receipt/" + filename, stream, contenttype);
-            var item = Receipt.FromFilename(filename,_clock);
+            var item = Receipt.FromFilename(filename, _clock);
             _context.Add(item);
+            await _storage.UploadBlobAsync($"r/{item.ID}", stream, contenttype);
         }
     }
 }

@@ -63,14 +63,18 @@ namespace YoFi.Tests.Core
             var filename = "Uptown Espresso $5.11 1-2.png";
             await repository.UploadReceiptAsync(filename, stream, contenttype);
 
+            // Then : Repository has it
+            var items = await repository.GetAllAsync();
+            Assert.AreEqual(1, items.Count());
+
             // Then: The receipt is contained in storage
             Assert.AreEqual(1, storage.BlobItems.Count());
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
+#if RECEIPTSINDB
+            Assert.AreEqual($"r/{items.Single().ID}", storage.BlobItems.Single().FileName);
+#else
             Assert.AreEqual("receipt/"+filename, storage.BlobItems.Single().FileName);
-
-            // And: Repository has it
-            var items = await repository.GetAllAsync();
-            Assert.AreEqual(1, items.Count());
+#endif
         }
 
         [TestMethod]
@@ -87,11 +91,13 @@ namespace YoFi.Tests.Core
 
         private void GivenReceiptInStorage(string filename, string contenttype)
         {
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
 
 #if RECEIPTSINDB
             var item = Receipt.FromFilename(filename,clock: clock);
             context.Add(item);
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"r/{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
+#else
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
 #endif
         }
 
@@ -205,7 +211,11 @@ namespace YoFi.Tests.Core
             Assert.IsFalse(string.IsNullOrEmpty(t.ReceiptUrl));
 
             // And: The receipt is contained in storage as expected
+#if RECEIPTSINDB
+            var blob = storage.BlobItems.Where(x => x.FileName == "r/" + r.ID.ToString()).Single();
+#else
             var blob = storage.BlobItems.Where(x=>x.FileName == t.ID.ToString()).Single();
+#endif
             Assert.AreEqual(contenttype,blob.ContentType);
 
             // And: There are no more (unassigned) receipts now
@@ -234,7 +244,11 @@ namespace YoFi.Tests.Core
             Assert.IsFalse(string.IsNullOrEmpty(t.ReceiptUrl));
 
             // And: The receipt is contained in storage as expected
-            var blob = storage.BlobItems.Where(x => x.FileName == t.ID.ToString()).Single();
+#if RECEIPTSINDB
+            var blob = storage.BlobItems.Where(x => x.FileName == "r/1").Single();
+#else
+            var blob = storage.BlobItems.Where(x=>x.FileName == t.ID.ToString()).Single();
+#endif
             Assert.AreEqual(contenttype, blob.ContentType);
 
             // And: There are no more (unassigned) receipts now
@@ -350,7 +364,7 @@ namespace YoFi.Tests.Core
 
             // When: Deleting a nonexistent receipt
             var filename = "Uptown Espresso $5.11 1-2.png";
-            await repository.DeleteAsync(new Receipt() { Filename = "receipt/" + filename });
+            await repository.DeleteAsync(new Receipt() { ID = 100, Filename = "receipt/" + filename });
 
             // Then: Fails silently
         }
