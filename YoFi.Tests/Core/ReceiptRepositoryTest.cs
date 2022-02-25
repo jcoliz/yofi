@@ -1,4 +1,6 @@
-﻿using Common.DotNet;
+﻿#define RECEIPTSINDB
+
+using Common.DotNet;
 using Common.DotNet.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -7,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
@@ -16,10 +19,14 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class ReceiptRepositoryTest
     {
+
         IReceiptRepository repository;
         MockTransactionRepository txrepo;
         TestAzureStorage storage;
         TestClock clock;
+#if RECEIPTSINDB
+        IDataContext context;
+#endif
 
         [TestInitialize]
         public void SetUp()
@@ -27,10 +34,15 @@ namespace YoFi.Tests.Core
             storage = new TestAzureStorage();
             txrepo = new MockTransactionRepository() { Storage = storage };
             
-            // Match clock with fakeobjectsmaker
-            
-            clock = new TestClock() { Now = new DateTime(2001, 12, 31) }; 
+            // Match clock with fakeobjectsmaker            
+            clock = new TestClock() { Now = new DateTime(2001, 12, 31) };
+
+#if RECEIPTSINDB
+            context = new ReceiptDataContext();
+            repository = new ReceiptRepositoryInDb(context, txrepo, storage, clock);
+#else
             repository = new ReceiptRepository(txrepo,storage,clock);
+#endif
         }
 
         [TestMethod]
@@ -55,6 +67,10 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(1, storage.BlobItems.Count());
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
             Assert.AreEqual("receipt/"+filename, storage.BlobItems.Single().FileName);
+
+            // And: Repository has it
+            var items = await repository.GetAllAsync();
+            Assert.AreEqual(1, items.Count());
         }
 
         [TestMethod]
@@ -69,13 +85,23 @@ namespace YoFi.Tests.Core
             Assert.IsFalse(items.Any());
         }
 
+        private void GivenReceiptInStorage(string filename, string contenttype)
+        {
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+#if RECEIPTSINDB
+            var item = Receipt.FromFilename(filename,clock: clock);
+            context.Add(item);
+#endif
+        }
+
         [TestMethod]
         public async Task GetOne()
         {
             // Given: One receipt in storage
             var filename = "Uptown Espresso $5.11 1-2.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);  
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -97,7 +123,7 @@ namespace YoFi.Tests.Core
             for(int i=1; i<10; i++ )
             {
                 var filename = $"Uptown Espresso $5.11 1-{i}.png";
-                storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+                GivenReceiptInStorage(filename, contenttype);
             }
 
             // When: Getting All
@@ -124,7 +150,7 @@ namespace YoFi.Tests.Core
             // And: One receipt in storage which will match that
             var filename = $"{tx.Payee} {tx.Timestamp.ToString("MM-dd")}.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -146,7 +172,7 @@ namespace YoFi.Tests.Core
             // And: One receipt in storage which will match ALL of those
             var filename = $"Payee {txs[5].Timestamp.ToString("MM-dd")}.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -162,7 +188,7 @@ namespace YoFi.Tests.Core
             // Given: One receipt in storage
             var filename = "Uptown Espresso $5.11 1-2.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // And: Getting it
             var items = await repository.GetAllAsync();
@@ -196,7 +222,7 @@ namespace YoFi.Tests.Core
             // And: One receipt in storage, which will match the transaction we care about
             var filename = $"{t.Payee} ${t.Amount}.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // When: Assigning the receipt to its best match
             var matched = await repository.AssignAll();
@@ -225,7 +251,7 @@ namespace YoFi.Tests.Core
             // And: One receipt in storage, which will NOT MATCH ANY transactions
             var filename = $"Totally not matching.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // When: Assigning the receipt to its best match
             var matched = await repository.AssignAll();
@@ -247,7 +273,7 @@ namespace YoFi.Tests.Core
             // And: One receipt in storage, which will match MANY transactions
             var filename = $"Payee.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // When: Assigning the receipt to its best match
             var matched = await repository.AssignAll();
@@ -265,15 +291,15 @@ namespace YoFi.Tests.Core
             // And: One receipt in storage, which will match the transaction we care about
             var filename = $"{t.Payee} ${t.Amount}.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // And: One receipt in storage, which will match MANY transactions
             filename = $"Payee.png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // And: One receipt in storage, which will NOT MATCH ANY transactions
             filename = $"Totally not matching.png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
         }
 
         [TestMethod]
@@ -302,7 +328,7 @@ namespace YoFi.Tests.Core
             // Given: One receipt in storage
             var filename = "Uptown Espresso $5.11 1-2.png";
             var contenttype = "image/png";
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            GivenReceiptInStorage(filename, contenttype);
 
             // And: Getting All
             var items = await repository.GetAllAsync();
@@ -347,6 +373,102 @@ namespace YoFi.Tests.Core
             // And: The first one is the best one
             var best = matches.First();
             Assert.AreEqual(t.Payee, best.Name);
+        }
+    }
+
+    internal class ReceiptDataContext : IDataContext
+    {
+        int nextid = 1;
+
+        public List<Receipt> Receipts { get; } = new List<Receipt>();
+
+        public IQueryable<Transaction> Transactions => throw new NotImplementedException();
+
+        public IQueryable<Transaction> TransactionsWithSplits => throw new NotImplementedException();
+
+        public IQueryable<Split> Splits => throw new NotImplementedException();
+
+        public IQueryable<Split> SplitsWithTransactions => throw new NotImplementedException();
+
+        public IQueryable<Payee> Payees => throw new NotImplementedException();
+
+        public IQueryable<BudgetTx> BudgetTxs => throw new NotImplementedException();
+
+        public void Add(object item)
+        {
+            var receipt = item as Receipt; 
+            receipt.ID = nextid++;
+            Receipts.Add(receipt);
+        }
+
+        public void AddRange(IEnumerable<object> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> AnyAsync<T>(IQueryable<T> query) where T : class
+        {
+            return Task.FromResult(query.Any());
+        }
+
+        public Task BulkDeleteAsync<T>(IQueryable<T> items) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task BulkInsertAsync<T>(IList<T> items) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> ClearAsync<T>() where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> CountAsync<T>(IQueryable<T> query) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<T> Get<T>() where T : class
+        {
+            return Receipts.AsQueryable() as IQueryable<T>;
+        }
+
+        public void Remove(object item)
+        {
+            Receipts.Remove(item as Receipt);
+        }
+
+        public void RemoveRange(IEnumerable<object> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SaveChangesAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class
+        {
+            return Task.FromResult(query.ToList());
+        }
+
+        public void Update(object item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateRange(IEnumerable<object> items)
+        {
+            throw new NotImplementedException();
         }
     }
 }
