@@ -11,6 +11,6 @@ namespace YoFi.Core.Repositories
         Task<IEnumerable<Receipt>> GetAllAsync();
         Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx);
         Task DeleteAsync(Receipt receipt);
-        Task AssignReceipt(Receipt receipt, Transaction tx = null);
+        Task AssignReceipt(Receipt receipt, Transaction tx);
     }
 }

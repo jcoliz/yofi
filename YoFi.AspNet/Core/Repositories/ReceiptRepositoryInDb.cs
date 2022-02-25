@@ -7,7 +7,7 @@ namespace YoFi.Core.Repositories
 {
     public class ReceiptRepositoryInDb : IReceiptRepository
     {
-        public Task AssignReceipt(Receipt receipt, Transaction tx = null)
+        public Task AssignReceipt(Receipt receipt, Transaction tx)
         {
             throw new System.NotImplementedException();
         }
