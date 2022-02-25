@@ -16,7 +16,7 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class ReceiptRepositoryTest
     {
-        ReceiptRepository repository;
+        IReceiptRepository repository;
         MockTransactionRepository txrepo;
         TestAzureStorage storage;
         TestClock clock;
