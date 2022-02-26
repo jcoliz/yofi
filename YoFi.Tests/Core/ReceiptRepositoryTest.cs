@@ -63,7 +63,33 @@ namespace YoFi.Tests.Core
                 txrepo.AddRangeAsync(txs).Wait();
             }
         }
+        private void GivenReceiptInStorage(string filename, string contenttype)
+        {
 
+#if RECEIPTSINDB
+            var item = Receipt.FromFilename(filename, clock: clock);
+            context.Add(item);
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"{ReceiptRepositoryInDb.Prefix}{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
+#else
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = ReceiptRepository.Prefix + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+#endif
+        }
+
+        private void GivenMultipleReceipts(Transaction t)
+        {
+            // And: One receipt in storage, which will match the transaction we care about
+            var filename = $"{t.Payee} ${t.Amount}.png";
+            var contenttype = "image/png";
+            GivenReceiptInStorage(filename, contenttype);
+
+            // And: One receipt in storage, which will match MANY transactions
+            filename = $"Payee.png";
+            GivenReceiptInStorage(filename, contenttype);
+
+            // And: One receipt in storage, which will NOT MATCH ANY transactions
+            filename = $"Totally not matching.png";
+            GivenReceiptInStorage(filename, contenttype);
+        }
 
         #endregion
 
@@ -111,18 +137,6 @@ namespace YoFi.Tests.Core
 
             // Then: Nothing returned
             Assert.IsFalse(items.Any());
-        }
-
-        private void GivenReceiptInStorage(string filename, string contenttype)
-        {
-
-#if RECEIPTSINDB
-            var item = Receipt.FromFilename(filename,clock: clock);
-            context.Add(item);
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"{ReceiptRepositoryInDb.Prefix}{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
-#else
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = ReceiptRepository.Prefix + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
-#endif
         }
 
         [TestMethod]
@@ -324,21 +338,7 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(1, items.Count());
         }
 
-        private void GivenMultipleReceipts(Transaction t)
-        {
-            // And: One receipt in storage, which will match the transaction we care about
-            var filename = $"{t.Payee} ${t.Amount}.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
 
-            // And: One receipt in storage, which will match MANY transactions
-            filename = $"Payee.png";
-            GivenReceiptInStorage(filename, contenttype);
-
-            // And: One receipt in storage, which will NOT MATCH ANY transactions
-            filename = $"Totally not matching.png";
-            GivenReceiptInStorage(filename, contenttype);
-        }
 
         [TestMethod]
         public async Task AssignAllVariousMatch()
