@@ -31,7 +31,7 @@ namespace YoFi.Core.Models
         [DataType(DataType.Date)]
         [Column(TypeName = "date")]
         [Editable(true)]
-        public DateTime? Timestamp { get; set; }
+        public DateTime Timestamp { get; set; }
 
         /// <summary>
         /// Name of the underlying file
@@ -97,12 +97,9 @@ namespace YoFi.Core.Models
                     result += 100;
             }
 
-            if (Timestamp.HasValue)
-            {
-                var margin = TimeSpan.FromDays(14);
-                if (transaction.Timestamp > Timestamp.Value - margin && transaction.Timestamp < Timestamp.Value + margin && result > 0)
-                    result += 100 - (int)Math.Abs((transaction.Timestamp - Timestamp.Value).TotalDays);
-            }
+            var margin = TimeSpan.FromDays(14);
+            if (transaction.Timestamp > Timestamp - margin && transaction.Timestamp < Timestamp + margin && result > 0)
+                result += 100 - (int)Math.Abs((transaction.Timestamp - Timestamp).TotalDays);
 
             return result;
         }
@@ -115,19 +112,20 @@ namespace YoFi.Core.Models
         /// <returns></returns>
         public static IQueryable<Transaction> TransactionsForReceipts(IQueryable<Transaction> initial, IEnumerable<Receipt> receipts)
         {
+            if (!receipts.Any())
+                return Enumerable.Empty<Transaction>().AsQueryable();
+
             var result = initial;
 
-            // Can narrow date range if all have dates
-            if (receipts.Any() && receipts.All(x=>x.Timestamp.HasValue))
-            {
-                var margin = TimeSpan.FromDays(14);
+            // Narrow on date
+            var margin = TimeSpan.FromDays(14);
 
-                var from = receipts.Min(x => x.Timestamp.Value);
-                var to = receipts.Max(x => x.Timestamp.Value);
+            var from = receipts.Min(x => x.Timestamp);
+            var to = receipts.Max(x => x.Timestamp);
 
-                result = result.Where(x=>x.Timestamp >= from-margin && x.Timestamp <= to+margin);
-            }
+            result = result.Where(x=>x.Timestamp >= from-margin && x.Timestamp <= to+margin);
 
+            // TODO: This is incorrect, because per the spec it's still OK to match on the other items
             // Can narrow amount if all have amounts
             if (receipts.All(x=>x.Amount.HasValue))
             {
@@ -231,6 +229,12 @@ namespace YoFi.Core.Models
             // Assign memo based on the second unmatched items
             if (unmatchedterms.Any() && result.Memo is null)
                 result.Memo = unmatchedterms.Dequeue();
+
+            // All receipts must have a date
+            if (result.Timestamp == default)
+            {
+                result.Timestamp = clock.Now.Date;
+            }
 
             return result;
         }

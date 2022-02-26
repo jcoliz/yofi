@@ -119,8 +119,8 @@ namespace YoFi.Tests.Core
 
             // Then: The timestamp is set with correct month & date values
             var expected = DateTime.Parse(date).Date;
-            Assert.AreEqual(expected.Month, receipt.Timestamp.Value.Month);
-            Assert.AreEqual(expected.Day, receipt.Timestamp.Value.Day);
+            Assert.AreEqual(expected.Month, receipt.Timestamp.Month);
+            Assert.AreEqual(expected.Day, receipt.Timestamp.Day);
         }
 
         [DataRow("1-1","1-1-2010")]
@@ -140,7 +140,7 @@ namespace YoFi.Tests.Core
 
             // Then: The timestamp is set with correct month & date values
             var expected = DateTime.Parse(expectedstr);
-            Assert.AreEqual(expected.Date, receipt.Timestamp.Value.Date);
+            Assert.AreEqual(expected.Date, receipt.Timestamp.Date);
         }
 
         [TestMethod]
@@ -260,8 +260,8 @@ namespace YoFi.Tests.Core
             // Then: Components set as expected
             if (date.HasValue)
             {
-                Assert.AreEqual(date.Value.Month, receipt.Timestamp.Value.Month);
-                Assert.AreEqual(date.Value.Day, receipt.Timestamp.Value.Day);
+                Assert.AreEqual(date.Value.Month, receipt.Timestamp.Month);
+                Assert.AreEqual(date.Value.Day, receipt.Timestamp.Day);
             }
             if (amount.HasValue)
                 Assert.AreEqual(amount, receipt.Amount);
@@ -276,51 +276,51 @@ namespace YoFi.Tests.Core
         #region Match Transaction
 
         [TestMethod]
-        public void MatchTxNameOnly()
+        public void MatchTxNameAndDate()
         {
             // Given: A transaction
             var item = FakeObjects<Transaction>.Make(1).Single();
 
             // And: A receipt which substring matches the name
-            var receipt = new Receipt() { Name = item.Payee[0..7] };
-
-            // When: Testing for a match
-            var match = receipt.MatchesTransaction(item);
-
-            // Then: This is a 100-point match
-            Assert.AreEqual(100, match);
-        }
-
-        [TestMethod]
-        public void MatchTxAmountOnly()
-        {
-            // Given: A transaction
-            var item = FakeObjects<Transaction>.Make(1).Single();
-
-            // And: A receipt which exactly matches the amount
-            var receipt = new Receipt() { Amount = item.Amount };
-
-            // When: Testing for a match
-            var match = receipt.MatchesTransaction(item);
-
-            // Then: This is a 100-point match
-            Assert.AreEqual(100, match);
-        }
-
-        [TestMethod]
-        public void MatchTxAmountAndName()
-        {
-            // Given: A transaction
-            var item = FakeObjects<Transaction>.Make(1).Single();
-
-            // And: A receipt which substring matches the name and matches the amount
-            var receipt = new Receipt() { Name = item.Payee[0..7], Amount = item.Amount };
+            var receipt = new Receipt() { Name = item.Payee[0..7], Timestamp = item.Timestamp };
 
             // When: Testing for a match
             var match = receipt.MatchesTransaction(item);
 
             // Then: This is a 200-point match
             Assert.AreEqual(200, match);
+        }
+
+        [TestMethod]
+        public void MatchTxAmountAndDate()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which exactly matches the amount
+            var receipt = new Receipt() { Amount = item.Amount, Timestamp = item.Timestamp };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 200-point match
+            Assert.AreEqual(200, match);
+        }
+
+        [TestMethod]
+        public void MatchTxAmountAndNameAndDate()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1).Single();
+
+            // And: A receipt which substring matches the name and matches the amount
+            var receipt = new Receipt() { Name = item.Payee[0..7], Amount = item.Amount, Timestamp = item.Timestamp };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 300-point match
+            Assert.AreEqual(300, match);
         }
 
         [TestMethod]
@@ -432,8 +432,8 @@ namespace YoFi.Tests.Core
             // And: A small number of receipts which each will match one of those transactions
             var receipts = new List<Receipt>()
             {
-                new Receipt() { Name = items[50].Payee, Amount = items[50].Amount },
-                new Receipt() { Name = items[60].Payee, Amount = items[60].Amount },
+                new Receipt() { Name = items[50].Payee, Amount = items[50].Amount, Timestamp = items[50].Timestamp },
+                new Receipt() { Name = items[60].Payee, Amount = items[60].Amount, Timestamp = items[60].Timestamp },
             };
 
             // When: Narrowing the transactions
