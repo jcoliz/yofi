@@ -81,6 +81,22 @@ namespace YoFi.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKey(document, items);
         }
 
+        [TestMethod]
+        public async Task Details()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var expected = FakeObjects<Receipt>.Make(5).SaveTo(this).Last();
+            var id = expected.ID;
+
+            // When: Getting details for the chosen item
+            var document = await WhenGetAsync($"{urlroot}/Details/{id}");
+
+            // Then: That item is shown
+            var testkey = FindTestKey<Receipt>().Name.ToLowerInvariant();
+            var actual = document.QuerySelector($"dd[data-test-id={testkey}]").TextContent.Trim();
+            Assert.AreEqual(TestKeyOrder<Receipt>()(expected), actual);
+        }
+
         #endregion
     }
 }

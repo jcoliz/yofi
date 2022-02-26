@@ -1,0 +1,94 @@
+﻿@model YoFi.Core.Models.Receipt
+
+<div>
+    <h4>Receipt</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Amount)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Amount)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Memo)
+        </dt>
+        <dd class = "col-sm-10" data-test-id="memo">
+            @Html.DisplayFor(model => model.Memo)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Timestamp)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Timestamp)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Filename)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Filename)
+        </dd>
+    </dl>
+    <hr/>
+    @if(Model.Matches.Any())
+    {        
+        <table class="table" data-test-id="results">
+        <thead>
+            <tr>
+                <th class="col-1">
+                    Date
+                </th>
+                <th class="col-5">
+                    @nameof(Transaction.Payee)
+                </th>
+                <th class="col-1" style="text-align:right">
+                    @nameof(Transaction.Amount)
+                </th>
+                <th class="col-3">
+                    @Html.DisplayNameFor(model => model.Matches.FirstOrDefault().Memo)
+                </th>
+                <th class="col-2">
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Matches)
+                {
+                    int line = 1;
+                    <tr data-test-id="line-@(line++)">
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Timestamp)
+                    </td>
+                    <td class="display-payee">
+                        @Html.DisplayFor(modelItem => item.Payee)
+                    </td>
+                    <td style="text-align:right">
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                    <td class="display-memo" data-test-id="memo">
+                        @Html.DisplayFor(modelItem => item.Memo)
+                    </td>
+                    <td>
+
+                    </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No matching transactions.</p>
+    }
+
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
