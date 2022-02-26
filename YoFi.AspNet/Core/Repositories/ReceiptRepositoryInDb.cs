@@ -118,6 +118,10 @@ namespace YoFi.Core.Repositories
             return receipts;
         }
 
+        /// <summary>
+        /// Find all the receipts which match this <paramref name="transaction"/>
+        /// </summary>
+        /// <returns>Matching receipts ordered by better match first</returns>
         public async Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx)
         {
             var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>());
@@ -131,6 +135,12 @@ namespace YoFi.Core.Repositories
             return result;
         }
 
+        /// <summary>
+        /// Add a receipt to the system from <paramref name="stream"/>
+        /// </summary>
+        /// <param name="stream">Source of content</param>
+        /// <param name="filename">Name of content</param>
+        /// <param name="contenttype">Type of content</param>
         public async Task UploadReceiptAsync(string filename, Stream stream, string contenttype)
         {
             var item = Receipt.FromFilename(filename, _clock);

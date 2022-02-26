@@ -148,13 +148,11 @@ namespace YoFi.Core.Repositories
         }
 
         /// <summary>
-        /// Add a receipt to the system
+        /// Add a receipt to the system from <paramref name="stream"/>
         /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="filename"></param>
-        /// <param name="contenttype"></param>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <param name="stream">Source of content</param>
+        /// <param name="filename">Name of content</param>
+        /// <param name="contenttype">Type of content</param>
         public async Task UploadReceiptAsync(string filename, Stream stream, string contenttype)
         {
             await _storage.UploadBlobAsync(Prefix + filename, stream, contenttype);
