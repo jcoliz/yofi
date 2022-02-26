@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
@@ -13,6 +15,8 @@ namespace YoFi.Tests.Integration.Controllers
     public class ReceiptControllerTest: IntegrationTest
     {
         protected string urlroot => "/Receipts";
+
+        private IDataContext iDC => integrationcontext.context as IDataContext;
 
         #region Init/Cleanup
 
@@ -110,6 +114,31 @@ namespace YoFi.Tests.Integration.Controllers
 
             // Then: The transactions are shown
             ThenResultsAreEqualByTestKey(document, txs);
+        }
+
+        [TestMethod]
+        public async Task Delete()
+        {
+            // Given: There are two items in the database, one of which we care about
+            var id = FakeObjects<Receipt>.Make(2).SaveTo(this).Last().ID;
+
+            // When: Deleting the selected item
+            var formData = new Dictionary<string, string>()
+            {
+                { "ID", id.ToString() }
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/",d=>$"{urlroot}/Delete/{id}", formData);
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+
+            // Then: Redirected to index
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: Now is only one item in database
+            Assert.AreEqual(1, iDC.Get<Receipt>().Count());
+
+            // And: The deleted item cannot be found;
+            Assert.IsFalse(iDC.Get<Receipt>().Any(x => x.ID == id));
         }
 
         #endregion

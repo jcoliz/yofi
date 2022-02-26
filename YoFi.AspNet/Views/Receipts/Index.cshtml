@@ -4,6 +4,17 @@
     ViewData["Title"] = "Index";
 }
 
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+<input type="hidden" id="xsrf"
+       name="__RequestVerificationToken" value="@GetAntiXsrfRequestToken()">
+
 <h1>Index</h1>
 
 <p>
