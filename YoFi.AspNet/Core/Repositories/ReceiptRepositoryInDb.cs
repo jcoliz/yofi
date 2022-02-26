@@ -101,15 +101,19 @@ namespace YoFi.Core.Repositories
             // Match transactions for each
 
             // Narrow down the universe of possible transactions
-            var txs = await _context.ToListNoTrackingAsync( Receipt.TransactionsForReceipts(_txrepo.All, receipts) );
+            if (receipts.Any())
+            {
+                var query = Receipt.TransactionsForReceipts(_txrepo.All, receipts);
+                var txs = await _context.ToListNoTrackingAsync(query);
 
-            foreach (var receipt in receipts)
-                receipt.Matches = txs
-                                    .Select(t => (quality:receipt.MatchesTransaction(t), t))
-                                    .Where(x => x.quality > 0)
-                                    .OrderByDescending(x => x.quality)
-                                    .Select(x => x.t)
-                                    .ToList();
+                foreach (var receipt in receipts)
+                    receipt.Matches = txs
+                                        .Select(t => (quality: receipt.MatchesTransaction(t), t))
+                                        .Where(x => x.quality > 0)
+                                        .OrderByDescending(x => x.quality)
+                                        .Select(x => x.t)
+                                        .ToList();
+            }
 
             return receipts;
         }

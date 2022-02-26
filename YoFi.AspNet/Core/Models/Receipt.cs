@@ -1,6 +1,7 @@
 ﻿using Common.DotNet;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
@@ -24,6 +25,7 @@ namespace YoFi.Core.Models
         public decimal? Amount { get; set; }
 
         [Editable(true)]
+        [Category("TestKey")]
         public string Memo { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
@@ -113,7 +115,7 @@ namespace YoFi.Core.Models
         public static IQueryable<Transaction> TransactionsForReceipts(IQueryable<Transaction> initial, IEnumerable<Receipt> receipts)
         {
             if (!receipts.Any())
-                return Enumerable.Empty<Transaction>().AsQueryable();
+                throw new ArgumentException("No receipts supplied", nameof(receipts));
 
             // Narrow on date
             var margin = TimeSpan.FromDays(14);

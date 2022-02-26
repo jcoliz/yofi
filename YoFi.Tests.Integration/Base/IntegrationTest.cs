@@ -49,6 +49,9 @@ namespace YoFi.Tests.Integration
                 context.AddRange(s);
             if (objects is IEnumerable<BudgetTx> b)
                 context.AddRange(b);
+            if (objects is IEnumerable<Receipt> r)
+                foreach(var o in r)
+                    context.Add(o);
 
             context.SaveChanges();
         }

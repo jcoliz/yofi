@@ -76,6 +76,7 @@ namespace YoFi.AspNet.Main
             services.AddScoped<IRepository<Transaction>, TransactionRepository>();
             services.AddScoped<IRepository<Split>, BaseRepository<Split>>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IReceiptRepository, ReceiptRepositoryInDb>();
             services.AddScoped<AllRepositories>();
             services.AddScoped<UniversalImporter>();
             services.AddScoped<TransactionImporter>();

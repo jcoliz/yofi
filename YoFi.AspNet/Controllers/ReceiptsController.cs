@@ -21,8 +21,16 @@ namespace YoFi.AspNet.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var qresult = await _repository.GetAllAsync();
-            return View(qresult);
+            try
+            {
+                var qresult = await _repository.GetAllAsync();
+                return View(qresult);
+
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         [ValidateReceiptExists]
