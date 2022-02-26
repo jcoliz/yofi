@@ -1,4 +1,5 @@
 ﻿using Common.DotNet;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -65,12 +66,16 @@ namespace YoFi.Core.Repositories
 
         public async Task AssignReceipt(Receipt receipt, Transaction tx)
         {
+            // Ensure that the transaction and receipt at least somewhat match
+            var match = receipt.MatchesTransaction(tx);
+            if (match <= 0)
+                throw new ArgumentException("Receipt and transaction do not match");
+
             // Add to the transaction
             tx.ReceiptUrl = $"{Prefix}{receipt.ID}";
             await _txrepo.UpdateAsync(tx);
 
             // Remove it from our purview
-            await _storage.RemoveBlobAsync(Prefix + receipt.Filename);
             _context.Remove(receipt);
             await _context.SaveChangesAsync();
         }

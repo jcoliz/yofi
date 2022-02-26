@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,10 +14,12 @@ namespace YoFi.AspNet.Controllers
     public class ReceiptsController: Controller
     {
         private readonly IReceiptRepository _repository;
+        private readonly ITransactionRepository _txrepository;
 
-        public ReceiptsController(IReceiptRepository repository)
+        public ReceiptsController(IReceiptRepository repository, ITransactionRepository txrepository)
         {
             _repository = repository;
+            _txrepository = txrepository;
         }
 
         public async Task<IActionResult> Index()
@@ -54,14 +57,25 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateReceiptExists]
-        public async Task<IActionResult> Accept(int id)
+        //TODO: [ValidateTransactionExists("txid")]
+        public async Task<IActionResult> Accept(int id, int txid)
         {
             var receipt = await _repository.GetByIdAsync(id);
+            var tx = await _txrepository.GetByIdAsync(txid);
 
-            if (!receipt.Matches.Any())
+            try
+            {
+                await _repository.AssignReceipt(receipt, tx);
+            }
+            catch (ArgumentException)
+            {
                 return BadRequest();
+            }
+            catch
+            {
+                throw;
+            }
 
-            await _repository.AssignReceipt(receipt,receipt.Matches.First());
 
             return RedirectToAction(nameof(Index));
         }

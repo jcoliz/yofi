@@ -224,19 +224,18 @@ namespace YoFi.Tests.Core
         [TestMethod]
         public async Task AssignReceipt()
         {
-            // Given: One receipt in storage
-            var filename = "Uptown Espresso $5.11 1-2.png";
+            // Given: A transaction
+            var t = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: One receipt in storage which matches
+            var filename = $"{t.Payee} ${t.Amount} {t.Timestamp.Month}-{t.Timestamp.Day}.png";
             GivenReceiptInStorage(filename);
 
             // And: Getting it
             var items = await repository.GetAllAsync();
             var r = items.Single();
 
-            // And: A transaction (doesn't matter if it's matching
-            var t = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
-
-            // When: Assigning the receipt to the transaction
-            
+            // When: Assigning the receipt to the transaction           
             await repository.AssignReceipt(r, t);
 
             // Then: The transaction displays as having a receipt

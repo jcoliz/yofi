@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Common.DotNet;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,7 +47,25 @@ namespace YoFi.Tests.Integration.Controllers
             var rs = iDC.Get<Receipt>().ToList();
             foreach (var r in rs)
                 iDC.Remove(r);
+            context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
             context.SaveChanges();
+
+            // Clean out storage
+            integrationcontext.storage.BlobItems.Clear();
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private Receipt GivenReceiptInStorage(string filename, string contenttype)
+        {
+
+            var item = Receipt.FromFilename(filename, clock: new SystemClock());
+            iDC.Add(item);
+            integrationcontext.storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"{ReceiptRepositoryInDb.Prefix}{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            return item;
         }
 
         #endregion
@@ -165,6 +185,7 @@ namespace YoFi.Tests.Integration.Controllers
             var response = await WhenUploading(content, $"{urlroot}/", $"{urlroot}/Upload");
 
             // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
             var redirect = response.Headers.GetValues("Location").Single();
             Assert.AreEqual($"{urlroot}", redirect);
 
@@ -180,6 +201,44 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual(1, integrationcontext.storage.BlobItems.Count);
             Assert.AreEqual(ReceiptRepositoryInDb.Prefix + actual.ID.ToString(), integrationcontext.storage.BlobItems.Single().FileName);
         }
+
+        [TestMethod]
+        public async Task AcceptOne()
+        {
+            // Given: Several transactions, one of which we care about
+            // Note: We have to override the timestamp on these to match the clock
+            // that the system under test is using, else the transaction wont match the receipt
+            // because the years will be off.
+            var i = 0;
+            var t = FakeObjects<Transaction>.Make(10,x=>x.Timestamp = DateTime.Now - TimeSpan.FromDays(i++)).SaveTo(this).Last();
+
+            // And: One receipt in storage, which will match the transaction we care about
+            var filename = $"{t.Payee} ${t.Amount} {t.Timestamp.Month}-{t.Timestamp.Day}.png";
+            var contenttype = "image/png";
+            var r = GivenReceiptInStorage(filename,contenttype);
+
+            // When: Assigning the receipt to its best match
+            var formData = new Dictionary<string, string>()
+            {
+                { "ID", r.ID.ToString() },
+                { "txid", t.ID.ToString() }
+            };
+            var response = await WhenGettingAndPostingForm($"{urlroot}/", d => $"{urlroot}/Accept", formData);
+
+            // Then: Redirected to index
+            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // Then: The selected transaction has a receipt now, with the expected name
+            var expected = $"{ReceiptRepositoryInDb.Prefix}{r.ID}";
+            var actual = await context.Set<Transaction>().Where(x => x.ID == t.ID).AsNoTracking().SingleAsync();
+            Assert.AreEqual(expected, actual.ReceiptUrl);
+
+            // And: There are no more (unassigned) receipts now
+            Assert.IsFalse(iDC.Get<Receipt>().Any());
+        }
+
         #endregion
     }
 }
