@@ -21,6 +21,7 @@ namespace YoFi.Core.Models
         [Editable(true)]
         public string Name { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
         [Editable(true)]
         public decimal? Amount { get; set; }
 
@@ -38,11 +39,13 @@ namespace YoFi.Core.Models
         /// <summary>
         /// Name of the underlying file
         /// </summary>
+        [Required]
         public string Filename { get; set; }
 
         /// <summary>
         /// Set of potential matches
         /// </summary>
+        [NotMapped]
         public ICollection<Transaction> Matches { get; set; }
 
         public override bool Equals(object obj)
