@@ -26,6 +26,7 @@ namespace YoFi.Tests.Core
         ITransactionRepository txrepo;
         TestAzureStorage storage;
         TestClock clock;
+        const string contenttype = "image/png";
 #if RECEIPTSINDB
         IDataContext context;
 #endif
@@ -63,7 +64,7 @@ namespace YoFi.Tests.Core
                 txrepo.AddRangeAsync(txs).Wait();
             }
         }
-        private void GivenReceiptInStorage(string filename, string contenttype)
+        private void GivenReceiptInStorage(string filename)
         {
 
 #if RECEIPTSINDB
@@ -79,16 +80,15 @@ namespace YoFi.Tests.Core
         {
             // And: One receipt in storage, which will match the transaction we care about
             var filename = $"{t.Payee} ${t.Amount}.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // And: One receipt in storage, which will match MANY transactions
             filename = $"Payee.png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // And: One receipt in storage, which will NOT MATCH ANY transactions
             filename = $"Totally not matching.png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
         }
 
         #endregion
@@ -105,7 +105,6 @@ namespace YoFi.Tests.Core
         public async Task Upload()
         {
             // Given: A receipt file
-            var contenttype = "image/png";
             var length = 25;
             var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
 
@@ -144,8 +143,7 @@ namespace YoFi.Tests.Core
         {
             // Given: One receipt in storage
             var filename = "Uptown Espresso $5.11 1-2.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);  
+            GivenReceiptInStorage(filename);  
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -163,11 +161,10 @@ namespace YoFi.Tests.Core
         public async Task GetMany()
         {
             // Given: Many receipts in storage
-            var contenttype = "image/png";
             for(int i=1; i<10; i++ )
             {
                 var filename = $"Uptown Espresso $5.11 1-{i}.png";
-                GivenReceiptInStorage(filename, contenttype);
+                GivenReceiptInStorage(filename);
             }
 
             // When: Getting All
@@ -193,8 +190,7 @@ namespace YoFi.Tests.Core
 
             // And: One receipt in storage which will match that
             var filename = $"{tx.Payee} {tx.Timestamp.ToString("MM-dd")}.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -215,8 +211,7 @@ namespace YoFi.Tests.Core
 
             // And: One receipt in storage which will match ALL of those
             var filename = $"Payee {txs[5].Timestamp.ToString("MM-dd")}.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // When: Getting All
             var items = await repository.GetAllAsync();
@@ -231,8 +226,7 @@ namespace YoFi.Tests.Core
         {
             // Given: One receipt in storage
             var filename = "Uptown Espresso $5.11 1-2.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // And: Getting it
             var items = await repository.GetAllAsync();
@@ -269,8 +263,7 @@ namespace YoFi.Tests.Core
 
             // And: One receipt in storage, which will match the transaction we care about
             var filename = $"{t.Payee} ${t.Amount}.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // When: Assigning the receipt to its best match
             var matched = await repository.AssignAll();
@@ -302,8 +295,7 @@ namespace YoFi.Tests.Core
 
             // And: One receipt in storage, which will NOT MATCH ANY transactions
             var filename = $"Totally not matching.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // When: Assigning the receipt to its best match
             var matched = await repository.AssignAll();
@@ -324,8 +316,7 @@ namespace YoFi.Tests.Core
 
             // And: One receipt in storage, which will match MANY transactions
             var filename = $"Payee.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // When: Assigning the receipt to its best match
             var matched = await repository.AssignAll();
@@ -337,8 +328,6 @@ namespace YoFi.Tests.Core
             var items = await repository.GetAllAsync();
             Assert.AreEqual(1, items.Count());
         }
-
-
 
         [TestMethod]
         public async Task AssignAllVariousMatch()
@@ -365,8 +354,7 @@ namespace YoFi.Tests.Core
         {
             // Given: One receipt in storage
             var filename = "Uptown Espresso $5.11 1-2.png";
-            var contenttype = "image/png";
-            GivenReceiptInStorage(filename, contenttype);
+            GivenReceiptInStorage(filename);
 
             // And: Getting All
             var items = await repository.GetAllAsync();
