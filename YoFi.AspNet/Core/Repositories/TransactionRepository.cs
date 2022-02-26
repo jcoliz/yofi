@@ -292,6 +292,13 @@ namespace YoFi.Core.Repositories
             if (Int32.TryParse(transaction.ReceiptUrl, out _))
                 name = transaction.ReceiptUrl;
 
+            // User Story 1190: [User Can] Upload receipts independently of transactions
+            // If the receipt was uploaded independently of the transaction, it will have an
+            // "r/" prefix. If so, we should just use THAT as the name.
+
+            if (transaction.ReceiptUrl.StartsWith("r/"))
+                name = transaction.ReceiptUrl;
+
             var stream = new MemoryStream();
             var contenttype = await _storage.DownloadBlobAsync(name, stream);
 

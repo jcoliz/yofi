@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.Core;
 using YoFi.Core.Models;
@@ -17,16 +18,18 @@ using YoFi.Tests.Helpers;
 namespace YoFi.Tests.Core
 {
     [TestClass]
-    public class ReceiptRepositoryTest
+    public class ReceiptRepositoryTest: IFakeObjectsSaveTarget
     {
+        #region Fields
 
         IReceiptRepository repository;
-        MockTransactionRepository txrepo;
+        ITransactionRepository txrepo;
         TestAzureStorage storage;
         TestClock clock;
 #if RECEIPTSINDB
         IDataContext context;
 #endif
+        #endregion
 
         [TestInitialize]
         public void SetUp()
@@ -44,6 +47,20 @@ namespace YoFi.Tests.Core
             repository = new ReceiptRepository(txrepo,storage,clock);
 #endif
         }
+
+        #region Helpers
+
+        public void AddRange(System.Collections.IEnumerable objects)
+        {
+            if (objects is IEnumerable<Transaction> txs)
+            {
+                txrepo.AddRangeAsync(txs).Wait();
+            }
+        }
+
+
+        #endregion
+
 
         [TestMethod]
         public void Empty()
@@ -151,7 +168,7 @@ namespace YoFi.Tests.Core
             // even if the amounts are wrong.
 
             // Given: One transaction
-            var tx = FakeObjects<Transaction>.Make(1).SaveTo(txrepo).Single();
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
 
             // And: One receipt in storage which will match that
             var filename = $"{tx.Payee} {tx.Timestamp.ToString("MM-dd")}.png";
@@ -173,7 +190,7 @@ namespace YoFi.Tests.Core
             // regarding dates. It needs to employ the same +/- rangefinfer that "transactionmatches" uses
 
             // Given: Many transactions
-            var txs = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Group(0);
+            var txs = FakeObjects<Transaction>.Make(10).SaveTo(this).Group(0);
 
             // And: One receipt in storage which will match ALL of those
             var filename = $"Payee {txs[5].Timestamp.ToString("MM-dd")}.png";
@@ -201,7 +218,7 @@ namespace YoFi.Tests.Core
             var r = items.Single();
 
             // And: A transaction (doesn't matter if it's matching
-            var t = FakeObjects<Transaction>.Make(1).SaveTo(txrepo).Single();
+            var t = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
 
             // When: Assigning the receipt to the transaction
             
@@ -227,7 +244,7 @@ namespace YoFi.Tests.Core
         public async Task AssignReceiptAllMatch()
         {
             // Given: Several transactions, one of which we care about
-            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(this).Last();
 
             // And: One receipt in storage, which will match the transaction we care about
             var filename = $"{t.Payee} ${t.Amount}.png";
@@ -260,7 +277,7 @@ namespace YoFi.Tests.Core
         public async Task AssignAllNoMatch()
         {
             // Given: Several transactions
-            _ = FakeObjects<Transaction>.Make(10).SaveTo(txrepo);
+            _ = FakeObjects<Transaction>.Make(10).SaveTo(this);
 
             // And: One receipt in storage, which will NOT MATCH ANY transactions
             var filename = $"Totally not matching.png";
@@ -282,7 +299,7 @@ namespace YoFi.Tests.Core
         public async Task AssignAllManyMatch()
         {
             // Given: Several transactions
-            _ = FakeObjects<Transaction>.Make(10).SaveTo(txrepo);
+            _ = FakeObjects<Transaction>.Make(10).SaveTo(this);
 
             // And: One receipt in storage, which will match MANY transactions
             var filename = $"Payee.png";
@@ -320,7 +337,7 @@ namespace YoFi.Tests.Core
         public async Task AssignAllVariousMatch()
         {
             // Given: Several transactions, one of which we care about
-            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(this).Last();
 
             // And: Multiple receipts, one matches this transaction, one matches all, one matches none
             GivenMultipleReceipts(t);
@@ -373,7 +390,7 @@ namespace YoFi.Tests.Core
         public async Task GetMatchingOne()
         {
             // Given: Several transactions, one of which we care about
-            var t = FakeObjects<Transaction>.Make(10).SaveTo(txrepo).Last();
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(this).Last();
 
             // And: Multiple receipts, one matches this transaction, one matches all, one matches none
             GivenMultipleReceipts(t);
@@ -388,6 +405,48 @@ namespace YoFi.Tests.Core
             var best = matches.First();
             Assert.AreEqual(t.Payee, best.Name);
         }
+
+        [TestMethod]
+        public async Task EndToEnd()
+        {
+            // Given: A real tx repository, and a receipt repository build off that
+            var mockdc = new MockDataContext();
+            txrepo = new TransactionRepository(mockdc,clock,storage);
+#if RECEIPTSINDB
+            repository = new ReceiptRepositoryInDb(context, txrepo, storage, clock);
+#else
+            repository = new ReceiptRepository(txrepo, storage,clock);
+#endif
+
+            // Given: Several transactions, one of which we care about
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(this).Last();
+
+            // And: Multiple receipts, one matches this transaction, one matches all, one matches none
+            GivenMultipleReceipts(t);
+
+            // And: Assigning the receipts to their top match
+            var matched = await repository.AssignAll();
+
+            // When: Downloading transaction for receipt
+            (var stream, var contenttype, var name) = await txrepo.GetReceiptAsync(t);
+
+            // Then: File details are as expected
+            Assert.AreEqual("image/png", contenttype);
+            Assert.AreEqual(4561, stream.Length);
+
+#if RECEIPTSINDB
+
+            // And: The receipt name identifies a receipt which is no longer in the system
+            // (because we deleted it)
+            var namematch = new Regex("^r/(?<id>[0-9]+)$");
+            var match = namematch.Match(name);
+            Assert.IsTrue(match.Success);
+
+            var id = int.Parse(match.Groups["id"].Value);
+            Assert.IsFalse((await repository.GetAllAsync()).Where(x=>x.ID == id).Any());
+#endif
+        }
+
     }
 
     internal class ReceiptDataContext : IDataContext

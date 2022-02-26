@@ -41,14 +41,23 @@ namespace Common.DotNet.Test
             throw new NotImplementedException();
         }
 
-        public Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream _, string ContentType)
+        public Task<Uri> UploadToBlob(string ContainerName, string FileName, Stream stream, string ContentType)
         {
             // Note that in real-life this is always an async method. Here in test code, we aren't
             // doing anything async. But the signature remains for the interface.
 
             // For this test, we are just going to full ignore it.
 
-            BlobItems.Add(new BlobItem() { ContainerName = ContainerName, FileName = FileName, ContentType = ContentType });
+            // Save off the stream, in case we want to retrieve it later
+            var path = "TestAzureStorage/" + FileName;
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            File.Delete(path);
+            using (var writestream = File.OpenWrite(path))
+            {
+                stream.CopyTo(writestream);
+            }
+
+            BlobItems.Add(new BlobItem() { ContainerName = ContainerName, FileName = FileName, ContentType = ContentType, UploadedFile = path });
 
             return Task.FromResult<Uri>(new Uri("http://www.nytimes.com/"));
         }
@@ -61,11 +70,20 @@ namespace Common.DotNet.Test
                 throw new ApplicationException("Blob not found");
 
             if (string.IsNullOrEmpty(blobitem.InternalFile))
-                throw new ApplicationException("No internal file for this blob");
+            {
+                if (string.IsNullOrEmpty(blobitem.UploadedFile))
+                {
+                    throw new ApplicationException("No uploaded or internal file for this blob");
+                }
 
-            var filestream = SampleData.Open(blobitem.InternalFile);
-
-            filestream.CopyTo(stream);
+                var filestream = File.OpenRead(blobitem.UploadedFile);
+                filestream.CopyTo(stream);
+            }
+            else
+            {
+                var filestream = SampleData.Open(blobitem.InternalFile);
+                filestream.CopyTo(stream);
+            }
 
             return Task.FromResult<string>(blobitem.ContentType);
         }
@@ -97,6 +115,7 @@ namespace Common.DotNet.Test
             public string FileName;
             public string ContentType;
             public string InternalFile;
+            public string UploadedFile;
         };
     }
 }
