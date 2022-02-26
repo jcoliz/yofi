@@ -25,7 +25,7 @@ namespace YoFi.AspNet.Controllers
             return View(qresult);
         }
 
-        //TODO: [ValidateReceiptExists]
+        [ValidateReceiptExists]
         public async Task<IActionResult> Details(int id)
         {
             var receipt = await _repository.GetByIdAsync(id);
@@ -35,7 +35,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        //TODO: [ValidateReceiptExists]
+        [ValidateReceiptExists]
         public async Task<IActionResult> Delete(int id)
         {
             await _repository.DeleteAsync(await _repository.GetByIdAsync(id));
@@ -45,7 +45,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
-        //TODO: [ValidateReceiptExists]
+        [ValidateReceiptExists]
         public async Task<IActionResult> Accept(int id)
         {
             var receipt = await _repository.GetByIdAsync(id);

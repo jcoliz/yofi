@@ -40,6 +40,14 @@ namespace YoFi.AspNet.Controllers
         }
     }
 
+    public class ValidateReceiptExistsAttribute : TypeFilterAttribute
+    {
+        public ValidateReceiptExistsAttribute() : base(typeof
+          (ValidateItemExists<Receipt>))
+        {
+        }
+    }
+
     // https://docs.microsoft.com/en-us/archive/msdn-magazine/2016/august/asp-net-core-real-world-asp-net-core-mvc-filters
 
     internal class ValidateItemExists<T> : IAsyncActionFilter where T : class, IID
