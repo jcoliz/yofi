@@ -402,6 +402,23 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public async Task GetMatchingButNotAmount()
+        {
+            // Given: Several transactions, one of which we care about
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(this).Skip(5).First();
+
+            // And: One receipt which matches the transaction BUT has the wrong amount
+            var filename = $"{t.Payee} ${t.Amount+2m} {t.Timestamp.Month}-{t.Timestamp.Day}.png";
+            GivenReceiptInStorage(filename);
+
+            // When: Querying All
+            var items = await repository.GetAllAsync();
+
+            // Then: The best match for the receipt is the given transaction
+            Assert.AreEqual(t, items.Single().Matches.First());
+        }
+
+        [TestMethod]
         public async Task EndToEnd()
         {
             // Given: A real tx repository, and a receipt repository build off that

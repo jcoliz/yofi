@@ -115,23 +115,13 @@ namespace YoFi.Core.Models
             if (!receipts.Any())
                 return Enumerable.Empty<Transaction>().AsQueryable();
 
-            var result = initial;
-
             // Narrow on date
             var margin = TimeSpan.FromDays(14);
 
             var from = receipts.Min(x => x.Timestamp);
             var to = receipts.Max(x => x.Timestamp);
 
-            result = result.Where(x=>x.Timestamp >= from-margin && x.Timestamp <= to+margin);
-
-            // TODO: This is incorrect, because per the spec it's still OK to match on the other items
-            // Can narrow amount if all have amounts
-            if (receipts.All(x=>x.Amount.HasValue))
-            {
-                var amounts = receipts.Select(x=>x.Amount.Value).ToList();
-                result = result.Where(x=>amounts.Contains(x.Amount));
-            }
+            var result = initial.Where(x=>x.Timestamp >= from-margin && x.Timestamp <= to+margin);
 
             return result;
         }

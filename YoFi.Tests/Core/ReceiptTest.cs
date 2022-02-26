@@ -424,29 +424,6 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
-        public void NarrowByAmount()
-        {
-            // Given: Many items with a range of dates
-            var items = FakeObjects<Transaction>.Make(100).Group(0);
-
-            // And: A small number of receipts which each will match one of those transactions
-            var receipts = new List<Receipt>()
-            {
-                new Receipt() { Name = items[50].Payee, Amount = items[50].Amount, Timestamp = items[50].Timestamp },
-                new Receipt() { Name = items[60].Payee, Amount = items[60].Amount, Timestamp = items[60].Timestamp },
-            };
-
-            // When: Narrowing the transactions
-            var narrow = Receipt.TransactionsForReceipts(items.AsQueryable(), receipts).ToList();
-
-            // Then: List was narrowed to 2 transactions
-            Assert.AreEqual(2, narrow.Count);
-
-            // And: They match
-            Assert.IsTrue(receipts.Select(x => narrow.Any(y => x.MatchesTransaction(y) > 100)).All(x => x));
-        }
-
-        [TestMethod]
         public void HashSet()
         {
             // Given: Three sets of receipts
