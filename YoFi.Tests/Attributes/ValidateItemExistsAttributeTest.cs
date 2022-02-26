@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Controllers;
+using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 
@@ -75,12 +76,14 @@ namespace YoFi.Tests.Attributes
         {
             txattribute = new ValidateTransactionExistsAttribute();
 
-            var repository = new Mock<IRepository<Transaction>>();
-            repository.Setup(x => x.TestExistsByIdAsync(1)).Returns(Task.FromResult(true));
-            repository.Setup(x => x.TestExistsByIdAsync(2)).Returns(Task.FromResult(false));
+            var someitems = new List<Transaction>() { new Transaction() { ID = 1 } };
+
+            var context = new Mock<IDataContext>();
+            context.Setup(x => x.Get<Transaction>()).Returns(someitems.AsQueryable());
+            context.Setup(x => x.AnyAsync<Transaction>(It.IsAny<IQueryable<Transaction>>())).Returns<IQueryable<Transaction>>(q => Task.FromResult(q.Any()));
 
             var services = new Mock<IServiceProvider>();
-            services.Setup(x => x.GetService(typeof(IRepository<Transaction>))).Returns(repository.Object);
+            services.Setup(x => x.GetService(typeof(IDataContext))).Returns(context.Object);
 
             var metadata = txattribute.CreateInstance(services.Object);
 

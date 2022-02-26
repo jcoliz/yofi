@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Linq;
 using System.Threading.Tasks;
+using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 
@@ -40,12 +42,12 @@ namespace YoFi.AspNet.Controllers
 
     // https://docs.microsoft.com/en-us/archive/msdn-magazine/2016/august/asp-net-core-real-world-asp-net-core-mvc-filters
 
-    internal class ValidateItemExists<T> : IAsyncActionFilter where T : class, IModelItem<T>
+    internal class ValidateItemExists<T> : IAsyncActionFilter where T : class, IID
     {
-        private readonly IRepository<T> _repository;
-        public ValidateItemExists(IRepository<T> repository)
+        private readonly IDataContext _context;
+        public ValidateItemExists(IDataContext context)
         {
-            _repository = repository;
+            _context = context;
         }
         public async Task OnActionExecutionAsync(ActionExecutingContext context,
           ActionExecutionDelegate next)
@@ -55,7 +57,10 @@ namespace YoFi.AspNet.Controllers
                 var id = context.ActionArguments["id"] as int?;
                 if (id.HasValue)
                 {
-                    if (! (await _repository.TestExistsByIdAsync(id.Value)))
+                    var query = _context.Get<T>().Where(x => x.ID == id.Value);
+                    var exists = await _context.AnyAsync(query);
+
+                    if (!exists)
                     {
                         context.Result = new NotFoundResult();
                         return;
