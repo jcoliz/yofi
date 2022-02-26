@@ -44,7 +44,7 @@ namespace YoFi.AspNet.Data
         public DbSet<BudgetTx> BudgetTxs { get; set; }
 
         // Mock receipts data for integration tests
-        private List<Receipt> Receipts { get; set; }
+        private List<Receipt> Receipts { get; set; } = new List<Receipt>();
         private int nextrid = 1;
 
         IQueryable<Payee> IDataContext.Payees => Payees;
@@ -93,11 +93,23 @@ namespace YoFi.AspNet.Data
 
         Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
 
-        Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) => query.AsNoTracking().ToListAsync();
+        Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) 
+        {
+            if (query is IQueryable<Receipt> qr)
+                return Task.FromResult(qr.ToList() as List<T>);
+            else
+                return query.AsNoTracking().ToListAsync(); 
+        }
 
         Task<int> IDataContext.CountAsync<T>(IQueryable<T> query) => query.CountAsync();
 
-        Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) => query.AnyAsync();
+        Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) 
+        {
+            if (query is IQueryable<Receipt> qr)
+                return Task.FromResult(qr.Any());
+            else
+                return query.AnyAsync(); 
+        }
 
         Task<int> IDataContext.ClearAsync<T>() where T : class => Set<T>().BatchDeleteAsync();
 
@@ -156,5 +168,7 @@ namespace YoFi.AspNet.Data
             else
                 await items.BatchUpdateAsync(newvalues,columns);
         }
+
+        public DbSet<YoFi.Core.Models.Receipt> Receipt { get; set; }
     }
 }
