@@ -158,6 +158,11 @@ namespace YoFi.Core.Repositories
             await _storage.UploadBlobAsync(Prefix + filename, stream, contenttype);
         }
 
+        public Task<Receipt> GetByIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
     }

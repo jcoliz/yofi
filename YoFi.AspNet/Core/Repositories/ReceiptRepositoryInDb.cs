@@ -82,12 +82,8 @@ namespace YoFi.Core.Repositories
         /// <returns></returns>
         public async Task DeleteAsync(Receipt receipt)
         {
-            var hasitem = await _context.AnyAsync(_context.Get<Receipt>().Where(x => x.ID == receipt.ID));
-            if (hasitem)
-            {
-                _context.Remove(receipt);
-                await _context.SaveChangesAsync();
-            }
+            _context.Remove(receipt);
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -146,6 +142,13 @@ namespace YoFi.Core.Repositories
             var item = Receipt.FromFilename(filename, _clock);
             _context.Add(item);
             await _storage.UploadBlobAsync($"{Prefix}{item.ID}", stream, contenttype);
+        }
+
+        public async Task<Receipt> GetByIdAsync(int id)
+        {
+            var query = _context.Get<Receipt>().Where(x => x.ID == id);
+            var list = await _context.ToListNoTrackingAsync(query);
+            return list.First();
         }
 
         #endregion
