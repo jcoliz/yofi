@@ -88,7 +88,8 @@ namespace YoFi.AspNet.Data
             {
                 Receipts.Remove(r);
             }
-            base.Remove(item); 
+            else
+                base.Remove(item); 
         }
 
         Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
