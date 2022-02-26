@@ -67,6 +67,7 @@ namespace YoFi.Tests.Core
 
         #endregion
 
+        #region Tests
 
         [TestMethod]
         public void Empty()
@@ -94,9 +95,9 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(1, storage.BlobItems.Count());
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
 #if RECEIPTSINDB
-            Assert.AreEqual($"r/{items.Single().ID}", storage.BlobItems.Single().FileName);
+            Assert.AreEqual($"{ReceiptRepositoryInDb.Prefix}{items.Single().ID}", storage.BlobItems.Single().FileName);
 #else
-            Assert.AreEqual("receipt/"+filename, storage.BlobItems.Single().FileName);
+            Assert.AreEqual(ReceiptRepository.Prefix + filename, storage.BlobItems.Single().FileName);
 #endif
         }
 
@@ -118,9 +119,9 @@ namespace YoFi.Tests.Core
 #if RECEIPTSINDB
             var item = Receipt.FromFilename(filename,clock: clock);
             context.Add(item);
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"r/{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"{ReceiptRepositoryInDb.Prefix}{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
 #else
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = "receipt/" + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
+            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = ReceiptRepository.Prefix + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
 #endif
         }
 
@@ -235,7 +236,7 @@ namespace YoFi.Tests.Core
 
             // And: The receipt is contained in storage as expected
 #if RECEIPTSINDB
-            var blob = storage.BlobItems.Where(x => x.FileName == "r/" + r.ID.ToString()).Single();
+            var blob = storage.BlobItems.Where(x => x.FileName == ReceiptRepositoryInDb.Prefix + r.ID.ToString()).Single();
 #else
             var blob = storage.BlobItems.Where(x=>x.FileName == t.ID.ToString()).Single();
 #endif
@@ -268,7 +269,7 @@ namespace YoFi.Tests.Core
 
             // And: The receipt is contained in storage as expected
 #if RECEIPTSINDB
-            var blob = storage.BlobItems.Where(x => x.FileName == "r/1").Single();
+            var blob = storage.BlobItems.Where(x => x.FileName == $"{ReceiptRepositoryInDb.Prefix}1").Single();
 #else
             var blob = storage.BlobItems.Where(x=>x.FileName == t.ID.ToString()).Single();
 #endif
@@ -387,7 +388,7 @@ namespace YoFi.Tests.Core
 
             // When: Deleting a nonexistent receipt
             var filename = "Uptown Espresso $5.11 1-2.png";
-            await repository.DeleteAsync(new Receipt() { ID = 100, Filename = "receipt/" + filename });
+            await repository.DeleteAsync(new Receipt() { ID = 100, Filename = ReceiptRepository.Prefix + filename });
 
             // Then: Fails silently
         }
@@ -444,7 +445,7 @@ namespace YoFi.Tests.Core
 
             // And: The receipt name identifies a receipt which is no longer in the system
             // (because we deleted it)
-            var namematch = new Regex("^r/(?<id>[0-9]+)$");
+            var namematch = new Regex($"^{ReceiptRepositoryInDb.Prefix}(?<id>[0-9]+)$");
             var match = namematch.Match(name);
             Assert.IsTrue(match.Success);
 
@@ -452,6 +453,8 @@ namespace YoFi.Tests.Core
             Assert.IsFalse((await repository.GetAllAsync()).Where(x=>x.ID == id).Any());
 #endif
         }
+
+        #endregion
 
     }
 

@@ -25,6 +25,7 @@ namespace YoFi.Core.Repositories
         private readonly IStorageService _storage;
         private readonly IClock _clock;
 
+        public const string Prefix = "receipt/";
         #endregion
 
         #region Constructor
@@ -46,23 +47,19 @@ namespace YoFi.Core.Repositories
         /// <remarks>
         /// Note that this also removes it from the repository, as its now owned by the transaction
         /// </remarks>
-        /// <param name="receipt"></param>
-        /// <param name="tx"></param>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         public async Task AssignReceipt(Receipt receipt, Transaction tx)
         {
             // Which transaction will own the receipt now?
             // Get the receipt
             var stream = new MemoryStream();
-            var contenttype = await _storage.DownloadBlobAsync("receipt/" + receipt.Filename, stream);
+            var contenttype = await _storage.DownloadBlobAsync(Prefix + receipt.Filename, stream);
             stream.Seek(0, SeekOrigin.Begin);
 
             // Add to the transaction
             await _txrepo.UploadReceiptAsync(tx, stream, contenttype);
 
             // Remove it from our purview
-            await _storage.RemoveBlobAsync("receipt/" + receipt.Filename);
+            await _storage.RemoveBlobAsync(Prefix + receipt.Filename);
         }
 
         /// <summary>
@@ -89,17 +86,16 @@ namespace YoFi.Core.Repositories
         }
 
         /// <summary>
-        /// Remove the specified receipt from the system
+        /// Remove the specified <paramref name="receipt"/> from the system
         /// </summary>
-        /// <param name="filename"></param>
+        /// <param name="receipt">Which receipt to remove</param>
         /// <returns></returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         public async Task DeleteAsync(Receipt receipt)
         {
             // Question: Will this fail silently if there IS none??
 
             // Remove it from our purview
-            await _storage.RemoveBlobAsync("receipt/" + receipt.Filename);
+            await _storage.RemoveBlobAsync(Prefix + receipt.Filename);
         }
 
         /// <summary>
@@ -108,10 +104,9 @@ namespace YoFi.Core.Repositories
         /// <remarks>
         /// Note that this does tranaction matching here, and will fill in all the matching transactions
         /// </remarks>
-        /// <returns></returns>
         public async Task<IEnumerable<Receipt>> GetAllAsync()
         {
-            var filenames = await _storage.GetBlobNamesAsync("receipt/");
+            var filenames = await _storage.GetBlobNamesAsync(Prefix);
             var result = filenames.Select(x => Receipt.FromFilename(x[8..],_clock)).ToList();
 
             // Now, need to match transactions for each
@@ -122,9 +117,6 @@ namespace YoFi.Core.Repositories
 
             foreach(var receipt in result)
             {
-                var m = txs
-                        .Select(t => (receipt.MatchesTransaction(t), t));
-
                 receipt.Matches = txs
                                     .Select(t => (receipt.MatchesTransaction(t),t))
                                     .Where(x=>x.Item1 > 0)
@@ -137,18 +129,16 @@ namespace YoFi.Core.Repositories
         }
 
         /// <summary>
-        /// Find all the receipts which match this transaction
+        /// Find all the receipts which match this <paramref name="transaction"/>
         /// </summary>
-        /// <param name="tx"></param>
         /// <returns>Matching receipts ordered by better match first</returns>
-        /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx)
+        public async Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction transaction)
         {
-            var filenames = await _storage.GetBlobNamesAsync("receipt/");
+            var filenames = await _storage.GetBlobNamesAsync(Prefix);
             var receipts = filenames.Select(x => Receipt.FromFilename(x[8..], _clock)).ToList();
 
             var result = receipts
-                    .Select(r => (r.MatchesTransaction(tx), r))
+                    .Select(r => (r.MatchesTransaction(transaction), r))
                     .Where(x => x.Item1 > 0)
                     .OrderByDescending(x => x.Item1)
                     .Select(x => x.r)
@@ -167,7 +157,7 @@ namespace YoFi.Core.Repositories
         /// <exception cref="System.NotImplementedException"></exception>
         public async Task UploadReceiptAsync(string filename, Stream stream, string contenttype)
         {
-            await _storage.UploadBlobAsync("receipt/" + filename, stream, contenttype);
+            await _storage.UploadBlobAsync(Prefix + filename, stream, contenttype);
         }
 
         #endregion

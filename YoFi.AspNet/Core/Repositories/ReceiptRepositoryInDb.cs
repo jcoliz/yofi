@@ -15,7 +15,7 @@ namespace YoFi.Core.Repositories
         private readonly ITransactionRepository _txrepo;
         private readonly IStorageService _storage;
         private readonly IClock _clock;
-
+        public const string Prefix = "r/";
         #endregion
 
         #region Constructor
@@ -27,6 +27,16 @@ namespace YoFi.Core.Repositories
             _storage = storage;
             _clock = clock;
         }
+
+        #endregion
+
+        #region Public Interface
+
+        /// <summary>
+        /// Assigned all receipts to their matching transaction, only if the receipt
+        /// matches just a single transaction
+        /// </summary>
+        /// <returns>The number of matched receipts</returns>
 
         public async Task<int> AssignAll()
         {
@@ -46,22 +56,30 @@ namespace YoFi.Core.Repositories
             return result;
         }
 
-        #endregion
+        /// <summary>
+        /// Assign the given <paramref name="receipt"/> to the given <paramref name="tx"/>
+        /// </summary>
+        /// <remarks>
+        /// Note that this also removes it from the repository, as its now owned by the transaction
+        /// </remarks>
 
         public async Task AssignReceipt(Receipt receipt, Transaction tx)
         {
-            // Which transaction will own the receipt now?
-
             // Add to the transaction
-            tx.ReceiptUrl = $"r/{receipt.ID}";
+            tx.ReceiptUrl = $"{Prefix}{receipt.ID}";
             await _txrepo.UpdateAsync(tx);
 
             // Remove it from our purview
-            await _storage.RemoveBlobAsync("r/" + receipt.Filename);
+            await _storage.RemoveBlobAsync(Prefix + receipt.Filename);
             _context.Remove(receipt);
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Remove the specified <paramref name="receipt"/> from the system
+        /// </summary>
+        /// <param name="receipt">Which receipt to remove</param>
+        /// <returns></returns>
         public async Task DeleteAsync(Receipt receipt)
         {
             var hasitem = await _context.AnyAsync(_context.Get<Receipt>().Where(x => x.ID == receipt.ID));
@@ -72,39 +90,41 @@ namespace YoFi.Core.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieve all receipts waiting for matches
+        /// </summary>
+        /// <remarks>
+        /// Note that this does tranaction matching here, and will fill in all the matching transactions
+        /// </remarks>
         public async Task<IEnumerable<Receipt>> GetAllAsync()
         {
+            // Get the receipts from the DB
+
             var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>()) as IEnumerable<Receipt>;
 
-            // Now, need to match transactions for each
+            // Match transactions for each
 
             // Narrow down the universe of possible transactions
             var txs = await _context.ToListNoTrackingAsync( Receipt.TransactionsForReceipts(_txrepo.All, receipts) );
 
             foreach (var receipt in receipts)
-            {
-                var m = txs
-                        .Select(t => (receipt.MatchesTransaction(t), t));
-
                 receipt.Matches = txs
-                                    .Select(t => (receipt.MatchesTransaction(t), t))
-                                    .Where(x => x.Item1 > 0)
-                                    .OrderByDescending(x => x.Item1)
+                                    .Select(t => (quality:receipt.MatchesTransaction(t), t))
+                                    .Where(x => x.quality > 0)
+                                    .OrderByDescending(x => x.quality)
                                     .Select(x => x.t)
                                     .ToList();
-            }
 
             return receipts;
         }
 
         public async Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx)
         {
-            var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>()) as IEnumerable<Receipt>;
-
+            var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>());
             var result = receipts
-                    .Select(r => (r.MatchesTransaction(tx), r))
-                    .Where(x => x.Item1 > 0)
-                    .OrderByDescending(x => x.Item1)
+                    .Select(r => (quality:r.MatchesTransaction(tx), r))
+                    .Where(x => x.quality > 0)
+                    .OrderByDescending(x => x.quality)
                     .Select(x => x.r)
                     .ToList();
 
@@ -115,7 +135,9 @@ namespace YoFi.Core.Repositories
         {
             var item = Receipt.FromFilename(filename, _clock);
             _context.Add(item);
-            await _storage.UploadBlobAsync($"r/{item.ID}", stream, contenttype);
+            await _storage.UploadBlobAsync($"{Prefix}{item.ID}", stream, contenttype);
         }
+
+        #endregion
     }
 }
