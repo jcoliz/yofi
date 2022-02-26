@@ -124,7 +124,7 @@ namespace YoFi.Tests.Integration.Helpers
 
                 if (t == typeof(string))
                     o = $"{property.Name} {index:D5}";
-                else if (t == typeof(decimal))
+                else if (t == typeof(decimal) || t == typeof(decimal?))
                     o = index * 100m;
                 else if (t == typeof(DateTime))
                     // Note that datetimes should descend, because anything which sorts by a datetime
