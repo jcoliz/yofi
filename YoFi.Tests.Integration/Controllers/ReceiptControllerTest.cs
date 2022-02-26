@@ -97,6 +97,21 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual(TestKeyOrder<Receipt>()(expected), actual);
         }
 
+        [TestMethod]
+        public async Task DetailsWithMatches()
+        {
+            // Given: There are 5 items in the database, one of which we care about, which also has matches
+            var txs = FakeObjects<Transaction>.Make(3);
+            var expected = FakeObjects<Receipt>.Make(4).Add(1,x=>x.Matches = txs.Group(0)).SaveTo(this).Last();
+            var id = expected.ID;
+
+            // When: Getting details for the chosen item
+            var document = await WhenGetAsync($"{urlroot}/Details/{id}");
+
+            // Then: The transactions are shown
+            ThenResultsAreEqualByTestKey(document, txs);
+        }
+
         #endregion
     }
 }
