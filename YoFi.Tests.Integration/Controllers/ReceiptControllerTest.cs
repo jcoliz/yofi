@@ -55,7 +55,7 @@ namespace YoFi.Tests.Integration.Controllers
         }
 
 
-        // Fails [TestMethod]
+        [TestMethod]
         public async Task IndexMany()
         {
             // Given: Many items in the database
@@ -68,7 +68,7 @@ namespace YoFi.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKey(document, items);
         }
 
-        // Fails [TestMethod]
+        [TestMethod]
         public async Task IndexSingle()
         {
             // Given: There is one item in the database

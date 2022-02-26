@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.AspNet.Data;
+using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
@@ -51,7 +52,7 @@ namespace YoFi.Tests.Integration
                 context.AddRange(b);
             if (objects is IEnumerable<Receipt> r)
                 foreach(var o in r)
-                    context.Add(o);
+                    (context as IDataContext).Add(o);
 
             context.SaveChanges();
         }
