@@ -43,6 +43,10 @@ namespace YoFi.AspNet.Data
         public DbSet<Split> Splits { get; set; }
         public DbSet<BudgetTx> BudgetTxs { get; set; }
 
+        // Mock receipts data for integration tests
+        private List<Receipt> Receipts { get; set; }
+        private int nextrid = 1;
+
         IQueryable<Payee> IDataContext.Payees => Payees;
 
         IQueryable<Transaction> IDataContext.Transactions => Transactions;
@@ -55,13 +59,37 @@ namespace YoFi.AspNet.Data
 
         IQueryable<Split> IDataContext.SplitsWithTransactions => Splits.Include(x => x.Transaction);
 
-        IQueryable<T> IDataContext.Get<T>() where T : class => Set<T>();
+        IQueryable<T> IDataContext.Get<T>() where T : class 
+        {
+            if (typeof(T) == typeof(Receipt))
+            {
+                return Receipts.AsQueryable() as IQueryable<T>;
+            }
+            else
+                return Set<T>(); 
+        }
 
-        void IDataContext.Add(object item) => base.Add(item);
+        void IDataContext.Add(object item)
+        {
+            if (item is Receipt r)
+            {
+                r.ID = nextrid++;
+                Receipts.Add(r);
+            }
+            else
+                base.Add(item);
+        }
 
         void IDataContext.Update(object item) => base.Update(item);
 
-        void IDataContext.Remove(object item) => base.Remove(item);
+        void IDataContext.Remove(object item) 
+        {
+            if (item is Receipt r)
+            {
+                Receipts.Remove(r);
+            }
+            base.Remove(item); 
+        }
 
         Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
 
