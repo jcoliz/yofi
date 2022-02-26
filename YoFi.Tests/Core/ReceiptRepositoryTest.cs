@@ -40,6 +40,12 @@ namespace YoFi.Tests.Core
             // Match clock with fakeobjectsmaker            
             clock = new TestClock() { Now = new DateTime(2001, 12, 31) };
 
+            //
+            // There are two competing implementations of IReceiptRepository. One persists the receipt metadata in
+            // the database. That's ReceiptRepositoryInDb. The other uses only the azure storage as its source of
+            // truth. That's ReceiptRepository. I am debating which is better. I am leaning toward the DB version.
+            //
+
 #if RECEIPTSINDB
             context = new ReceiptDataContext();
             repository = new ReceiptRepositoryInDb(context, txrepo, storage, clock);
