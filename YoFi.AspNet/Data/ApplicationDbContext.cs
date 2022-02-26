@@ -44,7 +44,7 @@ namespace YoFi.AspNet.Data
         public DbSet<BudgetTx> BudgetTxs { get; set; }
 
         // Mock receipts data for integration tests
-        private List<Receipt> Receipts { get; set; } = new List<Receipt>();
+        private static List<Receipt> Receipts { get; set; } = new List<Receipt>();
         private int nextrid = 1;
 
         IQueryable<Payee> IDataContext.Payees => Payees;
