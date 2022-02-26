@@ -486,6 +486,37 @@ namespace YoFi.Tests.Core
 
         public List<Receipt> Receipts { get; } = new List<Receipt>();
 
+        public void Add(object item)
+        {
+            var receipt = item as Receipt;
+            receipt.ID = nextid++;
+            Receipts.Add(receipt);
+        }
+        public IQueryable<T> Get<T>() where T : class
+        {
+            return Receipts.AsQueryable() as IQueryable<T>;
+        }
+
+        public void Remove(object item)
+        {
+            Receipts.Remove(item as Receipt);
+        }
+
+        public Task SaveChangesAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class
+        {
+            return Task.FromResult(query.ToList());
+        }
+
+        public Task<bool> AnyAsync<T>(IQueryable<T> query) where T : class
+        {
+            return Task.FromResult(query.Any());
+        }
+
         public IQueryable<Transaction> Transactions => throw new NotImplementedException();
 
         public IQueryable<Transaction> TransactionsWithSplits => throw new NotImplementedException();
@@ -498,21 +529,9 @@ namespace YoFi.Tests.Core
 
         public IQueryable<BudgetTx> BudgetTxs => throw new NotImplementedException();
 
-        public void Add(object item)
-        {
-            var receipt = item as Receipt; 
-            receipt.ID = nextid++;
-            Receipts.Add(receipt);
-        }
-
         public void AddRange(IEnumerable<object> items)
         {
             throw new NotImplementedException();
-        }
-
-        public Task<bool> AnyAsync<T>(IQueryable<T> query) where T : class
-        {
-            return Task.FromResult(query.Any());
         }
 
         public Task BulkDeleteAsync<T>(IQueryable<T> items) where T : class
@@ -540,29 +559,10 @@ namespace YoFi.Tests.Core
             throw new NotImplementedException();
         }
 
-        public IQueryable<T> Get<T>() where T : class
-        {
-            return Receipts.AsQueryable() as IQueryable<T>;
-        }
-
-        public void Remove(object item)
-        {
-            Receipts.Remove(item as Receipt);
-        }
 
         public void RemoveRange(IEnumerable<object> items)
         {
             throw new NotImplementedException();
-        }
-
-        public Task SaveChangesAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class
-        {
-            return Task.FromResult(query.ToList());
         }
 
         public void Update(object item)
