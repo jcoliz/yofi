@@ -1,12 +1,15 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core;
 using YoFi.Core.Models;
+using YoFi.Core.Repositories;
 using YoFi.Tests.Integration.Helpers;
 
 namespace YoFi.Tests.Integration.Controllers
@@ -14,9 +17,12 @@ namespace YoFi.Tests.Integration.Controllers
     [TestClass]
     public class ReceiptControllerTest: IntegrationTest
     {
-        protected string urlroot => "/Receipts";
+        #region Fields
 
+        protected string urlroot => "/Receipts";
         private IDataContext iDC => integrationcontext.context as IDataContext;
+
+        #endregion
 
         #region Init/Cleanup
 
@@ -36,9 +42,9 @@ namespace YoFi.Tests.Integration.Controllers
         public void Cleanup()
         {
             // Clean out database
-            var rs = context.Set<Receipt>();
+            var rs = iDC.Get<Receipt>().ToList();
             foreach (var r in rs)
-                context.Remove(r);
+                iDC.Remove(r);
             context.SaveChanges();
         }
 
@@ -141,6 +147,39 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.IsFalse(iDC.Get<Receipt>().Any(x => x.ID == id));
         }
 
+        [TestMethod]
+        public async Task Upload()
+        {
+            // Given: An image file
+            var length = 25;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
+
+            // When: Uploading it as a receipt
+            var name = "Uptown Espresso";
+            var amount = 12.24m;
+            var filename = $"{name} ${amount}.png";
+            var content = new MultipartFormDataContent
+            {
+                { new StreamContent(stream), "files", filename }
+            };
+            var response = await WhenUploading(content, $"{urlroot}/", $"{urlroot}/Upload");
+
+            // Then: Redirected to index
+            var redirect = response.Headers.GetValues("Location").Single();
+            Assert.AreEqual($"{urlroot}", redirect);
+
+            // And: Now is one item in database
+            Assert.AreEqual(1, iDC.Get<Receipt>().Count());
+
+            // And: Its properties match what we expect
+            var actual = iDC.Get<Receipt>().Single();
+            Assert.AreEqual(name, actual.Name);
+            Assert.AreEqual(amount, actual.Amount);
+
+            // And: The receipt was uploaded to storage with the expected name
+            Assert.AreEqual(1, integrationcontext.storage.BlobItems.Count);
+            Assert.AreEqual(ReceiptRepositoryInDb.Prefix + actual.ID.ToString(), integrationcontext.storage.BlobItems.Single().FileName);
+        }
         #endregion
     }
 }
