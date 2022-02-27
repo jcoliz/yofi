@@ -61,6 +61,10 @@ namespace YoFi.Tests.Helpers
             {
                 return Transactions as IQueryable<T>;
             }
+            if (typeof(T) == typeof(Split))
+            {
+                return Splits as IQueryable<T>;
+            }
             throw new NotImplementedException();
         }
 

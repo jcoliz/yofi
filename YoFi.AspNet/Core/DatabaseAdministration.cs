@@ -43,15 +43,15 @@ namespace YoFi.Core
         public async Task ClearTestDataAsync(string id)
         {
             if (id.Contains("payee") || "all" == id)
-                _context.RemoveRange(_context.Payees.Where(x => x.Category.Contains(TestMarker)));
+                _context.RemoveRange(_context.Get<Payee>().Where(x => x.Category.Contains(TestMarker)));
 
             if (id.Contains("budgettx") || "all" == id)
-                _context.RemoveRange(_context.BudgetTxs.Where(x => x.Category.Contains(TestMarker)));
+                _context.RemoveRange(_context.Get<BudgetTx>().Where(x => x.Category.Contains(TestMarker)));
 
             if (id.Contains("trx") || "all" == id)
             {
-                _context.RemoveRange(_context.Transactions.Where(x => x.Category.Contains(TestMarker) || x.Memo.Contains(TestMarker) || x.Payee.Contains(TestMarker)));
-                _context.RemoveRange(_context.Splits.Where(x => x.Category.Contains(TestMarker)));
+                _context.RemoveRange(_context.Get<Transaction>().Where(x => x.Category.Contains(TestMarker) || x.Memo.Contains(TestMarker) || x.Payee.Contains(TestMarker)));
+                _context.RemoveRange(_context.Get<Split>().Where(x => x.Category.Contains(TestMarker)));
             }
 
             await _context.SaveChangesAsync();
@@ -61,9 +61,9 @@ namespace YoFi.Core
         {
             var result = new DatabaseStatus()
             {
-                NumTransactions = await _context.CountAsync(_context.Transactions),
-                NumBudgetTxs = await _context.CountAsync(_context.BudgetTxs),
-                NumPayees = await _context.CountAsync(_context.Payees),
+                NumTransactions = await _context.CountAsync(_context.Get<Transaction>()),
+                NumBudgetTxs = await _context.CountAsync(_context.Get<BudgetTx>()),
+                NumPayees = await _context.CountAsync(_context.Get<Payee>()),
             };
             result.IsEmpty = result.NumTransactions == 0 && result.NumBudgetTxs == 0 && result.NumPayees == 0;
 
@@ -72,7 +72,7 @@ namespace YoFi.Core
 
         public async Task UnhideTransactionsToToday()
         {
-            var unhideme = _context.Transactions.Where(x => x.Timestamp <= _clock.Now && x.Hidden == true);
+            var unhideme = _context.Get<Transaction>().Where(x => x.Timestamp <= _clock.Now && x.Hidden == true);
             var any = await _context.AnyAsync(unhideme);
             if (any)
             {

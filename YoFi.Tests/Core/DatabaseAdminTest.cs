@@ -131,7 +131,7 @@ namespace YoFi.Tests.Core
         {
             // Given: A set of transactions of varying dates
             var transactions = Enumerable.Range(1,10).Select(x=>new Transaction() { Timestamp = new System.DateTime(2022,1,x), Hidden = x > 3 }).ToList();
-            context.Setup(x=>x.Transactions).Returns(transactions.AsQueryable());
+            context.Setup(x=>x.Get<Transaction>()).Returns(transactions.AsQueryable());
             context.Setup(x=>x.AnyAsync<Transaction>(It.IsAny<IQueryable<Transaction>>())).Returns(Task.FromResult(true));
 
             // And: Current time is in the middle of those
