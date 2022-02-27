@@ -46,7 +46,7 @@ namespace YoFi.Core.Models
         /// Set of potential matches
         /// </summary>
         [NotMapped]
-        public ICollection<Transaction> Matches { get; set; }
+        public ICollection<Transaction> Matches { get; set; } = new List<Transaction>();
 
         public override bool Equals(object obj)
         {

@@ -1,15 +1,13 @@
-﻿using System;
+﻿using EFCore.BulkExtensions;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using YoFi.Core.Models;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core;
-using EFCore.BulkExtensions;
-using System.Linq.Expressions;
+using YoFi.Core.Models;
 
 namespace YoFi.AspNet.Data
 {
@@ -42,10 +40,7 @@ namespace YoFi.AspNet.Data
         public DbSet<Payee> Payees { get; set; }
         public DbSet<Split> Splits { get; set; }
         public DbSet<BudgetTx> BudgetTxs { get; set; }
-
-        // Mock receipts data for integration tests
-        private static List<Receipt> Receipts { get; set; } = new List<Receipt>();
-        private int nextrid = 1;
+        public DbSet<Receipt> Receipts { get; set; }
 
         IQueryable<Transaction> IDataContext.TransactionsWithSplits => Transactions.Include(x => x.Splits);
 
@@ -63,45 +58,28 @@ namespace YoFi.AspNet.Data
 
         void IDataContext.Add(object item)
         {
-            if (item is Receipt r)
-            {
-                r.ID = nextrid++;
-                Receipts.Add(r);
-            }
-            else
-                base.Add(item);
+            base.Add(item);
         }
 
         void IDataContext.Update(object item) => base.Update(item);
 
         void IDataContext.Remove(object item) 
         {
-            if (item is Receipt r)
-            {
-                Receipts.Remove(r);
-            }
-            else
-                base.Remove(item); 
+            base.Remove(item); 
         }
 
         Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
 
         Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) 
         {
-            if (query is IQueryable<Receipt> qr)
-                return Task.FromResult(qr.ToList() as List<T>);
-            else
-                return query.AsNoTracking().ToListAsync(); 
+            return query.AsNoTracking().ToListAsync(); 
         }
 
         Task<int> IDataContext.CountAsync<T>(IQueryable<T> query) => query.CountAsync();
 
         Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) 
         {
-            if (query is IQueryable<Receipt> qr)
-                return Task.FromResult(qr.Any());
-            else
-                return query.AnyAsync(); 
+            return query.AnyAsync(); 
         }
 
         Task<int> IDataContext.ClearAsync<T>() where T : class => Set<T>().BatchDeleteAsync();
@@ -161,7 +139,5 @@ namespace YoFi.AspNet.Data
             else
                 await items.BatchUpdateAsync(newvalues,columns);
         }
-
-        public DbSet<YoFi.Core.Models.Receipt> Receipt { get; set; }
     }
 }

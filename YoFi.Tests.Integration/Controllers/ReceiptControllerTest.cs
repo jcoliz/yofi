@@ -62,7 +62,8 @@ namespace YoFi.Tests.Integration.Controllers
         {
 
             var item = Receipt.FromFilename(filename, clock: new SystemClock());
-            iDC.Add(item);
+            context.Add(item);
+            context.SaveChanges();
             integrationcontext.storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"{ReceiptRepositoryInDb.Prefix}{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
 
             return item;
@@ -130,9 +131,11 @@ namespace YoFi.Tests.Integration.Controllers
         [TestMethod]
         public async Task DetailsWithMatches()
         {
-            // Given: There are 5 items in the database, one of which we care about, which also has matches
-            var txs = FakeObjects<Transaction>.Make(3);
-            var expected = FakeObjects<Receipt>.Make(4).Add(1,x=>x.Matches = txs.Group(0)).SaveTo(this).Last();
+            // Given: There are 5 items in the database, one of which we care about, which matches ALL the transactions
+            var amount = 12.34m;
+            var txs = FakeObjects<Transaction>.Make(3,x=>x.Amount = amount).SaveTo(this);
+            var t = txs.Last();
+            var expected = FakeObjects<Receipt>.Make(4).Add(1,x=> { x.Amount = amount; x.Timestamp = t.Timestamp; }).SaveTo(this).Last();
             var id = expected.ID;
 
             // When: Getting details for the chosen item
@@ -146,7 +149,9 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task Delete()
         {
             // Given: There are two items in the database, one of which we care about
-            var id = FakeObjects<Receipt>.Make(2).SaveTo(this).Last().ID;
+            var expected = FakeObjects<Receipt>.Make(2).SaveTo(this).Last();
+            var id = expected.ID;
+            context.Entry(expected).State = EntityState.Detached;
 
             // When: Deleting the selected item
             var formData = new Dictionary<string, string>()

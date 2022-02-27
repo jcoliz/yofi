@@ -150,6 +150,7 @@ namespace YoFi.Core.Repositories
         {
             var item = Receipt.FromFilename(filename, _clock);
             _context.Add(item);
+            await _context.SaveChangesAsync();
             await _storage.UploadBlobAsync($"{Prefix}{item.ID}", stream, contenttype);
         }
 
@@ -157,7 +158,18 @@ namespace YoFi.Core.Repositories
         {
             var query = _context.Get<Receipt>().Where(x => x.ID == id);
             var list = await _context.ToListNoTrackingAsync(query);
-            return list.First();
+            var result = list.First();
+
+            // Now check for receipt matches
+            var qt = Receipt.TransactionsForReceipts(_txrepo.All, new[] { result });
+            var txs = await _context.ToListNoTrackingAsync(qt);
+            result.Matches = txs
+                                .Select(t => (quality: result.MatchesTransaction(t), t))
+                                .Where(x => x.quality > 0)
+                                .OrderByDescending(x => x.quality)
+                                .Select(x => x.t)
+                                .ToList();
+            return result;
         }
 
         #endregion
