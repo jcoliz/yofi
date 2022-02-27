@@ -20,7 +20,7 @@
             @Html.DisplayNameFor(model => model.Memo)
         </dt>
         <dd class = "col-sm-10" data-test-id="memo">
-            @Html.DisplayFor(model => model.Memo)
+            @(Model.Memo ?? "...")
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Timestamp)
@@ -78,7 +78,7 @@
                         <form asp-action="Accept">
                             <input type="hidden" asp-for="ID" />
                             <input type="hidden" name="txid" value="@item.ID" />
-                            <input type="submit" value="Accept" class="btn btn-primary" />
+                            <input type="submit" value="Accept" class="btn btn-sm btn-primary" />
                         </form>
                     </td>
                     </tr>
@@ -91,7 +91,4 @@
         <p>No matching transactions.</p>
     }
 
-</div>
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>

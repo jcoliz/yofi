@@ -82,7 +82,7 @@
                             <input type="submit" value="Accept" class="btn btn-sm btn-primary" />
                         </form>
                     }
-                    <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.ID">Review</a>
+                    <button class="btn btn-sm btn-secondary" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal">Review</button>
                 }
                 <form asp-action="Delete">
                     <input type="hidden" name="id" value="@item.ID" />
@@ -100,3 +100,20 @@
         <input type="submit" value="Accept All" class="btn btn-primary" />
     </form>
 }
+
+<div class="buttondialog modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true" data-endpoint="/Receipts/Details">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="d-flex justify-content-center spinner-container">
+                    <div class="spinner-border my-5" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-test-id="btn-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

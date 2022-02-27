@@ -63,10 +63,10 @@
         var id = button.data('id')
         var modal = $(this);
         var endpoint = modal.data('endpoint');
-        if (id.length > 0)
+        if (id !== undefined)
             endpoint = endpoint + "/" + id;
         var method = button.data('method');
-        if (method.length <= 0)
+        if (method === undefined)
             method = "GET";
 
         $.ajax({
