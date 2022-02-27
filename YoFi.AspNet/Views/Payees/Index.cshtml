@@ -91,7 +91,6 @@ else
                 <th>
                     Name
                 </th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -114,11 +113,15 @@ else
                     <td class="display-payee" data-test-id="name">
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
-                    <td>
-                        <span data-bs-toggle="tooltip" title="Edit">
-                            <button class="btn btn-outline-secondary btn-sm" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editPayeeModal"><i class="fa fa-edit"></i></button>
-                        </span>
-                        <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
+                    <td style="padding-left:0; padding-right:5px">
+                        <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editPayeeModal">
+                            <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
+                        </a>
+                    </td>
+                    <td style="padding-left:0; padding-right:5px">
+                        <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete">
+                            <i class="fa fa-trash-alt" data-bs-toggle="tooltip" title="Delete"></i>
+                        </a>
                     </td>
                 </tr>
             }
