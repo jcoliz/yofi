@@ -111,7 +111,7 @@
                     <input type="hidden" name="id" value="@item.ID"/>
                     @if (nmatches == 0)
                     {
-                        <input type="submit" name="command" value="Create" class="btn btn-sm btn-primary my-1"/>
+                        <a asp-controller="Transactions" asp-action="Create" asp-route-rid="@item.ID" class="btn btn-sm btn-primary my-1">Create</a>
                     }
                     else
                     {

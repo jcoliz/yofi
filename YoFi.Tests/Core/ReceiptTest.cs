@@ -473,6 +473,20 @@ namespace YoFi.Tests.Core
             Assert.AreSame(expected, actual);
         }
 
+        [TestMethod]
+        public void AsTransaction()
+        {
+            // Given: A receipt
+            var r = FakeObjects<Receipt>.Make(1).Single();
+
+            // When: Creating a trasnaction out of it
+            var t = r.AsTransaction();
+
+            // Then: The transaction matches the receipt maximally
+            var match = r.MatchesTransaction(t);
+            Assert.AreEqual(300, match);
+        }
+
         #endregion
     }
 }

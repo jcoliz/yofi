@@ -110,6 +110,15 @@ namespace YoFi.Core.Models
         }
 
         /// <summary>
+        /// Create a transaction out of this receipt
+        /// </summary>
+        /// <returns></returns>
+        public Transaction AsTransaction()
+        {
+            return new Transaction() { Timestamp = Timestamp, Payee = Name, Memo = Memo, Amount = Amount ?? default };
+        }
+
+        /// <summary>
         /// Constructs a query which can be used to narrow transactions to then consider individually
         /// </summary>
         /// <param name="initial"></param>

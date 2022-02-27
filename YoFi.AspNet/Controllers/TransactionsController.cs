@@ -57,10 +57,19 @@ namespace YoFi.AspNet.Controllers
         /// <summary>
         /// View for create transaction page, which is empty because we're creating a transaction from empty
         /// </summary>
+        /// <param name="rid">Optional receipt ID to duplicate</param>
         /// <returns></returns>
-        public Task<IActionResult> Create()
+        public async Task<IActionResult> Create([FromServices] IReceiptRepository rrepo, int? rid)
         {
-            return Task.FromResult(View() as IActionResult);
+            if (rid.HasValue && await rrepo.TestExistsByIdAsync(rid.Value))
+            {
+                var r = await rrepo.GetByIdAsync(rid.Value);
+                var tx = r.AsTransaction();
+
+                return View(tx);
+            }
+            else
+                return View();
         }
 
         /// <summary>
@@ -404,6 +413,8 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Transaction>.Download() => Download(false);
         Task<IActionResult> IController<Transaction>.Upload(List<IFormFile> files) => throw new NotImplementedException();
         Task<IActionResult> IController<Transaction>.Edit(int? id) => Edit(id, null);
+
+        Task<IActionResult> IController<Transaction>.Create() => Create(null, null);
         #endregion
     }
 }

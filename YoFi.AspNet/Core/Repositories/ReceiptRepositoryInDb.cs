@@ -179,6 +179,7 @@ namespace YoFi.Core.Repositories
                                 .ToList();
             return result;
         }
+        public Task<bool> TestExistsByIdAsync(int id) => _context.AnyAsync(_context.Get<Receipt>().Where(x => x.ID == id));
 
         #endregion
     }
