@@ -41,7 +41,7 @@
                 <span asp-validation-for="BankReference" class="text-danger"></span>
             </div>
 
-            @if(!string.IsNullOrEmpty(Model.ReceiptUrl))
+            @if(!string.IsNullOrEmpty(Model?.ReceiptUrl))
             {
                 <input type="hidden" name="ReceiptUrl" value="@Model.ReceiptUrl"/>
                 <p>Receipt:</p>
