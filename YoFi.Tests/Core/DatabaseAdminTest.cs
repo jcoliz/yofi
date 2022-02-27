@@ -26,7 +26,6 @@ namespace YoFi.Tests.Core
             context.Setup(x=>x.Transactions).Returns(Enumerable.Empty<Transaction>().AsQueryable());
             context.Setup(x => x.Get<Transaction>()).Returns(Enumerable.Empty<Transaction>().AsQueryable());
             context.Setup(x=>x.Get<Payee>()).Returns(Enumerable.Empty<Payee>().AsQueryable());
-            context.Setup(x=>x.BudgetTxs).Returns(Enumerable.Empty<BudgetTx>().AsQueryable());
             context.Setup(x => x.Get<BudgetTx>()).Returns(Enumerable.Empty<BudgetTx>().AsQueryable());
             clock = new Mock<IClock>();
             dbadmin  = new DatabaseAdministration(context.Object,clock.Object);

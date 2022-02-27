@@ -371,7 +371,7 @@ namespace YoFi.Core.Reports
 
         private IQueryable<BudgetTx> QueryBudgetSingle_AsBudgetTx(IEnumerable<string> excluded = null)
         {
-            var result = _context.BudgetTxs
+            var result = _context.Get<BudgetTx>()
                 .Where(x => x.Timestamp.Year == Year)
                 .AsQueryable();
 

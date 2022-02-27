@@ -28,10 +28,6 @@ namespace YoFi.Core
         /// Retrieve the splits (with transactions attached)
         /// </summary>
         IQueryable<Split> SplitsWithTransactions { get; }
-        /// <summary>
-        /// Retrieve the budget line items
-        /// </summary>
-        IQueryable<BudgetTx> BudgetTxs { get; }
 
         /// <summary>
         /// Retrieve all <typeparamref name="T"/> entities 

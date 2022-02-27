@@ -79,10 +79,12 @@ namespace YoFi.Tests.Helpers
             }
         }
 
-        IQueryable<BudgetTx> IDataContext.BudgetTxs => BudgetTxs.AsQueryable();
-
         IQueryable<T> IDataContext.Get<T>()
         {
+            if (typeof(T) == typeof(BudgetTx))
+            {
+                return BudgetTxs.AsQueryable() as IQueryable<T>;
+            }
             throw new NotImplementedException();
         }
 
