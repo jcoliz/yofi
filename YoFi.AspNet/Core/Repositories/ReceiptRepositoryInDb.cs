@@ -71,8 +71,14 @@ namespace YoFi.Core.Repositories
             if (match <= 0)
                 throw new ArgumentException("Receipt and transaction do not match");
 
-            // Add to the transaction
+            // Add receipt to the transaction
             tx.ReceiptUrl = $"{Prefix}{receipt.ID}";
+
+            // Copy over the memo, if exists
+            if (!string.IsNullOrEmpty(receipt.Memo))
+                tx.Memo = receipt.Memo;
+
+            // Save the transaction
             await _txrepo.UpdateAsync(tx);
 
             // Remove it from our purview

@@ -55,12 +55,14 @@ namespace YoFi.Tests.Core
                 txrepo.AddRangeAsync(txs).Wait();
             }
         }
-        private void GivenReceiptInStorage(string filename)
+        private Receipt GivenReceiptInStorage(string filename)
         {
             var item = Receipt.FromFilename(filename, clock: clock);
             context.Add(item);
             context.SaveChangesAsync().Wait();
             storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"{ReceiptRepositoryInDb.Prefix}{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
+
+            return item;
         }
 
         private void GivenMultipleReceipts(Transaction t)
@@ -231,6 +233,24 @@ namespace YoFi.Tests.Core
             // And: There are no more (unassigned) receipts now
             items = await repository.GetAllAsync();
             Assert.IsFalse(items.Any());
+        }
+
+        [TestMethod]
+        public async Task AssignReceiptWithMemo()
+        {
+            // Given: A transaction
+            var t = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: One receipt in storage which matches, and contains a memo
+            var newmemo = "This is a whole new memo!!";
+            var filename = $"{t.Payee} ${t.Amount} {t.Timestamp.Month}-{t.Timestamp.Day} {newmemo}.png";
+            var r = GivenReceiptInStorage(filename);
+
+            // When: Assigning the receipt to the transaction           
+            await repository.AssignReceipt(r, t);
+
+            // Then: The transaction contians the memo from the receipt
+            Assert.AreEqual(newmemo,t.Memo);
         }
 
         [TestMethod]
@@ -442,6 +462,7 @@ namespace YoFi.Tests.Core
             var id = int.Parse(match.Groups["id"].Value);
             Assert.IsFalse((await repository.GetAllAsync()).Where(x=>x.ID == id).Any());
         }
+
 
         #endregion
     }
