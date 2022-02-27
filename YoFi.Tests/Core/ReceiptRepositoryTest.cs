@@ -25,6 +25,7 @@ namespace YoFi.Tests.Core
         TestClock clock;
         const string contenttype = "image/png";
         IDataContext context;
+
         #endregion
 
         [TestInitialize]
@@ -35,12 +36,6 @@ namespace YoFi.Tests.Core
             
             // Match clock with fakeobjectsmaker            
             clock = new TestClock() { Now = new DateTime(2001, 12, 31) };
-
-            //
-            // There are two competing implementations of IReceiptRepository. One persists the receipt metadata in
-            // the database. That's ReceiptRepositoryInDb. The other uses only the azure storage as its source of
-            // truth. That's ReceiptRepository. I am debating which is better. I am leaning toward the DB version.
-            //
 
             context = new MockDataContext();
             repository = new ReceiptRepositoryInDb(context, txrepo, storage, clock);
@@ -226,11 +221,7 @@ namespace YoFi.Tests.Core
 
             // And: One receipt in storage which matches
             var filename = $"{t.Payee} ${t.Amount} {t.Timestamp.Month}-{t.Timestamp.Day}.png";
-            GivenReceiptInStorage(filename);
-
-            // And: Getting it
-            var items = await repository.GetAllAsync();
-            var r = items.Single();
+            var r = GivenReceiptInStorage(filename);
 
             // When: Assigning the receipt to the transaction           
             await repository.AssignReceipt(r, t);
@@ -243,7 +234,7 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(contenttype,blob.ContentType);
 
             // And: There are no more (unassigned) receipts now
-            items = await repository.GetAllAsync();
+            var items = await repository.GetAllAsync();
             Assert.IsFalse(items.Any());
         }
 
@@ -377,16 +368,13 @@ namespace YoFi.Tests.Core
         {
             // Given: One receipt in storage
             var filename = "Uptown Espresso $5.11 1-2.png";
-            GivenReceiptInStorage(filename);
+            var r = GivenReceiptInStorage(filename);
+
+            // When: Deleting it
+            await repository.DeleteAsync(r);
 
             // And: Getting All
             var items = await repository.GetAllAsync();
-
-            // When: Deleting it
-            await repository.DeleteAsync(items.Single());
-
-            // And: Getting All again
-            items = await repository.GetAllAsync();
 
             // Then: Nothing returned
             Assert.IsFalse(items.Any());
@@ -490,7 +478,6 @@ namespace YoFi.Tests.Core
             var id = int.Parse(match.Groups["id"].Value);
             Assert.IsFalse((await repository.GetAllAsync()).Where(x=>x.ID == id).Any());
         }
-
 
         #endregion
     }
