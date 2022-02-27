@@ -1,13 +1,10 @@
-﻿#define RECEIPTSINDB
-
-using Common.DotNet;
+﻿using Common.DotNet;
 using Common.DotNet.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.Core;
@@ -27,9 +24,7 @@ namespace YoFi.Tests.Core
         TestAzureStorage storage;
         TestClock clock;
         const string contenttype = "image/png";
-#if RECEIPTSINDB
         IDataContext context;
-#endif
         #endregion
 
         [TestInitialize]
@@ -47,12 +42,8 @@ namespace YoFi.Tests.Core
             // truth. That's ReceiptRepository. I am debating which is better. I am leaning toward the DB version.
             //
 
-#if RECEIPTSINDB
             context = new ReceiptDataContext();
             repository = new ReceiptRepositoryInDb(context, txrepo, storage, clock);
-#else
-            repository = new ReceiptRepository(txrepo,storage,clock);
-#endif
         }
 
         #region Helpers
@@ -66,14 +57,9 @@ namespace YoFi.Tests.Core
         }
         private void GivenReceiptInStorage(string filename)
         {
-
-#if RECEIPTSINDB
             var item = Receipt.FromFilename(filename, clock: clock);
             context.Add(item);
             storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"{ReceiptRepositoryInDb.Prefix}{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
-#else
-            storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = ReceiptRepository.Prefix + filename, InternalFile = "budget-white-60x.png", ContentType = contenttype });
-#endif
         }
 
         private void GivenMultipleReceipts(Transaction t)
@@ -119,11 +105,7 @@ namespace YoFi.Tests.Core
             // Then: The receipt is contained in storage
             Assert.AreEqual(1, storage.BlobItems.Count());
             Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
-#if RECEIPTSINDB
             Assert.AreEqual($"{ReceiptRepositoryInDb.Prefix}{items.Single().ID}", storage.BlobItems.Single().FileName);
-#else
-            Assert.AreEqual(ReceiptRepository.Prefix + filename, storage.BlobItems.Single().FileName);
-#endif
         }
 
         [TestMethod]
@@ -242,11 +224,7 @@ namespace YoFi.Tests.Core
             Assert.IsFalse(string.IsNullOrEmpty(t.ReceiptUrl));
 
             // And: The receipt is contained in storage as expected
-#if RECEIPTSINDB
             var blob = storage.BlobItems.Where(x => x.FileName == ReceiptRepositoryInDb.Prefix + r.ID.ToString()).Single();
-#else
-            var blob = storage.BlobItems.Where(x=>x.FileName == t.ID.ToString()).Single();
-#endif
             Assert.AreEqual(contenttype,blob.ContentType);
 
             // And: There are no more (unassigned) receipts now
@@ -274,11 +252,7 @@ namespace YoFi.Tests.Core
             Assert.IsFalse(string.IsNullOrEmpty(t.ReceiptUrl));
 
             // And: The receipt is contained in storage as expected
-#if RECEIPTSINDB
             var blob = storage.BlobItems.Where(x => x.FileName == $"{ReceiptRepositoryInDb.Prefix}1").Single();
-#else
-            var blob = storage.BlobItems.Where(x=>x.FileName == t.ID.ToString()).Single();
-#endif
             Assert.AreEqual(contenttype, blob.ContentType);
 
             // And: There are no more (unassigned) receipts now
@@ -440,11 +414,7 @@ namespace YoFi.Tests.Core
             // Given: A real tx repository, and a receipt repository build off that
             var mockdc = new MockDataContext();
             txrepo = new TransactionRepository(mockdc,clock,storage);
-#if RECEIPTSINDB
             repository = new ReceiptRepositoryInDb(context, txrepo, storage, clock);
-#else
-            repository = new ReceiptRepository(txrepo, storage,clock);
-#endif
 
             // Given: Several transactions, one of which we care about
             var t = FakeObjects<Transaction>.Make(10).SaveTo(this).Last();
@@ -462,8 +432,6 @@ namespace YoFi.Tests.Core
             Assert.AreEqual("image/png", contenttype);
             Assert.AreEqual(4561, stream.Length);
 
-#if RECEIPTSINDB
-
             // And: The receipt name identifies a receipt which is no longer in the system
             // (because we deleted it)
             var namematch = new Regex($"^{ReceiptRepositoryInDb.Prefix}(?<id>[0-9]+)$");
@@ -472,7 +440,6 @@ namespace YoFi.Tests.Core
 
             var id = int.Parse(match.Groups["id"].Value);
             Assert.IsFalse((await repository.GetAllAsync()).Where(x=>x.ID == id).Any());
-#endif
         }
 
         #endregion
