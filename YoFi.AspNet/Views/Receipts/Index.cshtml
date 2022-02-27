@@ -12,14 +12,16 @@
     }
 }
 
-<input type="hidden" id="xsrf"
-       name="__RequestVerificationToken" value="@GetAntiXsrfRequestToken()">
+<h1>Receipts</h1>
 
-<h1>Index</h1>
+<form method="post" enctype="multipart/form-data" asp-action="Upload">
+    <div class="input-group mb-3 mt-3">
+        <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
+        <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
+    </div>
+</form>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+
 <table class="table" data-test-id="results">
     <thead>
         <tr>
@@ -42,7 +44,10 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+    @foreach (var item in Model) 
+    {
+        var nmatches = item.Matches.Count;
+
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
@@ -60,11 +65,38 @@
                 @Html.DisplayFor(modelItem => item.Filename)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                @if (nmatches == 0)
+                {
+                    <form asp-action="Create">
+                        <input type="hidden" name="id" value="@item.ID" />
+                        <input type="submit" value="Create" class="btn btn-sm btn-primary" />
+                    </form>
+                }
+                else 
+                {
+                    if (nmatches == 1)
+                    {
+                        <form asp-action="Accept">
+                            <input type="hidden" name="id" value="@item.ID" />
+                            <input type="hidden" name="txid" value="@item.Matches.Single().ID" />
+                            <input type="submit" value="Accept" class="btn btn-sm btn-primary" />
+                        </form>
+                    }
+                    <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@item.ID">Review</a>
+                }
+                <form asp-action="Delete">
+                    <input type="hidden" name="id" value="@item.ID" />
+                    <input type="submit" value="Delete" class="btn btn-sm btn-outline-secondary" />
+                </form>
             </td>
         </tr>
-}
+    }
     </tbody>
 </table>
+
+@if (Model.Any(x=>x.Matches.Count == 1))
+{
+    <form asp-action="AcceptAll">
+        <input type="submit" value="Accept All" class="btn btn-primary" />
+    </form>
+}

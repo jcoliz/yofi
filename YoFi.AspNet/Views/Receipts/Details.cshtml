@@ -75,7 +75,11 @@
                         @Html.DisplayFor(modelItem => item.Memo)
                     </td>
                     <td>
-
+                        <form asp-action="Accept">
+                            <input type="hidden" asp-for="ID" />
+                            <input type="hidden" name="txid" value="@item.ID" />
+                            <input type="submit" value="Accept" class="btn btn-primary" />
+                        </form>
                     </td>
                     </tr>
                 }
@@ -89,6 +93,5 @@
 
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
