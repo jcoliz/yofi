@@ -1,8 +1,12 @@
 ﻿@model IEnumerable<YoFi.Core.Models.Receipt>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Receipts";
 }
+
+@*
+    ANTI-FORGERY
+*@
 
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 @functions{
@@ -12,7 +16,19 @@
     }
 }
 
-<h1>Receipts</h1>
+@*
+    PAGE NAVBAR
+*@
+
+<nav class="navbar navbar-light navbar-page mb-3">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+    </div>
+</nav>
+
+@*
+    UPLOAD FILES CONTROL
+*@
 
 <form method="post" enctype="multipart/form-data" asp-action="Upload">
     <div class="input-group mb-3 mt-3">
@@ -21,6 +37,10 @@
     </div>
 </form>
 
+
+@*
+    RESULTS TABLE
+*@
 
 <table class="table" data-test-id="results">
     <thead>
@@ -88,12 +108,20 @@
     </tbody>
 </table>
 
+@*
+    ACCEPT ALL BUTTON
+*@
+
 @if (Model.Any(x=>x.Matches.Count == 1))
 {
     <form asp-action="AcceptAll">
         <input type="submit" value="Accept All" class="btn btn-primary" />
     </form>
 }
+
+@*
+    DETAILS DIALOG
+*@
 
 <div class="buttondialog modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true" data-endpoint="/Receipts/Details">
     <div class="modal-dialog modal-dialog-centered" role="document">
