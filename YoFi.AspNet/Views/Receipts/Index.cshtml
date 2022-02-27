@@ -65,28 +65,22 @@
                 @Html.DisplayFor(modelItem => item.Filename)
             </td>
             <td>
-                @if (nmatches == 0)
-                {
-                    <form asp-action="Create">
-                        <input type="hidden" name="id" value="@item.ID" />
-                        <input type="submit" value="Create" class="btn btn-sm btn-primary" />
-                    </form>
-                }
-                else 
-                {
-                    if (nmatches == 1)
-                    {
-                        <form asp-action="Accept">
-                            <input type="hidden" name="id" value="@item.ID" />
-                            <input type="hidden" name="txid" value="@item.Matches.Single().ID" />
-                            <input type="submit" value="Accept" class="btn btn-sm btn-primary" />
-                        </form>
-                    }
-                    <button class="btn btn-sm btn-secondary" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal">Review</button>
-                }
-                <form asp-action="Delete">
+                <form method="post" asp-action="Action">
                     <input type="hidden" name="id" value="@item.ID" />
-                    <input type="submit" value="Delete" class="btn btn-sm btn-outline-secondary" />
+                    @if (nmatches == 0)
+                    {
+                        <input type="submit" name="command" value="Create" class="btn btn-sm btn-primary" />
+                    }
+                    else
+                    {
+                        if (nmatches == 1)
+                        {
+                            <input type="hidden" name="txid" value="@item.Matches.Single().ID" />
+                            <input type="submit" name="command" value="Accept" class="btn btn-sm btn-primary" />
+                        }
+                        <button type="button" class="btn btn-sm btn-secondary" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal">Review</button>                            
+                    }
+                    <input type="submit" name="command" value="Delete" class="btn btn-sm btn-outline-secondary" />
                 </form>
             </td>
         </tr>

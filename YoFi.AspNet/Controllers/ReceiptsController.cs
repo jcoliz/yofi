@@ -47,6 +47,22 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateReceiptExists]
+        public async Task<IActionResult> Action(int id, string command, int? txid)
+        {
+            switch (command)
+            {
+                case "Delete":
+                    return await Delete(id);
+                case "Accept":
+                    return await Accept(id, txid.Value);
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanWrite")]
+        [ValidateReceiptExists]
         public async Task<IActionResult> Delete(int id)
         {
             await _repository.DeleteAsync(await _repository.GetByIdAsync(id));
