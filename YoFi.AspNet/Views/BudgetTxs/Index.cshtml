@@ -96,7 +96,6 @@ else
                 <th style="text-align:right">
                     Amount
                 </th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -128,9 +127,15 @@ else
                     <td style="text-align:right">
                         @Html.DisplayFor(modelItem => item.Amount)
                     </td>
-                    <td>
-                        <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
-                        <a class="btn btn-outline-secondary btn-sm" asp-action="Delete" asp-route-id="@item.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
+                    <td style="padding-left:0; padding-right:5px">
+                        <a asp-action="Edit" asp-route-id="@item.ID" data-test-id="edit">
+                            <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
+                        </a>
+                    </td>
+                    <td style="padding-left:0; padding-right:5px">
+                        <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete">
+                            <i class="fa fa-trash-alt" data-bs-toggle="tooltip" title="Delete"></i>
+                        </a>
                     </td>
                 </tr>
             }
