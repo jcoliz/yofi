@@ -165,11 +165,6 @@ namespace YoFi.Tests.Core
         [TestMethod]
         public async Task GetOneTransaction()
         {
-            // TODO: This make me realize that the TransactionsForReceipts narrower may be incorrect.
-            // If there is an amount in the receipt, then it will REQUIRE the receipt to have that amount
-            // That's probably not right, because it's still possible to match, with a lesser match score,
-            // even if the amounts are wrong.
-
             // Given: One transaction
             var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
 
@@ -182,6 +177,23 @@ namespace YoFi.Tests.Core
 
             // Then: The transaction is listed among the matches
             var actual = items.Single();
+            Assert.AreEqual(tx, actual.Matches.Single());
+        }
+
+        [TestMethod]
+        public async Task GetOneTransactionViaGetById()
+        {
+            // Given: One transaction
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: One receipt in storage which will match that
+            var filename = $"{tx.Payee} {tx.Timestamp.ToString("MM-dd")}.png";
+            var r = GivenReceiptInStorage(filename);
+
+            // When: Getting The particular receipt
+            var actual = await repository.GetByIdAsync(r.ID);
+
+            // Then: The transaction is listed among the matches
             Assert.AreEqual(tx, actual.Matches.Single());
         }
 
