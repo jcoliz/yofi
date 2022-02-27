@@ -79,8 +79,6 @@ namespace YoFi.Tests.Helpers
             }
         }
 
-        IQueryable<Payee> IDataContext.Payees => throw new NotImplementedException();
-
         IQueryable<BudgetTx> IDataContext.BudgetTxs => BudgetTxs.AsQueryable();
 
         IQueryable<T> IDataContext.Get<T>()

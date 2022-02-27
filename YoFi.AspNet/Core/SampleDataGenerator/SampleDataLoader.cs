@@ -323,22 +323,22 @@ namespace YoFi.Core.SampleGen
             {
                 if (nameof(BudgetTx) == rule)
                 {
-                    if (_context.BudgetTxs.Any())
+                    if (_context.Get<BudgetTx>().Any())
                         return false;
                 }
                 if (nameof(Payee) == rule)
                 {
-                    if (_context.Payees.Any())
+                    if (_context.Get<Payee>().Any())
                         return false;
                 }
                 if (nameof(Transaction) == rule)
                 {
-                    if (_context.Transactions.Any())
+                    if (_context.Get<Transaction>().Any())
                         return false;
                 }
                 if ("Today" == rule)
                 {
-                    if (_context.Transactions.Any(x=>x.Timestamp >= _clock.Now))
+                    if (_context.Get<Transaction>().Any(x=>x.Timestamp >= _clock.Now))
                         return false;
                 }
             }

@@ -280,15 +280,15 @@ namespace YoFi.Tests.Core.SampleGen
             // And: The correct number and type of items are in the database
             if (chosen.Rules.Contains("Today"))
             {
-                Assert.AreEqual(202, context.Transactions.Count());
-                Assert.IsFalse(context.Transactions.Any(x => x.Timestamp > clock.Now));
+                Assert.AreEqual(202, context.Get<Transaction>().Count());
+                Assert.IsFalse(context.Get<Transaction>().Any(x => x.Timestamp > clock.Now));
             }
             if (chosen.Rules.Contains(nameof(Transaction)))
-                Assert.AreEqual(889, context.Transactions.Count());
+                Assert.AreEqual(889, context.Get<Transaction>().Count());
             if (chosen.Rules.Contains(nameof(Payee)))
-                Assert.AreEqual(40, context.Payees.Count());
+                Assert.AreEqual(40, context.Get<Payee>().Count());
             if (chosen.Rules.Contains(nameof(BudgetTx)))
-                Assert.AreEqual(46, context.BudgetTxs.Count());
+                Assert.AreEqual(46, context.Get<BudgetTx>().Count());
         }
 
         [TestMethod]
@@ -305,7 +305,7 @@ namespace YoFi.Tests.Core.SampleGen
             await loader.SeedAsync("txtoday");
 
             // Then: The correct number and type of items are in the database
-            Assert.AreEqual(889, context.Transactions.Count());
+            Assert.AreEqual(889, context.Get<Transaction>().Count());
         }
 
         [ExpectedException(typeof(ApplicationException))]

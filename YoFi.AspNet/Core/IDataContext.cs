@@ -29,10 +29,6 @@ namespace YoFi.Core
         /// </summary>
         IQueryable<Split> SplitsWithTransactions { get; }
         /// <summary>
-        /// Retrieve the payees
-        /// </summary>
-        IQueryable<Payee> Payees { get; }
-        /// <summary>
         /// Retrieve the budget line items
         /// </summary>
         IQueryable<BudgetTx> BudgetTxs { get; }
