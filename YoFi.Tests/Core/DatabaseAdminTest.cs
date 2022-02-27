@@ -23,7 +23,6 @@ namespace YoFi.Tests.Core
             context.Setup(x=>x.ClearAsync<BudgetTx>());
             context.Setup(x=>x.ClearAsync<Transaction>());
             context.Setup(x=>x.ClearAsync<Payee>());
-            context.Setup(x=>x.Transactions).Returns(Enumerable.Empty<Transaction>().AsQueryable());
             context.Setup(x => x.Get<Transaction>()).Returns(Enumerable.Empty<Transaction>().AsQueryable());
             context.Setup(x=>x.Get<Payee>()).Returns(Enumerable.Empty<Payee>().AsQueryable());
             context.Setup(x => x.Get<BudgetTx>()).Returns(Enumerable.Empty<BudgetTx>().AsQueryable());

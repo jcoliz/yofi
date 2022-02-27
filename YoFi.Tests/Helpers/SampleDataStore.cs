@@ -56,7 +56,6 @@ namespace YoFi.Tests.Helpers
             }
         }
 
-        IQueryable<Transaction> IDataContext.Transactions => Transactions.AsQueryable();
 
         IQueryable<Transaction> IDataContext.TransactionsWithSplits => Transactions.AsQueryable();
 
@@ -84,6 +83,10 @@ namespace YoFi.Tests.Helpers
             if (typeof(T) == typeof(BudgetTx))
             {
                 return BudgetTxs.AsQueryable() as IQueryable<T>;
+            }
+            if (typeof(T) == typeof(Transaction))
+            {
+                return Transactions.AsQueryable() as IQueryable<T>;
             }
             throw new NotImplementedException();
         }

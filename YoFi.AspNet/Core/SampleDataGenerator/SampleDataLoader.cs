@@ -259,7 +259,7 @@ namespace YoFi.Core.SampleGen
                 var txs = ssr.Deserialize<Transaction>();
 
                 DateTime last = DateTime.MinValue;
-                var lastq = _context.Transactions.OrderByDescending(x => x.Timestamp).Select(x => x.Timestamp);
+                var lastq = _context.Get<Transaction>().OrderByDescending(x => x.Timestamp).Select(x => x.Timestamp);
                 if (lastq.Any())
                     last = lastq.First();
 

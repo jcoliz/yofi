@@ -215,7 +215,7 @@ namespace YoFi.Core.Reports
         {
             var result = new List<NamedQuery>();
 
-            years = _context.Transactions.Select(x => x.Timestamp.Year).Distinct().ToArray();
+            years = _context.Get<Transaction>().Select(x => x.Timestamp.Year).Distinct().ToArray();
             foreach (var year in years)
             {
                 var txsyear = _context.TransactionsWithSplits.Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
@@ -260,7 +260,7 @@ namespace YoFi.Core.Reports
         /// <returns>Resulting query</returns>
         private NamedQuery QueryTransactions(string top = null, IEnumerable<string> excluded = null)
         {
-            IQueryable<IReportable> result = _context.Transactions
+            IQueryable<IReportable> result = _context.Get<Transaction>()
                 .Where(x => x.Timestamp.Year == Year && x.Hidden != true && x.Timestamp.Month <= Month)
                 .Where(x => !x.Splits.Any());
 

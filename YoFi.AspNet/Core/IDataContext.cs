@@ -17,10 +17,6 @@ namespace YoFi.Core
     {
         #region Entities
         /// <summary>
-        /// Retrieve the Transactions (with no splits)
-        /// </summary>
-        IQueryable<Transaction> Transactions { get; }
-        /// <summary>
         /// Retrieve the Transactions with Splits attached
         /// </summary>
         IQueryable<Transaction> TransactionsWithSplits { get; }

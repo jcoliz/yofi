@@ -47,8 +47,6 @@ namespace YoFi.AspNet.Data
         private static List<Receipt> Receipts { get; set; } = new List<Receipt>();
         private int nextrid = 1;
 
-        IQueryable<Transaction> IDataContext.Transactions => Transactions;
-
         IQueryable<Transaction> IDataContext.TransactionsWithSplits => Transactions.Include(x => x.Splits);
 
         IQueryable<Split> IDataContext.SplitsWithTransactions => Splits.Include(x => x.Transaction);

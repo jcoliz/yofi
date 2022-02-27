@@ -102,7 +102,7 @@ namespace YoFi.Core.Repositories
         public Task<Payee> NewFromTransactionAsync(int txid)
         {
             // TODO: QueryExec SingleAsync()
-            var transaction = _context.Transactions.Where(x => x.ID == txid).Single();
+            var transaction = _context.Get<Transaction>().Where(x => x.ID == txid).Single();
             var result = new Payee() { Category = transaction.Category, Name = transaction.Payee.Trim() };
 
             return Task.FromResult(result);
