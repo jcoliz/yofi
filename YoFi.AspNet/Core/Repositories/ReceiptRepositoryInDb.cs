@@ -87,7 +87,9 @@ namespace YoFi.Core.Repositories
         /// <returns></returns>
         public async Task DeleteAsync(Receipt receipt)
         {
-            _context.Remove(receipt);
+            var query = _context.Get<Receipt>().Where(x => x.ID == receipt.ID);
+            if (await _context.AnyAsync(query))
+                _context.Remove(receipt);
             await _context.SaveChangesAsync();
         }
 

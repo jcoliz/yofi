@@ -42,7 +42,7 @@ namespace YoFi.Tests.Core
             // truth. That's ReceiptRepository. I am debating which is better. I am leaning toward the DB version.
             //
 
-            context = new ReceiptDataContext();
+            context = new MockDataContext();
             repository = new ReceiptRepositoryInDb(context, txrepo, storage, clock);
         }
 
@@ -59,6 +59,7 @@ namespace YoFi.Tests.Core
         {
             var item = Receipt.FromFilename(filename, clock: clock);
             context.Add(item);
+            context.SaveChangesAsync().Wait();
             storage.BlobItems.Add(new TestAzureStorage.BlobItem() { FileName = $"{ReceiptRepositoryInDb.Prefix}{item.ID}", InternalFile = "budget-white-60x.png", ContentType = contenttype });
         }
 
@@ -443,102 +444,5 @@ namespace YoFi.Tests.Core
         }
 
         #endregion
-
-    }
-
-    internal class ReceiptDataContext : IDataContext
-    {
-        int nextid = 1;
-
-        public List<Receipt> Receipts { get; } = new List<Receipt>();
-
-        public void Add(object item)
-        {
-            var receipt = item as Receipt;
-            receipt.ID = nextid++;
-            Receipts.Add(receipt);
-        }
-        public IQueryable<T> Get<T>() where T : class
-        {
-            return Receipts.AsQueryable() as IQueryable<T>;
-        }
-
-        public void Remove(object item)
-        {
-            Receipts.Remove(item as Receipt);
-        }
-
-        public Task SaveChangesAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class
-        {
-            return Task.FromResult(query.ToList());
-        }
-
-        public Task<bool> AnyAsync<T>(IQueryable<T> query) where T : class
-        {
-            return Task.FromResult(query.Any());
-        }
-
-        public IQueryable<Transaction> Transactions => throw new NotImplementedException();
-
-        public IQueryable<Transaction> TransactionsWithSplits => throw new NotImplementedException();
-
-        public IQueryable<Split> Splits => throw new NotImplementedException();
-
-        public IQueryable<Split> SplitsWithTransactions => throw new NotImplementedException();
-
-        public IQueryable<Payee> Payees => throw new NotImplementedException();
-
-        public IQueryable<BudgetTx> BudgetTxs => throw new NotImplementedException();
-
-        public void AddRange(IEnumerable<object> items)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task BulkDeleteAsync<T>(IQueryable<T> items) where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task BulkInsertAsync<T>(IList<T> items) where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns) where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> ClearAsync<T>() where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> CountAsync<T>(IQueryable<T> query) where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public void RemoveRange(IEnumerable<object> items)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(object item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateRange(IEnumerable<object> items)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

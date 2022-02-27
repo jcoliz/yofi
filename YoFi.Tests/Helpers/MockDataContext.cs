@@ -18,6 +18,8 @@ namespace YoFi.Tests.Helpers
 
         public List<Transaction> TransactionData { get; } = new List<Transaction>();
 
+        public List<Receipt> ReceiptData { get; } = new List<Receipt>();
+
         public IQueryable<Transaction> Transactions => TransactionData.AsQueryable();
 
         public IQueryable<Split> Splits => Enumerable.Empty<Split>().AsQueryable();
@@ -65,6 +67,10 @@ namespace YoFi.Tests.Helpers
             {
                 return Splits as IQueryable<T>;
             }
+            if (typeof(T) == typeof(Receipt))
+            {
+                return ReceiptData.AsQueryable() as IQueryable<T>;
+            }
             throw new NotImplementedException();
         }
 
@@ -84,6 +90,10 @@ namespace YoFi.Tests.Helpers
             else if (item.GetType() == typeof(Transaction))
             {
                 TransactionData.Add(item as Transaction);
+            }
+            else if (item.GetType() == typeof(Receipt))
+            {
+                ReceiptData.Add(item as Receipt);
             }
             else
                 throw new NotImplementedException();
@@ -147,6 +157,13 @@ namespace YoFi.Tests.Helpers
                 var index = TransactionData.FindIndex(x => x.ID == btx.ID);
                 TransactionData.RemoveAt(index);
             }
+            else if (t == typeof(Receipt))
+            {
+                var r = item as Receipt;
+
+                var index = ReceiptData.FindIndex(x => x.ID == r.ID);
+                ReceiptData.RemoveAt(index);
+            }
             else
                 throw new NotImplementedException();
         }
@@ -178,6 +195,12 @@ namespace YoFi.Tests.Helpers
             {
                 var nextid = 1 + BudgetTxData.Max(x => x.ID);
                 foreach (var tx in BudgetTxData.Where(x => x.ID == default))
+                    tx.ID += nextid++;
+            }
+            if (ReceiptData.Any())
+            {
+                var nextid = 1 + ReceiptData.Max(x => x.ID);
+                foreach (var tx in ReceiptData.Where(x => x.ID == default))
                     tx.ID += nextid++;
             }
 
@@ -238,6 +261,11 @@ namespace YoFi.Tests.Helpers
             {
                 var theseitems = items as IEnumerable<Transaction>;
                 TransactionData.RemoveAll(x => theseitems.Contains(x));
+            }
+            else if (t == typeof(Receipt))
+            {
+                var theseitems = items as IEnumerable<Receipt>;
+                ReceiptData.RemoveAll(x => theseitems.Contains(x));
             }
             else
                 throw new NotImplementedException();
