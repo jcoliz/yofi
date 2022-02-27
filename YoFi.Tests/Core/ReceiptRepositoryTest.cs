@@ -248,6 +248,23 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]  
+        public async Task AssignReceiptNoMatch()
+        {
+            // Given: A transaction
+            var t = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: One receipt in storage which will NOT match
+            var filename = $"Bogus ${t.Amount * 2} .png";
+            var r = GivenReceiptInStorage(filename);
+
+            // When: Assigning the receipt to the transaction           
+            await repository.AssignReceipt(r, t);
+
+            // Then: Throws exception
+        }
+
+        [TestMethod]
         public async Task AssignReceiptWithMemo()
         {
             // Given: A transaction
