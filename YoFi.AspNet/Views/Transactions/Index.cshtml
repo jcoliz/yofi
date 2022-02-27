@@ -66,6 +66,9 @@
                    asp-route-v="@Model.ToggleSelected">
                     @(Model.ShowSelected?"Cancel Bulk Edit":"Bulk Edit")
                 </a>
+                <a asp-controller="Receipts" asp-action="Index" class="btn">
+                    Match Receipts
+                </a>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#exportHowModal" class="btn">Export</a>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
             </div>
