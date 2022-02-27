@@ -108,21 +108,21 @@
             </td>
             <td>
                 <form method="post" asp-action="Action">
-                    <input type="hidden" name="id" value="@item.ID" />
+                    <input type="hidden" name="id" value="@item.ID"/>
                     @if (nmatches == 0)
                     {
-                        <input type="submit" name="command" value="Create" class="btn btn-sm btn-primary" />
+                        <input type="submit" name="command" value="Create" class="btn btn-sm btn-primary my-1"/>
                     }
                     else
                     {
                         if (nmatches == 1)
                         {
                             <input type="hidden" name="txid" value="@item.Matches.Single().ID" />
-                            <input type="submit" name="command" value="Accept" class="btn btn-sm btn-primary" />
+                            <input type="submit" name="command" value="Accept" class="btn btn-sm btn-primary my-1"/>
                         }
-                        <button type="button" class="btn btn-sm btn-secondary" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal">Review</button>                            
+                        <button type="button" class="btn btn-sm btn-secondary my-1" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal">Review</button>                            
                     }
-                    <input type="submit" name="command" value="Delete" class="btn btn-sm btn-outline-secondary" />
+                    <input type="submit" name="command" value="Delete" class="btn btn-sm btn-outline-secondary my-1" />
                 </form>
             </td>
         </tr>
