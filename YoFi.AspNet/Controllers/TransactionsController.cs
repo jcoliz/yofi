@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.AspNet.Pages.Helpers;
@@ -66,6 +67,9 @@ namespace YoFi.AspNet.Controllers
                 var r = await rrepo.GetByIdAsync(rid.Value);
                 var tx = r.AsTransaction();
 
+                // Now encode receipt information into "ReceiptUrl" field
+                tx.ReceiptUrl = $"{r.Filename} [ID {r.ID}]";
+
                 return View(tx);
             }
             else
@@ -81,9 +85,33 @@ namespace YoFi.AspNet.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "CanWrite")]
         [ValidateModel]
-        public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,BankReference")] Transaction transaction)
+        public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,BankReference,ReceiptUrl")] Transaction transaction, [FromServices] IReceiptRepository rrepo)
         {
+            // Note that if a ReceiptUrl exists on creation, it was encoded there by Create(int) above, and so needs to be 
+            // handled here.
+
+            int? rid = null;
+            if (!string.IsNullOrEmpty(transaction.ReceiptUrl))
+            {
+                // ID is encoded at the end of displayed receipt url as "... [ID 23]"
+                var idregex = new Regex("\\[ID (?<id>[0-9]+)\\]$");
+                var match = idregex.Match(transaction.ReceiptUrl);
+                if (match.Success)
+                {
+                    rid = int.Parse(match.Groups["id"].Value);
+                }
+                transaction.ReceiptUrl = null;
+            }
+
             await _repository.AddAsync(transaction);
+
+            // Now, match the receipt to the newly-added transaction
+            if (rid.HasValue && await rrepo.TestExistsByIdAsync(rid.Value))
+            {
+                var r = await rrepo.GetByIdAsync(rid.Value);
+                await rrepo.AssignReceipt(r,transaction);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -414,7 +442,9 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Transaction>.Upload(List<IFormFile> files) => throw new NotImplementedException();
         Task<IActionResult> IController<Transaction>.Edit(int? id) => Edit(id, null);
 
-        Task<IActionResult> IController<Transaction>.Create() => Create(null, null);
+        Task<IActionResult> IController<Transaction>.Create() => Create(rrepo:null,rid:null);
+
+        Task<IActionResult> IController<Transaction>.Create(Transaction item) => Create(item, rrepo: null);
         #endregion
     }
 }
