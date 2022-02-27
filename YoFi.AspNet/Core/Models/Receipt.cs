@@ -98,7 +98,7 @@ namespace YoFi.Core.Models
 
             if (Amount.HasValue)
             {
-                if (Amount.Value == transaction.Amount)
+                if (Math.Abs(Amount.Value) == Math.Abs(transaction.Amount))
                     result += 100;
             }
 

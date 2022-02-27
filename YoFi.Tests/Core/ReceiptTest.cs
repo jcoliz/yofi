@@ -308,6 +308,22 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public void MatchTxNegativeAmountAndDate()
+        {
+            // Given: A transaction
+            var item = FakeObjects<Transaction>.Make(1,x=>x.Amount = -12.34m ).Single();
+
+            // And: A receipt which exactly matches the amount, but sign is flipped
+            var receipt = new Receipt() { Amount = -item.Amount, Timestamp = item.Timestamp };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 200-point match
+            Assert.AreEqual(200, match);
+        }
+
+        [TestMethod]
         public void MatchTxAmountAndNameAndDate()
         {
             // Given: A transaction
