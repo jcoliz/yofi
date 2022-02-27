@@ -369,8 +369,7 @@ namespace YoFi.Tests.Core
             // Given: No receipts
 
             // When: Deleting a nonexistent receipt
-            var filename = "Uptown Espresso $5.11 1-2.png";
-            await repository.DeleteAsync(new Receipt() { ID = 100, Filename = ReceiptRepository.Prefix + filename });
+            await repository.DeleteAsync(new Receipt() { ID = 100 });
 
             // Then: Fails silently
         }
