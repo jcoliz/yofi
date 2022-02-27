@@ -4,24 +4,33 @@
     <h4>Receipt</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Amount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Amount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Memo)
-        </dt>
-        <dd class = "col-sm-10" data-test-id="memo">
-            @(Model.Memo ?? "...")
-        </dd>
+        @if (!string.IsNullOrEmpty(Model.Name))
+        {
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Name)
+            </dd>           
+        }
+        @if (Model.Amount.HasValue)
+        {
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Amount)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Amount)
+            </dd>            
+        }
+        @if (!string.IsNullOrEmpty(Model.Memo))
+        {
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Memo)
+            </dt>
+            <dd class = "col-sm-10" data-test-id="memo">
+                @Html.DisplayFor(model => model.Memo)
+            </dd>
+        }
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Timestamp)
         </dt>
