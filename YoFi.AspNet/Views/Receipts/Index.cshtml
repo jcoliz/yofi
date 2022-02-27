@@ -23,6 +23,14 @@
 <nav class="navbar navbar-light navbar-page mb-3">
     <div class="container">
         <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+        <div class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </a>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
+            </div>
+        </div>
     </div>
 </nav>
 
@@ -153,3 +161,9 @@
         </div>
     </div>
 </div>
+
+@*
+    HELP DIALOG
+*@
+
+@await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "receipt")

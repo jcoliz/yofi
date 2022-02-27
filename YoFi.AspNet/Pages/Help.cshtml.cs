@@ -140,6 +140,23 @@ namespace YoFi.AspNet.Pages
             },
             new HelpTopic()
             {
+                Key = "receipt",
+
+                Title = "Attaching Receipts",
+
+                Contents = new string[]
+                {
+                    "You can upload receipts to the receipts page, then later match them with your transactions. If you name them according to the expected naming convention, the system can help you find the right transaction.",
+                    "Here’s how you name them: {Payee Name} ${Amount} {MM}-{DD} {Memo}.pdf/png/jpg.",
+                    "For example: Uptown Espresso $5.11 12-29 Afternoon pick-me up.pdf."
+                },
+
+                Button = "Receipts",
+
+                Href = "/Receipts"
+            },
+            new HelpTopic()
+            {
                 Key = "budget",
 
                 Title = "Creating a Budget",
