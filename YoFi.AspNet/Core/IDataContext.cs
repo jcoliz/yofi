@@ -25,10 +25,6 @@ namespace YoFi.Core
         /// </summary>
         IQueryable<Transaction> TransactionsWithSplits { get; }
         /// <summary>
-        /// Retrieve the splits (with no transactions attached)
-        /// </summary>
-        IQueryable<Split> Splits { get; }
-        /// <summary>
         /// Retrieve the splits (with transactions attached)
         /// </summary>
         IQueryable<Split> SplitsWithTransactions { get; }

@@ -51,8 +51,6 @@ namespace YoFi.AspNet.Data
 
         IQueryable<Transaction> IDataContext.Transactions => Transactions;
 
-        IQueryable<Split> IDataContext.Splits => Splits;
-
         IQueryable<BudgetTx> IDataContext.BudgetTxs => BudgetTxs;
 
         IQueryable<Transaction> IDataContext.TransactionsWithSplits => Transactions.Include(x => x.Splits);

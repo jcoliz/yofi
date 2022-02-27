@@ -60,8 +60,6 @@ namespace YoFi.Tests.Helpers
 
         IQueryable<Transaction> IDataContext.TransactionsWithSplits => Transactions.AsQueryable();
 
-        IQueryable<Split> IDataContext.Splits => Enumerable.Empty<Split>().AsQueryable();
-
         IQueryable<Split> IDataContext.SplitsWithTransactions
         {
             get
