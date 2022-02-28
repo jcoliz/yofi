@@ -14,6 +14,7 @@ namespace YoFi.Tests.Functional
     {
         #region User Story 1190: [User Can] Upload receipts independently of transactions
 
+        [TestMethod]
         public async Task NavigateToReceiptsPage()
         {
             /*
@@ -22,6 +23,19 @@ namespace YoFi.Tests.Functional
             When: Clicking on Match Receipts
             Then: On Receipts Page
             */
+
+            // Given: On Transactions Page
+            await WhenNavigatingToPage("Transactions");
+
+            // And: Clicking on Actions
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+            await Page.SaveScreenshotToAsync(TestContext, "Slide 07");
+
+            // When: Clicking on Match Receipts
+            await Page.ClickAsync("text=Match Receipts");
+
+            // Then: On Receipts Page
+            await Page.ThenIsOnPageAsync("Receipts");
         }
 
         public async Task UploadReceipts()
