@@ -42,6 +42,9 @@ namespace YoFi.Core
 
         public async Task ClearTestDataAsync(string id)
         {
+            if (id.Contains("receipt") || "all" == id)
+                _context.RemoveRange(_context.Get<Receipt>().Where(x => x.Memo.Contains(TestMarker) || x.Name.Contains(TestMarker)));
+
             if (id.Contains("payee") || "all" == id)
                 _context.RemoveRange(_context.Get<Payee>().Where(x => x.Category.Contains(TestMarker)));
 
