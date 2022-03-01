@@ -38,7 +38,7 @@ namespace YoFi.Tests.Functional
 
         #endregion
 
-        #region User Story 1190: [User Can] Upload receipts independently of transactions
+        #region Init/Cleanup
 
         [TestCleanup]
         public async Task Cleanup()
@@ -51,6 +51,10 @@ namespace YoFi.Tests.Functional
             api.SetUp(TestContext);
             await api.ClearTestData("receipt");
         }
+
+        #endregion
+
+        #region User Story 1190: [User Can] Upload receipts independently of transactions
 
         [TestMethod]
         public async Task NavigateToReceiptsPage()
