@@ -320,6 +320,7 @@ namespace YoFi.Tests.Functional
 
         #region User Story 1192: [User Can] Delete uploaded receipts before matching them to a transaction
 
+        [TestMethod]
         public async Task Delete()
         {
             /*
@@ -327,6 +328,30 @@ namespace YoFi.Tests.Functional
             When: Deleting it
             Then: No receipts shown on the page
             */
+
+            // Given: On receipts page
+            await NavigateToReceiptsPage();
+
+            // And: With an uploaded unmatched receipt
+            // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
+            var filenames = new[]
+            {
+                // Matches none
+                $"Create Me $12.34 12-21 {testmarker}.png"
+            };
+            await WhenUploadingSampleReceipts(filenames);
+            await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
+
+            // When: Deleting it
+            var deletebutton = await Page.QuerySelectorAsync("table[data-test-id=results] tbody input[value=Delete]");
+            Assert.IsNotNull(deletebutton);
+            await deletebutton.ClickAsync();
+            await Page.SaveScreenshotToAsync(TestContext, "Deleted");
+
+            // Then: No receipts shown on the page
+            var table = await ResultsTable.ExtractResultsFrom(Page);
+            Assert.IsNotNull(table);
+            Assert.IsFalse(table.Rows.Any());
         }
 
         #endregion
