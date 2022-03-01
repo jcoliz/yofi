@@ -305,15 +305,57 @@ namespace YoFi.Tests.Functional
             */
         }
 
+        [TestMethod]
         public async Task MemoInTransaction()
         {
             /*
-            Given: A receipt which matches an existing transaction and contains a memo
+            Given: An existing transaction 
+            And: A receipt which matches that existing transaction and contains a memo
             When: Accept All
             And: Navigating to Transactions Page
             And: Searching for the affected Transaction
             Then: The memo of the transaction matches the memo from the receipt
             */
+
+            // Given: An existing transaction 
+
+            await WhenNavigatingToPage("Transactions");
+            var name = NextName;
+            var date = new DateTime(2022, 12, 31);
+            var amount = 1234.56m;
+            await WhenCreatingTransaction(Page, new Dictionary<string, string>()
+            {
+                { "Payee", name },
+                { "Timestamp", date.ToString("yyyy-MM-dd") },
+                { "Amount", amount.ToString() },
+            });
+            await Page.SaveScreenshotToAsync(TestContext, "Created Tx");
+
+            // And: A receipt which matches that existing transaction and contains a unique memo
+            await NavigateToReceiptsPage();
+            var filenames = new[]
+            {
+                // Matches tx
+                $"{name} ${amount} {date.Month}-{date.Day} {name}.png"
+            };
+            await WhenUploadingSampleReceipts(filenames);
+            await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
+
+            // When: Accept All
+            await Page.ClickAsync("data-test-id=accept-all");
+            await Page.SaveScreenshotToAsync(TestContext, "Accept All");
+
+            // And: Navigating to Transactions Page
+            await WhenNavigatingToPage("Transactions");
+
+            // And: Searching for the affected Transaction
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext, "Find Marked");
+
+            // Then: The memo of the transaction matches the unique memo from the receipt
+            var txtable = await ResultsTable.ExtractResultsFrom(Page);
+            Assert.AreEqual(1, txtable.Rows.Count);
+            Assert.AreEqual(name, txtable.Rows[0]["Memo"]);
         }
 
         #endregion
