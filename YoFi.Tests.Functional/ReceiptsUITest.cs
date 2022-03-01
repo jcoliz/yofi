@@ -112,10 +112,8 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext, "Slide 10");
 
             // Then: Results displayed match number and composition of expected receipts
-            var results = await Page.QuerySelectorAsync("table[data-test-id=results]");
-            Assert.IsNotNull(results);
-            var table = new ResultTable();
-            await table.PopulateFromElement(results);
+            var table = await ResultTable.ExtractResultsFrom(Page);
+            Assert.IsNotNull(table);
 
             // Correct count
             Assert.AreEqual(4, table.Rows.Count);
@@ -145,25 +143,31 @@ namespace YoFi.Tests.Functional
             public List<string> Columns { get; } = new List<string>();
             public List<Dictionary<string, string>> Rows { get; } = new List<Dictionary<string, string>>();
 
-            public async Task PopulateFromElement(IElementHandle handle)
+            public static async Task<ResultTable> ExtractResultsFrom(IPage page)
             {
-                var headers_el = await handle.QuerySelectorAllAsync("thead th");
-                foreach(var el in headers_el)
+                var table = new ResultTable();
+
+                var table_el = await page.QuerySelectorAsync("table[data-test-id=results]");
+                if (table_el is null)
+                    return null;
+
+                var headers_el = await table_el.QuerySelectorAllAsync("thead th");
+                foreach (var el in headers_el)
                 {
                     var text = await el.TextContentAsync();
                     var header = text.Trim();
-                    Columns.Add(header);
+                    table.Columns.Add(header);
                 }
 
-                var rows_el = await handle.QuerySelectorAllAsync("tbody tr");
+                var rows_el = await table_el.QuerySelectorAllAsync("tbody tr");
                 foreach (var row_el in rows_el)
                 {
-                    var row = new Dictionary<string,string>();
-                    var col_enum = Columns.GetEnumerator();
+                    var row = new Dictionary<string, string>();
+                    var col_enum = table.Columns.GetEnumerator();
                     col_enum.MoveNext();
 
                     var cells_el = await row_el.QuerySelectorAllAsync("td");
-                    foreach(var cell_el in cells_el)
+                    foreach (var cell_el in cells_el)
                     {
                         var text = await cell_el.TextContentAsync();
                         var cell = text.Trim();
@@ -183,8 +187,10 @@ namespace YoFi.Tests.Functional
                         }
                     }
 
-                    Rows.Add(row);
+                    table.Rows.Add(row);
                 }
+
+                return table;
             }
         }
 
