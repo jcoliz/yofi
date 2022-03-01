@@ -1,11 +1,8 @@
 ﻿using Microsoft.Playwright;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using YoFi.Tests.Functional.Helpers;
 
 namespace YoFi.Tests.Functional
 {
@@ -15,6 +12,31 @@ namespace YoFi.Tests.Functional
     [TestClass]
     public class ReceiptsUITest : FunctionalUITest
     {
+        #region Helpers
+
+        protected async Task WhenUploadingSampleReceipts(string[] filenames)
+        {
+            // Conjure up some bytes (the bytes don't really matter)
+            byte[] bytes = Enumerable.Range(0, 255).Select(i => (byte)i).ToArray();
+
+            // Make file payloads out of them
+            var payloads = filenames.Select(x =>
+                new FilePayload()
+                {
+                    Name = x,
+                    MimeType = "image/png",
+                    Buffer = bytes
+                }
+            );
+
+            await Page.ClickAsync("[aria-label=Upload]");
+            await Page.SetInputFilesAsync("[aria-label=Upload]", payloads);
+            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.ClickAsync("data-test-id=btn-create-receipt");
+        }
+
+        #endregion
+
         #region User Story 1190: [User Can] Upload receipts independently of transactions
 
         [TestCleanup]
@@ -51,8 +73,12 @@ namespace YoFi.Tests.Functional
             // When: Clicking on Match Receipts
             await Page.ClickAsync("text=Match Receipts");
 
+            // And: Dismissing any help text
+            await DismissHelpTest();
+
             // Then: On Receipts Page
             await Page.ThenIsOnPageAsync("Receipts");
+
         }
 
         [TestMethod]
@@ -66,53 +92,26 @@ namespace YoFi.Tests.Functional
 
             // Given: On receipts page
             await NavigateToReceiptsPage();
-
-            // And: Dismissing any help text
-            await DismissHelpTest();
             await Page.SaveScreenshotToAsync(TestContext, "Slide 08");
 
-            //
             // When: Uploading many files with differing name compositions
-            //
-            // TODO: Make this stuff a helper class
-
-            // Conjure up some bytes (the bytes don't really matter)
-            byte[] bytes = Enumerable.Range(0,255).Select(i => (byte)i).ToArray();
-
             // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
             var filenames = new[]
             {
                 // Matches exactly one
                 "Olive Garden $130.85 __TEST__.png",
-
                 // Matches exactly one
                 "Waste Management 12-27 __TEST__.png",
-
                 // Matches many
                 "Uptown Espresso (__TEST__).png",
-
                 // Matches none
                 "Create Me $12.34 12-21 __TEST__.png"
             };
-
-            // Make file payloads out of them
-            var payloads = filenames.Select(x =>
-                new FilePayload()
-                {
-                    Name = x,
-                    MimeType = "image/png",
-                    Buffer = bytes
-                }
-            );
-
-            await Page.ClickAsync("[aria-label=Upload]");
-            await Page.SetInputFilesAsync("[aria-label=Upload]", payloads);
-            await Page.SaveScreenshotToAsync(TestContext);
-            await Page.ClickAsync("data-test-id=btn-create-receipt");
+            await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Slide 10");
 
             // Then: Results displayed match number and composition of expected receipts
-            var table = await ResultTable.ExtractResultsFrom(Page);
+            var table = await ResultsTable.ExtractResultsFrom(Page);
             Assert.IsNotNull(table);
 
             // Correct count
@@ -138,61 +137,6 @@ namespace YoFi.Tests.Functional
             }
         }
 
-        protected class ResultTable
-        {
-            public List<string> Columns { get; } = new List<string>();
-            public List<Dictionary<string, string>> Rows { get; } = new List<Dictionary<string, string>>();
-
-            public static async Task<ResultTable> ExtractResultsFrom(IPage page)
-            {
-                var table = new ResultTable();
-
-                var table_el = await page.QuerySelectorAsync("table[data-test-id=results]");
-                if (table_el is null)
-                    return null;
-
-                var headers_el = await table_el.QuerySelectorAllAsync("thead th");
-                foreach (var el in headers_el)
-                {
-                    var text = await el.TextContentAsync();
-                    var header = text.Trim();
-                    table.Columns.Add(header);
-                }
-
-                var rows_el = await table_el.QuerySelectorAllAsync("tbody tr");
-                foreach (var row_el in rows_el)
-                {
-                    var row = new Dictionary<string, string>();
-                    var col_enum = table.Columns.GetEnumerator();
-                    col_enum.MoveNext();
-
-                    var cells_el = await row_el.QuerySelectorAllAsync("td");
-                    foreach (var cell_el in cells_el)
-                    {
-                        var text = await cell_el.TextContentAsync();
-                        var cell = text.Trim();
-
-                        var col = col_enum.Current;
-                        if (col != null)
-                        {
-                            row[col] = cell;
-                            col_enum.MoveNext();
-                        }
-                        else
-                        {
-                            var testid = await cell_el.GetAttributeAsync("data-test-id");
-                            var testvalue = await cell_el.GetAttributeAsync("data-test-value");
-                            if (testid != null && testvalue != null)
-                                row[testid] = testvalue;
-                        }
-                    }
-
-                    table.Rows.Add(row);
-                }
-
-                return table;
-            }
-        }
 
         public async Task UploadMatching()
         {
