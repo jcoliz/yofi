@@ -136,7 +136,7 @@
 @if (Model.Any(x=>x.Matches.Count == 1))
 {
     <form asp-action="AcceptAll">
-        <input type="submit" value="Accept All" class="btn btn-primary" />
+        <input type="submit" value="Accept All" class="btn btn-primary" data-test-id="accept-all" />
     </form>
 }
 

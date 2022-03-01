@@ -234,8 +234,11 @@ else
                     <td style="padding-left:0; padding-right:5px">
                         <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush" data-bs-toggle="tooltip" title="Apply Payee"></i></a>
                     </td>
-                    <td style="padding-left:0; padding-right:0" class="display-receipt">
-                        @if (!string.IsNullOrEmpty(item.ReceiptUrl)) //(item.HasReceipt) // This is a DTO construct
+                    @{
+                        var hasreceipt = !string.IsNullOrEmpty(item.ReceiptUrl);
+                    }
+                    <td style="padding-left:0; padding-right:0" class="display-receipt" data-test-id="Receipt" data-test-value="@hasreceipt">
+                        @if (hasreceipt) //(item.HasReceipt) // This is a DTO construct
                         {
                             <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="far fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
                         }

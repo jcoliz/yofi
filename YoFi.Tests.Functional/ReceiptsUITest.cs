@@ -1,5 +1,6 @@
 ﻿using Microsoft.Playwright;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -49,7 +50,7 @@ namespace YoFi.Tests.Functional
 
             var api = new ApiKeyTest();
             api.SetUp(TestContext);
-            await api.ClearTestData("receipt");
+            await api.ClearTestData("all");
         }
 
         #endregion
@@ -172,6 +173,7 @@ namespace YoFi.Tests.Functional
                 ("Create Me $12.34 12-21 __TEST__.png",0)
             };
             await WhenUploadingSampleReceipts(receipts.Select(x=>x.name));
+            await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
 
             // Then: Matching receipts are found and shown, as expected, with matches shown as expected
             var table = await ResultsTable.ExtractResultsFrom(Page);
@@ -187,14 +189,97 @@ namespace YoFi.Tests.Functional
 
         #region User Story 1191: [User Can] Accept automatically matched receipts to transactions 
 
+        [TestMethod]
         public async Task AcceptAll()
         {
             /*
-            Given: Many receipts with differing name compositions, some of which will exactly match the transactions
+            Given: A set of transactions
+            And: On receipts page
+            And: Many receipts with differing name compositions, some of which will exactly match the transactions
             When: Accept All
             Then: The receipts which have a single match are all assigned to that transaction
             And: The receipts are removed from the display
             */
+
+            // Given: A set of transactions
+            await WhenNavigatingToPage("Transactions");
+
+            var names = new string[]
+            {
+                NextName, NextName, NextName, NextName
+            };
+
+            var date = new DateTime(2022, 12, 31);
+            var transactions = new List<(string name, decimal amount, DateTime date)>()
+            {
+                (names[0],100m,date), // 12-31
+                (names[0],200m,date - TimeSpan.FromDays(1)), // 12-30
+                (names[0],300m,date - TimeSpan.FromDays(2)), // 12-29
+                (names[1],100m,date - TimeSpan.FromDays(3)), // 12-28
+                (names[2],100m,date - TimeSpan.FromDays(4)),
+                (names[2],200m,date - TimeSpan.FromDays(5)),
+                (names[2],300m,date - TimeSpan.FromDays(6)),
+                (names[2],400m,date - TimeSpan.FromDays(7)),
+            };
+
+            foreach (var tx in transactions)
+            {
+                await WhenCreatingTransaction(Page, new Dictionary<string, string>()
+                {
+                    { "Payee", tx.name },
+                    { "Timestamp", tx.date.ToString("yyyy-MM-dd") },
+                    { "Amount", tx.amount.ToString() },
+                });
+            }
+            await Page.SaveScreenshotToAsync(TestContext, "CreatedTx");
+
+            // And: On receipts page
+            await NavigateToReceiptsPage();
+
+            // And: Uploading many files with differing name compositions, some of which will exactly match the transactions
+            var receipts = new (string name, int matches)[]
+            {
+                // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
+                ($"{names[0]} $200 __TEST__.png",3),
+                // Matches exactly one
+                ($"{names[1]} 12-28 __TEST__ 1.png",1),
+                // Matches many
+                ($"{names[2]} (__TEST__).png",4),
+                // Matches none
+                ($"{names[3]} $12.34 12-28 __TEST__.png",0)
+            };
+
+            await WhenUploadingSampleReceipts(receipts.Select(x => x.name));
+            await Page.SaveScreenshotToAsync(TestContext, "Slide 12");
+
+            // When: Accept All
+            await Page.ClickAsync("data-test-id=accept-all");
+            await Page.SaveScreenshotToAsync(TestContext, "Slide 13");
+
+            // Then: The receipts are removed from the display
+            // (Receipt for names[1] is gone)
+            var table = await ResultsTable.ExtractResultsFrom(Page);
+            Assert.AreEqual(3, table.Rows.Count);
+            Assert.IsFalse(table.Rows.Any(x=>x["Name"] == names[1]));
+
+            // And: The receipts which have a single match are all assigned to that transaction
+
+            // Go to transactions page
+            await WhenNavigatingToPage("Transactions");
+
+            // Search for test marker
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext,"FindMarked");
+
+            // Extract those results
+            var txtable = await ResultsTable.ExtractResultsFrom(Page);
+
+            // There is only one with a receipt
+            var found = txtable.Rows.Where(x => x["Receipt"] == "True");
+            Assert.AreEqual(1,found.Count());
+
+            // The one with a receipt has name=names[1]
+            Assert.AreEqual(names[1],found.First()["Payee"]);
         }
 
         #endregion

@@ -105,6 +105,15 @@ namespace YoFi.Tests.Functional
             await DismissHelpTest();
         }
 
+        protected async Task WhenCreatingTransaction(IPage page, Dictionary<string, string> values)
+        {
+            await page.ClickAsync("#dropdownMenuButtonAction");
+            await page.ClickAsync("text=Create New");
+            await page.FillFormAsync(values);
+            await page.SaveScreenshotToAsync(TestContext);
+            await page.ClickAsync("input:has-text(\"Create\")");
+        }
+
         protected async Task GivenPayeeInDatabase(string category, string name)
         {
             // Given: We are starting at the payee index page

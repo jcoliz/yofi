@@ -52,10 +52,18 @@ namespace YoFi.Tests.Functional.Helpers
                     }
                     else
                     {
-                        var testid = await cell_el.GetAttributeAsync("data-test-id");
-                        var testvalue = await cell_el.GetAttributeAsync("data-test-value");
-                        if (testid != null && testvalue != null)
-                            row[testid] = testvalue;
+                        try
+                        {
+                            var testid = await cell_el.GetAttributeAsync("data-test-id");
+                            var testvalue = await cell_el.GetAttributeAsync("data-test-value");
+                            if (testid != null && testvalue != null)
+                                row[testid] = testvalue;
+                        }
+                        catch
+                        {
+                            // THis is a hack, because I don't know how to test if an element HAS
+                            // an attribute or not
+                        }
                     }
                 }
 
