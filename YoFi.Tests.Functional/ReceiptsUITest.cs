@@ -1,5 +1,6 @@
 ﻿using Microsoft.Playwright;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Tests.Functional.Helpers;
@@ -14,7 +15,7 @@ namespace YoFi.Tests.Functional
     {
         #region Helpers
 
-        protected async Task WhenUploadingSampleReceipts(string[] filenames)
+        protected async Task WhenUploadingSampleReceipts(IEnumerable<string> filenames)
         {
             // Conjure up some bytes (the bytes don't really matter)
             byte[] bytes = Enumerable.Range(0, 255).Select(i => (byte)i).ToArray();
@@ -137,7 +138,7 @@ namespace YoFi.Tests.Functional
             }
         }
 
-
+        [TestMethod]
         public async Task UploadMatching()
         {
             /*
@@ -146,6 +147,36 @@ namespace YoFi.Tests.Functional
             When: Uploading many files with differing name compositions, some of which will exactly match the transactions
             Then: Matching receipts are found and shown, as expected, with matches shown as expected
             */
+
+            // Given: A set of transactions
+            // (Will use the transactions already in place from sample data. Note that these receipts are precisely
+            // tuned to the exact contents of the expected sample data)
+
+            // And: On receipts page
+            await NavigateToReceiptsPage();
+
+            // When: Uploading many files with differing name compositions, some of which will exactly match the transactions
+            var receipts = new (string name,int matches)[]
+            {
+                // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
+                ("Olive Garden $130.85 __TEST__.png",4),
+                // Matches exactly one
+                ("Waste Management 12-27 __TEST__.png",1),
+                // Matches many
+                ("Uptown Espresso (__TEST__).png",5),
+                // Matches none
+                ("Create Me $12.34 12-21 __TEST__.png",0)
+            };
+            await WhenUploadingSampleReceipts(receipts.Select(x=>x.name));
+
+            // Then: Matching receipts are found and shown, as expected, with matches shown as expected
+            var table = await ResultsTable.ExtractResultsFrom(Page);
+            Assert.IsNotNull(table);
+
+            for(int i = 0; i < table.Rows.Count; i++)
+            {
+                Assert.AreEqual(receipts[i].matches, int.Parse( table.Rows[i]["Matches"]), $"For {table.Rows[i]["Filename"]}" );
+            }
         }
 
         #endregion
