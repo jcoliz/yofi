@@ -105,13 +105,13 @@ namespace YoFi.Tests.Functional
             var filenames = new[]
             {
                 // Matches exactly one
-                "Olive Garden $130.85 __TEST__.png",
+                $"Olive Garden $130.85 {testmarker}.png",
                 // Matches exactly one
-                "Waste Management 12-27 __TEST__.png",
+                $"Waste Management 12-27 {testmarker}.png",
                 // Matches many
-                "Uptown Espresso (__TEST__).png",
+                $"Uptown Espresso ({testmarker}).png",
                 // Matches none
-                "Create Me $12.34 12-21 __TEST__.png"
+                $"Create Me $12.34 12-21 {testmarker}.png"
             };
             await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Slide 10");
@@ -124,7 +124,7 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(4, table.Rows.Count);
 
             // Memo is "__TEST__" on all
-            Assert.IsTrue(table.Rows.All(x => x["Memo"] == "__TEST__"));
+            Assert.IsTrue(table.Rows.All(x => x["Memo"] == testmarker));
 
             // Spot check values (Note that these are all subject to culture variablility)
             Assert.AreEqual("Olive Garden",table.Rows[0]["Name"]);
@@ -164,13 +164,13 @@ namespace YoFi.Tests.Functional
             var receipts = new (string name,int matches)[]
             {
                 // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
-                ("Olive Garden $130.85 __TEST__.png",4),
+                ($"Olive Garden $130.85 {testmarker}.png",4),
                 // Matches exactly one
-                ("Waste Management 12-27 __TEST__.png",1),
+                ($"Waste Management 12-27 {testmarker}.png",1),
                 // Matches many
-                ("Uptown Espresso (__TEST__).png",5),
+                ($"Uptown Espresso ({testmarker}).png",5),
                 // Matches none
-                ("Create Me $12.34 12-21 __TEST__.png",0)
+                ($"Create Me $12.34 12-21 {testmarker}.png",0)
             };
             await WhenUploadingSampleReceipts(receipts.Select(x=>x.name));
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
@@ -240,13 +240,13 @@ namespace YoFi.Tests.Functional
             var receipts = new (string name, int matches)[]
             {
                 // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
-                ($"{names[0]} $200 __TEST__.png",3),
+                ($"{names[0]} $200 {testmarker}.png",3),
                 // Matches exactly one
-                ($"{names[1]} 12-28 __TEST__ 1.png",1),
+                ($"{names[1]} 12-28 {testmarker} 1.png",1),
                 // Matches many
-                ($"{names[2]} (__TEST__).png",4),
+                ($"{names[2]} ({testmarker}).png",4),
                 // Matches none
-                ($"{names[3]} $12.34 12-28 __TEST__.png",0)
+                ($"{names[3]} $12.34 12-28 {testmarker}.png",0)
             };
 
             await WhenUploadingSampleReceipts(receipts.Select(x => x.name));
