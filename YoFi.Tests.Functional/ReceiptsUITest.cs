@@ -339,9 +339,7 @@ namespace YoFi.Tests.Functional
             var matchamount = await GivenReceiptWithMultipleMatchingTransactions(name,numtx);
 
             // When: Clicking "Review"
-            var reviewbutton = Page.Locator("button[data-test-id=review]");
-            Assert.IsTrue(await reviewbutton.IsVisibleAsync());
-            await reviewbutton.ClickAsync();
+            await Page.ClickAsync("button[data-test-id=review]");
             var detailsModal = Page.Locator("div#detailsModal");
             await detailsModal.WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Visible });
             await Task.Delay(500);
@@ -375,9 +373,7 @@ namespace YoFi.Tests.Functional
             var matchamount = await GivenReceiptWithMultipleMatchingTransactions(name, numtx);
 
             // And: Having clicked "Review"
-            var reviewbutton = Page.Locator("button[data-test-id=review]");
-            Assert.IsTrue(await reviewbutton.IsVisibleAsync());
-            await reviewbutton.ClickAsync();
+            await Page.ClickAsync("button[data-test-id=review]");
             await Page.Locator("div#detailsModal").WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Visible } );
             await Task.Delay(500);
             await Page.SaveScreenshotToAsync(TestContext, "Slide 16");
@@ -486,9 +482,7 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
 
             // When: Deleting it
-            var deletebutton = await Page.QuerySelectorAsync("[aria-label=Delete]");
-            Assert.IsNotNull(deletebutton);
-            await deletebutton.ClickAsync();
+            await Page.ClickAsync("[aria-label=Delete]");
             await Page.SaveScreenshotToAsync(TestContext, "Deleted");
 
             // Then: No receipts shown on the page
