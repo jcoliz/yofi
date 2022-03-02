@@ -496,5 +496,33 @@ namespace YoFi.Tests.Functional
         }
 
         #endregion
+
+        #region User Story 1311: [User Can] Create a new transaction from an uploaded receipt
+
+        public Task CreateDetails()
+        {
+            /*
+            Given: A receipt which does not match any transaction
+            When: Clicking "Create"
+            Then: On the transaction create page with correct details
+             */
+
+            return Task.CompletedTask;
+        }
+
+        public Task CreateSave()
+        {
+            /*
+            Given: A receipt which does not match any transaction
+            And: On the transaction create page with correct details
+            When: Clicking "Save"
+            Then: Transaction is created with attached receipt
+             */
+
+            return Task.CompletedTask;
+        }
+
+
+        #endregion
     }
 }
