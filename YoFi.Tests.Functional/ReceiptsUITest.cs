@@ -288,23 +288,13 @@ namespace YoFi.Tests.Functional
 
         #region User Story 1310: [User Can] Manually choose among possible matches for uploaded receipts when no direct match is found
 
-        [TestMethod]
-        public async Task ReviewMatches()
+        public async Task<decimal> GivenReceiptWithMultipleMatchingTransactions(string name, int numtx)
         {
-            /*
-            Given: Several transactions
-            And: A receipt which will match the transactions
-            When: Tapping “review”
-            Then: The receipts which match the selected transaction are shown
-            */
-
             // Given: Several Transactions
             await WhenNavigatingToPage("Transactions");
-            var name = NextName;
             var date = new DateTime(2022, 12, 31);
             var amount = 1234.56m;
             var matchamount = amount + 100m;
-            var numtx = 3;
             for (int i = 0; i < numtx; i++)
             {
                 await WhenCreatingTransaction(Page, new Dictionary<string, string>()
@@ -326,6 +316,25 @@ namespace YoFi.Tests.Functional
             await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Slide 15");
 
+            return matchamount;
+        }
+
+        [TestMethod]
+        public async Task ReviewMatches()
+        {
+            /*
+            Given: Several transactions
+            And: A receipt which will match the transactions
+            When: Tapping “review”
+            Then: The receipts which match the selected transaction are shown
+            */
+
+            // Given: Several Transactions
+            // And: A receipt which will match the transactions
+            var name = NextName;
+            var numtx = 3;
+            var matchamount = await GivenReceiptWithMultipleMatchingTransactions(name,numtx);
+
             // When: Clicking "Review"
             var reviewbutton = await Page.QuerySelectorAsync("button[data-test-id=review]");
             Assert.IsNotNull(reviewbutton);
@@ -346,6 +355,7 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(matchamount,actual_amount);
         }
 
+        [TestMethod]
         public async Task AcceptChosenMatch()
         {
             /*
@@ -354,6 +364,44 @@ namespace YoFi.Tests.Functional
             Then: The receipt is added to the selected transaction
             And: The receipt is removed from the display
             */
+
+            // Given: Several Transactions
+            // And: A receipt which will match the transactions
+            var name = NextName;
+            var numtx = 3;
+            var matchamount = await GivenReceiptWithMultipleMatchingTransactions(name, numtx);
+
+            // And: Having clicked "Review"
+            var reviewbutton = await Page.QuerySelectorAsync("button[data-test-id=review]");
+            Assert.IsNotNull(reviewbutton);
+            await reviewbutton.ClickAsync();
+            await Page.WaitForSelectorAsync("div#detailsModal", new PageWaitForSelectorOptions() { State = WaitForSelectorState.Visible });
+            await Task.Delay(500);
+            await Page.SaveScreenshotToAsync(TestContext, "Slide 16");
+
+            // When: Tapping “Match”
+            await Page.ClickAsync("div#detailsModal >> tr[data-test-id=line-1] >> input[type=\"submit\"]");
+            await Task.Delay(500);
+            await Page.SaveScreenshotToAsync(TestContext, "Slide 17");
+
+            // Then: No receipts shown on the page
+            var table = await ResultsTable.ExtractResultsFrom(Page);
+            Assert.IsNotNull(table);
+            Assert.IsFalse(table.Rows.Any());
+
+            // And: Navigating to Transactions Page
+            await WhenNavigatingToPage("Transactions");
+
+            // And: Searching for the affected Transaction
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext, "Find Marked");
+
+            // Then: The only transaction with a receipt is the one with the correct amount
+            var txtable = await ResultsTable.ExtractResultsFrom(Page);
+            var found = txtable.Rows.Where(x => x["Receipt"] == "True");
+            Assert.AreEqual(1, found.Count());
+            var actual_amount = decimal.Parse(found.First()["Amount"], NumberStyles.Currency);
+            Assert.AreEqual(matchamount, actual_amount);
         }
 
         [TestMethod]
