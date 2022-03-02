@@ -204,9 +204,7 @@ namespace YoFi.Tests.Functional
             await Read();
 
             // When: Clicking delete on first item in list
-            var deletebutton = await Page.QuerySelectorAsync("[aria-label=\"Delete\"]");
-            Assert.IsNotNull(deletebutton);
-            await deletebutton.ClickAsync();
+            await Page.Locator("[aria-label=\"Delete\"]").First.ClickAsync();
 
             // Then: We land at the delete page
             await Page.ThenIsOnPageAsync("Delete Budget Line Item");
@@ -254,8 +252,7 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext);
 
             // And: The first item shown has the newly created memo
-            var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=memo");
-            var text = await element.TextContentAsync();
+            var text = await Page.Locator("data-test-id=memo").First.TextContentAsync();
             var actual = text.Trim();
 
             Assert.AreEqual(memotext, actual);
@@ -290,8 +287,7 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext);
 
             // And: The first item shown has the newly created memo
-            var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=memo");
-            var text = await element.TextContentAsync();
+            var text = await Page.Locator("data-test-id=memo").First.TextContentAsync();
             var actual = text.Trim();
 
             Assert.AreEqual(newmemo, actual);
@@ -308,15 +304,12 @@ namespace YoFi.Tests.Functional
             await CreateWithMemo();
 
             // When: Clicking delete on first item in list
-            var deletebutton = await Page.QuerySelectorAsync("[aria-label=\"Delete\"]");
-            Assert.IsNotNull(deletebutton);
-            await deletebutton.ClickAsync();
+            await Page.ClickAsync("[aria-label=\"Delete\"]");
             await Page.ThenIsOnPageAsync("Delete Budget Line Item");
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Deleted");
 
             // Then: The memo is shown when confirming details of what to delete
-            var element = await Page.QuerySelectorAsync("data-test-id=memo");
-            var text = await element.TextContentAsync();
+            var text = await Page.Locator("data-test-id=memo").TextContentAsync();
             var actual = text.Trim().ToLowerInvariant();
 
             Assert.IsTrue(actual.Contains("memo"));
@@ -416,8 +409,7 @@ namespace YoFi.Tests.Functional
 
             // And: The first item shown has the newly created frequency
             await Page.SearchFor(testmarker);
-            var freq = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=freq");
-            var freqtext = await freq.TextContentAsync();
+            var freqtext = await Page.Locator("data-test-id=freq").First.TextContentAsync();
             var actual = freqtext.Trim();
 
             Assert.AreEqual(text, actual);
@@ -453,8 +445,7 @@ namespace YoFi.Tests.Functional
 
             // And: The first item shown has the newly created frequency
             await Page.SearchFor(testmarker);
-            var element = await Page.QuerySelectorAsync("data-test-id=line-1 >> data-test-id=freq");
-            var text = await element.TextContentAsync();
+            var text = await Page.Locator("data-test-id=freq").First.TextContentAsync();
             var actual = text.Trim();
 
             Assert.AreEqual(frequency_text, actual);
