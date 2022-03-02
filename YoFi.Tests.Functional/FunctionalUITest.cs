@@ -1,4 +1,6 @@
-﻿using jcoliz.OfficeOpenXml.Serializer;
+﻿#undef VERBOSE_SCREENSHOTS
+
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -44,10 +46,10 @@ namespace YoFi.Tests.Functional
             await page.GotoAsync(Properties.Url);
 
             // Are we already logged in?
-            var hellouser = await page.QuerySelectorAsync("data-test-id=hello-user");
+            var hellouser_visible = await page.Locator("data-test-id=hello-user").IsVisibleAsync();
 
             // If we're not already logged in, well we need to do that then
-            if (null == hellouser)
+            if (!hellouser_visible)
             {
                 Console.WriteLine("Logging in...");
 
@@ -66,8 +68,8 @@ namespace YoFi.Tests.Functional
                 Assert.IsTrue(content.Contains(Properties.AdminUserEmail));
 
                 // And: The login button is not visible
-                var login = await page.QuerySelectorAsync("data-test-id=login");
-                Assert.IsNull(login);
+                var login_visible = await page.Locator("data-test-id=login").IsVisibleAsync();
+                Assert.IsFalse(login_visible);
 
                 // Save storage state into a file for later use            
                 var ConfigFileName = $"{TestContext.FullyQualifiedTestClassName}.loginstate.json";
@@ -135,17 +137,29 @@ namespace YoFi.Tests.Functional
 
         protected async Task DismissHelpTest()
         {
-            await Page.WaitForLoadStateAsync();
-            var dialogautoshow = await Page.QuerySelectorAsync(".dialog-autoshow");
-            if (null != dialogautoshow)
+            await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+            var dialogautoshow = Page.Locator(".dialog-autoshow");
+            if (await dialogautoshow.IsVisibleAsync())
             {
-                await dialogautoshow.WaitForElementStateAsync(ElementState.Visible);
-                await Page.ClickAsync("data-test-id=btn-help-close");
-                await dialogautoshow.WaitForElementStateAsync(ElementState.Hidden);
-                await Page.WaitForSelectorAsync(".modal-backdrop", new Microsoft.Playwright.PageWaitForSelectorOptions() { State = Microsoft.Playwright.WaitForSelectorState.Hidden });
+                await dialogautoshow.WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Visible });
 
 #if VERBOSE_SCREENSHOTS
-                await Page.SaveScreenshotToAsync(TestContext, $"-autoshow");
+                await Page.SaveScreenshotToAsync(TestContext, $"Autoshow");
+#endif
+
+                await Page.ClickAsync("data-test-id=btn-help-close");
+                await dialogautoshow.WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Hidden });
+                var backdrop = Page.Locator(".modal-backdrop");
+                await backdrop.WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Hidden });
+
+#if VERBOSE_SCREENSHOTS
+                await Page.SaveScreenshotToAsync(TestContext, $"Autoshow Closed");
+#endif
+            }
+            else
+            {
+#if VERBOSE_SCREENSHOTS
+                await Page.SaveScreenshotToAsync(TestContext, $"Autoshow Not Visible");
 #endif
             }
         }
