@@ -225,25 +225,26 @@ namespace YoFi.Tests.Functional
             // And: In bulk edit mode
             await Page.ClickAsync("#dropdownMenuButtonAction");
             await Page.ClickAsync("text=Bulk Edit");
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Bulk Edit Mode");
 
             // And: Clicking select on each item
             var numdelete = Int32.Parse(await Page.TextContentAsync("data-test-id=totalitems"));
             for (int i = 1; i <= numdelete; i++)
                 await Page.ClickAsync($"data-test-id=line-{i} >> data-test-id=check-select");
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Selected Items");
 
             // When: Clicking "Delete" on the bulk edit bar
             await Page.ClickAsync("data-test-id=btn-bulk-delete");
 
             // And: Clicking "OK" on the confirmation dialog
             await Page.WaitForSelectorAsync("#deleteConfirmModal");
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Task.Delay(500);
+            await Page.SaveScreenshotToAsync(TestContext,"Delete Confirm Dialog");
             await Page.ClickAsync("data-test-id=btn-modal-ok");
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Completed");
 
             // And: Total number of items is back to the standard amount
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
@@ -263,19 +264,19 @@ namespace YoFi.Tests.Functional
             await WhenNavigatingToPage("Transactions");
 
             // When: Clicking 'Add Payee' on the first line
-            var button = await Page.QuerySelectorAsync($"data-test-id=line-1 >> [aria-label=\"Add Payee\"]");
-            await button.ClickAsync();
+            await Page.Locator($"[aria-label=\"Add Payee\"]").First.ClickAsync();
 
             // And: Adding a new Payee from the ensuing dialog
             var name = NextName;
-            await Page.WaitForSelectorAsync("#addPayeeModal");
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.WaitForSelectorAsync("#addPayeeModal",new Microsoft.Playwright.PageWaitForSelectorOptions() { State = Microsoft.Playwright.WaitForSelectorState.Visible });
+            await Task.Delay(500);
+            await Page.SaveScreenshotToAsync(TestContext,"Dialog Before Edit");
             await Page.FillFormAsync(new Dictionary<string, string>()
             {
                 { "Category", NextCategory },
                 { "Name", name },
             });
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Dialog After Edit");
 
             await Page.ClickAsync("#addPayeeModal >> text=Save");
 
@@ -286,7 +287,7 @@ namespace YoFi.Tests.Functional
             // And: Searching for the payee finds it
             await Page.SearchFor(name);
             Assert.AreEqual(1, await Page.GetTotalItemsAsync());
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Found Items");
         }
 
         async Task GivenPayeeInDatabase()
@@ -329,9 +330,7 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking delete on first item in list
-            var deletebutton = await Page.QuerySelectorAsync("[aria-label=\"Delete\"]");
-            Assert.IsNotNull(deletebutton);
-            await deletebutton.ClickAsync();
+            await Page.ClickAsync("[aria-label=\"Delete\"]");
 
             // Then: We land at the delete payee page
             await Page.ThenIsOnPageAsync("Delete Payee");
