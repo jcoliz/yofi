@@ -387,8 +387,7 @@ namespace YoFi.Tests.Functional
 
             // Then: No receipts shown on the page
             var table = await ResultsTable.ExtractResultsFrom(Page);
-            Assert.IsNotNull(table);
-            Assert.IsFalse(table.Rows.Any());
+            Assert.IsNull(table);
 
             // And: Navigating to Transactions Page
             await WhenNavigatingToPage("Transactions");
@@ -492,8 +491,7 @@ namespace YoFi.Tests.Functional
 
             // Then: No receipts shown on the page
             var table = await ResultsTable.ExtractResultsFrom(Page);
-            Assert.IsNotNull(table);
-            Assert.IsFalse(table.Rows.Any());
+            Assert.IsNull(table);
         }
 
         #endregion

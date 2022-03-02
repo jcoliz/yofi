@@ -38,6 +38,8 @@
     RESULTS TABLE
 *@
 
+@if (Model.Any())
+{
 <table class="table" data-test-id="results">
     <thead>
         <tr>
@@ -102,6 +104,7 @@
     }
     </tbody>
 </table>
+}
 
 @*
     ACCEPT ALL BUTTON
