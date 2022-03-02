@@ -208,7 +208,7 @@ namespace YoFi.Tests.Functional
             var itemsnow = await Page.GetTotalItemsAsync();
             Assert.AreEqual(originalitems + 1,itemsnow);
 
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Created");
         }
 
         [DataRow(1)]
@@ -217,13 +217,13 @@ namespace YoFi.Tests.Functional
         [DataTestMethod]
         public async Task Read(int count)
         {
-            // Given: One item created
+            // Given: Some item(s) created
             for ( int i=count ; i > 0 ; i-- )
                 await Create();
 
-            // When: Searching for the new item
+            // When: Searching for the new item(s)
             await Page.SearchFor(testmarker);
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,$"{count} Created");
 
             // Then: It's found
             Assert.AreEqual(count, await Page.GetTotalItemsAsync());
@@ -317,20 +317,21 @@ namespace YoFi.Tests.Functional
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.ClickAsync("text=More");
-                await Page.SaveScreenshotToAsync(TestContext);
+                await Page.SaveScreenshotToAsync(TestContext, "Edit Dialog");
             });
+            await NextPage.SaveScreenshotToAsync(TestContext, "Edit Page");
             await NextPage.ClickAsync("text=Delete");
 
             // Then: We land at the delete page
             await NextPage.ThenIsOnPageAsync("Delete Transaction");
-            await NextPage.SaveScreenshotToAsync(TestContext);
+            await NextPage.SaveScreenshotToAsync(TestContext,"Delete Page");
 
             // When: Clicking the Delete button to execute the delete
             await NextPage.ClickAsync("input:has-text(\"Delete\")");
 
             // Then: We land at the transactions index page
             await NextPage.ThenIsOnPageAsync(MainPageName);
-            await NextPage.SaveScreenshotToAsync(TestContext);
+            await NextPage.SaveScreenshotToAsync(TestContext,"Deleted");
 
             // And: Total number of items is back to the standard amount
             Assert.AreEqual(TotalItemCount, await NextPage.GetTotalItemsAsync());
@@ -359,10 +360,9 @@ namespace YoFi.Tests.Functional
             await NextPage.ClickAsync("data-test-id=btn-create-receipt");
 
             // Then: Delete Receipt button is visible
-            var button = await NextPage.QuerySelectorAsync("data-test-id=btn-delete-receipt");
-            await NextPage.SaveScreenshotToAsync(TestContext);
-
+            var button = await NextPage.Locator("data-test-id=btn-delete-receipt").IsVisibleAsync();
             Assert.IsNotNull(button);
+            await NextPage.SaveScreenshotToAsync(TestContext);
 
             // TODO: Clean up the storage, else this is going to leave a lot of extra crap lying around there
         }
@@ -451,10 +451,10 @@ namespace YoFi.Tests.Functional
             await NextPage.ClickAsync("[data-test-id=btn-delete-receipt]");
 
             // Then: The upload receipt button is visible again
-            var button = await NextPage.QuerySelectorAsync("data-test-id=btn-create-receipt");
-            await NextPage.SaveScreenshotToAsync(TestContext);
+            var button_visible = await NextPage.Locator("data-test-id=btn-create-receipt").IsVisibleAsync();
+            Assert.IsTrue(button_visible);
 
-            Assert.IsNotNull(button);
+            await NextPage.SaveScreenshotToAsync(TestContext,"Passed");
         }
 
         [TestMethod]
@@ -469,7 +469,8 @@ namespace YoFi.Tests.Functional
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.WaitForSelectorAsync("input[name=Category]");
-                await Page.SaveScreenshotToAsync(TestContext);
+                await Task.Delay(500);
+                await Page.SaveScreenshotToAsync(TestContext,"Edit Dialog");
                 await Page.ClickAsync("text=More");
             });
 
@@ -480,17 +481,14 @@ namespace YoFi.Tests.Functional
             {
                 { "Amount", "25" },
             });
-            await NextPage.SaveScreenshotToAsync(TestContext);
+            await NextPage.SaveScreenshotToAsync(TestContext,"Split Filled");
 
             await NextPage.ClickAsync("text=Save");
-
-            var add = await NextPage.QuerySelectorAsync("data-test-id=btn-add-split");
-            await add.ScrollIntoViewIfNeededAsync();
-            await NextPage.SaveScreenshotToAsync(TestContext);
+            await NextPage.SaveScreenshotToAsync(TestContext,"Split Fixme");
 
             // Then: The fix split button is visible
-            var fix = await NextPage.QuerySelectorAsync("data-test-id=btn-add-split");
-            Assert.IsNotNull(fix);
+            var fix_visible = await NextPage.Locator("data-test-id=btn-fix-split").IsVisibleAsync();
+            Assert.IsTrue(fix_visible);
         }
 
         [TestMethod]
@@ -504,7 +502,7 @@ namespace YoFi.Tests.Functional
 
             // And: Searching for this item
             await Page.SearchFor(testmarker);
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Found item");
 
             // And: On the edit page for it
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
@@ -512,11 +510,10 @@ namespace YoFi.Tests.Functional
                 await Page.ClickAsync("[data-test-id=edit-splits] i");
             });
 
-            var fix = await NextPage.QuerySelectorAsync("data-test-id=btn-fix-split");
-            await fix.ScrollIntoViewIfNeededAsync();
-            await NextPage.SaveScreenshotToAsync(TestContext);
+            await NextPage.SaveScreenshotToAsync(TestContext,"Edit Transaction");
 
             // When: Clicking the "fix split" button
+            var fix = NextPage.Locator("data-test-id=btn-fix-split");
             await fix.ClickAsync();
 
             // Adding: Adding the remaining split (but not changing the amount)
@@ -526,19 +523,14 @@ namespace YoFi.Tests.Functional
                 { "Category", NextCategory },
                 { "Memo", testmarker },
             });
-            await NextPage.SaveScreenshotToAsync(TestContext);
+            await NextPage.SaveScreenshotToAsync(TestContext,"Edit 2nd Split");
 
             await NextPage.ClickAsync("text=Save");
-
-            var add = await NextPage.QuerySelectorAsync("data-test-id=btn-add-split");
-            await add.ScrollIntoViewIfNeededAsync();
-            await NextPage.SaveScreenshotToAsync(TestContext);
+            await NextPage.SaveScreenshotToAsync(TestContext,"Has 2 splits now");
 
             // Then: The fix split button is NOT visible
-            fix = await NextPage.QuerySelectorAsync("data-test-id=btn-fix-split");
-            Assert.IsNull(fix);
+            Assert.IsFalse(await fix.IsVisibleAsync());
         }
-
 
         /// <summary>
         /// User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided upon transaction import
@@ -577,12 +569,11 @@ namespace YoFi.Tests.Functional
 
             await Page.SearchFor($"p={payee}");
 
-            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.SaveScreenshotToAsync(TestContext,"Found by Payee");
             Assert.AreEqual(1, await Page.GetTotalItemsAsync());
 
             // Then: The transaction is imported as a split
-            var element = await Page.QuerySelectorAsync(".display-category");
-            var text = await element.TextContentAsync();
+            var text = await Page.Locator(".display-category").TextContentAsync();
             Assert.AreEqual("SPLIT", text.Trim());
 
             // And: The splits match the categories and amounts as expected from the {loan details} 
@@ -590,14 +581,10 @@ namespace YoFi.Tests.Functional
             {
                 await Page.ClickAsync("[data-test-id=\"edit-splits\"]");
             });
+            await NextPage.SaveScreenshotToAsync(TestContext,"Has good values");
 
-            var line1_e = await NextPage.QuerySelectorAsync($"data-test-id=line-1 >> data-test-id=split-amount");
-            var line1 = await line1_e.TextContentAsync();
-            var line2_e = await NextPage.QuerySelectorAsync($"data-test-id=line-2 >> data-test-id=split-amount");
-            var line2 = await line2_e.TextContentAsync();
-            await line2_e.ScrollIntoViewIfNeededAsync();
-            await NextPage.SaveScreenshotToAsync(TestContext);
-
+            var line1 = await NextPage.Locator($"data-test-id=line-1 >> data-test-id=split-amount").TextContentAsync();
+            var line2 = await NextPage.Locator($"data-test-id=line-2 >> data-test-id=split-amount").TextContentAsync();
             Assert.AreEqual(interest, decimal.Parse(line2.Trim()));
             Assert.AreEqual(principal, decimal.Parse(line1.Trim()));
         }
@@ -637,8 +624,7 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Clicking 'Apply Payee' on the first line
-            var button = await Page.QuerySelectorAsync($"data-test-id=line-1 >> [aria-label=\"Apply Payee\"]");
-            await button.ClickAsync();
+            await Page.Locator($"[aria-label=\"Apply Payee\"]").First.ClickAsync();
             await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Editing the transaction
@@ -650,15 +636,12 @@ namespace YoFi.Tests.Functional
             {
                 await Page.ClickAsync("[data-test-id=edit-splits]");
             });
-
-            // Then: Correct amounts are shown in splits
-            var line1_e = await NextPage.QuerySelectorAsync($"data-test-id=line-1 >> data-test-id=split-amount");
-            var line1 = await line1_e.TextContentAsync();
-            var line2_e = await NextPage.QuerySelectorAsync($"data-test-id=line-2 >> data-test-id=split-amount");
-            var line2 = await line2_e.TextContentAsync();
-            await line2_e.ScrollIntoViewIfNeededAsync();
             await NextPage.SaveScreenshotToAsync(TestContext);
 
+            // Then: Correct amounts are shown in splits
+
+            var line1 = await NextPage.Locator($"data-test-id=line-1 >> data-test-id=split-amount").TextContentAsync();
+            var line2 = await NextPage.Locator($"data-test-id=line-2 >> data-test-id=split-amount").TextContentAsync();
             Assert.AreEqual(interest, decimal.Parse(line2.Trim()));
             Assert.AreEqual(principal, decimal.Parse(line1.Trim()));
         }
@@ -676,11 +659,12 @@ namespace YoFi.Tests.Functional
             await Page.TypeAsync("[data-test-id=\"q\"]", "inc");
 
             // Then: There is a drop-down list of the expected length showing options
-            var element = await Page.WaitForSelectorAsync("div.bootstrap-autocomplete");
+            var autocomplete = Page.Locator("div.bootstrap-autocomplete");
+            await autocomplete.WaitForAsync();
             await Page.SaveScreenshotToAsync(TestContext);
 
-            var children = await element.QuerySelectorAllAsync("a");
-            Assert.AreEqual(5, children.Count);
+            var children = await autocomplete.Locator("a").CountAsync();
+            Assert.AreEqual(5, children);
         }
 
         /// <summary>

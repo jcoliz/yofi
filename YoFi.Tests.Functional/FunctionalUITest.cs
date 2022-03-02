@@ -112,7 +112,7 @@ namespace YoFi.Tests.Functional
             await page.ClickAsync("#dropdownMenuButtonAction");
             await page.ClickAsync("text=Create New");
             await page.FillFormAsync(values);
-            await page.SaveScreenshotToAsync(TestContext);
+            await page.SaveScreenshotToAsync(TestContext,"Creating");
             await page.ClickAsync("input:has-text(\"Create\")");
         }
 
