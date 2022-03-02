@@ -30,7 +30,7 @@ namespace YoFi.Tests.Functional.Helpers
 
             var headers_el = table_el.Locator("thead th");
             var headers = await headers_el.AllTextContentsAsync();
-            table.Columns.AddRange(headers.Select(x=>x.Trim()));
+            table.Columns.AddRange(headers.Select(x=>x.Trim()).Where(x=>x.Any()));
 
             var rows_el = table_el.Locator("tbody tr");
 

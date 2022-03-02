@@ -43,20 +43,22 @@
 <table class="table" data-test-id="results">
     <thead>
         <tr>
-            <th>
+            <th class="col-1">
                 @Html.DisplayNameFor(model => model.Timestamp)
             </th>
-            <th>
+            <th class="col-4">
                 @Html.DisplayNameFor(model => model.Name)
             </th>
-            <th  style="text-align:right">
+            <th class="col-1" style="text-align:right">
                 @Html.DisplayNameFor(model => model.Amount)
             </th>
-            <th>
+            <th class="col-2">
                 @Html.DisplayNameFor(model => model.Memo)
             </th>
-            <th>
+            <th class="col-3">
                 @Html.DisplayNameFor(model => model.Filename)
+            </th>
+            <th class="col-1">
             </th>
         </tr>
     </thead>

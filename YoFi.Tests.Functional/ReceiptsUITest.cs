@@ -417,7 +417,7 @@ namespace YoFi.Tests.Functional
             // Given: An existing transaction 
 
             await WhenNavigatingToPage("Transactions");
-            var name = NextName;
+            var name = "AA__TEST__ MemoInTransaction 1";
             var date = new DateTime(2022, 12, 31);
             var amount = 1234.56m;
             await WhenCreatingTransaction(Page, new Dictionary<string, string>()
