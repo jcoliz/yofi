@@ -24,10 +24,10 @@ namespace YoFi.Tests.Functional
             await Page.ThenIsOnPageAsync("Help");
 
             // And: There are lots of topics
-            var topics = await Page.QuerySelectorAllAsync("data-test-id=help-topic-title");
+            var topics = await Page.Locator("data-test-id=help-topic-title").CountAsync();
             
             // Flexible to not break this test if we add topics
-            Assert.IsTrue(topics.Count >= 3);
+            Assert.IsTrue(topics >= 3);
         }
 
         /// <summary>
@@ -114,15 +114,14 @@ namespace YoFi.Tests.Functional
             await NextPage.ThenIsOnPageAsync("Help");
 
             // And: There are lots of topics
-            var topics = await NextPage.QuerySelectorAllAsync("data-test-id=help-topic-title");
+            var topics = await NextPage.Locator("data-test-id=help-topic-title").CountAsync();
 
             // Flexible to not break this test if we add topics
-            Assert.IsTrue(topics.Count >= 3);
+            Assert.IsTrue(topics >= 3);
 
             // And: This topic is highlighted
-            var element = await NextPage.QuerySelectorAsync("[data-test-id=\"highlight\"]");
-
-            Assert.AreEqual(page.ToLower()[..3], (await element.GetAttributeAsync("id"))[..3]);
+            var id = await NextPage.Locator("[data-test-id=highlight]").GetAttributeAsync("id");
+            Assert.AreEqual(page.ToLower()[..3], id[..3]);
         }
 
         /// <summary>
