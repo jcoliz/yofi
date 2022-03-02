@@ -50,9 +50,7 @@ namespace YoFi.Tests.Functional
             await Page.ThenIsOnPageAsync("Home");
 
             // And: The login button is again visible
-            var login = await Page.QuerySelectorAsync("data-test-id=login");
-            Assert.IsNotNull(login);
-            var text = await login.TextContentAsync();
+            var text = await Page.Locator("data-test-id=login").TextContentAsync();
             Assert.AreEqual("Log in", text);
         }
 
@@ -72,9 +70,7 @@ namespace YoFi.Tests.Functional
             await Page.ThenIsOnPageAsync("HTTP Error 404");
 
             // And: The page is displaying the error
-            var h1 = await Page.QuerySelectorAsync("h1");
-            Assert.IsNotNull(h1);
-            var h1_text = await h1.TextContentAsync();
+            var h1_text = await Page.Locator("h1").TextContentAsync();
             Assert.AreEqual("404", h1_text);
         }
     }
