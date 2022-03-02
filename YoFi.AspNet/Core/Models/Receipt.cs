@@ -21,6 +21,7 @@ namespace YoFi.Core.Models
         [Editable(true)]
         public string Name { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:C2}")]
         [Column(TypeName = "decimal(18,2)")]
         [Editable(true)]
         public decimal? Amount { get; set; }

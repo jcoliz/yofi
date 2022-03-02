@@ -135,8 +135,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual("12/31/2022", table.Rows[2]["Date"]);
             Assert.AreEqual("12/21/2022", table.Rows[3]["Date"]);
 
-            Assert.AreEqual("130.85", table.Rows[0]["Amount"]);
-            Assert.AreEqual("12.34", table.Rows[3]["Amount"]);
+            //decimal.Parse(txtable.Rows.First()["Amount"], NumberStyles.Currency);
+            Assert.AreEqual(130.85m, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
+            Assert.AreEqual(12.34m, decimal.Parse(table.Rows[3]["Amount"], NumberStyles.Currency));
 
             // Check filenames
             for(int i = 0; i < filenames.Count(); i++)
