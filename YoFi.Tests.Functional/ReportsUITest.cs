@@ -42,8 +42,8 @@ namespace YoFi.Tests.Functional
             await ClickReports();
 
             // When: Checking the total of the {income} summary
-            var total = await Page.QuerySelectorAsync($"data-test-id=report-{which} >> tr.report-row-total >> td.report-col-total");
-            var totaltext = (await total.TextContentAsync()).Trim();
+            var total = await Page.Locator($"data-test-id=report-{which} >> tr.report-row-total >> td.report-col-total").TextContentAsync();
+            var totaltext = total.Trim();
 
             // And: Clicking on the detailed report link for the {income} report
             await Page.ClickAsync($"data-test-id={which}-detail");
@@ -52,8 +52,8 @@ namespace YoFi.Tests.Functional
             await Page.WaitForSelectorAsync("table.report");
 
             // Then: The total on the detailed report is the same as in the summary
-            var summarytotal = await Page.QuerySelectorAsync("tr.report-row-total >> td.report-col-total");
-            var summarytotaltext = (await summarytotal.TextContentAsync()).Trim();
+            var summarytotal = await Page.Locator("tr.report-row-total >> td.report-col-total").TextContentAsync();
+            var summarytotaltext = summarytotal.Trim();
 
             Assert.AreEqual(summarytotaltext, totaltext);
 
@@ -137,8 +137,8 @@ namespace YoFi.Tests.Functional
 
         private async Task ThenColumnCountIs(int howmany)
         {
-            var amountcols = await Page.QuerySelectorAllAsync("th.report-col-amount");
-            Assert.AreEqual(howmany, amountcols.Count);
+            var amountcols = await Page.Locator("th.report-col-amount").CountAsync();
+            Assert.AreEqual(howmany, amountcols);
         }
     }
 }
