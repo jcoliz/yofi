@@ -2,7 +2,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.Tests.Functional.Helpers;
 
@@ -286,13 +288,62 @@ namespace YoFi.Tests.Functional
 
         #region User Story 1310: [User Can] Manually choose among possible matches for uploaded receipts when no direct match is found
 
+        [TestMethod]
         public async Task ReviewMatches()
         {
             /*
-            Given: Many receipts with differing name compositions, some of which will exactly match the transactions
+            Given: Several transactions
+            And: A receipt which will match the transactions
             When: Tapping “review”
             Then: The receipts which match the selected transaction are shown
             */
+
+            // Given: Several Transactions
+            await WhenNavigatingToPage("Transactions");
+            var name = NextName;
+            var date = new DateTime(2022, 12, 31);
+            var amount = 1234.56m;
+            var matchamount = amount + 100m;
+            var numtx = 3;
+            for (int i = 0; i < numtx; i++)
+            {
+                await WhenCreatingTransaction(Page, new Dictionary<string, string>()
+                {
+                    { "Payee", name },
+                    { "Timestamp", (date-TimeSpan.FromDays(i)).ToString("yyyy-MM-dd") },
+                    { "Amount", (amount + i * 100m).ToString() },
+                });
+            }
+            await Page.SaveScreenshotToAsync(TestContext, "Created Tx");
+
+            // And: A receipt which will match the transactions
+            await NavigateToReceiptsPage();
+            var filenames = new[]
+            {
+                // Matches all tx
+                $"{name} ${matchamount} {testmarker}.png"
+            };
+            await WhenUploadingSampleReceipts(filenames);
+            await Page.SaveScreenshotToAsync(TestContext, "Slide 15");
+
+            // When: Clicking "Review"
+            var reviewbutton = await Page.QuerySelectorAsync("button[data-test-id=review]");
+            Assert.IsNotNull(reviewbutton);
+            await reviewbutton.ClickAsync();
+            await Page.WaitForSelectorAsync("div#detailsModal", new PageWaitForSelectorOptions() { State = WaitForSelectorState.Visible });
+            await Task.Delay(500);
+            await Page.SaveScreenshotToAsync(TestContext, "Slide 16");
+
+            // Then: The receipts which match the selected transaction are shown
+            var dialog_el = await Page.QuerySelectorAsync("div#detailsModal");
+            var txtable = await ResultsTable.ExtractResultsFrom(dialog_el);
+            Assert.AreEqual(numtx,txtable.Rows.Count);
+            Assert.IsTrue(txtable.Rows.All(x=>x["Payee"] == name));
+
+            // And: Best match is listed first
+            // (That's the one with the exact matching amount)
+            var actual_amount = decimal.Parse(txtable.Rows.First()["Amount"], NumberStyles.Currency);
+            Assert.AreEqual(matchamount,actual_amount);
         }
 
         public async Task AcceptChosenMatch()

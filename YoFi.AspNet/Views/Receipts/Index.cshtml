@@ -119,7 +119,7 @@
                             <input type="hidden" name="txid" value="@item.Matches.Single().ID" />
                             <input type="submit" name="command" value="Accept" class="btn btn-sm btn-primary my-1"/>
                         }
-                        <button type="button" class="btn btn-sm btn-secondary my-1" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal">Review</button>                            
+                        <button type="button" class="btn btn-sm btn-secondary my-1" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal" data-test-id="review">Review</button>                            
                     }
                     <input type="submit" name="command" value="Delete" class="btn btn-sm btn-outline-secondary my-1" />
                 </form>

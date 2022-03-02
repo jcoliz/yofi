@@ -17,11 +17,15 @@ namespace YoFi.Tests.Functional.Helpers
 
         public static async Task<ResultsTable> ExtractResultsFrom(IPage page)
         {
-            var table = new ResultsTable();
-
             var table_el = await page.QuerySelectorAsync("table[data-test-id=results]");
             if (table_el is null)
                 return null;
+
+            return await ExtractResultsFrom(table_el);
+        }
+        public static async Task<ResultsTable> ExtractResultsFrom(IElementHandle table_el)
+        {
+            var table = new ResultsTable();
 
             var headers_el = await table_el.QuerySelectorAllAsync("thead th");
             foreach (var el in headers_el)
