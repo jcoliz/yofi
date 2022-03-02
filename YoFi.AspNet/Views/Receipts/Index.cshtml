@@ -135,9 +135,13 @@
     UPLOAD FILES CONTROL
 *@
 
+@{
+    var btnclass = (Model.Any(x => x.Matches.Count == 1)) ? "btn-secondary" : "btn-primary";
+}
+
 <form method="post" enctype="multipart/form-data" asp-action="Upload">
     <div class="input-group mb-3 mt-3">
-        <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03" data-test-id="btn-create-receipt" disabled>Upload</button>
+        <button class="btn @btnclass" type="submit" id="inputGroupFileAddon03" data-test-id="btn-create-receipt" disabled>Upload</button>
         <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
     </div>
 </form>
