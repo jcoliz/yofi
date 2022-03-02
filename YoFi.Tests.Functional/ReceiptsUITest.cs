@@ -104,18 +104,18 @@ namespace YoFi.Tests.Functional
 
             // When: Uploading many files with differing name compositions
             // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
-            var filenames = new[]
+            var receipts = new (string name, int matches, int order)[]
             {
-                // Matches exactly one
-                $"Olive Garden $130.85 {testmarker}.png",
-                // Matches exactly one
-                $"Waste Management 12-27 {testmarker}.png",
-                // Matches many
-                $"Uptown Espresso ({testmarker}).png",
                 // Matches none
-                $"Create Me $12.34 12-21 {testmarker}.png"
+                ($"Create Me $12.34 12-21 {testmarker}.png",0,3),
+                // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
+                ($"Olive Garden $130.85 {testmarker}.png",4,0),
+                // Matches exactly one
+                ($"Waste Management 12-27 {testmarker}.png",1,2),
+                // Matches many
+                ($"Uptown Espresso ({testmarker}).png",5,1),
             };
-            await WhenUploadingSampleReceipts(filenames);
+            await WhenUploadingSampleReceipts(receipts.Select(x => x.name));
             await Page.SaveScreenshotToAsync(TestContext, "Slide 10");
 
             // Then: Results displayed match number and composition of expected receipts
@@ -130,9 +130,9 @@ namespace YoFi.Tests.Functional
 
             // Spot check values (Note that these are all subject to culture variablility)
             Assert.AreEqual("Olive Garden",table.Rows[0]["Name"]);
-            Assert.AreEqual("Create Me", table.Rows[3]["Name"]);
+            Assert.AreEqual("Waste Management", table.Rows[2]["Name"]);
 
-            Assert.AreEqual("12/31/2022", table.Rows[2]["Date"]);
+            Assert.AreEqual("12/31/2022", table.Rows[1]["Date"]);
             Assert.AreEqual("12/21/2022", table.Rows[3]["Date"]);
 
             //decimal.Parse(txtable.Rows.First()["Amount"], NumberStyles.Currency);
@@ -140,9 +140,10 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(12.34m, decimal.Parse(table.Rows[3]["Amount"], NumberStyles.Currency));
 
             // Check filenames
-            for(int i = 0; i < filenames.Count(); i++)
+            var orderedreceipts = receipts.OrderBy(x => x.order).ToList();
+            for (int i = 0; i < orderedreceipts.Count; i++)
             {
-                Assert.AreEqual(filenames[i], table.Rows[i]["Filename"]);
+                Assert.AreEqual(orderedreceipts[i].name, table.Rows[i]["Filename"]);
             }
         }
 
@@ -164,16 +165,16 @@ namespace YoFi.Tests.Functional
             await NavigateToReceiptsPage();
 
             // When: Uploading many files with differing name compositions, some of which will exactly match the transactions
-            var receipts = new (string name,int matches)[]
+            var receipts = new (string name,int matches,int order)[]
             {
-                // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
-                ($"Olive Garden $130.85 {testmarker}.png",4),
-                // Matches exactly one
-                ($"Waste Management 12-27 {testmarker}.png",1),
-                // Matches many
-                ($"Uptown Espresso ({testmarker}).png",5),
                 // Matches none
-                ($"Create Me $12.34 12-21 {testmarker}.png",0)
+                ($"Create Me $12.34 12-21 {testmarker}.png",0,3),
+                // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
+                ($"Olive Garden $130.85 {testmarker}.png",4,0),
+                // Matches exactly one
+                ($"Waste Management 12-27 {testmarker}.png",1,2),
+                // Matches many
+                ($"Uptown Espresso ({testmarker}).png",5,1),
             };
             await WhenUploadingSampleReceipts(receipts.Select(x=>x.name));
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
@@ -182,9 +183,10 @@ namespace YoFi.Tests.Functional
             var table = await ResultsTable.ExtractResultsFrom(Page);
             Assert.IsNotNull(table);
 
+            var orderedreceipts = receipts.OrderBy(x=>x.order).ToList();
             for(int i = 0; i < table.Rows.Count; i++)
             {
-                Assert.AreEqual(receipts[i].matches, int.Parse( table.Rows[i]["Matches"]), $"For {table.Rows[i]["Filename"]}" );
+                Assert.AreEqual(orderedreceipts[i].matches, int.Parse( table.Rows[i]["Matches"]), $"For {table.Rows[i]["Filename"]}" );
             }
         }
 

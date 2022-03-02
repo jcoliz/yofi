@@ -44,6 +44,9 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.Timestamp)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
             <th  style="text-align:right">
@@ -51,9 +54,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Memo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Timestamp)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Filename)
@@ -67,6 +67,9 @@
 
         <tr>
             <td>
+                @Html.DisplayFor(modelItem => item.Timestamp)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td style="text-align:right">
@@ -74,9 +77,6 @@
             </td>
             <td data-test-id="memo">
                 @Html.DisplayFor(modelItem => item.Memo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Timestamp)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Filename)

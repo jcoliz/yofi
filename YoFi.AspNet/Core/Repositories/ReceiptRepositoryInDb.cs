@@ -109,7 +109,7 @@ namespace YoFi.Core.Repositories
         {
             // Get the receipts from the DB
 
-            var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>()) as IEnumerable<Receipt>;
+            var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>().OrderByDescending(x=>x.Timestamp).ThenBy(x=>x.Name).ThenByDescending(x=>x.Amount)) as IEnumerable<Receipt>;
 
             // Match transactions for each
 
