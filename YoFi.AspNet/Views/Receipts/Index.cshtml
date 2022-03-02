@@ -35,32 +35,6 @@
 </nav>
 
 @*
-    UPLOAD FILES CONTROL
-*@
-
-<form method="post" enctype="multipart/form-data" asp-action="Upload">
-    <div class="input-group mb-3 mt-3">
-        <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03" data-test-id="btn-create-receipt" disabled>Upload</button>
-        <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
-    </div>
-</form>
-
-
-@*
-    HELP TEXT
-*@
-
-@if (!Model.Any())
-{
-<div data-test-id="help-text">
-<p>You can upload receipts here, then later match them with your transactions. If you name them according to the expected naming convention, the system can help you find the right transaction.</p>
-<p>Here’s how you name them: {Payee Name} ${Amount} {MM}-{DD} {Memo}.pdf/png/jpg.</p>
-<p>For example: Uptown Espresso $5.11 12-29 Afternoon pick-me up.pdf.</p>
-<p>You can include as many or as few of these terms as you like. The more you include, the better the transaction matches to follow.</p>
-</div>    
-}
-
-@*
     RESULTS TABLE
 *@
 
@@ -138,6 +112,32 @@
     <form asp-action="AcceptAll">
         <input type="submit" value="Accept All" class="btn btn-primary" data-test-id="accept-all" />
     </form>
+    <hr/>
+}
+
+@*
+    UPLOAD FILES CONTROL
+*@
+
+<form method="post" enctype="multipart/form-data" asp-action="Upload">
+    <div class="input-group mb-3 mt-3">
+        <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03" data-test-id="btn-create-receipt" disabled>Upload</button>
+        <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
+    </div>
+</form>
+
+@*
+    HELP TEXT
+*@
+
+@if (!Model.Any())
+{
+<div data-test-id="help-text">
+<p>You can upload receipts here, then later match them with your transactions. If you name them according to the expected naming convention, the system can help you find the right transaction.</p>
+<p>Here’s how you name them: {Payee Name} ${Amount} {MM}-{DD} {Memo}.pdf/png/jpg.</p>
+<p>For example: Uptown Espresso $5.11 12-29 Afternoon pick-me up.pdf.</p>
+<p>You can include as many or as few of these terms as you like. The more you include, the better the transaction matches to follow.</p>
+</div>    
 }
 
 @*
