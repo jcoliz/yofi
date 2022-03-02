@@ -1,5 +1,6 @@
 ﻿using Microsoft.Playwright;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional.Helpers
@@ -17,41 +18,42 @@ namespace YoFi.Tests.Functional.Helpers
 
         public static async Task<ResultsTable> ExtractResultsFrom(IPage page)
         {
-            var table_el = await page.QuerySelectorAsync("table[data-test-id=results]");
-            if (table_el is null)
+            var table_el = page.Locator("table[data-test-id=results]");
+            if (!await table_el.IsVisibleAsync())
                 return null;
 
             return await ExtractResultsFrom(table_el);
         }
-        public static async Task<ResultsTable> ExtractResultsFrom(IElementHandle table_el)
+        public static async Task<ResultsTable> ExtractResultsFrom(ILocator table_el)
         {
             var table = new ResultsTable();
 
-            var headers_el = await table_el.QuerySelectorAllAsync("thead th");
-            foreach (var el in headers_el)
-            {
-                var text = await el.TextContentAsync();
-                var header = text.Trim();
-                table.Columns.Add(header);
-            }
+            var headers_el = table_el.Locator("thead th");
+            var headers = await headers_el.AllTextContentsAsync();
+            table.Columns.AddRange(headers.Select(x=>x.Trim()));
 
-            var rows_el = await table_el.QuerySelectorAllAsync("tbody tr");
-            foreach (var row_el in rows_el)
+            var rows_el = table_el.Locator("tbody tr");
+
+            var count = await rows_el.CountAsync();
+            for (var i = 0; i < count; ++i)
             {
+                var row_el = rows_el.Nth(i);
+                var cells_el = row_el.Locator("td");
+
                 var row = new Dictionary<string, string>();
                 var col_enum = table.Columns.GetEnumerator();
                 col_enum.MoveNext();
 
-                var cells_el = await row_el.QuerySelectorAllAsync("td");
-                foreach (var cell_el in cells_el)
+                var cellcount = await cells_el.CountAsync();
+
+                for (var c = 0; c < cellcount; ++c)
                 {
-                    var text = await cell_el.TextContentAsync();
-                    var cell = text.Trim();
+                    var cell_el = cells_el.Nth(c);
 
                     var col = col_enum.Current;
                     if (col != null)
                     {
-                        row[col] = cell;
+                        row[col] = (await cell_el.TextContentAsync()).Trim();
                         col_enum.MoveNext();
                     }
                     else
@@ -70,7 +72,6 @@ namespace YoFi.Tests.Functional.Helpers
                         }
                     }
                 }
-
                 table.Rows.Add(row);
             }
 

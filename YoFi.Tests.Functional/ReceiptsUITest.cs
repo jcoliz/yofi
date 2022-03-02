@@ -339,16 +339,16 @@ namespace YoFi.Tests.Functional
             var matchamount = await GivenReceiptWithMultipleMatchingTransactions(name,numtx);
 
             // When: Clicking "Review"
-            var reviewbutton = await Page.QuerySelectorAsync("button[data-test-id=review]");
-            Assert.IsNotNull(reviewbutton);
+            var reviewbutton = Page.Locator("button[data-test-id=review]");
+            Assert.IsTrue(await reviewbutton.IsVisibleAsync());
             await reviewbutton.ClickAsync();
-            await Page.WaitForSelectorAsync("div#detailsModal", new PageWaitForSelectorOptions() { State = WaitForSelectorState.Visible });
+            var detailsModal = Page.Locator("div#detailsModal");
+            await detailsModal.WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Visible });
             await Task.Delay(500);
             await Page.SaveScreenshotToAsync(TestContext, "Slide 16");
 
             // Then: The receipts which match the selected transaction are shown
-            var dialog_el = await Page.QuerySelectorAsync("div#detailsModal");
-            var txtable = await ResultsTable.ExtractResultsFrom(dialog_el);
+            var txtable = await ResultsTable.ExtractResultsFrom(detailsModal);
             Assert.AreEqual(numtx,txtable.Rows.Count);
             Assert.IsTrue(txtable.Rows.All(x=>x["Payee"] == name));
 
@@ -375,10 +375,10 @@ namespace YoFi.Tests.Functional
             var matchamount = await GivenReceiptWithMultipleMatchingTransactions(name, numtx);
 
             // And: Having clicked "Review"
-            var reviewbutton = await Page.QuerySelectorAsync("button[data-test-id=review]");
-            Assert.IsNotNull(reviewbutton);
+            var reviewbutton = Page.Locator("button[data-test-id=review]");
+            Assert.IsTrue(await reviewbutton.IsVisibleAsync());
             await reviewbutton.ClickAsync();
-            await Page.WaitForSelectorAsync("div#detailsModal", new PageWaitForSelectorOptions() { State = WaitForSelectorState.Visible });
+            await Page.Locator("div#detailsModal").WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Visible } );
             await Task.Delay(500);
             await Page.SaveScreenshotToAsync(TestContext, "Slide 16");
 
