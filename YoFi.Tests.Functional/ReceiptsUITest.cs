@@ -486,7 +486,7 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
 
             // When: Deleting it
-            var deletebutton = await Page.QuerySelectorAsync("table[data-test-id=results] tbody input[value=Delete]");
+            var deletebutton = await Page.QuerySelectorAsync("[aria-label=Delete]");
             Assert.IsNotNull(deletebutton);
             await deletebutton.ClickAsync();
             await Page.SaveScreenshotToAsync(TestContext, "Deleted");
