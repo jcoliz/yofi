@@ -17,5 +17,10 @@ namespace YoFi.AspNet.Pages
         /// The set of all available report definitions
         /// </summary>
         IEnumerable<ReportDefinition> Definitions { get; }
+
+        /// <summary>
+        /// The maximum number of levels this report could be generated wtih
+        /// </summary>
+        int MaxLevels { get; }
     }
 }

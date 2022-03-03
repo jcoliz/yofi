@@ -39,7 +39,7 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLevel">
                             @{
-                                for (int i = 1; i <= 4; i++)
+                                for (int i = 1; i <= Model.MaxLevels; i++)
                                 {
                                     <a asp-page="Report"
                                        asp-route-id="@Parameters.id"

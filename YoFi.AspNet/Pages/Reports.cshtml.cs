@@ -22,6 +22,8 @@ namespace YoFi.AspNet.Pages
 
         IEnumerable<ReportDefinition> IReportNavbarViewModel.Definitions => _reports.Definitions;
 
+        int IReportNavbarViewModel.MaxLevels => 1;
+
         public ReportsModel(IReportEngine reports, IClock clock)
         {
             _reports = reports;

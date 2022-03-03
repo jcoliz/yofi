@@ -115,7 +115,7 @@ namespace YoFi.Tests.Core
         public void OneItemCols()
         {
             report.WithMonthColumns = true;
-            report.Source = new NamedQueryList( Items.Take(1).AsQueryable() );
+            report.Source = new NamedQueryList(Items.Take(1).AsQueryable());
 
             // When: Building the report
             WhenBuildingTheReport();
@@ -130,7 +130,7 @@ namespace YoFi.Tests.Core
         public void OneItemColsJson()
         {
             report.WithMonthColumns = true;
-            report.Source = new NamedQueryList( Items.Take(1).AsQueryable() );
+            report.Source = new NamedQueryList(Items.Take(1).AsQueryable());
 
             // When: Building the report
             WhenBuildingTheReport();
@@ -148,7 +148,7 @@ namespace YoFi.Tests.Core
             var IsTotal = total.GetProperty("IsTotal").GetBoolean();
             var TotalTotal = total.GetProperty("TOTAL").GetDecimal();
 
-            Assert.AreEqual("Name",Name);
+            Assert.AreEqual("Name", Name);
             Assert.AreEqual(100m, Jan);
             Assert.AreEqual(true, IsTotal);
             Assert.AreEqual(100m, TotalTotal);
@@ -331,7 +331,7 @@ namespace YoFi.Tests.Core
             report.SortOrder = Report.SortOrders.TotalAscending;
 
             // When: Building the report
-            WhenBuildingTheReport(sorted:true);
+            WhenBuildingTheReport(sorted: true);
 
             var actual = report.RowLabelsOrdered;
 
@@ -345,7 +345,7 @@ namespace YoFi.Tests.Core
             report.SortOrder = Report.SortOrders.NameAscending;
 
             // When: Building the report
-            WhenBuildingTheReport(sorted:true);
+            WhenBuildingTheReport(sorted: true);
 
             var actual = report.RowLabelsOrdered;
 
@@ -395,7 +395,7 @@ namespace YoFi.Tests.Core
             report.SortOrder = Report.SortOrders.TotalAscending;
 
             // When: Building the report
-            WhenBuildingTheReport(sorted:true);
+            WhenBuildingTheReport(sorted: true);
 
             var actual = report.RowLabelsOrdered.ToList();
 
@@ -482,7 +482,7 @@ namespace YoFi.Tests.Core
             report.SortOrder = Report.SortOrders.TotalAscending;
 
             // When: Building the report
-            WhenBuildingTheReport(sorted:true);
+            WhenBuildingTheReport(sorted: true);
 
             var actual = report.RowLabelsOrdered.ToList();
 
@@ -501,7 +501,7 @@ namespace YoFi.Tests.Core
             report.SortOrder = Report.SortOrders.TotalAscending;
 
             // When: Building the report
-            WhenBuildingTheReport(sorted:true);
+            WhenBuildingTheReport(sorted: true);
 
             var actual = report.RowLabelsOrdered.ToList();
 
@@ -652,7 +652,7 @@ namespace YoFi.Tests.Core
             report.NumLevels = 3;
 
             // When: Building the report
-            WhenBuildingTheReport(sorted:true);
+            WhenBuildingTheReport(sorted: true);
 
             var sortedrows = report.RowLabelsOrdered;
             Console.WriteLine(string.Join(',', sortedrows.Select(x => x.Name)));
@@ -677,7 +677,7 @@ namespace YoFi.Tests.Core
         }
 
 
-        NamedQueryList MultiSeriesSource =>new NamedQueryList()
+        NamedQueryList MultiSeriesSource => new NamedQueryList()
         {
             { "One",Items.Take(20).Where(x => Items.IndexOf(x) % 3 == 0).ToList().AsQueryable() },
             { "Two",Items.Take(20).Where(x => Items.IndexOf(x) % 3 != 0).ToList().AsQueryable() }
@@ -691,8 +691,8 @@ namespace YoFi.Tests.Core
             // When: Building the report
             WhenBuildingTheReport();
 
-            var Name = GetRow(x => x.Name == "Name" );
-            var Other = GetRow(x => x.Name == "Other" );
+            var Name = GetRow(x => x.Name == "Name");
+            var Other = GetRow(x => x.Name == "Other");
             var One = GetColumn(x => x.Name == "One");
             var Two = GetColumn(x => x.Name == "Two");
 
@@ -754,7 +754,7 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(600m, report[report.TotalColumn, Name]);
             Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
             Assert.AreEqual(0.5m, report[Pct, Name]);
-            Assert.AreEqual(5m/9m, report[Pct, Other]);
+            Assert.AreEqual(5m / 9m, report[Pct, Other]);
             Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
             Assert.AreEqual(700m, report[One, report.TotalRow]);
             Assert.AreEqual(1300m, report[Two, report.TotalRow]);
@@ -796,7 +796,7 @@ namespace YoFi.Tests.Core
         {
             // Given: Transaction source which includes categories of Top:[Blank]
             // (i.e. just "Top"), and asking for skip-levels one
-            var items = Items.Take(20).Where(x=>x.Category.StartsWith("Other"));
+            var items = Items.Take(20).Where(x => x.Category.StartsWith("Other"));
             report.Source = new NamedQueryList(items.AsQueryable());
             report.NumLevels = 2;
             report.SkipLevels = 1;
@@ -811,7 +811,7 @@ namespace YoFi.Tests.Core
             // And the "ID:[Blank]" row is included
             expected = items.Where(x => x.Category == "Other").Sum(x => x.Amount);
             var Blank = GetRow(x => x.Name == "[Blank]" && !x.IsTotal);
-            Assert.AreEqual(expected, report[report.TotalColumn,Blank]);
+            Assert.AreEqual(expected, report[report.TotalColumn, Blank]);
         }
 
         [TestMethod]
@@ -881,10 +881,10 @@ namespace YoFi.Tests.Core
         public void Slicer_TakeSliceExceptOther()
         {
             // Given: A report with multiple top categories, and levels of depth below those
-            var allitems = Items.Take(19); 
+            var allitems = Items.Take(19);
             report.Source = new NamedQueryList(allitems.AsQueryable());
             report.NumLevels = 2;
-            WhenBuildingTheReport(sorted:true);
+            WhenBuildingTheReport(sorted: true);
             var allitemsreport = report;
 
             // When: Taking a slice EXCEPT one category
@@ -984,10 +984,10 @@ namespace YoFi.Tests.Core
                 Enumerable
                 .Range(0, 20)
                 .Select(i =>
-                    new NamedQuery() 
-                    { 
-                        Name = i.ToString("D2"), 
-                        Query = Items.Skip(i).Take(1).AsQueryable() 
+                    new NamedQuery()
+                    {
+                        Name = i.ToString("D2"),
+                        Query = Items.Skip(i).Take(1).AsQueryable()
                     }
                 )
             );
@@ -1023,20 +1023,20 @@ namespace YoFi.Tests.Core
         [DataRow("D:E", "D,D:X,D:E,D:E:X", 200)]
         [DataRow("A:B:Z[^C;D;E;F]", "A:B:X,A:B:C,A:B:E,A:B:F", 100)]
         [DataTestMethod]
-        public void MixedLeafRowsAndCollector(string budget, string actual, int expected )
+        public void MixedLeafRowsAndCollector(string budget, string actual, int expected)
         {
             DataHash = HashCode.Combine(budget, actual, expected);
 
             report.Source = new NamedQueryList()
             {
-                new NamedQuery() 
-                { 
-                    Name = "Budget", 
-                    Query = budget.Split(',').Select(x=>new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = x }).ToList().AsQueryable(), 
-                    LeafRowsOnly = true 
+                new NamedQuery()
+                {
+                    Name = "Budget",
+                    Query = budget.Split(',').Select(x=>new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = x }).ToList().AsQueryable(),
+                    LeafRowsOnly = true
                 },
-                new NamedQuery() 
-                { 
+                new NamedQuery()
+                {
                     Name = "Actual",
                     Query = actual.Split(',').Select(x=>new Item() { Amount = 100, Timestamp = new DateTime(2000, 01, 01), Category = x }).ToList().AsQueryable(),
                 }
@@ -1099,7 +1099,7 @@ namespace YoFi.Tests.Core
 
             Assert.AreEqual(1, result.Captures.Count);
             Assert.AreEqual(3, result.Groups.Count);
-            Assert.IsTrue(result.Groups.Values.Select(x=>x.Value).Contains("A:B:G"));
+            Assert.IsTrue(result.Groups.Values.Select(x => x.Value).Contains("A:B:G"));
             Assert.IsTrue(result.Groups.Values.Select(x => x.Value).Contains("^C;D;E;F"));
         }
 
@@ -1145,7 +1145,7 @@ namespace YoFi.Tests.Core
         public void AutoLevels(int levels)
         {
             // Given: A set of transactions which have {levels} depth of transaction levels
-            var data = FakeObjects<Transaction>.Make(10).Add(10,x=>x.Category += ":A").Add(10, x => x.Category += ":A:A").Add(10, x => x.Category += ":A:A:A");
+            var data = FakeObjects<Transaction>.Make(10).Add(10, x => x.Category += ":A").Add(10, x => x.Category += ":A:A").Add(10, x => x.Category += ":A:A:A");
             var items = data.Groups(0..levels).ToList();
 
             // And: A report with "automatic" levels
@@ -1160,10 +1160,38 @@ namespace YoFi.Tests.Core
 
             // Then: The report has the expected number of levels
             var max = report.RowLabels.Max(x => x.Level);
-            Assert.AreEqual(levels-1, max);
+            Assert.AreEqual(levels - 1, max);
 
             // And: The numlevels value was set correctly
             Assert.AreEqual(levels, report.NumLevels);
+        }
+
+        #endregion
+
+        #region User Story 1186: [User Can] Select to display all the levels for a report which have data, but no more
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataTestMethod]
+        public void MaxLevels(int levels)
+        {
+            // Given: A set of transactions which have {levels} depth of transaction levels
+            var data = FakeObjects<Transaction>.Make(10).Add(10, x => x.Category += ":A").Add(10, x => x.Category += ":A:A").Add(10, x => x.Category += ":A:A:A");
+            var items = data.Groups(0..levels).ToList();
+
+            // And: A report with one level (the default)
+            report = new Report()
+            {
+                Source = new NamedQueryList() { new NamedQuery() { Query = items.AsQueryable() } }
+            };
+
+            // When: Building the report
+            WhenBuildingTheReport(true);
+
+            // Then: The max levels is set as expected
+            Assert.AreEqual(levels, report.MaxLevels);
         }
 
         #endregion

@@ -191,6 +191,14 @@ namespace YoFi.Core.Reports
         /// </remarks>
         public double YearProgress { get; set; }
 
+        /// <summary>
+        /// The maximum number of levels this report could have been built with
+        /// </summary>
+        /// <remarks>
+        /// Filled in after building
+        /// </remarks>
+        public int MaxLevels { get; set; }
+
         #endregion
 
         #region Public Methods
@@ -701,17 +709,25 @@ namespace YoFi.Core.Reports
             }
             Table.RowLabels.RemoveWhere(x => pruned.Contains(x));
 
-            // In the case of an "all" levels report, this is the time to handle that
-            if (!NumLevels.HasValue && RowLabels.Any())
+            // This is the time to set maxlevels
+            if (RowLabels.Any())
             {
                 var minrow = RowLabels.Min(x => x.Level);
-                NumLevels = 1 - minrow;
-                if (NumLevels > 1)
+                MaxLevels = 1 - minrow;
+
+                // In the case of an "all" levels report, this is the time to handle that
+                if (!NumLevels.HasValue && RowLabels.Any())
                 {
-                    foreach (var row in RowLabels.Where(x=>!x.IsTotal))
-                        row.Level += NumLevels.Value - 1;
+                    NumLevels = MaxLevels;
+                    if (NumLevels > 1)
+                    {
+                        foreach (var row in RowLabels.Where(x => !x.IsTotal))
+                            row.Level += NumLevels.Value - 1;
+                    }
                 }
             }
+            else
+                MaxLevels = 1;
 
             pruned = new HashSet<RowLabel>();
             foreach (var row in RowLabels)

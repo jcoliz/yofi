@@ -46,6 +46,11 @@ namespace YoFi.AspNet.Pages
 
         IDisplayReport IReportAndChartViewModel.Report => Report;
 
+        // TODO: See AB#1186. We would like to return the possible number of levels we COULD run this report with.
+        // However, at the time we NEED to know this, we DON'T know it yet. So for now I'm putting the interface
+        // framing in, but I don't yet know how to handle this.
+        int IReportNavbarViewModel.MaxLevels => Report?.MaxLevels ?? 4;
+
         public void OnGet([Bind] ReportParameters parms)
         {
             Parameters = parms;
