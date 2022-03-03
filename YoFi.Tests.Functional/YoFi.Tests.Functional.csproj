@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 	  <UserSecretsId>aspnet-OfxWeb.Asp-BDDDDEB0-488C-4CEF-A390-529A80D08E0A</UserSecretsId>
 	  <IsPackable>false</IsPackable>
 	  <RunSettingsFilePath>$(MSBuildProjectDirectory)\local.runsettings</RunSettingsFilePath>
@@ -39,7 +39,7 @@
   <ItemGroup>
     <PackageReference Include="jcoliz.OpenOfficeXml.Serializer" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.22" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
 	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Microsoft.Playwright.MSTest" Version="1.16.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
