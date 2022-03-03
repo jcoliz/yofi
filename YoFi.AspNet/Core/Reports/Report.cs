@@ -75,7 +75,11 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// How many levels deep to include
         /// </summary>
-        public int NumLevels { get; set; } = 1;
+        /// <remarks>
+        /// Set this to null to include all available levels.
+        /// Build() will update this value to how many levels were found
+        /// </remarks>
+        public int? NumLevels { get; set; } = 1;
 
         /// <summary>
         /// When displaying the report, how many levels higher to show as
@@ -241,8 +245,8 @@ namespace YoFi.Core.Reports
         /// </summary>
         public void Build()
         {
-            if (NumLevels < 1)
-                throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater");
+            if (NumLevels.HasValue && NumLevels.Value < 1)
+                throw new ArgumentOutOfRangeException(nameof(NumLevels), "Must be 1 or greater or null");
 
             if (Source == null)
                 throw new ArgumentOutOfRangeException(nameof(Source), "Must set a source");
@@ -350,10 +354,13 @@ namespace YoFi.Core.Reports
         /// <param name="newlevel">Resulting value of NumLevels after operation is complete</param>
         public void PruneToLevel(int newlevel)
         {
+            if (!NumLevels.HasValue)
+                throw new ApplicationException("Report has no set level");
+
             if (newlevel < 1 || newlevel > NumLevels)
                 throw new ArgumentException("Invalid level", nameof(newlevel));
 
-            var minuslevels = NumLevels - newlevel;
+            var minuslevels = NumLevels.Value - newlevel;
             foreach (var row in RowLabels.Where(x=>!x.IsTotal))
                 row.Level -= minuslevels;
 
@@ -662,7 +669,8 @@ namespace YoFi.Core.Reports
                     Table[seriescolumn, TotalRow] += amount;
 
                 // We now know what level we are, so we can set it here.
-                row.Level = NumLevels - 1;
+                if (NumLevels.HasValue)
+                    row.Level = NumLevels.Value - 1;
             }
         }
 
@@ -677,6 +685,10 @@ namespace YoFi.Core.Reports
             // a value in leaf-nodes-only series
             var leafnodecolumns = ColumnLabelsFiltered.Where(x => x.LeafNodesOnly);
 
+            // We have to prune in two phases now, because the report can have levels automatically
+            // set. However, we need to do the level-finding calculation AFTER the first round of
+            // pruning
+
             var pruned = new HashSet<RowLabel>();
             foreach (var row in RowLabels)
             {
@@ -686,6 +698,24 @@ namespace YoFi.Core.Reports
                             if (Table[TotalColumn, row] == Table[TotalColumn, row.Parent as RowLabel])
                                 pruned.Add(row);
 
+            }
+            Table.RowLabels.RemoveWhere(x => pruned.Contains(x));
+
+            // In the case of an "all" levels report, this is the time to handle that
+            if (!NumLevels.HasValue && RowLabels.Any())
+            {
+                var minrow = RowLabels.Min(x => x.Level);
+                NumLevels = 1 - minrow;
+                if (NumLevels > 1)
+                {
+                    foreach (var row in RowLabels.Where(x=>!x.IsTotal))
+                        row.Level += NumLevels.Value - 1;
+                }
+            }
+
+            pruned = new HashSet<RowLabel>();
+            foreach (var row in RowLabels)
+            {
                 // Also prune rows that are below the numrows cutoff
                 if (row.Level < 0)
                     pruned.Add(row);

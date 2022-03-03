@@ -1134,5 +1134,39 @@ namespace YoFi.Tests.Core
 
             Assert.AreEqual(0, sw.ToString().Length);
         }
+
+        #region User Story 1187: [Designer Can] Define a report to show all-available levels of data, no matter how many it has
+
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        [DataTestMethod]
+        public void AutoLevels(int levels)
+        {
+            // Given: A set of transactions which have {levels} depth of transaction levels
+            var data = FakeObjects<Transaction>.Make(10).Add(10,x=>x.Category += ":A").Add(10, x => x.Category += ":A:A").Add(10, x => x.Category += ":A:A:A");
+            var items = data.Groups(0..levels).ToList();
+
+            // And: A report with "automatic" levels
+            report = new Report()
+            {
+                Source = new NamedQueryList() { new NamedQuery() { Query = items.AsQueryable() } },
+                NumLevels = null
+            };
+
+            // When: Building the report
+            WhenBuildingTheReport(true);
+
+            // Then: The report has the expected number of levels
+            var max = report.RowLabels.Max(x => x.Level);
+            Assert.AreEqual(levels-1, max);
+
+            // And: The numlevels value was set correctly
+            Assert.AreEqual(levels, report.NumLevels);
+        }
+
+        #endregion
+
     }
 }
