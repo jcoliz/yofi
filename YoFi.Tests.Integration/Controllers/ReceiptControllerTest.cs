@@ -58,6 +58,21 @@ namespace YoFi.Tests.Integration.Controllers
 
         #region Helpers
 
+        private void SetFilename(Receipt r)
+        {
+            var parts = new List<string>();
+
+            if (!string.IsNullOrEmpty(r.Name))
+                parts.Add(r.Name);
+            if (r.Amount.HasValue)
+                parts.Add(r.Amount.Value.ToString());
+            parts.Add($"{r.Timestamp.Month}-{r.Timestamp.Day}");
+            if (!string.IsNullOrEmpty(r.Memo))
+                parts.Add(r.Memo);
+
+            r.Filename = string.Join(' ', parts) + ".pdf";
+        }
+
         private Receipt GivenReceiptInStorage(string filename, string contenttype)
         {
 
@@ -90,7 +105,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexMany()
         {
             // Given: Many items in the database
-            var items = FakeObjects<Receipt>.Make(20).SaveTo(this);
+            var items = FakeObjects<Receipt>.Make(20, x => SetFilename(x)).SaveTo(this);
 
             // When: Getting the index
             var document = await WhenGetAsync($"{urlroot}/");
@@ -103,7 +118,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexSingle()
         {
             // Given: There is one item in the database
-            var items = FakeObjects<Receipt>.Make(1).SaveTo(this);
+            var items = FakeObjects<Receipt>.Make(1, x => SetFilename(x)).SaveTo(this);
 
             // When: Getting the index
             var document = await WhenGetAsync($"{urlroot}/");
@@ -116,7 +131,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task Details()
         {
             // Given: There are 5 items in the database, one of which we care about
-            var expected = FakeObjects<Receipt>.Make(5).SaveTo(this).Last();
+            var expected = FakeObjects<Receipt>.Make(5, x => SetFilename(x)).SaveTo(this).Last();
             var id = expected.ID;
 
             // When: Getting details for the chosen item
@@ -133,9 +148,9 @@ namespace YoFi.Tests.Integration.Controllers
         {
             // Given: There are 5 items in the database, one of which we care about, which matches ALL the transactions
             var amount = 12.34m;
-            var txs = FakeObjects<Transaction>.Make(3,x=>x.Amount = amount).SaveTo(this);
+            var txs = FakeObjects<Transaction>.Make(3, x => x.Amount = amount).SaveTo(this);
             var t = txs.Last();
-            var expected = FakeObjects<Receipt>.Make(4).Add(1,x=> { x.Amount = amount; x.Timestamp = t.Timestamp; }).SaveTo(this).Last();
+            var expected = FakeObjects<Receipt>.Make(4, x => SetFilename(x)).Add(1,x=> { x.Amount = amount; x.Timestamp = t.Timestamp; SetFilename(x); }).SaveTo(this).Last();
             var id = expected.ID;
 
             // When: Getting details for the chosen item
@@ -149,7 +164,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task Delete()
         {
             // Given: There are two items in the database, one of which we care about
-            var expected = FakeObjects<Receipt>.Make(2).SaveTo(this).Last();
+            var expected = FakeObjects<Receipt>.Make(2,x=>SetFilename(x)).SaveTo(this).Last();
             var id = expected.ID;
             context.Entry(expected).State = EntityState.Detached;
 
