@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -139,7 +140,8 @@ namespace YoFi.Core.Models
         {
             var signature = $"/{Payee ?? "Null"}/{Amount:C2}/{Timestamp.Date.ToShortDateString()}";
             var buffer = UTF32Encoding.UTF32.GetBytes(signature);
-            var hash = new System.Security.Cryptography.MD5CryptoServiceProvider().ComputeHash(buffer);
+            var md5 = MD5.Create();
+            var hash = md5.ComputeHash(buffer);
             var x = hash.Aggregate(new StringBuilder(), (sb, b) => sb.Append(b.ToString("X2")));
 
             BankReference = x.ToString();
