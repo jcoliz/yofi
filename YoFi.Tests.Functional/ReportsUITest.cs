@@ -50,6 +50,7 @@ namespace YoFi.Tests.Functional
 
             // And: Waiting for the page to fully load
             await Page.WaitForSelectorAsync("table.report");
+            await Page.SaveScreenshotToAsync(TestContext,which);
 
             // Then: The total on the detailed report is the same as in the summary
             var summarytotal = await Page.Locator("tr.report-row-total >> td.report-col-total").TextContentAsync();
@@ -91,6 +92,8 @@ namespace YoFi.Tests.Functional
 
             // And: Waiting for the page to fully load
             await Page.WaitForSelectorAsync("table.report");
+            await Task.Delay(500);
+            await Page.SaveScreenshotToAsync(TestContext,expected);
 
             // Then: The expected report is generated
             await Page.ThenIsOnPageAsync(expected);
@@ -105,11 +108,12 @@ namespace YoFi.Tests.Functional
             await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
 
             // When: Selecting "hide months"
-            await Page.ClickAsync("id=dropdownMenuButtonColumns");
+            await Page.ClickInMenuAsync("[aria-label=\"Toggle page navigation\"]", "#dropdownMenuButtonColumns");
             await Page.ClickAsync("text=Hide");
 
             // And: Waiting for the page to fully load
             await Page.WaitForSelectorAsync("table.report");
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: There is only the one "amount" column, which is the total
             await ThenColumnCountIs(1);
@@ -122,11 +126,12 @@ namespace YoFi.Tests.Functional
             await Page.WaitForLoadStateAsync(Microsoft.Playwright.LoadState.DOMContentLoaded);
 
             // When: Selecting "June"
-            await Page.ClickAsync("id=dropdownMenuButtonMonth");
+            await Page.ClickInMenuAsync("[aria-label=\"Toggle page navigation\"]", "#dropdownMenuButtonMonth");
             await Page.ClickAsync("text=6 June");
 
             // And: Waiting for the page to load
             await Page.WaitForSelectorAsync("table.report");
+            await Page.SaveScreenshotToAsync(TestContext);
 
             // Then: There are 7 amount columns, one for each month plus total
             // NOTE: This relies on the fact that the sample data generator creates data for all months
