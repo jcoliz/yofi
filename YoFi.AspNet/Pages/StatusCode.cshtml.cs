@@ -18,5 +18,12 @@ namespace YoFi.AspNet.Pages
 
             Reason = Microsoft.AspNetCore.WebUtilities.ReasonPhrases.GetReasonPhrase(e);
         }
+
+        public void OnPost(int e)
+        {
+            ErrorCode = e;
+
+            Reason = Microsoft.AspNetCore.WebUtilities.ReasonPhrases.GetReasonPhrase(e);
+        }
     }
 }
