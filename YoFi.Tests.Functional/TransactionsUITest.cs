@@ -35,7 +35,7 @@ namespace YoFi.Tests.Functional
             //
 
             // Given: Clicking "Transactions" on the navbar
-            await Page.ClickAsync("text=Transactions");
+            await WhenNavigatingToPage(MainPageName);
 
             // And: Showing hidden items
             await Page.ClickAsync("#dropdownMenuButtonAction");
@@ -49,15 +49,14 @@ namespace YoFi.Tests.Functional
                 var api = new ApiKeyTest();
                 api.SetUp(TestContext);
                 await api.ClearTestData("trx,payee");
+
+                // And: Releaging the page
+                await Page.ReloadAsync();
+
+                // Then: Total items are back to normal
+                Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
             }
-
-            // And: Releaging the page
-            await Page.ReloadAsync();
-
-            // Then: Total items are back to normal
-            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
-
 
         [TestMethod]
         public async Task ClickTransactions()
@@ -374,7 +373,7 @@ namespace YoFi.Tests.Functional
             await CreateReceipt();
 
             // And: Back on the main page
-            await Page.ClickAsync("text=Transactions");
+            await WhenNavigatingToPage(MainPageName);
 
             // And: Searching for the new item
             await Page.SearchFor(testmarker);
@@ -399,7 +398,7 @@ namespace YoFi.Tests.Functional
             await CreateReceipt();
 
             // And: Back on the main page
-            await Page.ClickAsync("text=Transactions");
+            await WhenNavigatingToPage(MainPageName);
 
             // And: Searching for the new item
             await Page.SearchFor(testmarker);
@@ -433,7 +432,7 @@ namespace YoFi.Tests.Functional
             await CreateReceipt();
 
             // And: Back on the main page
-            await Page.ClickAsync("text=Transactions");
+            await WhenNavigatingToPage(MainPageName);
 
             // And: Searching for the new item
             await Page.SearchFor(testmarker);
@@ -498,7 +497,7 @@ namespace YoFi.Tests.Functional
             await CreateSplit();
 
             // And: Starting at the top
-            await Page.ClickAsync("text=Transactions");
+            await WhenNavigatingToPage(MainPageName);
 
             // And: Searching for this item
             await Page.SearchFor(testmarker);
@@ -619,7 +618,7 @@ namespace YoFi.Tests.Functional
             await GivenPayeeInDatabase(name: payee, category: rule);
 
             // When: Searching for this item
-            await WhenNavigatingToPage("Transactions");
+            await WhenNavigatingToPage(MainPageName);
             await Page.SearchFor($"p={payee}");
             await Page.SaveScreenshotToAsync(TestContext);
 

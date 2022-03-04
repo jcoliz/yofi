@@ -32,7 +32,7 @@ namespace YoFi.Tests.Functional
             //
 
             // When: Clicking "{page}" on the navbar
-            await Page.ClickAsync($".navbar >> text={MainPageName}");
+            await WhenNavigatingToPage(MainPageName);
 
             // And: totalitems > expected TotalItemCount
             var totalitems = await Page.GetTotalItemsAsync();
@@ -42,13 +42,13 @@ namespace YoFi.Tests.Functional
                 var api = new ApiKeyTest();
                 api.SetUp(TestContext);
                 await api.ClearTestData("payee");
+
+                await Page.ReloadAsync();
+                // (Above has in the past given timeouts)
+                //await Page.ClickAsync("text=Payees");
+
+                Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
             }
-
-            // Getting timeouts on this?!
-            //await Page.ReloadAsync();
-            await Page.ClickAsync("text=Payees");
-
-            Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
         /// <summary>
@@ -176,8 +176,8 @@ namespace YoFi.Tests.Functional
             // Step 2: Search for the new payees
             //
 
-            // When: Clicking "Payees" on the navbar
-            await Page.ClickAsync("text=Payees");
+            // When: Navgiating to Payees page
+            await WhenNavigatingToPage(MainPageName);
 
             // Then: We are on the main page for this section
             await Page.ThenIsOnPageAsync(MainPageName);
@@ -281,7 +281,7 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("#addPayeeModal >> text=Save");
 
             // Then: The payees page has one more item than expected
-            await Page.ClickAsync("text=Payees");
+            await WhenNavigatingToPage(MainPageName);
             Assert.AreEqual(TotalItemCount + 1, await Page.GetTotalItemsAsync());
 
             // And: Searching for the payee finds it

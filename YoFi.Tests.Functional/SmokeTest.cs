@@ -31,7 +31,7 @@ namespace YoFi.Tests.Functional
             await GivenLoggedIn();
 
             // When: Clicking my email on the navbar
-            await Page.ClickAsync("data-test-id=hello-user");
+            await Page.ClickInMenuAsync("[aria-label=\"Toggle navigation\"]", "data-test-id=hello-user");
 
             // Then: We land at profile page
             await Page.ThenIsOnPageAsync("Profile");

@@ -136,7 +136,7 @@ namespace YoFi.Tests.Functional
             await GivenLoggedIn();
 
             // When: Clicking "{page}" on the navbar
-            await Page.ClickAsync($".navbar >> text={split[0]}");
+            await Page.ClickInMenuAsync("[aria-label=\"Toggle navigation\"]", $".navbar >> text={split[0]}");
             await Page.WaitForLoadStateAsync();
 
             if (split.Length > 1)
@@ -249,7 +249,7 @@ namespace YoFi.Tests.Functional
             var counter = 1 + ScreenShotCounter.GetValueOrDefault(testname);
             ScreenShotCounter[testname] = counter;
 
-            var displaymoment = string.IsNullOrEmpty(moment) ? string.Empty : $"-{moment}";
+            var displaymoment = string.IsNullOrEmpty(moment) ? string.Empty : $"-{moment.Replace('/','-')}";
 
             var viewportwidth = FunctionalUITest.CurrentViewportSizeFrom(testContext).Width;
             var filename = $"Screenshot/{viewportwidth}/{testname} {counter:D4}{displaymoment}.png";
@@ -313,6 +313,10 @@ namespace YoFi.Tests.Functional
             {
                 await page.ClickAsync(menuselector);
                 await Task.Delay(500);
+                if (!await item.IsVisibleAsync())
+                {
+                    throw new ApplicationException($"Unable to find {itemselector}");
+                }
             }
             await item.ClickAsync();
         }
