@@ -265,7 +265,7 @@ namespace YoFi.Tests.Functional
             await NavigateToAsync("Report/all-summary?level=1");
 
             // Click "Depth" in the page navbar
-            await Page.ClickAsync("#dropdownMenuButtonLevel");
+            await Page.ClickInMenuAsync("[aria-label=\"Toggle page navigation\"]", "#dropdownMenuButtonLevel");
 
             await Page.SaveScreenshotToAsync(TestContext);
         }
@@ -280,7 +280,7 @@ namespace YoFi.Tests.Functional
             await NavigateToAsync("Report/all-summary?level=1");
 
             // Click "Show Months" in the page navbar
-            await Page.ClickAsync("#dropdownMenuButtonColumns");
+            await Page.ClickInMenuAsync("[aria-label=\"Toggle page navigation\"]", "#dropdownMenuButtonColumns");
 
             await Page.SaveScreenshotToAsync(TestContext);
         }
@@ -295,7 +295,7 @@ namespace YoFi.Tests.Functional
             await NavigateToAsync("Report/all-summary?level=1");
 
             // Click "Month" in the page navbar
-            await Page.ClickAsync("#dropdownMenuButtonMonth");
+            await Page.ClickInMenuAsync("[aria-label=\"Toggle page navigation\"]", "#dropdownMenuButtonMonth");
 
             await Page.SaveScreenshotToAsync(TestContext);
         }
@@ -310,7 +310,7 @@ namespace YoFi.Tests.Functional
             await NavigateToAsync("Report/all-summary?level=1");
 
             // Click "Year" in the page navbar
-            await Page.ClickAsync("#dropdownMenuButtonYear");
+            await Page.ClickInMenuAsync("[aria-label=\"Toggle page navigation\"]", "#dropdownMenuButtonYear");
 
             await Page.SaveScreenshotToAsync(TestContext);
         }

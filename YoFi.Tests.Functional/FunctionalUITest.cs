@@ -69,14 +69,36 @@ namespace YoFi.Tests.Functional
             await page.GotoAsync(Properties.Url);
 
             // Are we already logged in?
-            var hellouser_visible = await page.Locator("data-test-id=hello-user").IsVisibleAsync();
+            var hellouser = page.Locator("data-test-id=hello-user");
+            var hellouser_visible = await hellouser.IsVisibleAsync();
+
+            // If it's not visible on the main page, it may be hidden behind nav toggle
+            var navtoggle = page.Locator("[aria-label=\"Toggle navigation\"]");
+            if (!hellouser_visible && await navtoggle.IsVisibleAsync())
+            {
+                await navtoggle.ClickAsync();
+                hellouser_visible = await hellouser.IsVisibleAsync();
+            }
 
             // If we're not already logged in, well we need to do that then
             if (!hellouser_visible)
             {
                 Console.WriteLine("Logging in...");
 
-                await page.ClickAsync("data-test-id=login");
+                var login = page.Locator("data-test-id=login");
+                if (!await login.IsVisibleAsync())
+                {
+                    if (await navtoggle.IsVisibleAsync())
+                    {
+                        await navtoggle.ClickAsync();
+                    }
+                    if (!await login.IsVisibleAsync())
+                    {
+                        throw new ApplicationException("Can't find login button");
+                    }
+                }
+
+                await login.ClickAsync();
 
                 // When: Filling out the login form with those credentials and pressing "sign in"
                 await page.FillAsync("id=floatingInput", Properties.AdminUserEmail);
@@ -282,6 +304,17 @@ namespace YoFi.Tests.Functional
         {
             await page.FillAsync("data-test-id=q", q);
             await page.ClickAsync("data-test-id=btn-search");
+        }
+
+        public static async Task ClickInMenuAsync(this IPage page, string menuselector, string itemselector)
+        {
+            var item = page.Locator(itemselector);
+            if (!await item.IsVisibleAsync())
+            {
+                await page.ClickAsync(menuselector);
+                await Task.Delay(500);
+            }
+            await item.ClickAsync();
         }
     }
 }
