@@ -1,7 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.Playwright;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional
@@ -113,7 +111,7 @@ namespace YoFi.Tests.Functional
             // Click "Help Topic" in the actions dropdown
             await Page.ClickAsync("text=Help Topic");
 
-            await Page.WaitForSelectorAsync("[data-test-id=\"help-topic-title\"]", new Microsoft.Playwright.PageWaitForSelectorOptions() { State = Microsoft.Playwright.WaitForSelectorState.Visible });
+            await Page.WaitForSelectorAsync("[data-test-id=\"help-topic-title\"]", new PageWaitForSelectorOptions() { State = WaitForSelectorState.Visible });
             await Task.Delay(500);
             await Page.SaveScreenshotToAsync(TestContext);
         }
