@@ -11,6 +11,7 @@ namespace YoFi.Tests.Functional
         public string ApiKey { get; private set; }
         public bool IsDevelopment { get; private set; }
         public bool IsDemo { get; private set; }
+        public string ViewportSize { get; private set; }
 
         public TestConfigProperties(System.Collections.IDictionary testproperties)
         {
@@ -21,6 +22,7 @@ namespace YoFi.Tests.Functional
             ApiKey = testproperties["apikey"] as string;
             IsDevelopment = (testproperties["environment"] as string)?.Contains("Development") == true;
             IsDemo = (testproperties["environment"] as string)?.Contains("Demo") == true;
+            ViewportSize = testproperties["viewportSize"] as string;
 
             // Else get them from user secrets
             var config = new ConfigurationBuilder().AddUserSecrets(Assembly.GetAssembly(typeof(FunctionalUITest))).Build();

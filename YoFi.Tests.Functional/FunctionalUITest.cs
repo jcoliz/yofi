@@ -18,11 +18,34 @@ namespace YoFi.Tests.Functional
     public class FunctionalUITest: PageTest
     {
 
-        public override BrowserNewContextOptions ContextOptions => _ContextOptions;
+        public override BrowserNewContextOptions ContextOptions
+        {
+            get
+            {
+                _ContextOptions.ViewportSize = CurrentViewportSizeFrom(TestContext);
+                return _ContextOptions;
+            }
+        }
 
-        protected static readonly ViewportSize iPadLandscapeViewport = new ViewportSize() { Width = 1080, Height = 810 };
+        private static readonly ViewportSize WideViewport = new ViewportSize() { Width = 1080, Height = 810 };
+        private static readonly ViewportSize TabletViewport = new ViewportSize() { Width = 810, Height = 1080 };
+        private static readonly ViewportSize PhoneViewport = new ViewportSize() { Width = 390, Height = 844 };
 
-        private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions { AcceptDownloads = true, ViewportSize = iPadLandscapeViewport };
+        private static BrowserNewContextOptions _ContextOptions { get; set; } = new BrowserNewContextOptions
+        {
+            AcceptDownloads = true
+        };
+
+        public static ViewportSize CurrentViewportSizeFrom(TestContext testContext)
+        {
+            return testContext.Properties["viewportSize"]?.ToString()?.ToLowerInvariant()
+                switch
+                {
+                    "tablet" => TabletViewport,
+                    "phone" => PhoneViewport,
+                    _ => WideViewport
+                };
+        }
 
         protected const string testmarker = "__TEST__";
         private int nextid = 1;
@@ -76,7 +99,7 @@ namespace YoFi.Tests.Functional
                 await Context.StorageStateAsync(new BrowserContextStorageStateOptions { Path = ConfigFileName });
 
                 // Set it as our new context options for later contexts
-                _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName, AcceptDownloads = true, ViewportSize = iPadLandscapeViewport };
+                _ContextOptions = new BrowserNewContextOptions { StorageStatePath = ConfigFileName, AcceptDownloads = true };
 
                 // Once we're logged int, the timeouts can get a lot tighter
                 base.Context.SetDefaultTimeout(5000);
@@ -206,7 +229,8 @@ namespace YoFi.Tests.Functional
 
             var displaymoment = string.IsNullOrEmpty(moment) ? string.Empty : $"-{moment}";
 
-            var filename = $"Screenshot/{testname} {counter:D4}{displaymoment}.png";
+            var viewportwidth = FunctionalUITest.CurrentViewportSizeFrom(testContext).Width;
+            var filename = $"Screenshot/{viewportwidth}/{testname} {counter:D4}{displaymoment}.png";
             await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true, FullPage = true });
             testContext.AddResultFile(filename);
         }

@@ -9,7 +9,7 @@ namespace YoFi.Tests.Functional
     public class NotLoggedInUITest: FunctionalUITest
     {
         // We need to override the browser new context options here so we can NOT have the cookies file, and ergo NOT be logged in.
-        public override BrowserNewContextOptions ContextOptions => new BrowserNewContextOptions { ViewportSize = iPadLandscapeViewport };
+        public override BrowserNewContextOptions ContextOptions => new BrowserNewContextOptions() { ViewportSize = CurrentViewportSizeFrom(TestContext) };
 
         [TestMethod]
         public async Task HomePage()
@@ -22,6 +22,7 @@ namespace YoFi.Tests.Functional
 
             // Then: The home page loads
             await Page.ThenIsOnPageAsync("Home");
+            await Page.SaveScreenshotToAsync(TestContext);
         }
 
         [TestMethod]
@@ -29,7 +30,6 @@ namespace YoFi.Tests.Functional
         {
             // Given: Starting at the home page, not logged in
             await HomePage();
-            await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Clicking on the login link
             await Page.ClickAsync("data-test-id=login");
@@ -37,6 +37,7 @@ namespace YoFi.Tests.Functional
 
             // Then: The login page loads
             await Page.ThenIsOnPageAsync("Login");
+            await Page.SaveScreenshotToAsync(TestContext);
         }
 
     }
