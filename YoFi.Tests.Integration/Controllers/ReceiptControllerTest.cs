@@ -259,6 +259,54 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.IsFalse(iDC.Get<Receipt>().Any());
         }
 
+        [TestMethod]
+        public async Task Bug1348()
+        {
+            //
+            // Bug 1348: [Production Bug] Receipt shows matches on index but not on details
+            //
+
+            /*
+                Create transaction exactly 15 days prior to the current date
+                Create two receipts, both which match the transaction by name, and not by amount. One receipt is on the current date. The other receipt is a week prior.
+                View the receipts on the receipt index.
+                Note that both receipts show matches > 0, so "create" is not shown, but "review" is shown.
+                Expected: Current transaction should have 0 matches, and create is shown
+                Click review on the current-date transaction
+                Note that the details page shows no matches
+                Expected: This is correct
+            */
+
+            // Given: Transaction exactly 15 days prior
+            var today = DateTime.Now.Date;
+            var prior = today - TimeSpan.FromDays(15);
+            var txs = FakeObjects<Transaction>.Make(1, x => x.Timestamp = prior).SaveTo(this);
+            var tx = txs.Single();
+
+            // And: One receipt matches by name, not amount, on today's date
+            // And: One receipt matches by name, not amount, on an earlier date
+            var r = FakeObjects<Receipt>
+                        .Make(1, x => { x.Timestamp = today; x.Amount = tx.Amount * 2; x.Name = tx.Payee; SetFilename(x); })
+                        .Add(1, x => { x.Timestamp = today - TimeSpan.FromDays(7); x.Amount = tx.Amount * 2; x.Name = tx.Payee; SetFilename(x); })
+                        .SaveTo(this)
+                        .First();
+
+            // When: Getting the index
+            var document = await WhenGetAsync($"{urlroot}/");
+
+            // Then: First item shows no matches
+            var matches_el = document.QuerySelectorAll("tbody tr td[data-test-id=Matches]");
+            var matches_str = matches_el.First().GetAttribute("data-test-value");
+            var nmatches = int.Parse(matches_str);
+            Assert.AreEqual(0, nmatches);
+
+            // When: Getting details for the first receipt
+            document = await WhenGetAsync($"{urlroot}/Details/{r.ID}");
+
+            // Then: Item shows no matches
+            ThenResultsAreEqualByTestKey(document, Enumerable.Empty<Transaction>());
+        }
+
         #endregion
     }
 }

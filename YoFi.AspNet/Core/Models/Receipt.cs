@@ -104,8 +104,17 @@ namespace YoFi.Core.Models
             }
 
             var margin = TimeSpan.FromDays(14);
-            if (transaction.Timestamp > Timestamp - margin && transaction.Timestamp < Timestamp + margin && result > 0)
-                result += 100 - (int)Math.Abs((transaction.Timestamp - Timestamp).TotalDays);
+            if (transaction.Timestamp > Timestamp - margin && transaction.Timestamp < Timestamp + margin)
+            {
+                // Matching on timespan only helps if we ALSO match on something else
+                if (result > 0)
+                    result += 100 - (int)Math.Abs((transaction.Timestamp - Timestamp).TotalDays);
+            }
+            else
+            {
+                // Failing to match on timespan is an OVERRIDING non-match
+                result = 0;
+            }
 
             return result;
         }
@@ -136,7 +145,7 @@ namespace YoFi.Core.Models
             var from = receipts.Min(x => x.Timestamp);
             var to = receipts.Max(x => x.Timestamp);
 
-            var result = initial.Where(x=>x.Timestamp >= from-margin && x.Timestamp <= to+margin);
+            var result = initial.Where(x=>x.Timestamp > from - margin && x.Timestamp < to + margin);
 
             return result;
         }
