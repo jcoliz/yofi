@@ -93,7 +93,7 @@ namespace YoFi.Core.Models
 
             if (!string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(transaction.Payee))
             {
-                if (transaction.Payee.Contains(Name))
+                if (transaction.Payee.ToLowerInvariant().Contains(Name.ToLowerInvariant()))
                     result += 100;
             }
 

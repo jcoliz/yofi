@@ -274,23 +274,6 @@ namespace YoFi.Tests.Core
         #endregion
 
         #region Match Transaction
-
-        [TestMethod]
-        public void MatchTxNameAndDate()
-        {
-            // Given: A transaction
-            var item = FakeObjects<Transaction>.Make(1).Single();
-
-            // And: A receipt which substring matches the name
-            var receipt = new Receipt() { Name = item.Payee[0..7], Timestamp = item.Timestamp };
-
-            // When: Testing for a match
-            var match = receipt.MatchesTransaction(item);
-
-            // Then: This is a 200-point match
-            Assert.AreEqual(200, match);
-        }
-
         [TestMethod]
         public void MatchTxAmountAndDate()
         {
@@ -306,6 +289,7 @@ namespace YoFi.Tests.Core
             // Then: This is a 200-point match
             Assert.AreEqual(200, match);
         }
+
 
         [TestMethod]
         public void MatchTxNegativeAmountAndDate()
@@ -337,6 +321,26 @@ namespace YoFi.Tests.Core
 
             // Then: This is a 300-point match
             Assert.AreEqual(300, match);
+        }
+
+        [TestMethod]
+        public void MatchTxNameAndDate_MixedCase_Bug1341()
+        {
+            //
+            // Bug 1341: Receipt matching is case sensitive
+            //
+
+            // Given: A transaction, whose payee is all upper-case
+            var item = FakeObjects<Transaction>.Make(1,x=>x.Payee = x.Payee.ToUpperInvariant()).Single();
+
+            // And: A receipt which substring matches the name, except it's lowercase, and matches the date
+            var receipt = new Receipt() { Name = item.Payee[0..7].ToLowerInvariant(), Timestamp = item.Timestamp };
+
+            // When: Testing for a match
+            var match = receipt.MatchesTransaction(item);
+
+            // Then: This is a 200-point match
+            Assert.AreEqual(200, match);
         }
 
         [TestMethod]
