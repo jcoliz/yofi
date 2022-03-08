@@ -44,8 +44,8 @@
             @if(!string.IsNullOrEmpty(Model?.ReceiptUrl))
             {
                 <input type="hidden" name="ReceiptUrl" value="@Model.ReceiptUrl"/>
-                <p>Receipt:</p>
-                <p>@Model.ReceiptUrl</p>
+                <p><strong>Receipt</strong>: <span data-test-id="receipt-url">@Model.ReceiptUrl</span></p>
+                
             }
 
             <div class="form-group">

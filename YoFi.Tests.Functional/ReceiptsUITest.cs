@@ -493,7 +493,8 @@ namespace YoFi.Tests.Functional
 
         #region User Story 1311: [User Can] Create a new transaction from an uploaded receipt
 
-        public Task CreateDetails()
+        [TestMethod]
+        public async Task CreateDetails()
         {
             /*
             Given: A receipt which does not match any transaction
@@ -501,7 +502,42 @@ namespace YoFi.Tests.Functional
             Then: On the transaction create page with correct details
              */
 
-            return Task.CompletedTask;
+            // Given: On receipts page
+            await NavigateToReceiptsPage();
+
+            // And: With an uploaded unmatched receipt
+            // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
+            var payee = "A Whole New Thing";
+            var amount = 12.34m;
+            var filenames = new[]
+            {
+                // Matches none
+                $"{payee} ${amount} 12-21 {testmarker}.png"
+            };
+            await WhenUploadingSampleReceipts(filenames);
+            await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
+
+            // When: Clicking "Create"
+            await Page.ClickAsync("text=\"Create\"");
+            await Task.Delay(500);
+            await Page.SaveScreenshotToAsync(TestContext, "Create Page");
+
+            // Then: On create page
+            await Page.ThenIsOnPageAsync("Create Transaction");
+
+            // And: Details filled in correctly
+            var actual_payee = await Page.Locator("input[name=\"Payee\"]").GetAttributeAsync("value");
+            Assert.AreEqual(payee, actual_payee);
+
+            var actual_amount_str = await Page.Locator("input[name=\"Amount\"]").GetAttributeAsync("value");
+            var actual_amount = decimal.Parse(actual_amount_str);
+            Assert.AreEqual(amount, actual_amount);
+
+            var actual_memo = await Page.Locator("input[name=\"Memo\"]").GetAttributeAsync("value");
+            Assert.AreEqual(testmarker, actual_memo);
+
+            var actual_filename = await Page.Locator("data-test-id=receipt-url").TextContentAsync();
+            Assert.IsTrue(actual_filename.Contains(filenames.Single()));
         }
 
         public Task CreateSave()
