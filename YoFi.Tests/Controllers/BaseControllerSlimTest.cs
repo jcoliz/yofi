@@ -124,9 +124,13 @@ namespace YoFi.Tests.Controllers.Slim
             var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
 
             // And: It returns an empty model
-            var model = Assert.That.IsOfType<Transaction>(viewresult.Model);
-            Assert.IsNull(model.Payee);
-            Assert.IsNull(model.Memo);
+            if (viewresult.Model is Transaction model)
+            {
+                Assert.IsNull(model.Payee);
+                Assert.IsNull(model.Memo);
+            }
+            else
+                Assert.IsNull(viewresult.Model);
         }
 
         [TestMethod]
