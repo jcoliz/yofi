@@ -34,5 +34,13 @@ namespace Common.DotNet
                     return DateTime.Now + Offset;
             }
         }
+
+        public void Reset()
+        {
+            IsSet = false;
+            Explict = default;
+            IsLocked = false;
+            Offset = TimeSpan.Zero;
+        }
     }
 }

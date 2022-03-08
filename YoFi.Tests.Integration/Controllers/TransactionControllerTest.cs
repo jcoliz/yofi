@@ -1,4 +1,5 @@
-﻿using jcoliz.OfficeOpenXml.Serializer;
+﻿using AngleSharp.Html.Dom;
+using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -37,6 +38,9 @@ namespace YoFi.Tests.Integration.Controllers
         [TestCleanup]
         public void Cleanup()
         {
+            // Reset the clock back
+            integrationcontext.clock.Reset();
+
             // Clean out database
             context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
             context.Set<Payee>().RemoveRange(context.Set<Payee>());
@@ -942,6 +946,27 @@ namespace YoFi.Tests.Integration.Controllers
 
         #endregion
 
+        #region Other Tests
+
+        [TestMethod]
+        public async Task CreatePage()
+        {
+            // Given: It's a certain time
+            var now = new DateTime(2003, 07, 15);
+            integrationcontext.clock.Now = now;
+
+            // When: Asking for the page to create a new item
+            var document = await WhenGetAsync($"{urlroot}/Create");
+
+            // Then: The "timestamp" is filled in with the correct time
+            var input = document.QuerySelector("input[name=Timestamp]") as IHtmlInputElement;
+            var actual_str = input.DefaultValue;
+            var actual = DateTime.Parse(actual_str);
+            Assert.AreEqual(now.Date, actual.Date);
+        }
+
+        #endregion
+
         #region Hiding Tests
 
         // Need to hide download test. Works differently for transactions
@@ -966,5 +991,6 @@ namespace YoFi.Tests.Integration.Controllers
         }
 
 #endregion
+
     }
 }

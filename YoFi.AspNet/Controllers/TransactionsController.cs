@@ -73,7 +73,7 @@ namespace YoFi.AspNet.Controllers
                 return View(tx);
             }
             else
-                return View();
+                return View(new Transaction() { Timestamp = _clock.Now.Date });
         }
 
         /// <summary>

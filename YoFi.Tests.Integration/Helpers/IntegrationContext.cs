@@ -32,6 +32,7 @@ namespace YoFi.Tests.Integration.Helpers
         public AnonymousAuth canwrite { get; private set; }
         public AnonymousAuth canread { get; private set; }
         public ApiConfig apiconfig { get; private set; }
+        public TestClock clock { get; private set; }
 
         public IntegrationContext(string name)
         {
@@ -53,6 +54,7 @@ namespace YoFi.Tests.Integration.Helpers
                     });
                     services.AddScoped<IAuthorizationHandler, AnonymousAuthHandler>();
                     services.AddSingleton<IStorageService>(storage = new TestAzureStorage());
+                    services.AddSingleton<IClock>(clock = new TestClock());
                 });
             }).Server;
             parser = new HtmlParser();
