@@ -61,6 +61,9 @@ namespace YoFi.AspNet.Main
             services.AddDistributedMemoryCache();
             services.AddSession();
 
+            // The following line enables Application Insights telemetry collection.
+            services.AddApplicationInsightsTelemetry();
+
             // Bug 916: Reports endpoint should return content type json, not text.
             // http://www.binaryintellect.net/articles/a1e0e49e-d4d0-4b7c-b758-84234f14047b.aspx
             services.AddControllersWithViews()

@@ -39,6 +39,10 @@ This may be useful for sensitive keys such as the Administrator User Account pas
 This setting is only useful in production. It requires that the app be running as an App Service, and that you've given the app permission
 to access your key vault. Be sure to read more about the [Azure Key Vault Configuration Provider in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/key-vault-configuration) if you choose to go this route.
 
+### Application Insights
+
+If you are running an App Insights instance, put the connection string in ApplicationInsights:ConnectionString. Read how to [Create an Application Insights resource](https://docs.microsoft.com/en-us/azure/azure-monitor/app/create-new-resource), and how to use its [Connection strings](https://docs.microsoft.com/en-us/azure/azure-monitor/app/sdk-connection-string).
+
 ## Access
 
 ### Administrator User Account
