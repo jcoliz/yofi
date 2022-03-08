@@ -157,7 +157,7 @@ namespace YoFi.AspNet.Controllers
         #region Action Handlers: Update (Edit)
 
         [ValidateTransactionExists]
-        public async Task<IActionResult> Edit(int? id, [FromServices] IPayeeRepository payeeRepository)
+        public async Task<IActionResult> Edit(int? id, [FromServices] IPayeeRepository payeeRepository, [FromServices] IReceiptRepository rrepo)
         {
             var transaction = await _repository.GetWithSplitsByIdAsync(id);
             if (string.IsNullOrEmpty(transaction.Category) && payeeRepository != null)
@@ -170,6 +170,20 @@ namespace YoFi.AspNet.Controllers
                 }
             }
 
+// In progress
+#if false           
+            if (rrepo != null && await rrepo.AnyAsync())
+            {
+                var matches = await rrepo.GetMatchingAsync(transaction);
+                ViewData["MatchedReceipts"] = matches.Count();
+                
+                if (matches.Any())
+                {
+                    ViewData["SuggestedMatch"] = matches.First().Filename;
+                    ViewData["ReceiptID"] = matches.First().ID;
+                }
+            }
+#endif
             return View(transaction);
         }
 
@@ -229,9 +243,9 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        #endregion
+#endregion
 
-        #region Action Handlers: Delete
+#region Action Handlers: Delete
 
         // GET: Transactions/Delete/5
         [ValidateTransactionExists]
@@ -249,9 +263,9 @@ namespace YoFi.AspNet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        #endregion
+#endregion
 
-        #region Action Handlers: Download/Export
+#region Action Handlers: Download/Export
 
         [HttpPost]
         public async Task<IActionResult> Download(bool allyears, string q = null)
@@ -273,9 +287,9 @@ namespace YoFi.AspNet.Controllers
             return PartialView(year);
         }
 
-        #endregion
+#endregion
 
-        #region Action Handlers: Upload/Import
+#region Action Handlers: Upload/Import
 
         /// <summary>
         /// Upload split detail as spreadsheet for this transaction
@@ -346,9 +360,9 @@ namespace YoFi.AspNet.Controllers
             return (IActionResult)RedirectToPage("/Admin");
         }
 
-        #endregion
+#endregion
 
-        #region Action Handlers: Receipts
+#region Action Handlers: Receipts
 
         /// <summary>
         /// Upload receipt from <paramref name="files"/> to transaction #<paramref name="id"/>
@@ -418,33 +432,33 @@ namespace YoFi.AspNet.Controllers
             return File(stream, contenttype, name);
         }
 
-        #endregion
+#endregion
 
-        #region Action Handlers: Error
+#region Action Handlers: Error
 
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        #endregion
+#endregion
 
-        #region Internals
+#region Internals
 
         private readonly ITransactionRepository _repository;
         private readonly IClock _clock;
-        #endregion
+#endregion
 
-        #region IController
+#region IController
         Task<IActionResult> IController<Transaction>.Index() => Index();
         Task<IActionResult> IController<Transaction>.Edit(int id, Transaction item) => Edit(id, false, item);
         Task<IActionResult> IController<Transaction>.Download() => Download(false);
         Task<IActionResult> IController<Transaction>.Upload(List<IFormFile> files) => throw new NotImplementedException();
-        Task<IActionResult> IController<Transaction>.Edit(int? id) => Edit(id, null);
+        Task<IActionResult> IController<Transaction>.Edit(int? id) => Edit(id, null,null);
 
         Task<IActionResult> IController<Transaction>.Create() => Create(rrepo:null,rid:null);
 
         Task<IActionResult> IController<Transaction>.Create(Transaction item) => Create(item, rrepo: null);
-        #endregion
+#endregion
     }
 }

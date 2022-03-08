@@ -67,9 +67,13 @@
     </div>
 </div>
 
-
 <h2>Splits</h2>
 <hr />
+
+@*
+    UPLOAD SPLITS
+*@
+
 @if (!Model.HasSplits)
 {
     <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpSplits">
@@ -81,6 +85,10 @@
     </form>
 }
 
+@*
+    FIX SPLITS
+*@
+
 @if (!Model.IsSplitsOK)
 {
     <form asp-action="CreateSplit" asp-route-id="@Model.ID">
@@ -90,6 +98,10 @@
         </div>
     </form>
 }
+
+@*
+    SPLITS TABLE
+*@
 
 <div class="row">
     <div class="col-md-12">
@@ -141,17 +153,28 @@
     </div>
 </div>
 
+@*
+    CREATE SPLIT
+*@
+
 <form asp-action="CreateSplit" asp-route-id="@Model.ID">
     <button type="submit" class="btn btn-primary mb-3" data-test-id="btn-add-split">Add</button>
 </form>
 
 <br />
 
+@*
+    RECEIPT
+*@
+
 <h2>Receipt</h2>
 <hr />
 
 @if (null == Model.ReceiptUrl)
 {
+    var nmatches = ViewData["MatchedReceipts"] as int?;
+
+    <p>You can upload a receipt file here</p>
     <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
         <div class="input-group mb-3">
             <button class="btn btn-primary" type="submit" id="inputGroupFileAddon03" data-test-id="btn-create-receipt" disabled>Upload</button>
@@ -159,6 +182,31 @@
             <input type="hidden" asp-for="ID" />
         </div>
     </form>
+
+    @if (nmatches.HasValue)
+    {
+        var suggestedmatch = ViewData["SuggestedMatch"] as string;
+
+        <div data-test-id="hasreceipts">
+        <p>
+            <span>Or you can select one of the previously-uploaded receipts here</span>
+            @if (nmatches > 1)
+            {
+                <br/><span>Found: <span data-test-id="nmatches">@nmatches</span> possible matching receipts</span>
+            }
+        </p>
+
+        @if (!string.IsNullOrEmpty(suggestedmatch))
+        {
+            var rid = ViewData["ReceiptID"] as int?;
+
+            <p>Suggested: <span data-test-id="suggestedmatch">@suggestedmatch</span></p>
+            <a asp-controller="Receipts" asp-action="Accept" asp-route-txid="@Model.ID" asp-route-id="@rid" class="btn btn-primary" data-test-id="accept" data-test-value="@rid">Accept</a>
+        }
+
+        <a asp-controller="Receipts" asp-action="Pick" asp-route-txid="@Model.ID" class="btn btn-secondary">Review</a>
+        </div>
+    }
 }
 else
 {

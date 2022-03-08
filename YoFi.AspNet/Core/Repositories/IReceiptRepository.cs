@@ -11,6 +11,7 @@ namespace YoFi.Core.Repositories
         Task<IEnumerable<Receipt>> GetAllAsync();
         Task<Receipt> GetByIdAsync(int id);
         Task<bool> TestExistsByIdAsync(int id);
+        Task<bool> AnyAsync();
         Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx);
         Task DeleteAsync(Receipt receipt);
         Task AssignReceipt(Receipt receipt, Transaction tx);

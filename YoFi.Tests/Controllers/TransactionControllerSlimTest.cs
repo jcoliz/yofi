@@ -199,7 +199,7 @@ namespace YoFi.Tests.Controllers.Slim
             }
             else
             {
-                var actionresult = await itemController.Edit(99, payrepo.Object);
+                var actionresult = await itemController.Edit(99, payrepo.Object,null);
                 var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
                 model = Assert.That.IsOfType<Transaction>(viewresult.Model);
             }
