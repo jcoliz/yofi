@@ -1,4 +1,5 @@
-﻿using Common.DotNet;
+﻿using AngleSharp.Html.Dom;
+using Common.DotNet;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -305,6 +306,40 @@ namespace YoFi.Tests.Integration.Controllers
 
             // Then: Item shows no matches
             ThenResultsAreEqualByTestKey(document, Enumerable.Empty<Transaction>());
+        }
+
+        [TestMethod]
+        public async Task Bug1351()
+        {
+            //
+            // Bug 1351: Should be able to create a new transaction for a receipt which matches another
+            //
+
+            /*
+                Given: A transaction
+                And: Two receipts, both which match the transaction, but one of them matches better than the other
+                When: Getting the receipts index
+                Then: Both receipts have a "create" button 
+            */
+
+            // Given: A transaction
+            var t = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Two receipts, both which match the transaction, but one of them matches better than the other
+            var rs = FakeObjects<Receipt>
+                .Make(1, x => { x.Name = t.Payee; x.Amount = t.Amount; x.Timestamp = t.Timestamp; SetFilename(x); })
+                .Add(1, x => { x.Name = t.Payee; x.Amount = t.Amount * 2; x.Timestamp = t.Timestamp; SetFilename(x); })
+                .SaveTo(this);
+
+            // When: Getting the index
+            var document = await WhenGetAsync($"{urlroot}/");
+
+            // Then: Both receipts have a "create" button 
+            var elements = document.QuerySelectorAll("table[data-test-id=results] tbody td[data-test-id=Matches]");
+            foreach(var element in elements)
+            {
+                Assert.AreEqual(1,element.QuerySelectorAll("a").Where(x=>(x as IHtmlAnchorElement).Href.Contains("Transactions/Create")).Count());
+            }
         }
 
         #endregion

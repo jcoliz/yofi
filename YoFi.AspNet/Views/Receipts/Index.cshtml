@@ -88,16 +88,22 @@
                 <div class="ms-auto">
                     <form method="post" asp-action="Action">
                         <input type="hidden" name="id" value="@item.ID"/>
-                        @if (nmatches == 0)
-                        {
-                            <a asp-controller="Transactions" asp-action="Create" asp-route-rid="@item.ID" class="btn btn-sm btn-primary my-1">Create</a>
-                        }
-                        else if (nmatches == 1)
+                        @if (nmatches == 1)
                         {
                             <input type="hidden" name="txid" value="@item.Matches.Single().ID" />
                             <input type="submit" name="command" value="Accept" class="btn btn-sm btn-primary my-1"/>
                         }
                     </form>
+                </div>
+                <div class="ms-1">
+                    @if (nmatches == 1)
+                    {
+                        <a asp-controller="Transactions" asp-action="Create" asp-route-rid="@item.ID" class="btn btn-sm btn-secondary my-1" data-bs-toggle="tooltip" title="Create"><i class="fa fa-plus"></i></a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Transactions" asp-action="Create" asp-route-rid="@item.ID" class="btn btn-sm btn-primary my-1">Create</a>
+                    }
                 </div>
                 @if (nmatches > 0)
                 {
