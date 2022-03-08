@@ -519,7 +519,6 @@ namespace YoFi.Tests.Functional
 
             // When: Clicking "Create"
             await Page.ClickAsync("text=\"Create\"");
-            await Task.Delay(500);
             await Page.SaveScreenshotToAsync(TestContext, "Create Page");
 
             // Then: On create page
@@ -540,7 +539,8 @@ namespace YoFi.Tests.Functional
             Assert.IsTrue(actual_filename.Contains(filenames.Single()));
         }
 
-        public Task CreateSave()
+        // FAILS [TestMethod]
+        public async Task CreateSave()
         {
             /*
             Given: A receipt which does not match any transaction
@@ -549,9 +549,34 @@ namespace YoFi.Tests.Functional
             Then: Transaction is created with attached receipt
              */
 
-            return Task.CompletedTask;
-        }
+            // Given: On receipts page
+            await NavigateToReceiptsPage();
 
+            // And: With an uploaded unmatched receipt
+            // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
+            var payee = "A Whole New Thing";
+            var amount = 12.34m;
+            var filenames = new[]
+            {
+                // Matches none
+                $"{payee} ${amount} 12-21 {testmarker}.png"
+            };
+            await WhenUploadingSampleReceipts(filenames);
+            await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
+            // And: On the transaction create page with correct details
+            await Page.ClickAsync("text=\"Create\"");
+
+            // When: Clicking "Create"
+            await Page.SaveScreenshotToAsync(TestContext, "Creating");
+            await Page.ClickAsync("input:has-text(\"Create\")");
+            await Page.SaveScreenshotToAsync(TestContext, "Clicked");
+
+            // Then: Transaction is created with attached receipt
+            await Page.ThenIsOnPageAsync("Transactions");
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext, "Created");
+            Assert.AreEqual(1, Page.GetTotalItemsAsync());
+        }
 
         #endregion
     }
