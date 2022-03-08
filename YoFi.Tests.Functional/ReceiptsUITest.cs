@@ -539,7 +539,7 @@ namespace YoFi.Tests.Functional
             Assert.IsTrue(actual_filename.Contains(filenames.Single()));
         }
 
-        // FAILS [TestMethod]
+        [TestMethod]
         public async Task CreateSave()
         {
             /*
@@ -571,11 +571,25 @@ namespace YoFi.Tests.Functional
             await Page.ClickAsync("input:has-text(\"Create\")");
             await Page.SaveScreenshotToAsync(TestContext, "Clicked");
 
-            // Then: Transaction is created with attached receipt
+            // Then: Matching transaction is created 
             await Page.ThenIsOnPageAsync("Transactions");
             await Page.SearchFor(testmarker);
             await Page.SaveScreenshotToAsync(TestContext, "Created");
-            Assert.AreEqual(1, Page.GetTotalItemsAsync());
+
+            var table = await ResultsTable.ExtractResultsFrom(Page);
+            Assert.IsNotNull(table);
+
+            // Correct count
+            Assert.AreEqual(1, table.Rows.Count);
+
+            // And: Transaction matches
+            Assert.IsTrue(table.Rows.All(x => x["Memo"] == testmarker));
+            Assert.AreEqual(payee, table.Rows[0]["Payee"]);
+            Assert.AreEqual("12/21/2022", table.Rows[0]["Date"]);
+            Assert.AreEqual(amount, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
+
+            // And: It has a receipt
+            Assert.AreEqual("True", table.Rows[0]["Receipt"]);
         }
 
         #endregion
