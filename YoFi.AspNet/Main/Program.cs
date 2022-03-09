@@ -47,7 +47,7 @@ namespace YoFi.AspNet.Main
                     {
                         using var sr = File.OpenText("version.txt");
                         var version = sr.ReadToEnd();
-                        logger.LogInformation($"** Version: {version[..8],8}                                        **");
+                        logger.LogInformation($"** Version: {version[..^1],-47} **");
                     }
                     else
                         logger.LogInformation(" Unable to locate version info.");
