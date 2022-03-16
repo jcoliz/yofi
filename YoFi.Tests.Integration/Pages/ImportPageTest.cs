@@ -1,5 +1,5 @@
 ﻿using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
+using jcoliz.FakeObjects;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;

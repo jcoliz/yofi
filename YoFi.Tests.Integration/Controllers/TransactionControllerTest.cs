@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Html.Dom;
+using jcoliz.FakeObjects;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

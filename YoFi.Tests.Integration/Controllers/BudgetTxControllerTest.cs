@@ -1,14 +1,11 @@
-﻿using AngleSharp.Html.Parser;
-using Microsoft.EntityFrameworkCore;
+﻿using jcoliz.FakeObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Core.Repositories;
 using YoFi.Tests.Integration.Helpers;
 
 namespace YoFi.Tests.Integration.Controllers
