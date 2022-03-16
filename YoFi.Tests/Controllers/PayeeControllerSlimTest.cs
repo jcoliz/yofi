@@ -1,4 +1,5 @@
 ﻿using Common.DotNet.Test;
+using jcoliz.FakeObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;

@@ -1,5 +1,6 @@
 ﻿using Common.DotNet;
 using Common.DotNet.Test;
+using jcoliz.FakeObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

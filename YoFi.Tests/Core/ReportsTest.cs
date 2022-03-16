@@ -1,13 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using YoFi.Core.Models;
+﻿using jcoliz.FakeObjects;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using YoFi.Core.Models;
+using YoFi.Core.Reports;
 using YoFi.Tests.Helpers;
 using YoFi.Tests.Helpers.ReportExtensions;
-using YoFi.Core.Reports;
 
 namespace YoFi.Tests.Core
 {
