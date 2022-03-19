@@ -177,11 +177,11 @@ namespace YoFi.AspNet.Main
                 services.AddRazorPages(options =>
                 {
                     options.Conventions.AddPageRoute("/Home", "/");
-                }).AddRazorRuntimeCompilation();
+                }) /*.AddRazorRuntimeCompilation()*/;
             }
             else
             {
-                services.AddRazorPages().AddRazorRuntimeCompilation();
+                services.AddRazorPages() /*.AddRazorRuntimeCompilation()*/ ;
             }
         }
 
