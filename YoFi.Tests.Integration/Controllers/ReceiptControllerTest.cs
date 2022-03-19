@@ -342,6 +342,44 @@ namespace YoFi.Tests.Integration.Controllers
             }
         }
 
+        [TestMethod]
+        public async Task PickAll()
+        {
+            // Given: A transaction in the database
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Many receipts in the database all of which match that transaction
+            var rs = FakeObjects<Receipt>
+                .Make(5, x => { x.Name = tx.Payee; x.Timestamp = tx.Timestamp; SetFilename(x); })
+                .SaveTo(this);
+
+            // When: Getting the receipt picker for a the transaction
+            var document = await WhenGetAsync($"{urlroot}/Pick?txid={tx.ID}");
+
+            // Then: All receipts are included in the results
+            ThenResultsAreEqualByTestKey(document, rs);
+        }
+
+        [TestMethod]
+        public async Task PickSome()
+        {
+            // Given: A transaction in the database
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Many receipts in the database some of which match that transaction,
+            // but others which do not match
+            var rs = FakeObjects<Receipt>
+                .Make(5, x => { x.Name = tx.Payee; x.Timestamp = tx.Timestamp; SetFilename(x); })
+                .Add(7, x => { x.Name = "No Match"; x.Amount = tx.Amount * 10; SetFilename(x); })
+                .SaveTo(this);
+
+            // When: Getting the receipt picker for a the transaction
+            var document = await WhenGetAsync($"{urlroot}/Pick?txid={tx.ID}");
+
+            // Then: Only the matching receipts are included in the results
+            ThenResultsAreEqualByTestKey(document, rs.Group(0));
+        }
+
         #endregion
     }
 }

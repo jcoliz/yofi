@@ -1,0 +1,97 @@
+﻿@model IEnumerable<YoFi.Core.Models.Receipt>
+
+@{
+    ViewData["Title"] = "Pick a Receipt";
+    int txid = 1; //(int)ViewData["txid"];
+}
+
+@*
+    ANTI-FORGERY
+*@
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+@*
+    PAGE NAVBAR
+*@
+
+<nav class="navbar navbar-light navbar-page mb-3">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+    </div>
+</nav>
+
+@*
+    TRANSACTION DETAILS
+*@
+
+
+@*
+    RESULTS TABLE
+*@
+
+@if (Model.Any())
+{
+<table class="table" data-test-id="results">
+    <thead>
+        <tr>
+            <th class="col-1">
+                @Html.DisplayNameFor(model => model.Timestamp)
+            </th>
+            <th class="col-4">
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th class="col-1" style="text-align:right">
+                @Html.DisplayNameFor(model => model.Amount)
+            </th>
+            <th class="col-2">
+                @Html.DisplayNameFor(model => model.Memo)
+            </th>
+            <th class="col-3">
+                @Html.DisplayNameFor(model => model.Filename)
+            </th>
+            <th class="col-1">
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model) 
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Timestamp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td style="text-align:right">
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td data-test-id="memo">
+                @Html.DisplayFor(modelItem => item.Memo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Filename)
+            </td>
+            <td>
+                <div class="d-flex">
+                    <div class="ms-auto">
+                        <form method="post" asp-action="Action">
+                            <input type="hidden" name="id" value="@item.ID"/>
+                            <input type="hidden" name="txid" value="@txid" />
+                            <input type="submit" name="command" value="Accept" class="btn btn-sm btn-primary my-1"/>
+                        </form>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+}

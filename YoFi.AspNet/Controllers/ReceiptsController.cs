@@ -36,6 +36,31 @@ namespace YoFi.AspNet.Controllers
             }
         }
 
+        //TODO: [ValidateTransactionExists("txid")]
+        public async Task<IActionResult> Pick(int txid)
+        {
+            try
+            {
+                Console.WriteLine($"Pick: {txid}");
+
+                var tx = await _txrepository.GetByIdAsync(txid);
+                var qresult = await _repository.GetMatchingAsync(tx);
+
+                ViewData["txid"] = txid;
+
+                Console.WriteLine($"Found: {qresult.Count()}");
+
+                return View(qresult);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return BadRequest(ex.Message);
+                //throw;
+            }
+        }
+
         [ValidateReceiptExists]
         public async Task<IActionResult> Details(int id)
         {

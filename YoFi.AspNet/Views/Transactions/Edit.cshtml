@@ -201,6 +201,10 @@
             var rid = ViewData["ReceiptID"] as int?;
 
             <p>Suggested: <span data-test-id="suggestedmatch">@suggestedmatch</span></p>
+            @* 
+            TODO: This flow is not great. It will redirect to Receipts/Index, which is not obvious. Instead, we need to do this with a dialog, and
+            then stay here on this page. 
+            *@
             <a asp-controller="Receipts" asp-action="Accept" asp-route-txid="@Model.ID" asp-route-id="@rid" class="btn btn-primary" data-test-id="accept" data-test-value="@rid">Accept</a>
         }
 
