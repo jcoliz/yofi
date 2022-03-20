@@ -79,7 +79,7 @@ namespace YoFi.AspNet.Controllers
                 case "Delete":
                     return await Delete(id);
                 case "Accept":
-                    return await Accept(id, txid.Value);
+                    return await Accept(id, txid.Value, null);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -99,7 +99,7 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         [ValidateReceiptExists]
         //TODO: [ValidateTransactionExists("txid")]
-        public async Task<IActionResult> Accept(int id, int txid)
+        public async Task<IActionResult> Accept(int id, int txid, string next)
         {
             var receipt = await _repository.GetByIdAsync(id);
             var tx = await _txrepository.GetByIdAsync(txid);
@@ -117,8 +117,10 @@ namespace YoFi.AspNet.Controllers
                 throw;
             }
 
-
-            return RedirectToAction(nameof(Index));
+            if ("edittx" == next)
+                return RedirectToAction(nameof(TransactionsController.Edit),"Transactions", new { id = txid });
+            else
+                return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

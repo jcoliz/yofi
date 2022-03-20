@@ -201,10 +201,9 @@
             {
                 <p>Suggested: <span data-test-id="suggestedfilename">@suggested.Filename</span></p>
                 @* 
-                TODO: This flow is not great. It will redirect to Receipts/Index, which is not obvious. Instead, we need to do this with a dialog, and
-                then stay here on this page. 
+                TODO: It would be nicer to do this via Ajax, because as it is, this will just redirect right back here. 
                 *@
-                <a asp-controller="Receipts" asp-action="Accept" asp-route-txid="@Model.ID" asp-route-id="@suggested.ID" class="btn btn-primary" data-test-id="accept" data-test-value="@suggested.ID">Accept</a>
+                <a asp-controller="Receipts" asp-action="Accept" asp-route-txid="@Model.ID" asp-route-id="@suggested.ID" asp-route-next="edittx" class="btn btn-primary" data-test-id="accept" data-test-value="@suggested.ID">Accept</a>
             }
 
             <a asp-controller="Receipts" asp-action="Pick" asp-route-txid="@Model.ID" class="btn btn-secondary">Review</a>

@@ -82,9 +82,10 @@
             <td>
                 <div class="d-flex">
                     <div class="ms-auto">
-                        <form method="post" asp-action="Action">
+                        <form method="post" asp-action="Accept">
                             <input type="hidden" name="id" value="@item.ID"/>
                             <input type="hidden" name="txid" value="@txid" />
+                            <input type="hidden" name="next" value="edittx" />
                             <input type="submit" name="command" value="Accept" class="btn btn-sm btn-primary my-1"/>
                         </form>
                     </div>
