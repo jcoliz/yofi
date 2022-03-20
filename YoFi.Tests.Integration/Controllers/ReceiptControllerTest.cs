@@ -59,7 +59,7 @@ namespace YoFi.Tests.Integration.Controllers
 
         #region Helpers
 
-        private void SetFilename(Receipt r)
+        private static void SetFilename(Receipt r)
         {
             var parts = new List<string>();
 

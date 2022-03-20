@@ -908,6 +908,82 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual(newreceipturl, actual.ReceiptUrl);
         }
 
+        [TestMethod]
+        public async Task EditNoReceipts()
+        {
+            // Given: One transaction in the system
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: No receipts in the system
+            // ...
+
+            // When: Editing a transaction
+            var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
+
+            // Then: No option to match is offered
+            var hasreceipts = document.QuerySelector("div[data-test-id=hasreceipts]");
+            Assert.IsNull(hasreceipts);
+        }
+
+        [TestMethod]
+        public async Task EditAnyReceipts()
+        {
+            // Given: Some receipts in the system
+            _ = FakeObjects<Receipt>.Make(5).SaveTo(this);
+
+            // And: One transaction in the system
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // When: Editing the transaction
+            var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
+
+            // Then: Option to match a receipt is offered
+            var hasreceipts = document.QuerySelector("div[data-test-id=hasreceipts]");
+            Assert.IsNotNull(hasreceipts);
+        }
+
+        [TestMethod]
+        public async Task EditMatchingReceipt()
+        {
+            // Given: One transaction in the system
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Some receipts in the system where exactly one matches the transation
+            var r = FakeObjects<Receipt>.Make(1,x=>x.Name = tx.Payee).Add(5,x=>x.Timestamp += TimeSpan.FromDays(100)).SaveTo(this).First();
+
+            // When: Editing the transaction
+            var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
+
+            // Then: Option to apply the matching receipt is offered
+            var accept = document.QuerySelector("a[data-test-id=accept]");
+            Assert.IsNotNull(accept);
+
+            var rid_str = accept.GetAttribute("data-test-value");
+            var rid = int.Parse(rid_str);
+            Assert.AreEqual(r.ID,rid);
+        }
+
+        [TestMethod]
+        public async Task EditBestMatchingReceipt()
+        {
+            // Given: One transaction in the system
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Some receipts in the system where many match the transation, butone mattches exactly
+            var r = FakeObjects<Receipt>.Make(1,x=>{x.Name = tx.Payee;x.Timestamp = tx.Timestamp;}).Add(5,x=>{ x.Name = tx.Payee; x.Timestamp = tx.Timestamp + TimeSpan.FromDays(1);}).SaveTo(this).First();
+
+            // When: Editing the transaction
+            var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
+
+            // Then: Option to apply the best matching receipt is offered
+            var accept = document.QuerySelector("a[data-test-id=accept]");
+            Assert.IsNotNull(accept);
+
+            var rid_str = accept.GetAttribute("data-test-value");
+            var rid = int.Parse(rid_str);
+            Assert.AreEqual(r.ID,rid);
+        }
+
         #endregion
 
         #region Receipts

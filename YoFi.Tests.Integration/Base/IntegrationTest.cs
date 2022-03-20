@@ -50,10 +50,30 @@ namespace YoFi.Tests.Integration
             if (objects is IEnumerable<BudgetTx> b)
                 context.AddRange(b);
             if (objects is IEnumerable<Receipt> r)
+            {
+                foreach( var item in r )
+                    SetReceiptFilename(item);
                 context.AddRange(r);
+            }
 
             context.SaveChanges();
         }
+
+        private static void SetReceiptFilename(Receipt r)
+        {
+            var parts = new List<string>();
+
+            if (!string.IsNullOrEmpty(r.Name))
+                parts.Add(r.Name);
+            if (r.Amount.HasValue)
+                parts.Add(r.Amount.Value.ToString());
+            parts.Add($"{r.Timestamp.Month}-{r.Timestamp.Day}");
+            if (!string.IsNullOrEmpty(r.Memo))
+                parts.Add(r.Memo);
+
+            r.Filename = string.Join(' ', parts) + ".pdf";
+        }
+
 
         protected Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<T>(int total, int selected, Func<T, T> func = null) where T : class, new()
         {

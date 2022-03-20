@@ -172,7 +172,7 @@
 
 @if (null == Model.ReceiptUrl)
 {
-    var nmatches = ViewData["MatchedReceipts"] as int?;
+    var hasreceipts = (bool)ViewData["Receipt.Any"];
 
     <p>You can upload a receipt file here</p>
     <form method="post" enctype="multipart/form-data" asp-controller="Transactions" asp-action="UpReceipt">
@@ -183,32 +183,31 @@
         </div>
     </form>
 
-    @if (nmatches.HasValue)
+    @if (hasreceipts)
     {
-        var suggestedmatch = ViewData["SuggestedMatch"] as string;
+        var nmatches = ViewData["Receipt.Matches"] as int?;
+        var suggested = ViewData["Receipt.Suggested"] as Receipt;
 
         <div data-test-id="hasreceipts">
-        <p>
-            <span>Or you can select one of the previously-uploaded receipts here</span>
-            @if (nmatches > 1)
+            <p>
+                <span>Or you can select one of the previously-uploaded receipts here</span>
+                @if (nmatches > 1)
+                {
+                    <br/><span>Found: <span data-test-id="nmatches">@nmatches</span> possible matching receipts</span>
+                }
+            </p>
+
+            @if (nmatches > 0)
             {
-                <br/><span>Found: <span data-test-id="nmatches">@nmatches</span> possible matching receipts</span>
+                <p>Suggested: <span data-test-id="suggestedfilename">@suggested.Filename</span></p>
+                @* 
+                TODO: This flow is not great. It will redirect to Receipts/Index, which is not obvious. Instead, we need to do this with a dialog, and
+                then stay here on this page. 
+                *@
+                <a asp-controller="Receipts" asp-action="Accept" asp-route-txid="@Model.ID" asp-route-id="@suggested.ID" class="btn btn-primary" data-test-id="accept" data-test-value="@suggested.ID">Accept</a>
             }
-        </p>
 
-        @if (!string.IsNullOrEmpty(suggestedmatch))
-        {
-            var rid = ViewData["ReceiptID"] as int?;
-
-            <p>Suggested: <span data-test-id="suggestedmatch">@suggestedmatch</span></p>
-            @* 
-            TODO: This flow is not great. It will redirect to Receipts/Index, which is not obvious. Instead, we need to do this with a dialog, and
-            then stay here on this page. 
-            *@
-            <a asp-controller="Receipts" asp-action="Accept" asp-route-txid="@Model.ID" asp-route-id="@rid" class="btn btn-primary" data-test-id="accept" data-test-value="@rid">Accept</a>
-        }
-
-        <a asp-controller="Receipts" asp-action="Pick" asp-route-txid="@Model.ID" class="btn btn-secondary">Review</a>
+            <a asp-controller="Receipts" asp-action="Pick" asp-route-txid="@Model.ID" class="btn btn-secondary">Review</a>
         </div>
     }
 }

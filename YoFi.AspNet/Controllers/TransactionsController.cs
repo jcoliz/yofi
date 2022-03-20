@@ -170,20 +170,21 @@ namespace YoFi.AspNet.Controllers
                 }
             }
 
-// In progress
-#if false           
-            if (rrepo != null && await rrepo.AnyAsync())
+            if (rrepo != null)
             {
-                var matches = await rrepo.GetMatchingAsync(transaction);
-                ViewData["MatchedReceipts"] = matches.Count();
-                
-                if (matches.Any())
+                if (await rrepo.AnyAsync())
                 {
-                    ViewData["SuggestedMatch"] = matches.First().Filename;
-                    ViewData["ReceiptID"] = matches.First().ID;
+                    ViewData["Receipt.Any"] = true;
+
+                    var matches = await rrepo.GetMatchingAsync(transaction);
+                    ViewData["Receipt.Matches"] = matches.Count();
+                    
+                    if (matches.Any())
+                        ViewData["Receipt.Suggested"] = matches.First();
                 }
+                else
+                    ViewData["Receipt.Any"] = false;
             }
-#endif
             return View(transaction);
         }
 
