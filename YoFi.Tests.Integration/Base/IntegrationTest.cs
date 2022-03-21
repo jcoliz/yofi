@@ -74,17 +74,6 @@ namespace YoFi.Tests.Integration
             r.Filename = string.Join(' ', parts) + ".pdf";
         }
 
-
-        protected Task<(IEnumerable<T>, IEnumerable<T>)> GivenFakeDataInDatabase<T>(int total, int selected, Func<T, T> func = null) where T : class, new()
-        {
-            Action<T> action = null;
-            if (!(func is null) )
-                action = (x => x = func(x));
-            var data = FakeObjects<T>.Make(total - selected).Add(selected, action).SaveTo(this);
-
-            return Task.FromResult( (data as IEnumerable<T>, data.Group(1) as IEnumerable<T>) );
-        }
-
         protected Stream GivenSpreadsheetOf<T>(IEnumerable<T> items) where T : class
         {
             var stream = new MemoryStream();

@@ -99,13 +99,13 @@ namespace YoFi.Tests.Integration.Controllers
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             var pagesize = 25; // BaseRepository<T>.DefaultPageSize;
-            (var items, var p2) = await GivenFakeDataInDatabase<T>(pagesize * 3 / 2, pagesize / 2);
+            var items = FakeObjects<T>.Make(pagesize).Add(pagesize/2).SaveTo(this);
 
             // When: Getting the Index
             var document = await WhenGettingIndex(new WireQueryParameters());
 
             // Then: Only one page of items returned, which are the LAST group, cuz it's sorted by time
-            ThenResultsAreEqualByTestKey(document, items.Except(p2));
+            ThenResultsAreEqualByTestKey(document, items.Group(0));
         }
 
         [TestMethod]
@@ -113,13 +113,13 @@ namespace YoFi.Tests.Integration.Controllers
         {
             // Given: A long set of items, which is longer than one page, but not as long as two pages 
             var pagesize = 25; // BaseRepository<BudgetTx>.DefaultPageSize;
-            (var items, var p2) = await GivenFakeDataInDatabase<T>(pagesize * 3 / 2, pagesize / 2);
+            var items = FakeObjects<T>.Make(pagesize).Add(pagesize/2).SaveTo(this);
 
             // When: Getting the Index for page 2
             var document = await WhenGettingIndex(new WireQueryParameters() { Page = 2 });
 
             // Then: Only 2nd page items returned
-            ThenResultsAreEqualByTestKey(document, p2);
+            ThenResultsAreEqualByTestKey(document, items.Group(1));
         }
 
         [TestMethod]

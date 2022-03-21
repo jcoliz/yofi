@@ -80,7 +80,7 @@ namespace YoFi.Tests.Integration.Controllers
             // Given: A set of items, where the data set produces a different composition
             // when ordered by each property.
             // Note that this is NOT the usual way fake data is made.
-            (var _, var items) = await GivenFakeDataInDatabase<Transaction>(20,20,
+            var items = FakeObjects<Transaction>.Make(20,
                 x=> 
                 {
                     int index = (int)(x.Amount / 100m);
@@ -88,8 +88,8 @@ namespace YoFi.Tests.Integration.Controllers
                     x.Category = (index % 3).ToString() + x.Category;
                     x.Amount += (index % 4) * 10000m;
                     x.BankReference = (index % 5).ToString() + index.ToString();
-                    return x; 
-                });
+                })
+                .SaveTo(this);
 
             // When: Calling Index with a defined sort order
             // When: Getting the index
@@ -106,13 +106,12 @@ namespace YoFi.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKeyOrdered(document, expected);
         }
 
-
         [TestMethod]
         public async Task IndexPayeeSearch()
         {
             // Given: A set of items, some of which have a certain payee
             var word = "Fibbledy-jibbit";
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(7, 2, x => { x.Payee += word; return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(2, x => x.Payee += word).SaveTo(this).Group(1);
 
             // When: Calling Index with payee search term
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"p={word}" });
@@ -126,7 +125,7 @@ namespace YoFi.Tests.Integration.Controllers
         {
             // Given: A set of items, some of which have a certain category
             var word = "Fibbledy-jibbit";
-            (var _, var chosen) = await GivenFakeDataInDatabase<Transaction>(8, 3, x => { x.Category += word; return x; });
+            var chosen = FakeObjects<Transaction>.Make(5).Add(2, x => x.Category += word).SaveTo(this).Group(1);
 
             // When: Calling Index with category search term
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={word}" });
@@ -141,7 +140,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexShowHidden(bool ishidden)
         {
             // Given: A set of items, some of which are hidden
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.Hidden = true; return x; });
+            var items = FakeObjects<Transaction>.Make(2).Add(3, x => x.Hidden = true).SaveTo(this);
 
             // When: Calling Index with indirect search term for hidden items
             var searchterm = ishidden ? "H" : null;
@@ -151,7 +150,7 @@ namespace YoFi.Tests.Integration.Controllers
             if (ishidden)
                 ThenResultsAreEqualByTestKey(document, items);
             else
-                ThenResultsAreEqualByTestKey(document, items.Except(chosen));
+                ThenResultsAreEqualByTestKey(document, items.Group(0));
 
             // And: The hide checkbox is available (or not, as expected)
             var checkboxshown = !(document.QuerySelector($"th[data-test-id=hide]") is null);
@@ -182,7 +181,7 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexShowHasReceipt(bool? hasreceipt)
         {
             // Given: A set of items, some with receipts some not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 3, x => { x.ReceiptUrl = "Has receipt"; return x; });
+            var items = FakeObjects<Transaction>.Make(2).Add(3,x => x.ReceiptUrl = "Has receipt").SaveTo(this);
 
             // When: Calling Index with receipt search term
             string query = string.Empty;
@@ -194,9 +193,9 @@ namespace YoFi.Tests.Integration.Controllers
             if (hasreceipt.HasValue)
             {
                 if (hasreceipt.Value)
-                    ThenResultsAreEqualByTestKey(document, chosen);
+                    ThenResultsAreEqualByTestKey(document, items.Group(1));
                 else
-                    ThenResultsAreEqualByTestKey(document, items.Except(chosen));
+                    ThenResultsAreEqualByTestKey(document, items.Group(0));
             }
             else
                 ThenResultsAreEqualByTestKey(document, items);
@@ -209,13 +208,13 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task IndexPayeesWithReceipt(bool? hasreceipt)
         {
             // Given: A set of items, with two different payees, some with receipts some not
-            (var _, var items) = await GivenFakeDataInDatabase<Transaction>(6, 6, 
+            var items = FakeObjects<Transaction>.Make(6,
                 x => 
                 { 
-                    x.ReceiptUrl = (x.Amount%200m == 0) ? "Has receipt" : null;
+                    x.ReceiptUrl = (x.Amount % 200m == 0) ? "Has receipt" : null;
                     x.Payee = (x.Amount % 300m).ToString("0000");
-                    return x; 
-                });
+                })
+                .SaveTo(this);
 
             // When: Calling Index with combined search term for payee AND with/without a receipt
             string payee = "0100";
@@ -519,14 +518,15 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task SplitsDontAddUpInEdit()
         {
             // Given: Single transaction with NOT balanced splits
-            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(1, 1,
+            var id = FakeObjects<Transaction>.Make(1,
                 x =>
                 {
                     x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = 2 * x.Splits.Sum(x => x.Amount);
-                    return x;
-                });
-            var id = chosen.Single().ID;
+                })
+                .SaveTo(this)
+                .Single()
+                .ID;
 
             // When: Getting the edit page for the transaction
             var document = await WhenGetAsync($"{urlroot}/Edit/{id}");
@@ -548,15 +548,15 @@ namespace YoFi.Tests.Integration.Controllers
             // foreign key mappings that EF Core puts in place.
 
             // Given: Single transaction with balanced splits
-            (_, var chosen) = await GivenFakeDataInDatabase<Transaction>(1, 1,
+            var expected = FakeObjects<Transaction>.Make(1,
                 x =>
                 {
                     x.Timestamp = DateTime.Now;
                     x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = x.Splits.Sum(x => x.Amount);
-                    return x;
-                });
-            var expected = chosen.Single();
+                })
+                .SaveTo(this)
+                .Single();
 
             // When: Downloading them
             var formData = new Dictionary<string, string>()
@@ -628,12 +628,11 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task DownloadAllYears()
         {
             // Given: A mix of transactions over many years
-            (var items, _) = await GivenFakeDataInDatabase<Transaction>(30, 30,
+            var items = FakeObjects<Transaction>.Make(30,
                 x =>
-                {
-                    x.Timestamp = new DateTime(2020 - x.Timestamp.Day, x.Timestamp.Month, x.Timestamp.Day);
-                    return x;
-                });
+                    x.Timestamp = new DateTime(2020 - x.Timestamp.Day, x.Timestamp.Month, x.Timestamp.Day)
+                )
+                .SaveTo(this);
 
             // When: Downloading ALL YEARS of data
             var formData = new Dictionary<string, string>()
@@ -656,7 +655,7 @@ namespace YoFi.Tests.Integration.Controllers
             // And: Deserializing items from the spreadsheet
             var ssr_txs = ssr.Deserialize<Transaction>().OrderBy(x=>x.Timestamp);
 
-            // Then: The received items match the expected items
+            // And: The received items match the expected items
             Assert.IsTrue(items.SequenceEqual(ssr_txs));
         }
 
@@ -666,12 +665,11 @@ namespace YoFi.Tests.Integration.Controllers
             // Bug 895: Transaction download appears corrupt if no splits
 
             // Given: A mix of transactions over many years, with no splits
-            (var items, _) = await GivenFakeDataInDatabase<Transaction>(30, 30,
+            var items = FakeObjects<Transaction>.Make(30,
                 x =>
-                {
-                    x.Timestamp = new DateTime(2020 - x.Timestamp.Day, x.Timestamp.Month, x.Timestamp.Day);
-                    return x;
-                });
+                    x.Timestamp = new DateTime(2020 - x.Timestamp.Day, x.Timestamp.Month, x.Timestamp.Day)
+                )
+                .SaveTo(this);
 
             // When: Downloading ALL YEARS of data
             var formData = new Dictionary<string, string>()
@@ -805,16 +803,13 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task EditPayeeMatch(string endpoint)
         {
             // Given: A transaction with no category
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x=> { x.Category = null; return x; });
-            var expected = chosen.Single();
-            var id = expected.ID;
+            var tx = FakeObjects<Transaction>.Make(4).Add(1,x => x.Category = null).SaveTo(this).Group(1).Single();
 
             // And: A payee which matches the category payee
-            (_, var payees) = await GivenFakeDataInDatabase<Payee>(1, 1, x => { x.Name = expected.Payee; return x; });
-            var payee = payees.Single();
+            var payee = FakeObjects<Payee>.Make(1,x => x.Name = tx.Payee).SaveTo(this).Single();
 
             // When: Asking for the modal edit partial view
-            var document = await WhenGetAsync($"{urlroot}/{endpoint}/{id}");
+            var document = await WhenGetAsync($"{urlroot}/{endpoint}/{tx.ID}");
 
             // Then: The transaction gets the matching payee category
             var actual = document.QuerySelector($"input[name=Category]").GetAttribute("value").Trim();
@@ -827,16 +822,14 @@ namespace YoFi.Tests.Integration.Controllers
         public async Task EditNoPayeeMatch(string endpoint)
         {
             // Given: A transaction with an existing category
-            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
-            var id = expected.ID;
+            var tx = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
 
             // And: A payee which matches the transaction payee, but has a different category
             var unexpectedcategory = "Unexpected";
-            (_, var payees) = await GivenFakeDataInDatabase<Payee>(1, 1, x => { x.Name = expected.Payee; x.Category = unexpectedcategory; return x; });
-            var payee = payees.Single();
+            var payee = FakeObjects<Payee>.Make(1,x => { x.Name = tx.Payee; x.Category = unexpectedcategory; }).SaveTo(this).Single();
 
             // When: Asking for the modal edit partial view
-            var document = await WhenGetAsync($"{urlroot}/{endpoint}/{id}");
+            var document = await WhenGetAsync($"{urlroot}/{endpoint}/{tx.ID}");
 
             // Then: The transaction DID NOT get the matching payee category
             var actual = document.QuerySelector($"input[name=Category]").GetAttribute("value").Trim();

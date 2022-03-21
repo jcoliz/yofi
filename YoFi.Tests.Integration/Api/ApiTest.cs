@@ -73,13 +73,13 @@ namespace YoFi.Tests.Integration.Api
         {
             // Given: A mix of transactions, some with '{word}' in their {property}
             var word = "CAF";
-            Func<Transaction,Transaction> func = property switch {
-                "category" => (x => { x.Category += $":{word}"; return x; }),
-                "memo" => (x => { x.Memo += $":{word}"; return x; }),
-                "payee" => (x => { x.Payee += $":{word}"; return x; }),
+            Action<Transaction> func = property switch {
+                "category" => (x => x.Category += $":{word}"),
+                "memo" => (x => x.Memo += $":{word}"),
+                "payee" => (x => x.Payee += $":{word}"),
                 _ => null
             };
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(100, 15, func);
+            var chosen = FakeObjects<Transaction>.Make(85).Add(15,func).SaveTo(this).Group(1);
 
             // When: Calling GetTransactions q={word}
             var response = await client.GetAsync($"/api/txi/?q={word}");
@@ -96,7 +96,7 @@ namespace YoFi.Tests.Integration.Api
         public async Task GetTxQReceipt(bool with)
         {
             // Given: A mix of transactions, some with receipts, some without
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(100, 15, x => { x.ReceiptUrl = "Has"; return x; });
+            var items = FakeObjects<Transaction>.Make(85).Add(15,x=> x.ReceiptUrl = "Has").SaveTo(this);
 
             // When: Calling GetTransactions q='r=1' (or r=0)
             var response = await client.GetAsync($"/api/txi/?q=r%3d{(with ? '1' : '0')}");
@@ -106,16 +106,16 @@ namespace YoFi.Tests.Integration.Api
             var apiresult = await DeserializeAsync<List<Transaction>>(response);
 
             if (with)
-                Assert.IsTrue(apiresult.OrderBy(TestKeyOrder<Transaction>()).SequenceEqual(chosen));
+                Assert.IsTrue(apiresult.OrderBy(TestKeyOrder<Transaction>()).SequenceEqual(items.Group(1)));
             else
-                Assert.IsTrue(apiresult.OrderBy(TestKeyOrder<Transaction>()).SequenceEqual(items.Except(chosen)));
+                Assert.IsTrue(apiresult.OrderBy(TestKeyOrder<Transaction>()).SequenceEqual(items.Group(0)));
         }
 
         [TestMethod]
         public async Task ClearTestTransactions()
         {
             // Given: A mix of transactions, some with __test__ marker, some without
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 3, x => { x.Category += DatabaseAdministration.TestMarker; return x; });
+            var items = FakeObjects<Transaction>.Make(7).Add(3,x => x.Category += DatabaseAdministration.TestMarker).SaveTo(this);
 
             // When: Calling ClearTestData with id="trx"
             var response = await client.PostAsync($"/api/ClearTestData/trx", null);
@@ -123,37 +123,39 @@ namespace YoFi.Tests.Integration.Api
 
             // ANd: Only the transactions without __test__ remain
             var actual = context.Set<Transaction>().AsNoTracking().ToList().OrderBy(TestKey<Transaction>.Order());
-            Assert.IsTrue(actual.SequenceEqual(items.Except(chosen)));
+            Assert.IsTrue(actual.SequenceEqual(items.Group(0)));
         }
 
         [TestMethod]
         public async Task ClearTestBudgetTxs()
         {
-            // Given: A mix of transactions, some with __test__ marker, some without
-            (var items, var chosen) = await GivenFakeDataInDatabase<BudgetTx>(10, 3, x => { x.Category += DatabaseAdministration.TestMarker; return x; });
+            // Given: A mix of budget items, some with __test__ marker, some without
+            //(var items, var chosen) = await GivenFakeDataInDatabase<BudgetTx>(10, 3, x => { x.Category += DatabaseAdministration.TestMarker; return x; });
+            var items = FakeObjects<BudgetTx>.Make(7).Add(3,x => x.Category += DatabaseAdministration.TestMarker).SaveTo(this);
 
-            // When: Calling ClearTestData with id="trx"
+            // When: Calling ClearTestData with id="budgettx"
             var response = await client.PostAsync($"/api/ClearTestData/budgettx", null);
             response.EnsureSuccessStatusCode();
 
             // ANd: Only the transactions without __test__ remain
             var actual = context.Set<BudgetTx>().AsNoTracking().ToList().OrderBy(TestKey<BudgetTx>.Order());
-            Assert.IsTrue(actual.SequenceEqual(items.Except(chosen)));
+            Assert.IsTrue(actual.SequenceEqual(items.Group(0)));
         }
 
         [TestMethod]
         public async Task ClearTestPayees()
         {
-            // Given: A mix of transactions, some with __test__ marker, some without
-            (var items, var chosen) = await GivenFakeDataInDatabase<Payee>(10, 3, x => { x.Category += DatabaseAdministration.TestMarker; return x; });
+            // Given: A mix of payees, some with __test__ marker, some without
+            //(var items, var chosen) = await GivenFakeDataInDatabase<Payee>(10, 3, x => { x.Category += DatabaseAdministration.TestMarker; return x; });
+            var items = FakeObjects<Payee>.Make(7).Add(3,x => x.Category += DatabaseAdministration.TestMarker).SaveTo(this);
 
-            // When: Calling ClearTestData with id="trx"
+            // When: Calling ClearTestData with id="payee"
             var response = await client.PostAsync($"/api/ClearTestData/payee", null);
             response.EnsureSuccessStatusCode();
 
             // ANd: Only the transactions without __test__ remain
             var actual = context.Set<Payee>().AsNoTracking().ToList().OrderBy(TestKey<Payee>.Order());
-            Assert.IsTrue(actual.SequenceEqual(items.Except(chosen)));
+            Assert.IsTrue(actual.SequenceEqual(items.Group(0)));
         }
 
 

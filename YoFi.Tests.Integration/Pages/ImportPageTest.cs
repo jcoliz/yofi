@@ -314,7 +314,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task Import()
         {
             // Given: A mix of transactions, some flagged as imported, some as not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
+            var chosen = FakeObjects<Transaction>.Make(6).Add(4,x => x.Imported = true).SaveTo(this).Group(1);
 
             // When: Loading the import page
             var document = await WhenGetAsync($"/Import/");
@@ -327,14 +327,14 @@ namespace YoFi.Tests.Integration.Pages
         public async Task ImportOk()
         {
             // Given: As set of items, some with imported & selected flags, some with not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = x.Selected = true; return x; }));
+            var items = FakeObjects<Transaction>.Make(6).Add(4,x => x.Imported = x.Selected = true).SaveTo(this);
 
             // When: Approving the import
             var response = await WhenPostingImportCommand("ok");
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
 
             // Then: All items remain, none have imported flag
-            Assert.AreEqual(10, context.Set<Transaction>().Count());
+            Assert.AreEqual(items.Count, context.Set<Transaction>().Count());
             Assert.AreEqual(0, context.Set<Transaction>().Where(x => x.Imported == true).Count());
         }
 
@@ -342,8 +342,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task ImportOkSelected()
         {
             // Given: As set of items, all of which have imported flags, some of which have selected flags
-            (var _, var imported) = await GivenFakeDataInDatabase<Transaction>(10, 10, (x => { x.Imported = true; x.Selected = (x.Amount % 200) == 0; return x; }));
-            var selected = imported.Where(x => x.Selected == true).ToList();
+            var items = FakeObjects<Transaction>.Make(5,x=>x.Imported = true).Add(5,x => x.Imported = x.Selected = true).SaveTo(this);
 
             // When: Approving the import
             var response = await WhenPostingImportCommand("ok");
@@ -351,15 +350,14 @@ namespace YoFi.Tests.Integration.Pages
 
             // Then: Only selected items remain
             var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
-            Assert.IsTrue(selected.SequenceEqual(actual));
+            Assert.IsTrue(items.Group(1).SequenceEqual(actual));
         }
 
         [TestMethod]
         public async Task ImportCancel()
         {
             // Given: A mix of transactions, some flagged as imported, some as not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
-            var expected = items.Except(chosen).ToList();
+            var items = FakeObjects<Transaction>.Make(6).Add(4,x => x.Imported = true).SaveTo(this);
 
             // When: Cancelling the import
             var response = await WhenPostingImportCommand("cancel");
@@ -367,7 +365,7 @@ namespace YoFi.Tests.Integration.Pages
 
             // Then: Only items without imported flag remain
             var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
-            Assert.IsTrue(expected.SequenceEqual(actual));
+            Assert.IsTrue(items.Group(0).SequenceEqual(actual));
         }
 
         [DataRow(null)]
@@ -376,8 +374,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task ImportWrong(string command)
         {
             // Given: A mix of transactions, some flagged as imported, some as not
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(10, 4, (x => { x.Imported = true; return x; }));
-            var expected = items.Except(chosen).ToList();
+            var items = FakeObjects<Transaction>.Make(6).Add(4,x => x.Imported = true).SaveTo(this);
 
             // When: Sending the import an incorrect command
             var response = await WhenPostingImportCommand(command);
@@ -385,12 +382,10 @@ namespace YoFi.Tests.Integration.Pages
             // Then: Bad request
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
 
-            // Then: Bad request
-
-            // Then: No change to db
+            // And: No change to db
             var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
-            Assert.AreEqual(10, actual.Count());
-            Assert.AreEqual(4, actual.Where(x => x.Imported == true).Count());
+            Assert.AreEqual(items.Count, actual.Count());
+            Assert.AreEqual(items.Group(1).Count, actual.Where(x => x.Imported == true).Count());
         }
 
         [TestMethod]
