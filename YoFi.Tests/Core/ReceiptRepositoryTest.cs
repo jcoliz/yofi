@@ -447,6 +447,32 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public async Task GetOrderByMatching()
+        {
+            // Given: Several transactions, one of which we care about
+            var t = FakeObjects<Transaction>.Make(10).SaveTo(this).Last();
+
+            // And: Multiple receipts, one matches this transaction, one matches all, one matches none
+            GivenMultipleReceipts(t);
+
+            // When: Asking for the receipt(s) ordered by matching THIS transaction
+            var rs = await repository.GetAllOrderByMatchAsync(t);
+
+            // Then: There all receipts are returned
+            Assert.AreEqual(3,rs.Count());
+
+            // And: The first one is the best one
+            var best = rs.First();
+            Assert.AreEqual(t.Payee, best.Name);
+
+            // And: The last one matches not at all
+            var nomatch = rs.Last();
+            var quality = nomatch.MatchesTransaction(t);
+            Assert.AreEqual(0,quality);
+        }
+
+
+        [TestMethod]
         public async Task EndToEnd()
         {
             // Given: A real tx repository, and a receipt repository build off that

@@ -149,6 +149,29 @@ namespace YoFi.Core.Repositories
         }
 
         /// <summary>
+        /// Retrieve all receipts waiting for matches, in order of how well it matches 
+        /// this <paramref name="transaction"/>
+        /// </summary>
+        /// <remarks>
+        /// Note that this DOES NOT fill in the "Matches" property
+        /// </remarks>
+        public async Task<IEnumerable<Receipt>> GetAllOrderByMatchAsync(Transaction tx)
+        {
+            // Get the receipts from the DB
+            var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>());
+
+            // Order by match level
+            var result = receipts
+                    .Select(r => (quality:r.MatchesTransaction(tx), r))
+                    .OrderByDescending(x => x.quality)
+                    .ThenByDescending(x => x.r.Timestamp)
+                    .Select(x => x.r)
+                    .ToList();
+
+            return result;
+        }
+
+        /// <summary>
         /// Add a receipt to the system from <paramref name="stream"/>
         /// </summary>
         /// <param name="stream">Source of content</param>
