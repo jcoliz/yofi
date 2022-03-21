@@ -55,9 +55,9 @@ namespace YoFi.Tests.Integration.Controllers
             var document = await WhenGetAsync($"{urlroot}/EditModal/{id}");
 
             // Then: That item is shown
-            var testkey = FindTestKey<Payee>().Name;
+            var testkey = TestKey<Payee>.Find().Name;
             var actual = document.QuerySelector($"input[name={testkey}]").GetAttribute("value").Trim();
-            Assert.AreEqual(TestKeyOrder<Payee>()(expected), actual);
+            Assert.AreEqual(TestKey<Payee>.Order()(expected), actual);
         }
 
         [TestMethod]
@@ -85,7 +85,7 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.IsTrue(edited.All(x=>x.Category == category));
 
             // And: None of the un-edited items have the new category
-            var unedited = context.Set<Payee>().Where(x => !ids.Contains(x.ID)).AsNoTracking().OrderBy(TestKeyOrder<Payee>()).ToList();
+            var unedited = context.Set<Payee>().Where(x => !ids.Contains(x.ID)).AsNoTracking().OrderBy(TestKey<Payee>.Order()).ToList();
             Assert.IsTrue(data.Group(0).SequenceEqual(unedited));
         }
 
@@ -139,7 +139,7 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual($"{urlroot}", redirect);
 
             // And: Only the unselected items remain
-            var actual = context.Set<Payee>().AsQueryable().OrderBy(TestKeyOrder<Payee>()).ToList();
+            var actual = context.Set<Payee>().AsQueryable().OrderBy(TestKey<Payee>.Order()).ToList();
             Assert.IsTrue(actual.SequenceEqual(data.Group(0)));
         }
 

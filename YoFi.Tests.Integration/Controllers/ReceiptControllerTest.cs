@@ -123,9 +123,9 @@ namespace YoFi.Tests.Integration.Controllers
             var document = await WhenGetAsync($"{urlroot}/Details/{id}");
 
             // Then: That item is shown
-            var testkey = FindTestKey<Receipt>().Name.ToLowerInvariant();
+            var testkey = TestKey<Receipt>.Find().Name.ToLowerInvariant();
             var actual = document.QuerySelector($"dd[data-test-id={testkey}]").TextContent.Trim();
-            Assert.AreEqual(TestKeyOrder<Receipt>()(expected), actual);
+            Assert.AreEqual(TestKey<Receipt>.Order()(expected), actual);
         }
 
         [TestMethod]

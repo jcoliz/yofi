@@ -106,7 +106,7 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual($"{urlroot}", redirect);
 
             // And: Only the unselected items remain
-            var actual = context.Set<BudgetTx>().AsQueryable().OrderBy(TestKeyOrder<BudgetTx>()).ToList();
+            var actual = context.Set<BudgetTx>().AsQueryable().OrderBy(TestKey<BudgetTx>.Order()).ToList();
             Assert.IsTrue(actual.SequenceEqual(data.Group(0)));
         }
 

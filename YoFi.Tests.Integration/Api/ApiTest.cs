@@ -87,7 +87,7 @@ namespace YoFi.Tests.Integration.Api
 
             // Then: Only the expected items are returned
             var apiresult = await DeserializeAsync<List<Transaction>>(response);
-            Assert.IsTrue(apiresult.OrderBy(TestKeyOrder<Transaction>()).SequenceEqual(chosen));
+            Assert.IsTrue(apiresult.OrderBy(TestKey<Transaction>.Order()).SequenceEqual(chosen));
         }
 
         [DataRow(true)]
@@ -106,9 +106,9 @@ namespace YoFi.Tests.Integration.Api
             var apiresult = await DeserializeAsync<List<Transaction>>(response);
 
             if (with)
-                Assert.IsTrue(apiresult.OrderBy(TestKeyOrder<Transaction>()).SequenceEqual(items.Group(1)));
+                Assert.IsTrue(apiresult.OrderBy(TestKey<Transaction>.Order()).SequenceEqual(items.Group(1)));
             else
-                Assert.IsTrue(apiresult.OrderBy(TestKeyOrder<Transaction>()).SequenceEqual(items.Group(0)));
+                Assert.IsTrue(apiresult.OrderBy(TestKey<Transaction>.Order()).SequenceEqual(items.Group(0)));
         }
 
         [TestMethod]

@@ -355,7 +355,7 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.IsTrue(edited.All(x => x.Category == category));
 
             // And: None of the un-edited items have the new category
-            var unedited = context.Set<Transaction>().Where(x => !ids.Contains(x.ID)).AsNoTracking().OrderBy(TestKeyOrder<Transaction>()).ToList();
+            var unedited = context.Set<Transaction>().Where(x => !ids.Contains(x.ID)).AsNoTracking().OrderBy(TestKey<Transaction>.Order()).ToList();
             Assert.IsTrue(data.Group(0).SequenceEqual(unedited));
 
         }
@@ -617,7 +617,7 @@ namespace YoFi.Tests.Integration.Controllers
             var actual = context.Set<Transaction>().Include(x=>x.Splits).Where(x => x.ID == id).AsNoTracking().Single();
             Assert.IsTrue(actual.HasSplits);
             Assert.IsTrue(actual.IsSplitsOK);
-            Assert.IsTrue(splits.SequenceEqual(actual.Splits.OrderBy(TestKeyOrder<Split>())));
+            Assert.IsTrue(splits.SequenceEqual(actual.Splits.OrderBy(TestKey<Split>.Order())));
         }
 
         #endregion
@@ -792,9 +792,9 @@ namespace YoFi.Tests.Integration.Controllers
             var document = await WhenGetAsync($"{urlroot}/EditModal/{id}");
 
             // Then: That item is shown
-            var testkey = FindTestKey<Transaction>().Name;
+            var testkey = TestKey<Transaction>.Find().Name;
             var actual = document.QuerySelector($"input[name={testkey}]").GetAttribute("value").Trim();
-            Assert.AreEqual(TestKeyOrder<Transaction>()(expected), actual);
+            Assert.AreEqual(TestKey<Transaction>.Order()(expected), actual);
         }
 
         [DataRow("Edit")]
@@ -858,7 +858,7 @@ namespace YoFi.Tests.Integration.Controllers
             Assert.AreEqual($"{urlroot}", redirect);
 
             // And: The item was added, so the whole database now is the original items plus the expected
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.IsTrue(actual.SequenceEqual(data));
         }
 

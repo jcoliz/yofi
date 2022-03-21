@@ -79,7 +79,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task UploadTransactionsXlsx()
         {
             // Given: Many items
-            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKeyOrder<Transaction>());
+            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKey<Transaction>.Order());
 
             // When: Uploading them as a spreadsheet
             var document = await WhenImportingAsSpreadsheet(items);
@@ -88,7 +88,7 @@ namespace YoFi.Tests.Integration.Pages
             ThenResultsAreEqualByTestKey(document, items);
 
             // And: The database now contains the items
-            items.SequenceEqual(context.Set<Transaction>().OrderBy(TestKeyOrder<Transaction>()));
+            items.SequenceEqual(context.Set<Transaction>().OrderBy(TestKey<Transaction>.Order()));
         }
 
         [TestMethod]
@@ -99,21 +99,21 @@ namespace YoFi.Tests.Integration.Pages
 
             // And: A list of many items, one of which is a duplicate of the one item already in the database
             // (Item 1 in this list naturally overlaps item 1 in the previous list.
-            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKeyOrder<Transaction>());
+            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKey<Transaction>.Order());
 
             // When: Uploading them as a spreadsheet
             var document = await WhenImportingAsSpreadsheet(items);
 
             // Then: All items are in the database
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.AreEqual(initial.Count() + items.Count(), actual.Count());
 
             // And: All the uploaded item are imported
-            var imported = context.Set<Transaction>().Where(x=>x.Imported == true).AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var imported = context.Set<Transaction>().Where(x=>x.Imported == true).AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.IsTrue(imported.SequenceEqual(items));
 
             // And: Only the non-overlapping items are selected
-            var selected = context.Set<Transaction>().Where(x => x.Selected == true).AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var selected = context.Set<Transaction>().Where(x => x.Selected == true).AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.IsTrue(imported.SequenceEqual(items));
         }
 
@@ -133,7 +133,7 @@ namespace YoFi.Tests.Integration.Pages
             var document = await WhenImportingAsSpreadsheet(items);
 
             // Then: All items are in the database
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.IsTrue(actual.SequenceEqual(initial.Concat(items)));
         }
 
@@ -154,7 +154,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task UploadHighlights()
         {
             // Given: A large set of transactions
-            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKeyOrder<Transaction>());
+            var items = FakeObjects<Transaction>.Make(15).OrderBy(TestKey<Transaction>.Order());
 
             // And: Having uploaded some of them initially (and approved it)
             var uploaded = items.Skip(10);
@@ -170,7 +170,7 @@ namespace YoFi.Tests.Integration.Pages
             var document = await WhenImportingAsSpreadsheet(items);
 
             // Then: Only the non-overlapping items are selected
-            var selected = context.Set<Transaction>().Where(x => x.Selected == true).AsNoTracking().OrderBy(TestKeyOrder<Transaction>()).ToList();
+            var selected = context.Set<Transaction>().Where(x => x.Selected == true).AsNoTracking().OrderBy(TestKey<Transaction>.Order()).ToList();
             Assert.IsTrue(selected.SequenceEqual(items.Except(uploaded)));
 
             // And: The overlapping new transactions are highlighted and deselected, indicating that they
@@ -180,7 +180,7 @@ namespace YoFi.Tests.Integration.Pages
                 .Select(x=>x.TextContent.Trim())
                 .OrderBy(x=>x);
             var expected = uploaded
-                .Select(TestKeyOrder<Transaction>());
+                .Select(TestKey<Transaction>.Order());
             Assert.IsTrue(expected.SequenceEqual(highlights));
         }
 
@@ -214,7 +214,7 @@ namespace YoFi.Tests.Integration.Pages
             _ = await WhenImportingAsSpreadsheet(items);
 
             // Then: There are two items in db
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.IsTrue(items.SequenceEqual(actual));
         }
 
@@ -349,7 +349,7 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
 
             // Then: Only selected items remain
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.IsTrue(items.Group(1).SequenceEqual(actual));
         }
 
@@ -364,7 +364,7 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
 
             // Then: Only items without imported flag remain
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.IsTrue(items.Group(0).SequenceEqual(actual));
         }
 
@@ -383,7 +383,7 @@ namespace YoFi.Tests.Integration.Pages
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
 
             // And: No change to db
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKeyOrder<Transaction>());
+            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
             Assert.AreEqual(items.Count, actual.Count());
             Assert.AreEqual(items.Group(1).Count, actual.Where(x => x.Imported == true).Count());
         }

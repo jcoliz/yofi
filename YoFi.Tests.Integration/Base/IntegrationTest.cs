@@ -242,7 +242,7 @@ namespace YoFi.Tests.Integration
 
         protected void ThenResultsAreEqualByTestKey<T>(IHtmlDocument document, IEnumerable<T> expected)
         {
-            var property = FindTestKey<T>();
+            var property = TestKey<T>.Find();
             var testid = $"[data-test-id={property.Name.ToLowerInvariant()}]";
 
             ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)), testid);
@@ -250,7 +250,7 @@ namespace YoFi.Tests.Integration
 
         protected void ThenResultsAreEqualByTestKeyOrdered<T>(IHtmlDocument document, IEnumerable<T> expected)
         {
-            var property = FindTestKey<T>();
+            var property = TestKey<T>.Find();
             var testid = $"[data-test-id={property.Name.ToLowerInvariant()}]";
 
             ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)), testid, ordered:true);
@@ -268,18 +268,8 @@ namespace YoFi.Tests.Integration
 
             // And: The spreadsheet contains all our items
             var actual = ssr.Deserialize<T>();
-            var property = FindTestKey<T>();
+            var property = TestKey<T>.Find();
             Assert.IsTrue(items.OrderBy(x => property.GetValue(x)).SequenceEqual(actual.OrderBy(x => property.GetValue(x))));
-        }
-
-        protected PropertyInfo FindTestKey<T>()
-        {
-            return TestKey<T>.Find();
-        }
-
-        protected Func<T,object> TestKeyOrder<T>()
-        {
-            return TestKey<T>.Order();
         }
 
         protected async Task<T> DeserializeAsync<T>(HttpResponseMessage response)

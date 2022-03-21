@@ -129,7 +129,7 @@ namespace YoFi.Tests.Integration.Controllers
             var chosen = FakeObjects<T>.Make(5).SaveTo(this).Take(1);
 
             // When: Searching the index for the focused item's testkey
-            var q = (string)TestKeyOrder<T>()(chosen.Single());
+            var q = (string)TestKey<T>.Order()(chosen.Single());
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = q });
 
             // Then: The expected items are returned
@@ -147,9 +147,9 @@ namespace YoFi.Tests.Integration.Controllers
             var document = await WhenGetAsync($"{urlroot}/Details/{id}");
 
             // Then: That item is shown
-            var testkey = FindTestKey<T>().Name.ToLowerInvariant();
+            var testkey = TestKey<T>.Find().Name.ToLowerInvariant();
             var actual = document.QuerySelector($"[data-test-id={testkey}]").TextContent.Trim();
-            Assert.AreEqual(TestKeyOrder<T>()(expected), actual);
+            Assert.AreEqual(TestKey<T>.Order()(expected), actual);
         }
 
         [TestMethod]
@@ -263,7 +263,7 @@ namespace YoFi.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKey(document, items);
 
             // And: The database now contains the items
-            items.SequenceEqual(context.Set<T>().OrderBy(TestKeyOrder<T>()));
+            items.SequenceEqual(context.Set<T>().OrderBy(TestKey<T>.Order()));
         }
 
         [TestMethod]
@@ -284,7 +284,7 @@ namespace YoFi.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKey(document, items.Skip(1));
 
             // And: The database now contains the items
-            items.SequenceEqual(context.Set<T>().OrderBy(TestKeyOrder<T>()));
+            items.SequenceEqual(context.Set<T>().OrderBy(TestKey<T>.Order()));
         }
 
         [TestMethod]
