@@ -956,7 +956,7 @@ namespace YoFi.Tests.Integration.Controllers
             var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
 
             // Then: Option to apply the matching receipt is offered
-            var accept = document.QuerySelector("a[data-test-id=accept]");
+            var accept = document.QuerySelector("form[data-test-id=accept]");
             Assert.IsNotNull(accept);
 
             var rid_str = accept.GetAttribute("data-test-value");
@@ -977,7 +977,7 @@ namespace YoFi.Tests.Integration.Controllers
             var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
 
             // Then: Option to apply the best matching receipt is offered
-            var accept = document.QuerySelector("a[data-test-id=accept]");
+            var accept = document.QuerySelector("form[data-test-id=accept]");
             Assert.IsNotNull(accept);
 
             var rid_str = accept.GetAttribute("data-test-value");

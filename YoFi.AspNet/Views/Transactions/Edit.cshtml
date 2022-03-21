@@ -203,7 +203,12 @@
                 @* 
                 TODO: It would be nicer to do this via Ajax, because as it is, this will just redirect right back here. 
                 *@
-                <a asp-controller="Receipts" asp-action="Accept" asp-route-txid="@Model.ID" asp-route-id="@suggested.ID" asp-route-next="edittx" class="btn btn-primary" data-test-id="accept" data-test-value="@suggested.ID">Accept</a>
+                <form method="post" asp-controller="Receipts" asp-action="Accept" data-test-id="accept" data-test-value="@suggested.ID">
+                    <input type="hidden" name="id" value="@suggested.ID"/>
+                    <input type="hidden" name="txid" value="@Model.ID" />
+                    <input type="hidden" name="next" value="edittx" />
+                    <input type="submit" name="command" value="Accept" class="btn btn-primary my-1"/>
+                </form>                       
             }
 
             <a asp-controller="Receipts" asp-action="Pick" asp-route-txid="@Model.ID" class="btn btn-secondary">Review</a>
