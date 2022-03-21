@@ -45,6 +45,7 @@ namespace YoFi.Tests.Integration.Controllers
             // Clean out database
             context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
             context.Set<Payee>().RemoveRange(context.Set<Payee>());
+            context.Set<Receipt>().RemoveRange(context.Set<Receipt>());
             context.SaveChanges();
         }
 
