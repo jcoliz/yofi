@@ -122,8 +122,7 @@ namespace YoFi.Tests.Integration.Ajax
             var payee = FakeObjects<Payee>.Make(15).SaveTo(this).Last();
 
             // Given: Five transactions, one of which has no category, and has "payee" matching name of chosen payee
-            (_, var txchosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x => { x.Category = null; x.Payee = payee.Name; return x; });
-            var id = txchosen.Single().ID;
+            var id = FakeObjects<Transaction>.Make(4).Add(1, x => { x.Category = null; x.Payee = payee.Name; }).SaveTo(this).Last().ID;
 
             // When: Applying the payee to the transaction's ID
             var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{id}", new Dictionary<string, string>());
@@ -219,8 +218,7 @@ namespace YoFi.Tests.Integration.Ajax
             _ = FakeObjects<Payee>.Make(15).SaveTo(this);
 
             // Given: Five transactions, one of which has no category, and has "payee" matching NONE of the payees in the DB
-            (_, var txchosen) = await GivenFakeDataInDatabase<Transaction>(5, 1, x => { x.Category = null; x.Payee = "notfound"; return x; });
-            var id = txchosen.Single().ID;
+            var id = FakeObjects<Transaction>.Make(4).Add(1, x => { x.Category = null; x.Payee = "notfound"; }).SaveTo(this).Last().ID;
 
             // When: Applying the payee to the transaction's ID
             var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{id}", new Dictionary<string, string>());
@@ -234,7 +232,7 @@ namespace YoFi.Tests.Integration.Ajax
         {
             // Given: Many recent transactions, some with {word} in their category, some not
             var word = "WORD";
-            (var items, var chosen) = await GivenFakeDataInDatabase<Transaction>(15, 5, (x => { x.Category += word; x.Timestamp = DateTime.Now; return x; }));
+            var chosen = FakeObjects<Transaction>.Make(10).Add(5, x => { x.Category += word; x.Timestamp = DateTime.Now; }).SaveTo(this).Group(1);
 
             // When: Calling CategoryAutocomplete with '{word}'
             var response = await client.GetAsync($"/ajax/tx/cat-ac?q={word}");
