@@ -593,5 +593,79 @@ namespace YoFi.Tests.Functional
         }
 
         #endregion
+
+        #region User Story 1313: [User Can] Attach receipt to existing transaction from repository, manually choosing among possible matches for uploaded receipts when no direct match is found
+
+        [TestMethod]
+        public async Task ReceiptsOffered()
+        {
+            /*
+            [Scenario] Receipts offered on edit tx page
+            Given: A single transaction and two matching receipts in the system
+            When: Navigating to the edit page for that transaction
+            Then: Is displayed that 2 possible receipts exist
+            And: Option to “Review” is available
+            */
+            await Task.Delay(1);
+        }
+
+        [TestMethod]
+        public async Task ReceiptsShown()
+        {
+            /*
+            [Scenario] Receipts shown on pick page
+            Given: A single transaction and two matching receipts in the system
+            And: On the transaction edit page for that transaction
+            When: Tapping “Review”
+            Then: Receipt matches are shown, with better-matching receipts ordered first
+            */
+            await Task.Delay(1);
+        }
+
+        [TestMethod]
+        public async Task PickedReceipt()
+        {
+            /*
+            [Scenario] Picked receipt attached to transaction
+            Given: A single transaction and two matching receipts in the system
+            And: On the transaction edit page for that transaction
+            And: Having tapped “Review”
+            When: Tapping “Match” on one of the receipts
+            Then: The selected receipt is added to the given transaction
+            */
+            await Task.Delay(1);
+        }
+
+        #endregion
+
+        #region User Story 1314: [User Can] Attach receipt to existing transaction from repository, accepting automatically matched receipt
+
+        [TestMethod]
+        public async Task AcceptOffered()
+        {
+            /*
+            [Scenario] Accept receipt offered on edit tx page
+            Given: A single transaction and one matching receipts in the system
+            When: Navigating to the edit page for that transaction
+            Then: Is displayed that 1 matching receipt exist
+            And: Option to “Accept” is available
+            */
+            await Task.Delay(1);
+        }
+
+        [TestMethod]
+        public async Task AcceptedAttached()
+        {
+            /*
+            [Scenario] Accepted receipt attached to transaction
+            Given: A single transaction and one matching receipts in the system
+            And: On the transaction edit page for that transaction
+            When: Tapping “Accept”
+            Then: The selected receipt is added to the given transaction
+            */            
+            await Task.Delay(1);
+        }
+
+        #endregion
     }
 }
