@@ -399,9 +399,29 @@ namespace YoFi.Tests.Integration.Controllers
             // When: Getting the receipt picker for a the transaction
             var document = await WhenGetAsync($"{urlroot}/Pick?txid={tx.ID}");
 
-            // Then: Only the matching receipts are included in the results
-            ThenResultsAreEqualByTestKey(document, rs.Group(0));
+            // Then: All receipts are included in the results
+            ThenResultsAreEqualByTestKey(document, rs);
         }
+
+        [TestMethod]
+        public async Task PickNone()
+        {
+            // Given: A transaction in the database
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Many receipts in the database none of which match that transaction
+            var rs = FakeObjects<Receipt>
+                .Make(5, x => { x.Name = "No Match"; x.Amount = 0; x.Timestamp += TimeSpan.FromDays(100); })
+                .SaveTo(this);
+
+            // When: Getting the receipt picker for a the transaction
+            var document = await WhenGetAsync($"{urlroot}/Pick?txid={tx.ID}");
+
+            // Then: All receipts are included in the results
+            ThenResultsAreEqualByTestKey(document, rs);
+        }
+
+
 
         #endregion
     }

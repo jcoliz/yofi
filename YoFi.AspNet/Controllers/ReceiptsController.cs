@@ -44,7 +44,7 @@ namespace YoFi.AspNet.Controllers
                 Console.WriteLine($"Pick: {txid}");
 
                 var tx = await _txrepository.GetByIdAsync(txid);
-                var qresult = await _repository.GetMatchingAsync(tx);
+                var qresult = await _repository.GetAllOrderByMatchAsync(tx);
 
                 ViewData["txid"] = txid;
 
