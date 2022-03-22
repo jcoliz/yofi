@@ -167,13 +167,13 @@ namespace YoFi.Tests.Functional
             var receipts = new (string name,int matches,int order)[]
             {
                 // Matches none
-                ($"Create Me $12.34 12-21 {testmarker}.png",0,3),
-                // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
-                ($"Olive Garden $130.85 {testmarker}.png",4,0),
+                ($"Create Me $12.34 12-21 {testmarker}.png",0,2),
+                // Matches exactly one at 200 (name and amount), but will also match 2 others at 100 (name only)
+                ($"Olive Garden $132.55 {testmarker}.png",3,0),
                 // Matches exactly one
-                ($"Waste Management 12-27 {testmarker}.png",1,2),
+                ($"Waste Management 12-6 {testmarker}.png",1,3),
                 // Matches many
-                ($"Uptown Espresso ({testmarker}).png",5,1),
+                ($"Uptown Espresso ({testmarker}).png",3,1),
             };
             await WhenUploadingSampleReceipts(receipts.Select(x=>x.name));
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
