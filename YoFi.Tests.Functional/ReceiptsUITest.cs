@@ -778,6 +778,7 @@ namespace YoFi.Tests.Functional
 
             // And: Navigating to the edit page for that transaction
             var NextPage = await NavigatingToEditPage();
+            await NextPage.SaveScreenshotToAsync(TestContext, "Single Receipt-Slide 26");
 
             // Then: Is displayed that 1 matching receipt exist
             Assert.IsTrue(await NextPage.IsVisibleAsync("data-test-id=hasreceipts"));
@@ -789,7 +790,7 @@ namespace YoFi.Tests.Functional
         }
 
         [TestMethod]
-        public async Task AcceptedAttached()
+        public async Task AcceptSuggested()
         {
             /*
             [Scenario] Accepted receipt attached to transaction
@@ -798,7 +799,22 @@ namespace YoFi.Tests.Functional
             When: Tapping “Accept”
             Then: The selected receipt is added to the given transaction
             */            
-            await Task.Delay(1);
+
+            // Given: A single transaction in the system
+            var tx = await GivenSingleTransaction();
+
+            // And: One receipts matching the transaction
+            var filenames = await GivenMatchingReceipts(tx,1);
+
+            // And: Navigating to the edit page for that transaction
+            var NextPage = await NavigatingToEditPage();
+
+            // When: Tapping “Accept”
+            await NextPage.ClickAsync("input[value=Accept]");
+            await NextPage.SaveScreenshotToAsync(TestContext, "Accepted Receipt-Slide 27");
+
+            // Then: The transaction has a receipt now
+            Assert.IsTrue(await NextPage.IsVisibleAsync("data-test-id=btn-get-receipt"));
         }
 
         #endregion
