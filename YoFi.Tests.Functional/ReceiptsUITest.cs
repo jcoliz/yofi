@@ -621,17 +621,11 @@ namespace YoFi.Tests.Functional
             return tx;
         }
 
-        private async Task<string[]> GivenMatchingReceipts(Transaction tx)
+        private async Task<string[]> GivenMatchingReceipts(Transaction tx, int count)
         {
             // Given: Two receipts matching the transaction
-            await NavigateToReceiptsPage();
-            var filenames = new[]
-            {
-                // Matches tx
-                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day} {testmarker} 01.png",
-                // Matches tx, but not quite as good
-                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day - 1} {testmarker} 02.png"
-            };
+            await NavigateToReceiptsPage();            
+            var filenames = Enumerable.Range(0,count).Select(x => $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day - x} {testmarker} 01.png").ToArray();
             await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Receipts Created");
 
@@ -670,7 +664,7 @@ namespace YoFi.Tests.Functional
             var tx = await GivenSingleTransaction();
 
             // And: Two receipts matching the transaction
-            var filenames = await GivenMatchingReceipts(tx);
+            var filenames = await GivenMatchingReceipts(tx,2);
 
             // When: Navigating to the edit page for that transaction
             var NextPage = await NavigatingToEditPage();
@@ -708,7 +702,7 @@ namespace YoFi.Tests.Functional
             var tx = await GivenSingleTransaction();
 
             // And: Two receipts matching the transaction
-            var filenames = await GivenMatchingReceipts(tx);
+            var filenames = await GivenMatchingReceipts(tx,2);
 
             // And: Navigating to the edit page for that transaction
             var NextPage = await NavigatingToEditPage();
@@ -742,7 +736,7 @@ namespace YoFi.Tests.Functional
             var tx = await GivenSingleTransaction();
 
             // And: Two receipts matching the transaction
-            var filenames = await GivenMatchingReceipts(tx);
+            var filenames = await GivenMatchingReceipts(tx,2);
 
             // And: Navigating to the edit page for that transaction
             var NextPage = await NavigatingToEditPage();
@@ -775,7 +769,23 @@ namespace YoFi.Tests.Functional
             Then: Is displayed that 1 matching receipt exist
             And: Option to “Accept” is available
             */
-            await Task.Delay(1);
+
+            // Given: A single transaction in the system
+            var tx = await GivenSingleTransaction();
+
+            // And: One receipts matching the transaction
+            var filenames = await GivenMatchingReceipts(tx,1);
+
+            // And: Navigating to the edit page for that transaction
+            var NextPage = await NavigatingToEditPage();
+
+            // Then: Is displayed that 1 matching receipt exist
+            Assert.IsTrue(await NextPage.IsVisibleAsync("data-test-id=hasreceipts"));
+            Assert.IsFalse(await NextPage.IsVisibleAsync("data-test-id=nmatches"));
+
+            // And: Option to “Accept” is available
+            var accept_loc = NextPage.Locator("data-test-id=accept");
+            Assert.IsTrue(await accept_loc.IsVisibleAsync());
         }
 
         [TestMethod]
