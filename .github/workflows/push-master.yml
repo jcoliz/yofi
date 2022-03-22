@@ -27,3 +27,5 @@ jobs:
       run: dotnet test YoFi.Tests/YoFi.Tests.csproj --no-build --verbosity normal
     - name: Run Integration Tests
       run: dotnet test YoFi.Tests.Integration/YoFi.Tests.Integration.csproj --no-build --verbosity normal
+      env:
+        api__key: APITESTKEYVALUE
