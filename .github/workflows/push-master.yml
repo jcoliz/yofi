@@ -23,3 +23,5 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
+    - name: Run Unit Tests
+      run: dotnet test YoFi.Tests/YoFi.Tests.csproj --no-build --verbosity normal
