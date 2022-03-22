@@ -610,6 +610,51 @@ namespace YoFi.Tests.Functional
             };
         };
 
+        private async Task<Transaction> GivenSingleTransaction()
+        {
+            // Given: A single transaction in the system
+            await WhenNavigatingToPage("Transactions");
+            var tx = new Transaction() { Payee = NextName, Timestamp = new DateTime(2022,12,31), Amount = 100m };
+            await WhenCreatingTransaction(Page, tx.AsDictionary());
+            await Page.SaveScreenshotToAsync(TestContext, "Tx Created-Slide 20");
+
+            return tx;
+        }
+
+        private async Task<string[]> GivenMatchingReceipts(Transaction tx)
+        {
+            // Given: Two receipts matching the transaction
+            await NavigateToReceiptsPage();
+            var filenames = new[]
+            {
+                // Matches tx
+                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day} {testmarker} 01.png",
+                // Matches tx, but not quite as good
+                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day - 1} {testmarker} 02.png"
+            };
+            await WhenUploadingSampleReceipts(filenames);
+            await Page.SaveScreenshotToAsync(TestContext, "Receipts Created");
+
+            return filenames;
+        }
+
+        private async Task<IPage> NavigatingToEditPage()
+        {
+            // When: Navigating to the edit page for the first transaction with testmarker
+            await WhenNavigatingToPage("Transactions");
+            await Page.SearchFor(testmarker);
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.WaitForSelectorAsync("input[name=\"Category\"]");
+                await Page.SaveScreenshotToAsync(TestContext);
+                await Page.ClickAsync("text=More");
+            });
+            await NextPage.SaveScreenshotToAsync(TestContext, "Edit Transaction-Slide 22");
+
+            return NextPage;
+        }
+
         [TestMethod]
         public async Task ReceiptsOffered()
         {
@@ -622,34 +667,13 @@ namespace YoFi.Tests.Functional
             */
 
             // Given: A single transaction in the system
-            await WhenNavigatingToPage("Transactions");
-            var tx = new Transaction() { Payee = NextName, Timestamp = new DateTime(2022,12,31), Amount = 100m };
-            await WhenCreatingTransaction(Page, tx.AsDictionary());
-            await Page.SaveScreenshotToAsync(TestContext, "Tx Created");
+            var tx = await GivenSingleTransaction();
 
             // And: Two receipts matching the transaction
-            await NavigateToReceiptsPage();
-            var filenames = new[]
-            {
-                // Matches tx
-                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day} {testmarker} 01.png",
-                // Matches tx, but not quite as good
-                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day - 1} {testmarker} 02.png"
-            };
-            await WhenUploadingSampleReceipts(filenames);
-            await Page.SaveScreenshotToAsync(TestContext, "Receipts Created");
+            var filenames = await GivenMatchingReceipts(tx);
 
             // When: Navigating to the edit page for that transaction
-            await WhenNavigatingToPage("Transactions");
-            await Page.SearchFor(testmarker);
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
-            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
-            {
-                await Page.WaitForSelectorAsync("input[name=\"Category\"]");
-                await Page.SaveScreenshotToAsync(TestContext);
-                await Page.ClickAsync("text=More");
-            });
-            await NextPage.SaveScreenshotToAsync(TestContext, "Edit Transaction");
+            var NextPage = await NavigatingToEditPage();
 
             // Then: Is displayed that 2 possible receipts exist
             var nmatches_loc = NextPage.Locator("data-test-id=nmatches");
@@ -681,34 +705,13 @@ namespace YoFi.Tests.Functional
             Then: Receipt matches are shown, with better-matching receipts ordered first
             */
             // Given: A single transaction in the system
-            await WhenNavigatingToPage("Transactions");
-            var tx = new Transaction() { Payee = NextName, Timestamp = new DateTime(2022,12,31), Amount = 100m };
-            await WhenCreatingTransaction(Page, tx.AsDictionary());
-            await Page.SaveScreenshotToAsync(TestContext, "Tx Created");
+            var tx = await GivenSingleTransaction();
 
             // And: Two receipts matching the transaction
-            await NavigateToReceiptsPage();
-            var filenames = new[]
-            {
-                // Matches tx
-                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day} {testmarker} 01.png",
-                // Matches tx, but not quite as good
-                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day - 1} {testmarker} 02.png"
-            };
-            await WhenUploadingSampleReceipts(filenames);
-            await Page.SaveScreenshotToAsync(TestContext, "Receipts Created");
+            var filenames = await GivenMatchingReceipts(tx);
 
-            // When: Navigating to the edit page for that transaction
-            await WhenNavigatingToPage("Transactions");
-            await Page.SearchFor(testmarker);
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
-            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
-            {
-                await Page.WaitForSelectorAsync("input[name=\"Category\"]");
-                await Page.SaveScreenshotToAsync(TestContext);
-                await Page.ClickAsync("text=More");
-            });
-            await NextPage.SaveScreenshotToAsync(TestContext, "Edit Transaction");
+            // And: Navigating to the edit page for that transaction
+            var NextPage = await NavigatingToEditPage();
 
             // When: Tapping “Review”
             var review_loc = NextPage.Locator("text=Review");
@@ -735,7 +738,27 @@ namespace YoFi.Tests.Functional
             When: Tapping “Match” on one of the receipts
             Then: The selected receipt is added to the given transaction
             */
-            await Task.Delay(1);
+            // Given: A single transaction in the system
+            var tx = await GivenSingleTransaction();
+
+            // And: Two receipts matching the transaction
+            var filenames = await GivenMatchingReceipts(tx);
+
+            // And: Navigating to the edit page for that transaction
+            var NextPage = await NavigatingToEditPage();
+
+            // And: Having tapped “Review”
+            var review_loc = NextPage.Locator("text=Review");
+            await review_loc.ClickAsync();
+            await NextPage.SaveScreenshotToAsync(TestContext, "Pick Receipt-Slide 23");
+
+            // When: Tapping “Match” on one of the receipts
+            var match_loc = NextPage.Locator("text=Accept");
+            await match_loc.First.ClickAsync();
+            await NextPage.SaveScreenshotToAsync(TestContext, "Matched Receipt-Slide 24");
+            
+            // Then: The transaction has a receipt now
+            Assert.IsTrue(await NextPage.IsVisibleAsync("data-test-id=btn-get-receipt"));
         }
 
         #endregion
