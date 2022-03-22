@@ -1,4 +1,4 @@
-name: Build Only
+name: Build+Test
 
 on:
   push:
@@ -25,3 +25,5 @@ jobs:
       run: dotnet build --no-restore
     - name: Run Unit Tests
       run: dotnet test YoFi.Tests/YoFi.Tests.csproj --no-build --verbosity normal
+    - name: Run Integration Tests
+      run: dotnet test YoFi.Tests.Integration/YoFi.Tests.Integration.csproj --no-build --verbosity normal
