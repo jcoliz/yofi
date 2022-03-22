@@ -11,6 +11,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Get all git tags
       run: git fetch --prune --unshallow --tags
+    - name: Create version.txt
+      run: git describe --long --always --abbrev=8 > YoFi.AspNet/version.txt
+    - name: Create release.txt
+      run: git describe --tags > YoFi.AspNet/release.txt
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
