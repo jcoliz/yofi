@@ -596,6 +596,20 @@ namespace YoFi.Tests.Functional
 
         #region User Story 1313: [User Can] Attach receipt to existing transaction from repository, manually choosing among possible matches for uploaded receipts when no direct match is found
 
+        class Transaction
+        {
+            public string Payee { get; set; }
+            public DateTime Timestamp { get; set; }
+            public decimal Amount { get; set; }       
+
+            public Dictionary<string, string> AsDictionary() => new Dictionary<string, string>()
+            {
+                { "Payee", Payee },
+                { "Timestamp", Timestamp.ToString("yyyy-MM-dd") },
+                { "Amount", Amount.ToString() },
+            };
+        };
+
         [TestMethod]
         public async Task ReceiptsOffered()
         {
@@ -606,7 +620,54 @@ namespace YoFi.Tests.Functional
             Then: Is displayed that 2 possible receipts exist
             And: Option to “Review” is available
             */
-            await Task.Delay(1);
+
+            // Given: A single transaction in the system
+            await WhenNavigatingToPage("Transactions");
+            var tx = new Transaction() { Payee = NextName, Timestamp = new DateTime(2022,12,31), Amount = 100m };
+            await WhenCreatingTransaction(Page, tx.AsDictionary());
+            await Page.SaveScreenshotToAsync(TestContext, "Tx Created");
+
+            // And: Two receipts matching the transaction
+            await NavigateToReceiptsPage();
+            var filenames = new[]
+            {
+                // Matches tx
+                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day} {testmarker} 01.png",
+                // Matches tx, but not quite as good
+                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day - 1} {testmarker} 02.png"
+            };
+            await WhenUploadingSampleReceipts(filenames);
+            await Page.SaveScreenshotToAsync(TestContext, "Receipts Created");
+
+            // When: Navigating to the edit page for that transaction
+            await WhenNavigatingToPage("Transactions");
+            await Page.SearchFor(testmarker);
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.WaitForSelectorAsync("input[name=\"Category\"]");
+                await Page.SaveScreenshotToAsync(TestContext);
+                await Page.ClickAsync("text=More");
+            });
+            await NextPage.SaveScreenshotToAsync(TestContext, "Edit Transaction");
+
+            // Then: Is displayed that 2 possible receipts exist
+            var nmatches_loc = NextPage.Locator("data-test-id=nmatches");
+            var nmatches_str = await nmatches_loc.TextContentAsync();
+            Assert.AreEqual("2",nmatches_str);
+
+            // And: Best match is suggested
+            var suggestedfilename_loc = NextPage.Locator("data-test-id=suggestedfilename");
+            var suggestedfilename = await suggestedfilename_loc.TextContentAsync();
+            Assert.AreEqual(filenames.First(),suggestedfilename);
+
+            // And: Option to “Accept” is available
+            var accept_loc = NextPage.Locator("data-test-id=accept");
+            Assert.IsTrue(await accept_loc.IsVisibleAsync());
+
+            // And: Option to “Review” is available
+            var review_loc = NextPage.Locator("text=Review");
+            Assert.IsTrue(await review_loc.IsVisibleAsync());
         }
 
         [TestMethod]
@@ -619,7 +680,48 @@ namespace YoFi.Tests.Functional
             When: Tapping “Review”
             Then: Receipt matches are shown, with better-matching receipts ordered first
             */
-            await Task.Delay(1);
+            // Given: A single transaction in the system
+            await WhenNavigatingToPage("Transactions");
+            var tx = new Transaction() { Payee = NextName, Timestamp = new DateTime(2022,12,31), Amount = 100m };
+            await WhenCreatingTransaction(Page, tx.AsDictionary());
+            await Page.SaveScreenshotToAsync(TestContext, "Tx Created");
+
+            // And: Two receipts matching the transaction
+            await NavigateToReceiptsPage();
+            var filenames = new[]
+            {
+                // Matches tx
+                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day} {testmarker} 01.png",
+                // Matches tx, but not quite as good
+                $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day - 1} {testmarker} 02.png"
+            };
+            await WhenUploadingSampleReceipts(filenames);
+            await Page.SaveScreenshotToAsync(TestContext, "Receipts Created");
+
+            // When: Navigating to the edit page for that transaction
+            await WhenNavigatingToPage("Transactions");
+            await Page.SearchFor(testmarker);
+            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.WaitForSelectorAsync("input[name=\"Category\"]");
+                await Page.SaveScreenshotToAsync(TestContext);
+                await Page.ClickAsync("text=More");
+            });
+            await NextPage.SaveScreenshotToAsync(TestContext, "Edit Transaction");
+
+            // When: Tapping “Review”
+            var review_loc = NextPage.Locator("text=Review");
+            await review_loc.ClickAsync();
+            await NextPage.SaveScreenshotToAsync(TestContext, "Pick Receipt");
+
+            // Then: All receipt matches are shown
+            var table = await ResultsTable.ExtractResultsFrom(NextPage);
+            Assert.IsNotNull(table);
+            Assert.AreEqual(filenames.Count(), table.Rows.Count);
+
+            // And: Better-matching receipt is ordered first
+            Assert.AreEqual($"{testmarker} 01",table.Rows[0]["Memo"]);
         }
 
         [TestMethod]
