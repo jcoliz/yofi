@@ -42,23 +42,21 @@
 {
 <table class="table" data-test-id="results">
     <thead>
-        <tr>
-            <th class="col-1">
+        <tr class="row">
+            <th class="col-lg-2 col-md-3 col-3">
                 @Html.DisplayNameFor(model => model.Timestamp)
             </th>
-            <th class="col-4">
+            <th class="col-lg-5 col-md-7 col-9">
                 @Html.DisplayNameFor(model => model.Name)
             </th>
-            <th class="col-1" style="text-align:right">
+            <th class="d-none d-md-block col-md-2 col-lg-1" style="text-align:right">
                 @Html.DisplayNameFor(model => model.Amount)
             </th>
-            <th class="col-2">
+            <th class="d-none d-lg-block col-lg-4">
                 @Html.DisplayNameFor(model => model.Memo)
             </th>
-            <th class="col-3">
+            <th class="d-none">
                 @Html.DisplayNameFor(model => model.Filename)
-            </th>
-            <th class="col-1">
             </th>
         </tr>
     </thead>
@@ -67,23 +65,26 @@
     {
         var nmatches = item.Matches.Count;
 
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Timestamp)
+        <tr class="row">
+            <td class="col-lg-2 col-md-3 col-3">
+                <span class="me-1">@Html.DisplayFor(modelItem => item.Timestamp)</span>
             </td>
-            <td>
+            <td class="col-lg-5 col-md-7 col-9">
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td style="text-align:right">
+            <td class="col-lg-1 col-md-2 col-3" style="text-align:right">
                 @Html.DisplayFor(modelItem => item.Amount)
             </td>
-            <td data-test-id="memo">
-                @Html.DisplayFor(modelItem => item.Memo)
+            <td class="col-lg-4 col-md-12 col-9">
+                @if(item.Memo != null)
+                {
+                    <span class="d-lg-none">Memo: </span><span data-test-id="memo">@Html.DisplayFor(modelItem => item.Memo)</span>
+                }
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Filename)
+            <td class="col-md-8 col-12">
+                <span class="d-none d-sm-inline">Filename: </span>@Html.DisplayFor(modelItem => item.Filename)
             </td>
-            <td data-test-id="Matches" data-test-value="@nmatches">
+            <td data-test-id="Matches" data-test-value="@nmatches" class="col-md-4 col-12">
                 <div class="d-flex">
                 <div class="ms-auto">
                     <form method="post" asp-action="Action">
