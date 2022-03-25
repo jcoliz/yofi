@@ -74,27 +74,27 @@ else
 
     <table class="table" data-test-id="results">
         <thead>
-            <tr>
+            <tr class="row">
                 @if ((bool)(ViewData["ShowSelected"]))
                 {
                     <th>
                         Edit
                     </th>
                 }
-                <th>
+                <th class="col-3 col-md-2">
                     Date
                 </th>
-                <th>
+                <th class="col-6 col-md-5">
                     Category
                 </th>
-                <th>
-                    Memo
-                </th>
-                <th>
+                <th class="d-none d-md-block col-md-2">
                     Frequency
                 </th>
-                <th style="text-align:right">
+                <th class="col-3 col-md-3" style="text-align:right">
                     Amount
+                </th>
+                <th class="d-none">
+                    Frequency
                 </th>
             </tr>
         </thead>
@@ -104,7 +104,7 @@ else
             }
             @foreach (var item in Model.Items)
             {
-                <tr data-test-id="line-@(line++)">
+                <tr class="row" data-test-id="line-@(line++)">
                     @if ((bool)(ViewData["ShowSelected"]))
                     {
                         <td>
@@ -112,30 +112,40 @@ else
                             <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/budget/select/@item.ID" data-test-id="check-select">
                         </td>
                     }
-                    <td>
+                    <td class="col-3 col-md-2">
                         @Html.DisplayFor(modelItem => item.Timestamp)
                     </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Category)
+                    <td class="col-6 col-md-5">
+                        @item.Category.Replace(":",": ")
                     </td>
-                    <td data-test-id="memo">
-                        @Html.DisplayFor(modelItem => item.Memo)
-                    </td>
-                    <td data-test-id="freq">
+                    <td class="d-none d-md-block col-3 col-md-2">
                         @(item.Frequency > 1 ? item.FrequencyName : string.Empty)
                     </td>
-                    <td style="text-align:right">
+                    <td class="col-3 col-md-3" style="text-align:right">
                         @Html.DisplayFor(modelItem => item.Amount)
                     </td>
-                    <td style="padding-left:0; padding-right:5px">
-                        <a asp-action="Edit" asp-route-id="@item.ID" data-test-id="edit">
-                            <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
-                        </a>
+                    <td class="col-3 d-md-none" data-test-id="freq">
+                        @(item.Frequency > 1 ? item.FrequencyName : string.Empty)
                     </td>
-                    <td style="padding-left:0; padding-right:5px">
-                        <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete">
-                            <i class="fa fa-trash-alt" data-bs-toggle="tooltip" title="Delete"></i>
-                        </a>
+                    <td class="col-6 col-md-6">
+                        @if(item.Memo != null)
+                        {
+                            <span class="d-lg-none">Memo: </span><span data-test-id="memo">@Html.DisplayFor(modelItem => item.Memo)</span>
+                        }
+                    </td>
+                    <td class="col-3 col-md-6">
+                        <div class="d-flex">
+                            <div class="ms-auto">
+                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary my-1" data-test-id="edit">
+                                    <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
+                                </a>
+                            </div>
+                            <div class="ms-1">
+                                <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-secondary my-1" data-test-id="delete">
+                                    <i class="fa fa-trash-alt" data-bs-toggle="tooltip" title="Delete"></i>
+                                </a>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             }
