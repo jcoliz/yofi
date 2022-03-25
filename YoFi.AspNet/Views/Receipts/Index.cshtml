@@ -46,10 +46,10 @@
             <th class="col-lg-2 col-md-3 col-3">
                 @Html.DisplayNameFor(model => model.Timestamp)
             </th>
-            <th class="col-lg-5 col-md-7 col-9">
+            <th class="col-lg-5 col-md-7 col-6">
                 @Html.DisplayNameFor(model => model.Name)
             </th>
-            <th class="d-none d-md-block col-md-2 col-lg-1" style="text-align:right">
+            <th class="col-lg-1 col-3" style="text-align:right">
                 @Html.DisplayNameFor(model => model.Amount)
             </th>
             <th class="d-none d-lg-block col-lg-4">
@@ -66,13 +66,13 @@
         var nmatches = item.Matches.Count;
 
         <tr class="row">
-            <td class="col-lg-2 col-md-3 col-3">
+            <td class="col-lg-2 col-3">
                 <span class="me-1">@Html.DisplayFor(modelItem => item.Timestamp)</span>
             </td>
-            <td class="col-lg-5 col-md-7 col-9">
+            <td class="col-lg-5 col-6">
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td class="col-lg-1 col-md-2 col-3" style="text-align:right">
+            <td class="col-lg-1 col-3" style="text-align:right">
                 @Html.DisplayFor(modelItem => item.Amount)
             </td>
             <td class="col-lg-4 col-md-12 col-9">
