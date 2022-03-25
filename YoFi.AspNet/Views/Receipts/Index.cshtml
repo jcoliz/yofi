@@ -43,10 +43,10 @@
 <table class="table" data-test-id="results">
     <thead>
         <tr class="row">
-            <th class="col-lg-2 col-md-3 col-3">
+            <th class="col-lg-2 col-3">
                 @Html.DisplayNameFor(model => model.Timestamp)
             </th>
-            <th class="col-lg-5 col-md-7 col-6">
+            <th class="col-lg-5 col-6">
                 @Html.DisplayNameFor(model => model.Name)
             </th>
             <th class="col-lg-1 col-3" style="text-align:right">
@@ -75,7 +75,7 @@
             <td class="col-lg-1 col-3" style="text-align:right">
                 @Html.DisplayFor(modelItem => item.Amount)
             </td>
-            <td class="col-lg-4 col-md-12 col-9">
+            <td class="col-lg-4 col-12">
                 @if(item.Memo != null)
                 {
                     <span class="d-lg-none">Memo: </span><span data-test-id="memo">@Html.DisplayFor(modelItem => item.Memo)</span>
