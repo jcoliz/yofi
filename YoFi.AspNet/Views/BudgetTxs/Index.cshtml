@@ -1,6 +1,8 @@
 ﻿@model YoFi.Core.Repositories.Wire.IWireQueryResult<YoFi.Core.Models.BudgetTx>
 @{
     ViewData["Title"] = "Budget Line Items";
+    var showselected = (bool)(ViewData["ShowSelected"]);
+    int selectedcols = showselected ? 1 : 0;
 }
 
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
@@ -42,7 +44,7 @@
     </div>
 </nav>
 
-@if ((bool)(ViewData["ShowSelected"]))
+@if (showselected)
 {
     <div class="form-actions d-flex">
         <p class="me-2 fs-6 mt-auto mb-auto">Bulk edit operations:</p>
@@ -77,23 +79,20 @@ else
             <tr class="row">
                 @if ((bool)(ViewData["ShowSelected"]))
                 {
-                    <th>
+                    <th class="col-@selectedcols">
                         Edit
                     </th>
                 }
                 <th class="col-3 col-md-2">
                     Date
                 </th>
-                <th class="col-6 col-md-5">
+                <th class="col-@(6-selectedcols) col-md-@(5-selectedcols)">
                     Category
-                </th>
-                <th class="d-none d-md-block col-md-2">
-                    Frequency
                 </th>
                 <th class="col-3 col-md-3" style="text-align:right">
                     Amount
                 </th>
-                <th class="d-none">
+                <th class="d-none d-md-block col-md-2">
                     Frequency
                 </th>
             </tr>
@@ -107,7 +106,7 @@ else
                 <tr class="row" data-test-id="line-@(line++)">
                     @if ((bool)(ViewData["ShowSelected"]))
                     {
-                        <td>
+                        <td class="col-@selectedcols">
                             @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
                             <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/budget/select/@item.ID" data-test-id="check-select">
                         </td>
@@ -115,22 +114,19 @@ else
                     <td class="col-3 col-md-2">
                         @Html.DisplayFor(modelItem => item.Timestamp)
                     </td>
-                    <td class="col-6 col-md-5">
+                    <td class="col-@(6-selectedcols) col-md-@(5-selectedcols)">
                         @item.Category.Replace(":",": ")
-                    </td>
-                    <td class="d-none d-md-block col-3 col-md-2">
-                        @(item.Frequency > 1 ? item.FrequencyName : string.Empty)
                     </td>
                     <td class="col-3 col-md-3" style="text-align:right">
                         @Html.DisplayFor(modelItem => item.Amount)
                     </td>
-                    <td class="col-3 d-md-none" data-test-id="freq">
+                    <td class="col-@(3+selectedcols) col-md-2" data-test-id="freq">
                         @(item.Frequency > 1 ? item.FrequencyName : string.Empty)
                     </td>
-                    <td class="col-6 col-md-6">
+                    <td class="col-@(6-selectedcols) col-md-6">
                         @if(item.Memo != null)
                         {
-                            <span class="d-lg-none">Memo: </span><span data-test-id="memo">@Html.DisplayFor(modelItem => item.Memo)</span>
+                            <span data-test-id="memo">@Html.DisplayFor(modelItem => item.Memo)</span>
                         }
                     </td>
                     <td class="col-3 col-md-6">
