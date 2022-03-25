@@ -152,9 +152,11 @@ Passed!  - Failed:     0, Passed:   123, Skipped:     0, Total:   123, Duration:
 
 ## Viewport size options
 
-In runsettings, the "viewportSize" parameter is used to control the size of viewport used when testing.
+It can be useful to change the viewport being used for tests. This has two values:
+* Screen shots. The tests take a lot of screen shots, so it can be super helpful to see how the app is looking overall, or review a single feature on various screen sizes
+* Functionality differences. Various viewports hide or show different things, so it's good to ensure everything is still working on all viewports.
 
-The options are:
+In runsettings, the "viewportSize" parameter is used to control the size of viewport used when testing. The options are:
 
 * "wide" 1080 x 810. That's iPad Landscape, which is the default visual tuning for this app.
 * "tablet" 810 x 1080. iPad Portrait.
