@@ -125,7 +125,7 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(4, table.Rows.Count);
 
             // Memo is "__TEST__" on all
-            Assert.IsTrue(table.Rows.All(x => x["Memo"] == testmarker));
+            Assert.IsTrue(table.Rows.All(x => x["Memo"].Contains(testmarker)),"All memos contain testmarker");
 
             // Spot check values (Note that these are all subject to culture variablility)
             Assert.AreEqual("Olive Garden",table.Rows[0]["Name"]);
@@ -141,9 +141,7 @@ namespace YoFi.Tests.Functional
             // Check filenames
             var orderedreceipts = receipts.OrderBy(x => x.order).ToList();
             for (int i = 0; i < orderedreceipts.Count; i++)
-            {
-                Assert.AreEqual(orderedreceipts[i].name, table.Rows[i]["Filename"]);
-            }
+                Assert.IsTrue(table.Rows[i]["Filename"].Contains(orderedreceipts[i].name), orderedreceipts[i].name);
         }
 
         [TestMethod]
