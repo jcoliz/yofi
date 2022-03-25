@@ -111,17 +111,16 @@
             var splitorder = (Model.Amount < 0) ? Model.Splits.OrderBy(x => x.Amount) : Model.Splits.OrderByDescending(x => x.Amount);
             <table class="table" data-test-id="splits">
                 <thead>
-                    <tr>
-                        <th>
-                            @Html.DisplayNameFor(x => x.Category)
+                    <tr class="row">
+                        <th class="col-9 col-lg-4">
+                            <span class="d-none d-lg-inline">@Html.DisplayNameFor(x => x.Category)</span>
+                            <span class="d-lg-none">@Html.DisplayNameFor(x => x.Category)/@Html.DisplayNameFor(x => x.Memo)</span>                            
                         </th>
-                        <th>
+                        <th class="col-3 col-lg-2" style="text-align:right">
                             @Html.DisplayNameFor(x => x.Amount)
                         </th>
-                        <th>
+                        <th class="col-9 col-lg-4 d-none d-lg-block">
                             @Html.DisplayNameFor(x => x.Memo)
-                        </th>
-                        <th>
                         </th>
                     </tr>
                 </thead>
@@ -131,19 +130,29 @@
                     }
                     @foreach (var split in splitorder)
                     {
-                    <tr data-test-id="line-@(line++)">
-                        <td>
+                    <tr class="row" data-test-id="line-@(line++)">
+                        <td class="col-9 col-lg-4">
                             @(split.Category ?? String.Empty)
                         </td>
-                        <td data-test-id="split-amount">
+                        <td class="col-3 col-lg-2" data-test-id="split-amount" style="text-align:right">
                             @split.Amount
                         </td>
-                        <td>
+                        <td class="col-9 col-lg-4">
                             @split.Memo
                         </td>
-                        <td>
-                            <a class="btn btn-outline-secondary btn-sm" asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID" data-bs-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
-                            <a class="btn btn-outline-secondary btn-sm" asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></a>
+                        <td class="col-3 col-lg-2">
+                            <div class="d-flex">
+                                <div class="ms-auto">
+                                    <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID" class="btn btn-sm btn-primary my-1" data-test-id="edit">
+                                        <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
+                                    </a>
+                                </div>
+                                <div class="ms-1">
+                                    <a asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID" class="btn btn-sm btn-outline-secondary my-1" data-test-id="delete">
+                                        <i class="fa fa-trash-alt" data-bs-toggle="tooltip" title="Delete"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 }
