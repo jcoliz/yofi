@@ -58,6 +58,8 @@ namespace YoFi.Tests.Functional
         public async Task Initial()
         {
             // When: We are on the main page for this section
+            // (Set up in Setup)
+            await Page.SaveScreenshotToAsync(TestContext, "Index");
 
             // And: All expected items are here
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());

@@ -1,6 +1,8 @@
 ﻿@model YoFi.Core.Repositories.Wire.IWireQueryResult<YoFi.Core.Models.Payee>
 @{
     ViewData["Title"] = "Payees";
+    var showselected = (bool)(ViewData["ShowSelected"]);
+    int selectedcols = showselected ? 1 : 0;
 }
 
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
@@ -42,15 +44,27 @@
     </div>
 </nav>
 
-@if ((bool)(ViewData["ShowSelected"]))
+@if (showselected)
 {
     <form asp-action="BulkEdit" method="post">
-        <div class="form-actions d-flex">
-            <p class="me-2 fs-6 mt-2">Set Category To:</p>
-            <input type="text" name="Category" class="col-md-4 category-autocomplete me-3 fs-6 mt-1 mb-1" autocomplete="off" />
-            <input type="submit" value="OK" class="btn btn-primary me-3 mt-1 mb-1" />
-            <a asp-action="Index" class="btn btn-outline-secondary me-auto mt-1 mb-1">Cancel</a>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" class="btn btn-outline-secondary ms-auto mt-1 mb-1" data-test-id="btn-bulk-delete">Delete</a>
+        <div class="form-actions">
+            <div class="row">
+                    <div class="col-5 col-md-3 col-lg-2">
+                        <p class="fs-6 mt-2">Set Category To:</p>
+                    </div>
+                    <div class="col-7 col-md-4 col-lg-6">
+                        <input type="text" name="Category" class="category-autocomplete w-100 fs-6 mt-2 mb-1" autocomplete="off" />
+                    </div>
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <input type="submit" value="OK" class="btn btn-primary mt-1 mb-1" />
+                        <a asp-action="Index" class="btn btn-outline-secondary mt-1 mb-1">Cancel</a>
+                    </div>
+                    <div class="col-6 col-md-2 col-lg-2">
+                        <div class="d-flex w-100">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" class="btn btn-outline-secondary ms-auto mt-1 mb-1" data-test-id="btn-bulk-delete">Delete</a>
+                        </div>
+                    </div>
+            </div>
         </div>
     </form>
 }
@@ -78,17 +92,18 @@ else
 {
     <table class="table" data-test-id="results">
         <thead>
-            <tr>
-                @if ((bool)(ViewData["ShowSelected"]))
+            <tr class="row">
+                @if (showselected)
                 {
-                    <th data-test-id="select">
-                        Edit
+                    <th class="col-@selectedcols" data-test-id="select">
+                        E
                     </th>
                 }
-                <th>
-                    Category
+                <th class="col-@(12-selectedcols) col-lg-4">
+                    <span class="d-none d-lg-inline">Category</span>
+                    <span class="d-lg-none">Category/Name</span>
                 </th>
-                <th>
+                <th class="d-none d-lg-block col-lg-@(6-selectedcols)">
                     Name
                 </th>
             </tr>
@@ -99,29 +114,33 @@ else
             }
             @foreach (var item in Model.Items)
             {
-                <tr data-id="@item.ID" data-test-id="line-@(line++)">
-                    @if ((bool)(ViewData["ShowSelected"]))
+                <tr data-id="@item.ID" data-test-id="line-@(line++)" class="row">
+                    @if (showselected)
                     {
-                        <td>
+                        <td class="col-@selectedcols">
                             @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
                             <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/payee/select/@item.ID" data-test-id="check-select">
                         </td>
                     }
-                    <td class="display-category">
+                    <td class="display-category col-@(12-selectedcols) col-lg-4">
                         @Html.DisplayFor(modelItem => item.Category)
                     </td>
-                    <td class="display-payee" data-test-id="name">
+                    <td class="display-payee col-9 col-lg-@(6-selectedcols)" data-test-id="name">
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
-                    <td style="padding-left:0; padding-right:5px">
-                        <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editPayeeModal">
-                            <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
-                        </a>
-                    </td>
-                    <td style="padding-left:0; padding-right:5px">
-                        <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete">
-                            <i class="fa fa-trash-alt" data-bs-toggle="tooltip" title="Delete"></i>
-                        </a>
+                    <td class="col-3 col-lg-2">
+                        <div class="d-flex">
+                            <div class="ms-auto">
+                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary my-1" data-test-id="edit">
+                                    <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
+                                </a>
+                            </div>
+                            <div class="ms-1">
+                                <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-secondary my-1" data-test-id="delete">
+                                    <i class="fa fa-trash-alt" data-bs-toggle="tooltip" title="Delete"></i>
+                                </a>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             }
