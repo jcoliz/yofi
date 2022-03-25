@@ -409,6 +409,7 @@ namespace YoFi.Tests.Functional
 
             // And: The first item shown has the newly created frequency
             await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext);
             var freqtext = await Page.Locator("data-test-id=freq").First.TextContentAsync();
             var actual = freqtext.Trim();
 
