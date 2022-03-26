@@ -1,6 +1,7 @@
 ﻿using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional
@@ -32,8 +33,22 @@ namespace YoFi.Tests.Functional
             await HomePage();
 
             // When: Clicking on the login link
-            await Page.ClickAsync("data-test-id=login");
-            // NOTE: This line has failed in full-suite testing then passed later in individual testing
+
+            var login = Page.Locator("data-test-id=login");
+            if (!await login.IsVisibleAsync())
+            {
+                var navtoggle = Page.Locator("[aria-label=\"Toggle navigation\"]");
+                if (await navtoggle.IsVisibleAsync())
+                {
+                    await navtoggle.ClickAsync();
+                }
+                if (!await login.IsVisibleAsync())
+                {
+                    throw new ApplicationException("Can't find login button");
+                }
+            }
+
+            await login.ClickAsync();
 
             // Then: The login page loads
             await Page.ThenIsOnPageAsync("Login");
