@@ -129,14 +129,14 @@ else
                     </td>
                     <td class="col-3 col-md-6">
                         <div class="d-flex">
-                            <div class="ms-auto">
+                            <div class="ms-auto" data-bs-toggle="tooltip" title="Edit">
                                 <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary my-1" data-test-id="edit">
-                                    <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
+                                    <i class="fa fa-edit"></i>
                                 </a>
                             </div>
-                            <div class="ms-1">
+                            <div class="ms-1" data-bs-toggle="tooltip" title="Delete">
                                 <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-secondary my-1" data-test-id="delete">
-                                    <i class="fa fa-trash-alt" data-bs-toggle="tooltip" title="Delete"></i>
+                                    <i class="fa fa-trash-alt"></i>
                                 </a>
                             </div>
                         </div>
