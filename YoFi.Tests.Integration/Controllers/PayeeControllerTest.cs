@@ -120,7 +120,7 @@ namespace YoFi.Tests.Integration.Controllers
             var document = await WhenGetAsync($"{urlroot}/{searchterm}");
 
             // Then: The selection checkbox is available
-            var selectionshown = ! (document.QuerySelector($"th[data-test-id=select]") is null);
+            var selectionshown = ! (document.QuerySelector($"span[data-test-id=select]") is null);
             Assert.AreEqual(isselected, selectionshown);
         }
 

@@ -93,13 +93,11 @@ else
     <table class="table" data-test-id="results">
         <thead>
             <tr class="row">
-                @if (showselected)
-                {
-                    <th class="col-@selectedcols" data-test-id="select">
-                        E
-                    </th>
-                }
-                <th class="col-@(12-selectedcols) col-lg-4">
+                <th class="col-12 col-lg-@(4+selectedcols)">
+                    @if (showselected)
+                    {
+                        <span class="me-1" data-test-id="select">✓</span>
+                    }
                     <span class="d-none d-lg-inline">Category</span>
                     <span class="d-lg-none">Category/Name</span>
                 </th>
@@ -115,17 +113,19 @@ else
             @foreach (var item in Model.Items)
             {
                 <tr data-id="@item.ID" data-test-id="line-@(line++)" class="row">
-                    @if (showselected)
-                    {
-                        <td class="col-@selectedcols">
-                            @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/payee/select/@item.ID" data-test-id="check-select">
-                        </td>
-                    }
-                    <td class="display-category col-@(12-selectedcols) col-lg-4">
+                    <td class="display-category col-12 col-lg-@(4+selectedcols)">
+                        @if (showselected)
+                        {
+                            var checkedornot = (item.Selected == true) ? "checked" : string.Empty;
+                            <input type="checkbox" class="checkbox-post me-1" @checkedornot data-endpoint="/ajax/payee/select/@item.ID" data-test-id="check-select">
+                        }
                         @Html.DisplayFor(modelItem => item.Category)
                     </td>
                     <td class="display-payee col-9 col-lg-@(6-selectedcols)" data-test-id="name">
+                        @if (showselected)
+                        {
+                            <span class="d-lg-none me-4"></span>
+                        }
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
                     <td class="col-3 col-lg-2">

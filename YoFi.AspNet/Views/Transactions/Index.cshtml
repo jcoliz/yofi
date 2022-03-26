@@ -125,9 +125,7 @@ else
                 }
                 @if (Model.ShowSelected)
                 {
-                    <th data-test-id="select">
-                        Edit
-                    </th>
+                    <th data-test-id="select">✓</th>
                 }
                 <th class="col-1">
                     <a asp-action="Index" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.NextDateOrder">Date</a>
