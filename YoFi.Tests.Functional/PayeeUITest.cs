@@ -331,8 +331,13 @@ namespace YoFi.Tests.Functional
             await Page.SearchFor(testmarker);
             await Page.SaveScreenshotToAsync(TestContext);
 
-            // When: Clicking delete on first item in list
-            await Page.ClickAsync("[aria-label=\"Delete\"]");
+            // When: Opening the actions menu on the first item in the list
+            //dropdown-noarrow
+            await Page.ClickAsync("#actions-2");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+
+            // When: Clicking delete in that menu
+            await Page.ClickAsync("[data-test-id=delete]");
 
             // Then: We land at the delete payee page
             await Page.ThenIsOnPageAsync("Delete Payee");
