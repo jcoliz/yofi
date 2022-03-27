@@ -108,11 +108,12 @@ else
         </thead>
         <tbody>
             @{
-                var line = 1;
+                var line = 0;
             }
             @foreach (var item in Model.Items)
             {
-                <tr data-id="@item.ID" data-test-id="line-@(line++)" class="row">
+                ++line;
+                <tr data-id="@item.ID" data-test-id="line-@line" class="row">
                     <td class="display-category col-12 col-lg-@(5+selectedcols)">
                         @if (showselected)
                         {

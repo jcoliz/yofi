@@ -333,7 +333,7 @@ namespace YoFi.Tests.Functional
 
             // When: Opening the actions menu on the first item in the list
             //dropdown-noarrow
-            await Page.ClickAsync("#actions-2");
+            await Page.ClickAsync("#actions-1");
             await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
 
             // When: Clicking delete in that menu
