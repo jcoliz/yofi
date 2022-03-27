@@ -93,7 +93,7 @@ else
     <table class="table" data-test-id="results">
         <thead>
             <tr class="row">
-                <th class="col-12 col-lg-@(4+selectedcols)">
+                <th class="col-12 col-lg-@(5+selectedcols)">
                     @if (showselected)
                     {
                         <span class="me-1" data-test-id="select">✓</span>
@@ -113,7 +113,7 @@ else
             @foreach (var item in Model.Items)
             {
                 <tr data-id="@item.ID" data-test-id="line-@(line++)" class="row">
-                    <td class="display-category col-12 col-lg-@(4+selectedcols)">
+                    <td class="display-category col-12 col-lg-@(5+selectedcols)">
                         @if (showselected)
                         {
                             var checkedornot = (item.Selected == true) ? "checked" : string.Empty;
@@ -121,23 +121,24 @@ else
                         }
                         @Html.DisplayFor(modelItem => item.Category)
                     </td>
-                    <td class="display-payee col-9 col-lg-@(6-selectedcols)" data-test-id="name">
+                    <td class="display-payee col-10 col-lg-@(6-selectedcols)" data-test-id="name">
                         @if (showselected)
                         {
                             <span class="d-lg-none me-4"></span>
                         }
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
-                    <td class="col-3 col-lg-2">
-                        <div class="d-flex">
-                            <div class="ms-auto" data-bs-toggle="tooltip" title="Edit">
-                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary my-1" data-test-id="edit">
-                                    <i class="fa fa-edit"></i>
+                    <td class="col-2 col-lg-1" style="text-align:right">
+                        <div class="dropdown">
+                            <button href="#" class="btn btn-sm btn-outline-secondary my-1 dropdown-toggle dropdown-noarrow" id="actions-@line" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="actions-@line">
+                                <a asp-action="Edit" asp-route-id="@item.ID" data-test-id="edit" class="btn dropdown-item" >
+                                    <i class="fa fa-edit"></i> Edit
                                 </a>
-                            </div>
-                            <div class="ms-1" data-bs-toggle="tooltip" title="Delete">
-                                <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-secondary my-1" data-test-id="delete">
-                                    <i class="fa fa-trash-alt"></i>
+                                <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete" class="btn dropdown-item">
+                                    <i class="fa fa-trash-alt"></i> Delete
                                 </a>
                             </div>
                         </div>

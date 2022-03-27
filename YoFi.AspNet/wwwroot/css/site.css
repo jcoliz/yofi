@@ -263,3 +263,20 @@ body.iscarousel {
 .page-link {
     color: var(--color-1);
 }
+
+.color1 {
+    color: var(--color-1);
+}
+
+.color2 {
+    color: var(--color-2);
+}
+
+.dropdown-noarrow::after {
+    content: none;
+}
+
+table div.dropdown-menu i {
+    color: var(--color-2);
+    width: 20px;
+}
