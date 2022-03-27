@@ -353,5 +353,49 @@ namespace YoFi.Tests.Functional
             // And: Total number of items is back to the standard amount
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
+
+        /// <summary>
+        /// [User can] Quickly edit the most relevant details for a payee
+        /// </summary>
+        [TestMethod]
+        public async Task UpdateModal()
+        {
+            // Given: One item created
+            await GivenPayeeInDatabase();
+
+            // And: It's the one item in search results
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // When: Editing it
+            var newcategory = NextCategory;
+            var newpayee = NextName;
+
+            // When: Opening the actions menu on the first item in the list
+            //dropdown-noarrow
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+
+            // When: Clicking edit in that menu
+            await Page.ClickAsync("[data-test-id=edit]");
+            await Page.FillFormAsync(new Dictionary<string, string>()
+            {
+                { "Category", newcategory },
+                { "Name", newpayee },
+            });
+            await Task.Delay(200);
+            await Page.SaveScreenshotToAsync(TestContext);
+            await Page.ClickAsync("text=Save");
+
+            // Then: We are on the main page for this section
+            await Page.ThenIsOnPageAsync(MainPageName);
+
+            // And: Searching for the new item...
+            await Page.SearchFor(newcategory);
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // Then: It's found
+            Assert.AreEqual(1, await Page.GetTotalItemsAsync());
+        }
     }
 }

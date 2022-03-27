@@ -135,7 +135,7 @@ else
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
                             <div class="dropdown-menu" aria-labelledby="actions-@line">
-                                <a asp-action="Edit" asp-route-id="@item.ID" data-test-id="edit" class="btn dropdown-item" >
+                                <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-test-id="edit" data-bs-target="#editPayeeModal" class="btn dropdown-item">
                                     <i class="fa fa-edit"></i> Edit
                                 </a>
                                 <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete" class="btn dropdown-item">
