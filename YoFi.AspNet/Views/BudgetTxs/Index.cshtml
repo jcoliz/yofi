@@ -73,6 +73,7 @@
 }
 else
 {
+    var line = 0;
 
     <table class="table" data-test-id="results">
         <thead>
@@ -96,12 +97,13 @@ else
             </tr>
         </thead>
         <tbody>
-            @{
-                var line = 1;
-            }
             @foreach (var item in Model.Items)
             {
-                <tr class="row" data-test-id="line-@(line++)">
+                ++line;
+                var showfreq = item.Frequency > 1;
+                var showmemo = item.Memo != null;
+
+                <tr class="row" data-test-id="line-@line">
                     @if ((bool)(ViewData["ShowSelected"]))
                     {
                         <td class="col-@selectedcols">
@@ -118,25 +120,33 @@ else
                     <td class="col-3 col-md-3" style="text-align:right">
                         @Html.DisplayFor(modelItem => item.Amount)
                     </td>
-                    <td class="col-@(3+selectedcols) col-md-2" data-test-id="freq">
-                        @(item.Frequency > 1 ? item.FrequencyName : string.Empty)
+                    @if(showfreq)
+                    {
+                        var fcols = 3 + selectedcols;
+                        <td class="col-@fcols col-md-2" data-test-id="freq">
+                            @item.FrequencyName
+                        </td>
+                    }
+                    else
+                    {
+                        <td class="d-none" data-test-id="freq"/>
+                    }
+                    @{ var mcols = (showfreq ? 7 - selectedcols : 10); }
+                    <td class="col-@mcols col-md-6" data-test-id="memo">
+                        @Html.DisplayFor(modelItem => item.Memo)
                     </td>
-                    <td class="col-@(6-selectedcols) col-md-6">
-                        @if(item.Memo != null)
-                        {
-                            <span data-test-id="memo">@Html.DisplayFor(modelItem => item.Memo)</span>
-                        }
-                    </td>
-                    <td class="col-3 col-md-6">
-                        <div class="d-flex">
-                            <div class="ms-auto" data-bs-toggle="tooltip" title="Edit">
-                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-sm btn-primary my-1" data-test-id="edit">
-                                    <i class="fa fa-edit"></i>
+
+                    <td class="col-2 col-md-6" style="text-align:right">
+                        <div class="dropdown">
+                            <button href="#" class="btn btn-sm btn-outline-secondary my-1 dropdown-toggle dropdown-noarrow" id="actions-@line" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="actions-@line">
+                                <a asp-action="Edit" asp-route-id="@item.ID" data-test-id="edit" class="btn dropdown-item">
+                                    <i class="fa fa-edit"></i> Edit
                                 </a>
-                            </div>
-                            <div class="ms-1" data-bs-toggle="tooltip" title="Delete">
-                                <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-sm btn-outline-secondary my-1" data-test-id="delete">
-                                    <i class="fa fa-trash-alt"></i>
+                                <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete" class="btn dropdown-item">
+                                    <i class="fa fa-trash-alt"></i> Delete
                                 </a>
                             </div>
                         </div>

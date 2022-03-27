@@ -173,7 +173,9 @@ namespace YoFi.Tests.Functional
 
             // When: Editing the category to {newcategory}
             var newcategory = NextCategory;
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=edit]");
             await Page.FillFormAsync(new Dictionary<string, string>()
             {
                 { "Category", newcategory },
@@ -203,8 +205,10 @@ namespace YoFi.Tests.Functional
             // And: It's the one item in search results
             await Read();
 
-            // When: Clicking delete on first item in list
-            await Page.Locator("[aria-label=\"Delete\"]").First.ClickAsync();
+            // When: Clicking delete on first item in list (in line context menu)
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=delete]");
 
             // Then: We land at the delete page
             await Page.ThenIsOnPageAsync("Delete Budget Line Item");
@@ -270,7 +274,9 @@ namespace YoFi.Tests.Functional
 
             // When: Editing the memo to {newmemo}
             var newmemo = "Edited the memo";
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=edit]");
             await Page.FillFormAsync(new Dictionary<string, string>()
             {
                 { "Memo", newmemo },
@@ -304,7 +310,9 @@ namespace YoFi.Tests.Functional
             await CreateWithMemo();
 
             // When: Clicking delete on first item in list
-            await Page.ClickAsync("[aria-label=\"Delete\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=delete]");
             await Page.ThenIsOnPageAsync("Delete Budget Line Item");
             await Page.SaveScreenshotToAsync(TestContext,"Deleted");
 
@@ -435,7 +443,9 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Editing the memo to {newfrequency}
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=edit]");
             await Page.SelectOptionAsync("select[name=\"Frequency\"]", new[] { frequency_num });
             await Page.SaveScreenshotToAsync(TestContext);
             await Page.ClickAsync("text=Save");
