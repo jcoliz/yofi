@@ -335,11 +335,12 @@ namespace YoFi.Tests.Functional
             var numtx = 3;
             var matchamount = await GivenReceiptWithMultipleMatchingTransactions(name,numtx);
 
-            // When: Clicking "Review"
+            // When: Clicking "Review" from the line actions dropdown
+            await Page.ClickAsync("#actions-1");
             await Page.ClickAsync("button[data-test-id=review]");
             var detailsModal = Page.Locator("div#detailsModal");
             await detailsModal.WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Visible });
-            await Task.Delay(500);
+            await Task.Delay(200);
             await Page.SaveScreenshotToAsync(TestContext, "Slide 16");
 
             // Then: The receipts which match the selected transaction are shown
@@ -370,6 +371,7 @@ namespace YoFi.Tests.Functional
             var matchamount = await GivenReceiptWithMultipleMatchingTransactions(name, numtx);
 
             // And: Having clicked "Review"
+            await Page.ClickAsync("#actions-1");
             await Page.ClickAsync("button[data-test-id=review]");
             await Page.Locator("div#detailsModal").WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Visible } );
             await Task.Delay(500);
@@ -479,7 +481,9 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
 
             // When: Deleting it
-            await Page.ClickAsync("[aria-label=Delete]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("button[value=Delete]");
             await Page.SaveScreenshotToAsync(TestContext, "Deleted");
 
             // Then: No receipts shown on the page
@@ -515,7 +519,8 @@ namespace YoFi.Tests.Functional
             await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
 
-            // When: Clicking "Create"
+            // When: Clicking "Create" in the line actions menu
+            await Page.ClickAsync("#actions-1");
             await Page.ClickAsync("text=\"Create\"");
             await Page.SaveScreenshotToAsync(TestContext, "Create Page");
 
@@ -561,7 +566,9 @@ namespace YoFi.Tests.Functional
             };
             await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
+
             // And: On the transaction create page with correct details
+            await Page.ClickAsync("#actions-1");
             await Page.ClickAsync("text=\"Create\"");
 
             // When: Clicking "Create"

@@ -40,6 +40,8 @@
 
 @if (Model.Any())
 {
+    var line = 0;
+
 <table class="table" data-test-id="results">
     <thead>
         <tr class="row">
@@ -63,6 +65,8 @@
     <tbody>
     @foreach (var item in Model) 
     {
+        ++line;
+
         var nmatches = item.Matches.Count;
 
         <tr class="row">
@@ -84,40 +88,41 @@
             <td class="col-md-8 col-12">
                 <span class="d-none d-sm-inline">Filename: </span>@Html.DisplayFor(modelItem => item.Filename)
             </td>
-            <td data-test-id="Matches" data-test-value="@nmatches" class="col-md-4 col-12">
-                <div class="d-flex">
-                <div class="ms-auto">
-                    <form method="post" asp-action="Action">
-                        <input type="hidden" name="id" value="@item.ID"/>
-                        @if (nmatches == 1)
-                        {
-                            <input type="hidden" name="txid" value="@item.Matches.Single().ID" />
-                            <input type="submit" name="command" value="Accept" class="btn btn-sm btn-primary my-1"/>
-                        }
-                    </form>
-                </div>
-                <div class="ms-1">
+            <td data-test-id="Matches" data-test-value="@nmatches" class="col-md-4 col-12" style="text-align: right">
+                <form method="post" asp-action="Action" id="form-@line">
+                    <input type="hidden" name="id" value="@item.ID"/>
                     @if (nmatches == 1)
                     {
-                        <a asp-controller="Transactions" asp-action="Create" asp-route-rid="@item.ID" class="btn btn-sm btn-secondary my-1" data-bs-toggle="tooltip" title="Create"><i class="fa fa-plus"></i></a>
+                        <input type="hidden" name="txid" value="@item.Matches.Single().ID" />
                     }
-                    else
-                    {
-                        <a asp-controller="Transactions" asp-action="Create" asp-route-rid="@item.ID" class="btn btn-sm btn-primary my-1">Create</a>
-                    }
-                </div>
-                @if (nmatches > 0)
-                {
-                    <div class="ms-1">
-                    <button type="button" class="btn btn-sm btn-secondary my-1" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal" data-test-id="review"><i data-bs-toggle="tooltip" title="Review" class="fa fa-eye"></i></button>                            
+                </form>
+
+                <div class="dropdown">
+                    <button href="#" class="btn btn-sm btn-outline-secondary my-1 dropdown-toggle dropdown-noarrow" id="actions-@line" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="actions-@line">
+                        @if (nmatches == 1)
+                        {
+                            <button type="submit" form="form-@line" name="command" value="Accept" class="btn dropdown-item">
+                                <i class="fa fa-check"></i> Accept
+                            </button>
+                        }
+                        @if (nmatches > 0)
+                        {
+                            <button type="button" class="btn dropdown-item" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#detailsModal" data-test-id="review">
+                                <i class="fa fa-eye"></i> Review
+                            </button>                            
+                        }
+                        <a asp-controller="Transactions" asp-action="Create" asp-route-rid="@item.ID" class="btn dropdown-item">
+                            <i class="fa fa-plus"></i> Create
+                        </a>
+
+                        <button type="submit" form="form-@line" class="btn dropdown-item" name="command" value="Delete">
+                            <i class="fa fa-trash-alt"></i> Delete
+                        </button>
+
                     </div>
-                }
-                <div class="ms-1">
-                    <form method="post" asp-action="Delete">
-                        <input type="hidden" name="id" value="@item.ID"/>
-                        <button type="submit" class="btn btn-sm btn-outline-secondary my-1" data-bs-toggle="tooltip" title="Delete"><i class="fa fa-trash-alt"></i></button>
-                    </form>
-                </div>
                 </div>
             </td>
         </tr>

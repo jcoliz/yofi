@@ -332,7 +332,6 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext);
 
             // When: Opening the actions menu on the first item in the list
-            //dropdown-noarrow
             await Page.ClickAsync("#actions-1");
             await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
 
