@@ -122,7 +122,7 @@ else
                 <th class="col-3 col-lg-2">
                     @if (Model.ShowSelected)
                     {
-                        <span>✓ </span>
+                        <span data-test-id="select">✓ </span>
                     }
                     <span>Date</span><span class="d-none d-sm-inline d-lg-none">/Amount</span>
                 </th>
@@ -138,14 +138,14 @@ else
                 <th class="d-none">
                     @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Memo)
                 </th>
+                <th class="d-none">
+                </th>
                 @if (Model.ShowHidden)
                 {
-                    <th class="d-none">
+                    <th class="d-none" data-test-id=hide>
                         <a asp-action="Index" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.NextBankReferenceOrder">@nameof(Transaction.BankReference)</a>
                     </th>
                 }
-                <th class="d-none">
-                </th>
             </tr>
         </thead>
         <tbody>

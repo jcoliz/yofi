@@ -170,7 +170,7 @@ namespace YoFi.Tests.Integration.Controllers
             var document = await WhenGettingIndex(new WireQueryParameters() { View = searchterm });
 
             // Then: The selection checkbox is available (or not, as expected)
-            var checkboxshown = !(document.QuerySelector($"th[data-test-id=select]") is null);
+            var checkboxshown = !(document.QuerySelector($"span[data-test-id=select]") is null);
             Assert.AreEqual(isselected, checkboxshown);
         }
 
