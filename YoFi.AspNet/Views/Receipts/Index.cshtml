@@ -42,7 +42,7 @@
 {
     var line = 0;
 
-<table class="table" data-test-id="results">
+<table class="table table-striped" data-test-id="results">
     <thead>
         <tr class="row">
             <th class="col-lg-2 col-3">
@@ -87,7 +87,7 @@
             }
             else
             {
-                <td class="d-none" data-test-id="memo"/>
+                <td class="d-none d-lg-block col-lg-4" data-test-id="memo"/>
             }
             <td class="col-md-11 col-10">
                 <span class="d-none d-sm-inline">Filename: </span>@Html.DisplayFor(modelItem => item.Filename)

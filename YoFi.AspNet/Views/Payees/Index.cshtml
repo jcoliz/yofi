@@ -90,7 +90,7 @@
 }
 else
 {
-    <table class="table" data-test-id="results">
+    <table class="table table-striped" data-test-id="results">
         <thead>
             <tr class="row">
                 <th class="col-12 col-lg-@(5+selectedcols)">
@@ -113,7 +113,7 @@ else
             @foreach (var item in Model.Items)
             {
                 ++line;
-                <tr data-id="@item.ID" data-test-id="line-@line" class="row">
+                <tr data-id="@item.ID" data-test-id="line-@line" class="row border-bottom">
                     <td class="display-category col-12 col-lg-@(5+selectedcols)">
                         @if (showselected)
                         {

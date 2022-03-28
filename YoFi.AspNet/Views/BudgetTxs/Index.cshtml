@@ -75,7 +75,7 @@ else
 {
     var line = 0;
 
-    <table class="table" data-test-id="results">
+    <table class="table table-striped" data-test-id="results">
         <thead>
             <tr class="row">
                 @if ((bool)(ViewData["ShowSelected"]))
@@ -103,7 +103,7 @@ else
                 var showfreq = item.Frequency > 1;
                 var showmemo = item.Memo != null;
 
-                <tr class="row" data-test-id="line-@line">
+                <tr class="row border-bottom" data-test-id="line-@line">
                     @if ((bool)(ViewData["ShowSelected"]))
                     {
                         <td class="col-@selectedcols">
@@ -129,7 +129,7 @@ else
                     }
                     else
                     {
-                        <td class="d-none" data-test-id="freq"/>
+                        <td class="d-none d-md-block col-md-2" data-test-id="freq"/>
                     }
                     @{ var mcols = (showfreq ? 7 - selectedcols : 10); }
                     <td class="col-@mcols col-md-6" data-test-id="memo">

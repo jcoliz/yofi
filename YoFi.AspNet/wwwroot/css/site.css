@@ -280,3 +280,12 @@ table div.dropdown-menu i {
     color: var(--color-2);
     width: 20px;
 }
+
+.table-striped td {
+    border-bottom-width: 0;
+    padding: 0.2rem 0.5rem;
+}
+
+.table-striped tr {
+    padding: 0rem 0.5rem;
+}
