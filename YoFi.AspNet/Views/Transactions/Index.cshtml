@@ -159,6 +159,8 @@ else
                 ++line;
                 var hascheckboxes = Model.ShowHidden || Model.ShowSelected;
                 var hasmemo = !string.IsNullOrEmpty(item.Memo);
+                var hasreceipt = !string.IsNullOrEmpty(item.ReceiptUrl);
+
                 <tr class="txdrop row" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@line">
                     @if (hascheckboxes)
                     {
@@ -216,61 +218,50 @@ else
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
                             <div class="dropdown-menu" aria-labelledby="actions-@line">
-                                <a asp-action="Edit" asp-route-id="@item.ID" data-test-id="edit" class="btn dropdown-item">
-                                    <i class="fa fa-edit"></i> Edit
+
+                                @if (item.HasSplits)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.ID" target="_blank" data-test-id="edit-splits" class="btn dropdown-item">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editModal" class="btn dropdown-item">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </a>
+                                }
+
+                                <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#addPayeeModal" class="btn dropdown-item">
+                                    <i class="fa fa-plus"></i> Add Payee
                                 </a>
+
+                                <a href="#" class="btn dropdown-item apply-link" data-id="@item.ID"><i class="fa fa-paint-brush"></i> Apply Payee</a>
+
+                                <a asp-action="Index"
+                                   asp-route-o="@Model.Parameters.Order"
+                                   asp-route-v="@Model.Parameters.View"
+                                   asp-route-q="p=@item.Payee?.Trim()"
+                                    class="btn dropdown-item">
+                                    <i class="fa fa-search"></i> Search Payee
+                                </a>
+
+                                @if (hasreceipt) //(item.HasReceipt) // This is a DTO construct
+                                {
+                                    <a href="/Transactions/GetReceipt/@item.ID" target="_blank" class="btn dropdown-item"><i class="far fa-file-pdf"></i> Get Receipt</a>
+                                }
+                                else
+                                {
+                                    <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank" class="btn dropdown-item"><i class="fa fa-file-pdf"></i> Get Receipt</a>
+                                }
+
                                 <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete" class="btn dropdown-item">
                                     <i class="fa fa-trash-alt"></i> Delete
                                 </a>
                             </div>
                         </div>
                     </td>
-                    @*
-                    <td style="padding-left:0; padding-right:5px">
 
-                        @if (item.HasSplits)
-                        {
-                            <a asp-action="Edit" asp-route-id="@item.ID" target="_blank" data-test-id="edit-splits">
-                                <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
-                            </a>
-                        }
-                        else
-                        {
-                            <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editModal">
-                                <i class="fa fa-edit" data-bs-toggle="tooltip" title="Edit"></i>
-                            </a>
-                        }
-                    </td>
-                    <td style="padding-left:0; padding-right:5px">
-                        <a asp-action="Index"
-                           asp-route-o="@Model.Parameters.Order"
-                           asp-route-v="@Model.Parameters.View"
-                           asp-route-q="p=@item.Payee?.Trim()">
-                            <i class="fa fa-search" data-bs-toggle="tooltip" title="Search Payee"></i>
-                        </a>
-                    </td>
-                    <td style="padding-left:0; padding-right:5px">
-                        <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#addPayeeModal">
-                            <i class="fa fa-plus" data-bs-toggle="tooltip" title="Add Payee"></i>
-                        </a>
-                    </td>
-                    <td style="padding-left:0; padding-right:5px">
-                        <a href="#" class="apply-link" data-id="@item.ID"><i class="fa fa-paint-brush" data-bs-toggle="tooltip" title="Apply Payee"></i></a>
-                    </td>
-                    @{
-                        var hasreceipt = !string.IsNullOrEmpty(item.ReceiptUrl);
-                    }
-                    <td style="padding-left:0; padding-right:0" class="display-receipt" data-test-id="Receipt" data-test-value="@hasreceipt">
-                        @if (hasreceipt) //(item.HasReceipt) // This is a DTO construct
-                        {
-                            <a href="/Transactions/GetReceipt/@item.ID" target="_blank"><i class="far fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
-                        }
-                        else
-                        {
-                            <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank"><i class="fa fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
-                        }
-                    </td>
-                    *@
                 </tr>
             }
         </tbody>
