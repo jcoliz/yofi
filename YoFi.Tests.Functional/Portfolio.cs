@@ -164,6 +164,11 @@ namespace YoFi.Tests.Functional
             });
 
             await NextPage.SaveScreenshotToAsync(TestContext);
+
+            // Click the "..." icon on the first split line to open the context menu
+            await NextPage.ClickAsync("#actions-1");
+            await NextPage.SaveScreenshotToAsync(TestContext, "Context Menu");
+
         }
 
         /// <summary>
@@ -398,6 +403,10 @@ namespace YoFi.Tests.Functional
             await DismissHelpTest();
 
             await Page.SaveScreenshotToAsync(TestContext);
+
+            // Click the "..." icon on the first line to open the context menu
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
         }
 
         /// <summary>
@@ -414,6 +423,10 @@ namespace YoFi.Tests.Functional
             await DismissHelpTest();
 
             await Page.SaveScreenshotToAsync(TestContext);
+
+            // Click the "..." icon on the first line to open the context menu
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
         }
 
         /// <summary>
