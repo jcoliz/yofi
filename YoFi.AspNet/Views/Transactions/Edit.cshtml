@@ -108,11 +108,13 @@
 
         @if (Model.HasSplits)
         {
+            var line = 0;
+
             var splitorder = (Model.Amount < 0) ? Model.Splits.OrderBy(x => x.Amount) : Model.Splits.OrderByDescending(x => x.Amount);
             <table class="table" data-test-id="splits">
                 <thead>
                     <tr class="row">
-                        <th class="col-9 col-lg-4">
+                        <th class="col-9 col-lg-5">
                             <span class="d-none d-lg-inline">@Html.DisplayNameFor(x => x.Category)</span>
                             <span class="d-lg-none">@Html.DisplayNameFor(x => x.Category)/@Html.DisplayNameFor(x => x.Memo)</span>                            
                         </th>
@@ -125,31 +127,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @{
-                        var line = 1;
-                    }
                     @foreach (var split in splitorder)
                     {
-                    <tr class="row" data-test-id="line-@(line++)">
-                        <td class="col-9 col-lg-4">
+                        ++line;
+
+                    <tr class="row" data-test-id="line-@line">
+                        <td class="col-9 col-lg-5">
                             @(split.Category ?? String.Empty)
                         </td>
                         <td class="col-3 col-lg-2" data-test-id="split-amount" style="text-align:right">
                             @split.Amount
                         </td>
-                        <td class="col-9 col-lg-4">
+                        <td class="col-10 col-lg-4">
                             @split.Memo
                         </td>
-                        <td class="col-3 col-lg-2">
-                            <div class="d-flex">
-                                <div class="ms-auto" data-bs-toggle="tooltip" title="Edit">
-                                    <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID" class="btn btn-sm btn-primary my-1" data-test-id="edit">
-                                        <i class="fa fa-edit"></i>
+                        <td class="col-2 col-lg-1" style="text-align:right">
+                            <div class="dropdown">
+                                <button href="#" class="btn btn-sm btn-outline-secondary my-1 dropdown-toggle dropdown-noarrow" id="actions-@line" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="actions-@line">
+                                    <a asp-controller="Splits" asp-action="Edit" asp-route-id="@split.ID" data-test-id="edit" class="btn dropdown-item">
+                                        <i class="fa fa-edit"></i> Edit
                                     </a>
-                                </div>
-                                <div class="ms-1" data-bs-toggle="tooltip" title="Delete">
-                                    <a asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID" class="btn btn-sm btn-outline-secondary my-1" data-test-id="delete">
-                                        <i class="fa fa-trash-alt"></i>
+                                    <a asp-controller="Splits" asp-action="Delete" asp-route-id="@split.ID" data-test-id="delete" class="btn dropdown-item">
+                                        <i class="fa fa-trash-alt"></i> Delete
                                     </a>
                                 </div>
                             </div>

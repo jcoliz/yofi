@@ -530,6 +530,49 @@ namespace YoFi.Tests.Functional
             Assert.IsFalse(await fix.IsVisibleAsync());
         }
 
+        [TestMethod]
+        public async Task DeleteSplit()
+        {
+            // Given: A transaction with two splits
+            await BalanceSplits();
+
+            // And: Starting at the top
+            await WhenNavigatingToPage(MainPageName);
+
+            // And: Searching for this item
+            await Page.SearchFor(testmarker);
+            await Page.SaveScreenshotToAsync(TestContext, "Found item");
+
+            // And: On the edit page for it
+            var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
+            {
+                await Page.ClickAsync("[data-test-id=edit-splits] i");
+            });
+            await NextPage.SaveScreenshotToAsync(TestContext, "Edit Transaction");
+
+            // When: Opening the actions menu on the first item in the list
+            await NextPage.ClickAsync("#actions-1");
+            await NextPage.SaveScreenshotToAsync(TestContext, "Context Menu");
+
+            // And: Clicking delete in that menu
+            await NextPage.ClickAsync("[data-test-id=delete]");
+
+            // Then: We land at the delete split page
+            await NextPage.ThenIsOnPageAsync("Delete Split");
+            await NextPage.SaveScreenshotToAsync(TestContext,"Delete Page");
+
+            // When: Clicking the Delete button to execute the delete
+            await NextPage.ClickAsync("input[value=Delete]");
+
+            // Then: We are back on the edit transaction page
+            await NextPage.ThenIsOnPageAsync("Edit Transaction");
+            await NextPage.SaveScreenshotToAsync(TestContext,"Was Deleted");
+
+            // And: The fix split button is visible
+            var fix_visible = await NextPage.Locator("data-test-id=btn-fix-split").IsVisibleAsync();
+            Assert.IsTrue(fix_visible);
+        }
+
         /// <summary>
         /// User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided upon transaction import
         /// </summary>
