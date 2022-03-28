@@ -113,10 +113,11 @@
 }
 else
 {
+    var line = 0;
 
-    <table class="table" data-test-id="results">
+    <table class="table table-index" data-test-id="results">
         <thead>
-            <tr>
+            <tr class="row">
                 @if (Model.ShowHidden)
                 {
                     <th data-test-id="hide">
@@ -127,62 +128,63 @@ else
                 {
                     <th data-test-id="select">✓</th>
                 }
-                <th class="col-1">
-                    <a asp-action="Index" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.NextDateOrder">Date</a>
+                <th class="col-3 col-lg-2">
+                    <span>Date</span><span class="d-none d-sm-inline d-lg-none">/Amount</span>
                 </th>
-                <th class="col-5">
-                    <a asp-action="Index" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.NextPayeeOrder">@nameof(Transaction.Payee)</a>
+                <th class="col-9 col-lg-4">
+                    <span>@nameof(Transaction.Payee)</span><span class="d-lg-none">/Category</span>
                 </th>
-                <th class="col-1" style="text-align:right">
-                    <a asp-action="Index" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.NextAmountOrder">@nameof(Transaction.Amount)</a>
+                <th class="d-none d-lg-block col-lg-2" style="text-align:right">
+                    @nameof(Transaction.Amount)
                 </th>
-                <th class="col-2">
-                    <a asp-action="Index" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.NextCategoryOrder">@nameof(Transaction.Category)</a>
+                <th class="d-none d-lg-block col-lg-3">
+                    @nameof(Transaction.Category)
                 </th>
-                <th class="col-2">
+                <th class="d-none">
                     @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Memo)
                 </th>
                 @if (Model.ShowHidden)
                 {
-                    <th>
+                    <th class="d-none">
                         <a asp-action="Index" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.NextBankReferenceOrder">@nameof(Transaction.BankReference)</a>
                     </th>
                 }
-                <th colspan="5" class="col-1">
+                <th class="d-none">
                 </th>
             </tr>
         </thead>
         <tbody>
-            @{
-                var line = 1;
-            }
             @foreach (var item in Model.Items)
             {
-                <tr class="txdrop" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@(line++)">
-                    @if (Model.ShowHidden)
+                ++line;
+                var hascheckboxes = Model.ShowHidden || Model.ShowSelected;
+                var hasmemo = !string.IsNullOrEmpty(item.Memo);
+                <tr class="txdrop row" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@line">
+                    @if (hascheckboxes)
                     {
-                        <td>
-                            @{ var checkedornot = (item.Hidden == true) ? "checked" : string.Empty; }
-                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID">
+                        <td class="col-12">
+                            @if (Model.ShowHidden)
+                            {
+                                var checkedornot = (item.Hidden == true) ? "checked" : string.Empty;
+                                <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID">
+                            }
+                            @if (Model.ShowSelected)
+                            {
+                                var checkedornot = (item.Selected == true) ? "checked" : string.Empty;
+                                <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select">
+                            }
                         </td>
                     }
-                    @if (Model.ShowSelected)
-                    {
-                        <td>
-                            @{ var checkedornot = (item.Selected == true) ? "checked" : string.Empty; }
-                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select">
-                        </td>
-                    }
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Timestamp)
+                    <td class="col-3 col-lg-2">
+                        @item.Timestamp.ToString("MM/dd/yy")
                     </td>
-                    <td class="display-payee">
+                    <td class="col-9 col-lg-4 display-payee">
                         @Html.DisplayFor(modelItem => item.Payee)
                     </td>
-                    <td style="text-align:right">
+                    <td class="col-3 col-lg-2" style="text-align:right">
                         @Html.DisplayFor(modelItem => item.Amount)
                     </td>
-                    <td class="display-category">
+                    <td class="col-@(hasmemo?9:7) col-lg-3 display-category">
                         @if (item.HasSplits)
                         {
                             <span>SPLIT</span>
@@ -192,15 +194,38 @@ else
                             @Html.DisplayFor(modelItem => item.Category)
                         }
                     </td>
-                    <td class="display-memo" data-test-id="memo">
-                        @Html.DisplayFor(modelItem => item.Memo)
-                    </td>
+                    @if (hasmemo)
+                    {
+                        <td class="col-10 col-lg-11 display-memo" data-test-id="memo">
+                            @Html.DisplayFor(modelItem => item.Memo)
+                        </td>
+                    }
+                    else
+                    {
+                        <td class="d-none" data-test-id="memo"/>
+                    }
                     @if (Model.ShowHidden)
                     {
-                        <td>
+                        <td class="col-12">
                             @Html.DisplayFor(modelItem => item.BankReference)
                         </td>
                     }
+                    <td class="col-2 col-lg-1" style="text-align:right">
+                        <div class="dropdown">
+                            <button href="#" class="btn btn-sm btn-outline-secondary my-1 dropdown-toggle dropdown-noarrow" id="actions-@line" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="actions-@line">
+                                <a asp-action="Edit" asp-route-id="@item.ID" data-test-id="edit" class="btn dropdown-item">
+                                    <i class="fa fa-edit"></i> Edit
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete" class="btn dropdown-item">
+                                    <i class="fa fa-trash-alt"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                    @*
                     <td style="padding-left:0; padding-right:5px">
 
                         @if (item.HasSplits)
@@ -245,6 +270,7 @@ else
                             <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank"><i class="fa fa-file-pdf" data-bs-toggle="tooltip" title="Get Receipt"></i></a>
                         }
                     </td>
+                    *@
                 </tr>
             }
         </tbody>
