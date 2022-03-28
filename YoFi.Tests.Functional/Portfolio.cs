@@ -128,8 +128,12 @@ namespace YoFi.Tests.Functional
             // Dismiss the help text, if appears
             await DismissHelpTest();
 
-            // Click the "Edit" icon on the first line
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            // Click the "..." icon on the first line to open the context menu
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+
+            // Click the "Edit" icon in the context menu
+            await Page.ClickAsync("[data-test-id=edit]");
 
             await Task.Delay(500);
             await Page.SaveScreenshotToAsync(TestContext);
@@ -151,7 +155,11 @@ namespace YoFi.Tests.Functional
             await Page.SearchFor("a=256992");
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
-                // Click the "Edit" icon on the first line
+                // Click the "..." icon on the first line to open the context menu
+                await Page.ClickAsync("#actions-1");
+                await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+
+                // Click the "Edit" icon in the context menu
                 await Page.ClickAsync("data-test-id=edit-splits");
             });
 

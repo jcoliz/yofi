@@ -238,7 +238,9 @@ namespace YoFi.Tests.Functional
             var newcategory = NextCategory;
             var newpayee = NextName;
 
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=edit]");
             await Page.FillFormAsync(new Dictionary<string, string>()
             {
                 { "Category", newcategory },
@@ -271,7 +273,9 @@ namespace YoFi.Tests.Functional
             var newcategory = NextCategory;
             var newpayee = NextName;
 
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=edit]");
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.WaitForSelectorAsync("input[name=\"Category\"]");
@@ -311,7 +315,9 @@ namespace YoFi.Tests.Functional
 
             // When: Deleting first item in list
 
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=edit]");
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.ClickAsync("text=More");
@@ -343,7 +349,9 @@ namespace YoFi.Tests.Functional
             await Read(1);
 
             // And: Editing it
-            await Page.ClickAsync("[aria-label=Edit]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=edit]");
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.WaitForSelectorAsync("input[name=Category]");
@@ -380,7 +388,8 @@ namespace YoFi.Tests.Functional
             // When: Clicking on the get-receipt icon
             var download1 = await Page.RunAndWaitForDownloadAsync(async () =>
             {
-                await Page.ClickAsync("[aria-label=\"Get Receipt\"]");
+                await Page.ClickAsync("#actions-1");
+                await Page.ClickAsync("data-test-id=get-receipt");
             });
 
             // Then: Image loads successfully
@@ -403,7 +412,8 @@ namespace YoFi.Tests.Functional
             await Page.SearchFor(testmarker);
 
             // And: On the edit page
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.ClickAsync("[data-test-id=edit]");
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.WaitForSelectorAsync("input[name=\"Category\"]");
@@ -437,7 +447,8 @@ namespace YoFi.Tests.Functional
             await Page.SearchFor(testmarker);
 
             // And: On the edit page
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.ClickAsync("[data-test-id=edit]");
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.WaitForSelectorAsync("input[name=\"Category\"]");
@@ -463,7 +474,9 @@ namespace YoFi.Tests.Functional
             await Read(1);
 
             // And: Editing it
-            await Page.ClickAsync("[aria-label=Edit]");
+            await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
+            await Page.ClickAsync("[data-test-id=edit]");
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.WaitForSelectorAsync("input[name=Category]");
@@ -505,7 +518,8 @@ namespace YoFi.Tests.Functional
             // And: On the edit page for it
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
-                await Page.ClickAsync("[data-test-id=edit-splits] i");
+                await Page.ClickAsync("#actions-1");
+                await Page.ClickAsync("[data-test-id=edit-splits]");
             });
 
             await NextPage.SaveScreenshotToAsync(TestContext,"Edit Transaction");
@@ -546,7 +560,8 @@ namespace YoFi.Tests.Functional
             // And: On the edit page for it
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
-                await Page.ClickAsync("[data-test-id=edit-splits] i");
+                await Page.ClickAsync("#actions-1");
+                await Page.ClickAsync("[data-test-id=edit-splits]");
             });
             await NextPage.SaveScreenshotToAsync(TestContext, "Edit Transaction");
 
@@ -620,6 +635,7 @@ namespace YoFi.Tests.Functional
             // And: The splits match the categories and amounts as expected from the {loan details} 
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
+                await Page.ClickAsync("#actions-1");
                 await Page.ClickAsync("[data-test-id=\"edit-splits\"]");
             });
             await NextPage.SaveScreenshotToAsync(TestContext,"Has good values");
@@ -665,7 +681,8 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Clicking 'Apply Payee' on the first line
-            await Page.Locator($"[aria-label=\"Apply Payee\"]").First.ClickAsync();
+            await Page.ClickAsync("#actions-1");
+            await Page.Locator($"data-test-id=apply-payee").ClickAsync();
             await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Editing the transaction
@@ -675,6 +692,7 @@ namespace YoFi.Tests.Functional
 
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
+                await Page.ClickAsync("#actions-1");
                 await Page.ClickAsync("[data-test-id=edit-splits]");
             });
             await NextPage.SaveScreenshotToAsync(TestContext);

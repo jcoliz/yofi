@@ -371,7 +371,6 @@ namespace YoFi.Tests.Functional
             var newpayee = NextName;
 
             // When: Opening the actions menu on the first item in the list
-            //dropdown-noarrow
             await Page.ClickAsync("#actions-1");
             await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
 

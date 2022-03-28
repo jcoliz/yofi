@@ -206,7 +206,7 @@ else
                                 }
                                 else
                                 {
-                                    <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editModal" class="btn dropdown-item">
+                                    <a href="#" data-id="@item.ID" data-bs-toggle="modal" data-bs-target="#editModal" data-test-id="edit" class="btn dropdown-item">
                                         <i class="fa fa-edit"></i> Edit
                                     </a>
                                 }
@@ -215,7 +215,7 @@ else
                                     <i class="fa fa-plus"></i> Add Payee
                                 </a>
 
-                                <a href="#" class="btn dropdown-item apply-link" data-id="@item.ID"><i class="fa fa-paint-brush"></i> Apply Payee</a>
+                                <a href="#" class="btn dropdown-item apply-link" data-id="@item.ID" data-test-id="apply-payee"><i class="fa fa-paint-brush"></i> Apply Payee</a>
 
                                 <a asp-action="Index"
                                    asp-route-o="@Model.Parameters.Order"
@@ -227,11 +227,11 @@ else
 
                                 @if (hasreceipt) //(item.HasReceipt) // This is a DTO construct
                                 {
-                                    <a href="/Transactions/GetReceipt/@item.ID" target="_blank" class="btn dropdown-item"><i class="far fa-file-pdf"></i> Get Receipt</a>
+                                    <a href="/Transactions/GetReceipt/@item.ID" target="_blank" class="btn dropdown-item" data-test-id="get-receipt"><i class="far fa-file-pdf"></i> Get Receipt</a>
                                 }
                                 else
                                 {
-                                    <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank" class="btn dropdown-item"><i class="fa fa-file-pdf"></i> Get Receipt</a>
+                                    <a href="/Transactions/GetReceipt/@item.ID" style="display:none" target="_blank" class="btn dropdown-item" data-test-id="get-receipt"><i class="fa fa-file-pdf"></i> Get Receipt</a>
                                 }
 
                                 <a asp-action="Delete" asp-route-id="@item.ID" data-test-id="delete" class="btn dropdown-item">
