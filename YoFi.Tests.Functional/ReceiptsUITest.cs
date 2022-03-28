@@ -337,6 +337,7 @@ namespace YoFi.Tests.Functional
 
             // When: Clicking "Review" from the line actions dropdown
             await Page.ClickAsync("#actions-1");
+            await Page.SaveScreenshotToAsync(TestContext, "Context Menu");
             await Page.ClickAsync("button[data-test-id=review]");
             var detailsModal = Page.Locator("div#detailsModal");
             await detailsModal.WaitForAsync(new LocatorWaitForOptions() { State = WaitForSelectorState.Visible });
@@ -590,7 +591,7 @@ namespace YoFi.Tests.Functional
             // And: Transaction matches
             Assert.IsTrue(table.Rows.All(x => x["Memo"] == testmarker));
             Assert.AreEqual(payee, table.Rows[0]["Payee"]);
-            Assert.AreEqual("12/21/2022", table.Rows[0]["Date"]);
+            Assert.AreEqual("12/21/22", table.Rows[0]["Date"]);
             Assert.AreEqual(amount, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
 
             // And: It has a receipt
@@ -642,7 +643,8 @@ namespace YoFi.Tests.Functional
             // When: Navigating to the edit page for the first transaction with testmarker
             await WhenNavigatingToPage("Transactions");
             await Page.SearchFor(testmarker);
-            await Page.ClickAsync("[aria-label=\"Edit\"]");
+            await Page.ClickAsync("#actions-1");
+            await Page.ClickAsync("[data-test-id=edit]");
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
             {
                 await Page.WaitForSelectorAsync("input[name=\"Category\"]");

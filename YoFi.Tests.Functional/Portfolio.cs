@@ -410,6 +410,27 @@ namespace YoFi.Tests.Functional
         }
 
         /// <summary>
+        /// Budget editor, bulk edit mechanism. Other views use a similar mechanism
+        /// </summary>
+        [TestMethod]
+        public async Task _22_Budget_Edit_BulkEdit()
+        {
+            // Navigate to https://www.try-yofi.com/BudgetTxs
+            await NavigateToAsync("BudgetTxs");
+
+            // Dismiss the help text, if appears
+            await DismissHelpTest();
+
+            // Click "Actions" in the page navbar
+            await Page.ClickAsync("#dropdownMenuButtonAction");
+
+            // Click "Bulk Edit" in the actions dropdown
+            await Page.ClickAsync("text=Bulk Edit");
+
+            await Page.SaveScreenshotToAsync(TestContext);
+        }
+
+        /// <summary>
         /// Payee matching rules, where user can view, edit or delete the rules whereby categories are
         /// automatically assigned based on payee of a transaction
         /// </summary>

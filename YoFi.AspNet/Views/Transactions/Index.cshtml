@@ -119,14 +119,14 @@ else
         <thead>
             <tr class="row">
 
-                <th class="col-3 col-lg-2">
+                <th class="col-3 col-lg-2" data-test-id="Date">
                     @if (Model.ShowSelected)
                     {
                         <span data-test-id="select">✓ </span>
                     }
                     <span>Date</span><span class="d-none d-sm-inline d-lg-none">/Amount</span>
                 </th>
-                <th class="col-9 col-lg-4">
+                <th class="col-9 col-lg-4" data-test-id="Payee">
                     <span>@nameof(Transaction.Payee)</span><span class="d-lg-none">/Category</span>
                 </th>
                 <th class="d-none d-lg-block col-lg-2" style="text-align:right">
@@ -135,10 +135,9 @@ else
                 <th class="d-none d-lg-block col-lg-3">
                     @nameof(Transaction.Category)
                 </th>
-                <th class="d-none">
-                    @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Memo)
+                <th class="d-none" data-test-id="Memo">
                 </th>
-                <th class="d-none">
+                <th class="d-none" data-test-id="Receipt">
                 </th>
                 @if (Model.ShowHidden)
                 {
@@ -191,7 +190,7 @@ else
                     {
                         <td class="d-none" data-test-id="memo"/>
                     }
-                    <td class="col-2 col-lg-1" style="text-align:right">
+                    <td class="col-2 col-lg-1" style="text-align:right" data-test-value="@hasreceipt">
                         <div class="dropdown">
                             <button href="#" class="btn btn-sm btn-outline-secondary my-1 dropdown-toggle dropdown-noarrow" id="actions-@line" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-ellipsis-h"></i>

@@ -29,8 +29,24 @@ namespace YoFi.Tests.Functional.Helpers
             var table = new ResultsTable();
 
             var headers_el = table_el.Locator("thead th");
-            var headers = await headers_el.AllTextContentsAsync();
-            table.Columns.AddRange(headers.Select(x=>x.Trim()).Where(x=>x.Any()));
+
+            var headercount = await headers_el.CountAsync();
+
+            for (var h = 0; h < headercount; ++h)
+            {
+                var header_el = headers_el.Nth(h);
+                var testid = await header_el.GetAttributeAsync("data-test-id");
+                if (testid != null)
+                {
+                    table.Columns.Add(testid);
+                }
+                else
+                {
+                    var text = await header_el.TextContentAsync();
+                    if (!string.IsNullOrEmpty(text))
+                        table.Columns.Add(text.Trim());
+                }
+            }
 
             var rows_el = table_el.Locator("tbody tr");
 
@@ -53,7 +69,23 @@ namespace YoFi.Tests.Functional.Helpers
                     var col = col_enum.Current;
                     if (col != null)
                     {
-                        row[col] = (await cell_el.TextContentAsync()).Trim();
+                        string testvalue = null;
+                        try
+                        {
+                            testvalue = await cell_el.GetAttributeAsync("data-test-value");
+                        }
+                        catch
+                        {
+
+                        }
+                        if (!string.IsNullOrEmpty(testvalue))
+                        {
+                            row[col] = testvalue;
+                        }
+                        else
+                        {
+                            row[col] = (await cell_el.TextContentAsync()).Trim();
+                        }
                         col_enum.MoveNext();
                     }
                     else
