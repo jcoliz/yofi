@@ -118,16 +118,7 @@ else
     <table class="table table-index" data-test-id="results">
         <thead>
             <tr class="row">
-                @if (Model.ShowHidden)
-                {
-                    <th data-test-id="hide">
-                        Hidden
-                    </th>
-                }
-                @if (Model.ShowSelected)
-                {
-                    <th data-test-id="select">✓</th>
-                }
+
                 <th class="col-3 col-lg-2">
                     <span>Date</span><span class="d-none d-sm-inline d-lg-none">/Amount</span>
                 </th>
@@ -165,15 +156,19 @@ else
                     @if (hascheckboxes)
                     {
                         <td class="col-12">
-                            @if (Model.ShowHidden)
-                            {
-                                var checkedornot = (item.Hidden == true) ? "checked" : string.Empty;
-                                <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID">
-                            }
                             @if (Model.ShowSelected)
                             {
                                 var checkedornot = (item.Selected == true) ? "checked" : string.Empty;
-                                <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select">
+                                <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select"><span> Selected</span>
+                            }
+                            @if (Model.ShowHidden)
+                            {
+                                var checkedornot = (item.Hidden == true) ? "checked" : string.Empty;
+                                <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID"><span> Hidden</span>
+                                if (!string.IsNullOrEmpty(item.BankReference))
+                                {
+                                    <span> Ref:@Html.DisplayFor(modelItem => item.BankReference)</span>                                   
+                                }
                             }
                         </td>
                     }
@@ -205,12 +200,6 @@ else
                     else
                     {
                         <td class="d-none" data-test-id="memo"/>
-                    }
-                    @if (Model.ShowHidden)
-                    {
-                        <td class="col-12">
-                            @Html.DisplayFor(modelItem => item.BankReference)
-                        </td>
                     }
                     <td class="col-2 col-lg-1" style="text-align:right">
                         <div class="dropdown">
