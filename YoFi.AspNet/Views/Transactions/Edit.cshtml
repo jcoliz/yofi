@@ -111,7 +111,7 @@
             var line = 0;
 
             var splitorder = (Model.Amount < 0) ? Model.Splits.OrderBy(x => x.Amount) : Model.Splits.OrderByDescending(x => x.Amount);
-            <table class="table table-striped" data-test-id="splits">
+            <table class="table table-index" data-test-id="splits">
                 <thead>
                     <tr class="row">
                         <th class="col-9 col-lg-5">
@@ -131,7 +131,7 @@
                     {
                         ++line;
 
-                    <tr class="row border-bottom" data-test-id="line-@line">
+                    <tr class="row" data-test-id="line-@line">
                         <td class="col-9 col-lg-5">
                             @(split.Category ?? String.Empty)
                         </td>
