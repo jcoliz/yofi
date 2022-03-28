@@ -281,11 +281,31 @@ table div.dropdown-menu i {
     width: 20px;
 }
 
-.table-striped td {
+.table-index td {
     border-bottom-width: 0;
     padding: 0.2rem 0.5rem;
 }
 
-.table-striped tr {
-    padding: 0rem 0.5rem;
+.table-index th {
+    padding: 0.2rem 0.5rem;
+}
+
+.table-index tr {
+    padding: 0rem 0rem;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.table-index tbody tr:nth-of-type(2n+1) {
+    background-color: #00000020;
+}
+
+.table-index tbody tr {
+    border-bottom-color: #00000040;
+    border-bottom-width: 2px;
+}
+
+.table-index tbody {
+    border-bottom-color: black;
+    border-bottom-width: 2px;
 }
