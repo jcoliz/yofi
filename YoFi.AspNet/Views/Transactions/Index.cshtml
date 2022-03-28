@@ -120,6 +120,10 @@ else
             <tr class="row">
 
                 <th class="col-3 col-lg-2">
+                    @if (Model.ShowSelected)
+                    {
+                        <span>✓ </span>
+                    }
                     <span>Date</span><span class="d-none d-sm-inline d-lg-none">/Amount</span>
                 </th>
                 <th class="col-9 col-lg-4">
@@ -153,26 +157,12 @@ else
                 var hasreceipt = !string.IsNullOrEmpty(item.ReceiptUrl);
 
                 <tr class="txdrop row" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@line">
-                    @if (hascheckboxes)
-                    {
-                        <td class="col-12">
-                            @if (Model.ShowSelected)
-                            {
-                                var checkedornot = (item.Selected == true) ? "checked" : string.Empty;
-                                <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select"><span> Selected</span>
-                            }
-                            @if (Model.ShowHidden)
-                            {
-                                var checkedornot = (item.Hidden == true) ? "checked" : string.Empty;
-                                <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID"><span> Hidden</span>
-                                if (!string.IsNullOrEmpty(item.BankReference))
-                                {
-                                    <span> Ref:@Html.DisplayFor(modelItem => item.BankReference)</span>                                   
-                                }
-                            }
-                        </td>
-                    }
                     <td class="col-3 col-lg-2">
+                        @if (Model.ShowSelected)
+                        {
+                            var checkedornot = (item.Selected == true) ? "checked" : string.Empty;
+                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select">
+                        }
                         @item.Timestamp.ToString("MM/dd/yy")
                     </td>
                     <td class="col-9 col-lg-4 display-payee">
@@ -250,6 +240,17 @@ else
                             </div>
                         </div>
                     </td>
+                    @if (Model.ShowHidden)
+                    {
+                        var checkedornot = (item.Hidden == true) ? "checked" : string.Empty;
+                        <td class="col-12">
+                            <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Hide/@item.ID"><span> Hidden</span>
+                            @if (!string.IsNullOrEmpty(item.BankReference))
+                            {
+                                <span> Ref:@Html.DisplayFor(modelItem => item.BankReference)</span>                                   
+                            }
+                        </td>
+                    }
 
                 </tr>
             }
