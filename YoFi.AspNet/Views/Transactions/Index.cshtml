@@ -177,7 +177,7 @@ else
                         }
                         else
                         {
-                            @Html.DisplayFor(modelItem => item.Category)
+                             @item.Category?.Replace(":",": ")
                         }
                     </td>
                     @if (hasmemo)
