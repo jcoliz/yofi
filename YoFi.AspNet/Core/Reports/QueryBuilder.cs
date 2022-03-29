@@ -351,7 +351,7 @@ namespace YoFi.Core.Reports
                 result = result
                     .Where(x => !excluded.Contains(x.Category))
                     .AsEnumerable()
-                    .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                    .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category?.StartsWith(y) ?? false))
                     .AsQueryable();
             }
 

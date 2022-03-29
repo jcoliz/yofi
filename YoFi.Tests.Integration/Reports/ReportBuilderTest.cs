@@ -54,6 +54,7 @@ namespace YoFi.Tests.Integration.Reports
             base.Cleanup();
 
             // Remove ephemeral items
+            context.Transactions.RemoveRange(context.Transactions.Where(x => x.Memo == "__TEST__"));
             context.BudgetTxs.RemoveRange(context.BudgetTxs.Where(x=>x.Memo == "__TEST__"));
             context.SaveChanges();
         }
@@ -370,6 +371,48 @@ namespace YoFi.Tests.Integration.Reports
             // And: The "There is no data" message is present
             var nodata = document.QuerySelector("[data-test-id=no-data]");
             Assert.IsNotNull(nodata);
+        }
+
+        [TestMethod]
+        public async Task Bug1405()
+        {
+            // Bug 1405: Blank split causes reports to fail
+
+            /*
+                On Transactions Index
+                Edit a transaction (with no splits to start)
+                Add a split, accept it. This creates a split with the full amouint and category of parent
+                Add another split, accept it. This creates the "blank split" referred to in this bug
+                Go to Reports page, then click ">>" under expenses.
+                (May need to ensure months is set to include the transaction edited above e.g. https://localhost:44364/Report/expenses-detail?month=12)
+                Result: Error dialog
+                Expected: Reports work as normal
+            */
+
+            // Given: A transaction with an empty split in the database
+            var tx = new Transaction()
+            {
+                Timestamp = new DateTime(2020, 1, 1),
+                Payee = "Payee",
+                Amount = 100m,
+                Memo = "__TEST__", // So it gets cleaned up
+                Splits = new Split[]
+                {
+                    new Split()
+                    {
+                        Amount = 100m,
+                        Category = "Income"
+                    },
+                    new Split() // <-- This is the problem
+                }
+            };
+            context.Transactions.Add(tx);
+            context.SaveChanges();
+
+            // When: Building the 'expenses' report for the year including that year
+            await WhenGettingReport(new ReportParameters() { id = "expenses", year = 2020 });
+
+            // Then: The report builds without error
         }
 
 #if false
