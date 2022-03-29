@@ -276,6 +276,13 @@ body.iscarousel {
     content: none;
 }
 
+.dropdown-noarrow::before {
+    content: none;
+}
+
+.dropstart .dropdown-noarrow::before {
+    content: none;
+}
 table div.dropdown-menu i {
     color: var(--color-2);
     width: 20px;
