@@ -11,6 +11,8 @@ namespace YoFi.Tests.Functional
         public const int TotalItemCount = 40;
         const string MainPageName = "Payees";
 
+        #region Init/Cleanup
+
         [TestInitialize]
         public new async Task SetUp()
         {
@@ -50,6 +52,10 @@ namespace YoFi.Tests.Functional
                 Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
             }
         }
+
+        #endregion
+
+        #region Index Tests
 
         /// <summary>
         /// [User Can] View the current list of active payee matching rules
@@ -134,6 +140,10 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
+        #endregion
+
+        #region Upload/Download Tests
+
         /// <summary>
         /// [User can] Export all payees to a spreadsheet for later viewing/editing in Excel
         /// </summary>
@@ -194,6 +204,10 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(3, await Page.GetTotalItemsAsync());
         }
 
+        #endregion
+
+        #region Bulk Operations Tests
+
         /// <summary>
         /// [User can] Delete multiple payees in a single operation
         /// </summary>
@@ -251,6 +265,10 @@ namespace YoFi.Tests.Functional
             // And: Total number of items is back to the standard amount
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
+
+        #endregion
+
+        #region CRUD
 
         /// <summary>
         /// [User can] Add a new payee matching rule based on a selected transaction from the list of transactions
@@ -395,5 +413,7 @@ namespace YoFi.Tests.Functional
             // Then: It's found
             Assert.AreEqual(1, await Page.GetTotalItemsAsync());
         }
+
+        #endregion
     }
 }

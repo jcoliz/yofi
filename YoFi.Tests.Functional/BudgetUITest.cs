@@ -14,6 +14,8 @@ namespace YoFi.Tests.Functional
         public const int TotalItemCount = 46;
         const string MainPageName = "Budget Line Items";
 
+        #region Init/Cleanup
+
         [TestInitialize]
         public new async Task SetUp()
         {
@@ -52,6 +54,14 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
+        #endregion
+
+        #region Index Tests
+
+        /// <summary>
+        /// [User Can] view their list of budget items
+        /// [Scenario] First page
+        /// </summary>
         [TestMethod]
         public async Task ClickBudget()
         {
@@ -64,6 +74,10 @@ namespace YoFi.Tests.Functional
             await Page.ThenContainsItemsAsync(from: 1, to: 25);
         }
 
+        /// <summary>
+        /// [User Can] view their list of budget items
+        /// [Scenario] Second page
+        /// </summary>
         [TestMethod]
         public async Task Page2()
         {
@@ -79,6 +93,10 @@ namespace YoFi.Tests.Functional
             await Page.ThenContainsItemsAsync(from: 26, to: 46);
         }
 
+        /// <summary>
+        /// [User Can] Search for budget items containing a chosen term
+        /// [Scenario] Enter search term
+        /// </summary>
         [TestMethod]
         public async Task IndexQ25()
         {
@@ -91,6 +109,10 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(3, await Page.GetTotalItemsAsync());
         }
 
+        /// <summary>
+        /// [User Can] Search for budget items containing a chosen term
+        /// [Scenario] Clear search term
+        /// </summary>
         [TestMethod]
         public async Task IndexClear()
         {
@@ -104,6 +126,13 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
+        #endregion
+
+        #region Download Tests
+
+        /// <summary>
+        /// [User Can] Download their budget items to a spreadsheet
+        /// </summary>
         [TestMethod]
         public async Task DownloadAll()
         {
@@ -121,6 +150,14 @@ namespace YoFi.Tests.Functional
             await download1.ThenIsSpreadsheetContainingAsync<IdOnly>(name: "BudgetTx", count: TotalItemCount);
         }
 
+        #endregion
+
+        #region  CRUD Tests
+
+        /// <summary>
+        /// [User Can] Manually create a new budget item
+        /// [Scenario] Create item
+        /// </summary>
         [TestMethod]
         public async Task Create()
         {
@@ -150,6 +187,10 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext);
         }
 
+        /// <summary>
+        /// [User Can] View the details of a budget item
+        /// (Note this would normally entail a "details" screen, but budgettx are pretty simple so we don't need that)
+        /// </summary>
         [TestMethod]
         public async Task Read()
         {
@@ -164,6 +205,9 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(1, await Page.GetTotalItemsAsync());
         }
 
+        /// <summary>
+        /// [User Can] Update the editable values of a budget item
+        /// </summary>
         [TestMethod]
         public async Task Update()
         {
@@ -198,6 +242,9 @@ namespace YoFi.Tests.Functional
             // TODO: Also check that the amount is correct
         }
 
+        /// <summary>
+        /// [User Can] Delete a budget item
+        /// </summary>
         [TestMethod]
         public async Task Delete()
         {
@@ -225,9 +272,54 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
+        #endregion
+
+        #region Upload Tests
+
         /// <summary>
-        /// User Story 911: [User Can] Designate additional 'memo' information about a single budget line item
-        /// -- User Can create an item with a memo
+        /// [User can] Upload new budget line items from a spreadsheet which was created in Excel
+        /// </summary>
+        [TestMethod]
+        public async Task Upload()
+        {
+            //
+            // Step 1: Upload payees
+            //
+
+            // Given: We are logged in and on the payees page
+
+            // Then: We are on the main page for this section
+            await Page.ClickAsync("[aria-label=\"Upload\"]");
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            await Page.ClickAsync("text=Upload");
+
+            // Then: We land at the uploaded OK page
+            await Page.ThenIsOnPageAsync("Uploaded Budget");
+
+            //
+            // Step 2: Search for the new payees
+            //
+
+            // When: Navigating to edit budget page
+            await WhenNavigatingToPage("Budget/Edit Budget");
+
+            // Then: {numadded} more items found than before, because we just added them
+            var numadded = 4;
+            Assert.AreEqual(TotalItemCount + numadded, await Page.GetTotalItemsAsync());
+
+            // When: Searching for what we just imported
+            await Page.SearchFor(testmarker);
+
+            // Then: {numadded} items are found, because we know this about our imported data
+            Assert.AreEqual(numadded, await Page.GetTotalItemsAsync());
+        }
+
+        #endregion
+
+        #region User Story 911: [User Can] Designate additional 'memo' information about a single budget line item
+
+        /// <summary>
+        /// [Scenario] User Can create an item with a memo
         /// </summary>
         [TestMethod]
         public async Task CreateWithMemo()
@@ -263,8 +355,7 @@ namespace YoFi.Tests.Functional
         }
 
         /// <summary>
-        /// User Story 911: [User Can] Designate additional 'memo' information about a single budget line item
-        /// -- User Can edit the memo and change it
+        /// [Scenario] User Can edit the memo and change it
         /// </summary>
         [TestMethod]
         public async Task EditMemo()
@@ -300,8 +391,7 @@ namespace YoFi.Tests.Functional
         }
 
         /// <summary>
-        /// User Story 911: [User Can] Designate additional 'memo' information about a single budget line item
-        /// -- User Can see the memo when deleting it
+        /// [Scenario] User Can see the memo when deleting it
         /// </summary>
         [TestMethod]
         public async Task DeleteWithMemo()
@@ -323,9 +413,10 @@ namespace YoFi.Tests.Functional
             Assert.IsTrue(actual.Contains("memo"));
         }
 
-        /// <summary>
-        /// User Story 1194: [User Can] Delete multiple budgettx in a single operation
-        /// </summary>
+        #endregion
+
+        #region User Story 1194: [User Can] Delete multiple budgettx in a single operation
+
         [TestMethod]
         public async Task BulkDelete()
         {
@@ -384,9 +475,12 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
 
+        #endregion
+
+        #region User Story 1226: [User Can] Describe their budget with a single line item per category, which may repeat over the year
+
         /// <summary>
-        /// User Story 1226: [User Can] Describe their budget with a single line item per category, which may repeat over the year
-        /// -- User can create a new budget line item with an alternative frequency
+        /// [Scenario] User can create a new budget line item with an alternative frequency
         /// </summary>
         
         [DataRow("1","")]
@@ -425,8 +519,7 @@ namespace YoFi.Tests.Functional
         }
 
         /// <summary>
-        /// User Story 1226: [User Can] Describe their budget with a single line item per category, which may repeat over the year
-        /// -- User can create a edit an existing budget line item to an alternative frequency
+        /// [Scenario] User can create a edit an existing budget line item to an alternative frequency
         /// </summary>
         [DataRow("1", "")]
         [DataRow("4", "Quarterly")]
@@ -462,42 +555,7 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(frequency_text, actual);
         }
 
-        /// <summary>
-        /// [User can] Upload new budget line items from a spreadsheet which was created in Excel
-        /// </summary>
-        [TestMethod]
-        public async Task Upload()
-        {
-            //
-            // Step 1: Upload payees
-            //
+        #endregion
 
-            // Given: We are logged in and on the payees page
-
-            // Then: We are on the main page for this section
-            await Page.ClickAsync("[aria-label=\"Upload\"]");
-            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
-            await Page.ClickAsync("text=Upload");
-
-            // Then: We land at the uploaded OK page
-            await Page.ThenIsOnPageAsync("Uploaded Budget");
-
-            //
-            // Step 2: Search for the new payees
-            //
-
-            // When: Navigating to edit budget page
-            await WhenNavigatingToPage("Budget/Edit Budget");
-
-            // Then: {numadded} more items found than before, because we just added them
-            var numadded = 4;
-            Assert.AreEqual(TotalItemCount + numadded, await Page.GetTotalItemsAsync());
-
-            // When: Searching for what we just imported
-            await Page.SearchFor(testmarker);
-
-            // Then: {numadded} items are found, because we know this about our imported data
-            Assert.AreEqual(numadded, await Page.GetTotalItemsAsync());
-        }
     }
 }
