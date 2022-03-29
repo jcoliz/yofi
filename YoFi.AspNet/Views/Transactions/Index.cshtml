@@ -1,5 +1,5 @@
 ﻿@model YoFi.AspNet.Controllers.TransactionsIndexPresenter
-
+@inject Common.DotNet.IClock clock;
 @{
     ViewData["Title"] = "Transactions";
 
@@ -114,26 +114,30 @@
 else
 {
     var line = 0;
+    var selectedcols = (Model.ShowSelected) ? 1 : 0;
 
     <table class="table table-index" data-test-id="results">
         <thead>
             <tr class="row">
 
-                <th class="col-3 col-lg-2" data-test-id="Date">
-                    @if (Model.ShowSelected)
-                    {
-                        <span data-test-id="select">✓ </span>
-                    }
+                @if (Model.ShowSelected)
+                {
+                    <th class="col-1 col-lg-1" data-test-id="select">✓</th>
+                }
+
+                <th class="col-@(3-selectedcols) col-lg-2" data-test-id="Date" style="text-align:right">
                     <span>Date</span><span class="d-none d-sm-inline d-lg-none">/Amount</span>
                 </th>
-                <th class="col-9 col-lg-4" data-test-id="Payee">
-                    <span>@nameof(Transaction.Payee)</span><span class="d-lg-none">/Category</span>
+                <th class="col-9 col-lg-@(4-selectedcols)" data-test-id="Payee">
+                    <span>@nameof(Transaction.Payee)</span><span class="d-lg-none">/Category</span><span>/Memo</span>
                 </th>
                 <th class="d-none d-lg-block col-lg-2" style="text-align:right">
                     @nameof(Transaction.Amount)
                 </th>
                 <th class="d-none d-lg-block col-lg-3">
                     @nameof(Transaction.Category)
+                </th>
+                <th class="d-none" data-test-id="Spacer">
                 </th>
                 <th class="d-none" data-test-id="Memo">
                 </th>
@@ -156,15 +160,26 @@ else
                 var hasreceipt = !string.IsNullOrEmpty(item.ReceiptUrl);
 
                 <tr class="txdrop row" data-id="@item.ID" ondragover="dragOverHandler(event);" data-test-id="line-@line">
-                    <td class="col-3 col-lg-2">
-                        @if (Model.ShowSelected)
-                        {
-                            var checkedornot = (item.Selected == true) ? "checked" : string.Empty;
+
+                    @if (Model.ShowSelected)
+                    {
+                        var checkedornot = (item.Selected == true) ? "checked" : string.Empty;
+                        <td class="col-1 col-lg-1">
                             <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/tx/Select/@item.ID" data-test-id="check-select">
+                        </td>
+                    }
+
+                    <td class="col-@(3-selectedcols) col-lg-2" style="text-align:right">
+                        @if (item.Timestamp.Year == clock.Now.Year)
+                        {
+                            @item.Timestamp.ToString("M/dd")                            
                         }
-                        @item.Timestamp.ToString("MM/dd/yy")
+                        else
+                        {
+                            @item.Timestamp.ToString("M/dd/yy")
+                        }
                     </td>
-                    <td class="col-9 col-lg-4 display-payee">
+                    <td class="col-9 col-lg-@(4-selectedcols) display-payee">
                         @Html.DisplayFor(modelItem => item.Payee)
                     </td>
                     <td class="col-3 col-lg-2" style="text-align:right">
@@ -182,12 +197,14 @@ else
                     </td>
                     @if (hasmemo)
                     {
-                        <td class="col-10 col-lg-11 display-memo" data-test-id="memo">
+                        <td class="col-3 col-lg-@(2+selectedcols)"/>
+                        <td class="col-7 col-lg-@(9-selectedcols) display-memo" data-test-id="memo">
                             @Html.DisplayFor(modelItem => item.Memo)
                         </td>
                     }
                     else
                     {
+                        <td class="d-none"/>
                         <td class="d-none" data-test-id="memo"/>
                     }
                     <td class="col-2 col-lg-1" style="text-align:right" data-test-value="@hasreceipt">
