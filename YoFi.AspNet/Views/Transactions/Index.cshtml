@@ -33,46 +33,50 @@
 <input type="hidden" id="xsrf"
        name="xsrf" value="@GetAntiXsrfRequestToken()">
 
+@*
+    PAGE NAVBAR
+*@
+
 <nav class="navbar navbar-light navbar-page mb-2">
-    <div class="container">
-        <span class="navbar-brand">Transactions</span>
+    <div class="container-fluid">
+        <span class="navbar-brand h1 mt-1">@ViewData["Title"]</span>
         <form class="d-flex my-1" asp-action="Index" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.Parameters.Order" method="post">
             <input class="form-control me-2 category-autocomplete input-lg" type="search" data-test-id="q" placeholder="Search" aria-label="Search" name="q" value="@Model.Parameters.Query" autocomplete="off">
             <button type="submit" class="btn btn-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Search" data-test-id="btn-search">
                 <i class="fas fa-search"></i>
             </button>
-            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Help">
+            <div data-bs-toggle="tooltip" data-bs-placement="bottom" title="Help">
                 <a href="#" data-bs-toggle="modal" data-bs-target="#searchHelpModal" class="btn btn-outline-secondary me-1" data-test-id="btn-help"><i class="fas fa-question"></i></a>
-            </span>
-            <a asp-action="Index" asp-route-o="@Model.Parameters.Order" asp-route-v="@Model.Parameters.View" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
-        </form>
-        <div class="nav-item dropstart ms-auto">
-            <button class="btn btn-secondary dropdown-toggle dropdown-noarrow my-1" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
-                <a asp-action="Create" class="btn">Create New</a>
-                <a asp-action="Index" class="btn"
-                   asp-route-o="@Model.Parameters.Order"
-                   asp-route-p="@Model.Parameters.Page"
-                   asp-route-q="@Model.Parameters.Query"
-                   asp-route-v="@Model.ToggleHidden">
-                    @(Model.ShowHidden?"Hide Hidden":"Show Hidden")
-                </a>
-                <a asp-action="Index" class="btn"
-                   asp-route-o="@Model.Parameters.Order"
-                   asp-route-p="@Model.Parameters.Page"
-                   asp-route-q="@Model.Parameters.Query"
-                   asp-route-v="@Model.ToggleSelected">
-                    @(Model.ShowSelected?"Cancel Bulk Edit":"Bulk Edit")
-                </a>
-                <a asp-controller="Receipts" asp-action="Index" class="btn">
-                    Match Receipts
-                </a>
-                <a href="#" data-bs-toggle="modal" data-bs-target="#exportHowModal" class="btn">Export</a>
-                <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
             </div>
-        </div>
+            <a asp-action="Index" asp-route-o="@Model.Parameters.Order" asp-route-v="@Model.Parameters.View" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
+            <div class="nav-item dropstart" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Actions">
+                <button class="btn btn-secondary dropdown-toggle dropdown-noarrow" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
+                    <a asp-action="Create" class="btn">Create New</a>
+                    <a asp-action="Index" class="btn"
+                       asp-route-o="@Model.Parameters.Order"
+                       asp-route-p="@Model.Parameters.Page"
+                       asp-route-q="@Model.Parameters.Query"
+                       asp-route-v="@Model.ToggleHidden">
+                        @(Model.ShowHidden?"Hide Hidden":"Show Hidden")
+                    </a>
+                    <a asp-action="Index" class="btn"
+                       asp-route-o="@Model.Parameters.Order"
+                       asp-route-p="@Model.Parameters.Page"
+                       asp-route-q="@Model.Parameters.Query"
+                       asp-route-v="@Model.ToggleSelected">
+                        @(Model.ShowSelected?"Cancel Bulk Edit":"Bulk Edit")
+                    </a>
+                    <a asp-controller="Receipts" asp-action="Index" class="btn">
+                        Match Receipts
+                    </a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#exportHowModal" class="btn">Export</a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
+                </div>
+            </div>
+        </form>
     </div>
 </nav>
 

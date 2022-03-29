@@ -20,15 +20,17 @@
     PAGE NAVBAR
 *@
 
-<nav class="navbar navbar-light navbar-page mb-3">
-    <div class="container">
-        <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
-        <div class="nav-item dropdown">
-            <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Actions
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
-                <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
+<nav class="navbar navbar-light navbar-page mb-2">
+    <div class="container-fluid">
+        <span class="navbar-brand mt-1 h1">@ViewData["Title"]</span>
+        <div class="d-flex my-1">
+            <div class="nav-item dropstart" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Actions">
+                <button class="btn btn-secondary dropdown-toggle dropdown-noarrow" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
+                </div>
             </div>
         </div>
     </div>

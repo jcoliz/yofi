@@ -5,6 +5,10 @@
     int selectedcols = showselected ? 1 : 0;
 }
 
+@*
+    ANTI-FORGERY
+*@
+
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 @functions{
     public string GetAntiXsrfRequestToken()
@@ -16,33 +20,41 @@
 <input type="hidden" id="xsrf"
        name="xsrf" value="@GetAntiXsrfRequestToken()">
 
-<nav class="navbar navbar-light navbar-page mb-3">
+@*
+    PAGE NAVBAR
+*@
+
+<nav class="navbar navbar-light navbar-page mb-2">
     <div class="container">
-        <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
-        <form class="d-flex" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.Parameters.Order" method="post">
+        <span class="navbar-brand mt-1 h1">@ViewData["Title"]</span>
+        <form class="d-flex my-1" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.Parameters.Order" method="post">
             <input class="form-control me-2 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" data-test-id="q" value="@Model.Parameters.Query" autocomplete="off">
             <button type="submit" class="btn btn-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Search" data-test-id="btn-search">
                 <i class="fas fa-search"></i>
             </button>
             <a asp-route-o="@Model.Parameters.Order" asp-route-v="@Model.Parameters.View" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
-        </form>
-        <div class="nav-item dropdown">
-            <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Actions
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
-                <a asp-action="Create" class="btn">Create New</a>
-                <a asp-action="Index" class="btn"
-                   asp-route-q="@Model.Parameters.Query"
-                   asp-route-v="@ViewData["ToggleSelected"]">
-                    @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
-                </a>
-                <a asp-action="Download" class="btn">Export</a>
-                <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
+            <div class="nav-item dropstart" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Actions">
+                <button class="btn btn-secondary dropdown-toggle dropdown-noarrow" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
+                    <a asp-action="Create" class="btn">Create New</a>
+                    <a asp-action="Index" class="btn"
+                       asp-route-q="@Model.Parameters.Query"
+                       asp-route-v="@ViewData["ToggleSelected"]">
+                        @((bool)(ViewData["ShowSelected"])?"Cancel Bulk Edit":"Bulk Edit")
+                    </a>
+                    <a asp-action="Download" class="btn">Export</a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#helpModal" class="btn">Help Topic</a>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </nav>
+
+@*
+    BULK OPERATIONS TASKBAR
+*@
 
 @if (showselected)
 {
@@ -51,6 +63,10 @@
         <a href="#" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" class="btn btn-outline-secondary mt-1 mb-1" data-test-id="btn-bulk-delete">Delete</a>
     </div>
 }
+
+@*
+    WARNING: EMPTY!
+*@
 
 @if (0 == Model.PageInfo.TotalItems)
 {
@@ -71,6 +87,11 @@
         <h4>No items found</h4>
     }
 }
+
+@*
+    RESULTS TABLE
+*@
+
 else
 {
     var line = 0;
@@ -159,12 +180,20 @@ else
     @await Html.PartialAsync("/Views/Shared/_PaginationPartial.cshtml", Model)
 }
 
+@*
+    UPLOAD FILES CONTROL
+*@
+
 <form method="post" enctype="multipart/form-data" asp-controller="BudgetTxs" asp-action="Upload">
     <div class="input-group mb-3 mt-3">
         <button class="btn btn-secondary" type="submit" id="inputGroupFileAddon03" disabled>Upload</button>
         <input type="file" class="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" name="files" multiple>
     </div>
 </form>
+
+@*
+    DELETE CONFIRM DIALOG
+*@
 
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -182,5 +211,9 @@ else
         </div>
     </div>
 </div>
+
+@*
+    HELP DIALOG
+*@
 
 @await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "budget")

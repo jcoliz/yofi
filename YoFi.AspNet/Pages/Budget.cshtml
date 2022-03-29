@@ -10,35 +10,36 @@
     PAGE NAVBAR
 *@
 
-<nav class="navbar navbar-light navbar-page mb-3">
-    <div class="container">
-        <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
-            <div class="nav-item dropdown ms-auto">
-                <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonYear" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Year
-                </a>
+<nav class="navbar navbar-light navbar-page mb-2">
+    <div class="container-fluid">
+        <span class="navbar-brand mt-1 h1">@ViewData["Title"]</span>
+        <div class="d-flex my-1">
+            <div class="nav-item dropdown ms-auto me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Year">
+                <button class="btn btn-outline-secondary dropdown-toggle dropdown-noarrow" id="dropdownMenuButtonYear" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-calendar-alt"></i>
+                </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonYear">
                     @{
                         int currentyear = _clock.Now.Year;
                         for (int y = 2017; y <= currentyear; ++y)
                         {
                             <a asp-route-y="@y"
-                               class="dropdown-item">@y</a>
+                                class="dropdown-item">@y</a>
                         }
                     }
                 </div>
             </div>
 
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Actions
-                </a>
+            <div class="nav-item dropstart" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Actions">
+                <button class="btn btn-secondary dropdown-toggle dropdown-noarrow" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
                     <a asp-controller="BudgetTxs" asp-action="Index" class="btn">Edit Budget</a>
                 </div>
             </div>
-
         </div>
+    </div>
 </nav>
 
 @*
