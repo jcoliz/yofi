@@ -14,6 +14,8 @@ namespace YoFi.Tests.Functional
         public const int TotalItemCount = 889;
         public const string MainPageName = "Transactions";
 
+        #region Init/Cleanup
+
         [TestInitialize]
         public new async Task SetUp()
         {
@@ -56,6 +58,10 @@ namespace YoFi.Tests.Functional
                 Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
             }
         }
+
+        #endregion
+
+        #region Index Tests
 
         [TestMethod]
         public async Task ClickTransactions()
@@ -102,6 +108,10 @@ namespace YoFi.Tests.Functional
             // Then: Back to all the items
             Assert.AreEqual(TotalItemCount, await Page.GetTotalItemsAsync());
         }
+
+        #endregion
+
+        #region Upload/Download Tests
 
         [TestMethod]
         public async Task DownloadAll()
@@ -152,6 +162,8 @@ namespace YoFi.Tests.Functional
             public string Payee { get; set; }
         }
 
+        #endregion
+
         /* Not sure how to assert this
         [TestMethod]
         public async Task HelpPopup()
@@ -182,6 +194,8 @@ namespace YoFi.Tests.Functional
             Assert.IsFalse(await title.IsEnabledAsync());
         }
         */
+
+        #region CRUD Tests
 
         [TestMethod]
         public async Task Create()
@@ -341,6 +355,10 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(TotalItemCount, await NextPage.GetTotalItemsAsync());
         }
 
+        #endregion
+
+        #region Receipt Tests
+
         [TestMethod]
         public async Task CreateReceipt()
         {
@@ -466,6 +484,10 @@ namespace YoFi.Tests.Functional
             await NextPage.SaveScreenshotToAsync(TestContext,"Passed");
         }
 
+        #endregion
+
+        #region Splits Tests
+
         [TestMethod]
         public async Task CreateSplit()
         {
@@ -588,8 +610,12 @@ namespace YoFi.Tests.Functional
             Assert.IsTrue(fix_visible);
         }
 
+        #endregion
+
+        #region User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided upon transaction import
+
         /// <summary>
-        /// User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided upon transaction import
+        /// [Scenario] Import
         /// </summary>
         [TestMethod]
         public async Task LoanPayeeMatchImport()
@@ -647,8 +673,7 @@ namespace YoFi.Tests.Functional
         }
 
         /// <summary>
-        /// User Story 802: [User Can] Specify loan information in payee matching rules, then see that principal and interest are automatically divided 
-        /// (When applying payee from transations index)
+        /// [Scenario] When applying payee from transations index
         /// </summary>
         [TestMethod]
         public async Task LoanPayeeMatchApplyPayee()
@@ -704,6 +729,8 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual(interest, decimal.Parse(line2.Trim()));
             Assert.AreEqual(principal, decimal.Parse(line1.Trim()));
         }
+
+        #endregion
 
         /// <summary>
         /// [User Can] Choose from a prompt of recently-used transactions when typing just a few letters in any category input
