@@ -33,7 +33,7 @@
 <input type="hidden" id="xsrf"
        name="xsrf" value="@GetAntiXsrfRequestToken()">
 
-<nav class="navbar navbar-light navbar-page mb-3">
+<nav class="navbar navbar-light navbar-page mb-2">
     <div class="container">
         <span class="navbar-brand">Transactions</span>
         <form class="d-flex" asp-action="Index" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.Parameters.Order" method="post">
@@ -79,14 +79,23 @@
 
 @if (Model.ShowSelected)
 {
-    <div class="mt-2">
+    <div>
         <form asp-action="BulkEdit" asp-route-o="@Model.Parameters.Order" method="post">
             <div class="form-actions">
-                <p>
-                    Set Category To: <input type="text" name="Category" class="col-md-4 category-autocomplete align-middle" autocomplete="off" />
-                    <input type="submit" value="OK" class="btn btn-primary" />
-                    <a asp-action="Index" asp-route-o="@Model.Parameters.Order" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.ToggleSelected" class="btn btn-outline-secondary">Cancel</a>
-                </p>
+                <div class="row">
+                        <div class="col-5 col-md-3 col-lg-2">
+                            <p class="fs-6 mt-2">Set Category To:</p>
+                        </div>
+                        <div class="col-7 col-md-6 col-lg-8">
+                            <input type="text" name="Category" class="category-autocomplete w-100 fs-6 mt-2 mb-1" autocomplete="off" />
+                        </div>
+                        <div class="col-12 col-md-3 col-lg-2">
+                            <div class="d-flex w-100">
+                                <input type="submit" value="OK" class="btn btn-primary mt-1 mb-1 ms-auto" />
+                                <a asp-action="Index" asp-route-o="@Model.Parameters.Order" asp-route-q="@Model.Parameters.Query" asp-route-v="@Model.ToggleSelected" class="btn btn-outline-secondary mt-1 mb-1 ms-1">Cancel</a>
+                            </div>
+                        </div>
+                </div>
             </div>
         </form>
     </div>
@@ -96,7 +105,7 @@
 {
     if (string.IsNullOrEmpty(Model.Parameters.Query))
     {
-        <h4 class="mb-3">Your database is empty</h4>
+        <h4 class="mb-3 mt-1">Your database is empty</h4>
 
         <p>Please visit the Import page to add your data.</p>
 
@@ -108,7 +117,7 @@
     }
     else
     {
-        <h4>No items found</h4>
+        <h4 class="mt-1">No items found</h4>
     }
 }
 else
@@ -116,7 +125,7 @@ else
     var line = 0;
     var selectedcols = (Model.ShowSelected) ? 1 : 0;
 
-    <table class="table table-index" data-test-id="results">
+    <table class="table table-index mt-1" data-test-id="results">
         <thead>
             <tr class="row">
 
@@ -126,7 +135,7 @@ else
                 }
 
                 <th class="col-@(3-selectedcols) col-lg-2" data-test-id="Date" style="text-align:right">
-                    <span>Date</span><span class="d-none d-sm-inline d-lg-none">/Amount</span>
+                    <span>Date</span><span class="d-none d-@(Model.ShowSelected?"md":"sm")-inline d-lg-none">/Amount</span>
                 </th>
                 <th class="col-9 col-lg-@(4-selectedcols)" data-test-id="Payee">
                     <span>@nameof(Transaction.Payee)</span><span class="d-lg-none">/Category</span><span>/Memo</span>
