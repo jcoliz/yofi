@@ -591,7 +591,7 @@ namespace YoFi.Tests.Functional
             // And: Transaction matches
             Assert.IsTrue(table.Rows.All(x => x["Memo"] == testmarker));
             Assert.AreEqual(payee, table.Rows[0]["Payee"]);
-            Assert.AreEqual("12/21/22", table.Rows[0]["Date"]);
+            Assert.AreEqual("12/21", table.Rows[0]["Date"]);
             Assert.AreEqual(amount, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
 
             // And: It has a receipt

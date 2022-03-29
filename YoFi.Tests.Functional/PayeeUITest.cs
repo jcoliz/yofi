@@ -283,8 +283,9 @@ namespace YoFi.Tests.Functional
             // Given: We are logged in and on the transactions page
             await WhenNavigatingToPage("Transactions");
 
-            // When: Clicking 'Add Payee' on the first line
-            await Page.Locator($"[aria-label=\"Add Payee\"]").First.ClickAsync();
+            // When: Clicking 'Add Payee' on context menu of the the first line
+            await Page.ClickAsync("#actions-1");
+            await Page.Locator($"[data-bs-target=\"#addPayeeModal\"]").First.ClickAsync();
 
             // And: Adding a new Payee from the ensuing dialog
             var name = NextName;
