@@ -28,7 +28,7 @@
     <div class="container">
         <span class="navbar-brand mt-1 h1">@ViewData["Title"]</span>
         <form class="d-flex my-1" asp-route-v="@Model.Parameters.View" asp-route-o="@Model.Parameters.Order" method="post">
-            <input class="form-control me-2 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" data-test-id="q" value="@Model.Parameters.Query" autocomplete="off">
+            <input class="form-control me-1 category-autocomplete input-lg" type="search" placeholder="Search" aria-label="Search" name="q" data-test-id="q" value="@Model.Parameters.Query" autocomplete="off">
             <button type="submit" class="btn btn-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Search" data-test-id="btn-search">
                 <i class="fas fa-search"></i>
             </button>
