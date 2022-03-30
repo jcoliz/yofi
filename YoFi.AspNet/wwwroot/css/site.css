@@ -60,6 +60,10 @@ up {
     font-weight: bold;
 }
 
+.report td.report-col-name {
+    word-break: break-word;
+}
+
 .pivot-table td {
     text-align: right;
 }
@@ -305,7 +309,7 @@ table div.dropdown-menu i {
 }
 
 .table-index tbody tr:nth-of-type(2n+1) {
-    background-color: #00000018;
+    background-color: #eeeeee;
 }
 
 .table-index tbody tr {
