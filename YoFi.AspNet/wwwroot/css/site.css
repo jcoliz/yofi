@@ -291,6 +291,7 @@ table div.dropdown-menu i {
 .table-index td {
     border-bottom-width: 0;
     padding: 0.2rem 0.5rem;
+    word-break: break-word;
 }
 
 .table-index th {
