@@ -1,12 +1,21 @@
-﻿@model YoFi.AspNet.Controllers.TransactionsIndexPresenter
+﻿@*
+ *
+ * TRANSACTIONS INDEX
+ *
+*@
+
+@model YoFi.AspNet.Controllers.TransactionsIndexPresenter
 @inject Common.DotNet.IClock clock;
 @{
     ViewData["Title"] = "Transactions";
 
     var prevDisabled = Model.PageInfo.Page == 1 ? "disabled" : "";
     var nextDisabled = Model.PageInfo.Page == Model.PageInfo.TotalPages ? "disabled" : "";
-
 }
+
+@*
+    PAGE-SPECIFIC SCRIPTS
+*@
 
 @section scripts {
     <script type="text/javascript">
@@ -21,6 +30,10 @@
         }
     </script>
 }
+
+@*
+    ANTI-FORGERY
+*@
 
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 @functions{

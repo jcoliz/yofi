@@ -1,4 +1,11 @@
-﻿@model YoFi.Core.Repositories.Wire.IWireQueryResult<YoFi.Core.Models.BudgetTx>
+﻿@*
+ *
+ * BUDGET-TX INDEX
+ *
+*@
+
+@model YoFi.Core.Repositories.Wire.IWireQueryResult<YoFi.Core.Models.BudgetTx>
+@inject Common.DotNet.IClock clock;
 @{
     ViewData["Title"] = "Budget Line Items";
     var showselected = (bool)(ViewData["ShowSelected"]);
@@ -103,13 +110,13 @@ else
                 {
                     <th class="col-@selectedcols">✓</th>
                 }
-                <th class="col-3 col-md-2">
-                    Date
+                <th class="col-3 col-md-2" style="text-align:right">
+                    Date<span class="d-none d-sm-inline d-md-none">/Amount</span>
                 </th>
-                <th class="col-@(6-selectedcols) col-md-@(5-selectedcols)">
-                    Category
+                <th class="col-@(9-selectedcols) col-md-@(5-selectedcols)">
+                    Category<span class="d-md-none">/Frequency</span><span>/Memo</span>
                 </th>
-                <th class="col-3 col-md-3" style="text-align:right">
+                <th class="d-none d-md-block col-md-2" style="text-align:right">
                     Amount
                 </th>
                 <th class="d-none d-md-block col-md-2">
@@ -132,32 +139,60 @@ else
                             <input type="checkbox" class="checkbox-post" @checkedornot data-endpoint="/ajax/budget/select/@item.ID" data-test-id="check-select">
                         </td>
                     }
-                    <td class="col-3 col-md-2">
-                        @Html.DisplayFor(modelItem => item.Timestamp)
+                    <td class="col-3 col-md-2" style="text-align:right">
+                        @if (item.Timestamp.Year == clock.Now.Year)
+                        {
+                            @item.Timestamp.ToString("M/dd")                            
+                        }
+                        else
+                        {
+                            @item.Timestamp.ToString("M/dd/yy")
+                        }
                     </td>
-                    <td class="col-@(6-selectedcols) col-md-@(5-selectedcols)">
+                    <td class="col-@(9-selectedcols) col-md-@(5-selectedcols)">
                         @item.Category.Replace(":",": ")
                     </td>
-                    <td class="col-3 col-md-3" style="text-align:right">
-                        @Html.DisplayFor(modelItem => item.Amount)
+                    <td class="col-@(3+selectedcols) col-md-2" style="text-align:right">
+                        @item.Amount.ToString("C0")
                     </td>
                     @if(showfreq)
                     {
-                        var fcols = 3 + selectedcols;
-                        <td class="col-@fcols col-md-2" data-test-id="freq">
+                        <td class="col-@(7-selectedcols) col-md-@(showmemo?3:2)" data-test-id="freq">
                             @item.FrequencyName
                         </td>
                     }
                     else
                     {
-                        <td class="d-none d-md-block col-md-2" data-test-id="freq"/>
+                        <td class="d-none d-md-block col-md-@(showmemo?3:2)" data-test-id="freq"/>
                     }
-                    @{ var mcols = (showfreq ? 7 - selectedcols : 10); }
-                    <td class="col-@mcols col-md-6" data-test-id="memo">
-                        @Html.DisplayFor(modelItem => item.Memo)
-                    </td>
+                    @if (!string.IsNullOrEmpty(item.Memo))
+                    {
+                        if (showfreq)
+                        {
+                            <td class="col-@(3+selectedcols) col-md-@(2+selectedcols)"/>
+                        }
+                        else
+                        {
+                            <td class="d-none d-md-block col-md-@(2+selectedcols)"/>                            
+                        }
+                        <td class="col-@(7-selectedcols) col-md-@(9-selectedcols)" data-test-id="memo">
+                            @Html.DisplayFor(modelItem => item.Memo)
+                        </td>
+                    }
+                    else
+                    {
+                        if (showfreq)
+                        {
+                            <td class="d-none" data-test-id="memo"/>                           
+                        }
+                        else
+                        {
+                            @* Spacing to move the menu to the right *@
+                            <td class="col-@(7-selectedcols) d-md-none" data-test-id="memo"/>
+                        }
+                    }
 
-                    <td class="col-2 col-md-6" style="text-align:right">
+                    <td class="col-2 col-md-1" style="text-align:right">
                         <div class="dropdown">
                             <button href="#" class="btn btn-sm btn-outline-secondary my-1 dropdown-toggle dropdown-noarrow" id="actions-@line" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-ellipsis-h"></i>
