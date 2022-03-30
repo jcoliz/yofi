@@ -5,7 +5,6 @@
     --color-2: #c29ffa; /* $indigo-200 */
     --color-3: #e0cffc; /* $indigo-100 */
 }
-/* Lighter/darker is using coolors.co shades */
 
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
@@ -62,27 +61,6 @@ up {
 
 .report td.report-col-name {
     word-break: break-word;
-}
-
-.pivot-table td {
-    text-align: right;
-}
-
-.pivot-table td.subhead {
-    text-align: left;
-    text-indent: 20px;
-}
-
-.pivot-table td.emphasis {
-    font-weight: bold;
-}
-
-.pivot-table td.warningX {
-    color: red;
-}
-
-.pivot-table tr.superhead {
-    background-color: #b0c4de7a;
 }
 
 .bd-footer a {
