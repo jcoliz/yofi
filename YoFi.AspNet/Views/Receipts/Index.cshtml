@@ -55,19 +55,19 @@
     <thead>
         <tr class="row">
             <th class="col-lg-2 col-3" style="text-align:right">
-                @Html.DisplayNameFor(model => model.Timestamp)
+                @Html.DisplayNameFor(model => model.Timestamp)<span class="d-none d-sm-inline d-lg-none">/Amount</span>
             </th>
             <th class="col-lg-5 col-6">
-                @Html.DisplayNameFor(model => model.Name)<span class="d-lg-none">/Memo</span>/Filename
+                @Html.DisplayNameFor(model => model.Filename)<span class="d-lg-none">/Name</span>/Memo
             </th>
-            <th class="col-lg-1 col-3" style="text-align:right">
+            <th class="d-none d-lg-block col-lg-1" style="text-align:right">
                 @Html.DisplayNameFor(model => model.Amount)
             </th>
-            <th class="d-none" data-test-id="Spacer"/>
             <th class="d-none d-lg-block col-lg-4">
-                @Html.DisplayNameFor(model => model.Memo)
+                @Html.DisplayNameFor(model => model.Name)
             </th>
-            <th class="d-none" data-test-id="Spacer2"/>
+            <th class="d-none" data-test-id="Spacer"/>
+            <th class="d-none" data-test-id="Memo"/>
             <th class="d-none">
                 @Html.DisplayNameFor(model => model.Filename)
             </th>
@@ -79,6 +79,7 @@
         ++line;
 
         var nmatches = item.Matches.Count;
+        var hasmemo = !string.IsNullOrEmpty(item.Memo);
 
         <tr class="row">
             <td class="col-lg-2 col-3" style="text-align:right">
@@ -91,28 +92,28 @@
                     @item.Timestamp.ToString("M/dd/yy")
                 }                
             </td>
-            <td class="col-lg-5 col-6">
-                @Html.DisplayFor(modelItem => item.Name)
+            <td class="col-lg-5 col-9">
+                @Html.DisplayFor(modelItem => item.Filename)
             </td>
             <td class="col-lg-1 col-3" style="text-align:right">
                 @Html.DisplayFor(modelItem => item.Amount)
             </td>
-            @if(item.Memo != null)
+            <td class="col-lg-@(hasmemo?4:3) col-@(hasmemo?9:7)">
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+
+            @if(hasmemo)
             {
-                <td class="d-lg-none col-3"/>
-                <td class="col-lg-4 col-9">
+                <td class="col-lg-2 col-3"/>
+                <td class="col-lg-9 col-7">
                     <span data-test-id="memo">@Html.DisplayFor(modelItem => item.Memo)</span>
                 </td>
             }
             else
             {
                 <td class="d-none"/>
-                <td class="d-none d-lg-block col-lg-4" data-test-id="memo"/>
+                <td class="d-none" data-test-id="memo"/>
             }
-            <td class="col-lg-2 col-3"/>
-            <td class="col-lg-9 col-7">
-                @Html.DisplayFor(modelItem => item.Filename)
-            </td>
             <td data-test-id="Matches" data-test-value="@nmatches" class="col-lg-1 col-2" style="text-align: right">
                 <form method="post" asp-action="Action" id="form-@line">
                     <input type="hidden" name="id" value="@item.ID"/>
