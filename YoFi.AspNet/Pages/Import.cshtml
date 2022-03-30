@@ -163,38 +163,45 @@ else
     <p><span data-test-id="NumBudgetTxsUploaded">@Model.NumBudgetTxsUploaded</span> items have been imported to your budget. You can review your entire set of budget line items on the Edit Budget page.@morecomments</p>
     <a asp-controller="BudgetTxs" asp-action="Index" class="btn btn-primary">Edit Budget &raquo;</a>
 
-    <table class="table">
+    <table class="table table-index mt-1">
         <thead>
-            <tr>
-                <th>
-                    Date
+            <tr class="row">
+                <th class="col-3 col-lg-2" style="text-align:right">
+                    Date<span class="d-none d-sm-inline d-lg-none">/Amount</span>
                 </th>
-                <th>
-                    Category
+                <th class="col-9 col-lg-4">
+                    Category<span class="d-lg-none">/Memo</span> 
                 </th>
-                <th>
-                    Memo
-                </th>
-                <th>
+                <th class="d-none d-lg-block col-lg-2" style="text-align:right">
                     Amount
+                </th>
+                <th class="d-none d-lg-block col-lg-4">
+                    Memo
                 </th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model.BudgetTxs)
             {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Timestamp)
+                <tr class="row">
+                    <td class="col-3 col-lg-2" style="text-align:right">
+                        @if (item.Timestamp.Year == _clock.Now.Year)
+                        {
+                            @item.Timestamp.ToString("M/dd")                            
+                        }
+                        else
+                        {
+                            @item.Timestamp.ToString("M/dd/yy")
+                        }
                     </td>
-                    <td>
+                    <td class="col-9 col-lg-4">
                         @Html.DisplayFor(modelItem => item.Category)
                     </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Memo)
-                    </td>
-                    <td>
+                    <td class="col-3 col-lg-2" style="text-align:right">
                         @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                    <td class="col-9 col-lg-4">
+                        @Html.DisplayFor(modelItem => item.Memo)
                     </td>
                 </tr>
             }
@@ -209,13 +216,13 @@ else
     <p><span data-test-id="NumPayeesUploaded">@Model.NumPayeesUploaded</span> items have been imported to your payee matching rules. You can review your entire set on the Payees page.@morecomments</p>
     <a asp-controller="Payees" asp-action="Index" class="btn btn-primary">Payees &raquo;</a>
 
-    <table class="table">
+    <table class="table table-index mt-1">
         <thead>
-            <tr>
-                <th>
-                    Category
+            <tr class="row">
+                <th class="col-md-6">
+                    Category<span class="d-md-none">/Name</span>
                 </th>
-                <th>
+                <th class="d-none d-md-block col-md-6">
                     Name
                 </th>
             </tr>
@@ -223,11 +230,11 @@ else
         <tbody>
             @foreach (var item in Model.Payees)
             {
-                <tr>
-                    <td>
+                <tr class="row">
+                    <td class="col-md-6">
                         @Html.DisplayFor(modelItem => item.Category)
                     </td>
-                    <td>
+                    <td class="col-md-6">
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
                 </tr>
