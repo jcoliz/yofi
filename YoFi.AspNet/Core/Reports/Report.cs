@@ -524,7 +524,8 @@ namespace YoFi.Core.Reports
                 { 
                     Name = oquery.Name, 
                     UniqueID = oquery.Name, 
-                    LeafNodesOnly = oquery.LeafRowsOnly 
+                    LeafNodesOnly = oquery.LeafRowsOnly,
+                    IsSeries = true
                 };
 
             // Make sure the series column is in the report, even if a total is never entered
@@ -992,8 +993,12 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// True if this column should not be propagating values up to parent rows
         /// </summary>
-
         public bool LeafNodesOnly { get; set; } = false;
+
+        /// <summary>
+        /// True if this column represents a distinct series of data
+        /// </summary>
+        public bool IsSeries { get; set; } = false;
 
         /// <summary>
         /// Custom function which will calculate values for this column based
@@ -1005,6 +1010,41 @@ namespace YoFi.Core.Reports
         /// Universal total column
         /// </summary>
         public static readonly ColumnLabel Total = new ColumnLabel() { IsTotal = true };
+
+        /// <summary>
+        /// Rendering priority order
+        /// </summary>
+        /// <remarks>
+        /// Lower numbers are rendered before higher numbers.
+        /// 
+        /// This is to handle the case where our rendering display doesn't have enough
+        /// width to show all columns. e.g. if you can only display 3 cols, display three
+        /// with the lowest 'Priority' values
+        /// </remarks>
+        public int Priority
+        {
+            get
+            {
+                if (IsTotal)
+                    return 1;
+                if (IsSeries)
+                    return 2;
+                if (DisplayAsPercent)
+                    return 3;
+                if (IsSortingAfterTotal)
+                    return 4;
+
+                // At this point we know it's a month column. Later months have higher priority
+
+                if (int.TryParse(UniqueID,out var month))
+                {
+                    return 20 - month;
+                }
+
+                // This shouldn't happen
+                return 100;
+            }
+        }
 
     }
 }
