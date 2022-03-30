@@ -1,9 +1,19 @@
-﻿@model YoFi.Core.Repositories.Wire.IWireQueryResult<YoFi.Core.Models.Payee>
+﻿@*
+ *
+ * TRANSACTIONS INDEX
+ *
+*@
+
+@model YoFi.Core.Repositories.Wire.IWireQueryResult<YoFi.Core.Models.Payee>
 @{
     ViewData["Title"] = "Payees";
     var showselected = (bool)(ViewData["ShowSelected"]);
     int selectedcols = showselected ? 1 : 0;
 }
+
+@*
+    ANTI-FORGERY
+*@
 
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 @functions{
@@ -48,11 +58,15 @@
     </div>
 </nav>
 
+@*
+    BULK OPERATIONS TASKBAR
+*@
+
 @if (showselected)
 {
     <form asp-action="BulkEdit" method="post">
         <div class="form-actions">
-            <div class="row">
+            <div class="row mb-2">
                     <div class="col-5 col-md-3 col-lg-2">
                         <p class="fs-6 mt-2">Set Category To:</p>
                     </div>
