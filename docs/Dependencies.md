@@ -2,11 +2,11 @@
 
 ## Microsoft Foundational Components
 
-### ASP<meta>.NET Core 3.1 LTS
+### .NET 6
 
-Fundamentally the app is built on .NET Core. It can run on Linux or Windows. My policy is to be
-on the latest LTS version, which is 3.1.19 as of this writing. Once 6.0 is a bit more settled,
-I'll look at upgrading to that LTS.
+Fundamentally the app is built on [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0). 
+It can run on Linux or Windows.
+My policy is to be always on the latest LTS version.
 
 ### Entity Framework Core
 

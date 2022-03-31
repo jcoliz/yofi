@@ -27,12 +27,6 @@ transaction, then create reports based on those categories. Its full feature set
 
 Please refer to the [Roadmap](/docs/Roadmap.md) to see whats's coming next.
 
-## Technologies
-
-* [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
-* If Visual Studio is desired, it must be Visual Studio 2022 or higher.  Microsoft offers a free [Community Edition](https://visualstudio.microsoft.com/vs/community) for students, open-source, and individual developers.
-* If Windows IIS is used, ASP.NET Hosting Bundle as part of [ASP.NET Core Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
-
 ## Background
 
 What's the best way to manage your money? I always thought Microsoft Excel was the answer to this
@@ -72,13 +66,16 @@ Azure bills you for only the minutes you use, so be sure to delete the resources
 
 ## Build it
 
-For users of Visual Studio, it's easy enough to clone the repo, and launch locally.
+YoFi is built on [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0). For more details, check out the full list of [Dependencies](/docs/Dependencies.md) taken by the project.
+
+For users of Visual Studio 2022, it's easy enough to clone the repo, and launch locally.
 From there, you can Publish updates from Visual Studio to the Azure App Service instance deployed earlier.
+Microsoft offers a free [Community Edition](https://visualstudio.microsoft.com/vs/community) for students, open-source, and individual developers.
 
 For serious developers, there is an Azure Pipelines definition file included, [azure-pipelines-dotnet.yml](/azure-pipelines-dotnet.yml). You can host your build
 service on Azure Dev Ops, then create an Azure Pipeline to build and release updates to your Azure App Service.
 
-Also see the full list of [Dependencies](/docs/Dependencies.md) taken by the project.
+Running Windows IIS? You'll want the [ASP.NET Core Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) with the Hosting Bundle.
 
 ## Give feedback
 
