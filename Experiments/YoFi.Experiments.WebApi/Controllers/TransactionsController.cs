@@ -29,4 +29,11 @@ public class TransactionsController : ControllerBase
     {
         return await _repository.GetByIdAsync(id);
     }
+
+    [HttpDelete("{id}")]
+    public async Task Delete(int id)
+    {
+        var item = await _repository.GetByIdAsync(id);
+        await _repository.RemoveAsync(item);
+    }
 }

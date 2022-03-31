@@ -68,7 +68,7 @@ public class MockDataContext : IDataContext
 
     public void Remove(object item)
     {
-        throw new NotImplementedException();
+        // NOP
     }
 
     public void RemoveRange(IEnumerable<object> items)
@@ -78,7 +78,8 @@ public class MockDataContext : IDataContext
 
     public Task SaveChangesAsync()
     {
-        throw new NotImplementedException();
+        // NOP
+        return Task.CompletedTask;
     }
 
     public Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class
