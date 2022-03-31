@@ -36,12 +36,18 @@ namespace YoFi.AspNet.Data
             builder.Entity<Transaction>().HasIndex(p => new { p.Timestamp, p.Hidden, p.Category });
         }
 
+        #region Entity Sets
+
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Payee> Payees { get; set; }
         public DbSet<Split> Splits { get; set; }
         public DbSet<BudgetTx> BudgetTxs { get; set; }
         public DbSet<Receipt> Receipts { get; set; }
+
+        #endregion
+
+        #region Entity Accessors
 
         IQueryable<Transaction> IDataContext.TransactionsWithSplits => SetIncluding<Transaction,ICollection<Split>>(x => x.Splits);
 
@@ -54,6 +60,8 @@ namespace YoFi.AspNet.Data
         {
             return Set<T>(); 
         }
+
+        #endregion
 
         void IDataContext.Add(object item)
         {
@@ -75,17 +83,26 @@ namespace YoFi.AspNet.Data
             return base.SaveChangesAsync();
         }
 
+        #region Async Queries
+
         Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) 
         {
             return query.AsNoTracking().ToListAsync(); 
         }
 
-        Task<int> IDataContext.CountAsync<T>(IQueryable<T> query) => query.CountAsync();
+        Task<int> IDataContext.CountAsync<T>(IQueryable<T> query)
+        {
+            return query.CountAsync();
+        }
 
         Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) 
         {
             return query.AnyAsync(); 
         }
+
+        #endregion
+
+        #region Bulk Operations
 
         Task<int> IDataContext.ClearAsync<T>() where T : class => Set<T>().BatchDeleteAsync();
 
@@ -144,5 +161,7 @@ namespace YoFi.AspNet.Data
             else
                 await items.BatchUpdateAsync(newvalues,columns);
         }
+
+        #endregion
     }
 }
