@@ -27,6 +27,12 @@ transaction, then create reports based on those categories. Its full feature set
 
 Please refer to the [Roadmap](/docs/Roadmap.md) to see whats's coming next.
 
+## Technologies
+
+* [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+* If Visual Studio is desired, it must be Visual Studio 2022 or higher.  Microsoft offers a free [Community Edition](https://visualstudio.microsoft.com/vs/community) for students, open-source, and individual developers.
+* If Windows IIS is used, ASP.NET Hosting Bundle as part of [ASP.NET Core Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
+
 ## Background
 
 What's the best way to manage your money? I always thought Microsoft Excel was the answer to this
@@ -45,7 +51,7 @@ manager accessible from any device anywhere anytime, yet still running on hardwa
 
 ## Try it!
 
-There is a read-only demo instance of YoFi hosted at www.try-yofi.com, with realistic sample data.
+There is a read-only demo instance of YoFi hosted at [www.try-yofi.com](https://www.try-yofi.com), with realistic sample data.
 
 ## Deploy it
 
@@ -66,7 +72,7 @@ Azure bills you for only the minutes you use, so be sure to delete the resources
 
 ## Build it
 
-For users of Visual Studio 2019 or higher, it's easy enough to clone the repo, and launch locally.
+For users of Visual Studio, it's easy enough to clone the repo, and launch locally.
 From there, you can Publish updates from Visual Studio to the Azure App Service instance deployed earlier.
 
 For serious developers, there is an Azure Pipelines definition file included, [azure-pipelines-dotnet.yml](/azure-pipelines-dotnet.yml). You can host your build
