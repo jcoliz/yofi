@@ -43,4 +43,13 @@ public class TransactionsController : ControllerBase
         await _repository.AddAsync(transaction);
         return transaction.ID;
     }
+
+    [HttpPut("{id}")]
+    public async Task Edit(int id, [Bind("Timestamp,Amount,Memo,Payee,Category,BankReference")] Transaction transaction )
+    {
+        var item = await _repository.GetByIdAsync(id);
+        transaction.ID = id;
+        await _repository.UpdateAsync(transaction);
+    }
+
 }
