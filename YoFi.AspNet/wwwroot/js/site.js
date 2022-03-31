@@ -251,13 +251,9 @@
     });
 
     // Enable all tooltips on page
-    $('[data-bs-toggle=tooltip]').tooltip({
-        trigger: 'hover'
-    });
-    $('[data-bs-toggle-second=tooltip]').tooltip({
-        trigger: 'hover'
-    });
-    $('[data-bs-toggle-second=tooltip]').on('click', function () {
+    $('[data-bs-toggle=tooltip]').tooltip();
+    $('[data-tooltip=tooltip]').tooltip();
+    $('[data-tooltip=tooltip]').on('click', function () {
         $(this).tooltip('hide')
     })
 });

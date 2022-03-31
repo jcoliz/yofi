@@ -39,8 +39,8 @@
                 <i class="fas fa-search"></i>
             </button>
             <a asp-route-o="@Model.Parameters.Order" asp-route-v="@Model.Parameters.View" class="btn btn-outline-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Clear" data-test-id="btn-clear"><i class="fas fa-times"></i></a>
-            <div class="nav-item dropstart">
-                <button class="btn btn-secondary dropdown-toggle dropdown-noarrow" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-bs-toggle-second="tooltip" data-bs-placement="bottom" title="Actions">
+            <div class="nav-item dropstart" data-tooltip="tooltip" data-bs-placement="bottom" title="Actions">
+                <button class="btn btn-secondary dropdown-toggle dropdown-noarrow" id="dropdownMenuButtonAction" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-ellipsis-h"></i>
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonAction">
