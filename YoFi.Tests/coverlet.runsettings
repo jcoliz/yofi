@@ -4,8 +4,7 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Include>[YoFi.AspNet]*</Include> <!-- [Assembly-Filter]Type-Filter -->
-          <Exclude>[*]YoFi.AspNet.*,[*]YoFi.Services.*,[*]AspNetCoreGeneratedDocument.*</Exclude> <!-- [Assembly-Filter]Type-Filter -->
+          <Include>[YoFi.Core]*</Include> <!-- [Assembly-Filter]Type-Filter -->
         </Configuration>
       </DataCollector>
     </DataCollectors>
