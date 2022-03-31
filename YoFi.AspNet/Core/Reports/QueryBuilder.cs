@@ -218,8 +218,8 @@ namespace YoFi.Core.Reports
             years = _context.Get<Transaction>().Select(x => x.Timestamp.Year).Distinct().ToArray();
             foreach (var year in years)
             {
-                var txsyear = _context.TransactionsWithSplits.Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
-                var splitsyear = _context.SplitsWithTransactions.Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
+                var txsyear = _context.GetIncluding<Transaction,ICollection<Split>>(x=>x.Splits).Where(x => x.Hidden != true && x.Timestamp.Year == year).Where(x => !x.Splits.Any());
+                var splitsyear = _context.GetIncluding<Split, Transaction>(x => x.Transaction).Where(x => x.Transaction.Hidden != true && x.Transaction.Timestamp.Year == year);
 
                 result.Add(new NamedQuery() { Name = year.ToString(), Query = txsyear, IsMultiSigned = true });
                 result.Add(new NamedQuery() { Name = year.ToString(), Query = splitsyear, IsMultiSigned = true });
@@ -328,7 +328,7 @@ namespace YoFi.Core.Reports
         /// <returns>Resulting query</returns>
         private NamedQuery QuerySplits(string top = null, IEnumerable<string> excluded = null)
         {
-            var result = _context.SplitsWithTransactions
+            var result = _context.GetIncluding<Split, Transaction>(x => x.Transaction)
                 .Where(x => x.Transaction.Timestamp.Year == Year && x.Transaction.Hidden != true && x.Transaction.Timestamp.Month <= Month)
                 .Select(x => new ReportableDto() { Amount = x.Amount, Timestamp = x.Transaction.Timestamp, Category = x.Category })
                 .AsQueryable<IReportable>();

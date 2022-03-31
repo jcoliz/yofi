@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core;
+using System.Linq.Expressions;
 
 namespace YoFi.Tests.Helpers
 {
@@ -21,13 +22,13 @@ namespace YoFi.Tests.Helpers
 
         public List<Receipt> ReceiptData { get; } = new List<Receipt>();
 
-        public IQueryable<Transaction> Transactions => TransactionData.AsQueryable();
+        private IQueryable<Transaction> Transactions => TransactionData.AsQueryable();
 
-        public IQueryable<Split> Splits => Enumerable.Empty<Split>().AsQueryable();
+        private IQueryable<Split> Splits => Enumerable.Empty<Split>().AsQueryable();
 
-        public IQueryable<Payee> Payees => PayeeData.AsQueryable();
+        private IQueryable<Payee> Payees => PayeeData.AsQueryable();
 
-        public IQueryable<BudgetTx> BudgetTxs => BudgetTxData.AsQueryable();
+        private IQueryable<BudgetTx> BudgetTxs => BudgetTxData.AsQueryable();
 
         public IQueryable<Transaction> TransactionsWithSplits => TransactionData.AsQueryable();
 
@@ -71,6 +72,19 @@ namespace YoFi.Tests.Helpers
             if (typeof(T) == typeof(Receipt))
             {
                 return ReceiptData.AsQueryable() as IQueryable<T>;
+            }
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<TEntity> GetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> _) where TEntity : class
+        {
+            if (typeof(TEntity) == typeof(Transaction))
+            {
+                return TransactionsWithSplits as IQueryable<TEntity>;
+            }
+            if (typeof(TEntity) == typeof(Split))
+            {
+                return SplitsWithTransactions as IQueryable<TEntity>;
             }
             throw new NotImplementedException();
         }

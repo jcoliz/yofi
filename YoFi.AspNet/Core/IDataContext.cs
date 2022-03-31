@@ -15,54 +15,57 @@ namespace YoFi.Core
     /// </remarks>
     public interface IDataContext
     {
-        #region Entities
         /// <summary>
-        /// Retrieve the Transactions with Splits attached
-        /// </summary>
-        IQueryable<Transaction> TransactionsWithSplits { get; }
-        /// <summary>
-        /// Retrieve the splits (with transactions attached)
-        /// </summary>
-        IQueryable<Split> SplitsWithTransactions { get; }
-
-        /// <summary>
-        /// Retrieve all <typeparamref name="T"/> entities 
+        /// Get a query of <typeparamref name="T"/> entities 
         /// </summary>
         /// <typeparam name="T">Which type of entitites to get</typeparam>
-        /// <returns></returns>
         IQueryable<T> Get<T>() where T : class;
-        #endregion
+
+        /// <summary>
+        /// Get a query of <typeparamref name="TEntity"/> entities including 
+        /// an expression of <typeparamref name="Property"/> properties
+        /// </summary>
+        /// <typeparam name="TEntity">Which type of entitites to get</typeparam>
+        /// <typeparam name="TProperty">Type of properties</typeparam>
+        /// <param name="navigationPropertyPath">Navigation expression to describe properties</param>
+        IQueryable<TEntity> GetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> navigationPropertyPath) where TEntity : class;
 
         /// <summary>
         /// Add an item
         /// </summary>
         /// <param name="item">Item to add</param>
         void Add(object item);
+
         /// <summary>
         /// Add a range of items
         /// </summary>
         /// <param name="items">Items to add</param>
         void AddRange(IEnumerable<object> items);
+       
         /// <summary>
         /// Update an item
         /// </summary>
         /// <param name="item">Item to update</param>
         void Update(object item);
+        
         /// <summary>
         /// Update a range of items
         /// </summary>
         /// <param name="items">Items to update</param>
         void UpdateRange(IEnumerable<object> items);
+        
         /// <summary>
         /// Remove an item
         /// </summary>
         /// <param name="item">Item to remove</param>
         void Remove(object item);
+        
         /// <summary>
         /// Remove items
         /// </summary>
         /// <param name="items">Items to remove</param>
         void RemoveRange(IEnumerable<object> items);
+        
         /// <summary>
         /// Save changes previously made
         /// </summary>

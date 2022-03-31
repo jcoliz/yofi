@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -57,9 +58,9 @@ namespace YoFi.Tests.Helpers
         }
 
 
-        IQueryable<Transaction> IDataContext.TransactionsWithSplits => Transactions.AsQueryable();
+        private IQueryable<Transaction> TransactionsWithSplits => Transactions.AsQueryable();
 
-        IQueryable<Split> IDataContext.SplitsWithTransactions
+        private IQueryable<Split> SplitsWithTransactions
         {
             get
             {
@@ -87,6 +88,19 @@ namespace YoFi.Tests.Helpers
             if (typeof(T) == typeof(Transaction))
             {
                 return Transactions.AsQueryable() as IQueryable<T>;
+            }
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<TEntity> GetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> _) where TEntity : class
+        {
+            if (typeof(TEntity) == typeof(Transaction))
+            {
+                return TransactionsWithSplits as IQueryable<TEntity>;
+            }
+            if (typeof(TEntity) == typeof(Split))
+            {
+                return SplitsWithTransactions as IQueryable<TEntity>;
             }
             throw new NotImplementedException();
         }

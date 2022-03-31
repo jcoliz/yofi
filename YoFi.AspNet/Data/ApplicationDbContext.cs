@@ -47,21 +47,15 @@ namespace YoFi.AspNet.Data
 
         #endregion
 
-        #region Entity Accessors
+        #region CRUD Entity Accessors
 
-        IQueryable<Transaction> IDataContext.TransactionsWithSplits => SetIncluding<Transaction,ICollection<Split>>(x => x.Splits);
-
-        IQueryable<Split> IDataContext.SplitsWithTransactions => SetIncluding<Split, Transaction>(x => x.Transaction);
-
-        IQueryable<TEntity> SetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> navigationPropertyPath) where TEntity : class
-            => base.Set<TEntity>().Include(navigationPropertyPath);
-
-        IQueryable<T> IDataContext.Get<T>() where T : class 
+        IQueryable<T> IDataContext.Get<T>() where T : class
         {
-            return Set<T>(); 
+            return Set<T>();
         }
 
-        #endregion
+        IQueryable<TEntity> IDataContext.GetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> navigationPropertyPath) where TEntity : class
+            => base.Set<TEntity>().Include(navigationPropertyPath);
 
         void IDataContext.Add(object item)
         {
@@ -82,6 +76,8 @@ namespace YoFi.AspNet.Data
         {
             return base.SaveChangesAsync();
         }
+
+        #endregion
 
         #region Async Queries
 

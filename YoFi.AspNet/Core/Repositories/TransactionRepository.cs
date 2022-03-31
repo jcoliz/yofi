@@ -43,14 +43,14 @@ namespace YoFi.Core.Repositories
         /// <returns>Query of requested items</returns>
         protected override IQueryable<Transaction> ForQuery(string q)
         {
-            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits),_clock);
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.GetIncluding<Transaction, ICollection<Split>>(x => x.Splits)),_clock);
             qbuilder.BuildForQ(q);
             return qbuilder.Query;
         }
 
         protected override IQueryable<Transaction> ForQuery(IWireQueryParameters parms)
         {
-            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.TransactionsWithSplits),_clock);
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.GetIncluding<Transaction, ICollection<Split>>(x => x.Splits)),_clock);
             qbuilder.BuildForQ(parms.Query);
             qbuilder.ApplyOrderParameter(parms.Order);
             qbuilder.ApplyViewParameter(parms.View);
@@ -65,13 +65,13 @@ namespace YoFi.Core.Repositories
         /// </remarks>
         /// <param name="id">Identifier of desired item</param>
         /// <returns>Desired item</returns>
-        public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.TransactionsWithSplits.Single(x => x.ID == id.Value));
+        public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.GetIncluding<Transaction, ICollection<Split>>(x => x.Splits).Single(x => x.ID == id.Value));
         // TODO: QueryExec SingleAsync()
 
         /// <summary>
         /// All splits including transactions
         /// </summary>
-        public IQueryable<Split> Splits => _context.SplitsWithTransactions;
+        public IQueryable<Split> Splits => _context.GetIncluding<Split, Transaction>(x => x.Transaction);
 
         #endregion
 
@@ -213,7 +213,7 @@ namespace YoFi.Core.Repositories
             // Which splits?
 
             // Product Backlog Item 870: Export & import transactions with splits
-            var splitsquery = _context.SplitsWithTransactions.Where(x => transactionsquery.Contains(x.Transaction)).OrderByDescending(x => x.Transaction.Timestamp);
+            var splitsquery = _context.GetIncluding<Split, Transaction>(x => x.Transaction).Where(x => transactionsquery.Contains(x.Transaction)).OrderByDescending(x => x.Transaction.Timestamp);
             var splits = await _context.ToListNoTrackingAsync(splitsquery);
 
             // Create the spreadsheet result
