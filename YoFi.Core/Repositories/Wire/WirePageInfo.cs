@@ -14,10 +14,13 @@ namespace YoFi.Core.Repositories.Wire
             PageSize = pagesize;
             TotalPages = (TotalItems - 1) / PageSize + 1;
 
-            var offset = (Page - 1) * PageSize;
-            FirstItem = offset + 1;
-            var last = Math.Min(TotalItems, offset + PageSize);
-            NumItems = 1 + last - FirstItem;
+            if (page <= TotalPages && page >= 1)
+            {
+                var offset = (Page - 1) * PageSize;
+                FirstItem = offset + 1;
+                var last = Math.Min(TotalItems, offset + PageSize);
+                NumItems = 1 + last - FirstItem;
+            }
         }
 
         public int Page { get; private set; }

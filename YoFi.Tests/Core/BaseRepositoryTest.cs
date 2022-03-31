@@ -149,6 +149,27 @@ namespace YoFi.Tests.Core
         }
 
         [TestMethod]
+        public async Task IndexPageTooMany()
+        {
+            // Given: A long set of items, which is longer than one page, but not as long as two pages 
+            var pagesize = 25; // BaseRepository<T>.DefaultPageSize;
+            var data = FakeObjects<T>.Make(pagesize).Add(pagesize / 2).SaveTo(this);
+
+            // When: Getting the Index for page 3
+            var document = await WhenGettingIndex(new WireQueryParameters() { Page = 3 });
+
+            // Then: No items returned
+            ThenResultsAreEqualByTestKey(document, Enumerable.Empty<T>());
+
+            // And: Page info also says no items
+            Assert.AreEqual(0, document.PageInfo.NumItems);
+            Assert.AreEqual(0, document.PageInfo.FirstItem);
+
+            // And: Acknowledge that there really should only be two pages
+            Assert.AreEqual(2, document.PageInfo.TotalPages);
+        }
+
+        [TestMethod]
         public async Task DetailsFound()
         {
             // Given: Five items in the data set
