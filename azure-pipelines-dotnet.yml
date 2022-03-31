@@ -5,9 +5,10 @@
 
 trigger:
   branches:
-  - master
-  - release/*
-  - hotfix/*
+    include:
+    - master
+    - release/*
+    - hotfix/*
 
 pr: none
 
