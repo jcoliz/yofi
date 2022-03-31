@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExcelFinancialFunctions" Version="3.1.0" />
+    <PackageReference Include="jcoliz.OfxSharp.NetStandard" Version="3.0.1" />
+    <PackageReference Include="jcoliz.OpenOfficeXml.Serializer" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Helpers\**" />
+    <Content Remove="Helpers\**" />
+    <EmbeddedResource Remove="Helpers\**" />
+    <None Remove="Helpers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="SampleDataGenerator\SampleDataDownloadOfferings.json" />
+    <Content Remove="SampleDataGenerator\SampleDataSeedOfferings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SampleDataGenerator\SampleDataDownloadOfferings.json" />
+    <EmbeddedResource Include="SampleDataGenerator\SampleDataSeedOfferings.json" />
+    <EmbeddedResource Include="Data\FullSampleDataDefinition.xlsx" />
+    <EmbeddedResource Include="Data\ofx-footer.txt" />
+    <EmbeddedResource Include="Data\ofx-header.txt" />
+  </ItemGroup>
+
+</Project>

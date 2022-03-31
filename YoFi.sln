@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoFi.Tests.Functional", "Yo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoFi.Tests.Integration", "YoFi.Tests.Integration\YoFi.Tests.Integration.csproj", "{EAC240B9-B3C9-4A25-81A1-AA3DEE2933FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoFi.Core", "YoFi.Core\YoFi.Core.csproj", "{71DAA4D7-5CDE-4DD1-8E24-893CBA07BF4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{EAC240B9-B3C9-4A25-81A1-AA3DEE2933FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAC240B9-B3C9-4A25-81A1-AA3DEE2933FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAC240B9-B3C9-4A25-81A1-AA3DEE2933FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71DAA4D7-5CDE-4DD1-8E24-893CBA07BF4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71DAA4D7-5CDE-4DD1-8E24-893CBA07BF4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71DAA4D7-5CDE-4DD1-8E24-893CBA07BF4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71DAA4D7-5CDE-4DD1-8E24-893CBA07BF4C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,18 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Core\Helpers\**" />
-    <Content Remove="Core\Helpers\**" />
-    <EmbeddedResource Remove="Core\Helpers\**" />
-    <None Remove="Core\Helpers\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="Core\SampleDataGenerator\SampleDataDownloadOfferings.json" />
-    <Content Remove="Core\SampleDataGenerator\SampleDataSeedOfferings.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="Data\FullSampleDataDefinition.xlsx" />
     <None Remove="Data\ofx-footer.txt" />
     <None Remove="Data\ofx-header.txt" />
@@ -73,14 +61,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Core\SampleDataGenerator\SampleDataDownloadOfferings.json" />
-    <EmbeddedResource Include="Core\SampleDataGenerator\SampleDataSeedOfferings.json" />
-    <EmbeddedResource Include="Data\FullSampleDataDefinition.xlsx" />
-    <EmbeddedResource Include="Data\ofx-footer.txt" />
-    <EmbeddedResource Include="Data\ofx-header.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Update="Views\BudgetTxs\Upload.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
@@ -90,6 +70,10 @@
     <Content Update="Views\Payees\EditPartial.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YoFi.Core\YoFi.Core.csproj" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
