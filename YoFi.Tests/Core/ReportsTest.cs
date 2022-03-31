@@ -1136,6 +1136,64 @@ namespace YoFi.Tests.Core
             Assert.AreEqual(0, sw.ToString().Length);
         }
 
+        [TestMethod]
+        public void ColumnPriority()
+        {
+            // Given: A set of column labels, with unique properties, where their NAME is the order
+            // they SHOULD be sorted in, but they are not currently sorted that way
+            var columns = new List<ColumnLabel>()
+            {
+                new ColumnLabel()
+                {
+                    Name = "4",
+                    IsSortingAfterTotal = true
+                },
+                new ColumnLabel()
+                {
+                    Name = "8"
+                },
+                new ColumnLabel()
+                {
+                    Name = "2",
+                    IsSeries = true
+                },
+                new ColumnLabel()
+                {
+                    Name = "7",
+                    UniqueID = "1"
+                },
+                new ColumnLabel()
+                {
+                    Name = "3",
+                    DisplayAsPercent = true
+                },
+                new ColumnLabel()
+                {
+                    Name = "5",
+                    UniqueID = "12"
+                },
+                new ColumnLabel()
+                {
+                    Name = "1",
+                    IsTotal = true
+                },
+                new ColumnLabel()
+                {
+                    Name = "6",
+                    UniqueID = "11"
+                },
+            };
+
+            // When: Sorting by column priority
+            var ordered = columns.OrderBy(x => x.Priority);
+
+            // Then: They are sorted in the expected order
+            var actual = ordered.Select(x => x.Name).ToList();
+            var expected = Enumerable.Range(1, columns.Count).Select(x => $"{x}");
+
+            Assert.IsTrue(actual.SequenceEqual(expected));
+        }
+
         #region User Story 1187: [Designer Can] Define a report to show all-available levels of data, no matter how many it has
 
         [DataRow(1)]
