@@ -8,7 +8,11 @@ public class MockDataContext : IDataContext
 {
     public void Add(object item)
     {
-        throw new NotImplementedException();
+        // Add an ID to it
+        if (item is Transaction tx)
+        {
+            tx.ID = 11;
+        }
     }
 
     public void AddRange(IEnumerable<object> items)

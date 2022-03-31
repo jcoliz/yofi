@@ -36,4 +36,11 @@ public class TransactionsController : ControllerBase
         var item = await _repository.GetByIdAsync(id);
         await _repository.RemoveAsync(item);
     }
+
+    [HttpPost]
+    public async Task<int> Create([Bind("Timestamp,Amount,Memo,Payee,Category,BankReference")] Transaction transaction )
+    {
+        await _repository.AddAsync(transaction);
+        return transaction.ID;
+    }
 }
