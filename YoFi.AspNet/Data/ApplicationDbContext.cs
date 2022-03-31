@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core;
@@ -42,9 +43,12 @@ namespace YoFi.AspNet.Data
         public DbSet<BudgetTx> BudgetTxs { get; set; }
         public DbSet<Receipt> Receipts { get; set; }
 
-        IQueryable<Transaction> IDataContext.TransactionsWithSplits => Transactions.Include(x => x.Splits);
+        IQueryable<Transaction> IDataContext.TransactionsWithSplits => SetIncluding<Transaction,ICollection<Split>>(x => x.Splits);
 
-        IQueryable<Split> IDataContext.SplitsWithTransactions => Splits.Include(x => x.Transaction);
+        IQueryable<Split> IDataContext.SplitsWithTransactions => SetIncluding<Split, Transaction>(x => x.Transaction);
+
+        IQueryable<TEntity> SetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> navigationPropertyPath) where TEntity : class
+            => this.Set<TEntity>().Include(navigationPropertyPath);
 
         IQueryable<T> IDataContext.Get<T>() where T : class 
         {
