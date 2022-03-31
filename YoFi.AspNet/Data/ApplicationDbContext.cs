@@ -48,16 +48,11 @@ namespace YoFi.AspNet.Data
         IQueryable<Split> IDataContext.SplitsWithTransactions => SetIncluding<Split, Transaction>(x => x.Transaction);
 
         IQueryable<TEntity> SetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> navigationPropertyPath) where TEntity : class
-            => this.Set<TEntity>().Include(navigationPropertyPath);
+            => base.Set<TEntity>().Include(navigationPropertyPath);
 
         IQueryable<T> IDataContext.Get<T>() where T : class 
         {
-            if (typeof(T) == typeof(Receipt))
-            {
-                return Receipts.AsQueryable() as IQueryable<T>;
-            }
-            else
-                return Set<T>(); 
+            return Set<T>(); 
         }
 
         void IDataContext.Add(object item)
