@@ -60,14 +60,20 @@ namespace YoFi.AspNet.Data
             base.Add(item);
         }
 
-        void IDataContext.Update(object item) => base.Update(item);
+        void IDataContext.Update(object item)
+        {
+            base.Update(item);
+        }
 
         void IDataContext.Remove(object item) 
         {
             base.Remove(item); 
         }
 
-        Task IDataContext.SaveChangesAsync() => base.SaveChangesAsync();
+        Task IDataContext.SaveChangesAsync()
+        {
+            return base.SaveChangesAsync();
+        }
 
         Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) 
         {
