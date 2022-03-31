@@ -19,8 +19,8 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IWireQueryResult<Transaction>> Get()
+    public async Task<IWireQueryResult<Transaction>> Get([FromQuery] WireQueryParameters parameters)
     {
-        return await _repository.GetByQueryAsync(new WireQueryParameters());
+        return await _repository.GetByQueryAsync(parameters);
     }
 }
