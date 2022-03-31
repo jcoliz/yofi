@@ -50,7 +50,8 @@ public class MockDataContext : IDataContext
     {
         if (typeof(T) == typeof(Transaction))
         {
-            return FakeObjects<Transaction>.Make(10).AsQueryable() as IQueryable<T> ?? Enumerable.Empty<T>().AsQueryable();
+            int id = 1;
+            return FakeObjects<Transaction>.Make(10,x=>x.ID = id++).AsQueryable() as IQueryable<T> ?? Enumerable.Empty<T>().AsQueryable();
         }
         throw new NotImplementedException();
     }
@@ -59,7 +60,8 @@ public class MockDataContext : IDataContext
     {
         if (typeof(TEntity) == typeof(Transaction))
         {
-            return FakeObjects<Transaction>.Make(10).AsQueryable() as IQueryable<TEntity> ?? Enumerable.Empty<TEntity>().AsQueryable();
+            int id = 1;
+            return FakeObjects<Transaction>.Make(10,x=>x.ID = id++).AsQueryable() as IQueryable<TEntity> ?? Enumerable.Empty<TEntity>().AsQueryable();
         }
         throw new NotImplementedException();
     }

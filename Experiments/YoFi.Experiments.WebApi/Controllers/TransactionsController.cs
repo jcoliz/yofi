@@ -23,4 +23,10 @@ public class TransactionsController : ControllerBase
     {
         return await _repository.GetByQueryAsync(parameters);
     }
+
+    [HttpGet("{id}")]
+    public async Task<Transaction> Get(int id)
+    {
+        return await _repository.GetByIdAsync(id);
+    }
 }
