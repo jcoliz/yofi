@@ -47,7 +47,7 @@
 *@
 
 @{ 
-    var url = "/ReportPartial?id=expenses-v-budget" + ((Model.Year.HasValue) ? $"&year={Model.Year.Value}" : string.Empty);
+    var url = "/ReportPartial?slug=expenses-v-budget" + ((Model.Year.HasValue) ? $"&year={Model.Year.Value}" : string.Empty);
 }
 
 <div class="w-100 loadr" data-endpoint="@url">
