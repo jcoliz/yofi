@@ -1194,6 +1194,41 @@ namespace YoFi.Tests.Core
             Assert.IsTrue(actual.SequenceEqual(expected));
         }
 
+        [TestMethod]
+        public void WireReportViaJson()
+        {
+            // Given: A report constructed the usual way
+            TwoSeriesDeepCols();
+
+            // When: Converting to a wire report
+            var wirereport = WireReport.BuildFrom(report);
+
+            // And: Serialize/Deserializing it via JSON
+            var json = System.Text.Json.JsonSerializer.Serialize(wirereport);
+            IDisplayReport actual = System.Text.Json.JsonSerializer.Deserialize<WireReport>(json);
+
+            // Then: Resulting values match original report
+            Assert.AreEqual(report.Name, actual.Name);
+            Assert.AreEqual(report.GrandTotal, actual.GrandTotal);
+
+            // Copy the tests from "TwoSeriesDeepCols" test
+            var Name = GetRow(x => x.Name == "Name");
+            var Other = GetRow(x => x.Name == "Other");
+            var Else = GetRow(x => x.Name == "Else");
+            var One = GetColumn(x => x.Name == "One");
+            var Two = GetColumn(x => x.Name == "Two");
+            var Jun = GetColumn(x => x.Name == "Jun");
+
+            Assert.AreEqual(600m, actual[report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, actual[report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, actual[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(700m, actual[One, report.TotalRow]);
+            Assert.AreEqual(1300m, actual[Two, report.TotalRow]);
+            Assert.AreEqual(400m, actual[Two, Else]);
+            Assert.AreEqual(200m, actual[Jun, Else]);
+            Assert.AreEqual(400m, actual[Jun, report.TotalRow]);
+        }
+
         #region User Story 1187: [Designer Can] Define a report to show all-available levels of data, no matter how many it has
 
         [DataRow(1)]
