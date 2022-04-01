@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using YoFi.Core.Models;
 
@@ -1004,6 +1005,7 @@ namespace YoFi.Core.Reports
         /// Custom function which will calculate values for this column based
         /// on values in other columns
         /// </summary>
+        [JsonIgnore]
         public Func<Dictionary<string,decimal>, decimal> Custom { get; set; }
 
         /// <summary>
