@@ -1,4 +1,6 @@
-﻿# YoFi
+<p align="center"><img src="https://github.com/jcoliz/yofi/blob/master/YoFi.AspNet/wwwroot/icon.svg" alt="YoFi Logo" width="200"></p>
+
+# YoFi
 
 Own your finances. Own your data.
 
