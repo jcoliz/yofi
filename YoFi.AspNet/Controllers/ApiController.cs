@@ -28,9 +28,9 @@ namespace YoFi.AspNet.Controllers
             return new OkObjectResult(await repository.GetByIdAsync(id));
         }
 
-        [HttpGet("ReportV2/{id}")]
+        [HttpGet("ReportV2/{slug}")]
         [ApiBasicAuthorization]
-        public IActionResult ReportV2([Bind("id,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
+        public IActionResult ReportV2([Bind("slug,year,month,showmonths,level")] ReportParameters parms, [FromServices] IReportEngine reports)
         {
             // TODO: Make this Async()
             try

@@ -245,8 +245,8 @@ namespace YoFi.Core.Reports
             if (definition.DisplayLevelAdjustment.HasValue)
                 DisplayLevelAdjustment = definition.DisplayLevelAdjustment.Value;
 
-            if (!string.IsNullOrEmpty(definition.id))
-                Definition = definition.id;
+            if (!string.IsNullOrEmpty(definition.slug))
+                Definition = definition.slug;
         }
 
         /// <summary>

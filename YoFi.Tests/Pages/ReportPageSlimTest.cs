@@ -42,7 +42,7 @@ namespace YoFi.Tests.Pages
         {
             clock = new TestClock();
             var engine = new Mock<IReportEngine>();
-            engine.Setup(x => x.Build(It.IsAny<ReportParameters>())).Returns((ReportParameters p) => new Report() { Name = p.id, Source = Enumerable.Empty<NamedQuery>(), WithMonthColumns = p.showmonths ?? false, WithTotalColumn = !(p.id=="nototal") });
+            engine.Setup(x => x.Build(It.IsAny<ReportParameters>())).Returns((ReportParameters p) => new Report() { Name = p.slug, Source = Enumerable.Empty<NamedQuery>(), WithMonthColumns = p.showmonths ?? false, WithTotalColumn = !(p.slug=="nototal") });
             engine.Setup(x => x.Definitions).Returns(new List<ReportDefinition>() { new ReportDefinition() { Name = "Mock" } });
             outermodel = new ReportModel(engine.Object,clock);
             pagemodel = new ReportPartialModel(engine.Object);
@@ -76,7 +76,7 @@ namespace YoFi.Tests.Pages
         {
             // When: Getting the page with a certain {name} report
             var name = "Empty";
-            var parameters = new ReportParameters() { id = name };
+            var parameters = new ReportParameters() { slug = name };
             var actionresult = await pagemodel.OnGetAsync(parameters);
             Assert.That.IsOfType<PartialViewResult>(actionresult);
 
@@ -129,7 +129,7 @@ namespace YoFi.Tests.Pages
             pagemodel = new ReportPartialModel(engine.Object);
 
             // When: Getting the page while asking for a report defintiion that doesn't exist
-            var parameters = new ReportParameters() { id = "dontexist" };
+            var parameters = new ReportParameters() { slug = "dontexist" };
             var actionresult = await pagemodel.OnGetAsync(parameters);
 
             // Then: Result is Not Found
@@ -166,7 +166,7 @@ namespace YoFi.Tests.Pages
         [TestMethod]
         public async Task MultiBarChart()
         {
-            var parameters = new ReportParameters() { id = "nototal" };
+            var parameters = new ReportParameters() { slug = "nototal" };
             var actionresult = await pagemodel.OnGetAsync(parameters);
             Assert.That.IsOfType<PartialViewResult>(actionresult);
 

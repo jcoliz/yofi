@@ -76,7 +76,7 @@ namespace YoFi.Tests.Core
             var tests = builder.Definitions;
 
             foreach (var def in tests)
-                RunOne(def.id);
+                RunOne(def.slug);
         }
 
         [DataRow("managed-budget")]
@@ -88,7 +88,7 @@ namespace YoFi.Tests.Core
         {
             // When: Running each w/ no parameters
             Console.WriteLine($"{id}...");
-            var report = builder.Build(new ReportParameters() { id = id, year = year });
+            var report = builder.Build(new ReportParameters() { slug = id, year = year });
             WriteReportToContext(report);
 
             // Then: There is data, except for reports we know will be empty

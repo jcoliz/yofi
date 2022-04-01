@@ -88,6 +88,7 @@ namespace YoFi.Tests.Functional
 
             // When: Selecting the "all" report from the dropdown
             await Page.ClickAsync("text=Choose a Report");
+            await Page.SaveScreenshotToAsync(TestContext, $"{expected}-Chooser");
             await Page.ClickAsync($"text={expected}");
 
             // And: Waiting for the page to fully load

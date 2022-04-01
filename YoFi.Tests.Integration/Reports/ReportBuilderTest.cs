@@ -101,7 +101,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on ClassInitialize)
 
             // When: Getting the report
-            await WhenGettingReport( new ReportParameters() { id = "all", year = 2020, showmonths = showmonths } );
+            await WhenGettingReport( new ReportParameters() { slug = "all", year = 2020, showmonths = showmonths } );
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
@@ -127,7 +127,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on Initialize)
 
             // When: Getting the report
-            await WhenGettingReport(new ReportParameters() { id = "all", year = 2020, showmonths = true, level = level });
+            await WhenGettingReport(new ReportParameters() { slug = "all", year = 2020, showmonths = true, level = level });
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
@@ -169,7 +169,7 @@ namespace YoFi.Tests.Integration.Reports
 
             // When: Building the 'All' report for the correct year, with level at '{level}'
             var report = "all";
-            await WhenGettingReport(new ReportParameters() { id = "all", year = 2020, showmonths = true, month = month });
+            await WhenGettingReport(new ReportParameters() { slug = "all", year = 2020, showmonths = true, month = month });
 
             // Then: On the expected page
             Assert.AreEqual("All Transactions", h2);
@@ -198,7 +198,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on Initialize)
 
             // When: Building the '{Category}' report for the correct year
-            await WhenGettingReport(new ReportParameters() { id = category.ToLowerInvariant(), year = 2020 });
+            await WhenGettingReport(new ReportParameters() { slug = category.ToLowerInvariant(), year = 2020 });
 
             // Then: Report has the correct total
             ThenReportHasTotal(SumOfTopCategory(category));
@@ -219,7 +219,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on Initialize)
 
             // When: Building the 'expenses-detail' report for the correct year
-            await WhenGettingReport(new ReportParameters() { id = "expenses-detail", year = 2020, showmonths = showmonths });
+            await WhenGettingReport(new ReportParameters() { slug = "expenses-detail", year = 2020, showmonths = showmonths });
 
             // Then: Report has the correct total
             ThenReportHasTotal(data.Transactions.Sum(x => x.Amount) - SumOfTopCategory("Taxes") - SumOfTopCategory("Savings") - SumOfTopCategory("Income"));
@@ -238,7 +238,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on Initialize)
 
             // When: Building the 'budget' report for the correct year
-            await WhenGettingReport(new ReportParameters() { id = "budget", year = 2020 });
+            await WhenGettingReport(new ReportParameters() { slug = "budget", year = 2020 });
 
             // Then: Report has the correct total
             ThenReportHasTotal(data.BudgetTxs.Sum(x => x.Amount));
@@ -257,7 +257,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on Initialize)
 
             // When: Building the 'expenses-budget' report for the correct year
-            await WhenGettingReport(new ReportParameters() { id = "expenses-budget", year = 2020 });
+            await WhenGettingReport(new ReportParameters() { slug = "expenses-budget", year = 2020 });
 
             // Then: Report has the correct total
             ThenReportHasTotal(data.BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income"));
@@ -276,7 +276,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on Initialize)
 
             // When: Building the 'expenses-v-budget' report for the correct year
-            await WhenGettingReport(new ReportParameters() { id = "expenses-v-budget", year = 2020 });
+            await WhenGettingReport(new ReportParameters() { slug = "expenses-v-budget", year = 2020 });
 
             // Then: Report has the correct total budget
             var expected = data.BudgetTxs.Sum(x => x.Amount) - SumOfBudgetTxsTopCategory("Taxes") - SumOfBudgetTxsTopCategory("Savings") - SumOfBudgetTxsTopCategory("Income");
@@ -302,7 +302,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Assembled on Initialize)
 
             // When: Building the 'all-v-budget' report for the correct year
-            await WhenGettingReport(new ReportParameters() { id = "all-v-budget", year = 2020 });
+            await WhenGettingReport(new ReportParameters() { slug = "all-v-budget", year = 2020 });
 
             // Then: Report has the correct total budget
             var expected = data.BudgetTxs.Sum(x => x.Amount);
@@ -330,7 +330,7 @@ namespace YoFi.Tests.Integration.Reports
             context.SaveChanges();
 
             // When: Building the 'managed-budget' report for the correct year
-            await WhenGettingReport(new ReportParameters() { id = "managed-budget", year = 2020 });
+            await WhenGettingReport(new ReportParameters() { slug = "managed-budget", year = 2020 });
 
             // Then: Report has the correct values 
 
@@ -363,7 +363,7 @@ namespace YoFi.Tests.Integration.Reports
             // So we can use the setup assembled on Initialize
 
             // When: Building the 'managed-budget' report for the correct year
-            await WhenGettingReport(new ReportParameters() { id = "managed-budget", year = 2020 });
+            await WhenGettingReport(new ReportParameters() { slug = "managed-budget", year = 2020 });
 
             // Then: The report is totally blank
             Assert.IsFalse(tables.Any());
@@ -410,7 +410,7 @@ namespace YoFi.Tests.Integration.Reports
             context.SaveChanges();
 
             // When: Building the 'expenses' report for the year including that year
-            await WhenGettingReport(new ReportParameters() { id = "expenses", year = 2020 });
+            await WhenGettingReport(new ReportParameters() { slug = "expenses", year = 2020 });
 
             // Then: The report builds without error
         }

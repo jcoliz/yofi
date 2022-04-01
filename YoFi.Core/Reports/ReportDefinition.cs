@@ -10,9 +10,9 @@
     public class ReportDefinition
     {
         /// <summary>
-        /// The short name identifier
+        /// The url slug, or short name identifier for this definition
         /// </summary>
-        public string id { get; set; }
+        public string slug { get; set; }
 
         #region Interpreted by QueryBuilder
 

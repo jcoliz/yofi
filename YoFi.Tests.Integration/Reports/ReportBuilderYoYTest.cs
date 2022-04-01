@@ -69,7 +69,7 @@ namespace YoFi.Tests.Integration.Reports
             // Given: A large database of transactions, over many years
 
             // When: Building the 'yoy' report 
-            await WhenGettingReport(new ReportParameters() { id = "yoy", level = level });
+            await WhenGettingReport(new ReportParameters() { slug = "yoy", level = level });
 
             // Then: Report has the correct total
             Assert.AreEqual(data.Transactions.Sum(x => x.Amount).ToString("C0", culture), total);

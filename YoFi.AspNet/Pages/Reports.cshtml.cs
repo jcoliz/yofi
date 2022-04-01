@@ -35,7 +35,7 @@ namespace YoFi.AspNet.Pages
         public void OnGet([Bind("year,month")] ReportParameters parms)
         {
             Parameters = parms;
-            Parameters.id = "summary";
+            Parameters.slug = "summary";
 
             var sessionvars = new SessionVariables(HttpContext);
 

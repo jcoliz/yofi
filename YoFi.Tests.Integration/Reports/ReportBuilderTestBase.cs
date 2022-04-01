@@ -79,9 +79,9 @@ namespace YoFi.Tests.Integration.Reports
         {
             // Given: A URL which encodes these report parameters
 
-            var start = (parameters.id == "summary")
+            var start = (parameters.slug == "summary")
                 ? $"/Reports/?year={parameters.year}"
-                : $"/Report/{parameters.id}?year={parameters.year}";
+                : $"/Report/{parameters.slug}?year={parameters.year}";
 
             var builder = new StringBuilder(start);
 
@@ -95,14 +95,14 @@ namespace YoFi.Tests.Integration.Reports
             var url = builder.ToString();
 
             // When: Getting a report at that URL from the system
-            if (parameters.id == "summary")
+            if (parameters.slug == "summary")
                 await WhenGettingReportDirectly(url);
             else
                 await WhenGettingReport(url);
 
             // Then: Is showing the correct report
             if (tables.Count() == 1)
-                Assert.AreEqual($"report-{parameters.id}", testid);
+                Assert.AreEqual($"report-{parameters.slug}", testid);
 
             // And: Return to the caller for futher checks
         }

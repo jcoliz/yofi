@@ -19,7 +19,7 @@
                 <a href="/Reports" class="dropdown-item">Summary</a>
                 @foreach (var item in Model.Definitions)
                 {
-                    <a asp-page="Report" asp-route-id="@item.id" class="dropdown-item">@item.Name</a>
+                    <a asp-page="Report" asp-route-slug="@item.slug" class="dropdown-item">@item.Name</a>
                 }
             </div>
         </div>
@@ -31,7 +31,7 @@
         <div class="collapse navbar-collapse" id="navbarPage">
 
             <ul class="navbar-nav ms-auto">
-                @if (Parameters.id != "summary")
+                @if (Parameters.slug != "summary")
                 {
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" role="button" id="dropdownMenuButtonLevel" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -42,7 +42,7 @@
                                 for (int i = 1; i <= Model.MaxLevels; i++)
                                 {
                                     <a asp-page="Report"
-                                       asp-route-id="@Parameters.id"
+                                       asp-route-slug="@Parameters.slug"
                                        asp-route-month="@Parameters.month"
                                        asp-route-showmonths="@Parameters.showmonths"
                                        asp-route-level="@i"
@@ -57,13 +57,13 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonColumns">
                             <a asp-page="Report"
-                                asp-route-id="@Parameters.id"
+                                asp-route-slug="@Parameters.slug"
                                 asp-route-level="@Parameters.level"
                                 asp-route-month="@Parameters.month"
                                asp-route-showmonths="true"
                                class="dropdown-item">Show</a>
                             <a asp-page="Report"
-                                asp-route-id="@Parameters.id"
+                                asp-route-slug="@Parameters.slug"
                                 asp-route-level="@Parameters.level"
                                 asp-route-month="@Parameters.month"
                                asp-route-showmonths="false"
@@ -81,7 +81,7 @@
                             int n = 1;
                             foreach (var monthname in System.Globalization.DateTimeFormatInfo.CurrentInfo.MonthNames.Where(x => !string.IsNullOrEmpty(x)))
                             {
-                                @if (Parameters.id == "summary")
+                                @if (Parameters.slug == "summary")
                                 {
                                     <a asp-page="Reports"
                                        asp-route-month="@n"
@@ -90,7 +90,7 @@
                                 else
                                 {
                                     <a asp-page="Report"
-                                        asp-route-id="@Parameters.id"
+                                        asp-route-slug="@Parameters.slug"
                                         asp-route-showmonths="@Parameters.showmonths"
                                         asp-route-level="@Parameters.level"
                                        asp-route-month="@n"
@@ -111,7 +111,7 @@
                             int currentyear = DateTime.Now.Year;
                             for (int y = 2017; y <= currentyear; ++y)
                             {
-                                @if (Parameters.id == "summary")
+                                @if (Parameters.slug == "summary")
                                 {
                                     <a asp-page="Reports"
                                        asp-route-year="@y"
@@ -120,7 +120,7 @@
                                 else
                                 {
                                     <a asp-page="Report"
-                                        asp-route-id="@Parameters.id"
+                                        asp-route-slug="@Parameters.slug"
                                         asp-route-showmonths="@Parameters.showmonths"
                                         asp-route-level="@Parameters.level"
                                        asp-route-year="@y"

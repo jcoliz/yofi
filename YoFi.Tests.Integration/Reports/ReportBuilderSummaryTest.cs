@@ -41,7 +41,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Done in ClassInitialize)
 
             // When: Getting the "Reports" Page for the year of our sample data
-            await WhenGettingReport(new ReportParameters() { id = "summary", year = 2021 });
+            await WhenGettingReport(new ReportParameters() { slug = "summary", year = 2021 });
 
             // Then: Reports have the correct total
             ThenReportHasTotal(report: "income", expected: 149000.08m);
@@ -57,7 +57,7 @@ namespace YoFi.Tests.Integration.Reports
             // (Done in ClassInitialize)
 
             // When: Getting the "Reports" Page for the NEXT year, where there is no data
-            await WhenGettingReport(new ReportParameters() { id = "summary", year = 2022 });
+            await WhenGettingReport(new ReportParameters() { slug = "summary", year = 2022 });
 
             // Then: All the totals are zero
             ThenReportHasTotal(report: "Net-Income", expected: 0);

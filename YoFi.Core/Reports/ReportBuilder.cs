@@ -45,10 +45,10 @@ namespace YoFi.Core.Reports
             int Month = _qbuilder.Month = parameters.month ?? 12;
             int Year = _qbuilder.Year = parameters.year ?? _clock.Now.Year;
 
-            if (!Definitions.Any(x => x.id == parameters.id))
-                throw new KeyNotFoundException($"Unable to find report {parameters.id}");
+            if (!Definitions.Any(x => x.slug == parameters.slug))
+                throw new KeyNotFoundException($"Unable to find report {parameters.slug}");
 
-            var definition = Definitions.Where(x => x.id == parameters.id).SingleOrDefault();
+            var definition = Definitions.Where(x => x.slug == parameters.slug).SingleOrDefault();
 
             // Timeframe and description (which displays timeframe)
 
@@ -91,7 +91,7 @@ namespace YoFi.Core.Reports
 
             // Special case for yoy report
 
-            if (parameters.id == "yoy")
+            if (parameters.slug == "yoy")
             {
                 var years = report.Source.Select(x => Int32.Parse(x.Name));
                 report.Description = $"For {years.Min()} to {years.Max()}";
@@ -169,7 +169,7 @@ namespace YoFi.Core.Reports
         public IEnumerable<IEnumerable<IDisplayReport>> BuildSummary(ReportParameters parms)
         {
             ReportParameters Parameters = parms;
-            Parameters.id = "summary";
+            Parameters.slug = "summary";
 
             // Fixup parameter
             if (!Parameters.month.HasValue)
@@ -181,7 +181,7 @@ namespace YoFi.Core.Reports
             // The idea here is to build a single report doing all the SQL queries just ONCE, then carve it up into
             // the various reports we want to display
 
-            var buildparms = new ReportParameters() { id = "all-summary", month = Parameters.month, year = parms.year };
+            var buildparms = new ReportParameters() { slug = "all-summary", month = Parameters.month, year = parms.year };
             var all = Build(buildparms);
 
             var result = new List<List<IDisplayReport>>();
@@ -268,7 +268,7 @@ namespace YoFi.Core.Reports
         {
             new ReportDefinition()
             {
-                id = "income",
+                slug = "income",
                 SkipLevels = 1,
                 SortOrder = "TotalAscending",
                 Name = "Income",
@@ -278,7 +278,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "taxes",
+                slug = "taxes",
                 Source = "Actual",
                 SourceParameters = "top=Taxes",
                 SkipLevels = 1,
@@ -287,7 +287,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "expenses",
+                slug = "expenses",
                 CustomColumns = "pctoftotal",
                 Source = "Actual",
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
@@ -296,7 +296,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "savings",
+                slug = "savings",
                 Source = "Actual",
                 SourceParameters = "top=Savings",
                 SkipLevels = 1,
@@ -305,7 +305,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "income-detail",
+                slug = "income-detail",
                 SkipLevels = 1,
                 SortOrder = "TotalAscending",
                 Name = "Income Detail",
@@ -317,7 +317,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "taxes-detail",
+                slug = "taxes-detail",
                 Source = "Actual",
                 SourceParameters = "top=Taxes",
                 SkipLevels = 1,
@@ -329,7 +329,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "expenses-detail",
+                slug = "expenses-detail",
                 CustomColumns = "pctoftotal",
                 Source = "Actual",
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
@@ -339,7 +339,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "savings-detail",
+                slug = "savings-detail",
                 Source = "Actual",
                 SourceParameters = "top=Savings",
                 SkipLevels = 1,
@@ -350,7 +350,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "all",
+                slug = "all",
                 NumLevels = 2,
                 Source = "Actual",
                 Name = "All Transactions",
@@ -358,7 +358,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "all-summary",
+                slug = "all-summary",
                 NumLevels = 2,
                 Source = "Actual",
                 Name = "All Transactions Summary",
@@ -366,7 +366,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "trips",
+                slug = "trips",
                 Source = "Actual",
                 SourceParameters = "top=Travel:Trips",
                 SkipLevels = 2,
@@ -376,7 +376,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "budget",
+                slug = "budget",
                 Name = "Full Budget",
                 Source = "Budget",
                 WholeYear = true,
@@ -384,7 +384,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "all-v-budget",
+                slug = "all-v-budget",
                 Name = "All vs. Budget",
                 Source = "ActualVsBudget",
                 WholeYear = true,
@@ -394,7 +394,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "expenses-budget",
+                slug = "expenses-budget",
                 Source = "Budget",
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
                 WholeYear = true,
@@ -403,7 +403,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "expenses-v-budget",
+                slug = "expenses-v-budget",
                 Name = "Expenses vs. Budget",
                 Source = "ActualVsBudget",
                 SourceParameters = "excluded=Savings,Taxes,Income,Transfer,Unmapped",
@@ -415,7 +415,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "managed-budget",
+                slug = "managed-budget",
                 Name = "Managed Budget",
                 Source = "ManagedBudget",
                 WithTotalColumn = false,
@@ -426,7 +426,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "export",
+                slug = "export",
                 Name = "Transaction Export",
                 Source = "ActualVsBudget",
                 SourceParameters = "leafrows=true",
@@ -436,7 +436,7 @@ namespace YoFi.Core.Reports
             },
             new ReportDefinition()
             {
-                id = "yoy",
+                slug = "yoy",
                 Name = "Year over Year",
                 Source = "YearOverYear",
                 NumLevels = 2,

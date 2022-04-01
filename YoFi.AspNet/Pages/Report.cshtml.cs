@@ -49,9 +49,9 @@ namespace YoFi.AspNet.Pages
         {
             Parameters = parms;
 
-            if (string.IsNullOrEmpty(parms.id))
+            if (string.IsNullOrEmpty(parms.slug))
             {
-                parms.id = "all";
+                parms.slug = "all";
             }
 
             var sessionvars = new SessionVariables(HttpContext);
@@ -73,7 +73,7 @@ namespace YoFi.AspNet.Pages
                     parms.month = 12;
             }
 
-            Title = _reports.Definitions.Where(x=>x.id == parms.id).SingleOrDefault()?.Name ?? "Not Found";
+            Title = _reports.Definitions.Where(x=>x.slug == parms.slug).SingleOrDefault()?.Name ?? "Not Found";
         }
 
         private readonly IReportEngine _reports;

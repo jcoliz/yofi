@@ -15,9 +15,9 @@ namespace YoFi.Core.Reports
     public class ReportParameters
     {
         /// <summary>
-        /// The identifier, or name, of the report we want
+        /// The url slug, or short name, of the report we want
         /// </summary>
-        public string id { get; set; }
+        public string slug { get; set; }
 
         /// <summary>
         /// Optionally set the constraint year, else will use current year
