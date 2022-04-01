@@ -6,6 +6,12 @@ namespace YoFi.Core.Reports
     /// <summary>
     /// Report suitable for transmission over the network
     /// </summary>
+    /// <remarks>
+    /// TODO: This is going to need more work. Custom columns contain a code Func<>.
+    /// This is not suitable for transmission. So at a minimum, I need to calculate
+    /// calculated columns. Generally speaking, I can probably greatly reduce the
+    /// amount of info in reports and columns by pre-processing a bit more.
+    /// </remarks>
     public class WireReport : IDisplayReport
     {
         public string Name { get; set; }
