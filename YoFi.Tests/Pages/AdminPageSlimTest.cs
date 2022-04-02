@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YoFi.AspNet.Pages;
 using YoFi.Core;
-using YoFi.Core.SampleGen;
+using YoFi.Core.SampleData;
 using static YoFi.AspNet.Pages.AdminModel;
 
 namespace YoFi.Tests.Pages

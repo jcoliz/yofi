@@ -62,7 +62,7 @@
     </p>
 
     <div class="row">
-        @foreach (var offering in Model.Offerings.Where(x => x.Kind == YoFi.Core.SampleGen.SampleDataDownloadOfferingKind.Primary))
+        @foreach (var offering in Model.Offerings.Where(x => x.Kind == YoFi.Core.SampleData.SampleDataDownloadOfferingKind.Primary))
         {
             <div class="col-sm-4 col-12 p-2 d-flex">
                 <a class="btn flex-fill highlight" asp-page-handler="Sample" asp-route-what="@offering.ID" data-test-id="offering">
@@ -73,7 +73,7 @@
     </div>
 
     <div class="row mb-3">
-        @foreach (var offering in Model.Offerings.Where(x => x.Kind == YoFi.Core.SampleGen.SampleDataDownloadOfferingKind.Monthly))
+        @foreach (var offering in Model.Offerings.Where(x => x.Kind == YoFi.Core.SampleData.SampleDataDownloadOfferingKind.Monthly))
         {
             <div class="col-lg-1 col-md-2 col-sm-3 col-4 p-2 d-flex">
                 <a class="btn flex-fill highlight" asp-page-handler="Sample" asp-route-what="@offering.ID" data-test-id="offering">

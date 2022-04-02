@@ -19,7 +19,7 @@ using YoFi.Core;
 using YoFi.Core.Importers;
 using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;
-using YoFi.Core.SampleGen;
+using YoFi.Core.SampleData;
 using Transaction = YoFi.Core.Models.Transaction;
 
 namespace YoFi.AspNet.Controllers

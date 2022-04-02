@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.AspNet.Boilerplate.Models;
-using YoFi.Core.SampleGen;
+using YoFi.Core.SampleData;
 using Common.DotNet.Data;
 using Common.DotNet;
 using YoFi.Core;

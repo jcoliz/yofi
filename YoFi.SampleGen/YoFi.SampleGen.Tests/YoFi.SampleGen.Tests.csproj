@@ -2,16 +2,30 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="SampleData\FullSampleDataDefinition.xlsx" />
+    <None Remove="SampleData\TestData1.xlsx" />
+    <None Remove="SampleData\UploadSampleDataDefinition.xlsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SampleData\FullSampleDataDefinition.xlsx" />
+    <EmbeddedResource Include="SampleData\TestData1.xlsx" />
+    <EmbeddedResource Include="SampleData\UploadSampleDataDefinition.xlsx" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
     <PackageReference Include="coverlet.collector" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YoFi.SampleGen\YoFi.SampleGen.csproj" />
   </ItemGroup>
 
 </Project>

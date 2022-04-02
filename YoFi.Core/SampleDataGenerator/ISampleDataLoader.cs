@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace YoFi.Core.SampleGen
+namespace YoFi.Core.SampleData
 {
     /// <summary>
     /// Provides a way for UI components to manage sample data in the system

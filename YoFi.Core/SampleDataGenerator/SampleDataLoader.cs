@@ -11,7 +11,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 
-namespace YoFi.Core.SampleGen
+namespace YoFi.Core.SampleData
 {
     public class SampleDataLoader : ISampleDataLoader
     {

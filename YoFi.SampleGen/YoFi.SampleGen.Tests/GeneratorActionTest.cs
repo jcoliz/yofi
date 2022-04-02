@@ -6,7 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core.SampleGen;
-using YoFi.Tests.Helpers;
+using YoFi.Core.SampleData;
+//using YoFi.Tests.Helpers;
 using CNDSampleData = Common.DotNet.Data.SampleData;
 
 namespace YoFi.Tests.Core.SampleGen
@@ -263,6 +264,7 @@ namespace YoFi.Tests.Core.SampleGen
             TestContext.AddResultFile(filename);
         }
 
+#if false        
         [TestMethod]
         public async Task GenerateJson()
         {
@@ -295,6 +297,7 @@ namespace YoFi.Tests.Core.SampleGen
             CollectionAssert.AreEqual(store.Payees, newstore.Payees);
             CollectionAssert.AreEqual(store.BudgetTxs, newstore.BudgetTxs);
         }
+#endif
 
         [TestMethod]
         public async Task GenerateOfx()

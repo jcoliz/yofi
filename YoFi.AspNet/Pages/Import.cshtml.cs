@@ -15,7 +15,7 @@ using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;
-using YoFi.Core.SampleGen;
+using YoFi.Core.SampleData;
 
 namespace YoFi.AspNet.Pages
 {
