@@ -20,10 +20,7 @@
     <None Remove="SampleData\FullSampleData.json" />
     <None Remove="SampleData\SampleData-Full.xlsx" />
     <None Remove="SampleData\Splits-Test.xlsx" />
-    <None Remove="SampleData\Test-Generator-GenerateUploadSampleData.xlsx" />
-    <None Remove="SampleData\TestData1.xlsx" />
     <None Remove="SampleData\Transactions1000.json" />
-    <None Remove="SampleData\UploadSampleDataDefinition.xlsx" />
     <None Remove="SampleData\User-Story-802.ofx" />
   </ItemGroup>
 
@@ -44,10 +41,7 @@
     <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
     <EmbeddedResource Include="SampleData\FullSampleData.json" />
     <EmbeddedResource Include="SampleData\Splits-Test.xlsx" />
-    <EmbeddedResource Include="SampleData\Test-Generator-GenerateUploadSampleData.xlsx" />
-    <EmbeddedResource Include="SampleData\TestData1.xlsx" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
-    <EmbeddedResource Include="SampleData\UploadSampleDataDefinition.xlsx" />
     <EmbeddedResource Include="SampleData\User-Story-802.ofx" />
   </ItemGroup>
 

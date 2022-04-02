@@ -23,11 +23,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="SampleDataGenerator\ofx-footer.txt" />
+    <None Remove="SampleDataGenerator\ofx-header.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SampleDataGenerator\ofx-footer.txt" />
+    <EmbeddedResource Include="SampleDataGenerator\ofx-header.txt" />
     <EmbeddedResource Include="SampleDataGenerator\SampleDataDownloadOfferings.json" />
     <EmbeddedResource Include="SampleDataGenerator\SampleDataSeedOfferings.json" />
-    <EmbeddedResource Include="Data\FullSampleDataDefinition.xlsx" />
-    <EmbeddedResource Include="Data\ofx-footer.txt" />
-    <EmbeddedResource Include="Data\ofx-header.txt" />
   </ItemGroup>
 
 </Project>
