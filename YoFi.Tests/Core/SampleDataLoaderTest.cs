@@ -8,10 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Core.SampleGen;
+using YoFi.Core.SampleData;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests.Core.SampleGen
+namespace YoFi.Tests.Core
 {
     [TestClass]
     public class SampleDataLoaderTest

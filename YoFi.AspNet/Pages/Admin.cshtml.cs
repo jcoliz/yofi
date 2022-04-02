@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using YoFi.Core;
-using YoFi.Core.SampleGen;
+using YoFi.Core.SampleData;
 
 namespace YoFi.AspNet.Pages
 {

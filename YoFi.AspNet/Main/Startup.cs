@@ -23,7 +23,7 @@ using YoFi.Core.Importers;
 using YoFi.Core.Models;
 using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
-using YoFi.Core.SampleGen;
+using YoFi.Core.SampleData;
 using YoFi.Services;
 
 #if __DEMO_OPEN_ACCESS__

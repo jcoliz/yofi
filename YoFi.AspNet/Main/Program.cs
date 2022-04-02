@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using Common.DotNet;
 using Microsoft.Extensions.Options;
-using YoFi.Core.SampleGen;
+using YoFi.Core.SampleData;
 using YoFi.Core;
 
 namespace YoFi.AspNet.Main
