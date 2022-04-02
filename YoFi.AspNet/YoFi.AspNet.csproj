@@ -14,9 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Data\FullSampleDataDefinition.xlsx" />
-    <None Remove="Data\ofx-footer.txt" />
-    <None Remove="Data\ofx-header.txt" />
     <None Remove="release.txt" />
     <None Remove="version.txt" />
   </ItemGroup>
