@@ -8,7 +8,7 @@ using YoFi.Core.Models;
 using YoFi.Core.SampleGen;
 using YoFi.Core.SampleData;
 //using YoFi.Tests.Helpers;
-using CNDSampleData = Common.DotNet.Data.SampleData;
+using CNTSampleData = Common.DotNet.Test.SampleData;
 
 namespace YoFi.Tests.Core.SampleGen
 {
@@ -223,7 +223,7 @@ namespace YoFi.Tests.Core.SampleGen
         [TestMethod]
         public void GenerateFullSampleData()
         {
-            var instream = CNDSampleData.Open("FullSampleDataDefinition.xlsx");
+            var instream = CNTSampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions();
             generator.GeneratePayees();
@@ -335,7 +335,7 @@ namespace YoFi.Tests.Core.SampleGen
         [TestMethod]
         public void GenerateFullSampleOfx()
         {
-            var instream = CNDSampleData.Open("FullSampleDataDefinition.xlsx");
+            var instream = CNTSampleData.Open("FullSampleDataDefinition.xlsx");
             generator.LoadDefinitions(instream);
             generator.GenerateTransactions();
 
