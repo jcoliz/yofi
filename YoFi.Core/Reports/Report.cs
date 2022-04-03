@@ -928,6 +928,7 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// In a multi-level report, whom are we under? or null for top-level
         /// </summary>
+        [JsonIgnore]
         public RowLabel Parent { get; set; }
 
         /// <summary>
