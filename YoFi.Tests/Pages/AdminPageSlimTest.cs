@@ -16,18 +16,18 @@ namespace YoFi.Tests.Pages
     [TestClass]
     public class AdminPageSlimTest
     {
-        private Mock<ISampleDataLoader> loader;
-        private Mock<IDatabaseAdministration> dbadmin;
+        private Mock<ISampleDataProvider> loader;
+        private Mock<IDataAdminProvider> dbadmin;
         private AdminModel page;
 
         [TestInitialize]
         public void SetUp()
         {
-            dbadmin = new Mock<IDatabaseAdministration>();
+            dbadmin = new Mock<IDataAdminProvider>();
             var configoptions = new Mock<IOptions<PageConfig>>();
             var config = new PageConfig() { NoDelete = true };
             configoptions.Setup(x => x.Value).Returns(config);
-            loader = new Mock<ISampleDataLoader>();
+            loader = new Mock<ISampleDataProvider>();
             page = new AdminModel(dbadmin.Object,configoptions.Object,loader.Object);
         }
 
@@ -53,7 +53,7 @@ namespace YoFi.Tests.Pages
             loader.Setup(x => x.ListSeedOfferingsAsync()).Returns(Task.FromResult(offerings.Cast<ISampleDataSeedOffering>()));
 
             // And: Database status of 2 budgettxs
-            var status = new Mock<IDatabaseStatus>();
+            var status = new Mock<IDataStatus>();
             status.Setup(x => x.NumBudgetTxs).Returns(2);
             dbadmin.Setup(x => x.GetDatabaseStatus()).Returns(Task.FromResult(status.Object));
 

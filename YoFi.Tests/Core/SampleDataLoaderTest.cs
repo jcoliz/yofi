@@ -16,7 +16,7 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class SampleDataLoaderTest
     {
-        ISampleDataLoader loader;
+        ISampleDataProvider loader;
         MockDataContext context;
         TestClock clock;
 
@@ -28,7 +28,7 @@ namespace YoFi.Tests.Core
             var dir = Environment.CurrentDirectory + "/SampleData";
             var config = new Mock<ISampleDataConfiguration>();
             config.Setup(x => x.Directory).Returns(dir);
-            loader = new SampleDataLoader(context, clock, config.Object);
+            loader = new SampleDataProvider(context, clock, config.Object);
         }
 
         [TestMethod]

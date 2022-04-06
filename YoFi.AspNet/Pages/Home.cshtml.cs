@@ -27,7 +27,7 @@ namespace YoFi.AspNet.Pages
 
         public bool isDemo { get; private set; }
 
-        public async Task OnGetAsync([FromServices] IDatabaseAdministration dbadmin)
+        public async Task OnGetAsync([FromServices] IDataAdminProvider dbadmin)
         {
             // Task 1270: Tie Admin page into Home page flow
             //

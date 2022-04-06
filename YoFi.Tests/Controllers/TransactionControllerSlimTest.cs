@@ -39,7 +39,7 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task Seed()
         {
             // Given: A mock data loader
-            var loader = new Mock<ISampleDataLoader>();
+            var loader = new Mock<ISampleDataProvider>();
             loader.Setup(x => x.SeedAsync(It.IsAny<string>(),It.IsAny<bool>()));
 
             // When: Seeding with a given ID
@@ -59,7 +59,7 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task SeedAppException()
         {
             // Given: A mock data loader which will produce an ApplicationException
-            var loader = new Mock<ISampleDataLoader>();
+            var loader = new Mock<ISampleDataProvider>();
             var message = "words";
             loader.Setup(x => x.SeedAsync(It.IsAny<string>(), It.IsAny<bool>())).Throws(new ApplicationException(message));
 
@@ -86,7 +86,7 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task SeedAnyException()
         {
             // Given: A mock data loader which will produce a strangeException
-            var loader = new Mock<ISampleDataLoader>();
+            var loader = new Mock<ISampleDataProvider>();
             var message = "words";
             loader.Setup(x => x.SeedAsync(It.IsAny<string>(), It.IsAny<bool>())).Throws(new AppDomainUnloadedException(message));
 
@@ -113,7 +113,7 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task DatabaseDelete()
         {
             // Given: A mock database administration
-            var dbadmin = new Mock<IDatabaseAdministration>();
+            var dbadmin = new Mock<IDataAdminProvider>();
             dbadmin.Setup(x => x.ClearDatabaseAsync(It.IsAny<string>()));
 
             // When: Calling DatabaseDelete with a given ID

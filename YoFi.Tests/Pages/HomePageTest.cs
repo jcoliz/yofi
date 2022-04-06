@@ -34,8 +34,8 @@ namespace YoFi.Tests.Pages
             identity.Setup(x => x.IsAuthenticated).Returns(false);
             page.PageContext.HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal(identity.Object) };
 
-            var dbadmin = new Mock<IDatabaseAdministration>();
-            var dbstatus = new Mock<IDatabaseStatus>();
+            var dbadmin = new Mock<IDataAdminProvider>();
+            var dbstatus = new Mock<IDataStatus>();
             dbstatus.Setup(x => x.NumTransactions).Returns(empty ? 0 : 100);
             dbadmin.Setup(x => x.GetDatabaseStatus()).Returns(Task.FromResult(dbstatus.Object));
             await page.OnGetAsync(dbadmin.Object);

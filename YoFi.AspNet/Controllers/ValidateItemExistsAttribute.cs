@@ -52,8 +52,8 @@ namespace YoFi.AspNet.Controllers
 
     internal class ValidateItemExists<T> : IAsyncActionFilter where T : class, IID
     {
-        private readonly IDataContext _context;
-        public ValidateItemExists(IDataContext context)
+        private readonly IDataProvider _context;
+        public ValidateItemExists(IDataProvider context)
         {
             _context = context;
         }

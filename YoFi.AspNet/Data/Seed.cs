@@ -69,7 +69,7 @@ namespace YoFi.AspNet.Data
         /// ONLY IF: The demo is enabled, AND there is no data of any time already there
         /// </remarks>
         /// <returns></returns>
-        public static async Task ManageSampleData(ISampleDataLoader loader, IDatabaseAdministration dbadmin)
+        public static async Task ManageSampleData(ISampleDataProvider loader, IDataAdminProvider dbadmin)
         {
             var status = await dbadmin.GetDatabaseStatus();
             if (status.IsEmpty)

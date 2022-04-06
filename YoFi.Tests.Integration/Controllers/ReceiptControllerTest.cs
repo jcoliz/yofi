@@ -23,7 +23,7 @@ namespace YoFi.Tests.Integration.Controllers
         #region Fields
 
         protected string urlroot => "/Receipts";
-        private IDataContext iDC => integrationcontext.context as IDataContext;
+        private IDataProvider iDC => integrationcontext.context as IDataProvider;
 
         #endregion
 

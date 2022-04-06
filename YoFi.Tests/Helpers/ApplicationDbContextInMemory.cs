@@ -16,25 +16,25 @@ namespace YoFi.Tests.Helpers
     /// <remarks>
     /// There are a few things we can't do in an inmemory DB, so we work around those here.
     /// </remarks>
-    public class ApplicationDbContextInMemory : ApplicationDbContext, IDataContext
+    public class ApplicationDbContextInMemory : ApplicationDbContext, IDataProvider
     {
         public ApplicationDbContextInMemory(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        async Task IDataContext.BulkInsertAsync<T>(IList<T> items)
+        async Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
         {
             await this.AddRangeAsync(items);
             await this.SaveChangesAsync();
         }
 
-        Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)
+        Task IDataProvider.BulkDeleteAsync<T>(IQueryable<T> items)
         {
             this.RemoveRange(items);
             return this.SaveChangesAsync();
         }
 
-        async Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
+        async Task IDataProvider.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
         {
             // We support ONLY a very limited range of possibilities, which is where this
             // method is actually called.

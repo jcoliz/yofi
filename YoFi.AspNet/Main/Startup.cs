@@ -88,10 +88,10 @@ namespace YoFi.AspNet.Main
             services.AddScoped<IImporter<Payee>, BaseImporter<Payee>>();
             services.AddScoped<IImporter<BudgetTx>, BaseImporter<BudgetTx>>();
             services.AddScoped<IReportEngine, ReportBuilder>();
-            services.AddScoped<IDataContext, ApplicationDbContext>();
-            services.AddScoped<ISampleDataLoader, SampleDataLoader>();
+            services.AddScoped<IDataProvider, ApplicationDbContext>();
+            services.AddScoped<ISampleDataProvider, SampleDataProvider>();
             services.AddScoped<ISampleDataConfiguration, SampleDataConfiguration>();
-            services.AddScoped<IDatabaseAdministration, DatabaseAdministration>();
+            services.AddScoped<IDataAdminProvider, DataAdminProvider>();
 
             if (Configuration.GetSection(SendGridEmailOptions.Section).Exists())
             {

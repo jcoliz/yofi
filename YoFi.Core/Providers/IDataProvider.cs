@@ -8,12 +8,12 @@ using YoFi.Core.Models;
 namespace YoFi.Core
 {
     /// <summary>
-    /// Data storage context
+    /// Provider of underlying object data storage for our models
     /// </summary>
     /// <remarks>
     /// Platform and storage agnostic interface for all data stored in the system
     /// </remarks>
-    public interface IDataContext
+    public interface IDataProvider
     {
         /// <summary>
         /// Get a query of <typeparamref name="T"/> entities 

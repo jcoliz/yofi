@@ -24,7 +24,7 @@ namespace YoFi.Core.Repositories
         /// <param name="context">Where to find the data we actually contain</param>
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
-        public TransactionRepository(IDataContext context, IClock clock, IStorageService storage = null) : base(context)
+        public TransactionRepository(IDataProvider context, IClock clock, IStorageService storage = null) : base(context)
         {
             _storage = storage;
             _clock = clock;

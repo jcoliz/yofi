@@ -324,7 +324,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Seed(string id, [FromServices] ISampleDataLoader loader)
+        public async Task<IActionResult> Seed(string id, [FromServices] ISampleDataProvider loader)
         {
             var result = string.Empty;
             var resultdetails = string.Empty;
@@ -350,7 +350,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DatabaseDelete(string id, [FromServices] IDatabaseAdministration dbadmin)
+        public async Task<IActionResult> DatabaseDelete(string id, [FromServices] IDataAdminProvider dbadmin)
         {
             await dbadmin.ClearDatabaseAsync(id);
 

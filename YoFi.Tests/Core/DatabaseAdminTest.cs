@@ -13,14 +13,14 @@ namespace YoFi.Tests.Core
     [TestClass]
     public class DatabaseAdminTest
     {
-        private DatabaseAdministration dbadmin;
-        private Mock<IDataContext> context;
+        private DataAdminProvider dbadmin;
+        private Mock<IDataProvider> context;
         private Mock<IClock> clock;
 
         [TestInitialize]
         public void SetUp()
         {
-            context = new Mock<IDataContext>();
+            context = new Mock<IDataProvider>();
             context.Setup(x=>x.ClearAsync<BudgetTx>());
             context.Setup(x=>x.ClearAsync<Transaction>());
             context.Setup(x=>x.ClearAsync<Payee>());
@@ -28,7 +28,7 @@ namespace YoFi.Tests.Core
             context.Setup(x=>x.Get<Payee>()).Returns(Enumerable.Empty<Payee>().AsQueryable());
             context.Setup(x => x.Get<BudgetTx>()).Returns(Enumerable.Empty<BudgetTx>().AsQueryable());
             clock = new Mock<IClock>();
-            dbadmin  = new DatabaseAdministration(context.Object,clock.Object);
+            dbadmin  = new DataAdminProvider(context.Object,clock.Object);
         }
 
         [TestMethod]
@@ -92,7 +92,7 @@ namespace YoFi.Tests.Core
             context.Setup(x=>x.CountAsync<Transaction>(It.IsAny<IQueryable<Transaction>>())).Returns(Task.FromResult(10));
             context.Setup(x=>x.CountAsync<Payee>(It.IsAny<IQueryable<Payee>>())).Returns(Task.FromResult(20));
             context.Setup(x=>x.CountAsync<BudgetTx>(It.IsAny<IQueryable<BudgetTx>>())).Returns(Task.FromResult(30));
-            dbadmin  = new DatabaseAdministration(context.Object,clock.Object);
+            dbadmin  = new DataAdminProvider(context.Object,clock.Object);
 
             // When: Asking for database status
             var status = await dbadmin.GetDatabaseStatus();
@@ -113,7 +113,7 @@ namespace YoFi.Tests.Core
             context.Setup(x=>x.CountAsync<Transaction>(It.IsAny<IQueryable<Transaction>>())).Returns(Task.FromResult(0));
             context.Setup(x=>x.CountAsync<Payee>(It.IsAny<IQueryable<Payee>>())).Returns(Task.FromResult(0));
             context.Setup(x=>x.CountAsync<BudgetTx>(It.IsAny<IQueryable<BudgetTx>>())).Returns(Task.FromResult(0));
-            dbadmin  = new DatabaseAdministration(context.Object,clock.Object);
+            dbadmin  = new DataAdminProvider(context.Object,clock.Object);
 
             // When: Asking for database status
             var status = await dbadmin.GetDatabaseStatus();
@@ -138,7 +138,7 @@ namespace YoFi.Tests.Core
             // And: Current time is in the middle of those
             clock = new Mock<IClock>();
             clock.Setup(x=>x.Now).Returns(new System.DateTime(2022,1,8));
-            dbadmin  = new DatabaseAdministration(context.Object,clock.Object);
+            dbadmin  = new DataAdminProvider(context.Object,clock.Object);
 
             // When: Unhiding up to today
             await dbadmin.UnhideTransactionsToToday();
@@ -162,15 +162,15 @@ namespace YoFi.Tests.Core
         {
             // Given: A fresh dbadmin using a mock data context
             var mycontext = new MockDataContext();
-            dbadmin = new DatabaseAdministration(mycontext, clock.Object);
+            dbadmin = new DataAdminProvider(mycontext, clock.Object);
 
             // Given: A mix of transactions, payees, and budgettx with and without the testmarker, in the database
             var tdata = FakeObjects<Transaction>
                 .Make(5)
-                .Add(6, x => x.Category += DatabaseAdministration.TestMarker)
+                .Add(6, x => x.Category += DataAdminProvider.TestMarker)
                 .SaveTo(mycontext);
-            var bdata = FakeObjects<BudgetTx>.Make(5).Add(6, x => x.Category += DatabaseAdministration.TestMarker).SaveTo(mycontext);
-            var pdata = FakeObjects<Payee>.Make(5).Add(6, x => x.Category += DatabaseAdministration.TestMarker).SaveTo(mycontext);
+            var bdata = FakeObjects<BudgetTx>.Make(5).Add(6, x => x.Category += DataAdminProvider.TestMarker).SaveTo(mycontext);
+            var pdata = FakeObjects<Payee>.Make(5).Add(6, x => x.Category += DataAdminProvider.TestMarker).SaveTo(mycontext);
 
             // When: Clearing test data using the selected {id}
             await dbadmin.ClearTestDataAsync(id);

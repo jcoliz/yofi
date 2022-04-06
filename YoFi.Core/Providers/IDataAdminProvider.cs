@@ -11,13 +11,13 @@ namespace YoFi.Core
     /// <remarks>
     /// Note that this is a wire interface, so no properties, everything is async
     /// </remarks>
-    public interface IDatabaseAdministration
+    public interface IDataAdminProvider
     {
         /// <summary>
         /// Discover information about the current state of the database
         /// </summary>
         /// <returns></returns>
-        Task<IDatabaseStatus> GetDatabaseStatus();
+        Task<IDataStatus> GetDatabaseStatus();
 
         /// <summary>
         /// Remove items with the test marker on them
@@ -48,7 +48,7 @@ namespace YoFi.Core
         Task UnhideTransactionsToToday();
     }
 
-    public interface IDatabaseStatus
+    public interface IDataStatus
     {
         bool IsEmpty { get; }
         int NumTransactions { get; }

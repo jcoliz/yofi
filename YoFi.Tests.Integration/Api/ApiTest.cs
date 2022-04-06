@@ -115,7 +115,7 @@ namespace YoFi.Tests.Integration.Api
         public async Task ClearTestTransactions()
         {
             // Given: A mix of transactions, some with __test__ marker, some without
-            var items = FakeObjects<Transaction>.Make(7).Add(3,x => x.Category += DatabaseAdministration.TestMarker).SaveTo(this);
+            var items = FakeObjects<Transaction>.Make(7).Add(3,x => x.Category += DataAdminProvider.TestMarker).SaveTo(this);
 
             // When: Calling ClearTestData with id="trx"
             var response = await client.PostAsync($"/api/ClearTestData/trx", null);
@@ -131,7 +131,7 @@ namespace YoFi.Tests.Integration.Api
         {
             // Given: A mix of budget items, some with __test__ marker, some without
             //(var items, var chosen) = await GivenFakeDataInDatabase<BudgetTx>(10, 3, x => { x.Category += DatabaseAdministration.TestMarker; return x; });
-            var items = FakeObjects<BudgetTx>.Make(7).Add(3,x => x.Category += DatabaseAdministration.TestMarker).SaveTo(this);
+            var items = FakeObjects<BudgetTx>.Make(7).Add(3,x => x.Category += DataAdminProvider.TestMarker).SaveTo(this);
 
             // When: Calling ClearTestData with id="budgettx"
             var response = await client.PostAsync($"/api/ClearTestData/budgettx", null);
@@ -147,7 +147,7 @@ namespace YoFi.Tests.Integration.Api
         {
             // Given: A mix of payees, some with __test__ marker, some without
             //(var items, var chosen) = await GivenFakeDataInDatabase<Payee>(10, 3, x => { x.Category += DatabaseAdministration.TestMarker; return x; });
-            var items = FakeObjects<Payee>.Make(7).Add(3,x => x.Category += DatabaseAdministration.TestMarker).SaveTo(this);
+            var items = FakeObjects<Payee>.Make(7).Add(3,x => x.Category += DataAdminProvider.TestMarker).SaveTo(this);
 
             // When: Calling ClearTestData with id="payee"
             var response = await client.PostAsync($"/api/ClearTestData/payee", null);
