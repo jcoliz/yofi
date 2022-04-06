@@ -83,7 +83,7 @@ namespace YoFi.AspNet.Main
                     var democonfig = services.GetRequiredService<DemoConfig>();
                     if (democonfig.IsEnabled)
                     {
-                        var loader = services.GetRequiredService<ISampleDataLoader>();
+                        var loader = services.GetRequiredService<ISampleDataProvider>();
                         var dbadmin = services.GetRequiredService<IDataAdminProvider>();
                         await Seed.ManageSampleData(loader, dbadmin);
                     }

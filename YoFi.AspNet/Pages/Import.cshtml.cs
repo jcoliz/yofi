@@ -26,7 +26,7 @@ namespace YoFi.AspNet.Pages
         public const int MaxOtherItemsToShow = 10;
         private readonly ITransactionRepository _repository;
         private readonly IAuthorizationService _authorizationService;
-        private readonly ISampleDataLoader _loader;
+        private readonly ISampleDataProvider _loader;
 
         public IWireQueryResult<Transaction> Transactions { get; private set; }
         public IEnumerable<ISampleDataDownloadOffering> Offerings { get; private set; }
@@ -40,7 +40,7 @@ namespace YoFi.AspNet.Pages
 
         public string Error { get; private set; }
 
-        public ImportModel(ITransactionRepository repository, IAuthorizationService authorizationService, ISampleDataLoader loader)
+        public ImportModel(ITransactionRepository repository, IAuthorizationService authorizationService, ISampleDataProvider loader)
         {
             _repository = repository;
             _authorizationService = authorizationService;

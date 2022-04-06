@@ -7,7 +7,7 @@ namespace YoFi.Core.SampleData
     /// <summary>
     /// Provides a way for UI components to manage sample data in the system
     /// </summary>
-    public interface ISampleDataLoader
+    public interface ISampleDataProvider
     {
         /// <summary>
         /// Discover the known sample data offerings which can be seeded into

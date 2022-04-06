@@ -324,7 +324,7 @@ namespace YoFi.AspNet.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Seed(string id, [FromServices] ISampleDataLoader loader)
+        public async Task<IActionResult> Seed(string id, [FromServices] ISampleDataProvider loader)
         {
             var result = string.Empty;
             var resultdetails = string.Empty;

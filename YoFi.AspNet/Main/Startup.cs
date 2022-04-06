@@ -89,7 +89,7 @@ namespace YoFi.AspNet.Main
             services.AddScoped<IImporter<BudgetTx>, BaseImporter<BudgetTx>>();
             services.AddScoped<IReportEngine, ReportBuilder>();
             services.AddScoped<IDataProvider, ApplicationDbContext>();
-            services.AddScoped<ISampleDataLoader, SampleDataLoader>();
+            services.AddScoped<ISampleDataProvider, SampleDataProvider>();
             services.AddScoped<ISampleDataConfiguration, SampleDataConfiguration>();
             services.AddScoped<IDataAdminProvider, DataAdminProvider>();
 

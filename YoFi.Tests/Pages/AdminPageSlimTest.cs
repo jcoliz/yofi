@@ -16,7 +16,7 @@ namespace YoFi.Tests.Pages
     [TestClass]
     public class AdminPageSlimTest
     {
-        private Mock<ISampleDataLoader> loader;
+        private Mock<ISampleDataProvider> loader;
         private Mock<IDataAdminProvider> dbadmin;
         private AdminModel page;
 
@@ -27,7 +27,7 @@ namespace YoFi.Tests.Pages
             var configoptions = new Mock<IOptions<PageConfig>>();
             var config = new PageConfig() { NoDelete = true };
             configoptions.Setup(x => x.Value).Returns(config);
-            loader = new Mock<ISampleDataLoader>();
+            loader = new Mock<ISampleDataProvider>();
             page = new AdminModel(dbadmin.Object,configoptions.Object,loader.Object);
         }
 
