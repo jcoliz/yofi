@@ -1,20 +1,22 @@
 ﻿using Common.DotNet;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 
 namespace YoFi.Core
 {
-    public class DatabaseAdministration : IDatabaseAdministration
+    /// <summary>
+    /// Providers administrator-driver services which operate on the
+    /// whole of the data in single operations.
+    /// </summary>
+    public class DataAdminProvider : IDataAdminProvider
     {
         public const string TestMarker = "__test__";
 
         private readonly IDataProvider _context;
         private readonly IClock _clock;
 
-        public DatabaseAdministration(IDataProvider context, IClock clock)
+        public DataAdminProvider(IDataProvider context, IClock clock)
         {
             _context = context;
             _clock = clock;
@@ -60,9 +62,9 @@ namespace YoFi.Core
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IDatabaseStatus> GetDatabaseStatus()
+        public async Task<IDataStatus> GetDatabaseStatus()
         {
-            var result = new DatabaseStatus()
+            var result = new DataStatus()
             {
                 NumTransactions = await _context.CountAsync(_context.Get<Transaction>()),
                 NumBudgetTxs = await _context.CountAsync(_context.Get<BudgetTx>()),
@@ -86,7 +88,7 @@ namespace YoFi.Core
         }
     }
 
-    public class DatabaseStatus : IDatabaseStatus
+    public class DataStatus : IDataStatus
     {
         public bool IsEmpty { get; set; }
 

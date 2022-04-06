@@ -113,7 +113,7 @@ namespace YoFi.Tests.Controllers.Slim
         public async Task DatabaseDelete()
         {
             // Given: A mock database administration
-            var dbadmin = new Mock<IDatabaseAdministration>();
+            var dbadmin = new Mock<IDataAdminProvider>();
             dbadmin.Setup(x => x.ClearDatabaseAsync(It.IsAny<string>()));
 
             // When: Calling DatabaseDelete with a given ID
