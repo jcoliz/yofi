@@ -23,7 +23,7 @@ namespace YoFi.Core.Reports
         /// Constructor
         /// </summary>
         /// <param name="context">Where to pull report data from</param>
-        public ReportBuilder(IDataContext context, IClock clock)
+        public ReportBuilder(IDataProvider context, IClock clock)
         {
             _qbuilder = new QueryBuilder(context);
             _clock = clock;

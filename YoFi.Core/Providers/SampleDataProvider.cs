@@ -15,7 +15,7 @@ namespace YoFi.Core.SampleData
 {
     public class SampleDataLoader : ISampleDataLoader
     {
-        private readonly IDataContext _context;
+        private readonly IDataProvider _context;
         private readonly IClock _clock;
         private readonly ISampleDataConfiguration _config;
  
@@ -24,7 +24,7 @@ namespace YoFi.Core.SampleData
         /// </summary>
         /// <param name="context">Application data context</param>
         /// <param name="directory">Location of sample data file</param>
-        public SampleDataLoader(IDataContext context, IClock clock, ISampleDataConfiguration config)
+        public SampleDataLoader(IDataProvider context, IClock clock, ISampleDataConfiguration config)
         {
             _context = context;
             _clock = clock;

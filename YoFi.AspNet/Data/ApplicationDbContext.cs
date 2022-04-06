@@ -12,7 +12,7 @@ using YoFi.Core.Models;
 
 namespace YoFi.AspNet.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataProvider
     {
         private readonly bool inmemory;
 
@@ -49,30 +49,30 @@ namespace YoFi.AspNet.Data
 
         #region CRUD Entity Accessors
 
-        IQueryable<T> IDataContext.Get<T>() where T : class
+        IQueryable<T> IDataProvider.Get<T>() where T : class
         {
             return Set<T>();
         }
 
-        IQueryable<TEntity> IDataContext.GetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> navigationPropertyPath) where TEntity : class
+        IQueryable<TEntity> IDataProvider.GetIncluding<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> navigationPropertyPath) where TEntity : class
             => base.Set<TEntity>().Include(navigationPropertyPath);
 
-        void IDataContext.Add(object item)
+        void IDataProvider.Add(object item)
         {
             base.Add(item);
         }
 
-        void IDataContext.Update(object item)
+        void IDataProvider.Update(object item)
         {
             base.Update(item);
         }
 
-        void IDataContext.Remove(object item) 
+        void IDataProvider.Remove(object item) 
         {
             base.Remove(item); 
         }
 
-        Task IDataContext.SaveChangesAsync()
+        Task IDataProvider.SaveChangesAsync()
         {
             return base.SaveChangesAsync();
         }
@@ -81,17 +81,17 @@ namespace YoFi.AspNet.Data
 
         #region Async Queries
 
-        Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) 
+        Task<List<T>> IDataProvider.ToListNoTrackingAsync<T>(IQueryable<T> query) 
         {
             return query.AsNoTracking().ToListAsync(); 
         }
 
-        Task<int> IDataContext.CountAsync<T>(IQueryable<T> query)
+        Task<int> IDataProvider.CountAsync<T>(IQueryable<T> query)
         {
             return query.CountAsync();
         }
 
-        Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) 
+        Task<bool> IDataProvider.AnyAsync<T>(IQueryable<T> query) 
         {
             return query.AnyAsync(); 
         }
@@ -100,9 +100,9 @@ namespace YoFi.AspNet.Data
 
         #region Bulk Operations
 
-        Task<int> IDataContext.ClearAsync<T>() where T : class => Set<T>().BatchDeleteAsync();
+        Task<int> IDataProvider.ClearAsync<T>() where T : class => Set<T>().BatchDeleteAsync();
 
-        async Task IDataContext.BulkInsertAsync<T>(IList<T> items)
+        async Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
         {
             if (inmemory)
             {
@@ -118,7 +118,7 @@ namespace YoFi.AspNet.Data
             }
         }
 
-        async Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)
+        async Task IDataProvider.BulkDeleteAsync<T>(IQueryable<T> items)
         {
             if (inmemory)
             {
@@ -129,7 +129,7 @@ namespace YoFi.AspNet.Data
                 await items.BatchDeleteAsync();
         }
 
-        async Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
+        async Task IDataProvider.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
         {
             if (inmemory)
             {

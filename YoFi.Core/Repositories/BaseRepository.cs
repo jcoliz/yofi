@@ -27,7 +27,7 @@ namespace YoFi.Core.Repositories
         /// Typically filled in by the frameworks' dependency injection
         /// </remarks>
         /// <param name="context">Data conext whe4re our data is to be found</param>
-        public BaseRepository(IDataContext context)
+        public BaseRepository(IDataProvider context)
         {
             _context = context;
         }
@@ -212,7 +212,7 @@ namespace YoFi.Core.Repositories
         /// <summary>
         /// Data context where our data is to be found
         /// </summary>
-        protected readonly IDataContext _context;
+        protected readonly IDataProvider _context;
 
         #endregion
 

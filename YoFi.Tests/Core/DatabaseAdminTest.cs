@@ -14,13 +14,13 @@ namespace YoFi.Tests.Core
     public class DatabaseAdminTest
     {
         private DatabaseAdministration dbadmin;
-        private Mock<IDataContext> context;
+        private Mock<IDataProvider> context;
         private Mock<IClock> clock;
 
         [TestInitialize]
         public void SetUp()
         {
-            context = new Mock<IDataContext>();
+            context = new Mock<IDataProvider>();
             context.Setup(x=>x.ClearAsync<BudgetTx>());
             context.Setup(x=>x.ClearAsync<Transaction>());
             context.Setup(x=>x.ClearAsync<Payee>());

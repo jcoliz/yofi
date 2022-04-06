@@ -78,12 +78,12 @@ namespace YoFi.Tests.Attributes
 
             var someitems = new List<Transaction>() { new Transaction() { ID = 1 } };
 
-            var context = new Mock<IDataContext>();
+            var context = new Mock<IDataProvider>();
             context.Setup(x => x.Get<Transaction>()).Returns(someitems.AsQueryable());
             context.Setup(x => x.AnyAsync<Transaction>(It.IsAny<IQueryable<Transaction>>())).Returns<IQueryable<Transaction>>(q => Task.FromResult(q.Any()));
 
             var services = new Mock<IServiceProvider>();
-            services.Setup(x => x.GetService(typeof(IDataContext))).Returns(context.Object);
+            services.Setup(x => x.GetService(typeof(IDataProvider))).Returns(context.Object);
 
             var metadata = txattribute.CreateInstance(services.Object);
 

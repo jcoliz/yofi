@@ -10,9 +10,9 @@ using System.Linq.Expressions;
 namespace YoFi.Tests.Helpers
 {
     /// <summary>
-    /// Provides an IDataContext which can be totally controlled and inspected
+    /// Provides an IDataProvider which can be totally controlled and inspected
     /// </summary>
-    public class MockDataContext : IDataContext, IFakeObjectsSaveTarget
+    public class MockDataContext : IDataProvider, IFakeObjectsSaveTarget
     {
         public List<BudgetTx> BudgetTxData { get; } = new List<BudgetTx>();
 
@@ -292,11 +292,11 @@ namespace YoFi.Tests.Helpers
                 Update(item);
         }
 
-        Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query) => Task.FromResult(query.ToList());
+        Task<List<T>> IDataProvider.ToListNoTrackingAsync<T>(IQueryable<T> query) => Task.FromResult(query.ToList());
 
-        Task<int> IDataContext.CountAsync<T>(IQueryable<T> query) => Task.FromResult(query.Count());
+        Task<int> IDataProvider.CountAsync<T>(IQueryable<T> query) => Task.FromResult(query.Count());
 
-        Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query) => Task.FromResult(query.Any());
+        Task<bool> IDataProvider.AnyAsync<T>(IQueryable<T> query) => Task.FromResult(query.Any());
 
         public Task<int> ClearAsync<T>() where T : class
         {
@@ -314,7 +314,7 @@ namespace YoFi.Tests.Helpers
             return Task.CompletedTask;
         }
 
-        Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
+        Task IDataProvider.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
         {
             // We support ONLY a very limited range of possibilities, which is where this
             // method is actually called.

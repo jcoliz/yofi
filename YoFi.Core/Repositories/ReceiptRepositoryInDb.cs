@@ -12,7 +12,7 @@ namespace YoFi.Core.Repositories
     {
         #region Fields
 
-        private readonly IDataContext _context;
+        private readonly IDataProvider _context;
         private readonly ITransactionRepository _txrepo;
         private readonly IStorageService _storage;
         private readonly IClock _clock;
@@ -21,7 +21,7 @@ namespace YoFi.Core.Repositories
 
         #region Constructor
 
-        public ReceiptRepositoryInDb(IDataContext context, ITransactionRepository txrepo, IStorageService storage, IClock clock)
+        public ReceiptRepositoryInDb(IDataProvider context, ITransactionRepository txrepo, IStorageService storage, IClock clock)
         {
             _context = context;
             _txrepo = txrepo;

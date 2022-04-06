@@ -11,10 +11,10 @@ namespace YoFi.Core
     {
         public const string TestMarker = "__test__";
 
-        private readonly IDataContext _context;
+        private readonly IDataProvider _context;
         private readonly IClock _clock;
 
-        public DatabaseAdministration(IDataContext context, IClock clock)
+        public DatabaseAdministration(IDataProvider context, IClock clock)
         {
             _context = context;
             _clock = clock;

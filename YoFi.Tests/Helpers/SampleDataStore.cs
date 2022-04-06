@@ -12,7 +12,7 @@ using YoFi.Core.Models;
 
 namespace YoFi.Tests.Helpers
 {
-    public class SampleDataStore: IDataContext
+    public class SampleDataStore: IDataProvider
     {
         public List<Transaction> Transactions { get; set; }
 
@@ -79,7 +79,7 @@ namespace YoFi.Tests.Helpers
             }
         }
 
-        IQueryable<T> IDataContext.Get<T>()
+        IQueryable<T> IDataProvider.Get<T>()
         {
             if (typeof(T) == typeof(BudgetTx))
             {
@@ -105,72 +105,72 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
-        void IDataContext.Add(object item)
+        void IDataProvider.Add(object item)
         {
             throw new NotImplementedException();
         }
 
-        void IDataContext.AddRange(IEnumerable<object> items)
+        void IDataProvider.AddRange(IEnumerable<object> items)
         {
             throw new NotImplementedException();
         }
 
-        void IDataContext.Update(object item)
+        void IDataProvider.Update(object item)
         {
             throw new NotImplementedException();
         }
 
-        void IDataContext.UpdateRange(IEnumerable<object> items)
+        void IDataProvider.UpdateRange(IEnumerable<object> items)
         {
             throw new NotImplementedException();
         }
 
-        void IDataContext.Remove(object item)
+        void IDataProvider.Remove(object item)
         {
             throw new NotImplementedException();
         }
 
-        void IDataContext.RemoveRange(IEnumerable<object> items)
+        void IDataProvider.RemoveRange(IEnumerable<object> items)
         {
             throw new NotImplementedException();
         }
 
-        Task IDataContext.SaveChangesAsync()
+        Task IDataProvider.SaveChangesAsync()
         {
             throw new NotImplementedException();
         }
 
-        Task<List<T>> IDataContext.ToListNoTrackingAsync<T>(IQueryable<T> query)
+        Task<List<T>> IDataProvider.ToListNoTrackingAsync<T>(IQueryable<T> query)
         {
             throw new NotImplementedException();
         }
 
-        Task<int> IDataContext.CountAsync<T>(IQueryable<T> query)
+        Task<int> IDataProvider.CountAsync<T>(IQueryable<T> query)
         {
             throw new NotImplementedException();
         }
 
-        Task<bool> IDataContext.AnyAsync<T>(IQueryable<T> query)
+        Task<bool> IDataProvider.AnyAsync<T>(IQueryable<T> query)
         {
             throw new NotImplementedException();
         }
 
-        Task<int> IDataContext.ClearAsync<T>()
+        Task<int> IDataProvider.ClearAsync<T>()
         {
             throw new NotImplementedException();
         }
 
-        Task IDataContext.BulkInsertAsync<T>(IList<T> items)
+        Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
         {
             throw new NotImplementedException();
         }
 
-        Task IDataContext.BulkDeleteAsync<T>(IQueryable<T> items)
+        Task IDataProvider.BulkDeleteAsync<T>(IQueryable<T> items)
         {
             throw new NotImplementedException();
         }
 
-        Task IDataContext.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
+        Task IDataProvider.BulkUpdateAsync<T>(IQueryable<T> items, T newvalues, List<string> columns)
         {
             throw new NotImplementedException();
         }

@@ -26,8 +26,8 @@ namespace YoFi.Core.Reports
     /// of our data. At the same time, it is tightly bound to the abilities
     /// of EF Core to general MS SQL Server queries.
     /// 
-    /// So, while this class does consume an IDataContext, and therefore has
-    /// interface separation, if we were to provide an IDataContext backed
+    /// So, while this class does consume an IDataProvider, and therefore has
+    /// interface separation, if we were to provide an IDataProvider backed
     /// by some other store, it's highly likely that this class would need
     /// some work.
     /// </remarks>
@@ -58,7 +58,7 @@ namespace YoFi.Core.Reports
         /// Constructor
         /// </summary>
         /// <param name="context">Which database context to create queries against</param>
-        public QueryBuilder(IDataContext context)
+        public QueryBuilder(IDataProvider context)
         {
             _context = context;
         }
@@ -231,7 +231,7 @@ namespace YoFi.Core.Reports
         #endregion
 
         #region Fields
-        private readonly IDataContext _context;
+        private readonly IDataProvider _context;
         #endregion
 
         #region Internals

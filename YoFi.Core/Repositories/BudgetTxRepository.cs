@@ -12,7 +12,7 @@ namespace YoFi.Core.Repositories
     /// </remarks>
     public class BudgetTxRepository: BaseRepository<BudgetTx>, IBudgetTxRepository
     {
-        public BudgetTxRepository(IDataContext context): base(context)
+        public BudgetTxRepository(IDataProvider context): base(context)
         {
         }
 

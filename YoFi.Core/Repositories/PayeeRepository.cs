@@ -19,7 +19,7 @@ namespace YoFi.Core.Repositories
         /// Constructor
         /// </summary>
         /// <param name="context">Where to find the data we actually contain</param>
-        public PayeeRepository(IDataContext context) : base(context)
+        public PayeeRepository(IDataProvider context) : base(context)
         {
         }
 

@@ -25,7 +25,7 @@ namespace YoFi.Tests.Core
         TestAzureStorage storage;
         TestClock clock;
         const string contenttype = "image/png";
-        IDataContext context;
+        IDataProvider context;
 
         #endregion
 
