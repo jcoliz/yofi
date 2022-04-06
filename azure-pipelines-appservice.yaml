@@ -20,8 +20,9 @@ variables:
   tests: YoFi.Tests
   inttests: YoFi.Tests.Integration
   functests: YoFi.Tests.Functional
-  azureAgent: 'ubuntu-latest'
+  azureAgent: 'ubuntu-latest' # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml
   artifactFolder: 'drop'
+  dotnetVersion: '6.0.x' # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/tool/dotnet-core-tool-installer?view=azure-devops
 
 stages:
 - stage: Build
@@ -46,6 +47,13 @@ stages:
       displayName: 'Create release.txt'
       inputs:
         script: 'git describe --tags > $(application)/release.txt'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET $(dotnetVersion) SDK'
+      inputs:
+        packageType: sdk
+        version: $(dotnetVersion)
+        installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish web app'
