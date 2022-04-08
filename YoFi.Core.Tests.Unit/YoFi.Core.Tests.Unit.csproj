@@ -7,10 +7,12 @@
 
   <ItemGroup>
     <None Remove="SampleData\budget-white-60x.png" />
+    <None Remove="SampleData\FullSampleData-Month02.ofx" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="SampleData\budget-white-60x.png" />
+    <EmbeddedResource Include="SampleData\FullSampleData-Month02.ofx" />
   </ItemGroup>
 
   <ItemGroup>

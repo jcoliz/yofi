@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using YoFi.Core.Models;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     [TestClass]
     public class BudgetTxTest

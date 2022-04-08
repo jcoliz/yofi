@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     [TestClass]
     public class OfxParserTest
@@ -18,7 +18,7 @@ namespace YoFi.Tests.Core
             if (null == Document)
             {
                 var filename = "FullSampleData-Month02.ofx";
-                var stream = SampleData.Open(filename);
+                var stream = Common.DotNet.Test.SampleData.Open(filename);
 
                 Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
             }
