@@ -1,5 +1,4 @@
-﻿using Common.DotNet.Test;
-using jcoliz.FakeObjects;
+﻿using jcoliz.FakeObjects;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -12,7 +11,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     internal class ImportPackageHelper : IDisposable
     {
@@ -315,7 +314,7 @@ namespace YoFi.Tests.Core
         public async Task TransactionsOfx()
         {
             // Given: An OFX file with transactions
-            var stream = SampleData.Open("FullSampleData-Month02.ofx");
+            var stream = Common.DotNet.Test.SampleData.Open("FullSampleData-Month02.ofx");
 
             // When: Importing it
             await importer.QueueImportFromOfxAsync(stream);
