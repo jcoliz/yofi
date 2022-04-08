@@ -9,7 +9,7 @@ using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     [TestClass]
     public class BudgetTxRepositoryTest: BaseRepositoryTest<BudgetTx>

@@ -9,7 +9,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     [TestClass]
     public class PayeeRepositoryTest : BaseRepositoryTest<Payee>

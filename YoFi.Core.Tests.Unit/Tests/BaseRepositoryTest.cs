@@ -1,5 +1,4 @@
-﻿using Common.DotNet.Test;
-using jcoliz.FakeObjects;
+﻿using jcoliz.FakeObjects;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -13,7 +12,7 @@ using YoFi.Core.Repositories;
 using YoFi.Core.Repositories.Wire;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     /// <summary>
     /// This class tests IRepository(<typeparamref name="T"/>)
