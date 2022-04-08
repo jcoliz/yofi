@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Text.RegularExpressions;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     [TestClass]
     public class TransactionTest

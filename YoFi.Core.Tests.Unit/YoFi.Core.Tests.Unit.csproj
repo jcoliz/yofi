@@ -8,11 +8,15 @@
   <ItemGroup>
     <None Remove="SampleData\budget-white-60x.png" />
     <None Remove="SampleData\FullSampleData-Month02.ofx" />
+    <None Remove="SampleData\FullSampleData.json" />
+    <None Remove="SampleData\Splits-Test.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="SampleData\budget-white-60x.png" />
     <EmbeddedResource Include="SampleData\FullSampleData-Month02.ofx" />
+    <EmbeddedResource Include="SampleData\FullSampleData.json" />
+    <EmbeddedResource Include="SampleData\Splits-Test.xlsx" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@ using System.Linq;
 using YoFi.Core.Models;
 using YoFi.Tests.Helpers;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     [TestClass]
     public class NewSpreadsheetsTest
@@ -214,7 +214,7 @@ namespace YoFi.Tests.Core
         public void LoadFromFile()
         {
             // Given: An existing file with splits
-            var instream = SampleData.Open("Splits-Test.xlsx");
+            var instream = Common.DotNet.Test.SampleData.Open("Splits-Test.xlsx");
 
             // When: Loading this file
             IEnumerable<Split> actual;

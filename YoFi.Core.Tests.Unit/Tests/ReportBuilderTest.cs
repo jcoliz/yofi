@@ -10,7 +10,7 @@ using YoFi.Core.Reports;
 using YoFi.Tests.Helpers;
 using YoFi.Tests.Helpers.ReportExtensions;
 
-namespace YoFi.Tests.Core
+namespace YoFi.Core.Tests.Unit
 {
     [TestClass]
     public class ReportBuilderTest
