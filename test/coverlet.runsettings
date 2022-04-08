@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Include>[YoFi.Core]*,[YoFi.AspNet]*,[YoFi.SampleGen]*</Include> <!-- [Assembly-Filter]Type-Filter -->
+          <Exclude>[*]AspNetCoreGeneratedDocument.*,[*]YoFi.AspNet.Data.Migrations.*,[*]YoFi.AspNet.Data.Seed</Exclude> <!-- [Assembly-Filter]Type-Filter -->
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
