@@ -17,6 +17,7 @@ pr: none
 
 variables:
   application: YoFi.AspNet
+  solution: YoFi.sln
   tests: YoFi.Tests
   inttests: YoFi.Tests.Integration
   functests: YoFi.Tests.Functional
@@ -56,6 +57,19 @@ stages:
         installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - task: DotNetCoreCLI@2
+      displayName: 'Build solution'
+      inputs:
+        command: 'build'
+        projects: '$(solution)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run CI tests'
+      inputs:
+        command: 'test'
+        projects: '$(solution)'
+        arguments: '--collect:"XPlat Code Coverage" --settings:test/coverlet.runsettings'
+
+    - task: DotNetCoreCLI@2
       displayName: 'Publish web app'
       inputs:
         command: 'publish'
@@ -63,25 +77,6 @@ stages:
         arguments: '--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release'
         zipAfterPublish: false
         modifyOutputPath: false
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Build Functional Tests'
-      inputs:
-        command: 'build'
-        projects: '$(functests)/$(functests).csproj'
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Run unit tests'
-      inputs:
-        command: 'test'
-        projects: '$(tests)/$(tests).csproj'
-        arguments: '--collect:"XPlat Code Coverage" --settings:$(tests)/coverlet.runsettings'
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Run integration tests'
-      inputs:
-        command: 'test'
-        projects: '$(inttests)/$(inttests).csproj'
 
     - task: PublishCodeCoverageResults@1
       displayName: 'Publish code coverage'
