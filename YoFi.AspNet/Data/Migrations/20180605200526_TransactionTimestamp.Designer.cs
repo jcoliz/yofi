@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
-using YoFi.AspNet.Data;
+using YoFi.Data;
 using System;
 
-namespace YoFi.AspNet.Data.Migrations
+namespace YoFi.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20180605200526_TransactionTimestamp")]

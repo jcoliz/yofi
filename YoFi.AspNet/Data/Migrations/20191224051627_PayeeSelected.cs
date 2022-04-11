@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System.Diagnostics.CodeAnalysis;
 
-namespace YoFi.AspNet.Data.Migrations
+namespace YoFi.Data.Migrations
 {
     [ExcludeFromCodeCoverage]
     public partial class PayeeSelected : Migration

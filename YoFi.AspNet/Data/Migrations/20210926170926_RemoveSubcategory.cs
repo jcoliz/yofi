@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace YoFi.AspNet.Data.Migrations
+namespace YoFi.Data.Migrations
 {
     public partial class RemoveSubcategory : Migration
     {

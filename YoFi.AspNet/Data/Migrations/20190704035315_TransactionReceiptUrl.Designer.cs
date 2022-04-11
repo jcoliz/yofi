@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using YoFi.AspNet.Data;
+using YoFi.Data;
 
-namespace YoFi.AspNet.Data.Migrations
+namespace YoFi.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20190704035315_TransactionReceiptUrl")]

@@ -13,7 +13,7 @@ using Common.DotNet.Data;
 using Common.DotNet;
 using YoFi.Core;
 
-namespace YoFi.AspNet.Data
+namespace YoFi.Data
 {
     // https://github.com/temilaj/ASP.NET-core-role-based-authentication/blob/version/dotnet-core-2-0/Data/Seed.cs
     // https://gooroo.io/GoorooTHINK/Article/17333/Custom-user-roles-and-rolebased-authorization-in-ASPNET-core/28380#.WxwmNExFyAd

@@ -6,11 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Core;
 using YoFi.Core.Models;
 
-namespace YoFi.AspNet.Data
+namespace YoFi.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataProvider
     {
