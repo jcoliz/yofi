@@ -84,7 +84,7 @@ namespace YoFi.AspNet.Main
                     {
                         var loader = services.GetRequiredService<ISampleDataProvider>();
                         var dbadmin = services.GetRequiredService<IDataAdminProvider>();
-                        await Seed.ManageSampleData(loader, dbadmin);
+                        await dbadmin.SeedDemoSampleData(true,loader);
                     }
                 }
                 catch (Exception ex)

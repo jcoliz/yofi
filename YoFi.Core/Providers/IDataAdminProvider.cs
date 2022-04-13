@@ -46,6 +46,15 @@ namespace YoFi.Core
         /// </remarks>
         /// <returns></returns>
         Task UnhideTransactionsToToday();
+
+        /// <summary>
+        /// Add sample data if database is empty
+        /// </summary>
+        /// <param name="hiddenaftertoday">
+        /// Whether to hide data after today, and reveal it over time
+        /// </param>
+        /// <param name="loader">Where to get the sample data</param>
+        Task SeedDemoSampleData(bool hiddenaftertoday, SampleData.ISampleDataProvider loader);
     }
 
     public interface IDataStatus

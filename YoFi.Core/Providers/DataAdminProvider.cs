@@ -86,6 +86,16 @@ namespace YoFi.Core
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task SeedDemoSampleData(bool hiddenaftertoday, SampleData.ISampleDataProvider loader)
+        {
+            var status = await GetDatabaseStatus();
+            if (status.IsEmpty)
+                await loader.SeedAsync("all", hidden: hiddenaftertoday);
+
+            if (hiddenaftertoday)
+                await UnhideTransactionsToToday();
+        }
     }
 
     public class DataStatus : IDataStatus
