@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using YoFi.AspNet.Boilerplate.Models;
 using YoFi.Data;
+using YoFi.Data.Identity;
 using YoFi.AspNet.Pages;
 using YoFi.Core;
 using YoFi.Core.Importers;

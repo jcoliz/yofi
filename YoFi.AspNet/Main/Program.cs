@@ -70,8 +70,7 @@ namespace YoFi.AspNet.Main
                 try
                 {
                     var serviceProvider = services.GetRequiredService<IServiceProvider>();
-                    var adminuserconfig = services.GetRequiredService<IOptions<AdminUserConfig>>();
-                    Data.Seed.CreateRoles(serviceProvider, adminuserconfig).Wait();
+                    YoFi.Data.Identity.Roles.CreateRoles(serviceProvider).Wait();
                 }
                 catch (Exception ex)
                 {

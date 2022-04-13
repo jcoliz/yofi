@@ -1,4 +1,4 @@
-﻿namespace Common.DotNet
+﻿namespace YoFi.Data.Identity
 {
     public class AdminUserConfig
     {
