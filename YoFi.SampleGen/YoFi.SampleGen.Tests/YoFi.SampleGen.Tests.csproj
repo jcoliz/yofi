@@ -15,6 +15,7 @@
     <EmbeddedResource Include="SampleData\FullSampleDataDefinition.xlsx" />
     <EmbeddedResource Include="SampleData\TestData1.xlsx" />
     <EmbeddedResource Include="SampleData\UploadSampleDataDefinition.xlsx" />
+    <EmbeddedResource Include="SampleData\SampleDataConfiguration.json" />
   </ItemGroup>
 
   <ItemGroup>

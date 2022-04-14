@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using YoFi.Core.Models;
 
 namespace YoFi.Core.SampleGen
@@ -147,16 +149,35 @@ namespace YoFi.Core.SampleGen
             ssr.Open(stream);
             ssr.Serialize(Transactions);
             ssr.Serialize(Transactions.Where(x=>x.Splits?.Count > 1).SelectMany(x => x.Splits),"Split");
-            ssr.Serialize(Payees);
-            ssr.Serialize(BudgetTxs);
+            if (Payees.Any())
+                ssr.Serialize(Payees);
+            if (BudgetTxs.Any())
+                ssr.Serialize(BudgetTxs);
         }
 
+        public void SaveXlsx(Stream stream)
+        {
+            Save(stream);
+        }
+
+        public void SaveJson(Stream stream)
+        {
+            System.Text.Json.JsonSerializer.Serialize(stream,this);
+        }
+
+        public void SaveOfx(Stream stream, int month)
+        {
+            var items = Transactions.Where(x => x.Timestamp.Month == month);
+            YoFi.Core.SampleData.SampleDataOfx.WriteToOfx(items, stream);
+        }
+
+        [JsonIgnore]
         public List<SampleDataPattern> Definitions { get; } = new List<SampleDataPattern>();
 
-        public List<Transaction> Transactions { get; } = new List<Transaction>();
+        public List<Transaction> Transactions { get; set; } = new List<Transaction>();
 
-        public List<Payee> Payees { get; private set; } = new List<Payee>();
+        public List<Payee> Payees { get; set; } = new List<Payee>();
 
-        public List<BudgetTx> BudgetTxs { get; private set; } = new List<BudgetTx>();
+        public List<BudgetTx> BudgetTxs { get; set; } = new List<BudgetTx>();
     }
 }
