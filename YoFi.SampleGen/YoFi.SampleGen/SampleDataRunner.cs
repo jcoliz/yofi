@@ -13,20 +13,22 @@ public class SampleDataRunner
     public Definition[] Definitions { get; set; }
     public SampleDataProject[] Projects { get; set; }
 
-    private Dictionary<string,SampleDataGenerator> Generators = new Dictionary<string, SampleDataGenerator>();
+    private Dictionary<string,SampleDataGenerator> Generators;
 
     public void Load()
     {
-        foreach(var def in Definitions)
-        {
-            using var stream = File.Open(def.Path,FileMode.Open);
-            var generator = new SampleDataGenerator();
-            generator.LoadDefinitions(stream);
-            generator.GenerateTransactions();
-            generator.GeneratePayees();
-            generator.GenerateBudget();
-            Generators[def.Name] = generator;
-        }
+        Generators = Definitions.ToDictionary(
+            x => x.Name,
+            x => 
+            {
+                using var stream = File.Open(x.Path,FileMode.Open);
+                var generator = new SampleDataGenerator();
+                generator.LoadDefinitions(stream);
+                generator.GenerateTransactions();
+                generator.GeneratePayees();
+                generator.GenerateBudget();
+                return generator;
+            });
     }
 
     public IEnumerable<string> Run(SampleDataProject project)
