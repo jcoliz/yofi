@@ -12,6 +12,8 @@ if (options.Help)
     options.WriteOptionDescriptions(Console.Out);
     return;
 }
+else
+    Console.WriteLine("\tRun with --help for details");
 
 SampleDataPattern.Year = options.Year ?? DateTime.Now.Year;
 
