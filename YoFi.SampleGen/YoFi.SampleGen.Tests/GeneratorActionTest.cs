@@ -5,12 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.Core.SampleGen;
 using YoFi.Core.SampleData;
 //using YoFi.Tests.Helpers;
 using CNTSampleData = Common.DotNet.Test.SampleData;
 
-namespace YoFi.Tests.Core.SampleGen
+namespace YoFi.SampleGen.Tests.Unit
 {
     [TestClass]
     public class GeneratorActionTest

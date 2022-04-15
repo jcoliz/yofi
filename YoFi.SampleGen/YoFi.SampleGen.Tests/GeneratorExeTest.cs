@@ -5,7 +5,7 @@ using System.Text.Json;
 using YoFi.SampleGen;
 using System.Text.Json.Serialization;
 
-namespace YoFi.Tests.Core.SampleGen;
+namespace YoFi.SampleGen.Tests.Unit;
 
 [TestClass]
 public class GeneratorExeTest

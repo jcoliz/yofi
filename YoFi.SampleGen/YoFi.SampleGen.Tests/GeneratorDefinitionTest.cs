@@ -3,9 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using YoFi.Core.Models;
-using YoFi.Core.SampleGen;
 
-namespace YoFi.Tests.Core.SampleGen
+namespace YoFi.SampleGen.Tests.Unit
 {
     [TestClass]
     public class GeneratorDefinitionTest

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using jcoliz.OfficeOpenXml.Serializer;
-using YoFi.Core.SampleGen;
 
 namespace YoFi.SampleGen;
 

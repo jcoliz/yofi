@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using YoFi.Core.SampleGen;
 using YoFi.SampleGen;
 
 Console.WriteLine("YoFi.SampleGen.Exe: Generate sample data for project");

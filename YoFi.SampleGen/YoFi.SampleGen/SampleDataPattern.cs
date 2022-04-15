@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using YoFi.Core.Models;
 
-namespace YoFi.Core.SampleGen
+namespace YoFi.SampleGen
 {
     /// <summary>
     /// Defines a single pattern of yearly spending

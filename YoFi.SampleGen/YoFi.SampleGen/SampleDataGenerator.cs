@@ -7,9 +7,8 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
-using YoFi.SampleGen;
 
-namespace YoFi.Core.SampleGen
+namespace YoFi.SampleGen
 {
     /// <summary>
     /// Generates realistic sample data so we can test and users can explore the system

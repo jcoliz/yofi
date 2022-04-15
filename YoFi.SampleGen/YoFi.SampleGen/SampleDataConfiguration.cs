@@ -1,5 +1,3 @@
-using YoFi.Core.SampleGen;
-
 namespace YoFi.SampleGen;
 
 public class SampleDataConfiguration
