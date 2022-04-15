@@ -31,11 +31,10 @@ public class SampleDataRunner
             });
     }
 
-    public IEnumerable<string> Run(SampleDataProject project)
+    public IEnumerable<string> Run(SampleDataProject project, string directory)
     {
         var result = new List<string>();
-        var dirname = "out/" + project.Name;
-        Directory.CreateDirectory(dirname);
+        Directory.CreateDirectory(directory);
         foreach(var output in project.Outputs)
         {
             var filenamecomponents = new List<string>()
@@ -49,7 +48,7 @@ public class SampleDataRunner
             if (output.Month > 0)
                 filenamecomponents.Add("Month" + output.Month.ToString("D2"));
 
-            var filename = dirname + "/" + string.Join('-',filenamecomponents) + $".{output.Save.ToString().ToLowerInvariant()}";
+            var filename = directory + "/" + string.Join('-',filenamecomponents) + $".{output.Save.ToString().ToLowerInvariant()}";
             result.Add(filename);
 
             File.Delete(filename);

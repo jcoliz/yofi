@@ -29,7 +29,10 @@ var projects =
 foreach (var project in projects)
 {
     Console.WriteLine($"> {project.Name}");
-    var files = runner.Run(project);
+
+    var directory = $"out/{project.Name}";
+    var files = runner.Run(project,directory);
+
     foreach (var file in files)
         Console.WriteLine($"\t{file}");
 }
