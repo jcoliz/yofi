@@ -54,8 +54,7 @@ public class SampleDataRunner
             File.Delete(filename);
             using var stream = File.Open(filename,FileMode.Create);
 
-            var generator = Generators[output.Load];
-            generator.Save(stream,output.Save);
+            Generators[output.Load].Save(stream,output.Save);
         }
 
         return result;
