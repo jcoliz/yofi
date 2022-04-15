@@ -31,7 +31,7 @@ foreach (var project in projects)
     Console.WriteLine($"> {project.Name}");
 
     var directory = $"out/{project.Name}";
-    var files = runner.Run(project,directory);
+    var files = runner.Save(project,directory);
 
     foreach (var file in files)
         Console.WriteLine($"\t{file}");

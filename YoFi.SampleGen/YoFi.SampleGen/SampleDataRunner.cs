@@ -31,7 +31,7 @@ public class SampleDataRunner
             });
     }
 
-    public IEnumerable<string> Run(SampleDataProject project, string directory)
+    public IEnumerable<string> Save(SampleDataProject project, string directory)
     {
         var result = new List<string>();
         Directory.CreateDirectory(directory);
