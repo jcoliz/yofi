@@ -1,111 +1,102 @@
 {
-    "Definitions": [
+  "Definitions": [
+    {
+      "Name": "Full",
+      "Path": "FullSampleDataDefinition.xlsx"
+    },
+    {
+      "Name": "Upload",
+      "Path": "UploadSampleDataDefinition.xlsx"
+    }
+  ],
+  "Projects": [
+    {
+      "Name": "YoFi.AspNet",
+      "Path": "wwwroot/sample",
+      "Outputs": [
         {
-            "Name": "Full",
-            "Path": "FullSampleDataDefinition.xlsx"
-        },
-        {
-            "Name": "Upload",
-            "Path": "UploadSampleDataDefinition.xlsx"
+          "Load": "Full",
+          "Save": { "Type": "Xlsx" }
         }
-    ],
-    "Projects": [
+      ]
+    },
+    {
+      "Name": "YoFi.Data",
+      "Path": "SampleData",
+      "Outputs": [
         {
-            "Name" : "YoFi.AspNet",
-            "Path" : "wwwroot/sample",
-            "Outputs" : [
-                {
-                    "Load": "Full",
-                    "Save": "Xlsx"
-                }
-            ]
-        },
-        {
-            "Name" : "YoFi.Data",
-            "Path" : "SampleData",
-            "Outputs" : [
-                {
-                    "Load": "Full",
-                    "Save": "Json"
-                }
-            ]
-        },
-        {
-            "Name" : "YoFi.Tests",
-            "Path" : "SampleData",
-            "Outputs" : [
-                {
-                    "Load": "Full",
-                    "Save": "Json"
-                },
-                {
-                    "Load": "Full",
-                    "Save": "Xlsx"
-                },
-                {
-                    "Load": "Full",
-                    "Generate": "Tx",
-                    "Save": "Ofx",
-                    "Month": 2
-                }
-            ]
-        },
-        {
-            "Name" : "YoFi.Core.Tests.Unit",
-            "Path" : "SampleData",
-            "Outputs" : [
-                {
-                    "Load": "Full",
-                    "Save": "Json"
-                },
-                {
-                    "Load": "Full",
-                    "Generate": "Tx",
-                    "Save": "Ofx",
-                    "Month": 2
-                }
-            ]
-        },
-        {
-            "Name" : "YoFi.Tests.Integration",
-            "Path" : "SampleData",
-            "Outputs" : [
-                {
-                    "Load": "Full",
-                    "Save": "Json"
-                },
-                {
-                    "Load": "Full",
-                    "Generate": "Tx",
-                    "Save": "Ofx",
-                    "Month": 2
-                },
-                {
-                    "Load": "Upload",
-                    "Save": "Xlsx"
-                }
-            ]
-        },
-        {
-            "Name" : "YoFi.Tests.Functional",
-            "Path" : "SampleData",
-            "Outputs" : [
-                {
-                    "Load": "Full",
-                    "Generate": "Tx",
-                    "Save": "Ofx",
-                    "Month": 1
-                },
-                {
-                    "Load": "Upload",
-                    "Save": "Xlsx"
-                },
-                {
-                    "Load": "Upload",
-                    "Generate": "Tx",
-                    "Save": "Xlsx"
-                }
-            ]
+          "Load": "Full",
+          "Save": { "Type": "Json" }
         }
-    ]
+      ]
+    },
+    {
+      "Name": "YoFi.Tests",
+      "Path": "SampleData",
+      "Outputs": [
+        {
+          "Load": "Full",
+          "Save": { "Type": "Json" }
+        },
+        {
+          "Load": "Full",
+          "Save": { "Type": "Xlsx" }
+        },
+        {
+          "Load": "Full",
+          "Save": { "Type": "Ofx", "TxOnly": true, "Month": 2 }
+        }
+      ]
+    },
+    {
+      "Name": "YoFi.Core.Tests.Unit",
+      "Path": "SampleData",
+      "Outputs": [
+        {
+          "Load": "Full",
+          "Save": { "Type": "Json" }
+        },
+        {
+          "Load": "Full",
+          "Save": { "Type": "Ofx", "TxOnly": true, "Month": 2 }
+        }
+      ]
+    },
+    {
+      "Name": "YoFi.Tests.Integration",
+      "Path": "SampleData",
+      "Outputs": [
+        {
+          "Load": "Full",
+          "Save": { "Type": "Json" }
+        },
+        {
+          "Load": "Full",
+          "Save": { "Type": "Ofx", "TxOnly": true, "Month": 2 }
+        },
+        {
+          "Load": "Upload",
+          "Save": { "Type": "Xlsx" }
+        }
+      ]
+    },
+    {
+      "Name": "YoFi.Tests.Functional",
+      "Path": "SampleData",
+      "Outputs": [
+        {
+          "Load": "Full",
+          "Save": { "Type": "Ofx", "TxOnly": true, "Month": 1 }
+        },
+        {
+          "Load": "Upload",
+          "Save": { "Type": "Xlsx" }
+        },
+        {
+          "Load": "Upload",
+          "Save": { "Type": "Xlsx", "TxOnly": true }
+        }
+      ]
+    }
+  ]
 }

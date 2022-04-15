@@ -43,19 +43,19 @@ public class SampleDataRunner
                 SampleDataPattern.Year.ToString(),
                 output.Load
             };
-            if (output.Generate.HasValue)
-                filenamecomponents.Add(output.Generate.ToString());
-            if (output.Month > 0)
-                filenamecomponents.Add("Month" + output.Month.ToString("D2"));
+            if (output.Save.TxOnly)
+                filenamecomponents.Add("Tx");
+            if (output.Save.Month > 0)
+                filenamecomponents.Add("Month" + output.Save.Month.ToString("D2"));
 
-            var filename = directory + "/" + string.Join('-',filenamecomponents) + $".{output.Save.ToString().ToLowerInvariant()}";
+            var filename = directory + "/" + string.Join('-',filenamecomponents) + $".{output.Save.Type.ToString().ToLowerInvariant()}";
             result.Add(filename);
 
             File.Delete(filename);
             using var stream = File.Open(filename,FileMode.Create);
 
             var generator = Generators[output.Load];
-            generator.Save(stream,action:output.Save,gt:output.Generate,month:output.Month);
+            generator.Save(stream,output.Save);
         }
 
         return result;

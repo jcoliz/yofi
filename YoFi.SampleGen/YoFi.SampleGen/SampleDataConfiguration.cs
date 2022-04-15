@@ -24,9 +24,7 @@ public class SampleDataProject
 public class SampleDataOutput
 {
     public string Load { get; set; }
-    public SampleDataGenerator.GenerateType? Generate { get; set; }
-    public SampleDataGenerator.SaveType Save { get; set; }
-    public int Month { get; set; }
+    public SampleDataGenerator.SaveOptions Save { get; set; }
 }
 
 // Outputs to filename:

@@ -143,14 +143,14 @@ namespace YoFi.SampleGen
         /// Save all generated data to spreadsheet at <paramref name="stream"/>
         /// </summary>
         /// <param name="stream"></param>
-        public void Save(Stream stream, GenerateType? gt = null)
+        public void Save(Stream stream, bool txonly = false)
         {
             using var ssr = new SpreadsheetWriter();
             ssr.Open(stream);
             ssr.Serialize(Transactions);
             ssr.Serialize(Transactions.Where(x=>x.Splits?.Count > 1).SelectMany(x => x.Splits),"Split");
 
-            if (!gt.HasValue || gt.Value == GenerateType.Full)
+            if (!txonly)
             {
                 if (Payees.Any())
                     ssr.Serialize(Payees);
@@ -159,20 +159,18 @@ namespace YoFi.SampleGen
             }
         }
 
-        public enum SaveType { Xlsx, Json, Ofx };
-
-        public void Save(Stream stream, SaveType action, GenerateType? gt = null, int month = 1)
+        public void Save(Stream stream, SaveOptions options)
         {
-            switch (action)
+            switch (options.Type)
             {
-            case SaveType.Xlsx:
-                Save(stream, gt);
+            case SaveOptions.FileType.Xlsx:
+                Save(stream, options.TxOnly);
                 break;
-            case SaveType.Json:
+            case SaveOptions.FileType.Json:
                 System.Text.Json.JsonSerializer.Serialize(stream, this);
                 break;
-            case SaveType.Ofx:
-                var items = Transactions.Where(x => x.Timestamp.Month == month);
+            case SaveOptions.FileType.Ofx:
+                var items = Transactions.Where(x => x.Timestamp.Month == options.Month);
                 YoFi.Core.SampleData.SampleDataOfx.WriteToOfx(items, stream);
                 break;
             }
@@ -187,5 +185,16 @@ namespace YoFi.SampleGen
         public List<Payee> Payees { get; set; } = new List<Payee>();
 
         public List<BudgetTx> BudgetTxs { get; set; } = new List<BudgetTx>();
+
+        public class SaveOptions
+        {
+            public enum FileType { Xlsx, Json, Ofx };
+
+            public FileType Type { get; set; }
+
+            public bool TxOnly { get; set; }
+
+            public int Month { get; set; }
+        } 
     }
 }
