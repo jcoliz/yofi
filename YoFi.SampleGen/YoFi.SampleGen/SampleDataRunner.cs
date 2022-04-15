@@ -10,13 +10,14 @@ namespace YoFi.SampleGen;
 /// </summary>
 public class SampleDataRunner
 {
+    public Definition[] Definitions { get; set; }
+    public SampleDataProject[] Projects { get; set; }
+
     private Dictionary<string,SampleDataGenerator> Generators = new Dictionary<string, SampleDataGenerator>();
 
-    private List<SampleDataProject> Projects = new List<SampleDataProject>();
-
-    public void Load(SampleDataConfiguration config)
+    public void Load()
     {
-        foreach(var def in config.Definitions)
+        foreach(var def in Definitions)
         {
             using var stream = File.Open(def.Path,FileMode.Open);
             var generator = new SampleDataGenerator();
@@ -26,14 +27,6 @@ public class SampleDataRunner
             generator.GenerateBudget();
             Generators[def.Name] = generator;
         }
-
-        Projects.AddRange(config.Projects);
-    }
-
-    public void Run(string projectname)
-    {
-        var project = Projects.Where(x=>x.Name == projectname).Single();
-        Run(project);
     }
 
     public IEnumerable<string> Run(SampleDataProject project)

@@ -6,12 +6,11 @@ Console.WriteLine("YoFi.SampleGen.Exe: Generate sample data for project");
 
 SampleDataPattern.Year = DateTime.Now.Year;
 var stream = File.Open("SampleDataConfiguration.json",FileMode.Open);
-var config = JsonSerializer.Deserialize<SampleDataConfiguration>(stream, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } } );
-var runner = new SampleDataRunner();
+var runner = JsonSerializer.Deserialize<SampleDataRunner>(stream, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } } );
 
-runner.Load(config);
+runner.Load();
 
-foreach(var project in config.Projects)
+foreach(var project in runner.Projects)
 {
     Console.WriteLine($"> {project.Name}");
     var files = runner.Run(project);
