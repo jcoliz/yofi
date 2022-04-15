@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
+using YoFi.SampleGen;
 
 namespace YoFi.Core.SampleGen
 {
@@ -139,40 +140,50 @@ namespace YoFi.Core.SampleGen
             BudgetTxs = regular.Concat(loanbudgets).ToList();
         }
 
+        public enum GenerateType { Full, Tx };
+
         /// <summary>
         /// Save all generated data to spreadsheet at <paramref name="stream"/>
         /// </summary>
         /// <param name="stream"></param>
-        public void Save(Stream stream)
+        public void Save(Stream stream, GenerateType? gt = null)
         {
             using var ssr = new SpreadsheetWriter();
             ssr.Open(stream);
             ssr.Serialize(Transactions);
             ssr.Serialize(Transactions.Where(x=>x.Splits?.Count > 1).SelectMany(x => x.Splits),"Split");
-            if (Payees.Any())
-                ssr.Serialize(Payees);
-            if (BudgetTxs.Any())
-                ssr.Serialize(BudgetTxs);
+
+            if (!gt.HasValue || gt.Value == GenerateType.Full)
+            {
+                if (Payees.Any())
+                    ssr.Serialize(Payees);
+                if (BudgetTxs.Any())
+                    ssr.Serialize(BudgetTxs);
+            }
         }
 
-        public void SaveXlsx(Stream stream)
-        {
-            Save(stream);
-        }
+        public enum SaveType { Xlsx, Json, Ofx };
 
-        public void SaveJson(Stream stream)
+        public void Save(Stream stream, SaveType action, GenerateType? gt = null, int month = 1)
         {
-            System.Text.Json.JsonSerializer.Serialize(stream,this);
-        }
+            switch (action)
+            {
+            case SaveType.Xlsx:
+                Save(stream, gt);
+                break;
+            case SaveType.Json:
+                System.Text.Json.JsonSerializer.Serialize(stream, this);
+                break;
+            case SaveType.Ofx:
+                var items = Transactions.Where(x => x.Timestamp.Month == month);
+                YoFi.Core.SampleData.SampleDataOfx.WriteToOfx(items, stream);
+                break;
+            }
 
-        public void SaveOfx(Stream stream, int month)
-        {
-            var items = Transactions.Where(x => x.Timestamp.Month == month);
-            YoFi.Core.SampleData.SampleDataOfx.WriteToOfx(items, stream);
         }
 
         [JsonIgnore]
-        public List<SampleDataPattern> Definitions { get; } = new List<SampleDataPattern>();
+        public List<SampleDataPattern> Definitions { get; set; } = new List<SampleDataPattern>();
 
         public List<Transaction> Transactions { get; set; } = new List<Transaction>();
 

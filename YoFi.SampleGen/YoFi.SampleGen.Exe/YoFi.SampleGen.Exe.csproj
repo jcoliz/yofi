@@ -10,4 +10,16 @@
     <ProjectReference Include="..\YoFi.SampleGen\YoFi.SampleGen.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="FullSampleDataDefinition.xlsx" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="UploadSampleDataDefinition.xlsx" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="SampleDataConfiguration.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Options" Version="6.12.0.148" />
+    <PackageReference Include="Mono.Options.Core" Version="1.0.0" />
+  </ItemGroup>
+  
+
 </Project>

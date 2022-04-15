@@ -10,7 +10,7 @@ Generate() methods many times for test purposes.
 ## Usage
 
 ```
-    YoFi.SampleGen.Exe <Input> --year <Year> --output <Project> --all --inplace
+    YoFi.SampleGen.Exe <Input> --year <Year> --project <Project> --inplace --help
 ```
 
 ## Input
@@ -23,9 +23,9 @@ directory.
 ## Options
 
 * --year &lt;Year&gt;. Defaults to current year
-* --all. Generate all outputs. Must select at least one output or "all".
-* --output &lt;Project&gt;. Output only single project. Ok to have multiple --output options for multiple projects.
-* --inplace. Generate outputs in their correct directories in the project. If not included, will generate in current directory
+* --project &lt;Project&gt;. Output only single project. Ok to have multiple --output options for multiple projects. If not specified, defaults to generating all projects.
+* --inplace. Generate outputs in their correct directories in the project. If not included, will generate in "out" under current directory
+* --help. Show usage and options
 
 The "Project" output is the name of a single project in the YoFi top-level. e.g. "YoFi.AspNet" or "YoFi.Data" for production,
 or e.g. "YoFi.Core.Tests.Unit" for that test project.

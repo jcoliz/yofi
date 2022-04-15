@@ -1,3 +1,5 @@
+using YoFi.Core.SampleGen;
+
 namespace YoFi.SampleGen;
 
 public class SampleDataConfiguration
@@ -24,9 +26,25 @@ public class SampleDataProject
 public class SampleDataOutput
 {
     public string Load { get; set; }
-    public enum GenerateType { Full, Tx };
-    public GenerateType? Generate { get; set; }
-    public enum SaveType { Xlsx, Json, Ofx };
-    public SaveType Save { get; set; }
+    public SampleDataGenerator.GenerateType? Generate { get; set; }
+    public SampleDataGenerator.SaveType Save { get; set; }
     public int Month { get; set; }
 }
+
+// Outputs to filename:
+//
+// SampleData-{Load}(-{Generate})(-Month{Month}).{Save}
+//
+// SampleData-Full.json
+// SampleData-Full.xlsx
+// SampleData-Upload.xlsx
+// SampleData-Upload-Tx.xlsx
+// SampleData-Full-Month02.ofx
+//
+// Outputs to directory (local)
+//
+// {Name}
+//
+// Outpus to directory (in place)
+//
+// [Root]/{Name}/{Path}
