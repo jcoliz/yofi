@@ -10,20 +10,13 @@ Generate() methods many times for test purposes.
 ## Usage
 
 ```
-    YoFi.SampleGen.Exe <Input> --year <Year> --project <Project> --inplace --help
+    YoFi.SampleGen.Exe --year <Year> --project <Project> --project <Project> --inplace --help
 ```
-
-## Input
-
-* Sample Data Definitions, e.g. YoFi.SampleGen.Tests/SampleData/FullSampleDataDefinition.xlsx
-
-If input is not specified, it will look for FullSampleDataDefinition.xlsx in the current
-directory.
 
 ## Options
 
 * --year &lt;Year&gt;. Defaults to current year
-* --project &lt;Project&gt;. Output only single project. Ok to have multiple --output options for multiple projects. If not specified, defaults to generating all projects.
+* --project &lt;Project&gt;. Output only single project. Ok to have multiple --project options for multiple projects. If not specified, defaults to generating all projects.
 * --inplace. Generate outputs in their correct directories in the project. If not included, will generate in "out" under current directory
 * --help. Show usage and options
 

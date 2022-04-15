@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
-    <PackageReference Include="Mono.Options.Core" Version="1.0.0" />
   </ItemGroup>
   
 
