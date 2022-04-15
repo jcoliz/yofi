@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core.SampleData;
-//using YoFi.Tests.Helpers;
 using CNTSampleData = Common.DotNet.Test.SampleData;
 
 namespace YoFi.SampleGen.Tests.Unit

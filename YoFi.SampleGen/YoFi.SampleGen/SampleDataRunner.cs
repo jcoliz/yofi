@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using jcoliz.OfficeOpenXml.Serializer;
 
 namespace YoFi.SampleGen;
 
@@ -37,8 +36,9 @@ public class SampleDataRunner
         Run(project);
     }
 
-    public string Run(SampleDataProject project)
+    public IEnumerable<string> Run(SampleDataProject project)
     {
+        var result = new List<string>();
         var dirname = "out/" + project.Name;
         Directory.CreateDirectory(dirname);
         foreach(var output in project.Outputs)
@@ -55,6 +55,7 @@ public class SampleDataRunner
                 filenamecomponents.Add("Month" + output.Month.ToString("D2"));
 
             var filename = dirname + "/" + string.Join('-',filenamecomponents) + $".{output.Save.ToString().ToLowerInvariant()}";
+            result.Add(filename);
 
             File.Delete(filename);
             using var stream = File.Open(filename,FileMode.Create);
@@ -63,6 +64,6 @@ public class SampleDataRunner
             generator.Save(stream,action:output.Save,gt:output.Generate,month:output.Month);
         }
 
-        return dirname;
+        return result;
     }
 }

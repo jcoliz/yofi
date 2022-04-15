@@ -13,7 +13,8 @@ runner.Load(config);
 
 foreach(var project in config.Projects)
 {
-    Console.WriteLine($"\t{project.Name}");
-    var directory = runner.Run(project);
-    Console.WriteLine($"\t\tCreated {project.Outputs.Count()} files in {directory}");
+    Console.WriteLine($"> {project.Name}");
+    var files = runner.Run(project);
+    foreach(var file in files)
+        Console.WriteLine($"\t{file}");
 }

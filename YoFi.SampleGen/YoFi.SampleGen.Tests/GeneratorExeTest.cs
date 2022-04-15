@@ -2,7 +2,6 @@ using Common.DotNet.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Text.Json;
-using YoFi.SampleGen;
 using System.Text.Json.Serialization;
 
 namespace YoFi.SampleGen.Tests.Unit;
