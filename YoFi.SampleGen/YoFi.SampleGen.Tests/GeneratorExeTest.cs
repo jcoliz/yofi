@@ -13,9 +13,9 @@ public class GeneratorExeTest
     public void LoadConfiguration()
     {
         var stream = SampleData.Open("SampleDataConfiguration.json");
-        var config = JsonSerializer.Deserialize<SampleDataConfiguration>(stream, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } } );
-        Assert.IsNotNull(config);
-        Assert.AreEqual(2,config.Definitions.Count());
-        Assert.AreEqual(6,config.Projects.Count());
+        var runner = JsonSerializer.Deserialize<SampleDataRunner>(stream, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } } );
+        Assert.IsNotNull(runner);
+        Assert.AreEqual(2,runner.Definitions.Count());
+        Assert.AreEqual(6,runner.Projects.Count());
     }
 }

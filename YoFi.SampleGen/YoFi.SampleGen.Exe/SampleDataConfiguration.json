@@ -44,7 +44,7 @@
         },
         {
           "Load": "Full",
-          "Save": { "Type": "Ofx", "TxOnly": true, "Month": 2 }
+          "Save": { "Type": "Ofx", "Month": 2 }
         }
       ]
     },
@@ -58,7 +58,7 @@
         },
         {
           "Load": "Full",
-          "Save": { "Type": "Ofx", "TxOnly": true, "Month": 2 }
+          "Save": { "Type": "Ofx", "Month": 2 }
         }
       ]
     },
@@ -72,7 +72,7 @@
         },
         {
           "Load": "Full",
-          "Save": { "Type": "Ofx", "TxOnly": true, "Month": 2 }
+          "Save": { "Type": "Ofx", "Month": 2 }
         },
         {
           "Load": "Upload",
@@ -86,7 +86,7 @@
       "Outputs": [
         {
           "Load": "Full",
-          "Save": { "Type": "Ofx", "TxOnly": true, "Month": 1 }
+          "Save": { "Type": "Ofx", "Month": 1 }
         },
         {
           "Load": "Upload",

@@ -10,8 +10,29 @@ namespace YoFi.SampleGen;
 /// </summary>
 public class SampleDataRunner
 {
+    public class Definition
+    {
+        public string Name { get; set; }
+        public string Path { get; set; }
+    }
+
+    public class Project
+    {
+        public string Name { get; set; }
+
+        public string Path { get; set; }
+
+        public Output[] Outputs { get; set; }
+    }
+
+    public class Output
+    {
+        public string Load { get; set; }
+        public SampleDataGenerator.SaveOptions Save { get; set; }
+    }
+
     public Definition[] Definitions { get; set; }
-    public SampleDataProject[] Projects { get; set; }
+    public Project[] Projects { get; set; }
 
     private Dictionary<string,SampleDataGenerator> Generators;
 
@@ -31,7 +52,7 @@ public class SampleDataRunner
             });
     }
 
-    public IEnumerable<string> Save(SampleDataProject project, string directory)
+    public IEnumerable<string> Save(Project project, string directory)
     {
         var result = new List<string>();
         Directory.CreateDirectory(directory);
