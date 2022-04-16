@@ -12,11 +12,6 @@ namespace YoFi.SampleGen
     /// Generates realistic sample data so we can test and users can explore the system
     /// without exposing any real data
     /// </summary>
-    /// <remarks>
-    /// The generator originally was designed to export to a file which we'd later import. It still
-    /// does that. However, I later desigend to just call it inline when starting and add the new data
-    /// directly into the database.
-    /// </remarks>
     public class SampleDataGenerator
     {
         /// <summary>

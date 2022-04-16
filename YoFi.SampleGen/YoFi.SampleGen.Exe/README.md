@@ -1,7 +1,9 @@
 ﻿# Sample Generator
 
-This console app will create the needed sample data. Note that currently, this is all done by the tests.
-Moving that to the console app is a TODO.
+This console app will create the needed sample data.
+Previously, I used outputs from various tests as the sample data files.
+It was pretty scattershot.
+So here with the command-line utility, I bring it into a single regime.
 
 The console app needs to create a single consistent set of data. That is, it should only call the
 Generate() methods ONCE. This is an important distinction versus the tests, as the tests call
@@ -10,75 +12,54 @@ Generate() methods many times for test purposes.
 ## Usage
 
 ```
-    YoFi.SampleGen.Exe --year <Year> --project <Project> --project <Project> --inplace --help
+YoFi.SampleGen.Exe: Generate sample data for project
+  -y, --year=YEAR            Calendar YEAR for all data.
+                               Defaults to current year.
+  -p, --project=PROJECT      Which PROJECT to generate data for.
+                               Repeat this option for multiple projects.
+                               Generates for all projects if not specified.
+  -i, --inplace              Generate data in its final location.
+                               Otherwise generates to local directory.
+  -h, --help                 Show this message and exit.
+
+Available Projects:
+        YoFi.AspNet
+        YoFi.Data
+        YoFi.Tests
+        YoFi.Core.Tests.Unit
+        YoFi.Tests.Integration
+        YoFi.Tests.Functional
 ```
 
-## Options
+## Example Run
 
-* --year &lt;Year&gt;. Defaults to current year
-* --project &lt;Project&gt;. Output only single project. Ok to have multiple --project options for multiple projects. If not specified, defaults to generating all projects.
-* --inplace. Generate outputs in their correct directories in the project. If not included, will generate in "out" under current directory
-* --help. Show usage and options
+```
+PS> dotnet run -- -i
 
-The "Project" output is the name of a single project in the YoFi top-level. e.g. "YoFi.AspNet" or "YoFi.Data" for production,
-or e.g. "YoFi.Core.Tests.Unit" for that test project.
+YoFi.SampleGen.Exe: Generate sample data for project
+        Run with --help for details
+> YoFi.AspNet
+        ../../YoFi.AspNet/wwwroot/sample/SampleData-2022-Full.xlsx
+> YoFi.Data
+        ../../YoFi.Data/SampleData/SampleData-2022-Full.json
+> YoFi.Tests
+        ../../YoFi.Tests/SampleData/SampleData-2022-Full.json
+        ../../YoFi.Tests/SampleData/SampleData-2022-Full.xlsx
+        ../../YoFi.Tests/SampleData/SampleData-2022-Full-Month02.ofx
+> YoFi.Core.Tests.Unit
+        ../../YoFi.Core.Tests.Unit/SampleData/SampleData-2022-Full.json
+        ../../YoFi.Core.Tests.Unit/SampleData/SampleData-2022-Full-Month02.ofx
+> YoFi.Tests.Integration
+        ../../YoFi.Tests.Integration/SampleData/SampleData-2022-Full.json
+        ../../YoFi.Tests.Integration/SampleData/SampleData-2022-Full-Month02.ofx
+        ../../YoFi.Tests.Integration/SampleData/SampleData-2022-Upload.xlsx
+> YoFi.Tests.Functional
+        ../../YoFi.Tests.Functional/SampleData/SampleData-2022-Full-Month01.ofx
+        ../../YoFi.Tests.Functional/SampleData/SampleData-2022-Upload.xlsx
+        ../../YoFi.Tests.Functional/SampleData/SampleData-2022-Upload-Tx.xlsx
+```
 
-## Output: Production Data
+## Configuration
 
-Note this really only needs to be done once a year, or if a change is needed
-
-### YoFi.AspNet
-
-In wwwroot/sample:
-
-* SampleData-Full.xlsx 
-
-### YoFi.Data
-
-In SampleData:
-
-* FullSampleData.json
-
-NOTE: When the refactoring of YoFi.Data is complete, the sample data in wwwroot
-should no longer be needed.
-
-## Output: Test Collateral
-
-This should never be needed, unless there's a new feature added to sample data
-
-### YoFi.Tests
-
-In SampleData:
-
-* SampleData-Full.xlsx
-* FullSampleData.json
-* FullSampleData-Month02.ofx
-
-NOTE: When the refactoring of YoFi.Data is complete, these tests should be 
-reconsidered to see if sample data is still needed there.
-
-### YoFi.Core.Tests.Unit
-
-In SampleData:
-
-* FullSampleData.json
-* FullSampleData-Month02.ofx
-
-### YoFi.Tests.Integration
-
-In SampleData:
-
-* FullSampleData.json
-* FullSampleData-Month02.ofx
-* Test-Generator-GenerateUploadSampleData.xlsx
-
-NOTE: When the refactoring of YoFi.Data is complete, its possible that this may
-not need FullSampleData.json, as it can use the copy in YoFi.Data.
-
-### YoFi.Tests.Functional
-
-In SampleData:
-
-* FullSampleData-Month01.ofx
-* Test-Generator-GenerateUploadSampleData.xlsx
-* Test-Generator-GenerateUploadSampleData-Transactions.xlsx
+The configuration of which projects get which kind of data is all contained in the
+[SampleDataConfiguration.json](./SampleDataConfiguration.json) file.

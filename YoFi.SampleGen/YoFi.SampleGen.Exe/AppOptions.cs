@@ -11,9 +11,9 @@ public class AppOptions: OptionSet
 
     public AppOptions()
     {
-        Add( "y|year=", "calendar {YEAR} for all data", (int v) => Year = v);
-        Add( "p|project=", "which {PROJECT} to generate data for", v => Projects.Add(v));
-        Add( "i|inplace", "generate data in its final location", v => InPlace = v != null);
-        Add( "h|help", "show this message and exit", v => Help = v != null );
+        Add( "y|year=", "Calendar {YEAR} for all data.\nDefaults to current year.", (int v) => Year = v);
+        Add( "p|project=", "Which {PROJECT} to generate data for.\nRepeat this option for multiple projects.\nGenerates for all projects if not specified.", v => Projects.Add(v));
+        Add( "i|inplace", "Generate data in its final location.\nOtherwise generates to local directory.", v => InPlace = v != null);
+        Add( "h|help", "Show this message and exit.", v => Help = v != null );
     }
 }
