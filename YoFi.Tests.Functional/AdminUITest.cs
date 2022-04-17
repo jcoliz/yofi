@@ -6,8 +6,10 @@ namespace YoFi.Tests.Functional;
 [TestClass]
 public class AdminUITest: FunctionalUITest
 {
-    [TestMethod]
-    public async Task SeedDatabase_Bug1387()
+    [DataRow("txyear")]
+    [DataRow("txtoday")]
+    [DataTestMethod]
+    public async Task SeedDatabase_Bug1387(string method)
     {
         //
         // Bug 1387: [Production Bug] Seed database with transactions does not save splits
@@ -32,8 +34,8 @@ public class AdminUITest: FunctionalUITest
         await Page.ClickAsync("data-test-id=btn-modal-ok");
         await Page.SaveScreenshotToAsync(TestContext);
 
-        // When: Seeding database with "Transactions Full Year"
-        await Page.ClickAsync("div[data-id=\"txyear\"]");
+        // When: Seeding database with {method}
+        await Page.ClickAsync($"div[data-id=\"{method}\"]");
         await Task.Delay(500);
         await Page.SaveScreenshotToAsync(TestContext);
         await Page.ClickAsync("text=Close");

@@ -123,10 +123,12 @@ namespace YoFi.Data
             }
             else
             {
-                // Note "IncludeGraph" locks to SQL Server.
-                // For more complex but portable alternative, see
-                // https://github.com/borisdj/EFCore.BulkExtensions
-                await this.BulkInsertAsync(items, b => b.IncludeGraph = true);
+                // Fix for AB#1387: [Production Bug] Seed database with transactions does not save splits
+                // Works around Issue #780 in EFCore.BulkExtensions
+                // https://github.com/borisdj/EFCore.BulkExtensions/issues/780
+                // Also see AB#1388: Revert fix for #1387
+
+                await this.BulkInsertAsync(items, b => b.SetOutputIdentity = true);
             }
         }
 
