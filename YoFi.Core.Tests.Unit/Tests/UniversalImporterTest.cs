@@ -314,14 +314,14 @@ namespace YoFi.Core.Tests.Unit
         public async Task TransactionsOfx()
         {
             // Given: An OFX file with transactions
-            var stream = Common.DotNet.Test.SampleData.Open("FullSampleData-Month02.ofx");
+            var stream = Common.DotNet.Test.SampleData.Open("SampleData-2022-Full-Month02.ofx");
 
             // When: Importing it
             await importer.QueueImportFromOfxAsync(stream);
             await importer.ProcessImportAsync();
 
             // Then: All items imported
-            Assert.AreEqual(74, txrepo.Items.Count);
+            Assert.AreEqual(73, txrepo.Items.Count);
 
             // And: Spot check facts we know about the items
             Assert.IsTrue(txrepo.Items.All(x => x.Timestamp.Month == 2));

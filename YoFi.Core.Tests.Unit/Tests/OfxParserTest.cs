@@ -17,7 +17,7 @@ namespace YoFi.Core.Tests.Unit
         {
             if (null == Document)
             {
-                var filename = "FullSampleData-Month02.ofx";
+                var filename = "SampleData-2022-Full-Month02.ofx";
                 var stream = Common.DotNet.Test.SampleData.Open(filename);
 
                 Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
@@ -33,7 +33,7 @@ namespace YoFi.Core.Tests.Unit
         [TestMethod]
         public void TransactionsCount()
         {
-            Assert.AreEqual(74, Document.Statements.SelectMany(x=>x.Transactions).Count());
+            Assert.AreEqual(73, Document.Statements.SelectMany(x=>x.Transactions).Count());
         }
 
         [TestMethod]
@@ -41,9 +41,9 @@ namespace YoFi.Core.Tests.Unit
         {
             var actual = Document.Statements.First().Transactions.First();
 
-            Assert.AreEqual(2569.92m, actual.Amount);
-            Assert.AreEqual("Megacorp Inc", actual.Memo.Trim());
-            Assert.AreEqual(new DateTime(2021, 2, 1), actual.Date.Value.DateTime);
+            Assert.AreEqual(-138.42m, actual.Amount);
+            Assert.AreEqual("Spaghetti Factory", actual.Memo.Trim());
+            Assert.AreEqual(new DateTime(2022, 2, 1), actual.Date.Value.DateTime);
         }
     }
 }
