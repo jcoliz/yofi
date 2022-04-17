@@ -54,10 +54,10 @@
 <table class="table table-index" data-test-id="results">
     <thead>
         <tr class="row">
-            <th class="col-lg-2 col-3" style="text-align:right">
+            <th class="col-lg-2 col-3" style="text-align:right" data-test-id="Date">
                 @Html.DisplayNameFor(model => model.Timestamp)<span class="d-none d-sm-inline d-lg-none">/Amount</span>
             </th>
-            <th class="col-lg-5 col-6">
+            <th class="col-lg-5 col-6" data-test-id="Filename">
                 @Html.DisplayNameFor(model => model.Filename)<span class="d-lg-none">/Name</span>/Memo
             </th>
             <th class="d-none d-lg-block col-lg-1" style="text-align:right">
@@ -68,9 +68,6 @@
             </th>
             <th class="d-none" data-test-id="Spacer"/>
             <th class="d-none" data-test-id="Memo"/>
-            <th class="d-none">
-                @Html.DisplayNameFor(model => model.Filename)
-            </th>
         </tr>
     </thead>
     <tbody>

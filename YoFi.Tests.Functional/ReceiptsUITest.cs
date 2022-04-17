@@ -131,8 +131,8 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual("Olive Garden",table.Rows[0]["Name"]);
             Assert.AreEqual("Waste Management", table.Rows[2]["Name"]);
 
-            Assert.AreEqual("12/31/2022", table.Rows[1]["Date"]);
-            Assert.AreEqual("12/21/2022", table.Rows[3]["Date"]);
+            Assert.AreEqual("12/31", table.Rows[1]["Date"]);
+            Assert.AreEqual("12/21", table.Rows[3]["Date"]);
 
             //decimal.Parse(txtable.Rows.First()["Amount"], NumberStyles.Currency);
             Assert.AreEqual(130.85m, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
