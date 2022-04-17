@@ -518,7 +518,7 @@ namespace YoFi.Tests.Integration.Pages
         public async Task AllDataTypes()
         {
             // Given: An XLSX file with all four types of data in sheets named for their type
-            var filename = "Test-Generator-GenerateUploadSampleData.xlsx";
+            var filename = "SampleData-2022-Upload.xlsx";
             var stream = SampleData.Open(filename);
 
             // When: Uploading that file
