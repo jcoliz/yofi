@@ -457,8 +457,8 @@ namespace YoFi.Tests.Integration.Pages
         public async Task OfxUploadNoBankRef()
         {
             // Given: An OFX file containing transactions with no bank reference
-            var filename = "FullSampleData-Month02.ofx";
-            var expected = 74;
+            var filename = "SampleData-2022-Full-Month02.ofx";
+            var expected = 73;
             var stream = SampleData.Open(filename);
 
             // When: Uploading that file
