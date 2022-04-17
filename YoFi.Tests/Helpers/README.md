@@ -1,4 +1,4 @@
-# YoFi.Tests.Helpers
+# Unit Test Helpers
 
 This directory contains application dependent helper classes which provide
 functionality that can be use across many tests.

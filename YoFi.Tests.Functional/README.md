@@ -1,4 +1,4 @@
-# Functional UI Tests in PlayWright
+# Functional UI Tests for Asp.Net Application using PlayWright
 
 These are browser-driving tests designed to be run against a complete environment
 with a seeded database of demo data.

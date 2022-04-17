@@ -1,4 +1,4 @@
-# Common.DotNet
+# Common DotNet Components
 
 This directory (and namespace) contains common classes which take
 no dependencies on UI or data. Should run on any .NET platform.

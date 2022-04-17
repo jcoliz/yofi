@@ -1,8 +1,14 @@
-# Unit Tests
+# Legacy Unit Tests
 
-This directory contains the unit tests. As opposed to the Integration Tests, the Unit Tests
+This directory contains the original unit tests. As opposed to the Integration Tests, the Unit Tests
 are responsible for ensuring Core and Common code is thoroughly tested. Coverage for the AspNet
 layer is the responsibility of the Integration Tests.
+
+Note that I am in the process of decomposing this project into:
+
+* YoFi.Core.Tests.Unit: Will only depend on the core. This is mostly done.
+* YoFi.Data.Tests.Unit: Most of the remaining tests will go here.
+* YoFi.AspNet.Tests.Unit: Remaining tests which target the Asp.Net layer.
 
 ## Core
 

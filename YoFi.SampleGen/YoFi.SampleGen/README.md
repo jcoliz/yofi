@@ -1,4 +1,4 @@
-# YoFi.SampleGen
+# Sample Generation Logic
 
 This is a class library containing the main logic of generation.
 

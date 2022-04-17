@@ -1,4 +1,4 @@
-# YoFi.SampleGen
+# Sample Generation Utility
 
 This is an offline utility for generating realistic sample data. 
 Originally, this was so users evaluating the app at www.try-yofi.com would be able to use the site effectively. 
