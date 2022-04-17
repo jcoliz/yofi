@@ -22,7 +22,7 @@
     },
     {
       "Name": "YoFi.Data",
-      "Path": "SampleData",
+      "Path": "SampleData/Data",
       "Outputs": [
         {
           "Load": "Full",

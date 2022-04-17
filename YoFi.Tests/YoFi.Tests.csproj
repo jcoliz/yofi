@@ -13,29 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SampleData\budget-white-60x.png" />
-    <None Remove="SampleData\BudgetTxs.json" />
-    <None Remove="SampleData\BudgetTxsManaged.json" />
-    <None Remove="SampleData\FullSampleData-Month02.ofx" />
-    <None Remove="SampleData\FullSampleData.json" />
-    <None Remove="SampleData\SampleData-Full.xlsx" />
-    <None Remove="SampleData\Splits-Test.xlsx" />
-    <None Remove="SampleData\Transactions1000.json" />
-    <None Remove="SampleData\User-Story-802.ofx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="SampleData\budget-white-60x.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <Content Include="SampleData\SampleData-Full.xlsx">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
+    <EmbeddedResource Include="SampleData\budget-white-60x.png"/>
     <EmbeddedResource Include="SampleData\BudgetTxs.json" />
     <EmbeddedResource Include="SampleData\FullSampleData-Month02.ofx" />
     <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
@@ -43,6 +21,19 @@
     <EmbeddedResource Include="SampleData\Splits-Test.xlsx" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
     <EmbeddedResource Include="SampleData\User-Story-802.ofx" />
+    <EmbeddedResource Include="SampleData\SampleData-2022-Full-Month02.ofx" />
+    <EmbeddedResource Include="SampleData\SampleData-2022-Full.json" />
+    <EmbeddedResource Include="SampleData\SampleData-2022-Full.xlsx" />
+    <Content Include="SampleData\SampleData-Full.xlsx">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleData\SampleData-2022-Full.xlsx">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -7,20 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SampleData\budget-white-60x.png" />
-    <None Remove="SampleData\BudgetTxs.json" />
-    <None Remove="SampleData\BudgetTxsManaged.json" />
-    <None Remove="SampleData\FullSampleData-Month02.ofx" />
-    <None Remove="SampleData\FullSampleData.json" />
-    <None Remove="SampleData\Test-Generator-GenerateUploadSampleData.xlsx" />
-    <None Remove="SampleData\Transactions1000.json" />
-    <None Remove="SampleData\User-Story-802.ofx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="SampleData\budget-white-60x.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="SampleData\budget-white-60x.png"/>
     <EmbeddedResource Include="SampleData\BudgetTxs.json" />
     <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
     <EmbeddedResource Include="SampleData\FullSampleData-Month02.ofx" />
@@ -28,6 +15,9 @@
     <EmbeddedResource Include="SampleData\Test-Generator-GenerateUploadSampleData.xlsx" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
     <EmbeddedResource Include="SampleData\User-Story-802.ofx" />
+    <EmbeddedResource Include="SampleData\SampleData-2022-Full-Month02.ofx" />
+    <EmbeddedResource Include="SampleData\SampleData-2022-Full.json" />
+    <EmbeddedResource Include="SampleData\SampleData-2022-Upload.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
