@@ -22,10 +22,11 @@ namespace YoFi.Tests.Helpers
         {
         }
 
-        async Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
+        async Task<bool> IDataProvider.BulkInsertAsync<T>(IList<T> items)
         {
             await this.AddRangeAsync(items);
             await this.SaveChangesAsync();
+            return true;
         }
 
         Task IDataProvider.BulkDeleteAsync<T>(IQueryable<T> items)

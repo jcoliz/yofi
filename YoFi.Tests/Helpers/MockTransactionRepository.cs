@@ -18,6 +18,8 @@ namespace YoFi.Tests.Helpers
 
         public IStorageService Storage {get;set;}
 
+        IQueryable<Split> ITransactionRepository.Splits => throw new NotImplementedException();
+
         public void AddRange(IEnumerable objects)
         {
             base.AddRangeAsync(objects as IEnumerable<Transaction>).Wait();
@@ -105,6 +107,11 @@ namespace YoFi.Tests.Helpers
 
             transaction.ReceiptUrl = blobname;
             await UpdateAsync(transaction);
+        }
+
+        Task ITransactionRepository.BulkInsertWithSplitsAsync(IList<Transaction> items)
+        {
+            throw new NotImplementedException();
         }
     }
 }

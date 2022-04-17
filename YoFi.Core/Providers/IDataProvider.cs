@@ -114,7 +114,8 @@ namespace YoFi.Core
         /// </remarks>
         /// <typeparam name="T">Type of items</typeparam>
         /// <param name="items">Items to be inserted</param>
-        Task BulkInsertAsync<T>(IList<T> items) where T : class;
+        /// <returns>True if you could expect child items to have been inserted</returns>
+        Task<bool> BulkInsertAsync<T>(IList<T> items) where T : class;
 
         /// <summary>
         /// Delete many items en masse

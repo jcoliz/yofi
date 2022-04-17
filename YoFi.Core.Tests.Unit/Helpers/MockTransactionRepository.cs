@@ -50,6 +50,11 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
+        public Task BulkInsertWithSplitsAsync(IList<Transaction> items)
+        {
+            return base.BulkInsertAsync(items);
+        }
+
         public IEnumerable<Split> CalculateCustomSplitRules(Transaction transaction, string json)
         {
             // We make splits for only one rule!

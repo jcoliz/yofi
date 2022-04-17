@@ -114,12 +114,26 @@ namespace YoFi.Data
 
         Task<int> IDataProvider.ClearAsync<T>() where T : class => Set<T>().BatchDeleteAsync();
 
-        async Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
+        /// <summary>
+        /// Insert many items en masse
+        /// </summary>
+        /// <remarks>
+        /// This is much more efficient than doing it one at a time
+        /// </remarks>
+        /// <typeparam name="T">Type of items</typeparam>
+        /// <param name="items">Items to be inserted</param>
+        /// <returns>True if you could expect child items to have been inserted</returns>
+
+        async Task<bool> IDataProvider.BulkInsertAsync<T>(IList<T> items)
         {
+            var result = false;
             if (inmemory)
             {
                 base.Set<T>().AddRange(items);
                 await base.SaveChangesAsync();
+
+                // Straight addrange DOES insert child items
+                result = true;
             }
             else
             {
@@ -130,6 +144,7 @@ namespace YoFi.Data
 
                 await this.BulkInsertAsync(items, b => b.SetOutputIdentity = true);
             }
+            return result;
         }
 
         async Task IDataProvider.BulkDeleteAsync<T>(IQueryable<T> items)
