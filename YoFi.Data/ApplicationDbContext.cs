@@ -33,6 +33,19 @@ namespace YoFi.Data
             builder.Entity<Split>().ToTable("Split");
 
             builder.Entity<Transaction>().HasIndex(p => new { p.Timestamp, p.Hidden, p.Category });
+
+            // https://stackoverflow.com/questions/60503553/ef-core-linq-to-sqlite-could-not-be-translated-works-on-sql-server
+            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                foreach (var entityType in builder.Model.GetEntityTypes())
+                {
+                    var properties = entityType.ClrType.GetProperties().Where(p => p.PropertyType == typeof(decimal));
+                    foreach (var property in properties)
+                    {
+                        builder.Entity(entityType.Name).Property(property.Name).HasConversion<double>();
+                    }
+                }
+            }
         }
 
         #region Entity Sets
