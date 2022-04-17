@@ -97,5 +97,15 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <returns></returns>
         Task AssignBankReferences();
+
+        /// <summary>
+        /// Insert a mass of transactions at once WITH their splits
+        /// </summary>
+        /// <remarks>
+        /// This is needed because the base repository will not insert the splits
+        /// Bulk Insert only inserts the top-level items
+        /// </remarks>
+        /// <param name="items"></param>
+        Task BulkInsertWithSplitsAsync(IList<Transaction> items);
     }
 }
