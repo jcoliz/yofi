@@ -243,10 +243,6 @@ namespace YoFi.Core.SampleData
                                 // Clear any imported IDs
                                 split.ID = 0;
                                 split.TransactionID = 0;
-
-                                // Workaround for Bug 1387: [Production Bug] Seed database with transactions does not save splits
-                                // Splits need to be NOT EQUAL. So for now I'll cram in a memo to force inequality
-                                split.Memo = tx.Timestamp.ToString("MM-dd");
                             }
                         }
                         // Also clear item ID, which will cause problems on import
