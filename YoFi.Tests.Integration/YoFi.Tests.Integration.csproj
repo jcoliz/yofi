@@ -10,7 +10,6 @@
     <EmbeddedResource Include="SampleData\budget-white-60x.png" />
     <EmbeddedResource Include="SampleData\BudgetTxs.json" />
     <EmbeddedResource Include="SampleData\BudgetTxsManaged.json" />
-    <EmbeddedResource Include="SampleData\FullSampleData.json" />
     <EmbeddedResource Include="SampleData\Transactions1000.json" />
     <EmbeddedResource Include="SampleData\User-Story-802.ofx" />
     <EmbeddedResource Include="SampleData\SampleData-2022-Full-Month02.ofx" />

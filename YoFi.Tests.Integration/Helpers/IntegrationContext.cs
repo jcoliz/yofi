@@ -54,7 +54,7 @@ namespace YoFi.Tests.Integration.Helpers
                     });
                     services.AddScoped<IAuthorizationHandler, AnonymousAuthHandler>();
                     services.AddSingleton<IStorageService>(storage = new TestAzureStorage());
-                    services.AddSingleton<IClock>(clock = new TestClock());
+                    services.AddSingleton<IClock>(clock = new TestClock() { Now = new DateTime( 2022, 12, 31 ) });
                 });
             }).Server;
             parser = new HtmlParser();

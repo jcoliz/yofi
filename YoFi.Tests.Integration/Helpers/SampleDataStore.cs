@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -32,13 +33,23 @@ namespace YoFi.Tests.Integration.Helpers
             BudgetTxs = incoming.BudgetTxs;
         }
 
-        public static readonly string FileName = "FullSampleData.json";
+        public static readonly string FileName = "SampleData-2022-Full.json";
         public static SampleDataStore Single = null;
 
         public static async Task LoadFullAsync()
         {
             var stream = SampleData.Open(FileName);
             Single = await JsonSerializer.DeserializeAsync<SampleDataStore>(stream);
+
+            // TODO: Fix this hack
+            // The generated sample data should NOT have IDs in the JSON. IDs are needed for the XLSX
+            // but not the JSON data
+            foreach (var transaction in Single.Transactions.Where(x => x.ID != 0))
+            {
+                transaction.ID = 0;
+                foreach (var split in transaction.Splits)
+                    split.TransactionID = 0;
+            }
         }
 
         public static async Task LoadPartialAsync()
