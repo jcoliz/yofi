@@ -33,7 +33,7 @@ namespace YoFi.Data.SampleData
             BudgetTxs = incoming.BudgetTxs;
         }
 
-        public static readonly string FileName = "FullSampleData.json";
+        public static readonly string FileName = "SampleData-2022-Full.json";
         public static SampleDataStore Single = null;
 
         public static async Task SeedFullAsync(IDataProvider context)
