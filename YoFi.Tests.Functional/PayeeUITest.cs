@@ -178,7 +178,7 @@ namespace YoFi.Tests.Functional
 
             // And: Uploading payees
             await Page.ClickAsync("[aria-label=\"Upload\"]");
-            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/SampleData-2022-Upload.xlsx" });
             await Page.ClickAsync("text=Upload");
 
             // Then: We land at the budget index page

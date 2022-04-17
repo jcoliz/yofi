@@ -81,7 +81,7 @@
       "Path": "SampleData",
       "Outputs": [
         {
-          "Load": "Full",
+          "Load": "Upload",
           "Save": { "Type": "Ofx", "Month": 1 }
         },
         {

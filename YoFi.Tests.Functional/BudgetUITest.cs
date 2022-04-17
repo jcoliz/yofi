@@ -283,21 +283,22 @@ namespace YoFi.Tests.Functional
         public async Task Upload()
         {
             //
-            // Step 1: Upload payees
+            // Step 1: Upload budget
             //
 
-            // Given: We are logged in and on the payees page
+            // Given: We are logged in and on the budget page
+            // (Initialized on setup)
 
-            // Then: We are on the main page for this section
+            // When: Uploading data which includes a budget
             await Page.ClickAsync("[aria-label=\"Upload\"]");
-            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/SampleData-2022-Upload.xlsx" });
             await Page.ClickAsync("text=Upload");
 
             // Then: We land at the uploaded OK page
             await Page.ThenIsOnPageAsync("Uploaded Budget");
 
             //
-            // Step 2: Search for the new payees
+            // Step 2: Search for the new budget items
             //
 
             // When: Navigating to edit budget page

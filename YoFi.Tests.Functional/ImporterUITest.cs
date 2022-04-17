@@ -61,7 +61,7 @@ namespace YoFi.Tests.Functional
 
             // When: Importing an OFX file, where the transactions match the existing payees
             await Page.ClickAsync("[aria-label=\"Upload\"]");
-            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData\\FullSampleDAta-Month01.ofx" });
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData\\SampleData-2022-Upload-Month01.ofx" });
             await Page.SaveScreenshotToAsync(TestContext, "SetInputFiles");
             await Page.ClickAsync("text=Upload");
 
@@ -69,9 +69,10 @@ namespace YoFi.Tests.Functional
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
 
             // Then: Expected number of items present in importer
-            Assert.AreEqual(6, await Page.GetTotalItemsAsync());
+            Assert.AreEqual(2, await Page.GetTotalItemsAsync());
 
             // And: All categories are set correctly
+            // TODO
         }
 
         /// <summary>
@@ -135,7 +136,7 @@ namespace YoFi.Tests.Functional
 
             // And: Uploading a sample file with all kinds of content in it
             await Page.ClickAsync("[aria-label=\"Upload\"]");
-            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/Test-Generator-GenerateUploadSampleData.xlsx" });
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData/SampleData-2022-Upload.xlsx" });
             await Page.ClickAsync("text=Upload");
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
 
