@@ -41,10 +41,6 @@
         {
           "Load": "Full",
           "Save": { "Type": "Xlsx" }
-        },
-        {
-          "Load": "Full",
-          "Save": { "Type": "Ofx", "Month": 2 }
         }
       ]
     },
