@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YoFi.AspNet.Data;
+using YoFi.Data;
 using YoFi.Core;
 using YoFi.Core.Models;
 

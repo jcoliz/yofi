@@ -12,7 +12,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
-using YoFi.AspNet.Data;
+using YoFi.Data;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 

@@ -71,6 +71,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\YoFi.Core\YoFi.Core.csproj" />
+    <ProjectReference Include="..\YoFi.Data\YoFi.Data.csproj" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using YoFi.AspNet.Data;
+using YoFi.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using Common.DotNet;
@@ -70,8 +70,7 @@ namespace YoFi.AspNet.Main
                 try
                 {
                     var serviceProvider = services.GetRequiredService<IServiceProvider>();
-                    var adminuserconfig = services.GetRequiredService<IOptions<AdminUserConfig>>();
-                    Data.Seed.CreateRoles(serviceProvider, adminuserconfig).Wait();
+                    YoFi.Data.Identity.Roles.CreateRoles(serviceProvider).Wait();
                 }
                 catch (Exception ex)
                 {
@@ -85,7 +84,7 @@ namespace YoFi.AspNet.Main
                     {
                         var loader = services.GetRequiredService<ISampleDataProvider>();
                         var dbadmin = services.GetRequiredService<IDataAdminProvider>();
-                        await Seed.ManageSampleData(loader, dbadmin);
+                        await dbadmin.SeedDemoSampleData(true,loader);
                     }
                 }
                 catch (Exception ex)
