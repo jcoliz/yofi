@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Run Tests
-      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --settings:test\coverlet.runsettings
+      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --settings:test/coverlet.runsettings
       env:
         api__key: APITESTKEYVALUE
     - name: Publish Code Coverage
