@@ -8,6 +8,7 @@ YoFi is an open-source web-based personal finance manager written in C# on ASP<m
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md) 
 [![Build Status](https://dev.azure.com/jcoliz/YoFi/_apis/build/status/jcoliz.yofi?branchName=master)](https://dev.azure.com/jcoliz/YoFi/_build/latest?definitionId=25&branchName=master)
+[![codecov](https://codecov.io/gh/jcoliz/yofi/branch/master/graph/badge.svg?token=E3T206CE21)](https://codecov.io/gh/jcoliz/yofi)
 [![Release](https://jcoliz.vsrm.visualstudio.com/_apis/public/Release/badge/c9089da1-9273-4ee3-b0a0-b26a5e1661d7/1/1)](https://jcoliz.vsrm.visualstudio.com/_apis/public/Release/badge/c9089da1-9273-4ee3-b0a0-b26a5e1661d7/1/1)
 
 ## Features
