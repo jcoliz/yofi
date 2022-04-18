@@ -303,10 +303,9 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
-        public async Task<bool> BulkInsertAsync<T>(IList<T> items) where T : class
+        public Task BulkInsertAsync<T>(IList<T> items) where T : class
         {
-            await AddRangeAsync(items);
-            return true;
+            return AddRangeAsync(items);
         }
 
         public Task BulkDeleteAsync<T>(IQueryable<T> items) where T : class

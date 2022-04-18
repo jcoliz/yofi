@@ -160,7 +160,7 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
-        Task<bool> IDataProvider.BulkInsertAsync<T>(IList<T> items)
+        Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
         {
             throw new NotImplementedException();
         }

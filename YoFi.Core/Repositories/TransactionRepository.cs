@@ -425,39 +425,6 @@ namespace YoFi.Core.Repositories
             }
         }
 
-        /// <summary>
-        /// Insert a mass of transactions at once WITH their splits
-        /// </summary>
-        /// <remarks>
-        /// This is needed because the base repository will not insert the splits
-        /// Bulk Insert only inserts the top-level items
-        /// </remarks>
-        /// <param name="items"></param>
-
-        public async Task BulkInsertWithSplitsAsync(IList<Transaction> items)
-        {
-            // Ensure there is object linkage from splits to transaction first
-            foreach(var tx in items.Where(x=>x.HasSplits))
-                foreach(var split in tx.Splits)
-                    split.Transaction = tx;
-
-            // Insert the items themselves
-            var splitsinserted = await _context.BulkInsertAsync(items);
-
-            // Fix for AB#1387: [Production Bug] Seed database with transactions does not save splits
-            // Works around Issue #780 in EFCore.BulkExtensions
-            // https://github.com/borisdj/EFCore.BulkExtensions/issues/780
-            // Also see AB#1388: Revert fix for #1387
-
-            if (!splitsinserted)
-            {
-                foreach (var split in items.Where(x => x.HasSplits).SelectMany(x => x.Splits))
-                    split.TransactionID = split.Transaction.ID;
-
-                await _context.BulkInsertAsync(items.Where(x => x.HasSplits).SelectMany(x => x.Splits).ToList());
-            }
-        }
-
         #endregion
 
         #region Fields

@@ -243,9 +243,6 @@ namespace YoFi.Core.SampleData
                                 // Clear any imported IDs
                                 split.ID = 0;
                                 split.TransactionID = 0;
-
-                                // Fix for AB#1387: [Production Bug] Seed database with transactions does not save splits
-                                split.Transaction = tx;
                             }
                         }
                         // Also clear item ID, which will cause problems on import
@@ -253,20 +250,7 @@ namespace YoFi.Core.SampleData
                     }
                 }
 
-                var splitsadded = await _context.BulkInsertAsync(txs);
-
-                // Fix for AB#1387: [Production Bug] Seed database with transactions does not save splits
-                // Works around Issue #780 in EFCore.BulkExtensions
-                // https://github.com/borisdj/EFCore.BulkExtensions/issues/780
-                // Also see AB#1388: Revert fix for #1387
-
-                if (!splitsadded)
-                {
-                    foreach (var split in txs.Where(x => x.HasSplits).SelectMany(x => x.Splits))
-                        split.TransactionID = split.Transaction.ID;
-
-                    await _context.BulkInsertAsync(txs.Where(x => x.HasSplits).SelectMany(x => x.Splits).ToList());
-                }
+                await _context.BulkInsertAsync(txs);
 
                 results.Add($"{txs.Count()} transactions");
             }
@@ -300,9 +284,6 @@ namespace YoFi.Core.SampleData
                                 // Clear any imported IDs
                                 split.ID = 0;
                                 split.TransactionID = 0;
-
-                                // Fix for AB#1387: [Production Bug] Seed database with transactions does not save splits
-                                split.Transaction = tx;
                             }
                         }
                         // Also clear item ID, which will cause problems on import
@@ -310,20 +291,7 @@ namespace YoFi.Core.SampleData
                     }
                 }
 
-                var splitsadded = await _context.BulkInsertAsync(added);
-
-                // Fix for AB#1387: [Production Bug] Seed database with transactions does not save splits
-                // Works around Issue #780 in EFCore.BulkExtensions
-                // https://github.com/borisdj/EFCore.BulkExtensions/issues/780
-                // Also see AB#1388: Revert fix for #1387
-
-                if (!splitsadded)
-                {
-                    foreach (var split in added.Where(x => x.HasSplits).SelectMany(x => x.Splits))
-                        split.TransactionID = split.Transaction.ID;
-
-                    await _context.BulkInsertAsync(added.Where(x => x.HasSplits).SelectMany(x => x.Splits).ToList());
-                }
+                await _context.BulkInsertAsync(added);
 
                 results.Add($"{added.Count()} transactions");
             }

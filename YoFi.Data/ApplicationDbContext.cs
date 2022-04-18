@@ -124,27 +124,41 @@ namespace YoFi.Data
         /// <param name="items">Items to be inserted</param>
         /// <returns>True if you could expect child items to have been inserted</returns>
 
-        async Task<bool> IDataProvider.BulkInsertAsync<T>(IList<T> items)
+        async Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
         {
-            var result = false;
             if (inmemory)
             {
                 base.Set<T>().AddRange(items);
                 await base.SaveChangesAsync();
-
-                // Straight addrange DOES insert child items
-                result = true;
             }
             else
             {
+                await this.BulkInsertAsync(items, b => b.SetOutputIdentity = true);
+
                 // Fix for AB#1387: [Production Bug] Seed database with transactions does not save splits
                 // Works around Issue #780 in EFCore.BulkExtensions
                 // https://github.com/borisdj/EFCore.BulkExtensions/issues/780
                 // Also see AB#1388: Revert fix for #1387
 
-                await this.BulkInsertAsync(items, b => b.SetOutputIdentity = true);
+                // So, this might seem like a hack, checking for the type here.  However, this at least
+                // localizes the impact to the smallest footprint. The previous solution impacted way too
+                // much code, largely because many tests use an in memory database, which calls
+                // AddRange directly, which DOES add the child items
+
+                if (items is IList<Transaction> transactions)
+                {
+                    // Ensure there is object linkage from splits to transaction first
+                    foreach (var tx in transactions.Where(x => x.HasSplits))
+                        foreach (var split in tx.Splits)
+                            split.Transaction = tx;
+
+                    var splits = transactions.Where(x => x.HasSplits).SelectMany(x => x.Splits).ToList();
+                    foreach (var split in splits)
+                        split.TransactionID = split.Transaction.ID;
+
+                    await this.BulkInsertAsync(splits);
+                }
             }
-            return result;
         }
 
         async Task IDataProvider.BulkDeleteAsync<T>(IQueryable<T> items)

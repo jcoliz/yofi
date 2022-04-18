@@ -155,7 +155,7 @@ namespace YoFi.Core.Importers
 
             // Add resulting transactions
 
-            await _repository.BulkInsertWithSplitsAsync(incoming);
+            await _repository.BulkInsertAsync(incoming);
         }
 
         #region Internals

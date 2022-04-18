@@ -108,10 +108,5 @@ namespace YoFi.Tests.Helpers
             transaction.ReceiptUrl = blobname;
             await UpdateAsync(transaction);
         }
-
-        Task ITransactionRepository.BulkInsertWithSplitsAsync(IList<Transaction> items)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
