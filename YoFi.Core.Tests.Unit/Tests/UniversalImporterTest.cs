@@ -113,7 +113,7 @@ namespace YoFi.Core.Tests.Unit
             budgetrepo = new MockBudgetTxRepository();
             payeerepo = new MockPayeeRepository();
             txrepo = new MockTransactionRepository();
-            importer = new UniversalImporter(new AllRepositories(txrepo, budgetrepo, payeerepo));
+            importer = new UniversalImporter(new AllRepositories(txrepo, budgetrepo, payeerepo, null));
         }
 
         [TestMethod]
