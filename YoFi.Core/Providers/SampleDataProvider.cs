@@ -252,7 +252,7 @@ namespace YoFi.Core.SampleData
 
                 await _context.BulkInsertAsync(txs);
 
-                results.Add($"{txs.Count()} transactions");
+                results.Add($"{txs.Count} transactions");
             }
             if (offering.Rules.Contains("Today"))
             {
@@ -293,7 +293,7 @@ namespace YoFi.Core.SampleData
 
                 await _context.BulkInsertAsync(added);
 
-                results.Add($"{added.Count()} transactions");
+                results.Add($"{added.Count} transactions");
             }
             if (offering.Rules.Contains(nameof(BudgetTx)))
             {

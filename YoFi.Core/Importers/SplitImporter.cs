@@ -71,7 +71,7 @@ namespace YoFi.Core.Importers
         /// <summary>
         /// Queue of items waiting to be imported
         /// </summary>
-        private readonly HashSet<Split> incoming = new HashSet<Split>();
+        private readonly HashSet<Split> incoming = new();
 
         /// <summary>
         /// Where should the target transaction be saved?

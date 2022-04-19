@@ -54,7 +54,7 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// Primary representation of data.
         /// </summary>
-        readonly Dictionary<Key,TValue> DataSet = new Dictionary<Key,TValue>();
+        readonly Dictionary<Key,TValue> DataSet = new();
 
         /// <summary>
         /// Column labels

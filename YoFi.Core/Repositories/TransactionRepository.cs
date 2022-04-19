@@ -92,7 +92,7 @@ namespace YoFi.Core.Repositories
                     // This may be a pattern-matching search, treat it like one
                     // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
                     // matching one, it's just slower.
-                    if (category.Contains("("))
+                    if (category.Contains('('))
                     {
                         var originals = item.Category?.Split(":") ?? default;
                         var result = new List<string>();
@@ -101,13 +101,13 @@ namespace YoFi.Core.Repositories
                             if (component.StartsWith("(") && component.EndsWith("+)"))
                             {
                                 if (Int32.TryParse(component[1..^2], out var position))
-                                    if (originals.Count() >= position)
+                                    if (originals.Length >= position)
                                         result.AddRange(originals.Skip(position - 1));
                             }
                             else if (component.StartsWith("(") && component.EndsWith(")"))
                             {
                                 if (Int32.TryParse(component[1..^1], out var position))
-                                    if (originals.Count() >= position)
+                                    if (originals.Length >= position)
                                         result.AddRange(originals.Skip(position - 1).Take(1));
                             }
                             else
@@ -344,7 +344,7 @@ namespace YoFi.Core.Repositories
             try
             {
                 if (string.IsNullOrEmpty(rule))
-                    throw new ArgumentNullException();
+                    throw new ArgumentNullException(nameof(rule));
 
                 //
                 // Deserialize the loan object out of the rule as sent in
@@ -355,17 +355,17 @@ namespace YoFi.Core.Repositories
 
                 var trimmed = rule.Trim();
                 if (!trimmed.Contains("[Loan]"))
-                    throw new ArgumentException();
+                    throw new ArgumentException("Missing Loan tag",nameof(rule));
 
                 var split = trimmed.Split("[Loan]");
-                if (split.Count() != 2)
-                    throw new ArgumentException();
+                if (split.Length != 2)
+                    throw new ArgumentException("Too many components", nameof(rule));
 
                 var category = split[0].Trim();
 
                 var loan = JsonSerializer.Deserialize<Loan>(split[1], new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
                 if (loan.Origination is null)
-                    throw new ArgumentException();
+                    throw new ArgumentException("No loan origination found", nameof(rule));
 
                 if (string.IsNullOrEmpty(loan.Principal))
                     loan.Principal = category;

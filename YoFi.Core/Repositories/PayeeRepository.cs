@@ -44,7 +44,7 @@ namespace YoFi.Core.Repositories
                     // This may be a pattern-matching search, treat it like one
                     // Note that you can treat a non-pattern-matching replacement JUST LIKE a pattern
                     // matching one, it's just slower.
-                    if (category.Contains("("))
+                    if (category.Contains('('))
                     {
                         var originals = item.Category?.Split(":") ?? default;
                         var result = new List<string>();
@@ -53,13 +53,13 @@ namespace YoFi.Core.Repositories
                             if (component.StartsWith("(") && component.EndsWith("+)"))
                             {
                                 if (Int32.TryParse(component[1..^2], out var position))
-                                    if (originals.Count() >= position)
+                                    if (originals.Length >= position)
                                         result.AddRange(originals.Skip(position - 1));
                             }
                             else if (component.StartsWith("(") && component.EndsWith(")"))
                             {
                                 if (Int32.TryParse(component[1..^1], out var position))
-                                    if (originals.Count() >= position)
+                                    if (originals.Length >= position)
                                         result.AddRange(originals.Skip(position - 1).Take(1));
                             }
                             else

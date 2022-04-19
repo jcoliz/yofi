@@ -28,8 +28,7 @@ namespace YoFi.Core.Repositories
 
         #region Fields
 
-        private IClock _clock;
-
+        private readonly IClock _clock;
 
         #endregion
 
@@ -81,7 +80,7 @@ namespace YoFi.Core.Repositories
                             'a' => TransactionsForQuery_Amount(Query, value),
                             'd' => TransactionsForQuery_Date(Query, value),
                             'i' => TransactionsForQuery_Imported(Query, value),
-                            _ => throw new ArgumentException($"Unknown query parameter {key}", nameof(key))
+                            _ => throw new ArgumentException($"Unknown query parameter {key}", nameof(q))
                         };
 
                     }
@@ -196,7 +195,7 @@ namespace YoFi.Core.Repositories
         /// </summary>
         internal void ApplyViewParameter(string v)
         {
-            if (!(v?.ToLowerInvariant().Contains("h") == true))
+            if (!(v?.ToLowerInvariant().Contains('h') == true))
                 Query = Query.Where(x => x.Hidden != true);
         }
 

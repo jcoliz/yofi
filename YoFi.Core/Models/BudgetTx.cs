@@ -162,11 +162,11 @@ namespace YoFi.Core.Models
 
         bool IImportDuplicateComparable.ImportEquals(object other)
         {
-            if (other == null)
+            if (other is null)
                 throw new ArgumentNullException(nameof(other));
 
-            if (! (other is BudgetTx))
-                throw new ArgumentException(nameof(other),"Expected BudgetTx");
+            if (other is not BudgetTx)
+                throw new ArgumentException("Expected BudgetTx", nameof(other));
 
             var item = other as BudgetTx;
 

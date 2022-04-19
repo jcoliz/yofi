@@ -226,17 +226,17 @@ namespace YoFi.Core.Importers
         /// <summary>
         /// Pending queue of transactions to import
         /// </summary>
-        private readonly List<Transaction> incoming = new List<Transaction>();
+        private readonly List<Transaction> incoming = new();
 
         /// <summary>
         /// Pending queue of splits to import
         /// </summary>
-        private readonly List<IGrouping<int, Split>> splits = new List<IGrouping<int, Split>>();
+        private readonly List<IGrouping<int, Split>> splits = new();
 
         /// <summary>
         /// Probably duplicate items, but the user should check to be sure.
         /// </summary>
-        private readonly List<Transaction> highlights = new List<Transaction>();
+        private readonly List<Transaction> highlights = new();
 
         /// <summary>
         /// Target repository for storing the imported results

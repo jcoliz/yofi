@@ -49,12 +49,12 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// The row which contains the total for columns
         /// </summary>
-        public RowLabel TotalRow => RowLabel.Total;
+        public static RowLabel TotalRow => RowLabel.Total;
 
         /// <summary>
         /// The column which contains the total for rows
         /// </summary>
-        public ColumnLabel TotalColumn => ColumnLabel.Total;
+        public static ColumnLabel TotalColumn => ColumnLabel.Total;
 
         /// <summary>
         /// The total of the total column

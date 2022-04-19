@@ -170,12 +170,12 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// The row which contains the total for columns
         /// </summary>
-        public RowLabel TotalRow => RowLabel.Total;
+        public static RowLabel TotalRow => RowLabel.Total;
 
         /// <summary>
         /// The column which contains the total for rows
         /// </summary>
-        public ColumnLabel TotalColumn => ColumnLabel.Total;
+        public static ColumnLabel TotalColumn => ColumnLabel.Total;
 
         /// <summary>
         /// The total of the total column
@@ -300,7 +300,7 @@ namespace YoFi.Core.Reports
                         result.Table[column, row] = value;
 
                         if (row.Parent == sliceparent)
-                            result.Table[column, result.TotalRow] += value;
+                            result.Table[column, TotalRow] += value;
                     }
                 }
                 else
@@ -345,7 +345,7 @@ namespace YoFi.Core.Reports
                         result.Table[column, row] = value;
 
                         if (row.Parent == null && includedrows.Contains(row))
-                            result.Table[column, result.TotalRow] += value;
+                            result.Table[column, TotalRow] += value;
                     }
                 }
                 else
@@ -431,7 +431,7 @@ namespace YoFi.Core.Reports
         #endregion
 
         #region Fields
-        readonly Table<ColumnLabel, RowLabel, decimal> Table = new Table<ColumnLabel, RowLabel, decimal>();
+        readonly Table<ColumnLabel, RowLabel, decimal> Table = new();
         #endregion
 
         #region Internal Methods
@@ -540,7 +540,7 @@ namespace YoFi.Core.Reports
             foreach (var cell in cells)
             {
                 var keysplit = cell.Location.FilteredRowName.Split(':');
-                if (keysplit.Count() == SkipLevels)
+                if (keysplit.Length == SkipLevels)
                     keysplit = keysplit.ToList().Append("[Blank]").ToArray();
                 var keys = keysplit.Skip(SkipLevels).ToList();
                 if (keys.Any())
@@ -551,7 +551,7 @@ namespace YoFi.Core.Reports
                     if (match.Success)
                     {
                         // Replace the last key with only the first part of the match
-                        keys[keys.Count()-1] = match.Groups[1].Value;
+                        keys[keys.Count-1] = match.Groups[1].Value;
 
                         // The second part IS the collector rule
                         collector = match.Groups[2].Value;
@@ -968,7 +968,7 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// Universal total row
         /// </summary>
-        public static readonly RowLabel Total = new RowLabel() { IsTotal = true };
+        public static readonly RowLabel Total = new() { IsTotal = true };
     }
 
     /// <summary>
@@ -1012,7 +1012,7 @@ namespace YoFi.Core.Reports
         /// <summary>
         /// Universal total column
         /// </summary>
-        public static readonly ColumnLabel Total = new ColumnLabel() { IsTotal = true };
+        public static readonly ColumnLabel Total = new() { IsTotal = true };
 
         /// <summary>
         /// Rendering priority order

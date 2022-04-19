@@ -80,8 +80,8 @@ namespace YoFi.Core.Reports
             if (!string.IsNullOrEmpty(definition.SourceParameters))
             {
                 var parms = definition.SourceParameters.Split('=');
-                if (parms.Count() != 2)
-                    throw new ArgumentException(nameof(definition.SourceParameters), "Expected: Parameter:Value(s)");
+                if (parms.Length != 2)
+                    throw new ArgumentException("Expected: Parameter:Value(s)",nameof(definition));
 
                 if (parms[0] == "top")
                     top = parms[1];

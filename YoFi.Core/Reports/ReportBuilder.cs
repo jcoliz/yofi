@@ -124,7 +124,7 @@ namespace YoFi.Core.Reports
             return report;
         }
 
-        private ColumnLabel CustomColumnFor(string name)
+        private static ColumnLabel CustomColumnFor(string name)
         {
             if (name == "budgetpct")
                 return new ColumnLabel()
@@ -264,7 +264,7 @@ namespace YoFi.Core.Reports
         IEnumerable<ReportDefinition> IReportEngine.Definitions => Definitions;
 #endregion
 
-        public static List<ReportDefinition> Definitions = new List<ReportDefinition>()
+        public static List<ReportDefinition> Definitions = new()
         {
             new ReportDefinition()
             {

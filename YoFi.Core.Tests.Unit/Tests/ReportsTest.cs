@@ -169,7 +169,7 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(4, report.ColumnLabels.Count());
             Assert.AreEqual(200m, report[Feb, Name]);
-            Assert.AreEqual(500m, report[report.TotalColumn, Name]);
+            Assert.AreEqual(500m, report[Report.TotalColumn, Name]);
         }
         [TestMethod]
         public void TwoCategoriesCols()
@@ -186,8 +186,8 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(5, report.ColumnLabels.Count());
             Assert.AreEqual(200m, report[Feb, Other]);
-            Assert.AreEqual(400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(900m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(900m, report[Report.TotalColumn, Report.TotalRow]);
         }
         [TestMethod]
         public void TwoCategoriesColsCustomSimple()
@@ -214,8 +214,8 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(6, report.ColumnLabels.Count());
             Assert.AreEqual(200m, report[Feb, Other]);
             Assert.AreEqual(10000m, report[Custom, Other]);
-            Assert.AreEqual(400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(900m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(900m, report[Report.TotalColumn, Report.TotalRow]);
         }
         [TestMethod]
         public void TwoCategoriesColsCustomComplex()
@@ -252,8 +252,8 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(6, report.ColumnLabels.Count());
             Assert.AreEqual(200m, report[Feb, Other]);
             Assert.AreEqual(300m, report[Custom, Other]);
-            Assert.AreEqual(400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(900m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(900m, report[Report.TotalColumn, Report.TotalRow]);
         }
         [TestMethod]
         public void SubCategoriesCols()
@@ -270,8 +270,8 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(6, report.ColumnLabels.Count());
             Assert.AreEqual(300m, report[Apr, Other]);
-            Assert.AreEqual(800m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(800m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(800m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(800m, report[Report.TotalColumn, Report.TotalRow]);
         }
         [TestMethod]
         public void Simple()
@@ -286,9 +286,9 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(500m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(800m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(1300m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(500m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(800m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(1300m, report[Report.TotalColumn, Report.TotalRow]);
 
         }
         [TestMethod]
@@ -300,7 +300,7 @@ namespace YoFi.Core.Tests.Unit
             WhenBuildingTheReport();
 
             var Blank = GetRow(x => x.Name == "[Blank]" && !x.IsTotal);
-            Assert.AreEqual(100m, report[report.TotalColumn, Blank]);
+            Assert.AreEqual(100m, report[Report.TotalColumn, Blank]);
         }
         [TestMethod]
         public void SimpleJson()
@@ -365,8 +365,8 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(2, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(1000m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(1000m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(1000m, report[Report.TotalColumn, Report.TotalRow]);
         }
         [TestMethod]
         public void SubItemsDeep()
@@ -383,10 +383,10 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(4, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(1000m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
-            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
-            Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(1000m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Something]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Else]);
+            Assert.AreEqual(1000m, report[Report.TotalColumn, Report.TotalRow]);
         }
         [TestMethod]
         public void SubItemsDeepSorted()
@@ -424,11 +424,11 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(6, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(500m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
-            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
-            Assert.AreEqual(1900m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(500m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Something]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Else]);
+            Assert.AreEqual(1900m, report[Report.TotalColumn, Report.TotalRow]);
         }
         [TestMethod]
         public void SubItemsAllDeepWithBlank()
@@ -563,12 +563,12 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(6, report.RowLabels.Count());
             Assert.AreEqual(9, report.ColumnLabels.Count());
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
-            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(400m, report[Jun, report.TotalRow]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Something]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Else]);
+            Assert.AreEqual(2000m, report[Report.TotalColumn, Report.TotalRow]);
+            Assert.AreEqual(400m, report[Jun, Report.TotalRow]);
             Assert.AreEqual(200m, report[Jun, Else]);
         }
         [TestMethod]
@@ -585,9 +585,9 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(3, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
-            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
-            Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Something]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Else]);
+            Assert.AreEqual(1000m, report[Report.TotalColumn, Report.TotalRow]);
         }
         [TestMethod]
         public void SubItemsFromL1Cols()
@@ -608,11 +608,11 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(8, report.RowLabels.Count());
             Assert.AreEqual(6, report.ColumnLabels.Count());
-            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
-            Assert.AreEqual(300m, report[report.TotalColumn, A]);
-            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
-            Assert.AreEqual(1000m, report[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(300m, report[Jun, report.TotalRow]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Something]);
+            Assert.AreEqual(300m, report[Report.TotalColumn, A]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Else]);
+            Assert.AreEqual(1000m, report[Report.TotalColumn, Report.TotalRow]);
+            Assert.AreEqual(300m, report[Jun, Report.TotalRow]);
             Assert.AreEqual(100m, report[Jun, B]);
         }
         [TestMethod]
@@ -635,13 +635,13 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(11, report.RowLabels.Count());
             Assert.AreEqual(9, report.ColumnLabels.Count());
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(400m, report[report.TotalColumn, Something]);
-            Assert.AreEqual(300m, report[report.TotalColumn, A]);
-            Assert.AreEqual(600m, report[report.TotalColumn, Else]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(400m, report[Jun, report.TotalRow]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(400m, report[Report.TotalColumn, Something]);
+            Assert.AreEqual(300m, report[Report.TotalColumn, A]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Else]);
+            Assert.AreEqual(2000m, report[Report.TotalColumn, Report.TotalRow]);
+            Assert.AreEqual(400m, report[Jun, Report.TotalRow]);
             Assert.AreEqual(100m, report[Jun, B]);
             Assert.AreEqual(200m, report[Jun, Else]);
 
@@ -673,8 +673,8 @@ namespace YoFi.Core.Tests.Unit
 
             Assert.AreEqual(7, report.RowLabels.Count());
             Assert.AreEqual(1, report.ColumnLabels.Count());
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(200m, report[report.TotalColumn, Else]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(200m, report[Report.TotalColumn, Else]);
         }
 
 
@@ -697,11 +697,11 @@ namespace YoFi.Core.Tests.Unit
             var One = GetColumn(x => x.Name == "One");
             var Two = GetColumn(x => x.Name == "Two");
 
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(700m, report[One, report.TotalRow]);
-            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[Report.TotalColumn, Report.TotalRow]);
+            Assert.AreEqual(700m, report[One, Report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, Report.TotalRow]);
         }
 
         [TestMethod]
@@ -719,11 +719,11 @@ namespace YoFi.Core.Tests.Unit
             var One = GetColumn(x => x.Name == "One");
             var Two = GetColumn(x => x.Name == "Two");
 
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(700m, report[One, report.TotalRow]);
-            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[Report.TotalColumn, Report.TotalRow]);
+            Assert.AreEqual(700m, report[One, Report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, Report.TotalRow]);
             Assert.AreEqual(200m, report[One, Else]);
             Assert.AreEqual(400m, report[Two, Else]);
         }
@@ -752,13 +752,13 @@ namespace YoFi.Core.Tests.Unit
             var Two = GetColumn(x => x.Name == "Two");
             var Pct = GetColumn(x => x.Name == "Pct");
 
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[Report.TotalColumn, Other]);
             Assert.AreEqual(0.5m, report[Pct, Name]);
             Assert.AreEqual(5m / 9m, report[Pct, Other]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(700m, report[One, report.TotalRow]);
-            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+            Assert.AreEqual(2000m, report[Report.TotalColumn, Report.TotalRow]);
+            Assert.AreEqual(700m, report[One, Report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, Report.TotalRow]);
             Assert.AreEqual(200m, report[One, Else]);
             Assert.AreEqual(400m, report[Two, Else]);
         }
@@ -782,14 +782,14 @@ namespace YoFi.Core.Tests.Unit
             var Two = GetColumn(x => x.Name == "Two");
             var Jun = GetColumn(x => x.Name == "Jun");
 
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(700m, report[One, report.TotalRow]);
-            Assert.AreEqual(1300m, report[Two, report.TotalRow]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[Report.TotalColumn, Report.TotalRow]);
+            Assert.AreEqual(700m, report[One, Report.TotalRow]);
+            Assert.AreEqual(1300m, report[Two, Report.TotalRow]);
             Assert.AreEqual(400m, report[Two, Else]);
             Assert.AreEqual(200m, report[Jun, Else]);
-            Assert.AreEqual(400m, report[Jun, report.TotalRow]);
+            Assert.AreEqual(400m, report[Jun, Report.TotalRow]);
         }
 
         [TestMethod]
@@ -812,7 +812,7 @@ namespace YoFi.Core.Tests.Unit
             // And the "ID:[Blank]" row is included
             expected = items.Where(x => x.Category == "Other").Sum(x => x.Amount);
             var Blank = GetRow(x => x.Name == "[Blank]" && !x.IsTotal);
-            Assert.AreEqual(expected, report[report.TotalColumn, Blank]);
+            Assert.AreEqual(expected, report[Report.TotalColumn, Blank]);
         }
 
         [TestMethod]
@@ -1001,15 +1001,15 @@ namespace YoFi.Core.Tests.Unit
             var Name = GetRow(x => x.Name == "Name");
             var Other = GetRow(x => x.Name == "Other");
 
-            Assert.AreEqual(600m, report[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, report[report.TotalColumn, Other]);
-            Assert.AreEqual(2000m, report[report.TotalColumn, report.TotalRow]);
+            Assert.AreEqual(600m, report[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, report[Report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, report[Report.TotalColumn, Report.TotalRow]);
 
             for (int i = 0; i < 20; i++)
             {
                 var key = i.ToString("D2");
                 var Column = GetColumn(x => x.Name == key);
-                Assert.AreEqual(100m, report[Column, report.TotalRow]);
+                Assert.AreEqual(100m, report[Column, Report.TotalRow]);
             }
         }
 
@@ -1219,14 +1219,14 @@ namespace YoFi.Core.Tests.Unit
             var Two = GetColumn(x => x.Name == "Two");
             var Jun = GetColumn(x => x.Name == "Jun");
 
-            Assert.AreEqual(600m, actual[report.TotalColumn, Name]);
-            Assert.AreEqual(1400m, actual[report.TotalColumn, Other]);
-            Assert.AreEqual(2000m, actual[report.TotalColumn, report.TotalRow]);
-            Assert.AreEqual(700m, actual[One, report.TotalRow]);
-            Assert.AreEqual(1300m, actual[Two, report.TotalRow]);
+            Assert.AreEqual(600m, actual[Report.TotalColumn, Name]);
+            Assert.AreEqual(1400m, actual[Report.TotalColumn, Other]);
+            Assert.AreEqual(2000m, actual[Report.TotalColumn, Report.TotalRow]);
+            Assert.AreEqual(700m, actual[One, Report.TotalRow]);
+            Assert.AreEqual(1300m, actual[Two, Report.TotalRow]);
             Assert.AreEqual(400m, actual[Two, Else]);
             Assert.AreEqual(200m, actual[Jun, Else]);
-            Assert.AreEqual(400m, actual[Jun, report.TotalRow]);
+            Assert.AreEqual(400m, actual[Jun, Report.TotalRow]);
         }
 
         #region User Story 1187: [Designer Can] Define a report to show all-available levels of data, no matter how many it has
