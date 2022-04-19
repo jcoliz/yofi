@@ -22,8 +22,8 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
     {
         #region Fields
 
-        protected string urlroot => "/Receipts";
-        private IDataProvider iDC => integrationcontext.context as IDataProvider;
+        protected static string urlroot => "/Receipts";
+        private static IDataProvider iDC => integrationcontext.context as IDataProvider;
 
         #endregion
 
@@ -58,7 +58,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         #endregion
 
         #region Helpers
-        private Receipt GivenReceiptInStorage(string filename, string contenttype)
+        private static Receipt GivenReceiptInStorage(string filename, string contenttype)
         {
 
             var item = Receipt.FromFilename(filename, clock: new SystemClock());

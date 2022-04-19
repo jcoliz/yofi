@@ -74,7 +74,7 @@ namespace YoFi.AspNet.Tests.Integration
             r.Filename = string.Join(' ', parts) + ".pdf";
         }
 
-        protected Stream GivenSpreadsheetOf<T>(IEnumerable<T> items) where T : class
+        protected static Stream GivenSpreadsheetOf<T>(IEnumerable<T> items) where T : class
         {
             var stream = new MemoryStream();
             using (var ssw = new SpreadsheetWriter())
@@ -87,7 +87,7 @@ namespace YoFi.AspNet.Tests.Integration
             return stream;
         }
 
-        protected Dictionary<string, string> FormDataFromObject<T>(T item)
+        protected static Dictionary<string, string> FormDataFromObject<T>(T item)
         {
             var result = new Dictionary<string, string>();
 
@@ -115,7 +115,7 @@ namespace YoFi.AspNet.Tests.Integration
             return result;
         }
 
-        protected async Task<IHtmlDocument> WhenGetAsync(string url)
+        protected static async Task<IHtmlDocument> WhenGetAsync(string url)
         {
             var response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
@@ -123,7 +123,7 @@ namespace YoFi.AspNet.Tests.Integration
             return document;
         }
 
-        protected async Task<IHtmlDocument> WhenGetAsyncSession(IEnumerable<string> urls)
+        protected static async Task<IHtmlDocument> WhenGetAsyncSession(IEnumerable<string> urls)
         {
             if (!urls.Any())
                 throw new ArgumentException("URLs are required", nameof(urls));
@@ -161,7 +161,7 @@ namespace YoFi.AspNet.Tests.Integration
             return document;
         }
 
-        protected async Task<HttpResponseMessage> WhenGettingAndPostingForm(string url, Func<IHtmlDocument, string> selector, Dictionary<string, string> fields)
+        protected static async Task<HttpResponseMessage> WhenGettingAndPostingForm(string url, Func<IHtmlDocument, string> selector, Dictionary<string, string> fields)
         {
             // First, we have to "get" the page
             var response = await client.GetAsync(url);
@@ -184,7 +184,7 @@ namespace YoFi.AspNet.Tests.Integration
             return outresponse;
         }
 
-        protected async Task<HttpResponseMessage> WhenUploading(MultipartFormDataContent content, string fromurl, string tourl)
+        protected static async Task<HttpResponseMessage> WhenUploading(MultipartFormDataContent content, string fromurl, string tourl)
         {
             // First, we have to "get" the page we upload "from"
             var getresponse = await client.GetAsync(fromurl);
@@ -204,7 +204,7 @@ namespace YoFi.AspNet.Tests.Integration
             return response;
         }
 
-        protected async Task<IHtmlDocument> WhenUploadingFile(Stream stream, string name, string filename, string fromurl, string tourl)
+        protected static async Task<IHtmlDocument> WhenUploadingFile(Stream stream, string name, string filename, string fromurl, string tourl)
         {
             var content = new MultipartFormDataContent
             {
@@ -219,18 +219,18 @@ namespace YoFi.AspNet.Tests.Integration
             return document;
         }
 
-        protected Task<IHtmlDocument> WhenUploadingSpreadsheet(Stream stream, string fromurl, string tourl)
+        protected static Task<IHtmlDocument> WhenUploadingSpreadsheet(Stream stream, string fromurl, string tourl)
         {
             return WhenUploadingFile(stream, "files", "Items.xlsx", fromurl, tourl);
         }
 
-        protected async Task<HttpResponseMessage> WhenUploadingEmpty(string fromurl, string tourl)
+        protected static async Task<HttpResponseMessage> WhenUploadingEmpty(string fromurl, string tourl)
         {
             var response = await WhenUploading(new MultipartFormDataContent(), fromurl, tourl);
             return response;
         }
 
-        protected void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector, bool ordered = false)
+        protected static void ThenResultsAreEqual(IHtmlDocument document, IEnumerable<string> chosen, string selector, bool ordered = false)
         {
             // Then: The expected items are returned
             var results = document.QuerySelectorAll("table[data-test-id=results] tbody tr");
@@ -240,7 +240,7 @@ namespace YoFi.AspNet.Tests.Integration
             Assert.IsTrue(chosen.SequenceEqual(names));
         }
 
-        protected void ThenResultsAreEqualByTestKey<T>(IHtmlDocument document, IEnumerable<T> expected)
+        protected static void ThenResultsAreEqualByTestKey<T>(IHtmlDocument document, IEnumerable<T> expected)
         {
             var property = TestKey<T>.Find();
             var testid = $"[data-test-id={property.Name.ToLowerInvariant()}]";
@@ -248,7 +248,7 @@ namespace YoFi.AspNet.Tests.Integration
             ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)), testid);
         }
 
-        protected void ThenResultsAreEqualByTestKeyOrdered<T>(IHtmlDocument document, IEnumerable<T> expected)
+        protected static void ThenResultsAreEqualByTestKeyOrdered<T>(IHtmlDocument document, IEnumerable<T> expected)
         {
             var property = TestKey<T>.Find();
             var testid = $"[data-test-id={property.Name.ToLowerInvariant()}]";
@@ -256,7 +256,7 @@ namespace YoFi.AspNet.Tests.Integration
             ThenResultsAreEqual(document, expected.Select(i => (string)property.GetValue(i)), testid, ordered:true);
         }
 
-        protected async Task ThenIsSpreadsheetContaining<T>(HttpContent content, IEnumerable<T> items) where T: class, new()
+        protected static async Task ThenIsSpreadsheetContaining<T>(HttpContent content, IEnumerable<T> items) where T: class, new()
         {
             // Then: It's a stream
             Assert.IsInstanceOfType(content, typeof(StreamContent));
@@ -272,7 +272,7 @@ namespace YoFi.AspNet.Tests.Integration
             Assert.IsTrue(items.OrderBy(x => property.GetValue(x)).SequenceEqual(actual.OrderBy(x => property.GetValue(x))));
         }
 
-        protected async Task<T> DeserializeAsync<T>(HttpResponseMessage response)
+        protected static async Task<T> DeserializeAsync<T>(HttpResponseMessage response)
         {
             var apiresult = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
             return apiresult;

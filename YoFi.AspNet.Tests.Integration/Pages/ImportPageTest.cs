@@ -49,7 +49,7 @@ namespace YoFi.AspNet.Tests.Integration.Pages
 
         #region Helpers
 
-        protected async Task<IHtmlDocument> WhenImportingAsSpreadsheet<T>(IEnumerable<T> items) where T: class
+        protected static async Task<IHtmlDocument> WhenImportingAsSpreadsheet<T>(IEnumerable<T> items) where T: class
         {
             // Given: A spreadsheet of the supplied items
             var stream = GivenSpreadsheetOf(items);
@@ -88,7 +88,7 @@ namespace YoFi.AspNet.Tests.Integration.Pages
             ThenResultsAreEqualByTestKey(document, items);
 
             // And: The database now contains the items
-            items.SequenceEqual(context.Set<Transaction>().OrderBy(TestKey<Transaction>.Order()));
+            Assert.IsTrue(items.SequenceEqual(context.Set<Transaction>().OrderBy(TestKey<Transaction>.Order())),"Sequences equal");
         }
 
         [TestMethod]

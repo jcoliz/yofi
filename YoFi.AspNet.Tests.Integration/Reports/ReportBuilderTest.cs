@@ -63,20 +63,20 @@ namespace YoFi.AspNet.Tests.Integration.Reports
 
         #region Helpers
 
-        protected decimal SumOfTopCategory(string category)
+        protected static decimal SumOfTopCategory(string category)
         {
             return
                 data.Transactions.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount) +
                 data.Transactions.Where(x => x.HasSplits).SelectMany(x => x.Splits).Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
-        protected decimal SumOfBudgetTxsTopCategory(string category)
+        protected static decimal SumOfBudgetTxsTopCategory(string category)
         {
             return
                 data.BudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
         }
 
-        protected decimal SumOfManagedBudgetTxsTopCategory(string category)
+        protected static decimal SumOfManagedBudgetTxsTopCategory(string category)
         {
             return
                 data.ManagedBudgetTxs.Where(x => !string.IsNullOrEmpty(x.Category) && x.Category.Contains(category)).Sum(x => x.Amount);
@@ -448,7 +448,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
 
         // Only enable this if need to generate more sample data
         //[TestMethod]
-        public void GenerateData()
+        public static void GenerateData()
         {
             // Generates a large dataset of transactions
 
