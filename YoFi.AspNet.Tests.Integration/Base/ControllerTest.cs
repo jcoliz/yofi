@@ -263,7 +263,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKey(document, items);
 
             // And: The database now contains the items
-            items.SequenceEqual(context.Set<T>().OrderBy(TestKey<T>.Order()));
+            Assert.IsTrue(items.SequenceEqual(context.Set<T>().OrderBy(TestKey<T>.Order())), "Sequences equal");
         }
 
         [TestMethod]
@@ -284,7 +284,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             ThenResultsAreEqualByTestKey(document, items.Skip(1));
 
             // And: The database now contains the items
-            items.SequenceEqual(context.Set<T>().OrderBy(TestKey<T>.Order()));
+            Assert.IsTrue(items.SequenceEqual(context.Set<T>().OrderBy(TestKey<T>.Order())), "Sequences equal");
         }
 
         [TestMethod]
