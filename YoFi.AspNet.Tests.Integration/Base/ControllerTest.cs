@@ -11,7 +11,7 @@ using System.Web;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories.Wire;
 
-namespace YoFi.Tests.Integration.Controllers
+namespace YoFi.AspNet.Tests.Integration.Controllers
 {
     [TestClass]
 

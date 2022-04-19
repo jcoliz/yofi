@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration
+namespace YoFi.AspNet.Tests.Integration
 {
     [TestClass]
     public class SmokeTest: IntegrationTest

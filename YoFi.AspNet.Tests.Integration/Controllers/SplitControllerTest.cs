@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration.Controllers
+namespace YoFi.AspNet.Tests.Integration.Controllers
 {
     [TestClass]
     public class SplitControllerTest: IntegrationTest

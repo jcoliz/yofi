@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration.Ajax
+namespace YoFi.AspNet.Tests.Integration.Ajax
 {
     [TestClass]
     public class AjaxTransactionsControllerTest: IntegrationTest

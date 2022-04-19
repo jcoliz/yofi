@@ -15,7 +15,7 @@ using YoFi.Tests.Integration.Helpers;
 using Dto = YoFi.Core.Models.Transaction; // YoFi.AspNet.Controllers.TransactionsIndexPresenter.TransactionIndexDto;
 using Transaction = YoFi.Core.Models.Transaction;
 
-namespace YoFi.Tests.Integration.Controllers
+namespace YoFi.AspNet.Tests.Integration.Controllers
 {
     [TestClass]
     public class TransactionControllerTest : ControllerTest<Transaction>

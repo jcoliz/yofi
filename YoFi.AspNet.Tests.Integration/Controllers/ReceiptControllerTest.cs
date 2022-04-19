@@ -15,7 +15,7 @@ using YoFi.Core.Models;
 using YoFi.Core.Repositories;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration.Controllers
+namespace YoFi.AspNet.Tests.Integration.Controllers
 {
     [TestClass]
     public class ReceiptControllerTest: IntegrationTest

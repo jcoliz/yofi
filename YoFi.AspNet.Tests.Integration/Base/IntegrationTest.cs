@@ -16,7 +16,7 @@ using YoFi.Data;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration
+namespace YoFi.AspNet.Tests.Integration
 {
     public abstract class IntegrationTest: IFakeObjectsSaveTarget
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Reports;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration.Reports
+namespace YoFi.AspNet.Tests.Integration.Reports
 {
     [TestClass]
     public class ReportBuilderSummaryTest: ReportBuilderTestBase

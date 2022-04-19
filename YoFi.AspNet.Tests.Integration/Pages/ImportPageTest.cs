@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration.Pages
+namespace YoFi.AspNet.Tests.Integration.Pages
 {
     [TestClass]
     public class ImportPageTest: IntegrationTest

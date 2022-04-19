@@ -11,7 +11,7 @@ using YoFi.Core;
 using YoFi.Core.Models;
 using YoFi.Tests.Integration.Helpers;
 
-namespace YoFi.Tests.Integration.Api
+namespace YoFi.AspNet.Tests.Integration.Api
 {
     [TestClass]
     public class ApiTest: IntegrationTest
