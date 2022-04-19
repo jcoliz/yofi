@@ -3,11 +3,17 @@ using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional;
 
+// NOTE: It's best if this class can go first, so it will leave the DB in a nice seeded
+// state for the rest of the tests.
+
 [TestClass]
-public class AdminUITest: FunctionalUITest
+public class AAAA_AdminUITest: FunctionalUITest
 {
+    // TODO: txtoday doesn't work against a production deployment, because we don't
+    // have control over what day it is today in production!!
+    // [DataRow("txtoday")]
+    
     [DataRow("txyear")]
-    [DataRow("txtoday")]
     [DataTestMethod]
     public async Task SeedDatabase_Bug1387(string method)
     {
@@ -41,8 +47,12 @@ public class AdminUITest: FunctionalUITest
         await Page.ClickAsync("text=Close");
         await Page.SaveScreenshotToAsync(TestContext);
 
-        // And: Navigating to Income Page
+        // And: Navigating to Reports Page
         await WhenNavigatingToPage("Reports");
+
+        // And: Setting Month to 12
+        await Page.ClickInMenuAsync("[aria-label=\"Toggle page navigation\"]", "#dropdownMenuButtonMonth");
+        await Page.ClickAsync("text=12 December");
         await Page.SaveScreenshotToAsync(TestContext);
 
         // Then: Income is $149,000
