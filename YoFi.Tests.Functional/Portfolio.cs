@@ -1,5 +1,6 @@
 ﻿using Microsoft.Playwright;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace YoFi.Tests.Functional
@@ -481,6 +482,71 @@ namespace YoFi.Tests.Functional
             await NavigateToAsync("StatusCode?e=404");
 
             await Page.SaveScreenshotToAsync(TestContext);
+        }
+
+        /// <summary>
+        /// Central receipt uploader
+        /// </summary>
+        [TestMethod]
+        public async Task _50_Receipts_Upload()
+        {
+            // Navigate to https://www.try-yofi.com/Receipts
+            await NavigateToAsync("Receipts");
+
+            await Page.SaveScreenshotToAsync(TestContext);
+        }
+
+        /// <summary>
+        /// List of uploaded receipts
+        /// </summary>
+        [TestMethod]
+        public async Task _51_Receipts_Index()
+        {
+            // Navigate to https://www.try-yofi.com/Receipts
+            await NavigateToAsync("Receipts");
+
+            // Dismiss the help text, if appears
+            await DismissHelpTest();
+
+            // Upload several receipts with correct naming
+            var receipts = new string[]
+            {
+                // Matches none
+                $"Create Me $12.34 12-21 {testmarker}.png",
+                // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
+                $"Olive Garden $130.85 {testmarker}.png",
+                // Matches exactly one
+                $"Waste Management 12-27 {testmarker}.png",
+                // Matches many
+                $"Uptown Espresso ({testmarker}).png",
+            };
+
+            // Conjure up some bytes (the bytes don't really matter)
+            byte[] bytes = Enumerable.Range(0, 255).Select(i => (byte)i).ToArray();
+
+            // Make file payloads out of them
+            var payloads = receipts.Select(x =>
+                new FilePayload()
+                {
+                    Name = x,
+                    MimeType = "image/png",
+                    Buffer = bytes
+                }
+            );
+
+            // Now upload them
+            await Page.ClickAsync("[aria-label=Upload]");
+            await Page.SetInputFilesAsync("[aria-label=Upload]", payloads);
+            await Page.ClickAsync("data-test-id=btn-create-receipt");
+
+            await Page.SaveScreenshotToAsync(TestContext);
+
+            // Clean up by deleting each one
+            for(int i=1; i<=4; i++)
+            {
+                await Page.ClickAsync("#actions-1");
+                await Page.ClickAsync("button[value=Delete]");
+            }
         }
     }
 }
