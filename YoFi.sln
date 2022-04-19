@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\push-master.yml = .github\workflows\push-master.yml
 		README.md = README.md
 		docs\Roadmap.md = docs\Roadmap.md
+		deploy\yofi.azuredeploy.json = deploy\yofi.azuredeploy.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoFi.AspNet.Tests.Integration", "YoFi.AspNet.Tests.Integration\YoFi.AspNet.Tests.Integration.csproj", "{EAC240B9-B3C9-4A25-81A1-AA3DEE2933FF}"

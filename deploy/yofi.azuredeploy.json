@@ -43,7 +43,7 @@
     "storage-name": "[concat('storage',uniqueString(resourceGroup().id))]",
     "sql-user": "sql-user",
     "app-sku": "F1",
-    "packageUri": "https://github.com/jcoliz/yofi/releases/download/0.9.8/yofi-0.9.8.zip"
+    "packageUri": "https://github.com/jcoliz/yofi/releases/download/1.0.0-rc1/yofi-1.0.0-rc1.zip"
   },
   "resources": [
     {
@@ -115,7 +115,7 @@
     {
       "name": "[variables('name')]",
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2020-12-01",
+      "apiVersion": "2021-02-01",
       "location": "[variables('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('farm-name'))]"
@@ -123,7 +123,7 @@
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('farm-name'))]",
         "siteConfig": {
-          "linuxFxVersion": "DOTNETCORE|3.1"
+          "linuxFxVersion": "DOTNETCORE|6.0"
         }
       }
     },
