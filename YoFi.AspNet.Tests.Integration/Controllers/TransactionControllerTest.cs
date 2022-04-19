@@ -153,7 +153,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
                 ThenResultsAreEqualByTestKey(document, items.Group(0));
 
             // And: The hide checkbox is available (or not, as expected)
-            var checkboxshown = !(document.QuerySelector($"th[data-test-id=hide]") is null);
+            var checkboxshown = document.QuerySelector($"th[data-test-id=hide]") is not null;
             Assert.AreEqual(ishidden, checkboxshown);
         }
 
@@ -163,14 +163,14 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         public async Task IndexShowSelected(bool isselected)
         {
             // Given: There are some items in the database
-            var items = FakeObjects<Transaction>.Make(5).SaveTo(this);
+            _ = FakeObjects<Transaction>.Make(5).SaveTo(this);
 
             // When: Calling index with view set to 'selected'
             var searchterm = isselected ? "S" : null;
             var document = await WhenGettingIndex(new WireQueryParameters() { View = searchterm });
 
             // Then: The selection checkbox is available (or not, as expected)
-            var checkboxshown = !(document.QuerySelector($"[data-test-id=select]") is null);
+            var checkboxshown = document.QuerySelector($"[data-test-id=select]") is not null;
             Assert.AreEqual(isselected, checkboxshown);
         }
 
@@ -479,7 +479,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
 
             // Then: One item returned, shown as having splits
             var display_category_span = document.QuerySelectorAll("td.display-category span");
-            Assert.AreEqual(1, display_category_span.Count());
+            Assert.AreEqual(1, display_category_span.Length);
             var category = display_category_span.Single().TextContent.Trim();
             Assert.AreEqual("SPLIT", category);
         }
@@ -502,7 +502,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
 
             // Then: Splits are shown
             var splits = document.QuerySelectorAll("table[data-test-id=splits] tbody tr");
-            Assert.AreEqual(2, splits.Count());
+            Assert.AreEqual(2, splits.Length);
 
             // And: Amounts are correct
             var amounts = splits.Select(x => x.QuerySelector("td[data-test-id=split-amount]").TextContent.Trim()).OrderBy(x=>x);
@@ -533,7 +533,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
 
             // Then: Splits are shown
             var splits = document.QuerySelectorAll("table[data-test-id=splits] tbody tr");
-            Assert.AreEqual(2, splits.Count());
+            Assert.AreEqual(2, splits.Length);
 
             // And: They're NOT OK (yes flagged as problematic)
             var splits_not_ok = document.QuerySelector("div[data-test-id=splits-not-ok]");
@@ -690,7 +690,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             ssr.Open(await streamcontent.ReadAsStreamAsync());
             var sheetnames = ssr.SheetNames.ToList();
 
-            Assert.AreEqual(1, sheetnames.Count());
+            Assert.AreEqual(1, sheetnames.Count);
             Assert.AreEqual("Transaction", sheetnames.Single());
         }
 
@@ -766,7 +766,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
 
             // Given: Having first set the session year with a call to reports
             var year = 2004;
-            List<string> urls = new List<string>() { $"/Report/all?year={year}" };
+            List<string> urls = new() { $"/Report/all?year={year}" };
 
             // When: Calling Download Partial (in the same session)
             urls.Add($"{urlroot}/DownloadPartial");

@@ -19,7 +19,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
     {
         #region Fields
 
-        protected static readonly CultureInfo culture = new CultureInfo("en-US");
+        protected static readonly CultureInfo culture = new ("en-US");
 
         protected IHtmlDocument document;
         protected string h2 = default;
@@ -71,7 +71,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             document = await parser.ParseDocumentAsync(await response.Content.ReadAsStreamAsync());
             h2 = document.QuerySelector("H2")?.TextContent.Trim();
             tables = document.QuerySelectorAll("table").ToDictionary(x => x.GetAttribute("data-test-id").Trim(), x => x);
-            if (tables.Count() == 1)
+            if (tables.Count == 1)
                 testid = tables.Single().Key;
         }
 
@@ -101,7 +101,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
                 await WhenGettingReport(url);
 
             // Then: Is showing the correct report
-            if (tables.Count() == 1)
+            if (tables.Count == 1)
                 Assert.AreEqual($"report-{parameters.slug}", testid);
 
             // And: Return to the caller for futher checks
@@ -109,7 +109,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
 
         protected void ThenReportHasTotal(decimal expected, string report = null)
         {
-            if (!(report is null))
+            if (report is not null)
                 testid = $"report-{report}";
 
             Assert.AreEqual(expected.ToString("C0", culture), total);

@@ -79,7 +79,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
 
             // And: Report has the correct # rows
             var rowset = new int[] { 9, 21, 24, 26 };
-            Assert.AreEqual(rowset[level - 1], rows.Count());
+            Assert.AreEqual(rowset[level - 1], rows.Length);
 
             // And: Report has the right levels
             // Note that we are using the report-row-x class

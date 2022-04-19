@@ -113,14 +113,14 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         public async Task IndexShowSelected(bool isselected)
         {
             // Given: Many items in the database
-            var items = FakeObjects<Payee>.Make(15).SaveTo(this);
+            _ = FakeObjects<Payee>.Make(15).SaveTo(this);
 
             // When: Getting the index with or without the "selected" view
             var searchterm = isselected ? "?v=S" : string.Empty;
             var document = await WhenGetAsync($"{urlroot}/{searchterm}");
 
             // Then: The selection checkbox is available
-            var selectionshown = ! (document.QuerySelector($"span[data-test-id=select]") is null);
+            var selectionshown = document.QuerySelector($"span[data-test-id=select]") is not null;
             Assert.AreEqual(isselected, selectionshown);
         }
 

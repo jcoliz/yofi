@@ -113,7 +113,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(showmonths?13:1, cols.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(21, rows.Count());
+            Assert.AreEqual(21, rows.Length);
         }
 
         [DataRow(1)]
@@ -140,7 +140,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
 
             // And: Report has the correct # rows
             var rowset = new int[] { 9, 21, 24, 26 };
-            Assert.AreEqual(rowset[level - 1], rows.Count());
+            Assert.AreEqual(rowset[level - 1], rows.Length);
 
             // And: Report has the right levels
             // Note that we are using the report-row-x class
@@ -185,7 +185,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(month + 1, cols.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(21, rows.Count());
+            Assert.AreEqual(21, rows.Length);
         }
 
         [DataRow("Income")]
@@ -207,7 +207,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(2, cols.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(3, rows.Count());
+            Assert.AreEqual(3, rows.Length);
         }
 
         [DataRow(true)]
@@ -228,7 +228,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(showmonths ? 14 : 2, cols.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(12, rows.Count());
+            Assert.AreEqual(12, rows.Length);
         }
 
         [TestMethod]
@@ -247,7 +247,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(1, cols.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(13, rows.Count());
+            Assert.AreEqual(13, rows.Length);
         }
 
         [TestMethod]
@@ -266,7 +266,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(1, cols.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(7, rows.Count());
+            Assert.AreEqual(7, rows.Length);
         }
 
         [TestMethod]
@@ -292,7 +292,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(4, cols.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(12, rows.Count());
+            Assert.AreEqual(12, rows.Length);
         }
 
         [TestMethod]
@@ -318,7 +318,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(3, cols.Count());
 
             // And: Report has the correct # rows
-            Assert.AreEqual(22, rows.Count());
+            Assert.AreEqual(22, rows.Length);
         }
 
         [TestMethod]
@@ -350,7 +350,7 @@ namespace YoFi.AspNet.Tests.Integration.Reports
             Assert.AreEqual(4, cols.Count());
 
             // And: Report has the correct # rows: just the 2 managed budgets
-            Assert.AreEqual(2, rows.Count());
+            Assert.AreEqual(2, rows.Length);
         }
 
         [TestMethod]

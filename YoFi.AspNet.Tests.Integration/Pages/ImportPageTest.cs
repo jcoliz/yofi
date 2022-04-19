@@ -106,7 +106,7 @@ namespace YoFi.AspNet.Tests.Integration.Pages
 
             // Then: All items are in the database
             var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
-            Assert.AreEqual(initial.Count() + items.Count(), actual.Count());
+            Assert.AreEqual(initial.Count + items.Count(), actual.Count());
 
             // And: All the uploaded item are imported
             var imported = context.Set<Transaction>().Where(x=>x.Imported == true).AsNoTracking().OrderBy(TestKey<Transaction>.Order());
@@ -547,7 +547,7 @@ namespace YoFi.AspNet.Tests.Integration.Pages
 
             // Then: There are the expected amount of sample offerings
             var offerings = getdocument.QuerySelectorAll("a[data-test-id=offering]");
-            Assert.IsTrue(offerings.Count() >= 27);
+            Assert.IsTrue(offerings.Length >= 27);
         }
 
         [TestMethod]
