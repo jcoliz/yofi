@@ -825,5 +825,33 @@ namespace YoFi.Tests.Functional
         }
 
         #endregion
+
+        #region User Story 1312: [User Can] Upload receipts on the Import page
+
+        [TestMethod]
+        public async Task UploadOnImportPage()
+        {
+            /*
+            [Scenario] Upload on import page
+            Given: On import page
+            And: Having a set of receipts
+            When: Uploading those receipts
+            Then: Receipts are shown
+            */
+        }
+
+        [TestMethod]
+        public async Task ShownOnReceiptsPageAfterImport()
+        {
+            /*
+            [Scenario] Shown on receipts page
+            Given: Having run the "Uploaded on import page" scenario
+            When: Clicking on "See Receipts"
+            Then: On receipts page
+            And: Receipts are shown as if user uploaded them on the receipts page
+            */
+        }
+
+        #endregion
     }
 }
