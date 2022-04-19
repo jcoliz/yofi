@@ -18,10 +18,6 @@ pool:
 variables:
   application: YoFi.AspNet
   solution: YoFi.sln
-  tests: YoFi.Tests
-  coretests: YoFi.Core.Tests.Unit
-  inttests: YoFi.Tests.Integration
-  functests: YoFi.Tests.Functional
   api__key: APITESTKEYVALUE
 
 steps:
@@ -45,11 +41,10 @@ steps:
     projects: '$(solution)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Run all unit tests'
+  displayName: 'Run all solution tests'
   inputs:
     command: 'test'
     projects: '$(solution)'
-    arguments: '--collect:"XPlat Code Coverage" --settings:test/coverlet.runsettings'
 
 - task: DotNetCoreCLI@2
   displayName: 'Publish web app'
