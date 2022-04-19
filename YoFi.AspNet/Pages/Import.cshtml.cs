@@ -33,8 +33,11 @@ namespace YoFi.AspNet.Pages
 
         public IEnumerable<BudgetTx> BudgetTxs { get; private set; } = Enumerable.Empty<BudgetTx>();
         public IEnumerable<Payee> Payees { get; private set; } = Enumerable.Empty<Payee>();
+        public IEnumerable<Receipt> Receipts { get; private set; } = Enumerable.Empty<Receipt>();
+
         public int NumBudgetTxsUploaded { get; private set; }
         public int NumPayeesUploaded { get; private set; }
+        public int NumReceiptsUploaded { get; private set; }
 
         public HashSet<int> Highlights { get; private set; } = new HashSet<int>();
 
@@ -118,14 +121,18 @@ namespace YoFi.AspNet.Pages
                         await importer.QueueImportFromOfxAsync(stream);
                     else if (filetype == ".xlsx")
                         importer.QueueImportFromXlsx(stream);
+                    else if (filetype == ".pdf" || filetype == ".png" || filetype == ".jpg")
+                        await importer.QueueImportFromImageAsync(formFile.FileName,stream,formFile.ContentType);
                 }
 
                 // Process the imported files
                 await importer.ProcessImportAsync();
                 BudgetTxs = importer.ImportedBudgetTxs.Take(MaxOtherItemsToShow);
                 Payees = importer.ImportedPayees.Take(MaxOtherItemsToShow);
+                Receipts = importer.ImportedReceipts.Take(MaxOtherItemsToShow);
                 NumBudgetTxsUploaded = importer.ImportedBudgetTxs.Count();
                 NumPayeesUploaded = importer.ImportedPayees.Count();
+                NumReceiptsUploaded = importer.ImportedReceipts.Count();
 
                 // Prepare the visual results
                 await OnGetAsync();

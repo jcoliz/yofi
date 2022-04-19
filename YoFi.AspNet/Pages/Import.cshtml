@@ -243,4 +243,33 @@ else
     </table>
 }
 
+@if (Model.NumReceiptsUploaded > 0)
+{
+    var morecomments = (Model.NumReceiptsUploaded > ImportModel.MaxOtherItemsToShow) ? $" You'll find the first {ImportModel.MaxOtherItemsToShow} items shown below." : string.Empty;
+
+    <h2>Imported Receipts</h2>
+    <p><span data-test-id="NumReceiptsUploaded">@Model.NumReceiptsUploaded</span> items have been imported to your receipts store. You can review your entire set on the Receipts page.@morecomments</p>
+    <a asp-controller="Receipts" asp-action="Index" class="btn btn-primary">Receipts &raquo;</a>
+
+    <table class="table table-index mt-1">
+        <thead>
+            <tr class="row">
+                <th class="col-md-12">
+                    Filename
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Receipts)
+            {
+                <tr class="row">
+                    <td class="col-md-12">
+                        @Html.DisplayFor(modelItem => item.Filename)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 @await Html.PartialAsync("/Views/Shared/_HelpDialogPartial.cshtml", "import")

@@ -17,20 +17,27 @@ namespace YoFi.Tests.Functional
     {
         #region Helpers
 
-        protected async Task WhenUploadingSampleReceipts(IEnumerable<string> filenames)
+        protected IEnumerable<FilePayload> MakeImageFilePayloadsFromNames(IEnumerable<string> filenames)
         {
             // Conjure up some bytes (the bytes don't really matter)
             byte[] bytes = Enumerable.Range(0, 255).Select(i => (byte)i).ToArray();
 
             // Make file payloads out of them
-            var payloads = filenames.Select(x =>
-                new FilePayload()
-                {
-                    Name = x,
-                    MimeType = "image/png",
-                    Buffer = bytes
-                }
-            );
+            return filenames
+                .Select(x =>
+                    new FilePayload()
+                    {
+                        Name = x,
+                        MimeType = "image/png",
+                        Buffer = bytes
+                    }
+                )
+                .ToList();
+        }
+
+        protected async Task WhenUploadingSampleReceipts(IEnumerable<string> filenames)
+        {
+            var payloads = MakeImageFilePayloadsFromNames(filenames);
 
             await Page.ClickAsync("[aria-label=Upload]");
             await Page.SetInputFilesAsync("[aria-label=Upload]", payloads);
@@ -838,10 +845,37 @@ namespace YoFi.Tests.Functional
             When: Uploading those receipts
             Then: Receipts are shown
             */
+            
+            // Given: On import page
+            await WhenNavigatingToPage("Import");
+
+            // And: Having a set of receipts
+            // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
+            var receipts = new[] 
+            {
+                $"Create Me $12.34 12-21 {testmarker}.png",
+                $"Olive Garden $130.85 {testmarker}.png",
+                $"Waste Management 12-27 {testmarker}.png",
+                $"Uptown Espresso ({testmarker}).png",
+            };
+            var payloads = MakeImageFilePayloadsFromNames(receipts);
+
+            // When: Uploading many files with differing name compositions
+            await Page.ClickAsync("[aria-label=\"Upload\"]");
+            await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", payloads);
+            await Page.SaveScreenshotToAsync(TestContext, "SetInputFiles");
+            await Page.ClickAsync("text=Upload");
+
+            // Then: Still on the import page
+            await Page.ThenIsOnPageAsync("Importer");
+            await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
+
+            // And: The receipts are shown on the import page
+            Assert.AreEqual(receipts.Length, await Page.GetNumberAsync("data-test-id=NumReceiptsUploaded"));
         }
 
         [TestMethod]
-        public async Task ShownOnReceiptsPageAfterImport()
+        public Task ShownOnReceiptsPageAfterImport()
         {
             /*
             [Scenario] Shown on receipts page
@@ -850,6 +884,7 @@ namespace YoFi.Tests.Functional
             Then: On receipts page
             And: Receipts are shown as if user uploaded them on the receipts page
             */
+            return Task.CompletedTask;
         }
 
         #endregion

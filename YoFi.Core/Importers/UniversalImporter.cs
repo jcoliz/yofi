@@ -16,14 +16,17 @@ namespace YoFi.Core.Importers
     {
         private readonly IImporter<Payee> _payeeImporter;
         private readonly IImporter<BudgetTx> _budgettxImporter;
+        private readonly IReceiptRepository _receiptRepository;
 
         public IEnumerable<BudgetTx> ImportedBudgetTxs { get; private set; } = Enumerable.Empty<BudgetTx>();
         public IEnumerable<Payee> ImportedPayees { get; private set; } = Enumerable.Empty<Payee>();
+        public List<Receipt> ImportedReceipts { get; } = new List<Receipt>();
 
         public UniversalImporter(AllRepositories repos) : base(repos)
         {
             _budgettxImporter = new BaseImporter<BudgetTx>(repos.BudgetTxs);
             _payeeImporter = new BaseImporter<Payee>(repos.Payees);
+            _receiptRepository = repos.Receipts;
         }
 
         public void QueueImportFromXlsx(Stream stream)
@@ -72,6 +75,13 @@ namespace YoFi.Core.Importers
             }
             else
                 throw new NotImplementedException();
+        }
+
+        public async Task QueueImportFromImageAsync(string filename, Stream stream, string contenttype)
+        {
+            var receipt = await _receiptRepository.UploadReceiptAsync(filename, stream, contenttype);
+            if (receipt != null)
+                ImportedReceipts.Add(receipt);
         }
 
         public new async Task ProcessImportAsync()

@@ -177,12 +177,14 @@ namespace YoFi.Core.Repositories
         /// <param name="stream">Source of content</param>
         /// <param name="filename">Name of content</param>
         /// <param name="contenttype">Type of content</param>
-        public async Task UploadReceiptAsync(string filename, Stream stream, string contenttype)
+        public async Task<Receipt> UploadReceiptAsync(string filename, Stream stream, string contenttype)
         {
             var item = Receipt.FromFilename(filename, _clock);
             _context.Add(item);
             await _context.SaveChangesAsync();
             await _storage.UploadBlobAsync($"{Prefix}{item.ID}", stream, contenttype);
+
+            return item;
         }
 
         public async Task<Receipt> GetByIdAsync(int id)
