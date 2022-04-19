@@ -875,7 +875,7 @@ namespace YoFi.Tests.Functional
         }
 
         [TestMethod]
-        public Task ShownOnReceiptsPageAfterImport()
+        public async Task ShownOnReceiptsPageAfterImport()
         {
             /*
             [Scenario] Shown on receipts page
@@ -884,7 +884,26 @@ namespace YoFi.Tests.Functional
             Then: On receipts page
             And: Receipts are shown as if user uploaded them on the receipts page
             */
-            return Task.CompletedTask;
+
+            // Given: Having run the "Uploaded on import page" scenario
+            await UploadOnImportPage();
+
+            // When: Clicking on "See Receipts"
+            await Page.ClickAsync("data-test-id=btn-receipts");
+            
+            // Then: On receipts page
+            await Page.ThenIsOnPageAsync("Receipts");
+            await Page.SaveScreenshotToAsync(TestContext, "Receipts Page");
+            
+            // And: Receipts are shown as if user uploaded them on the receipts page
+            var table = await ResultsTable.ExtractResultsFrom(Page);
+            Assert.IsNotNull(table);
+
+            // Correct count
+            Assert.AreEqual(4, table.Rows.Count);
+
+            // Memo is "__TEST__" on all
+            Assert.IsTrue(table.Rows.All(x => x["Memo"].Contains(testmarker)),"All memos contain testmarker");
         }
 
         #endregion

@@ -249,7 +249,7 @@ else
 
     <h2>Imported Receipts</h2>
     <p><span data-test-id="NumReceiptsUploaded">@Model.NumReceiptsUploaded</span> items have been imported to your receipts store. You can review your entire set on the Receipts page.@morecomments</p>
-    <a asp-controller="Receipts" asp-action="Index" class="btn btn-primary">Receipts &raquo;</a>
+    <a asp-controller="Receipts" asp-action="Index" class="btn btn-primary" data-test-id="btn-receipts">Receipts &raquo;</a>
 
     <table class="table table-index mt-1">
         <thead>

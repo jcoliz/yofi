@@ -44,7 +44,7 @@ namespace YoFi.Tests.Functional
 
         /// <summary>
         /// [User Can] Import transactions from an OFX file 
-        ///     - [User Can] Preview transactions before commiting to import them
+        ///     - [Scenario] Preview transactions before commiting to import them
         /// </summary>
         [TestMethod]
         public async Task ImportOfxPreview()
