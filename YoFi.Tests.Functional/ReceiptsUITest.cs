@@ -166,25 +166,51 @@ namespace YoFi.Tests.Functional
             */
 
             // Given: A set of transactions
-            // (Will use the transactions already in place from sample data. Note that these receipts are precisely
-            // tuned to the exact contents of the expected sample data)
+            await WhenNavigatingToPage("Transactions");
+
+            var today = DateTime.Now.Date;
+            var name1 = NextName;
+            var name2 = NextName;
+            var name3 = NextName;
+            var specialamount = 123.45m;
+            var specialday = today - TimeSpan.FromDays(20);
+            (string name, DateTime date, decimal amount)[] txs = new[] 
+            { 
+                (name1, today, 100m),
+                (name1, specialday, 200m),
+                (name2, today, specialamount),
+                (name2, today, 2 * specialamount),
+                (name2, today, 3 * specialamount),
+                (name3, today - TimeSpan.FromDays(1), 100.45m),
+                (name3, today - TimeSpan.FromDays(2), 200.45m),
+                (name3, today - TimeSpan.FromDays(3), 300.45m),
+            };
+            foreach(var tx in txs)
+                await WhenCreatingTransaction(Page, new Dictionary<string, string>()
+                {
+                    { "Payee", tx.name },
+                    { "Timestamp", tx.date.ToString("yyyy-MM-dd") },
+                    { "Amount", tx.amount.ToString() },
+                });
+
+            // NOTE: Cannot use transactions already in place from sample data. BECAUSE this test could
+            // be run at any time, and receipts are VERY date sensitive.
 
             // And: On receipts page
             await NavigateToReceiptsPage();
 
             // When: Uploading many files with differing name compositions, some of which will exactly match the transactions
+            var olddate = today - TimeSpan.FromDays(10);
             var receipts = new (string name,int matches,int order)[]
             {
                 // Matches none
-                // TODO: Today minus 10 days
-                ($"Create Me $12.34 12-21 {testmarker}.png",0,2),
+                ($"Create Me $1234.56 {olddate:M-dd} {testmarker}.png",0,2),
                 // Matches exactly one at 200 (name and amount), but will also match 2 others at 100 (name only)
-                ($"Olive Garden $132.55 {testmarker}.png",3,0),
+                ($"{name2} {specialamount:C2} {testmarker}.png",3,0),
                 // Matches exactly one
-                // TODO: This will be hard, because we are picking a particular transaction
-                ($"Waste Management 12-6 {testmarker}.png",1,3),
+                ($"{name1} {specialday:M-dd} {testmarker}.png",1,3),
                 // Matches many
-                ($"Uptown Espresso ({testmarker}).png",3,1),
+                ($"{name3} ({testmarker}).png",3,1),
             };
             await WhenUploadingSampleReceipts(receipts.Select(x=>x.name));
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
@@ -224,14 +250,14 @@ namespace YoFi.Tests.Functional
                 NextName, NextName, NextName, NextName
             };
 
-            // TODO: This should probably be 'today'
-            var date = new DateTime(2022, 12, 31);
+            var date = DateTime.Now;
+            var recentdate = date - TimeSpan.FromDays(3);
             var transactions = new List<(string name, decimal amount, DateTime date)>()
             {
                 (names[0],100m,date), // 12-31
                 (names[0],200m,date - TimeSpan.FromDays(1)), // 12-30
                 (names[0],300m,date - TimeSpan.FromDays(2)), // 12-29
-                (names[1],100m,date - TimeSpan.FromDays(3)), // 12-28
+                (names[1],100m,recentdate), // 12-28
                 (names[2],100m,date - TimeSpan.FromDays(4)),
                 (names[2],200m,date - TimeSpan.FromDays(5)),
                 (names[2],300m,date - TimeSpan.FromDays(6)),
@@ -258,13 +284,11 @@ namespace YoFi.Tests.Functional
                 // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
                 ($"{names[0]} $200 {testmarker}.png",3),
                 // Matches exactly one
-                // TODO: Pick correct date based on today
-                ($"{names[1]} 12-28 {testmarker} 1.png",1),
+                ($"{names[1]} {recentdate:M-dd} {testmarker} 1.png",1),
                 // Matches many
                 ($"{names[2]} ({testmarker}).png",4),
                 // Matches none
-                // TODO: Pick correct date based on today
-                ($"{names[3]} $12.34 12-28 {testmarker}.png",0)
+                ($"{names[3]} $12.34 {recentdate:M-dd} {testmarker}.png",0)
             };
 
             await WhenUploadingSampleReceipts(receipts.Select(x => x.name));
@@ -308,8 +332,7 @@ namespace YoFi.Tests.Functional
         {
             // Given: Several Transactions
             await WhenNavigatingToPage("Transactions");
-            // TODO: This should be 'today'
-            var date = new DateTime(2022, 12, 31);
+            var date = DateTime.Now;
             var amount = 1234.56m;
             var matchamount = amount + 100m;
             for (int i = 0; i < numtx; i++)
@@ -435,7 +458,7 @@ namespace YoFi.Tests.Functional
 
             await WhenNavigatingToPage("Transactions");
             var name = "AA__TEST__ MemoInTransaction 1";
-            var date = new DateTime(2022, 12, 31);
+            var date = DateTime.Now.Date;
             var amount = 1234.56m;
             await WhenCreatingTransaction(Page, new Dictionary<string, string>()
             {
@@ -450,7 +473,7 @@ namespace YoFi.Tests.Functional
             var filenames = new[]
             {
                 // Matches tx
-                $"{name} ${amount} {date.Month}-{date.Day} {name}.png"
+                $"{name} ${amount} {date:M-dd} {name}.png"
             };
             await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
@@ -577,10 +600,11 @@ namespace YoFi.Tests.Functional
             // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
             var payee = "A Whole New Thing";
             var amount = 12.34m;
+            var date = DateTime.Now - TimeSpan.FromDays(10);
             var filenames = new[]
             {
                 // Matches none
-                $"{payee} ${amount} 12-21 {testmarker}.png"
+                $"{payee} ${amount} {date:M-dd} {testmarker}.png"
             };
             await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
@@ -608,7 +632,7 @@ namespace YoFi.Tests.Functional
             // And: Transaction matches
             Assert.IsTrue(table.Rows.All(x => x["Memo"] == testmarker));
             Assert.AreEqual(payee, table.Rows[0]["Payee"]);
-            Assert.AreEqual("12/21", table.Rows[0]["Date"]);
+            Assert.AreEqual($"{date:M/dd}", table.Rows[0]["Date"]);
             Assert.AreEqual(amount, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
 
             // And: It has a receipt
@@ -637,7 +661,7 @@ namespace YoFi.Tests.Functional
         {
             // Given: A single transaction in the system
             await WhenNavigatingToPage("Transactions");
-            var tx = new Transaction() { Payee = NextName, Timestamp = new DateTime(2022,12,31), Amount = 100m };
+            var tx = new Transaction() { Payee = NextName, Timestamp = DateTime.Now.Date, Amount = 100m };
             await WhenCreatingTransaction(Page, tx.AsDictionary());
             await Page.SaveScreenshotToAsync(TestContext, "Tx Created-Slide 20");
 
@@ -648,7 +672,7 @@ namespace YoFi.Tests.Functional
         {
             // Given: Two receipts matching the transaction
             await NavigateToReceiptsPage();            
-            var filenames = Enumerable.Range(0,count).Select(x => $"{tx.Payee} ${tx.Amount} {tx.Timestamp.Month}-{tx.Timestamp.Day - x} {testmarker} 01.png").ToArray();
+            var filenames = Enumerable.Range(0,count).Select(x => $"{tx.Payee} ${tx.Amount} {tx.Timestamp - TimeSpan.FromDays(x):M-dd} {testmarker} 01.png").ToArray();
             await WhenUploadingSampleReceipts(filenames);
             await Page.SaveScreenshotToAsync(TestContext, "Receipts Created");
 
@@ -776,7 +800,7 @@ namespace YoFi.Tests.Functional
             await NextPage.SaveScreenshotToAsync(TestContext, "Matched Receipt-Slide 24");
             
             // Then: The transaction has a receipt now
-            Assert.IsTrue(await NextPage.IsVisibleAsync("data-test-id=btn-get-receipt"));
+            Assert.IsTrue(await NextPage.IsVisibleAsync("data-test-id=btn-get-receipt"),"btn-get-receipt is visible");
         }
 
         #endregion
@@ -805,12 +829,12 @@ namespace YoFi.Tests.Functional
             await NextPage.SaveScreenshotToAsync(TestContext, "Single Receipt-Slide 26");
 
             // Then: Is displayed that 1 matching receipt exist
-            Assert.IsTrue(await NextPage.IsVisibleAsync("data-test-id=hasreceipts"));
-            Assert.IsFalse(await NextPage.IsVisibleAsync("data-test-id=nmatches"));
+            Assert.IsTrue(await NextPage.IsVisibleAsync("data-test-id=hasreceipts"),"hasreceipts is visible");
+            Assert.IsFalse(await NextPage.IsVisibleAsync("data-test-id=nmatches"),"nmatches is visible");
 
             // And: Option to “Accept” is available
             var accept_loc = NextPage.Locator("data-test-id=accept");
-            Assert.IsTrue(await accept_loc.IsVisibleAsync());
+            Assert.IsTrue(await accept_loc.IsVisibleAsync(),"accept is visible");
         }
 
         [TestMethod]
