@@ -126,6 +126,23 @@ namespace YoFi.Tests.Functional
                 // Once we're logged int, the timeouts can get a lot tighter
                 base.Context.SetDefaultTimeout(5000);
             }
+
+            // Now that we're logged in, we need to ensure database is seeded
+            await DismissHelpTest();
+
+            // If the admin button is visible, that means there is NO data
+            var btn_admin = Page.Locator("data-test-id=btn-admin");
+            if (await btn_admin.IsVisibleAsync())
+            {
+                // So let's click through to the admin page and add some data!
+                await btn_admin.ClickAsync();
+
+                await Page.ClickAsync($"div[data-id=all]");
+                await Task.Delay(500);
+                await Page.SaveScreenshotToAsync(TestContext,"Seeding database");
+                await Page.ClickAsync("text=Close");
+                await Page.SaveScreenshotToAsync(TestContext,"Seeding complete");
+            }
         }
         protected async Task WhenNavigatingToPage(string path)
         {

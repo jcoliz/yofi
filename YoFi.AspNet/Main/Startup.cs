@@ -150,6 +150,8 @@ namespace YoFi.AspNet.Main
 #endif
             services.AddSingleton<DemoConfig>(democonfig);
 
+            logme.Enqueue($"*** DEMO CONFIG *** {democonfig}");
+
             var storageconnection = Configuration.GetConnectionString("StorageConnection");
             if (!string.IsNullOrEmpty(storageconnection))
             {
