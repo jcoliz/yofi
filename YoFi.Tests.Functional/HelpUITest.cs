@@ -128,7 +128,9 @@ namespace YoFi.Tests.Functional
         /// User Story 1196: [User Can] Receive necessary context when clicking "Try the demo" on the Home page Given: On the Home page
         /// </summary>
         /// <returns></returns>
-        [TestMethod]
+        
+        // NOTE: We don't run in demo mode anymore so we're not able to test this.
+#if false
         public async Task DemoHelp()
         {
             /*
@@ -168,5 +170,6 @@ namespace YoFi.Tests.Functional
             // Then: User is taken to Transactions page
             await Page.ThenIsOnPageAsync("Transactions");
         }
+#endif        
     }
 }

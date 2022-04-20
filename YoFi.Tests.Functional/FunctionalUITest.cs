@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -130,18 +131,29 @@ namespace YoFi.Tests.Functional
             // Now that we're logged in, we need to ensure database is seeded
             await DismissHelpTest();
 
-            // If the admin button is visible, that means there is NO data
-            var btn_admin = Page.Locator("data-test-id=btn-admin");
-            if (await btn_admin.IsVisibleAsync())
+            // If the Get Started admin button is visible, AND it links to the "Admin" page,
+            // that means there is NO data
+            // NOTE: I'd prefer to use btn-admin. However, I want this test to work against the current
+            // deployment, without having to deploy again.
+            // TODO: Change to use data-test-id in the future after 1.0.0-rc is finalized
+            // var btn_admin = Page.Locator("data-test-id=btn-admin");
+            var link_getstarted = Page.Locator("a", new PageLocatorOptions() { HasTextString = "Get Started" });
+            if (await link_getstarted.IsVisibleAsync())
             {
-                // So let's click through to the admin page and add some data!
-                await btn_admin.ClickAsync();
+                // We only need to seed if this link is going to the Admin page
+                var href = await link_getstarted.GetAttributeAsync("href");
+                if (href == "/Admin")
+                {
+                    // So let's click through to the admin page and add some data!
+                    await link_getstarted.ClickAsync();
+                    await Page.SaveScreenshotToAsync(TestContext,"Admin page");
 
-                await Page.ClickAsync($"div[data-id=all]");
-                await Task.Delay(500);
-                await Page.SaveScreenshotToAsync(TestContext,"Seeding database");
-                await Page.ClickAsync("text=Close");
-                await Page.SaveScreenshotToAsync(TestContext,"Seeding complete");
+                    await Page.ClickAsync($"div[data-id=all]");
+                    await Task.Delay(500);
+                    await Page.SaveScreenshotToAsync(TestContext,"Seeding database");
+                    await Page.ClickAsync("text=Close");
+                    await Page.SaveScreenshotToAsync(TestContext,"Seeding complete");
+                }
             }
         }
         protected async Task WhenNavigatingToPage(string path)
@@ -293,8 +305,17 @@ namespace YoFi.Tests.Functional
         public static async Task<IEnumerable<T>> ThenIsSpreadsheetContainingAsync<T>(this IDownload source, string name, int count, TestContext savetocontext = null) where T : class, new()
         {
             using var stream = await source.CreateReadStreamAsync();
+
+            // Ugh, playwright 1.21 decided to get rid of Read(), in favor of ReadAsync().
+            // Read is called DEEP in the OpenXml.PackageLoader, and I don't want to sort ALL of that out
+            // SO I am going to read it into memory first.
+
+            using var memorystream = new MemoryStream();
+            await stream.CopyToAsync(memorystream);
+            memorystream.Seek(0,SeekOrigin.Begin);
+
             using var ssr = new SpreadsheetReader();
-            ssr.Open(stream);
+            ssr.Open(memorystream);
             Assert.AreEqual(name, ssr.SheetNames.First());
             var items = ssr.Deserialize<T>(name);
             Assert.AreEqual(count, items.Count());
