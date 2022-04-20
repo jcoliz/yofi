@@ -110,7 +110,7 @@ namespace YoFi.Tests.Functional
 
             // When: Uploading many files with differing name compositions
             // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
-            var today = DateTime.Now;
+            var today = DateTime.Now.Date;
             var oldday = today - TimeSpan.FromDays(10);
             var recentday = today - TimeSpan.FromDays(3);
             var receipts = new (string name, int matches, int order)[]
@@ -142,9 +142,10 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual("Olive Garden",table.Rows[0]["Name"]);
             Assert.AreEqual("Waste Management", table.Rows[2]["Name"]);
 
-            // TODO: The year will be present if it's in a different year
-            Assert.AreEqual($"{today:M/dd}", table.Rows[1]["Date"]);
-            Assert.AreEqual($"{oldday:M/dd}", table.Rows[3]["Date"]);
+            // NOTE: I am optimistic that this will work if today is first week of Jan.
+            // TODO: Still need to TEST that, though
+            Assert.AreEqual(today, DateTime.Parse(table.Rows[1]["Date"]));
+            Assert.AreEqual(oldday, DateTime.Parse(table.Rows[3]["Date"]));
 
             Assert.AreEqual(130.85m, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
             Assert.AreEqual(12.34m, decimal.Parse(table.Rows[3]["Amount"], NumberStyles.Currency));
@@ -600,7 +601,7 @@ namespace YoFi.Tests.Functional
             // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
             var payee = "A Whole New Thing";
             var amount = 12.34m;
-            var date = DateTime.Now - TimeSpan.FromDays(10);
+            var date = DateTime.Now.Date - TimeSpan.FromDays(10);
             var filenames = new[]
             {
                 // Matches none
@@ -632,7 +633,7 @@ namespace YoFi.Tests.Functional
             // And: Transaction matches
             Assert.IsTrue(table.Rows.All(x => x["Memo"] == testmarker));
             Assert.AreEqual(payee, table.Rows[0]["Payee"]);
-            Assert.AreEqual($"{date:M/dd}", table.Rows[0]["Date"]);
+            Assert.AreEqual(date, DateTime.Parse(table.Rows[0]["Date"]));
             Assert.AreEqual(amount, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
 
             // And: It has a receipt
