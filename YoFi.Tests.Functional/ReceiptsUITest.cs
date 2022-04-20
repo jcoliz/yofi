@@ -110,16 +110,18 @@ namespace YoFi.Tests.Functional
 
             // When: Uploading many files with differing name compositions
             // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
+            var today = DateTime.Now;
+            var oldday = today - TimeSpan.FromDays(10);
+            var recentday = today - TimeSpan.FromDays(3);
             var receipts = new (string name, int matches, int order)[]
             {
                 // Matches none
-                // TODO: Today minus 10 days
-                ($"Create Me $12.34 12-21 {testmarker}.png",0,3),
+                ($"Create Me $12.34 {oldday:M-dd} {testmarker}.png",0,3),
                 // Matches exactly one at 200 (name and amount), but will also match 3 others at 100 (name only)
                 ($"Olive Garden $130.85 {testmarker}.png",4,0),
                 // Matches exactly one
                 // TODO: Today minus 3 days
-                ($"Waste Management 12-27 {testmarker}.png",1,2),
+                ($"Waste Management {recentday:M-dd} {testmarker}.png",1,2),
                 // Matches many
                 ($"Uptown Espresso ({testmarker}).png",5,1),
             };
@@ -140,12 +142,10 @@ namespace YoFi.Tests.Functional
             Assert.AreEqual("Olive Garden",table.Rows[0]["Name"]);
             Assert.AreEqual("Waste Management", table.Rows[2]["Name"]);
 
-            // TODO: Use generated dates from above
-            // NOTE: The year will be present if it's in a different year
-            Assert.AreEqual("12/31", table.Rows[1]["Date"]);
-            Assert.AreEqual("12/21", table.Rows[3]["Date"]);
+            // TODO: The year will be present if it's in a different year
+            Assert.AreEqual($"{today:M/dd}", table.Rows[1]["Date"]);
+            Assert.AreEqual($"{oldday:M/dd}", table.Rows[3]["Date"]);
 
-            //decimal.Parse(txtable.Rows.First()["Amount"], NumberStyles.Currency);
             Assert.AreEqual(130.85m, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
             Assert.AreEqual(12.34m, decimal.Parse(table.Rows[3]["Amount"], NumberStyles.Currency));
 
