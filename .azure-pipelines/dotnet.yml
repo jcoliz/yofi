@@ -9,6 +9,9 @@ trigger:
     - master
     - release/*
     - hotfix/*
+  tags:
+    include:
+    - '*'
 
 pr: none
 
