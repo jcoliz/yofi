@@ -1,17 +1,18 @@
 # Configuration
 
-Here's how to configure YoFi. Only the SQL server connection string is absolutely required. If others are missing, the application will
-not provide the features enabled by the missing configuration.
+Here's how to configure YoFi.
+Only the SQL server connection string is absolutely required. 
+If others are missing, the application will simply exclude the features enabled by the missing configuration.
 
 ## Where to store Configuration Keys
 
-You have three choices on where you want to store your keys
+You have three choices on where you want to store your keys:
 
 1. Environment variables. Both in production and during development, you may set these keys using environment variables. For configuration
 keys which are not particularly sensitive, like the site name, this is the best choice. Keys are listed here of the form "Section:Key". To
 add them to your environment, the environment variable name replaces the colon with two underscores, e.g. "SECTION__KEY".
-2. Azure Key Vault. In production only, you may choose to store sensitive configuration keys in the "Secrects" section of an Azure Key Vault. In this case,
-repalce the colon with two dashes, e.g. "Section--Key".
+2. Azure Key Vault. In production only, you may choose to store sensitive configuration keys in the "Secrets" section of an Azure Key Vault. In this case,
+replace the colon with two dashes, e.g. "Section--Key".
 3. Secret Manager. Microsoft recommends using the "Secret Manager" to store secrets in development. 
 
 For more information on storing app secrets, please 
@@ -102,8 +103,6 @@ These keys control how much of demonstration this version is, vs full production
 False by default, but set true for www.try-yofi.com. This seeds the database automatically, as well adds
 extra help text and simplifies the click path for evaluating users. 
 
-Functional tests also use this to ensure there is data.
-
 ### Demo:IsHomePageRoot
 
 True by default. Indicates that https://{site}/ will show the Home page. Set this to "false" to bypass that
@@ -113,4 +112,4 @@ and go straight to your transactions list.
 
 ### Clock:Now
 
-Useful during development if you want to force the system to think it's a certain day. Functional tests use this.
+Useful during development if you want to force the system to think it's a certain day.

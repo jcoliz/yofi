@@ -4,7 +4,6 @@ These features are in view for future development efforts:
 
 ## Priority 1
 
-* [Receipt Matching](https://dev.azure.com/jcoliz/YoFi/_workitems/edit/1189): Upload multiple receipts in one place, auto match them to transactions by file name
 * [Direct Statement Download](https://dev.azure.com/jcoliz/YoFi/_workitems/edit/931): Download statements directly from banks
 * [Investments](https://dev.azure.com/jcoliz/YoFi/_workitems/edit/1295): Monitor investment performance and holdings
 * [SPA Front End](https://dev.azure.com/jcoliz/YoFi/_workitems/edit/1436): Port views to a Single Page App framework (currently Vue.js)

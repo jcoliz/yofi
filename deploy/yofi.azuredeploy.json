@@ -41,6 +41,8 @@
     "sqlserver-name": "[concat('sqlserver-',variables('name'))]",
     "db-name": "[concat('db-',variables('name'))]",
     "storage-name": "[concat('storage',uniqueString(resourceGroup().id))]",
+    "appInsightName": "[concat('insight-', variables('name'))]",
+    "logAnalyticsName": "[concat('logs-', variables('name'))]",
     "sql-user": "sql-user",
     "app-sku": "F1",
     "packageUri": "https://github.com/jcoliz/yofi/releases/download/1.0.0-rc1/yofi-1.0.0-rc1.zip"
@@ -155,10 +157,15 @@
         "ASPNETCORE_ENVIRONMENT": "Production",
         "ADMINUSER__PASSWORD": "[parameters('web-pword')]",
         "ADMINUSER__EMAIL": "[parameters('web-user')]",
-        "API__KEY": "[parameters('api-key')]"
+        "API__KEY": "[parameters('api-key')]",
+        "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightName'))).ConnectionString]",
+        "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightName'))).InstrumentationKey]",
+        "ApplicationInsightsAgent_EXTENSION_VERSION": "~3",
+        "XDT_MicrosoftApplicationInsights_Mode": "Recommended"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', variables('name'))]"
+        "[resourceId('Microsoft.Web/sites', variables('name'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightName'))]"
       ]
     },
     {
@@ -173,6 +180,47 @@
         "[resourceId('Microsoft.Web/sites/config', variables('name'), 'connectionstrings')]",
         "[resourceId('Microsoft.Web/sites/config', variables('name'), 'appsettings')]"
       ]
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02-preview",
+      "name": "[variables('appInsightName')]",
+      "location": "[variables('location')]",
+      "kind": "string",
+      "tags": {
+        "displayName": "AppInsight",
+        "ProjectName": "[variables('name')]"
+      },
+      "properties": {
+        "Request_Source": "rest",
+        "Flow_Type": "Bluefield",
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2021-12-01-preview",
+      "name": "[variables('logAnalyticsName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "Log Analytics",
+        "ProjectName": "[variables('name')]"
+      },
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30,
+        "features": {
+          "searchVersion": 1,
+          "legacy": 0,
+          "enableLogAccessUsingOnlyResourcePermissions": true
+        }
+      }
     }
   ],
   "outputs": {

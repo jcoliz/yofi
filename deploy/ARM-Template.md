@@ -50,6 +50,8 @@ Here's what it creates:
 * Storage Account. Named 'storage{id}'. Used for storing receipts which correspond to transactions.
 * SQL Database. Named 'db-yofi-{id}'. Where your data lives.
 * SQL Server. Named 'sqlserver-yofi-{id}. Manages connections to your data.
+* Application Insights. Named 'insight-yofi-{id}'. For monitoring usage and performance.
+* Log Analytics Workspace. Named 'logs-yofi-{id}'. Required for the application insights instance.
 
 The template configures the App Service to load the release package directly from blob storage
 every time the site is loaded. While this is convenient for evaluation, you'll definitely want
@@ -57,7 +59,7 @@ to take control over your own deployments if you use the app for real.
 
 ## Connection Strings
 
-The app service needs connections strings for the database and storage account.
+The app service needs connections strings for the database, storage account, and application insights.
 The template wires them up onto the app service configuration, so it's ready to go.
 
 ## What to do next
