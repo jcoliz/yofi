@@ -1,4 +1,7 @@
 ﻿@page
+@using Common.DotNet
+@using Microsoft.Extensions.Options
+@inject IOptions<CodebaseConfig> codebase
 @model YoFi.AspNet.Pages.StatusCodeModel
 @{
     Layout = "_Layout";
@@ -10,5 +13,5 @@
 </div>
 <div class="text-center mt-5">
     <p><a class="btn btn-primary" asp-page="Home"> <span class="btn-label"><i class="fa fa-home"></i></span> Home Page</a></p>
-    <p><a class="btn btn-secondary" href="https://github.com/jcoliz/yofi/issues" target="_blank"> <span class="btn-label"><i class="fab fa-github"></i></span> Report an Issue</a></p>
+    <p><a class="btn btn-secondary" href="@codebase.Value.IssuesLink" target="_blank"> <span class="btn-label"><i class="fab fa-github"></i></span> Report an Issue</a></p>
 </div>

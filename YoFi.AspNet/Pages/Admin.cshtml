@@ -1,4 +1,7 @@
 ﻿@page
+@using Common.DotNet
+@using Microsoft.Extensions.Options
+@inject IOptions<CodebaseConfig> codebase
 @model YoFi.AspNet.Pages.AdminModel
 @{
     Layout = "_Layout";
@@ -35,9 +38,9 @@
 {
     <h2>Welcome!</h2>
 
-    <h4>Thanks for deploying YoFi</h4>
+    <h4>Thanks for deploying @codebase.Value.Name</h4>
 
-    <p>I appreciate you taking the time to try out YoFi. Find problems? Have questions? Please <a href="https://github.com/jcoliz/yofi/issues" target="_blank">open an issue</a> or <a href="https://github.com/jcoliz/yofi/discussions" target="_blank">start a discussion</a> on GitHub.</p>
+    <p>I appreciate you taking the time to try out @codebase.Value.Name. Find problems? Have questions? Please <a href="@codebase.Value.IssuesLink" target="_blank">open an issue</a> or <a href="@(codebase.Value.Link + "/discussions")" target="_blank">start a discussion</a> on GitHub.</p>
 
     <h4>Database Status: Empty</h4>
 

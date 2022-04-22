@@ -2,7 +2,7 @@
 
 # YoFi
 
-Own your finances. Own your data.
+Your own finances. Your own data.
 
 YoFi is an open-source web-based personal finance manager written in C# on ASP<meta/>.NET Core. Host it on a cloud service to enable access to your personal finances from any device anywhere anytime, all while maintaining complete control over your data.
 

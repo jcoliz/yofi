@@ -1,4 +1,7 @@
 ﻿@page
+@using Common.DotNet
+@using Microsoft.Extensions.Options
+@inject IOptions<CodebaseConfig> codebase
 @model YoFi.AspNet.Pages.HomeModel
 @{
     Layout = "_Layout";
@@ -17,8 +20,8 @@
 
             <div class="container">
                 <div class="carousel-caption text-start">
-                    <h1>Own your finances. Own your data.</h1>
-                    <p>YoFi is an open-source web-based personal finance manager written in C# on ASP.NET Core. Host it on a cloud service to enable access to your personal finances from any device anywhere anytime, all while maintaining complete control over your data.</p>
+                    <h1>@codebase.Value.Tagline</h1>
+                    <p>@codebase.Value.Name is an open-source web-based personal finance manager written in C# on ASP.NET Core. Host it on a cloud service to enable access to your personal finances from any device anywhere anytime, all while maintaining complete control over your data.</p>
                     @if (Model.isDemo)
                     {
                         <p><a href="#" class="btn btn-lg btn-primary" data-help-topic="demo" data-help-href="/Transactions">Try the demo</a></p>
@@ -40,8 +43,8 @@
             <div class="container">
                 <div class="carousel-caption">
                     <h1>100% free and Open Source.</h1>
-                    <p>YoFi is MIT-licensed, hosted on GitHub, and will always be free and open source. Fork it today and get hacking!</p>
-                    <p><a class="btn btn-lg btn-primary" href="https://github.com/jcoliz/yofi" target="_blank">See the code</a></p>
+                    <p>@codebase.Value.Name is @codebase..ValueLicense-licensed, hosted on GitHub, and will always be free and open source. Fork it today and get hacking!</p>
+                    <p><a class="btn btn-lg btn-primary" href="@codebase.Value.Link" target="_blank">See the code</a></p>
                 </div>
             </div>
         </div>
@@ -52,11 +55,11 @@
                 <div class="carousel-caption text-end">
                     <h1>Easy to deploy.</h1>
                     <p>
-                        The fastest and simplest way to bring up YoFi for your own use is to deploy it to Azure.
+                        The fastest and simplest way to bring up @codebase.Value.Name for your own use is to deploy it to Azure.
                         Use the included ARM deployment template to create all the needed resources in 
                         Azure, including an App Service, SQL Database, Storage, etc., and automatically deploy the most recent build.
                     </p>
-                    <p><a class="btn btn-lg btn-primary" href="https://github.com/jcoliz/yofi/blob/master/deploy/ARM-Template.md" target="_blank">Learn more</a></p>
+                    <p><a class="btn btn-lg btn-primary" href="@(codebase.Value.Link + "blob/master/deploy/ARM-Template.md")" target="_blank">Learn more</a></p>
                 </div>
             </div>
         </div>
@@ -83,7 +86,7 @@
         <div class="col-lg-3">
             <img style="max-width:100px" src="~/images/import-100.png" srcset="~/images/import.svg" />
             <h2>Import</h2>
-            <p>Download your debit & credit card statements from your bank in OFX or CSV format. Import them into YoFi to get started.</p>
+            <p>Download your debit & credit card statements from your bank in OFX or CSV format. Import them into @codebase.Value.Name to get started.</p>
             <p>Attach receipt images to individual transactions to keep your records organized.</p>
             <p><a class="btn btn-secondary" asp-page="/Import">Go to Imports &raquo;</a></p>
         </div><!-- /.col-lg-4 -->
@@ -106,7 +109,7 @@
         <div class="col-lg-3">
             <img style="max-width:100px" src="~/images/report-100.png" srcset="~/images/report.svg" />
             <h2>Report</h2>
-            <p>Gain insights on where your money is going over time, and how you're doing on your budget. YoFi's super flexible reporting system gives you the insight.</p>
+            <p>Gain insights on where your money is going over time, and how you're doing on your budget. @codebase.Value.Name's super flexible reporting system gives you the insight.</p>
             <p>Access reports via REST API to easily integrate into your financial systems and Excel spreadsheets.</p>
 
             <p><a class="btn btn-secondary" asp-page="/Reports">Go to Reports &raquo;</a></p>
