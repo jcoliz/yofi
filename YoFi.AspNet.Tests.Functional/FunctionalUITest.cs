@@ -52,7 +52,7 @@ namespace YoFi.AspNet.Tests.Functional
         private int nextid = 1;
         protected string NextName => $"AA{testmarker}{TestContext.TestName}_{nextid++}";
         protected string NextCategory => $"AA{testmarker}:{TestContext.TestName}:{nextid++}";
-        protected TestConfigProperties Properties = null;
+        protected static TestConfigProperties Properties = null;
 
         protected FunctionalUITest() { }
 
@@ -278,10 +278,11 @@ namespace YoFi.AspNet.Tests.Functional
             var counter = 1 + ScreenShotCounter.GetValueOrDefault(testname);
             ScreenShotCounter[testname] = counter;
 
+            var viewportwidth = FunctionalUITest.CurrentViewportSizeFrom(testContext).Width;
+            var hostname = testContext.Properties["host"];
             var displaymoment = string.IsNullOrEmpty(moment) ? string.Empty : $"-{moment.Replace('/','-')}";
 
-            var viewportwidth = FunctionalUITest.CurrentViewportSizeFrom(testContext).Width;
-            var filename = $"Screenshot/{viewportwidth}/{testname} {counter:D4}{displaymoment}.png";
+            var filename = $"Screenshot/{hostname}/{viewportwidth}/{testname} {counter:D4}{displaymoment}.png";
             await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true, FullPage = true });
             testContext.AddResultFile(filename);
         }

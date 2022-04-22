@@ -2,6 +2,7 @@
 <RunSettings>
 	<TestRunParameters>
 		<Parameter name="webAppUrl" value="http://localhost:50519/" />
+		<Parameter name="host" value="localhost" />
 		<Parameter name="viewportSize" value="default" />
 	</TestRunParameters>
 </RunSettings>

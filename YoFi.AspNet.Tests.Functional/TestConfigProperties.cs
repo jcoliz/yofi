@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Reflection;
 
 namespace YoFi.AspNet.Tests.Functional
@@ -12,6 +13,7 @@ namespace YoFi.AspNet.Tests.Functional
         public bool IsDevelopment { get; private set; }
         public bool IsDemo { get; private set; }
         public string ViewportSize { get; private set; }
+        public string Host { get; private set; }
 
         public TestConfigProperties(System.Collections.IDictionary testproperties)
         {
@@ -21,7 +23,8 @@ namespace YoFi.AspNet.Tests.Functional
             AdminUserPassword = testproperties["password"] as string;
             ApiKey = testproperties["apikey"] as string;
             IsDevelopment = (testproperties["environment"] as string)?.Contains("Development") == true;
-            IsDemo = (testproperties["environment"] as string)?.Contains("Demo") == true;
+            IsDemo = testproperties["demo"] as string == "true";
+            Host = testproperties["host"] as string;
             ViewportSize = testproperties["viewportSize"] as string;
 
             // Else get them from user secrets
