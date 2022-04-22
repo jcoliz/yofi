@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests.Functional
+namespace YoFi.AspNet.Tests.Functional
 {
     /// <summary>
     /// Run through top-level golden path to make sure primary pages load

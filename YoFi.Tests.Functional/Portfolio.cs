@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests.Functional
+namespace YoFi.AspNet.Tests.Functional
 {
     /// <summary>
     /// This test generates a portfolio of screen shots to be included in the visual refresh

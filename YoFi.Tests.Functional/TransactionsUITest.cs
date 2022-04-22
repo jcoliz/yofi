@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests.Functional
+namespace YoFi.AspNet.Tests.Functional
 {
     /// <summary>
     /// Test the Transactions page

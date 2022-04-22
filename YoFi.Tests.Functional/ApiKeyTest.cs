@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests.Functional
+namespace YoFi.AspNet.Tests.Functional
 {
     [TestClass]
     public class ApiKeyTest

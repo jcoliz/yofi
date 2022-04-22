@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 // Can't parallelize anymore. The tests have too much overlap now
 // [assembly: Parallelize(Workers = 3, Scope = ExecutionScope.ClassLevel)]
 
-namespace YoFi.Tests.Functional
+namespace YoFi.AspNet.Tests.Functional
 {
     public class FunctionalUITest: PageTest
     {

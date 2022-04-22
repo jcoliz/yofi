@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
-namespace YoFi.Tests.Functional;
+namespace YoFi.AspNet.Tests.Functional;
 
 // NOTE: It's best if this class can go first, so it will leave the DB in a nice seeded
 // state for the rest of the tests.

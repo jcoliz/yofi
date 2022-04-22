@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Tests.Functional.Helpers;
 
-namespace YoFi.Tests.Functional
+namespace YoFi.AspNet.Tests.Functional
 {
     /// <summary>
     /// Feature 1189: Receipt Matching: Upload multiple receipts in one place, auto match them to transactions by file name

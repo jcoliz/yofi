@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
-namespace YoFi.Tests.Functional
+namespace YoFi.AspNet.Tests.Functional
 {
     public class TestConfigProperties
     {
