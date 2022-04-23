@@ -45,7 +45,7 @@
     "logAnalyticsName": "[concat('logs-', variables('name'))]",
     "sql-user": "sql-user",
     "app-sku": "F1",
-    "packageUri": "https://github.com/jcoliz/yofi/releases/download/1.0.0-rc1/yofi-1.0.0-rc1.zip"
+    "packageUri": "https://github.com/jcoliz/yofi/releases/download/1.0.0/yofi-1.0.0.zip"
   },
   "resources": [
     {
