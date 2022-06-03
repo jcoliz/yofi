@@ -1,0 +1,69 @@
+﻿@model YoFi.Core.Models.Transaction
+
+@{
+    ViewData["Title"] = "Print Transaction";
+    Layout = "/Views/Shared/_CheckLayout.cshtml";
+}
+
+<div id="upper">
+    <div>
+        TO: @Model.Payee
+    </div>
+    <br/>
+    <div>
+        FOR: @Model.Memo
+    </div>
+
+    <div class="right">
+        <div>@Model.Timestamp.ToString("MMMM d, yyyy")</div>
+        <br/>
+        <div>@Math.Abs(Model.Amount).ToString("C2")</div>
+    </div>
+</div>
+
+<div id="check">
+    <div class="memo">
+        FOR: @Model.Memo
+    </div>
+
+    <div class="amountwords">
+        **@Math.Abs(Model.Amount).ToString("C2")**
+    </div>
+
+    <div class="payee">
+        <div>@Model.Payee</div>
+        <div>Line 2</div>
+        <div>Line 3</div>
+        <div>Line 4</div>
+    </div>
+
+    <div class="right">
+        @Model.Timestamp.ToString("MMMM d, yyyy")
+
+        <div class="amount">
+            **@Math.Abs(Model.Amount).ToString("C2")**
+        </div>
+    </div>
+
+</div>
+
+<div id="lower">
+    <div>
+        TO: @Model.Payee
+    </div>
+    <br/>
+    <div>
+        FOR: @Model.Memo
+    </div>
+    <br/>
+    <div>
+        CATEGORY:
+        @Model.Category
+    </div>
+
+    <div class="right">
+        <div>@Model.Timestamp.ToString("MMMM d, yyyy")</div>
+        <br/>
+        <div>@Math.Abs(Model.Amount).ToString("C2")</div>
+    </div>
+</div>

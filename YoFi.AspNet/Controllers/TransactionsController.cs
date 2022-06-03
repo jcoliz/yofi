@@ -152,6 +152,17 @@ namespace YoFi.AspNet.Controllers
             return View(await _repository.GetByIdAsync(id));
         }
 
+        /// <summary>
+        /// Print a single transaction as a check
+        /// </summary>
+        /// <param name="id">ID of the desired transaction</param>
+        /// <returns></returns>
+        [ValidateTransactionExists]
+        public async Task<IActionResult> Print(int? id)
+        {
+            return View(await _repository.GetByIdAsync(id));
+        }
+
         #endregion
 
         #region Action Handlers: Update (Edit)
