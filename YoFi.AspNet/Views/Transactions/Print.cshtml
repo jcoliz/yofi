@@ -42,7 +42,7 @@
     }
 
     <div class="amountwords">
-        **@Math.Abs(Model.Amount).ToString("C2")**
+        **@Common.DotNet.Numbers.ToWords(Model.Amount)**
     </div>
 
     <div class="payee">

@@ -41,6 +41,7 @@ div.payee {
 
 div.amountwords {
     position: absolute;
+    width: 7in;
     top: 0.62in;
 }
 
