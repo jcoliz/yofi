@@ -3,16 +3,27 @@
 @{
     ViewData["Title"] = "Print Transaction";
     Layout = "/Views/Shared/_CheckLayout.cshtml";
+
+    var payeelines = Model.Payee.Split(':').Select(x=>x.Trim());
 }
 
 <div id="upper">
-    <div>
-        TO: @Model.Payee
-    </div>
-    <br/>
-    <div>
-        FOR: @Model.Memo
-    </div>
+    <div>TO: @payeelines.First()</div>
+    @foreach(var line in payeelines.Skip(1))
+    {
+        <div>@line</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Memo))
+    {
+        var memolines = Model.Memo.Split(':');
+        <br/>
+        <div>FOR: @memolines[0].Trim()</div>
+        @foreach (var line in memolines.Skip(1))
+        {
+            <div>@line.Trim()</div>            
+        }
+    }
 
     <div class="right">
         <div>@Model.Timestamp.ToString("MMMM d, yyyy")</div>
@@ -22,19 +33,23 @@
 </div>
 
 <div id="check">
-    <div class="memo">
-        FOR: @Model.Memo
-    </div>
+    @if (!string.IsNullOrEmpty(Model.Memo))
+    {
+        var memolines = Model.Memo.Split(':');
+        <div class="memo">
+            FOR: @memolines[0].Trim()
+        </div>    
+    }
 
     <div class="amountwords">
         **@Math.Abs(Model.Amount).ToString("C2")**
     </div>
 
     <div class="payee">
-        <div>@Model.Payee</div>
-        <div>Line 2</div>
-        <div>Line 3</div>
-        <div>Line 4</div>
+        @foreach(var line in payeelines)
+        {
+            <div>@line</div>
+        }
     </div>
 
     <div class="right">
@@ -48,18 +63,26 @@
 </div>
 
 <div id="lower">
-    <div>
-        TO: @Model.Payee
-    </div>
-    <br/>
-    <div>
-        FOR: @Model.Memo
-    </div>
-    <br/>
-    <div>
-        CATEGORY:
-        @Model.Category
-    </div>
+    <div>TO: @payeelines.First()</div>
+    @foreach(var line in payeelines.Skip(1))
+    {
+        <div>@line</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.Memo))
+    {
+        var memolines = Model.Memo.Split(':');
+        <br/>
+        <div>FOR: @memolines[0].Trim()</div>
+        @foreach (var line in memolines.Skip(1))
+        {
+            <div>@line.Trim()</div>            
+        }
+    }
+    @if (!string.IsNullOrEmpty(Model.Category))
+    {
+        <br/>
+        <div>CATEGORY: @Model.Category</div>
+    }
 
     <div class="right">
         <div>@Model.Timestamp.ToString("MMMM d, yyyy")</div>
