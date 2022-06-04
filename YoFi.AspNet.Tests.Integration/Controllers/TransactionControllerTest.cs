@@ -1036,6 +1036,22 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             Assert.AreEqual(now.Date, actual.Date);
         }
 
+        [TestMethod]
+        public async Task PrintCheck()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
+            var id = expected.ID;
+
+            // When: Getting print check page for the chosen item
+            var document = await WhenGetAsync($"{urlroot}/Print/{id}");
+
+            // Then: That item is shown
+            var testkey = TestKey<Transaction>.Find().Name.ToLowerInvariant();
+            var actual = document.QuerySelector($"[data-test-id={testkey}]").TextContent.Trim();
+            Assert.AreEqual(TestKey<Transaction>.Order()(expected), actual);
+        }
+
         #endregion
 
         #region Hiding Tests

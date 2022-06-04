@@ -18,7 +18,7 @@
     {
         var memolines = Model.Memo.Split(':');
         <br/>
-        <div>FOR: @memolines[0].Trim()</div>
+        <div>FOR: <span data-test-id="memo">@memolines[0].Trim()</span></div>
         @foreach (var line in memolines.Skip(1))
         {
             <div>@line.Trim()</div>            
