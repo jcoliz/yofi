@@ -60,6 +60,7 @@
                 <input type="submit" value="Save" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-secondary">Cancel</a>
                 <input type="submit" value="Duplicate" class="btn btn-outline-secondary" asp-route-duplicate="true" />
+                <a asp-action="Print" asp-route-id="@Model.ID" class="btn btn-outline-secondary">Print Check</a>
                 <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-outline-secondary" style="float:right">Delete</a>
             </div>
         </form>
