@@ -230,7 +230,6 @@ namespace YoFi.AspNet.Main
                 logger.LogInformation($"*** CONFIGURE *** Running in Development");
 
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
                 app.UseMigrationsEndPoint();
             }
             else
