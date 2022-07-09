@@ -36,6 +36,13 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             integrationcontext.Dispose();
         }
 
+        [TestInitialize]
+        public void SetUp()
+        {
+            // Needs to be the default time when transactions are created from
+            integrationcontext.clock.Now = new DateTime(2001,12,31);
+        }
+
         [TestCleanup]
         public void Cleanup()
         {
@@ -247,7 +254,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         public async Task IndexQDate(int day)
         {
             // Given: A mix of transactions, with differing dates, within the current year
-            var items = FakeObjects<Transaction>.Make(22,x=>x.Timestamp = new DateTime(DateTime.Now.Year,x.Timestamp.Month,x.Timestamp.Day)).SaveTo(this);
+            var items = FakeObjects<Transaction>.Make(22,x=>x.Timestamp = new DateTime(integrationcontext.clock.Now.Year,x.Timestamp.Month,x.Timestamp.Day)).SaveTo(this);
 
             // When: Calling index with q='d=#/##'
             var target = items.Min(x => x.Timestamp).AddDays(day);
@@ -266,7 +273,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             var words = numbers.Select(x => x.ToString("0")).ToList();
             var number = numbers[0];
             var number00 = number / 100m;
-            var dates = numbers.Select(x => new DateTime(DateTime.Now.Year, (int)(x / 100m), (int)(x % 100m))).ToList();
+            var dates = numbers.Select(x => new DateTime(integrationcontext.clock.Now.Year, (int)(x / 100m), (int)(x % 100m))).ToList();
 
             var chosen = FakeObjects<Transaction>
                 .Make(5)
@@ -551,7 +558,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             var expected = FakeObjects<Transaction>.Make(1,
                 x =>
                 {
-                    x.Timestamp = DateTime.Now;
+                    x.Timestamp = integrationcontext.clock.Now;
                     x.Splits = FakeObjects<Split>.Make(2).Group(0);
                     x.Amount = x.Splits.Sum(x => x.Amount);
                 })

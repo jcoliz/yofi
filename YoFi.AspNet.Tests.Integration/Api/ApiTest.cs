@@ -35,6 +35,9 @@ namespace YoFi.AspNet.Tests.Integration.Api
         {
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"user:{integrationcontext.apiconfig.Key}"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64);
+
+            // Needs to be the default time when transactions are created from
+            integrationcontext.clock.Now = new DateTime(2001, 12, 31);
         }
 
         [TestCleanup]
@@ -43,6 +46,9 @@ namespace YoFi.AspNet.Tests.Integration.Api
             // Clean out database
             context.Set<Transaction>().RemoveRange(context.Set<Transaction>());
             context.SaveChanges();
+
+            // Reset the clock back
+            integrationcontext.clock.Reset();
         }
 
         #endregion

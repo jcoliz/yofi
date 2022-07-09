@@ -32,6 +32,13 @@ namespace YoFi.AspNet.Tests.Integration.Pages
             integrationcontext.Dispose();
         }
 
+        [TestInitialize]
+        public void SetUp()
+        {
+            // Needs to be the default time when transactions are created from
+            integrationcontext.clock.Now = new DateTime(2001, 12, 31);
+        }
+
         [TestCleanup]
         public void Cleanup()
         {
@@ -43,6 +50,9 @@ namespace YoFi.AspNet.Tests.Integration.Pages
 
             // Reset auth overrides
             integrationcontext.canwrite.Ok = true;
+
+            // Reset the clock back
+            integrationcontext.clock.Reset();
         }
 
         #endregion
