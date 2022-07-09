@@ -62,6 +62,14 @@ namespace YoFi.Core.Repositories
             {
                 var terms = q.Split(',');
 
+                // User Story 1385: Transactions search defaults to last 12 months
+
+                // If there is any "y" term, then we will NOT apply the last-12 rule
+                if (!terms.Any(x=>x.ToLowerInvariant().StartsWith("y")))
+                {
+                    Query = Query.Where(x => x.Timestamp > _clock.Now - TimeSpan.FromDays(366));
+                }
+
                 foreach (var term in terms)
                 {
                     // Look for "{key}={value}" terms

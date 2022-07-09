@@ -86,6 +86,10 @@ namespace YoFi.Core.Tests.Unit
             context = new MockDataContext();
             storage = new TestAzureStorage();
             clock = new TestClock();
+            
+            // This is the time supposed by the FakeObjects filler
+            clock.Now = new DateTime(2001, 12, 31);
+
             repository = new TransactionRepository(context, clock, storage);
         }
 
@@ -391,7 +395,7 @@ namespace YoFi.Core.Tests.Unit
             // Given: A set of items, some of which have a certain category
             var word = "Fibbledy-jibbit";
             var chosen = FakeObjects<Transaction>.Make(5).Add(2, x => x.Category += word).SaveTo(this).Group(1);
-
+ 
             // When: Calling Index with category search term
             var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"c={word}" });
 
@@ -552,6 +556,25 @@ namespace YoFi.Core.Tests.Unit
 
             // Then: Only the transactions in {year} are returned
             ThenResultsAreEqualByTestKey(document, chosen);
+        }
+
+        [TestMethod]
+        public async Task IndexQDefaultsToLast12mo()
+        {
+            // [Scenario] Default Search
+            // Given: Many transactions stretching back 3 + years
+            var now = clock.Now = new DateTime(2010, 12, 1);
+            var items = FakeObjects<Transaction>
+                .Make(5, x => x.Timestamp = now - TimeSpan.FromDays(30))
+                .Add(6, x => x.Timestamp = now - TimeSpan.FromDays(500))
+                .Add(7, x => x.Timestamp = now - TimeSpan.FromDays(600))
+                .SaveTo(this); 
+
+            // When: Searching for a term which will only be in some of the transactions
+            var document = await WhenGettingIndex(new WireQueryParameters() { Query = $"C=Category" });
+
+            // Then: Only items containing that term AND from the previous 12 months are returned
+            ThenResultsAreEqualByTestKey(document, items.Group(0));
         }
 
         [TestMethod]
@@ -768,7 +791,7 @@ namespace YoFi.Core.Tests.Unit
             // Given: A mix of transactions, with differing amounts, dates, and payees
             var number = 123m;
             var number00 = number / 100m;
-            var date = new DateTime(DateTime.Now.Year, (int)(number / 100m), (int)(number % 100m));
+            var date = new DateTime(clock.Now.Year, (int)(number / 100m), (int)(number % 100m));
             var word = number.ToString("0");
 
             var chosen = FakeObjects<Transaction>
@@ -801,7 +824,7 @@ namespace YoFi.Core.Tests.Unit
             var words = numbers.Select(x => x.ToString("0")).ToList();
             var number = numbers[0];
             var number00 = number / 100m;
-            var dates = numbers.Select(x => new DateTime(DateTime.Now.Year, (int)(x / 100m), (int)(x % 100m))).ToList();
+            var dates = numbers.Select(x => new DateTime(clock.Now.Year, (int)(x / 100m), (int)(x % 100m))).ToList();
 
             var chosen = FakeObjects<Transaction>
                 .Make(5)
