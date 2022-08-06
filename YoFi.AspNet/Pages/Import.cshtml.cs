@@ -53,7 +53,7 @@ namespace YoFi.AspNet.Pages
         public async Task<IActionResult> OnGetAsync(int? p = null)
         {
             // TODO: Should add a DTO here
-            Transactions = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = "i=1", Page = p, View = "h" } );
+            Transactions = await _repository.GetByQueryAsync(new WireQueryParameters() { Query = "i=1,y=*", Page = p, View = "h" } );
 
             Offerings = await _loader.ListDownloadOfferingsAsync();
 

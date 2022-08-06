@@ -645,11 +645,12 @@ namespace YoFi.AspNet.Tests.Functional
             await Page.SetInputFilesAsync("[aria-label=\"Upload\"]", new[] { "SampleData\\User-Story-802.ofx" });
             await Page.SaveScreenshotToAsync(TestContext, "SetInputFiles");
             await Page.ClickAsync("text=Upload");
+            await Page.SaveScreenshotToAsync(TestContext, "Uploaded");
             await Page.ClickAsync("button:has-text(\"Import\")");
 
             await Page.ThenIsOnPageAsync("Transactions");
 
-            await Page.SearchFor($"p={payee}");
+            await Page.SearchFor($"p={payee},y=*");
 
             await Page.SaveScreenshotToAsync(TestContext,"Found by Payee");
             Assert.AreEqual(1, await Page.GetTotalItemsAsync());
@@ -702,7 +703,7 @@ namespace YoFi.AspNet.Tests.Functional
 
             // When: Searching for this item
             await WhenNavigatingToPage(MainPageName);
-            await Page.SearchFor($"p={payee}");
+            await Page.SearchFor($"p={payee},y=*");
             await Page.SaveScreenshotToAsync(TestContext);
 
             // And: Clicking 'Apply Payee' on the first line
@@ -712,7 +713,7 @@ namespace YoFi.AspNet.Tests.Functional
 
             // And: Editing the transaction
             await Page.ReloadAsync();
-            await Page.SearchFor($"p={payee}");
+            await Page.SearchFor($"p={payee},y=*");
             await Page.SaveScreenshotToAsync(TestContext);
 
             var NextPage = await Page.RunAndWaitForPopupAsync(async () =>
