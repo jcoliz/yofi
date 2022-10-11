@@ -66,11 +66,16 @@ namespace YoFi.Core.Repositories
 
         public async Task AssignReceipt(Receipt receipt, Transaction tx)
         {
+            // Bug 1554: [Production Bug]: 400 Bad Request when matching receipts from Edit
+            //
+            // It should be supported to match a receipt that doesn't actually have ANY matching
+            // attributes.
+#if false
             // Ensure that the transaction and receipt at least somewhat match
             var match = receipt.MatchesTransaction(tx);
             if (match <= 0)
                 throw new ArgumentException("Receipt and transaction do not match");
-
+#endif
             // Add receipt to the transaction
             tx.ReceiptUrl = $"{Prefix}{receipt.ID}";
 
@@ -208,6 +213,6 @@ namespace YoFi.Core.Repositories
 
         public Task<bool> AnyAsync() => _context.AnyAsync(_context.Get<Receipt>());
 
-        #endregion
+#endregion
     }
 }

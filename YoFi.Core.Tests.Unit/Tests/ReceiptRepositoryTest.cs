@@ -239,6 +239,11 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsFalse(items.Any());
         }
 
+        // Bug 1554: [Production Bug]: 400 Bad Request when matching receipts from Edit
+        //
+        // It should be supported to match a receipt that doesn't actually have ANY matching
+        // attributes.
+#if false
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]  
         public async Task AssignReceiptNoMatch()
@@ -255,6 +260,7 @@ namespace YoFi.Core.Tests.Unit
 
             // Then: Throws exception
         }
+#endif
 
         [TestMethod]
         public async Task AssignReceiptWithMemo()
@@ -506,6 +512,6 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsFalse((await repository.GetAllAsync()).Where(x=>x.ID == id).Any());
         }
 
-        #endregion
+#endregion
     }
 }
