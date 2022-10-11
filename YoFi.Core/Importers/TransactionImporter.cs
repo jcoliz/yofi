@@ -48,7 +48,7 @@ namespace YoFi.Core.Importers
                 tx => new Transaction()
                 {
                     Amount = tx.Amount,
-                    Payee = tx.Memo?.Trim(),
+                    Payee = (tx.Name ?? tx.Memo) ?.Trim(),
                     BankReference = tx.ReferenceNumber?.Trim(),
                     Timestamp = tx.Date.Value.DateTime
                 }

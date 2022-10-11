@@ -10,6 +10,7 @@
     <EmbeddedResource Include="SampleData\SampleData-2022-Full-Month02.ofx" />
     <EmbeddedResource Include="SampleData\SampleData-2022-Full.json" />
     <EmbeddedResource Include="SampleData\Splits-Test.xlsx" />
+    <EmbeddedResource Include="SampleData\Bug-1252.ofx" />
   </ItemGroup>
 
   <ItemGroup>

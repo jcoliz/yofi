@@ -327,6 +327,26 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsTrue(txrepo.Items.All(x => x.Timestamp.Month == 2));
         }
 
+        //
+        // Bug 1552: OFX Importer: Doesn't import payee name
+        //
+
+        [TestMethod]
+        public async Task Bug1252()
+        {
+            // Given: An OFX file with a transaction containing a "NAME" field and no "MEMO" field
+            var stream = Common.DotNet.Test.SampleData.Open("Bug-1252.ofx");
+
+            // When: Importing it
+            await importer.QueueImportFromOfxAsync(stream);
+            await importer.ProcessImportAsync();
+
+            // Then: "NAME" field shows up as the payee name
+            var actual = txrepo.Items.First();
+
+            Assert.AreEqual("Spaghetti Factory", actual.Payee.Trim());
+        }
+
         [TestMethod]
         public async Task UploadHighlights()
         {
