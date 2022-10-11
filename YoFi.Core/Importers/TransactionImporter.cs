@@ -49,6 +49,7 @@ namespace YoFi.Core.Importers
                 {
                     Amount = tx.Amount,
                     Payee = (tx.Name ?? tx.Memo) ?.Trim(),
+                    Memo = ! string.IsNullOrEmpty(tx.Name) && !string.IsNullOrEmpty(tx.Memo) ? tx.Memo.Trim() : null,
                     BankReference = tx.ReferenceNumber?.Trim(),
                     Timestamp = tx.Date.Value.DateTime
                 }
