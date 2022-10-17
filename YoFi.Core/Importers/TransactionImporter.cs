@@ -45,13 +45,22 @@ namespace YoFi.Core.Importers
             OfxDocument Document = await OfxDocumentReader.FromSgmlFileAsync(stream);
 
             var created = Document.Statements.SelectMany(x => x.Transactions).Select(
-                tx => new Transaction()
-                {
-                    Amount = tx.Amount,
-                    Payee = (tx.Name ?? tx.Memo) ?.Trim(),
-                    Memo = ! string.IsNullOrEmpty(tx.Name) && !string.IsNullOrEmpty(tx.Memo) ? tx.Memo.Trim() : null,
-                    BankReference = tx.ReferenceNumber?.Trim(),
-                    Timestamp = tx.Date.Value.DateTime
+                tx => {
+                    var payee = (tx.Name ?? tx.Memo) ?.Trim();
+                    var memo = ! string.IsNullOrEmpty(tx.Name) && !string.IsNullOrEmpty(tx.Memo) ? tx.Memo.Trim() : null;
+                    if ( ! string.IsNullOrEmpty(memo) && ! string.IsNullOrEmpty(payee) && memo.StartsWith(payee))
+                    {
+                        payee = memo;
+                        memo = null;
+                    }
+                    return new Transaction()
+                    {
+                        Amount = tx.Amount,
+                        Payee = payee,
+                        Memo = memo,
+                        BankReference = tx.ReferenceNumber?.Trim(),
+                        Timestamp = tx.Date.Value.DateTime
+                    };
                 }
             );
 

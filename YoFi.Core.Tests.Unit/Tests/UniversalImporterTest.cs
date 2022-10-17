@@ -367,6 +367,26 @@ namespace YoFi.Core.Tests.Unit
         }
 
         [TestMethod]
+        public async Task Bug1252_Substr()
+        {
+            // Given: An OFX file with a transaction containing a "NAME" field *and* a "MEMO" field,
+            // where the NAME is simply a truncated version of the MEMO
+            var stream = Common.DotNet.Test.SampleData.Open("Bug-1252.ofx");
+
+            // When: Importing it
+            await importer.QueueImportFromOfxAsync(stream);
+            await importer.ProcessImportAsync();
+
+            // Then: "MEMO" field shows up as the payee name
+            var actual = txrepo.Items.Skip(2).First();
+
+            Assert.AreEqual("Megacorp Inc the first of his name", actual.Payee.Trim());
+
+            // And: The memo is blank
+            Assert.IsNull(actual.Memo);
+        }
+
+        [TestMethod]
         public async Task UploadHighlights()
         {
             // Given: Two chunks of transactions

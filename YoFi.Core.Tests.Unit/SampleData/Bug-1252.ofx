@@ -57,6 +57,14 @@ NEWFILEUID:NONE
 						<NAME>Megacorp Inc
 						<MEMO>This is a memo
 					</STMTTRN>
+					<STMTTRN>
+						<TRNTYPE>CREDIT
+						<DTPOSTED>20220201000000.000
+						<FITID>2022020100000002
+						<TRNAMT>2569.92
+						<NAME>Megacorp Inc
+						<MEMO>Megacorp Inc the first of his name
+					</STMTTRN>
 				</BANKTRANLIST>
 				<LEDGERBAL>
 				<BALAMT>10000.00</BALAMT>
