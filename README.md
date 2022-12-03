@@ -45,10 +45,6 @@ If you're a developer, you may find it useful to have a codebase which you can a
 you like. Even if you're not a developer, you may find it interesting to have your personal finance
 manager accessible from any device anywhere anytime, yet still running on hardware you control.
 
-## Try it!
-
-There is a read-only demo instance of YoFi hosted at [www.try-yofi.com](https://www.try-yofi.com), with realistic sample data.
-
 ## Deploy it
 
 The fastest and simplest way to bring up YoFi for your own use is to deploy it to Azure.
