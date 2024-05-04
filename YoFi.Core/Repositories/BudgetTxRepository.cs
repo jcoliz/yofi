@@ -25,6 +25,14 @@ namespace YoFi.Core.Repositories
             await _context.SaveChangesAsync();
         }
 
+        ///<inheritdoc/>
+        public async Task SetSelectedAsync(int id, bool value)
+        {
+            var payee = await GetByIdAsync(id);
+            payee.Selected = value;
+            await UpdateAsync(payee);
+        }
+
         /// <summary>
         /// Subset of all known items reduced by the specified query parameter
         /// </summary>

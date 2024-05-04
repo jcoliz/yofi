@@ -2,6 +2,7 @@
 using jcoliz.FakeObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -133,6 +134,22 @@ namespace YoFi.Core.Tests.Unit
 
             // And: The data set the entire expected data set, which does not include the duplicated item
             Assert.IsTrue(context.Get<BudgetTx>().SequenceEqual(data));
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task Select(bool value)
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var id = FakeObjects<BudgetTx>.Make(4).Add(1, (x => x.Selected = !value)).SaveTo(this).Last().ID;
+
+            // When: Selecting the item
+            await itemRepository.SetSelectedAsync(id, value);
+
+            // Then: Item selection matches value
+            var actual = context.Get<BudgetTx>().Where(x => x.ID == id).Single();
+            Assert.AreEqual(value, actual.Selected);
         }
 
         #region Wire Interface

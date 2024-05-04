@@ -20,13 +20,13 @@ namespace YoFi.AspNet.Controllers
         /// <summary>
         /// Repository where we can take our actions
         /// </summary>
-        private readonly IRepository<BudgetTx> _repository;
+        private readonly IBudgetTxRepository _repository;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="repository"></param>
-        public AjaxBudgetController(IRepository<BudgetTx> repository)
+        public AjaxBudgetController(IBudgetTxRepository repository)
         {
             _repository = repository;
         }
@@ -42,9 +42,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateBudgetTxExists]
         public async Task<IActionResult> Select(int id, bool value)
         {
-            var payee = await _repository.GetByIdAsync(id);
-            payee.Selected = value;
-            await _repository.UpdateAsync(payee);
+            await _repository.SetSelectedAsync(id, value);
 
             return new OkResult();
         }

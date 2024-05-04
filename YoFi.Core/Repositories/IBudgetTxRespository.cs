@@ -14,5 +14,12 @@ namespace YoFi.Core.Repositories
         /// Remove all selected items from the database
         /// </summary>
         Task BulkDeleteAsync();
+
+        /// <summary>
+        /// Set the selected value on the given tx
+        /// </summary>
+        /// <param name="id">Budget transaction ID</param>
+        /// <param name="value">New value</param>
+        Task SetSelectedAsync(int id, bool value);
     }
 }
