@@ -1,4 +1,5 @@
 ﻿using Common.DotNet;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using jcoliz.OfficeOpenXml.Serializer;
 using System;
 using System.Collections.Generic;
@@ -77,6 +78,18 @@ namespace YoFi.Core.Repositories
         #endregion
 
         #region Update
+
+        ///<inheritdoc/>
+        public async Task<Transaction> EditAsync(int id, Transaction newvalues)
+        {
+            var item = await GetByIdAsync(id);
+            item.Memo = newvalues.Memo;
+            item.Payee = newvalues.Payee;
+            item.Category = newvalues.Category;
+            await UpdateAsync(item);
+
+            return item;
+        }
 
         /// <summary>
         /// Change category of all selected items to <paramref name="category"/>

@@ -533,6 +533,29 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsTrue(apiresult.OrderBy(x => x).SequenceEqual(chosen.Select(x => x.Category).OrderBy(x => x)));
         }
 
+        [TestMethod]
+        public async Task Edit()
+        {
+            // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
+            var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
+            var id = data.Group(0).Last().ID;
+            var newvalues = data.Group(1).Single();
+
+            // When: posting changed values to /Ajax/Payee/Edit/
+            var apiresult = await transactionRepository.EditAsync(id, newvalues);
+
+            // Then: The result is what we expect (ApiItemResult in JSON with the item returned to us)
+            // Note that AjaxEdit ONLY allows changes to Memo,Payee,Category, so that's all we can verify
+            Assert.AreEqual(newvalues.Memo, apiresult.Memo);
+            Assert.AreEqual(newvalues.Category, apiresult.Category);
+            Assert.AreEqual(newvalues.Payee, apiresult.Payee);
+
+            // And: The item was changed
+            var actual = context.Get<Transaction>().Where(x => x.ID == id).Single();
+            Assert.AreEqual(newvalues.Memo, actual.Memo);
+            Assert.AreEqual(newvalues.Category, actual.Category);
+            Assert.AreEqual(newvalues.Payee, actual.Payee);
+        }
         #endregion
 
         #region Index Tests

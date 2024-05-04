@@ -29,6 +29,17 @@ namespace YoFi.Core.Repositories
         IQueryable<Split> Splits { get; }
 
         /// <summary>
+        /// Update only editable values from given transaction
+        /// </summary>
+        /// <remarks>
+        /// TODO: Should use a DTO
+        /// </remarks>
+        /// <param name="id">ID of target transaction</param>
+        /// <param name="newvalues">Item containing new values</param>
+        /// <returns>Resulting edited transaction</returns>
+        Task<Transaction> EditAsync(int id, Transaction newvalues);
+
+        /// <summary>
         /// Create a new split and add it to transaction #<paramref name="id"/>
         /// </summary>
         /// <param name="id">ID of target transaction</param>

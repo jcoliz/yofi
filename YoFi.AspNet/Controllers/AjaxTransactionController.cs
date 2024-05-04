@@ -52,12 +52,8 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> Edit(int id, [Bind("Memo,Payee,Category")] Transaction edited)
         {
-            var item = await _repository.GetByIdAsync(id);
-            item.Memo = edited.Memo;
-            item.Payee = edited.Payee;
-            item.Category = edited.Category;
-            await _repository.UpdateAsync(item);
-            return new ObjectResult(item);
+            var result = await _repository.EditAsync(id, edited);
+            return new ObjectResult(result);
         }
 
         [HttpPost("applypayee/{id}")]
