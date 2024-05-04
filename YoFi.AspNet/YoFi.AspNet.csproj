@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <UserSecretsId>aspnet-OfxWeb.Asp-BDDDDEB0-488C-4CEF-A390-529A80D08E0A</UserSecretsId>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
     <DefineConstants>$(MyDefineConstants)</DefineConstants>
@@ -33,19 +33,19 @@
     <PackageReference Include="Azure.Identity" Version="1.11.2" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
     <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />
-    <PackageReference Include="EFCore.BulkExtensions" Version="6.5.5" />
+    <PackageReference Include="EFCore.BulkExtensions" Version="8.0.3" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.7" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.7" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" PrivateAssets="All" />
     <PackageReference Include="SendGrid" Version="9.29.3" />
-    <PackageReference Include="System.Text.Json" Version="6.0.5" />
+    <PackageReference Include="System.Text.Json" Version="8.0.3" />
   </ItemGroup>
 
   <ItemGroup>
