@@ -125,7 +125,9 @@ namespace YoFi.Core.Models
         /// <returns></returns>
         public Transaction AsTransaction()
         {
-            return new Transaction() { Timestamp = Timestamp, Payee = Name, Memo = Memo, Amount = Amount ?? default };
+            // Encode receipt information into "ReceiptUrl" field
+            var url = $"{Filename} [ID {ID}]";
+            return new Transaction() { Timestamp = Timestamp, Payee = Name, Memo = Memo, Amount = Amount ?? default, ReceiptUrl = url };
         }
 
         /// <summary>

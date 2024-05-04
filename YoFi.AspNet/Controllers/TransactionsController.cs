@@ -67,9 +67,6 @@ namespace YoFi.AspNet.Controllers
                 var r = await rrepo.GetByIdAsync(rid.Value);
                 var tx = r.AsTransaction();
 
-                // Now encode receipt information into "ReceiptUrl" field
-                tx.ReceiptUrl = $"{r.Filename} [ID {r.ID}]";
-
                 return View(tx);
             }
             else
