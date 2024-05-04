@@ -46,25 +46,9 @@ namespace YoFi.AspNet.Controllers
         [Authorize(Policy = "CanWrite")]
         [ValidateAntiForgeryToken]
         [ValidateSplitExists]
-        public async Task<IActionResult> DeleteConfirmed(int id, [FromServices] IRepository<Transaction> transactionRepository)
+        public async Task<IActionResult> DeleteConfirmed(int id, [FromServices] ITransactionRepository transactionRepository)
         {
-            var split = await _repository.GetByIdAsync(id);
-            var category = split.Category;
-            var txid = split.TransactionID;
-
-            await _repository.RemoveAsync(split);
-
-            if (await transactionRepository.TestExistsByIdAsync(txid))
-            {
-                var tx = await transactionRepository.GetByIdAsync(txid);
-                if ( !tx.HasSplits )
-                {
-                    tx.Category = category;
-                    await transactionRepository.UpdateAsync(tx);
-                }
-            }
-            // else if dones't exist, something bizarre happened, but we'll not take any action 
-
+            var txid = await transactionRepository.RemoveSplitAsync(id);
             return RedirectToAction("Edit", "Transactions", new { id = txid });
         }
     }

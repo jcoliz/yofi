@@ -25,11 +25,18 @@ namespace YoFi.Core.Repositories
         /// <param name="context">Where to find the data we actually contain</param>
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
-        public TransactionRepository(IDataProvider context, IClock clock, IPayeeRepository payeeRepository, IStorageService storage = null) : base(context)
+        public TransactionRepository(
+            IDataProvider context, 
+            IClock clock, 
+            IPayeeRepository payeeRepository,
+            IRepository<Split> splitRepository,
+            IStorageService storage = null
+        ) : base(context)
         {
             _storage = storage;
             _clock = clock;
             _payeeRepository = payeeRepository;
+            _splitRepository = splitRepository;
         }
 
         #region Read
@@ -167,6 +174,29 @@ namespace YoFi.Core.Repositories
             await UpdateAsync(transaction);
 
             return result.ID;
+        }
+
+        ///<inheritdoc/>
+        public async Task<int> RemoveSplitAsync(int id)
+        {
+            var split = await _splitRepository.GetByIdAsync(id);
+            var category = split.Category;
+            var txid = split.TransactionID;
+
+            await _splitRepository.RemoveAsync(split);
+
+            if (await TestExistsByIdAsync(txid))
+            {
+                var tx = await GetByIdAsync(txid);
+                if (!tx.HasSplits)
+                {
+                    tx.Category = category;
+                    await UpdateAsync(tx);
+                }
+            }
+            // else if dones't exist, something bizarre happened, but we'll not take any action 
+
+            return txid;
         }
 
         /// <summary>
@@ -499,6 +529,7 @@ namespace YoFi.Core.Repositories
         private readonly IStorageService _storage;
         private readonly IClock _clock;
         private readonly IPayeeRepository _payeeRepository;
+        private readonly IRepository<Split> _splitRepository;
 
         #endregion
 

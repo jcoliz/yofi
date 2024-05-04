@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core;
 using System.Linq.Expressions;
+using DocumentFormat.OpenXml.EMMA;
 
 namespace YoFi.Tests.Helpers
 {
@@ -22,9 +23,11 @@ namespace YoFi.Tests.Helpers
 
         public List<Receipt> ReceiptData { get; } = new List<Receipt>();
 
+        public List<Split> SplitData { get; } = new List<Split>();
+
         private IQueryable<Transaction> Transactions => TransactionData.AsQueryable();
 
-        private IQueryable<Split> Splits => Enumerable.Empty<Split>().AsQueryable();
+        private IQueryable<Split> Splits => SplitData.AsQueryable();
 
         private IQueryable<Payee> Payees => PayeeData.AsQueryable();
 
@@ -135,6 +138,10 @@ namespace YoFi.Tests.Helpers
             {
                 TransactionData.AddRange(items as IEnumerable<Transaction>);
             }
+            else if (t == typeof(Split))
+            {
+                SplitData.AddRange(items as IEnumerable<Split>);
+            }
             else
                 throw new NotImplementedException();
         }
@@ -178,6 +185,13 @@ namespace YoFi.Tests.Helpers
 
                 var index = ReceiptData.FindIndex(x => x.ID == r.ID);
                 ReceiptData.RemoveAt(index);
+            }
+            else if (t == typeof(Split))
+            {
+                var r = item as Split;
+
+                var index = SplitData.FindIndex(x => x.ID == r.ID);
+                SplitData.RemoveAt(index);
             }
             else
                 throw new NotImplementedException();

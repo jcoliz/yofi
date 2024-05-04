@@ -47,6 +47,13 @@ namespace YoFi.Core.Repositories
         Task<int> AddSplitToAsync(int id);
 
         /// <summary>
+        /// Remove the given split from its parent transaction
+        /// </summary>
+        /// <param name="id">ID of split</param>
+        /// <returns>Transaction ID of parent transaction</returns>
+        Task<int> RemoveSplitAsync(int id);
+
+        /// <summary>
         /// Change category of all selected items to <paramref name="category"/>
         /// </summary>
         /// <param name="category">Next category</param>

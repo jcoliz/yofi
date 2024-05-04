@@ -100,11 +100,12 @@ namespace YoFi.Core.Tests.Unit
             // TODO: It would be better to MOCK this dependency, however for expediency,
             // we will extend the test into payee repository
             payees = new PayeeRepository(context);
+            var splits = new BaseRepository<Split>(context);
 
             // This is the time supposed by the FakeObjects filler
             clock.Now = new DateTime(2001, 12, 31);
 
-            repository = new TransactionRepository(context, clock, payees, storage);
+            repository = new TransactionRepository(context, clock, payees, splits, storage);
         }
 
         #endregion
@@ -353,7 +354,7 @@ namespace YoFi.Core.Tests.Unit
         public async Task CategoryAutoCompleteError()
         {
             // Given: An error-generating setup
-            repository = new TransactionRepository(null, null, null);
+            repository = new TransactionRepository(null, null, null, null);
 
             // When: Asking for the category autocomplete for anything
             var list = await transactionRepository.CategoryAutocompleteAsync("anything");
@@ -1262,6 +1263,25 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsTrue(expected.SequenceEqual(actual));
         }
 
+        [TestMethod]
+        public async Task DeleteSplit()
+        {
+            // TODO: This test misses the case where the transaction had two splits but now has
+            // only one, so the category is transferred to the parent transaction.
+
+            // Given: There are two items in the database, one of which we care about
+            int nextid = 1;
+            var id = FakeObjects<Split>.Make(2, x => x.ID = nextid++).SaveTo(this).Last().ID;
+
+            // When: Deleting the selected item
+            var result = transactionRepository.RemoveSplitAsync(id);
+
+            // Then: Now is only one item in database
+            Assert.AreEqual(1, context.Get<Split>().Count());
+
+            // And: The deleted item cannot be found
+            Assert.IsFalse(context.Get<Split>().Any(x => x.ID == id));
+        }
 
         #endregion
 
@@ -1371,7 +1391,7 @@ namespace YoFi.Core.Tests.Unit
                 .Single();
 
             // And: An error-generating setup
-            repository = new TransactionRepository(null, null, null);
+            repository = new TransactionRepository(null, null, null, null);
 
             // When: Getting the receipt
             _ = await transactionRepository.GetReceiptAsync(expected);
@@ -1394,7 +1414,7 @@ namespace YoFi.Core.Tests.Unit
             var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
 
             // And: An error-generating setup
-            repository = new TransactionRepository(null, null, null);
+            repository = new TransactionRepository(null, null, null, null);
 
             // When: Uploading it as a receipt
             await transactionRepository.UploadReceiptAsync(expected, stream, contenttype);

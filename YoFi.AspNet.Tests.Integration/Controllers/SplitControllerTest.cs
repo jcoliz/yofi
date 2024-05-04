@@ -72,31 +72,6 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             Assert.AreEqual(newvalues, actual);
         }
 
-        [TestMethod]
-        public async Task Delete()
-        {
-            // Given: There are two items in the database, one of which we care about
-            var id = FakeObjects<Split>.Make(2).SaveTo(this).Last().ID;
-
-            // When: Deleting the selected item
-            var formData = new Dictionary<string, string>()
-            {
-                { "ID", id.ToString() }
-            };
-            var response = await WhenGettingAndPostingForm($"{urlroot}/Delete/{id}", d => d.QuerySelector("form").Attributes["action"].TextContent, formData);
-            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
-
-            // Then: Redirected to "/Transactions/Edit"
-            var redirect = response.Headers.GetValues("Location").Single();
-            Assert.AreEqual("/Transactions/Edit/0", redirect);
-
-            // And: Now is only one item in database
-            Assert.AreEqual(1, context.Set<Split>().Count());
-
-            // And: The deleted item cannot be found
-            Assert.IsFalse(context.Set<Split>().Any(x => x.ID == id));
-        }
-
         #endregion
     }
 }
