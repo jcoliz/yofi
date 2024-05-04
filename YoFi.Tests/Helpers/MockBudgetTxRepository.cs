@@ -19,5 +19,7 @@ namespace YoFi.Tests.Helpers
             WasBulkDeleteCalled = true;
             return Task.CompletedTask;
         }
+
+        public Task SetSelectedAsync(int id, bool value) => throw new NotImplementedException();
     }
 }

@@ -62,15 +62,10 @@ namespace YoFi.AspNet.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Create([FromServices] IReceiptRepository rrepo, int? rid)
         {
-            if (rid.HasValue && await rrepo.TestExistsByIdAsync(rid.Value))
-            {
-                var r = await rrepo.GetByIdAsync(rid.Value);
-                var tx = r.AsTransaction();
-
-                return View(tx);
-            }
+            if (rrepo != null)
+                return View(await rrepo.CreateTransactionAsync(rid));
             else
-                return View(new Transaction() { Timestamp = _clock.Now.Date });
+                return View(await _repository.CreateAsync());
         }
 
         /// <summary>

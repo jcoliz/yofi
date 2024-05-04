@@ -13,6 +13,16 @@ namespace YoFi.Core.Repositories
     /// </summary>
     public interface ITransactionRepository: IRepository<Transaction>
     {
+
+        /// <summary>
+        /// Create a new transaction
+        /// </summary>
+        /// <remarks>
+        /// Note that this does not commit it to storage. Returns it for user to modify and then commit.
+        /// </remarks>
+        /// <returns>New empty transaction</returns>
+        Task<Transaction> CreateAsync();
+
         /// <summary>
         /// Retrieve a single item by <paramref name="id"/>, including children splits
         /// </summary>

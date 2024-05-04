@@ -30,6 +30,8 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
+        public Task<string> ApplyPayeeAsync(int id) => throw new NotImplementedException();
+
         public async Task AssignBankReferences()
         {
             var needbankrefs = All.Where(x => null == x.BankReference).ToList();
@@ -71,6 +73,9 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
+        public Task<Transaction> CreateAsync() => Task.FromResult(new Transaction());
+        public Task<Transaction> EditAsync(int id, Transaction newvalues) => throw new NotImplementedException();
+
         public Task FinalizeImportAsync()
         {
             throw new NotImplementedException();
@@ -84,6 +89,9 @@ namespace YoFi.Tests.Helpers
         }
 
         public Task<Transaction> GetWithSplitsByIdAsync(int? id) => base.GetByIdAsync(id);
+        public Task<int> RemoveSplitAsync(int id) => throw new NotImplementedException();
+        public Task SetHiddenAsync(int id, bool value) => throw new NotImplementedException();
+        public Task SetSelectedAsync(int id, bool value) => throw new NotImplementedException();
 
         public async Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype)
         {
@@ -108,5 +116,7 @@ namespace YoFi.Tests.Helpers
             transaction.ReceiptUrl = blobname;
             await UpdateAsync(transaction);
         }
+
+        public Task UploadReceiptAsync(int id, Stream stream, string contenttype) => throw new NotImplementedException();
     }
 }

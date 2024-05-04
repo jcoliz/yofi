@@ -33,6 +33,27 @@ namespace YoFi.Core.Repositories
 
         #region Public Interface
 
+
+        /// <summary>
+        /// Create a transaction, if possible based on this receipt, else just a blank transaction
+        /// </summary>
+        /// <param name="id">ID</param>
+        /// <returns>New transaction</returns>
+        public async Task<Transaction> CreateTransactionAsync(int? id)
+        {
+            if (id.HasValue && await TestExistsByIdAsync(id.Value))
+            {
+                var r = await GetByIdAsync(id.Value);
+                var tx = r.AsTransaction();
+
+                return tx;
+            }
+            else
+            {
+                return await _txrepo.CreateAsync();
+            }
+        }
+
         /// <summary>
         /// Assigned all receipts to their matching transaction, only if the receipt
         /// matches just a single transaction

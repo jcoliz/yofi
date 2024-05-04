@@ -325,6 +325,12 @@ namespace YoFi.Core.Repositories
 
         #region Receipts
 
+        ///<inheritdoc/>
+        public async Task<Transaction> CreateAsync()
+        {
+            return new Transaction() { Timestamp = _clock.Now.Date };
+        }
+
         /// <summary>
         /// Upload a receipt to blob storage and save the location to this <paramref name="transaction"/>
         /// </summary>

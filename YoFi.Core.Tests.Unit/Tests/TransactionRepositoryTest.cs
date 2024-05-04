@@ -354,7 +354,7 @@ namespace YoFi.Core.Tests.Unit
         public async Task CategoryAutoCompleteError()
         {
             // Given: An error-generating setup
-            repository = new TransactionRepository(null, null, null, null);
+            repository = new TransactionRepository(null, null, null, null, null);
 
             // When: Asking for the category autocomplete for anything
             var list = await transactionRepository.CategoryAutocompleteAsync("anything");
@@ -1288,6 +1288,21 @@ namespace YoFi.Core.Tests.Unit
         #region Receipts
 
         [TestMethod]
+        public async Task CreatePage()
+        {
+            // Given: It's a certain time
+            var now = new DateTime(2003, 07, 15);
+            clock.Now = now;
+
+            // When: Asking for the page to create a new item
+            var actual = await transactionRepository.CreateAsync();
+
+            // Then: The "timestamp" is filled in with the correct time
+            Assert.AreEqual(now.Date, actual.Timestamp);
+        }
+
+
+        [TestMethod]
         public async Task UpReceipt()
         {
             // Given: A transaction with no receipt
@@ -1391,7 +1406,7 @@ namespace YoFi.Core.Tests.Unit
                 .Single();
 
             // And: An error-generating setup
-            repository = new TransactionRepository(null, null, null, null);
+            repository = new TransactionRepository(null, null, null, null, null);
 
             // When: Getting the receipt
             _ = await transactionRepository.GetReceiptAsync(expected);
@@ -1414,7 +1429,7 @@ namespace YoFi.Core.Tests.Unit
             var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
 
             // And: An error-generating setup
-            repository = new TransactionRepository(null, null, null, null);
+            repository = new TransactionRepository(null, null, null, null, null);
 
             // When: Uploading it as a receipt
             await transactionRepository.UploadReceiptAsync(expected, stream, contenttype);

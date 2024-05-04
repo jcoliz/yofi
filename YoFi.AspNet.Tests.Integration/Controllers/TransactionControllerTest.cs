@@ -1027,23 +1027,6 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         #region Other Tests
 
         [TestMethod]
-        public async Task CreatePage()
-        {
-            // Given: It's a certain time
-            var now = new DateTime(2003, 07, 15);
-            integrationcontext.clock.Now = now;
-
-            // When: Asking for the page to create a new item
-            var document = await WhenGetAsync($"{urlroot}/Create");
-
-            // Then: The "timestamp" is filled in with the correct time
-            var input = document.QuerySelector("input[name=Timestamp]") as IHtmlInputElement;
-            var actual_str = input.DefaultValue;
-            var actual = DateTime.Parse(actual_str);
-            Assert.AreEqual(now.Date, actual.Date);
-        }
-
-        [TestMethod]
         public async Task PrintCheck()
         {
             // Given: There are 5 items in the database, one of which we care about

@@ -52,5 +52,7 @@ namespace YoFi.Tests.Helpers
 
             return Task.FromResult(result);
         }
+
+        public Task SetSelectedAsync(int id, bool value) => throw new NotImplementedException();
     }
 }

@@ -19,5 +19,6 @@ namespace YoFi.Core.Repositories
         Task AssignReceipt(Receipt receipt, Transaction tx);
         Task AssignReceipt(int id, int txid);
         Task<int> AssignAll();
+        Task<Transaction> CreateTransactionAsync(int? id);
     }
 }
