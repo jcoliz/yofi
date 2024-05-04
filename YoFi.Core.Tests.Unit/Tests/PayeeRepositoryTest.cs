@@ -199,6 +199,22 @@ namespace YoFi.Core.Tests.Unit
             // Then: No problems
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task Select(bool value)
+        {
+            // Given: There are 5 items in the database, one of which we care about, which has the given selected value
+            var id = FakeObjects<Payee>.Make(4).Add(1, (x => x.Selected = !value)).SaveTo(this).Last().ID;
+
+            // When: Selecting the item via AJAX
+            await itemRepository.SetSelectedAsync(id, value);
+
+            // Then: Item selection matches value
+            var actual = context.Get<Payee>().Where(x => x.ID == id).Single();
+            Assert.AreEqual(value, actual.Selected);
+        }
+
         #endregion
 
         #region Payee Object Test(s)

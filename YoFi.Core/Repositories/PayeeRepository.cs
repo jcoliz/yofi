@@ -157,6 +157,15 @@ namespace YoFi.Core.Repositories
             return Task.FromResult(result);
         }
 
+        ///<inheritdoc/>
+        public async Task SetSelectedAsync(int id, bool value)
+        {
+            var item = await GetByIdAsync(id);
+            item.Selected = value;
+            await UpdateAsync(item);
+        }
+
+
         /// <summary>
         /// Internal cache of payees for operations that work across the whole dataset
         /// </summary>

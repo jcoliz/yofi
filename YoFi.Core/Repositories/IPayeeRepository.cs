@@ -42,5 +42,12 @@ namespace YoFi.Core.Repositories
         /// <param name="Name">Name of payee to search for a match</param>
         /// <returns>Matching category or null if no match</returns>
         Task<string> GetCategoryMatchingPayeeAsync(string Name);
+
+        /// <summary>
+        /// Set the selected value on the given tx
+        /// </summary>
+        /// <param name="id">Budget transaction ID</param>
+        /// <param name="value">New value</param>
+        Task SetSelectedAsync(int id, bool value);
     }
 }

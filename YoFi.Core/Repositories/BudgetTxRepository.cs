@@ -28,9 +28,9 @@ namespace YoFi.Core.Repositories
         ///<inheritdoc/>
         public async Task SetSelectedAsync(int id, bool value)
         {
-            var payee = await GetByIdAsync(id);
-            payee.Selected = value;
-            await UpdateAsync(payee);
+            var item = await GetByIdAsync(id);
+            item.Selected = value;
+            await UpdateAsync(item);
         }
 
         /// <summary>

@@ -40,10 +40,7 @@ namespace YoFi.AspNet.Controllers
         [ValidatePayeeExists]
         public async Task<IActionResult> Select(int id, bool value)
         {
-            var payee = await _repository.GetByIdAsync(id);
-            payee.Selected = value;
-            await _repository.UpdateAsync(payee);
-
+            await _repository.SetSelectedAsync(id, value);
             return new OkResult();
         }
 
