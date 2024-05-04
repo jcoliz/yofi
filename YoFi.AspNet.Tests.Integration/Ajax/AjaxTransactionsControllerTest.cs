@@ -118,38 +118,6 @@ namespace YoFi.AspNet.Tests.Integration.Ajax
             Assert.AreEqual(principal, actual.Splits.Where(x => x.Category == principalcategory).Single().Amount);
         }
 
-        [DataTestMethod]
-        [DataRow("1234567 Bobby XN April 2021 5 wks")]
-        [DataRow("1234567 Bobby MAR XN")]
-        [DataRow("1234567 Jan XN ")]
-        public async Task ApplyPayeeRegex_Pbi871(string name)
-        {
-            // Product Backlog Item 871: Match payee on regex, optionally
-
-            // Given: A payee with a regex for its name
-            var expectedpayee = new Payee() { Category = "Y", Name = "/1234567.*XN/" };
-            context.Set<Payee>().Add(expectedpayee);
-
-            // And: A transaction which should match it
-            var expected = new Transaction() { Payee = name, Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
-            context.Set<Transaction>().Add(expected);
-            context.SaveChanges();
-
-            // When: Applying the payee to the transaction's ID
-            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{expected.ID}", new Dictionary<string, string>());
-
-            // Then: The request succeeds
-            response.EnsureSuccessStatusCode();
-
-            // Then: The result is the applied category
-            var apiresult = await JsonSerializer.DeserializeAsync<string>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            Assert.AreEqual(expectedpayee.Category, apiresult);
-
-            // And: The chosen transaction has the chosen payee's category
-            var actual = context.Set<Transaction>().Where(x => x.ID == expected.ID).AsNoTracking().Single();
-            Assert.AreEqual(expectedpayee.Category, actual.Category);
-        }
-
         [TestMethod]
         public async Task CategoryAutocomplete()
         {

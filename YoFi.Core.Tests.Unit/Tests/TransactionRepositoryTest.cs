@@ -1,5 +1,6 @@
 ﻿using Common.DotNet;
 using Common.DotNet.Test;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using jcoliz.FakeObjects;
 using jcoliz.OfficeOpenXml.Serializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -450,6 +451,34 @@ namespace YoFi.Core.Tests.Unit
             // Then: KeyNotFoundException
         }
 
+        [DataTestMethod]
+        [DataRow("1234567 Bobby XN April 2021 5 wks")]
+        [DataRow("1234567 Bobby MAR XN")]
+        [DataRow("1234567 Jan XN ")]
+        public async Task ApplyPayeeRegex_Pbi871(string name)
+        {
+            // Product Backlog Item 871: Match payee on regex, optionally
+
+            // Given: A payee with a regex for its name
+            var expectedpayee = new Payee() { Category = "Y", Name = "/1234567.*XN/" };
+            AddRange(new[] { expectedpayee });
+            await payees.LoadCacheAsync();
+
+            // And: A transaction which should match it
+            var expected = new Transaction() { Payee = name, Timestamp = new DateTime(DateTime.Now.Year, 01, 03), Amount = 100m };
+            AddRange(new[] { expected });
+
+            // When: Applying the payee to the transaction's ID
+            // When: Applying the payee to the transaction's ID
+            var apiresult = await transactionRepository.ApplyPayeeAsync(expected.ID);
+
+            // Then: The result is the applied category
+            Assert.AreEqual(expectedpayee.Category, apiresult);
+
+            // And: The chosen transaction has the chosen payee's category
+            var actual = context.Get<Transaction>().Where(x => x.ID == expected.ID).Single();
+            Assert.AreEqual(expectedpayee.Category, actual.Category);
+        }
 
         #endregion
 
