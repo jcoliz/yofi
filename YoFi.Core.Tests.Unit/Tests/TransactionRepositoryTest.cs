@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -1377,7 +1379,54 @@ namespace YoFi.Core.Tests.Unit
             // Then: Exception
         }
 
+        [TestMethod]
+        public async Task UpReceiptId()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var id = FakeObjects<Transaction>.Make(5).SaveTo(this).Last().ID;
 
+            // And: An image file
+            var contenttype = "image/png";
+            var length = 25;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
+
+            // When: Uploading it as a receipt
+            await transactionRepository.UploadReceiptAsync(id, stream, contenttype);
+
+            // Then: The request is successful
+            // (No exception thrown)
+
+            // And: The database was updated with a receipt url
+            var actual = context.Get<Transaction>().Where(x => x.ID == id).Single();
+            Assert.AreEqual(id.ToString(), actual.ReceiptUrl);
+
+            // And: The receipt is contained in storage
+            Assert.AreEqual(1, storage.BlobItems.Count());
+            Assert.AreEqual(contenttype, storage.BlobItems.Single().ContentType);
+            Assert.AreEqual(id.ToString(), storage.BlobItems.Single().FileName);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public async Task UpReceiptIdAgainFails()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var id = FakeObjects<Transaction>.Make(5).SaveTo(this).Last().ID;
+
+            // And: An image file
+            var contenttype = "image/png";
+            var length = 25;
+            var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
+
+            // And: It has already been uploaded
+            await transactionRepository.UploadReceiptAsync(id, stream, contenttype);
+
+            // When: Uploading it again
+            var newstream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
+            await transactionRepository.UploadReceiptAsync(id, newstream, contenttype);
+
+            // Then: ApplicationException
+        }
         #endregion
 
     }

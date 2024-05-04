@@ -115,5 +115,7 @@ namespace YoFi.Tests.Helpers
             transaction.ReceiptUrl = blobname;
             await UpdateAsync(transaction);
         }
+
+        public Task UploadReceiptAsync(int id, Stream stream, string contenttype) => throw new NotImplementedException();
     }
 }

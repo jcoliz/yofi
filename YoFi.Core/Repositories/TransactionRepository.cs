@@ -312,6 +312,17 @@ namespace YoFi.Core.Repositories
             await UpdateAsync(transaction);
         }
 
+        ///<inheritdoc/>
+        public async Task UploadReceiptAsync(int id, Stream stream, string contenttype)
+        {
+            var item = await GetByIdAsync(id);
+
+            if (!string.IsNullOrEmpty(item.ReceiptUrl))
+                throw new ApplicationException($"This transaction already has a receipt. Delete the current receipt before uploading a new one.");
+
+            await UploadReceiptAsync(item, stream, contenttype);
+        }
+
         /// <summary>
         /// Get a receipt from storage
         /// </summary>

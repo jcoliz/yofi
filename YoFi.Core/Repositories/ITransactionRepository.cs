@@ -56,6 +56,14 @@ namespace YoFi.Core.Repositories
         Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype);
 
         /// <summary>
+        /// Upload a receipt to blob storage and save the location to this <paramref name="transaction"/>
+        /// </summary>
+        /// <param name="id">Transaction ID</param>
+        /// <param name="stream">Source location of receipt file</param>
+        /// <param name="contenttype">Content type of this file</param>
+        Task UploadReceiptAsync(int id, Stream stream, string contenttype);
+
+        /// <summary>
         /// Get a receipt from storage
         /// </summary>
         /// <param name="transaction">Which transaction this is for</param>
