@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace YoFi.Core.Models
+﻿namespace YoFi.Core.Models
 {
     /// <summary>
     /// Logic for testing whether two imported items are duplicates
