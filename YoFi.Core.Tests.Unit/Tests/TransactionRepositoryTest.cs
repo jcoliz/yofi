@@ -370,6 +370,37 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsTrue(data.All(x => x.Selected != true));
         }
 
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task Select(bool value)
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var id = FakeObjects<Transaction>.Make(4).Add(1, (x => x.Selected = !value)).SaveTo(this).Last().ID;
+
+            // When: Selecting the item
+            await transactionRepository.SetSelectedAsync(id, value);
+
+            // Then: Item selection matches value
+            var actual = context.Get<Transaction>().Where(x => x.ID == id).Single();
+            Assert.AreEqual(value, actual.Selected);
+        }
+
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public async Task Hide(bool value)
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var id = FakeObjects<Transaction>.Make(4).Add(1, (x => x.Hidden = !value)).SaveTo(this).Last().ID;
+
+            // When: Hiding the item via AJAX
+            await transactionRepository.SetHiddenAsync(id, value);
+
+            // Then: Item hidden matches value
+            var actual = context.Get<Transaction>().Where(x => x.ID == id).Single();
+            Assert.AreEqual(value, actual.Hidden);
+        }
 
         #endregion
 

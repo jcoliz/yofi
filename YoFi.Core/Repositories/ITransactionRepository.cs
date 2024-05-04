@@ -97,5 +97,20 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <returns></returns>
         Task AssignBankReferences();
+
+        /// <summary>
+        /// Set the selected value on the given tx
+        /// </summary>
+        /// <param name="id">Transaction ID</param>
+        /// <param name="value">New value</param>
+        Task SetSelectedAsync(int id, bool value);
+
+        /// <summary>
+        /// Set the hidden value on the given tx
+        /// </summary>
+        /// <param name="id">Transaction ID</param>
+        /// <param name="value">New value</param>
+        Task SetHiddenAsync(int id, bool value);
+
     }
 }

@@ -29,10 +29,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> Select(int id, bool value)
         {
-            var item = await _repository.GetByIdAsync(id);
-            item.Selected = value;
-            await _repository.UpdateAsync(item);
-
+            await _repository.SetSelectedAsync(id, value);
             return new OkResult();
         }
 
@@ -42,10 +39,7 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> Hide(int id, bool value)
         {
-            var item = await _repository.GetByIdAsync(id);
-            item.Hidden = value;
-            await _repository.UpdateAsync(item);
-
+            await _repository.SetHiddenAsync(id, value);
             return new OkResult();
         }
 

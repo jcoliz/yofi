@@ -87,6 +87,8 @@ namespace YoFi.Tests.Helpers
         }
 
         public Task<Transaction> GetWithSplitsByIdAsync(int? id) => base.GetByIdAsync(id);
+        public Task SetHiddenAsync(int id, bool value) => throw new NotImplementedException();
+        public Task SetSelectedAsync(int id, bool value) => throw new NotImplementedException();
 
         public async Task UploadReceiptAsync(Transaction transaction, Stream stream, string contenttype)
         {

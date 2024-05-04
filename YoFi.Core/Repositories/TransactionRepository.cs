@@ -176,6 +176,22 @@ namespace YoFi.Core.Repositories
             }
         }
 
+        ///<inheritdoc/>
+        public async Task SetSelectedAsync(int id, bool value)
+        {
+            var item = await GetByIdAsync(id);
+            item.Selected = value;
+            await UpdateAsync(item);
+        }
+
+        ///<inheritdoc/>
+        public async Task SetHiddenAsync(int id, bool value)
+        {
+            var item = await GetByIdAsync(id);
+            item.Hidden = value;
+            await UpdateAsync(item);
+        }
+
         #endregion
 
         #region Export

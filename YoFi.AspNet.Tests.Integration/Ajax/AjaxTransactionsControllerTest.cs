@@ -45,46 +45,6 @@ namespace YoFi.AspNet.Tests.Integration.Ajax
 
         #region Tests
 
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task Select(bool value)
-        {
-            // Given: There are 5 items in the database, one of which we care about
-            var id = FakeObjects<Transaction>.Make(4).Add(1, (x => x.Selected = !value)).SaveTo(this).Last().ID;
-
-            // When: Selecting the item via AJAX
-            var formData = new Dictionary<string, string>()
-            {
-                { "value", value.ToString() },
-            };
-            var response = await WhenGettingAndPostingForm("/Transactions/Index/", d => $"/ajax/tx/select/{id}", formData);
-
-            // Then: Item selection matches value
-            var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.AreEqual(value, actual.Selected);
-        }
-
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
-        public async Task Hide(bool value)
-        {
-            // Given: There are 5 items in the database, one of which we care about
-            var id = FakeObjects<Transaction>.Make(4).Add(1, (x => x.Hidden = !value)).SaveTo(this).Last().ID;
-
-            // When: Selecting the item via AJAX
-            var formData = new Dictionary<string, string>()
-            {
-                { "value", value.ToString() },
-            };
-            var response = await WhenGettingAndPostingForm("/Transactions/Index/", d => $"/ajax/tx/hide/{id}", formData);
-
-            // Then: Item hidden matches value
-            var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.AreEqual(value, actual.Hidden);
-        }
-
         [TestMethod]
         public async Task Edit()
         {
