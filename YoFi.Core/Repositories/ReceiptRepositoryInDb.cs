@@ -91,6 +91,13 @@ namespace YoFi.Core.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task AssignReceipt(int id, int txid)
+        {
+            var receipt = await GetByIdAsync(id);
+            var tx = await _txrepo.GetByIdAsync(txid);
+            await AssignReceipt(receipt, tx);
+        }
+
         /// <summary>
         /// Remove the specified <paramref name="receipt"/> from the system
         /// </summary>

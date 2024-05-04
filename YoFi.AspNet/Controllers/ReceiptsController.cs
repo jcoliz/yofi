@@ -101,12 +101,14 @@ namespace YoFi.AspNet.Controllers
         //TODO: [ValidateTransactionExists("txid")]
         public async Task<IActionResult> Accept(int id, int txid, string next)
         {
-            var receipt = await _repository.GetByIdAsync(id);
-            var tx = await _txrepository.GetByIdAsync(txid);
-
             try
             {
-                await _repository.AssignReceipt(receipt, tx);
+                await _repository.AssignReceipt(id, txid);
+
+                if ("edittx" == next)
+                    return RedirectToAction(nameof(TransactionsController.Edit), "Transactions", new { id = txid });
+                else
+                    return RedirectToAction(nameof(Index));
             }
             catch (ArgumentException)
             {
@@ -116,11 +118,6 @@ namespace YoFi.AspNet.Controllers
             {
                 throw;
             }
-
-            if ("edittx" == next)
-                return RedirectToAction(nameof(TransactionsController.Edit),"Transactions", new { id = txid });
-            else
-                return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

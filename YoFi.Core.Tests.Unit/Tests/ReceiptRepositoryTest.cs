@@ -1,11 +1,13 @@
 ﻿using Common.DotNet;
 using Common.DotNet.Test;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using jcoliz.FakeObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.Core;
@@ -512,6 +514,33 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsFalse((await repository.GetAllAsync()).Where(x=>x.ID == id).Any());
         }
 
-#endregion
+        [TestMethod]
+        public async Task AcceptOne()
+        {
+            // Given: Several transactions, one of which we care about
+            // Note: We have to override the timestamp on these to match the clock
+            // that the system under test is using, else the transaction wont match the receipt
+            // because the years will be off.
+            var i = 0;
+            var t = FakeObjects<Transaction>.Make(10, x => x.Timestamp = DateTime.Now - TimeSpan.FromDays(i++)).SaveTo(this).Last();
+
+            // And: One receipt in storage, which will match the transaction we care about
+            var filename = $"{t.Payee} ${t.Amount} {t.Timestamp.Month}-{t.Timestamp.Day}.png";
+            var r = GivenReceiptInStorage(filename);
+
+            // When: Assigning the receipt to its best match
+            await repository.AssignReceipt(r.ID, t.ID);
+
+            // Then: The selected transaction has a receipt now, with the expected name
+            var expected = $"{ReceiptRepositoryInDb.Prefix}{r.ID}";
+            var actual = txrepo.All.Where(x => x.ID == t.ID).Single();
+            Assert.AreEqual(expected, actual.ReceiptUrl);
+
+            // And: There are no more (unassigned) receipts now
+            Assert.IsFalse((await repository.GetAllAsync()).Any());
+        }
+
+
+        #endregion
     }
 }

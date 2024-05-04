@@ -208,43 +208,6 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         }
 
         [TestMethod]
-        public async Task AcceptOne()
-        {
-            // Given: Several transactions, one of which we care about
-            // Note: We have to override the timestamp on these to match the clock
-            // that the system under test is using, else the transaction wont match the receipt
-            // because the years will be off.
-            var i = 0;
-            var t = FakeObjects<Transaction>.Make(10,x=>x.Timestamp = DateTime.Now - TimeSpan.FromDays(i++)).SaveTo(this).Last();
-
-            // And: One receipt in storage, which will match the transaction we care about
-            var filename = $"{t.Payee} ${t.Amount} {t.Timestamp.Month}-{t.Timestamp.Day}.png";
-            var contenttype = "image/png";
-            var r = GivenReceiptInStorage(filename,contenttype);
-
-            // When: Assigning the receipt to its best match
-            var formData = new Dictionary<string, string>()
-            {
-                { "ID", r.ID.ToString() },
-                { "txid", t.ID.ToString() }
-            };
-            var response = await WhenGettingAndPostingForm($"{urlroot}/", d => $"{urlroot}/Accept", formData);
-
-            // Then: Redirected to index
-            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
-            var redirect = response.Headers.GetValues("Location").Single();
-            Assert.AreEqual($"{urlroot}", redirect);
-
-            // Then: The selected transaction has a receipt now, with the expected name
-            var expected = $"{ReceiptRepositoryInDb.Prefix}{r.ID}";
-            var actual = await context.Set<Transaction>().Where(x => x.ID == t.ID).AsNoTracking().SingleAsync();
-            Assert.AreEqual(expected, actual.ReceiptUrl);
-
-            // And: There are no more (unassigned) receipts now
-            Assert.IsFalse(iDC.Get<Receipt>().Any());
-        }
-
-        [TestMethod]
         public async Task AcceptPick()
         {
             // Given: Several transactions, one of which we care about
