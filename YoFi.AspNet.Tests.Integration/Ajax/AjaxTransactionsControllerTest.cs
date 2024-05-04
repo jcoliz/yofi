@@ -76,22 +76,6 @@ namespace YoFi.AspNet.Tests.Integration.Ajax
         }
 
         [TestMethod]
-        public async Task CategoryAutocomplete()
-        {
-            // Given: Many recent transactions, some with {word} in their category, some not
-            var word = "WORD";
-            var chosen = FakeObjects<Transaction>.Make(10).Add(5, x => { x.Category += word; x.Timestamp = DateTime.Now; }).SaveTo(this).Group(1);
-
-            // When: Calling CategoryAutocomplete with '{word}'
-            var response = await client.GetAsync($"/ajax/tx/cat-ac?q={word}");
-            response.EnsureSuccessStatusCode();
-
-            // Then: All of the categories from given items which contain '{word}' are returned
-            var apiresult = await JsonSerializer.DeserializeAsync<List<string>>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            Assert.IsTrue(apiresult.OrderBy(x=>x).SequenceEqual(chosen.Select(x=>x.Category).OrderBy(x=>x)));
-        }
-
-        [TestMethod]
         public async Task UpReceipt()
         {
             // Given: There are 5 items in the database, one of which we care about

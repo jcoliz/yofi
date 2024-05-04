@@ -517,6 +517,20 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(principal, actual.Splits.Where(x => x.Category == principalcategory).Single().Amount);
         }
 
+        [TestMethod]
+        public async Task CategoryAutocomplete()
+        {
+            // Given: Many recent transactions, some with {word} in their category, some not
+            var word = "WORD";
+            var chosen = FakeObjects<Transaction>.Make(10).Add(5, x => { x.Category += word; x.Timestamp = DateTime.Now; }).SaveTo(this).Group(1);
+
+            // When: Calling CategoryAutocomplete with '{word}'
+            var apiresult = await transactionRepository.CategoryAutocompleteAsync(word);
+
+            // Then: All of the categories from given items which contain '{word}' are returned
+            Assert.IsTrue(apiresult.OrderBy(x => x).SequenceEqual(chosen.Select(x => x.Category).OrderBy(x => x)));
+        }
+
         #endregion
 
         #region Index Tests
