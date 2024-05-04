@@ -3,7 +3,9 @@ using Common.AspNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SendGrid.Helpers.Errors.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -64,28 +66,15 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> ApplyPayee(int id, [FromServices] IPayeeRepository payeeRepository)
         {
-            var item = await _repository.GetByIdAsync(id);
-
-            var category = await payeeRepository.GetCategoryMatchingPayeeAsync(item.StrippedPayee);
-            if (category != null)
+            try
             {
-                var result = category;
-
-                // Consider custom split rules based on matched category
-                var customsplits = _repository.CalculateCustomSplitRules(item, category);
-                if (customsplits.Any())
-                {
-                    item.Splits = customsplits.ToList();
-                    result = "SPLIT"; // This is what we display in the UI to indicate a transaction has a split
-                }
-                else
-                    item.Category = category;
-
-                await _repository.UpdateAsync(item);
+                var result = await _repository.ApplyPayeeAsync(id);
                 return new OkObjectResult(result);
             }
-            else
-                return new NotFoundObjectResult($"Payee {item.StrippedPayee} not found");
+            catch (KeyNotFoundException ex) 
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
         }
 
         [HttpPost("uprcpt/{id}")]

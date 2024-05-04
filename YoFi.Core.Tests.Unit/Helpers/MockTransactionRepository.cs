@@ -28,6 +28,8 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
+        public Task<string> ApplyPayeeAsync(int id) => throw new NotImplementedException();
+
         public async Task AssignBankReferences()
         {
             var needbankrefs = All.Where(x => null == x.BankReference).ToList();

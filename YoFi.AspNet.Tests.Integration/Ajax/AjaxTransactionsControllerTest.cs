@@ -75,27 +75,6 @@ namespace YoFi.AspNet.Tests.Integration.Ajax
             Assert.AreEqual(newvalues.Payee, actual.Payee);
         }
 
-        [TestMethod]
-        public async Task ApplyPayee()
-        {
-            // Given : More than five payees, one of which matches the name of the transaction we care about
-            var payee = FakeObjects<Payee>.Make(15).SaveTo(this).Last();
-
-            // Given: Five transactions, one of which has no category, and has "payee" matching name of chosen payee
-            var id = FakeObjects<Transaction>.Make(4).Add(1, x => { x.Category = null; x.Payee = payee.Name; }).SaveTo(this).Last().ID;
-
-            // When: Applying the payee to the transaction's ID
-            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{id}", new Dictionary<string, string>());
-            response.EnsureSuccessStatusCode();
-
-            // Then: The result is the applied category
-            var apiresult = await JsonSerializer.DeserializeAsync<string>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            Assert.AreEqual(payee.Category, apiresult);
-
-            // And: The chosen transaction has the chosen payee's category
-            var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.AreEqual(payee.Category, actual.Category);
-        }
 
         [TestMethod]
         public async Task ApplyPayeeLoanMatch()

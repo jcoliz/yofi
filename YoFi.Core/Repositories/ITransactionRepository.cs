@@ -112,5 +112,11 @@ namespace YoFi.Core.Repositories
         /// <param name="value">New value</param>
         Task SetHiddenAsync(int id, bool value);
 
+        /// <summary>
+        /// Using the payee which matches this transaction, update the category to match it
+        /// </summary>
+        /// <param name="id">Transaction ID</param>
+        /// <returns>The category which was applied, or null if none matched</returns>
+        Task<string> ApplyPayeeAsync(int id);
     }
 }

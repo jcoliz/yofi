@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 using YoFi.Core.Repositories;
@@ -22,6 +23,7 @@ namespace YoFi.Core.Tests.Unit
 
         private TestAzureStorage storage;
         private TestClock clock;
+        private PayeeRepository payees;
         private ITransactionRepository transactionRepository => repository as ITransactionRepository;
 
         #endregion
@@ -33,6 +35,10 @@ namespace YoFi.Core.Tests.Unit
             if (objects is IEnumerable<Transaction> txs)
             {
                 repository.AddRangeAsync(txs).Wait();
+            }
+            else
+            {
+                context.AddRange(objects.Cast<object>());
             }
         }
 
@@ -86,11 +92,15 @@ namespace YoFi.Core.Tests.Unit
             context = new MockDataContext();
             storage = new TestAzureStorage();
             clock = new TestClock();
-            
+
+            // TODO: It would be better to MOCK this dependency, however for expediency,
+            // we will extend the test into payee repository
+            payees = new PayeeRepository(context);
+
             // This is the time supposed by the FakeObjects filler
             clock.Now = new DateTime(2001, 12, 31);
 
-            repository = new TransactionRepository(context, clock, storage);
+            repository = new TransactionRepository(context, clock, payees, storage);
         }
 
         #endregion
@@ -400,6 +410,27 @@ namespace YoFi.Core.Tests.Unit
             // Then: Item hidden matches value
             var actual = context.Get<Transaction>().Where(x => x.ID == id).Single();
             Assert.AreEqual(value, actual.Hidden);
+        }
+
+        [TestMethod]
+        public async Task ApplyPayee()
+        {
+            // Given : More than five payees, one of which matches the name of the transaction we care about
+            var payee = FakeObjects<Payee>.Make(15).SaveTo(this).Last();
+            await payees.LoadCacheAsync();
+
+            // Given: Five transactions, one of which has no category, and has "payee" matching name of chosen payee
+            var id = FakeObjects<Transaction>.Make(4).Add(1, x => { x.Category = null; x.Payee = payee.Name; }).SaveTo(this).Last().ID;
+
+            // When: Applying the payee to the transaction's ID
+            var apiresult = await transactionRepository.ApplyPayeeAsync(id);
+
+            // Then: The result is the applied category
+            Assert.AreEqual(payee.Category, apiresult);
+
+            // And: The chosen transaction has the chosen payee's category
+            var actual = context.Get<Transaction>().Where(x => x.ID == id).Single();
+            Assert.AreEqual(payee.Category, actual.Category);
         }
 
         #endregion

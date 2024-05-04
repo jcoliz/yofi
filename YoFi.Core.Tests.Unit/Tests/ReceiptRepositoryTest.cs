@@ -483,7 +483,7 @@ namespace YoFi.Core.Tests.Unit
         {
             // Given: A real tx repository, and a receipt repository build off that
             var mockdc = new MockDataContext();
-            txrepo = new TransactionRepository(mockdc,clock,storage);
+            txrepo = new TransactionRepository(mockdc,clock,null,storage);
             repository = new ReceiptRepositoryInDb(context, txrepo, storage, clock);
 
             // Given: Several transactions, one of which we care about

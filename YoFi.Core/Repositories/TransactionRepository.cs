@@ -24,10 +24,11 @@ namespace YoFi.Core.Repositories
         /// <param name="context">Where to find the data we actually contain</param>
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
-        public TransactionRepository(IDataProvider context, IClock clock, IStorageService storage = null) : base(context)
+        public TransactionRepository(IDataProvider context, IClock clock, IPayeeRepository payeeRepository, IStorageService storage = null) : base(context)
         {
             _storage = storage;
             _clock = clock;
+            _payeeRepository = payeeRepository;
         }
 
         #region Read
@@ -190,6 +191,32 @@ namespace YoFi.Core.Repositories
             var item = await GetByIdAsync(id);
             item.Hidden = value;
             await UpdateAsync(item);
+        }
+
+        ///<inheritdoc/>
+        public async Task<string> ApplyPayeeAsync(int id)
+        {
+            var item = await GetByIdAsync(id);
+
+            var category = await _payeeRepository.GetCategoryMatchingPayeeAsync(item.StrippedPayee);
+            if (category == null)
+                throw new KeyNotFoundException($"No payee found for {item.StrippedPayee}");
+
+            var result = category;
+
+            // Consider custom split rules based on matched category
+            var customsplits = CalculateCustomSplitRules(item, category);
+            if (customsplits.Any())
+            {
+                item.Splits = customsplits.ToList();
+                result = "SPLIT"; // This is what we display in the UI to indicate a transaction has a split
+            }
+            else
+                item.Category = category;
+
+            await UpdateAsync(item);
+
+            return result;
         }
 
         #endregion
@@ -447,6 +474,7 @@ namespace YoFi.Core.Repositories
 
         private readonly IStorageService _storage;
         private readonly IClock _clock;
+        private readonly IPayeeRepository _payeeRepository;
 
         #endregion
 
