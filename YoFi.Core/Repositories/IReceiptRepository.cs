@@ -10,6 +10,7 @@ namespace YoFi.Core.Repositories
         Task<Receipt> UploadReceiptAsync(string filename, Stream stream, string contenttype);
         Task<IEnumerable<Receipt>> GetAllAsync();
         Task<IEnumerable<Receipt>> GetAllOrderByMatchAsync(Transaction tx);
+        Task<IEnumerable<Receipt>> GetAllOrderByMatchAsync(int txid);
         Task<Receipt> GetByIdAsync(int id);
         Task<bool> TestExistsByIdAsync(int id);
         Task<bool> AnyAsync();

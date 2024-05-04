@@ -142,6 +142,10 @@ namespace YoFi.Tests.Helpers
             {
                 SplitData.AddRange(items as IEnumerable<Split>);
             }
+            else if (t == typeof(Receipt))
+            {
+                ReceiptData.AddRange(items as IEnumerable<Receipt>);
+            }
             else
                 throw new NotImplementedException();
         }

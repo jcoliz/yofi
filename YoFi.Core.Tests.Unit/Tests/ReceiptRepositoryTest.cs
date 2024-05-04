@@ -52,6 +52,12 @@ namespace YoFi.Core.Tests.Unit
             {
                 txrepo.AddRangeAsync(txs).Wait();
             }
+            else if (objects is IEnumerable<Receipt> r)
+            {
+                context.AddRange(r);
+            }
+            else
+                throw new NotImplementedException();
         }
         private Receipt GivenReceiptInStorage(string filename)
         {
@@ -540,6 +546,174 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsFalse((await repository.GetAllAsync()).Any());
         }
 
+
+        [TestMethod]
+        public async Task Bug1348()
+        {
+            //
+            // Bug 1348: [Production Bug] Receipt shows matches on index but not on details
+            //
+
+            /*
+                Create transaction exactly 15 days prior to the current date
+                Create two receipts, both which match the transaction by name, and not by amount. One receipt is on the current date. The other receipt is a week prior.
+                View the receipts on the receipt index.
+                Note that both receipts show matches > 0, so "create" is not shown, but "review" is shown.
+                Expected: Current transaction should have 0 matches, and create is shown
+                Click review on the current-date transaction
+                Note that the details page shows no matches
+                Expected: This is correct
+            */
+
+            // Given: Transaction exactly 15 days prior
+            var today = DateTime.Now.Date;
+            var prior = today - TimeSpan.FromDays(15);
+            var txs = FakeObjects<Transaction>.Make(1, x => x.Timestamp = prior).SaveTo(this);
+            var tx = txs.Single();
+
+            // And: One receipt matches by name, not amount, on today's date
+            // And: One receipt matches by name, not amount, on an earlier date
+            var r = FakeObjects<Receipt>
+                        .Make(1, x => { x.Timestamp = today; x.Amount = tx.Amount * 2; x.Name = tx.Payee; })
+                        .Add(1, x => { x.Timestamp = today - TimeSpan.FromDays(7); x.Amount = tx.Amount * 2; x.Name = tx.Payee; })
+                        .SaveTo(this)
+                        .First();
+
+            // When: Getting All
+            var items = await repository.GetAllAsync();
+
+            // Then: First item shows no matches
+            var nmatches = items.First().Matches.Count;
+            Assert.AreEqual(0, nmatches);
+
+            // When: Getting details for the first receipt
+            var details = await repository.GetByIdAsync(r.ID);
+
+            // Then: Item shows no matches
+            Assert.AreEqual(0, details.Matches.Count);
+        }
+
+
+        [TestMethod]
+        public async Task Bug1351()
+        {
+            //
+            // Bug 1351: Should be able to create a new transaction for a receipt which matches another
+            //
+
+            /*
+                Given: A transaction
+                And: Two receipts, both which match the transaction, but one of them matches better than the other
+                When: Getting the receipts index
+                Then: Both receipts have a "create" button
+
+                NOTE: Looking back, I don't see any logic for why they WOULDN'T have a create button. 
+                As long as the receipts are in the list, they would have a create button
+
+                So, in porting this test, I'll just make sure they both exists.
+            */
+
+            // Given: A transaction
+            var t = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Two receipts, both which match the transaction, but one of them matches better than the other
+            int nextid = 1;
+            var rs = FakeObjects<Receipt>
+                .Make(1, x => { x.ID = nextid++; x.Name = t.Payee; x.Amount = t.Amount; x.Timestamp = t.Timestamp; })
+                .Add(1, x => { x.ID = nextid++; x.Name = t.Payee; x.Amount = t.Amount * 2; x.Timestamp = t.Timestamp; })
+                .SaveTo(this);
+
+            // When: Getting All
+            var items = await repository.GetAllAsync();
+
+            // Then: Both receipts are returned
+            Assert.IsTrue(items.Any(x => x.ID == 1));
+            Assert.IsTrue(items.Any(x => x.ID == 2));
+        }
+
+
+        [TestMethod]
+        public async Task AcceptPick()
+        {
+            // Given: Several transactions, one of which we care about
+            // Note: We have to override the timestamp on these to match the clock
+            // that the system under test is using, else the transaction wont match the receipt
+            // because the years will be off.
+            var i = 0;
+            var t = FakeObjects<Transaction>.Make(10, x => x.Timestamp = DateTime.Now - TimeSpan.FromDays(i++)).SaveTo(this).Last();
+
+            // And: One receipt in storage, which will match the transaction we care about
+            var filename = $"{t.Payee} ${t.Amount} {t.Timestamp.Month}-{t.Timestamp.Day}.png";
+            var r = GivenReceiptInStorage(filename);
+
+            // When: Assigning the receipt to its best match
+            // And: Asking for the redirect (next) to edit transaction
+            await repository.AssignReceipt(r.ID, t.ID);
+
+            // Then: The selected transaction has a receipt now, with the expected name
+            var expected = $"{ReceiptRepositoryInDb.Prefix}{r.ID}";
+            var actual = txrepo.All.Where(x => x.ID == t.ID).Single();
+            Assert.AreEqual(expected, actual.ReceiptUrl);
+
+            // And: There are no more (unassigned) receipts now
+            Assert.IsFalse((await repository.GetAllAsync()).Any());
+        }
+
+        [TestMethod]
+        public async Task PickAll()
+        {
+            // Given: A transaction in the database
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Many receipts in the database all of which match that transaction
+            var rs = FakeObjects<Receipt>
+                .Make(5, x => { x.Name = tx.Payee; x.Timestamp = tx.Timestamp; })
+                .SaveTo(this);
+
+            // When: Getting the receipt picker for a the transaction
+            var qresult = await repository.GetAllOrderByMatchAsync(tx.ID);
+
+            // Then: All receipts are included in the results
+            CollectionAssert.AreEquivalent(qresult.Select(x => x.Memo).ToArray(), rs.Select(x => x.Memo).ToArray());
+        }
+
+        [TestMethod]
+        public async Task PickSome()
+        {
+            // Given: A transaction in the database
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Many receipts in the database some of which match that transaction,
+            // but others which do not match
+            var rs = FakeObjects<Receipt>
+                .Make(5, x => { x.Name = tx.Payee; x.Timestamp = tx.Timestamp; })
+                .Add(7, x => { x.Name = "No Match"; x.Amount = tx.Amount * 10; })
+                .SaveTo(this);
+
+            // When: Getting the receipt picker for a the transaction
+            var qresult = await repository.GetAllOrderByMatchAsync(tx.ID);
+
+            // Then: All receipts are included in the results
+            CollectionAssert.AreEquivalent(qresult.Select(x => x.Memo).ToArray(), rs.Select(x => x.Memo).ToArray());
+        }
+
+        [TestMethod]
+        public async Task PickNone()
+        {
+            // Given: A transaction in the database
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Many receipts in the database none of which match that transaction
+            var rs = FakeObjects<Receipt>
+                .Make(5, x => { x.Name = "No Match"; x.Amount = 0; x.Timestamp += TimeSpan.FromDays(100); })
+                .SaveTo(this);
+
+            // When: Getting the receipt picker for a the transaction
+            var qresult = await repository.GetAllOrderByMatchAsync(tx.ID);
+
+            // Then: All receipts are included in the results
+            CollectionAssert.AreEquivalent(qresult.Select(x => x.Memo).ToArray(), rs.Select(x => x.Memo).ToArray());
+        }
 
         #endregion
     }

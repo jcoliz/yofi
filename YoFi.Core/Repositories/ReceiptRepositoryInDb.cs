@@ -121,7 +121,7 @@ namespace YoFi.Core.Repositories
         {
             // Get the receipts from the DB
 
-            var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>().OrderByDescending(x=>x.Timestamp).ThenBy(x=>x.Name).ThenByDescending(x=>x.Amount)) as IEnumerable<Receipt>;
+            var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>().OrderByDescending(x => x.Timestamp).ThenBy(x => x.Name).ThenByDescending(x => x.Amount)) as IEnumerable<Receipt>;
 
             // Match transactions for each
 
@@ -151,7 +151,7 @@ namespace YoFi.Core.Repositories
         {
             var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>());
             var result = receipts
-                    .Select(r => (quality:r.MatchesTransaction(tx), r))
+                    .Select(r => (quality: r.MatchesTransaction(tx), r))
                     .Where(x => x.quality > 0)
                     .OrderByDescending(x => x.quality)
                     .Select(x => x.r)
@@ -174,13 +174,21 @@ namespace YoFi.Core.Repositories
 
             // Order by match level
             var result = receipts
-                    .Select(r => (quality:r.MatchesTransaction(tx), r))
+                    .Select(r => (quality: r.MatchesTransaction(tx), r))
                     .OrderByDescending(x => x.quality)
                     .ThenByDescending(x => x.r.Timestamp)
                     .Select(x => x.r)
                     .ToList();
 
             return result;
+        }
+
+        public async Task<IEnumerable<Receipt>> GetAllOrderByMatchAsync(int txid)
+        {
+            var tx = await _txrepo.GetByIdAsync(txid);
+            var qresult = await GetAllOrderByMatchAsync(tx);
+
+            return qresult;
         }
 
         /// <summary>
