@@ -71,6 +71,10 @@
     <ProjectReference Include="..\YoFi.Data\YoFi.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Seeders\" />
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="git describe --long --always --abbrev=8 &gt; &quot;$(ProjectDir)\version.txt&quot;" />
     <Exec Command="git describe --tags &gt; &quot;$(ProjectDir)\release.txt&quot;" />
