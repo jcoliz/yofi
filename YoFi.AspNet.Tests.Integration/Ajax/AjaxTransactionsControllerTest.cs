@@ -75,49 +75,6 @@ namespace YoFi.AspNet.Tests.Integration.Ajax
             Assert.AreEqual(newvalues.Payee, actual.Payee);
         }
 
-
-        [TestMethod]
-        public async Task ApplyPayeeLoanMatch()
-        {
-            // Given: A set of loan details
-            var inmonth = 133;
-            var interest = -359.32m;
-            var principal = -1328.39m;
-            var payment = -1687.71m;
-            var year = 2000 + (inmonth - 1) / 12;
-            var month = 1 + (inmonth - 1) % 12;
-            var principalcategory = "Mortgage Principal";
-            var interestcategory = "Mortgage Interest";
-            var rule = $"{principalcategory} [Loan] {{ \"interest\": \"{interestcategory}\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" }} ";
-            var payeename = "Mortgage Lender";
-
-            // Given: A test transaction in the database which is a payment for that loan
-            var transaction = new Transaction() { Payee = payeename, Amount = payment, Timestamp = new DateTime(year, month, 1) };
-            context.Set<Transaction>().Add(transaction);
-
-            // And: A payee matching rule for that loan
-            var payee = new Payee() { Name = payeename, Category = rule };
-            context.Set<Payee>().Add(payee);
-            context.SaveChanges();
-
-            // When: Applying the payee to the transaction's ID
-            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{transaction.ID}", new Dictionary<string, string>());
-
-            // Then: The request succeeds
-            response.EnsureSuccessStatusCode();
-
-            // And: The returned text is "SPLIT"
-            var apiresult = await JsonSerializer.DeserializeAsync<string>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            Assert.AreEqual("SPLIT", apiresult);
-
-            // And: The item now has 2 splits which match the expected loan details
-            var actual = context.Set<Transaction>().Include(x=>x.Splits).Where(x => x.ID == transaction.ID).AsNoTracking().Single();
-            Assert.IsNull(actual.Category);
-            Assert.AreEqual(2, actual.Splits.Count);
-            Assert.AreEqual(interest, actual.Splits.Where(x => x.Category == interestcategory).Single().Amount);
-            Assert.AreEqual(principal, actual.Splits.Where(x => x.Category == principalcategory).Single().Amount);
-        }
-
         [TestMethod]
         public async Task CategoryAutocomplete()
         {

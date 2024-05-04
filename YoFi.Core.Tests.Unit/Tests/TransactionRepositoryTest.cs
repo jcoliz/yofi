@@ -469,7 +469,6 @@ namespace YoFi.Core.Tests.Unit
             AddRange(new[] { expected });
 
             // When: Applying the payee to the transaction's ID
-            // When: Applying the payee to the transaction's ID
             var apiresult = await transactionRepository.ApplyPayeeAsync(expected.ID);
 
             // Then: The result is the applied category
@@ -478,6 +477,44 @@ namespace YoFi.Core.Tests.Unit
             // And: The chosen transaction has the chosen payee's category
             var actual = context.Get<Transaction>().Where(x => x.ID == expected.ID).Single();
             Assert.AreEqual(expectedpayee.Category, actual.Category);
+        }
+
+
+        [TestMethod]
+        public async Task ApplyPayeeLoanMatch()
+        {
+            // Given: A set of loan details
+            var inmonth = 133;
+            var interest = -359.32m;
+            var principal = -1328.39m;
+            var payment = -1687.71m;
+            var year = 2000 + (inmonth - 1) / 12;
+            var month = 1 + (inmonth - 1) % 12;
+            var principalcategory = "Mortgage Principal";
+            var interestcategory = "Mortgage Interest";
+            var rule = $"{principalcategory} [Loan] {{ \"interest\": \"{interestcategory}\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" }} ";
+            var payeename = "Mortgage Lender";
+
+            // Given: A test transaction in the database which is a payment for that loan
+            var transaction = new Transaction() { Payee = payeename, Amount = payment, Timestamp = new DateTime(year, month, 1) };
+            AddRange(new[] { transaction });
+
+            // And: A payee matching rule for that loan
+            var payee = new Payee() { Name = payeename, Category = rule };
+            AddRange(new[] { payee });
+
+            // When: Applying the payee to the transaction's ID
+            var apiresult = await transactionRepository.ApplyPayeeAsync(transaction.ID);
+
+            // And: The returned text is "SPLIT"
+            Assert.AreEqual("SPLIT", apiresult);
+
+            // And: The item now has 2 splits which match the expected loan details
+            var actual = context.Get<Transaction>().Where(x => x.ID == transaction.ID).Single();
+            Assert.IsNull(actual.Category);
+            Assert.AreEqual(2, actual.Splits.Count);
+            Assert.AreEqual(interest, actual.Splits.Where(x => x.Category == interestcategory).Single().Amount);
+            Assert.AreEqual(principal, actual.Splits.Where(x => x.Category == principalcategory).Single().Amount);
         }
 
         #endregion
