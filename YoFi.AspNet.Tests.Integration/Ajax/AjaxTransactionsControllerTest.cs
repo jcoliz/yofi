@@ -151,22 +151,6 @@ namespace YoFi.AspNet.Tests.Integration.Ajax
         }
 
         [TestMethod]
-        public async Task ApplyPayeeNotFound()
-        {
-            // Given: Many payees
-            _ = FakeObjects<Payee>.Make(15).SaveTo(this);
-
-            // Given: Five transactions, one of which has no category, and has "payee" matching NONE of the payees in the DB
-            var id = FakeObjects<Transaction>.Make(4).Add(1, x => { x.Category = null; x.Payee = "notfound"; }).SaveTo(this).Last().ID;
-
-            // When: Applying the payee to the transaction's ID
-            var response = await WhenGettingAndPostingForm($"/Transactions/Index/", d => $"/ajax/tx/applypayee/{id}", new Dictionary<string, string>());
-
-            // Then: 404
-            Assert.AreEqual(HttpStatusCode.NotFound,response.StatusCode);
-        }
-
-        [TestMethod]
         public async Task CategoryAutocomplete()
         {
             // Given: Many recent transactions, some with {word} in their category, some not

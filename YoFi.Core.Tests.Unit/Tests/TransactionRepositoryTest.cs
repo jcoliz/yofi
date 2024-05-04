@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
@@ -432,6 +433,23 @@ namespace YoFi.Core.Tests.Unit
             var actual = context.Get<Transaction>().Where(x => x.ID == id).Single();
             Assert.AreEqual(payee.Category, actual.Category);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(KeyNotFoundException))]
+        public async Task ApplyPayeeNotFound()
+        {
+            // Given: Many payees
+            _ = FakeObjects<Payee>.Make(15).SaveTo(this);
+
+            // Given: Five transactions, one of which has no category, and has "payee" matching NONE of the payees in the DB
+            var id = FakeObjects<Transaction>.Make(4).Add(1, x => { x.Category = null; x.Payee = "notfound"; }).SaveTo(this).Last().ID;
+
+            // When: Applying the payee to the transaction's ID
+            var apiresult = await transactionRepository.ApplyPayeeAsync(id);
+
+            // Then: KeyNotFoundException
+        }
+
 
         #endregion
 
