@@ -70,7 +70,7 @@ namespace YoFi.AspNet.Main
                 try
                 {
                     var serviceProvider = services.GetRequiredService<IServiceProvider>();
-                    YoFi.Data.Identity.Roles.CreateRoles(serviceProvider).Wait();
+                    YoFi.Main.Seeders.IdentitySeeder.SeedIdentity(serviceProvider).Wait();
                 }
                 catch (Exception ex)
                 {

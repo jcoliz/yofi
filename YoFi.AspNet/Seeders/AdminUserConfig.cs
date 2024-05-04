@@ -1,4 +1,4 @@
-﻿namespace YoFi.Data.Identity
+﻿namespace YoFi.Main.Seeders
 {
     public class AdminUserConfig
     {

@@ -3,14 +3,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using YoFi.Data;
 
-namespace YoFi.Data.Identity;
+namespace YoFi.Main.Seeders;
 
 // https://github.com/temilaj/ASP.NET-core-role-based-authentication/blob/version/dotnet-core-2-0/Data/Seed.cs
 // https://gooroo.io/GoorooTHINK/Article/17333/Custom-user-roles-and-rolebased-authorization-in-ASPNET-core/28380#.WxwmNExFyAd
-public static class Roles
+public static class IdentitySeeder
 {
-    public static async Task CreateRoles(IServiceProvider serviceProvider)
+    public static async Task SeedIdentity(IServiceProvider serviceProvider)
     {
         //adding custom roles
         var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
