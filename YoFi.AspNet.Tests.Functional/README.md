@@ -54,6 +54,17 @@ do not load the app code at all.
 
 ## How to use it
 
+### Environment vars
+
+The tests expect that the system under test is running with the following environment var setup
+
+```PowerShell
+$env:Demo__IsEnabled = "false"
+$env:Storage__BlobContainerName = "yofi-uitest"
+$env:Clock__Now = "2022-12-31"
+$env:ConnectionStrings__DefaultConnection = "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=yofi-test-functional;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"
+```
+
 ### Set up a dedicated LocalDB
 
 It's best to isolate functional tests into their own LocalDB database, so they don't mix with data in your
