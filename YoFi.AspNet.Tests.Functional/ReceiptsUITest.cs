@@ -49,6 +49,9 @@ namespace YoFi.AspNet.Tests.Functional
 
         #region Init/Cleanup
 
+        // Current time that the system under test thinks it is
+        private DateTime Now { get; } = new DateTime(2022, 12, 31);
+
         [TestCleanup]
         public async Task Cleanup()
         {
@@ -110,7 +113,10 @@ namespace YoFi.AspNet.Tests.Functional
 
             // When: Uploading many files with differing name compositions
             // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
-            var today = DateTime.Now.Date;
+
+            // NOTE: This has to concur with the day that the server thinks it is,
+            // usually set with Clock:Now env var.
+            var today = Now;
             var oldday = today - TimeSpan.FromDays(10);
             var recentday = today - TimeSpan.FromDays(3);
             var receipts = new (string name, int matches, int order)[]
@@ -144,8 +150,8 @@ namespace YoFi.AspNet.Tests.Functional
 
             // NOTE: I am optimistic that this will work if today is first week of Jan.
             // TODO: Still need to TEST that, though
-            Assert.AreEqual(today, DateTime.Parse(table.Rows[1]["Date"]));
-            Assert.AreEqual(oldday, DateTime.Parse(table.Rows[3]["Date"]));
+            Assert.AreEqual(today, DateTime.Parse(table.Rows[1]["Date"] + "/2022"));
+            Assert.AreEqual(oldday, DateTime.Parse(table.Rows[3]["Date"] + "/2022"));
 
             Assert.AreEqual(130.85m, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
             Assert.AreEqual(12.34m, decimal.Parse(table.Rows[3]["Amount"], NumberStyles.Currency));
@@ -169,7 +175,7 @@ namespace YoFi.AspNet.Tests.Functional
             // Given: A set of transactions
             await WhenNavigatingToPage("Transactions");
 
-            var today = DateTime.Now.Date;
+            var today = Now.Date;
             var name1 = NextName;
             var name2 = NextName;
             var name3 = NextName;
@@ -251,7 +257,7 @@ namespace YoFi.AspNet.Tests.Functional
                 NextName, NextName, NextName, NextName
             };
 
-            var date = DateTime.Now;
+            var date = Now;
             var recentdate = date - TimeSpan.FromDays(3);
             var transactions = new List<(string name, decimal amount, DateTime date)>()
             {
@@ -333,7 +339,7 @@ namespace YoFi.AspNet.Tests.Functional
         {
             // Given: Several Transactions
             await WhenNavigatingToPage("Transactions");
-            var date = DateTime.Now;
+            var date = Now;
             var amount = 1234.56m;
             var matchamount = amount + 100m;
             for (int i = 0; i < numtx; i++)
@@ -459,7 +465,7 @@ namespace YoFi.AspNet.Tests.Functional
 
             await WhenNavigatingToPage("Transactions");
             var name = "AA__TEST__ MemoInTransaction 1";
-            var date = DateTime.Now.Date;
+            var date = Now.Date;
             var amount = 1234.56m;
             await WhenCreatingTransaction(Page, new Dictionary<string, string>()
             {
@@ -601,7 +607,7 @@ namespace YoFi.AspNet.Tests.Functional
             // Here are the filenames we want. Need __TEST__ on each so they can be cleaned up
             var payee = "A Whole New Thing";
             var amount = 12.34m;
-            var date = DateTime.Now.Date - TimeSpan.FromDays(10);
+            var date = Now.Date - TimeSpan.FromDays(10);
             var filenames = new[]
             {
                 // Matches none
@@ -633,7 +639,7 @@ namespace YoFi.AspNet.Tests.Functional
             // And: Transaction matches
             Assert.IsTrue(table.Rows.All(x => x["Memo"] == testmarker));
             Assert.AreEqual(payee, table.Rows[0]["Payee"]);
-            Assert.AreEqual(date, DateTime.Parse(table.Rows[0]["Date"]));
+            Assert.AreEqual(date, DateTime.Parse(table.Rows[0]["Date"] + "/2022"));
             Assert.AreEqual(amount, decimal.Parse(table.Rows[0]["Amount"], NumberStyles.Currency));
 
             // And: It has a receipt
@@ -662,7 +668,7 @@ namespace YoFi.AspNet.Tests.Functional
         {
             // Given: A single transaction in the system
             await WhenNavigatingToPage("Transactions");
-            var tx = new Transaction() { Payee = NextName, Timestamp = DateTime.Now.Date, Amount = 100m };
+            var tx = new Transaction() { Payee = NextName, Timestamp = Now.Date, Amount = 100m };
             await WhenCreatingTransaction(Page, tx.AsDictionary());
             await Page.SaveScreenshotToAsync(TestContext, "Tx Created-Slide 20");
 
