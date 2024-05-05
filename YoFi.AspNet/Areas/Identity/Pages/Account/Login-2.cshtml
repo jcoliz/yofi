@@ -13,6 +13,8 @@
     var hasbrandconfig = _brandconfig.Value.Exists;
     var sitename = hasbrandconfig ? _brandconfig.Value.Name : _codebaseonfig.Value.Name;
     ViewData["Title"] = "Login";
+    Layout = "/Views/Shared/_Layout.cshtml";
+
 }
 
 <main class="form-signin">

@@ -14,6 +14,15 @@ Lately I have taken to marking such user-facing User Stories as [User Can] stori
 
 The UI tests are only designed to work on a local machine, right now.
 
+## Secrets
+
+The tests pull secrets from the local development secret storage, using the same project ID as
+the main page. So, set these secrets, and you'll guarantee consistency between the app and the
+tests:
+* AdminUser:Email
+* AdminUser:Password
+* Api:Key
+
 ## Future: Test Environment
 
 In the future, I have ambition to run them as part of the release pipeline. 

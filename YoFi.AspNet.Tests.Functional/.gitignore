@@ -1,2 +1,3 @@
 *.azuredeploy.runsettings
 *.azuredeploy.parameters.json
+*.secrets.runsettings
