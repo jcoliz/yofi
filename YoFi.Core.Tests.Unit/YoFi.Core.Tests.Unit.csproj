@@ -6,6 +6,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SampleData\SampleData-2022-Full.xlsx" />
+    <None Remove="SampleData\SampleData-Full.xlsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="SampleData\SampleData-2022-Full.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="SampleData\SampleData-Full.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="SampleData\budget-white-60x.png" />
     <EmbeddedResource Include="SampleData\SampleData-2022-Full-Month02.ofx" />
     <EmbeddedResource Include="SampleData\SampleData-2022-Full.json" />
