@@ -26,6 +26,7 @@ using YoFi.Core.Reports;
 using YoFi.Core.Repositories;
 using YoFi.Core.SampleData;
 using YoFi.Services;
+using System.Reflection;
 
 #if __DEMO_OPEN_ACCESS__
 using Microsoft.AspNetCore.Authorization;
@@ -100,13 +101,17 @@ namespace YoFi.AspNet.Main
                 services.AddTransient<IEmailSender, SendGridEmailService>();
             }
 
-            var release = "Unknown";
-            if (File.Exists("release.txt"))
+            // Get app version, store in configuration for later use
+            var assembly = Assembly.GetEntryAssembly();
+            var resource = assembly!.GetManifestResourceNames().Where(x => x.EndsWith(".version.txt")).SingleOrDefault();
+            if (resource is not null)
             {
-                using var sr = File.OpenText("release.txt");
-                release = sr.ReadLine();
+                using var stream = assembly.GetManifestResourceStream(resource);
+                using var streamreader = new StreamReader(stream!);
+                var version = streamreader.ReadLine();
+                Configuration["Codebase:Release"] = version;
+                logme.Enqueue($"Version: {version}");
             }
-            Configuration["Codebase:Release"] = release;
 
             services.Configure<CodebaseConfig>(Configuration.GetSection(CodebaseConfig.Section));
             services.Configure<BrandConfig>(Configuration.GetSection(BrandConfig.Section));

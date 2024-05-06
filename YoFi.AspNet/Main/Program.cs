@@ -43,22 +43,6 @@ namespace YoFi.AspNet.Main
 
                 try
                 {
-                    if (File.Exists("version.txt"))
-                    {
-                        using var sr = File.OpenText("version.txt");
-                        var version = sr.ReadToEnd();
-                        logger.LogInformation($"** Version: {version[..^1],-47} **");
-                    }
-                    else
-                        logger.LogInformation(" Unable to locate version info.");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "An error occurred while loading version info");
-                }
-
-                try
-                {
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     context.Database.Migrate();
                 }
