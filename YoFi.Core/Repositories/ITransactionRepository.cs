@@ -34,6 +34,19 @@ namespace YoFi.Core.Repositories
         Task<Transaction> GetWithSplitsByIdAsync(int? id);
 
         /// <summary>
+        /// Retrieve a single item by <paramref name="id"/>, including children splits, with a matching
+        /// category based on payee if possible
+        /// </summary>
+        /// <remarks>
+        /// Will throw an exception if not found.
+        /// Note that the matched category is not saved. This is an edit-in-progress transaction 
+        /// offered to the user to later commit
+        /// </remarks>
+        /// <param name="id">Identifier of desired item</param>
+        /// <returns>Desired item with matched payee AND true if a category was automatically assigned</returns>
+        Task<(Transaction,bool)> GetWithSplitsAndMatchCategoryByIdAsync(int? id);
+
+        /// <summary>
         /// All splits including transactions
         /// </summary>
         IQueryable<Split> Splits { get; }

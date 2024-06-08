@@ -71,11 +71,30 @@ namespace YoFi.Core.Repositories
         /// </summary>
         /// <remarks>
         /// Will throw an exception if not found
+        /// TODO: This looks like a bug how are we calling Single here?!
         /// </remarks>
         /// <param name="id">Identifier of desired item</param>
         /// <returns>Desired item</returns>
         public Task<Transaction> GetWithSplitsByIdAsync(int? id) => Task.FromResult(_context.GetIncluding<Transaction, ICollection<Split>>(x => x.Splits).Single(x => x.ID == id.Value));
         // TODO: QueryExec SingleAsync()
+
+        /// <inheritdoc/>
+        public async Task<(Transaction,bool)> GetWithSplitsAndMatchCategoryByIdAsync(int? id)
+        {
+            var auto_category = false;
+            var transaction = await GetWithSplitsByIdAsync(id);
+            if (string.IsNullOrEmpty(transaction.Category))
+            {
+                var category = await _payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
+                if (category != null)
+                {
+                    transaction.Category = category;
+                    auto_category = true;
+                }
+            }
+
+            return (transaction, auto_category);
+        }
 
         /// <summary>
         /// All splits including transactions

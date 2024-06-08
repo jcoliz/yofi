@@ -194,19 +194,10 @@ namespace YoFi.AspNet.Controllers
         [ValidateTransactionExists]
         public async Task<IActionResult> EditModal(int? id, [FromServices] IPayeeRepository payeeRepository)
         {
-            var transaction = await _repository.GetWithSplitsByIdAsync(id);
-            if (string.IsNullOrEmpty(transaction.Category))
-            {
-                var category = await payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
-                if (category != null)
-                {
-                    transaction.Category = category;
-                    ViewData["AutoCategory"] = true;
-                }
-            }
+            (var transaction, var auto_category) = await _repository.GetWithSplitsAndMatchCategoryByIdAsync(id);
+            ViewData["AutoCategory"] = auto_category;
 
             return PartialView("EditPartial", transaction);
-
         }
 
         [HttpPost]
