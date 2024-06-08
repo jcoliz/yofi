@@ -26,8 +26,8 @@ namespace YoFi.Core.Repositories
         /// <param name="storage">Where to store receipts</param>
         /// <param name="config">Where to get configuration information</param>
         public TransactionRepository(
-            IDataProvider context, 
-            IClock clock, 
+            IDataProvider context,
+            IClock clock,
             IPayeeRepository payeeRepository,
             IRepository<Split> splitRepository,
             IStorageService storage = null
@@ -52,14 +52,14 @@ namespace YoFi.Core.Repositories
         /// <returns>Query of requested items</returns>
         protected override IQueryable<Transaction> ForQuery(string q)
         {
-            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.GetIncluding<Transaction, ICollection<Split>>(x => x.Splits)),_clock);
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.GetIncluding<Transaction, ICollection<Split>>(x => x.Splits)), _clock);
             qbuilder.BuildForQ(q);
             return qbuilder.Query;
         }
 
         protected override IQueryable<Transaction> ForQuery(IWireQueryParameters parms)
         {
-            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.GetIncluding<Transaction, ICollection<Split>>(x => x.Splits)),_clock);
+            var qbuilder = new TransactionsQueryBuilder(Transaction.InDefaultOrder(_context.GetIncluding<Transaction, ICollection<Split>>(x => x.Splits)), _clock);
             qbuilder.BuildForQ(parms.Query);
             qbuilder.ApplyOrderParameter(parms.Order);
             qbuilder.ApplyViewParameter(parms.View);
@@ -380,7 +380,7 @@ namespace YoFi.Core.Repositories
         public async Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction)
         {
             if (string.IsNullOrEmpty(transaction.ReceiptUrl))
-                return (null,null,null);
+                return (null, null, null);
 
             // Note that the view should not ever get this far. It's the view's reposibility to check first if
             // there is storage defined. Ergo, if we get this far, it's a legit 500 error.
@@ -411,17 +411,25 @@ namespace YoFi.Core.Repositories
 
             stream.Seek(0, SeekOrigin.Begin);
 
-            return (stream,contenttype,name);
+            return (stream, contenttype, name);
         }
 
-        #endregion
+        /// <inheritdoc/>
+        public async Task DeleteReceiptAsync(int id)
+        {
+            var transaction = await GetByIdAsync(id);
+            transaction.ReceiptUrl = null;
+            await UpdateAsync(transaction);
+        }
 
-        #region Import
+    #endregion
 
-        /// <summary>
-        /// Finally merge in all selected imported items into the live data set
-        /// </summary>
-        public async Task FinalizeImportAsync()
+    #region Import
+
+    /// <summary>
+    /// Finally merge in all selected imported items into the live data set
+    /// </summary>
+    public async Task FinalizeImportAsync()
         {
             var accepted = All.Where(x => x.Imported == true && x.Selected == true);
             await _context.BulkUpdateAsync(accepted, new Transaction() { Hidden = false, Imported = false, Selected = false }, new List<string>() { "Hidden", "Imported", "Selected" });

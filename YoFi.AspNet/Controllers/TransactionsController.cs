@@ -412,9 +412,7 @@ namespace YoFi.AspNet.Controllers
         /// <param name="id">Which transaction</param>
         private async Task<IActionResult> DeleteReceipt(int id)
         {
-            var transaction = await _repository.GetByIdAsync(id);
-            transaction.ReceiptUrl = null;
-            await _repository.UpdateAsync(transaction);
+            await _repository.DeleteReceiptAsync(id);
 
             return RedirectToAction(nameof(Edit), new { id });
         }

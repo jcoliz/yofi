@@ -99,6 +99,12 @@ namespace YoFi.Core.Repositories
         Task<(Stream stream, string contenttype, string name)> GetReceiptAsync(Transaction transaction);
 
         /// <summary>
+        /// Remove the a receipt associated with this transaction
+        /// </summary>
+        /// <param name="id">Transaction ID</param>
+        Task DeleteReceiptAsync(int id);
+
+        /// <summary>
         /// Finally merge in all selected imported items into the live data set
         /// </summary>
         Task FinalizeImportAsync();

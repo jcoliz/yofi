@@ -118,5 +118,9 @@ namespace YoFi.Tests.Helpers
         }
 
         public Task UploadReceiptAsync(int id, Stream stream, string contenttype) => throw new NotImplementedException();
+
+        /// <inheritdoc/>
+        public async Task DeleteReceiptAsync(int id) => throw new NotImplementedException();
     }
+
 }
