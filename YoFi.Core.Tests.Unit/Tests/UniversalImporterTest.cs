@@ -460,9 +460,8 @@ namespace YoFi.Core.Tests.Unit
             var splitimporter = new SplitImporter(txrepo);
 
             // When: Uploading the spreadsheet for the transaction
-            splitimporter.Target = expected;
             splitimporter.QueueImportFromXlsx(stream);
-            await splitimporter.ProcessImportAsync();
+            await splitimporter.ProcessImportAsync(expected);
 
             // Then : The splits are now attached to the transaction in the database
             var actual = txrepo.All.Where(x => x.ID == id).Single();

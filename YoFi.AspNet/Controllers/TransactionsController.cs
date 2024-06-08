@@ -310,19 +310,16 @@ namespace YoFi.AspNet.Controllers
         {
             var transaction = await _repository.GetWithSplitsByIdAsync(id);
 
-            importer.Target = transaction;
-
             foreach (var file in files.Where(x => Path.GetExtension(x.FileName).ToLowerInvariant() == ".xlsx"))
             {
                 using var stream = file.OpenReadStream();
                 importer.QueueImportFromXlsx(stream);
             }
 
-            await importer.ProcessImportAsync();
+            await importer.ProcessImportAsync(transaction);
 
             return RedirectToAction("Edit", new { id = id });
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]

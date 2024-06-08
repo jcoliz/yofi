@@ -13,13 +13,8 @@ namespace YoFi.Core.Importers
     /// Imports splits into the database, adding them to a specified
     /// target transaction
     /// </summary>
-    public class SplitImporter : IImporter<Split>
+    public class SplitImporter
     {
-        /// <summary>
-        /// Which transaction should the imported splits be added to
-        /// </summary>
-        public Transaction Target { get; set; }
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -30,6 +25,26 @@ namespace YoFi.Core.Importers
         }
 
         /// <summary>
+        /// Import previously queued files into their final destination
+        /// </summary>
+        /// <param name="target">Transaction to add queued splits</param>
+        public async Task<IEnumerable<Split>> ProcessImportAsync(Transaction target)
+        {
+            if (incoming.Any())
+            {
+                // Why no has AddRange??
+                foreach (var split in incoming)
+                {
+                    target.Splits.Add(split);
+                }
+
+                await _repository.UpdateAsync(target);
+            }
+
+            return incoming.ToList();
+        }
+
+        /// <summary>
         /// Declare that items from the spreadsheet in the given <paramref name="stream"/> should be
         /// imported.
         /// </summary>
@@ -37,24 +52,6 @@ namespace YoFi.Core.Importers
         /// Call this as many times as needed, then call ProcessImportAsync when ready to do the import.
         /// </remarks>
         /// <param name="stream">Where to find the spreadsheet to import</param>
-        public async Task<IEnumerable<Split>> ProcessImportAsync()
-        {
-            if (incoming.Any())
-            {
-                // Why no has AddRange??
-                foreach (var split in incoming)
-                {
-                    Target.Splits.Add(split);
-                }
-
-                await _repository.UpdateAsync(Target);
-            }
-
-            return incoming.ToList();
-        }
-        /// <summary>
-        /// Import previously queued files into their final destination
-        /// </summary>
         public void QueueImportFromXlsx(Stream stream)
         {
             using var reader = new SpreadsheetReader();
