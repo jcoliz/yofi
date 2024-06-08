@@ -177,9 +177,10 @@ namespace YoFi.Tests.Controllers.Slim
         }
 
         // TODO: Move to unit tests
-        [DataRow(true)]
-        [DataRow(false)]
-        [DataTestMethod]
+        // These don't make sense as controllers tests. However, do need to ensure there are matching unit tests!
+        //[DataRow(true)]
+        //[DataRow(false)]
+        //[DataTestMethod]
         public async Task EditPayeeMatch(bool modal)
         {
             // Given: Mocked repositories
@@ -194,7 +195,7 @@ namespace YoFi.Tests.Controllers.Slim
             Transaction model;
             if (modal)
             {
-                var actionresult = await itemController.EditModal(99, payrepo.Object);
+                var actionresult = await itemController.EditModal(99);
                 var viewresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
                 model = Assert.That.IsOfType<Transaction>(viewresult.Model);
             }
