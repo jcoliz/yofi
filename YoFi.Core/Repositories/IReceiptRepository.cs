@@ -14,11 +14,18 @@ namespace YoFi.Core.Repositories
         Task<Receipt> GetByIdAsync(int id);
         Task<bool> TestExistsByIdAsync(int id);
         Task<bool> AnyAsync();
-        Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx);
+        Task<ReceiptMatchResult> GetMatchingAsync(Transaction tx);
         Task DeleteAsync(Receipt receipt);
         Task AssignReceipt(Receipt receipt, Transaction tx);
         Task AssignReceipt(int id, int txid);
         Task<int> AssignAll();
         Task<Transaction> CreateTransactionAsync(int? id);
+    }
+
+    public record ReceiptMatchResult
+    {
+        public bool Any { get; init; }
+        public int? Matches { get; init; }
+        public Receipt Suggested{ get; init; }
     }
 }

@@ -168,8 +168,9 @@ namespace YoFi.Core.Repositories
         /// Find all the receipts which match this <paramref name="transaction"/>
         /// </summary>
         /// <returns>Matching receipts ordered by better match first</returns>
-        public async Task<IEnumerable<Receipt>> GetMatchingAsync(Transaction tx)
+        public async Task<ReceiptMatchResult> GetMatchingAsync(Transaction tx)
         {
+            var any = await AnyAsync();
             var receipts = await _context.ToListNoTrackingAsync(_context.Get<Receipt>());
             var result = receipts
                     .Select(r => (quality: r.MatchesTransaction(tx), r))
@@ -178,7 +179,7 @@ namespace YoFi.Core.Repositories
                     .Select(x => x.r)
                     .ToList();
 
-            return result;
+            return new ReceiptMatchResult() { Any = any, Matches = result.Count, Suggested = result.FirstOrDefault() };
         }
 
         /// <summary>

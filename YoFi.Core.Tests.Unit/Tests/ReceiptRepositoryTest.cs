@@ -419,10 +419,10 @@ namespace YoFi.Core.Tests.Unit
             var matches = await repository.GetMatchingAsync(t);
 
             // Then: There are two matches
-            Assert.AreEqual(2,matches.Count());
+            Assert.AreEqual(2,matches.Matches);
 
             // And: The first one is the best one
-            var best = matches.First();
+            var best = matches.Suggested;
             Assert.AreEqual(t.Payee, best.Name);
         }
 
