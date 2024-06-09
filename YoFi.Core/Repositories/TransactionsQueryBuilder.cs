@@ -64,7 +64,7 @@ public class TransactionsQueryBuilder
             // User Story 1385: Transactions search defaults to last 12 months
 
             // If there is any "y" term, then we will NOT apply the last-12 rule
-            if (!terms.Any(x=>x.ToLowerInvariant().StartsWith("y")))
+            if (!terms.Any(x=>x.ToLowerInvariant().StartsWith('y')))
             {
                 Query = Query.Where(x => x.Timestamp > _clock.Now - TimeSpan.FromDays(366));
             }
@@ -202,7 +202,7 @@ public class TransactionsQueryBuilder
     /// </summary>
     internal void ApplyViewParameter(string v)
     {
-        if (!(v?.ToLowerInvariant().Contains('h') == true))
+        if ((v?.ToLowerInvariant().Contains('h') != true))
             Query = Query.Where(x => x.Hidden != true);
     }
 

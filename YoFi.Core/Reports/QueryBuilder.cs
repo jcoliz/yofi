@@ -102,7 +102,7 @@ public class QueryBuilder
         else if (definition.Source == "YearOverYear")
             return QueryYearOverYear(out _); // TODO: How do I get years back out??
         else
-            return null;
+            return Enumerable.Empty<NamedQuery>();
     }
 
     /// <summary>
@@ -289,7 +289,7 @@ public class QueryBuilder
             result = result
                 .Where(x => x.Category != null && !excluded.Contains(x.Category))
                 .AsEnumerable()
-                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category.StartsWith(y)))
+                .Where(x => !excludetopcategoriesstartswith.Exists(y => x.Category.StartsWith(y)))
                 .AsQueryable();
         }
 
@@ -351,7 +351,7 @@ public class QueryBuilder
             result = result
                 .Where(x => !excluded.Contains(x.Category))
                 .AsEnumerable()
-                .Where(x => !excludetopcategoriesstartswith.Any(y => x.Category?.StartsWith(y) ?? false))
+                .Where(x => !excludetopcategoriesstartswith.Exists(y => x.Category?.StartsWith(y) ?? false))
                 .AsQueryable();
         }
 
@@ -384,7 +384,7 @@ public class QueryBuilder
             result = result
                 .Where(x => x.Category != null && !excluded.Contains(x.Category))
                 .AsEnumerable()
-                .Where(x => !topstarts.Any(y => x.Category.StartsWith(y)))
+                .Where(x => !topstarts.Exists(y => x.Category.StartsWith(y)))
                 .AsQueryable();
         }
 

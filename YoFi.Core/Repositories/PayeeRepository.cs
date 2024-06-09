@@ -49,13 +49,13 @@ public class PayeeRepository : BaseRepository<Payee>, IPayeeRepository
                     var result = new List<string>();
                     foreach (var component in category.Split(":"))
                     {
-                        if (component.StartsWith("(") && component.EndsWith("+)"))
+                        if (component.StartsWith('(') && component.EndsWith("+)"))
                         {
                             if (Int32.TryParse(component[1..^2], out var position))
                                 if (originals.Length >= position)
                                     result.AddRange(originals.Skip(position - 1));
                         }
-                        else if (component.StartsWith("(") && component.EndsWith(")"))
+                        else if (component.StartsWith('(') && component.EndsWith(')'))
                         {
                             if (Int32.TryParse(component[1..^1], out var position))
                                 if (originals.Length >= position)
@@ -134,7 +134,7 @@ public class PayeeRepository : BaseRepository<Payee>, IPayeeRepository
         if (!string.IsNullOrEmpty(Name))
         {
             IQueryable<Payee> payees = payeecache?.AsQueryable<Payee>() ?? All;
-            regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
+            regexpayees = payees.Where(x => x.Name.StartsWith('/') && x.Name.EndsWith('/'));
 
             // Product Backlog Item 871: Match payee on regex, optionally
             Payee payee = null;

@@ -45,7 +45,7 @@ public class ReportBuilder: IReportEngine
         int Month = _qbuilder.Month = parameters.month ?? 12;
         int Year = _qbuilder.Year = parameters.year ?? _clock.Now.Year;
 
-        if (!Definitions.Any(x => x.slug == parameters.slug))
+        if (!Definitions.Exists(x => x.slug == parameters.slug))
             throw new KeyNotFoundException($"Unable to find report {parameters.slug}");
 
         var definition = Definitions.Where(x => x.slug == parameters.slug).SingleOrDefault();

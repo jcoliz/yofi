@@ -194,7 +194,6 @@ public class TransactionImporter
             FROM [Transactions] AS [x]
             WHERE [x].[BankReference] IN (N'A1ABC7FE34871F02304982126CAF5C5C', N'EE49717DE89A3D97A9003230734A94B7')
             */
-        //
         var uniqueids = incoming.Select(x => x.BankReference).ToHashSet();
         var conflicts = _repository.All.Where(x => uniqueids.Contains(x.BankReference)).ToLookup(x => x.BankReference, x => x);
 

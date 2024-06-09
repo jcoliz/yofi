@@ -139,13 +139,13 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
                     var result = new List<string>();
                     foreach (var component in category.Split(":"))
                     {
-                        if (component.StartsWith("(") && component.EndsWith("+)"))
+                        if (component.StartsWith('(') && component.EndsWith("+)"))
                         {
                             if (Int32.TryParse(component[1..^2], out var position))
                                 if (originals.Length >= position)
                                     result.AddRange(originals.Skip(position - 1));
                         }
-                        else if (component.StartsWith("(") && component.EndsWith(")"))
+                        else if (component.StartsWith('(') && component.EndsWith(')'))
                         {
                             if (Int32.TryParse(component[1..^1], out var position))
                                 if (originals.Length >= position)
@@ -346,9 +346,9 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
     #region Receipts
 
     ///<inheritdoc/>
-    public async Task<Transaction> CreateAsync()
+    public Task<Transaction> CreateAsync()
     {
-        return new Transaction() { Timestamp = _clock.Now.Date };
+        return Task.FromResult( new Transaction() { Timestamp = _clock.Now.Date } );
     }
 
     /// <summary>
@@ -481,7 +481,7 @@ public async Task FinalizeImportAsync()
             // Deserialize the loan object out of the rule as sent in
             //
             // Here's how the Loan rule looks:
-            // var rule = "Mortgage Principal [Loan] { \"interest\": \"Mortgage Interest\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } ";
+            // var rule = "Mortgage Principal [Loan] { \"interest\": \"Mortgage Interest\", \"amount\": 200000, \"rate\": 6, \"term\": 180, \"origination\": \"1/1/2000\" } "
             //
 
             var trimmed = rule.Trim();

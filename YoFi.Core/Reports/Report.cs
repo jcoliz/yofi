@@ -541,17 +541,17 @@ public class Report : IDisplayReport, IComparer<RowLabel>
         {
             var keysplit = cell.Location.FilteredRowName.Split(':');
             if (keysplit.Length == SkipLevels)
-                keysplit = keysplit.ToList().Append("[Blank]").ToArray();
+                keysplit = keysplit.AsEnumerable().Append("[Blank]").ToArray();
             var keys = keysplit.Skip(SkipLevels).ToList();
             if (keys.Any())
             {
                 // Is this a collector row?
-                var match = collectorregex.Match(keys.Last());
+                var match = collectorregex.Match(keys[^1]);
                 string collector = null;
                 if (match.Success)
                 {
                     // Replace the last key with only the first part of the match
-                    keys[keys.Count-1] = match.Groups[1].Value;
+                    keys[^1] = match.Groups[1].Value;
 
                     // The second part IS the collector rule
                     collector = match.Groups[2].Value;
@@ -660,7 +660,7 @@ public class Report : IDisplayReport, IComparer<RowLabel>
 
                     // When 'isnotlist' is false, the catgories array contains categories
                     // we DO match. When it's true, the opposite is true.
-                    if (categories.Contains(split.Last()) ^ isnotlist && collectorrow.UniqueID != row.UniqueID)
+                    if (categories.Contains(split[^1]) ^ isnotlist && collectorrow.UniqueID != row.UniqueID)
                     {
                         // Found a peer collector who wants us, let's do the collection.
                         Table[seriescolumn, collectorrow] += amount;
@@ -703,9 +703,9 @@ public class Report : IDisplayReport, IComparer<RowLabel>
         foreach (var row in RowLabels)
         {
             if (!leafnodecolumns.Any())
-                if (string.IsNullOrEmpty(row.UniqueID.Split(':').Last()))
+                if (string.IsNullOrEmpty(row.UniqueID.Split(':')[^1]))
                     if (row.Parent != null)
-                        if (Table[TotalColumn, row] == Table[TotalColumn, row.Parent as RowLabel])
+                        if (Table[TotalColumn, row] == Table[TotalColumn, row.Parent])
                             pruned.Add(row);
 
         }

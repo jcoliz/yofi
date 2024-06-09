@@ -232,7 +232,7 @@ public class ReceiptRepositoryInDb : IReceiptRepository
     {
         var query = _context.Get<Receipt>().Where(x => x.ID == id);
         var list = await _context.ToListNoTrackingAsync(query);
-        var result = list.First();
+        var result = list[0];
 
         // Now check for receipt matches
         var qt = Receipt.TransactionsForReceipts(_txrepo.All, new[] { result });

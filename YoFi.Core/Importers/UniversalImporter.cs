@@ -69,12 +69,14 @@ public class UniversalImporter: TransactionImporter
             _budgettxImporter.QueueImportFromXlsx(stream);
         }
         else
-        if (typeof(T) == typeof(Payee))
         {
-            _payeeImporter.QueueImportFromXlsx(stream);
+            if (typeof(T) == typeof(Payee))
+            {
+                _payeeImporter.QueueImportFromXlsx(stream);
+            }
+            else
+                throw new NotImplementedException();
         }
-        else
-            throw new NotImplementedException();
     }
 
     public async Task QueueImportFromImageAsync(string filename, Stream stream, string contenttype)

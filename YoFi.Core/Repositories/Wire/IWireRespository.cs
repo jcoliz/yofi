@@ -44,7 +44,7 @@ public interface IWireQueryResultBase
 /// The result of a wire repository query
 /// </summary>
 /// <typeparam name="T">Type of items returned</typeparam>
-public interface IWireQueryResult<T>: IWireQueryResultBase
+public interface IWireQueryResult<out T>: IWireQueryResultBase
 {
     /// <summary>
     /// Items which were found as a result of the query
