@@ -2,27 +2,26 @@
 using System.Linq;
 using System.Reflection;
 
-namespace Common.DotNet.Data
+namespace Common.DotNet.Data;
+
+public static class SampleData
 {
-    public static class SampleData
+    public static Stream Open(string filename)
     {
-        public static Stream Open(string filename)
-        {
-            var assy = Assembly.GetExecutingAssembly();
-            var names = assy.GetManifestResourceNames();
+        var assy = Assembly.GetExecutingAssembly();
+        var names = assy.GetManifestResourceNames();
 
-            var matching = names.Where(x => x.Contains(filename));
-            if (!matching.Any())
-                throw new FileNotFoundException($"{filename} not found in assembly");
-            if (matching.Skip(1).Any())
-                throw new FileNotFoundException($"{filename} is ambiguous. Multiple found in assembly");
+        var matching = names.Where(x => x.Contains(filename));
+        if (!matching.Any())
+            throw new FileNotFoundException($"{filename} not found in assembly");
+        if (matching.Skip(1).Any())
+            throw new FileNotFoundException($"{filename} is ambiguous. Multiple found in assembly");
 
-            var name = matching.First();
-            var stream = assy.GetManifestResourceStream(name);
-            if (null == stream)
-                throw new FileNotFoundException($"{filename} not found in assembly");
+        var name = matching.First();
+        var stream = assy.GetManifestResourceStream(name);
+        if (null == stream)
+            throw new FileNotFoundException($"{filename} not found in assembly");
 
-            return stream;
-        }
+        return stream;
     }
 }

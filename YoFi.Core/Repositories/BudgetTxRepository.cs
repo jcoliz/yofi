@@ -2,42 +2,41 @@
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 
-namespace YoFi.Core.Repositories
+namespace YoFi.Core.Repositories;
+
+/// <summary>
+/// Contains a set of Budget Line Item (budgettx) model items and logic needed to operate on them
+/// </summary>
+/// <remarks>
+/// BudgetTx items are pretty simple. No additional logic. Just need to implement here how to query them
+/// </remarks>
+public class BudgetTxRepository: BaseRepository<BudgetTx>, IBudgetTxRepository
 {
-    /// <summary>
-    /// Contains a set of Budget Line Item (budgettx) model items and logic needed to operate on them
-    /// </summary>
-    /// <remarks>
-    /// BudgetTx items are pretty simple. No additional logic. Just need to implement here how to query them
-    /// </remarks>
-    public class BudgetTxRepository: BaseRepository<BudgetTx>, IBudgetTxRepository
+    public BudgetTxRepository(IDataProvider context): base(context)
     {
-        public BudgetTxRepository(IDataProvider context): base(context)
-        {
-        }
-
-        /// <summary>
-        /// Remove all selected items from the database
-        /// </summary>
-        public async Task BulkDeleteAsync()
-        {
-            _context.RemoveRange(All.Where(x => x.Selected == true));
-            await _context.SaveChangesAsync();
-        }
-
-        ///<inheritdoc/>
-        public async Task SetSelectedAsync(int id, bool value)
-        {
-            var item = await GetByIdAsync(id);
-            item.Selected = value;
-            await UpdateAsync(item);
-        }
-
-        /// <summary>
-        /// Subset of all known items reduced by the specified query parameter
-        /// </summary>
-        /// <param name="q">Query describing the desired subset</param>
-        /// <returns>Requested items</returns>
-        protected override IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => (x.Category != null && x.Category.Contains(q)) || (x.Memo != null && x.Memo.Contains(q)));
     }
+
+    /// <summary>
+    /// Remove all selected items from the database
+    /// </summary>
+    public async Task BulkDeleteAsync()
+    {
+        _context.RemoveRange(All.Where(x => x.Selected == true));
+        await _context.SaveChangesAsync();
+    }
+
+    ///<inheritdoc/>
+    public async Task SetSelectedAsync(int id, bool value)
+    {
+        var item = await GetByIdAsync(id);
+        item.Selected = value;
+        await UpdateAsync(item);
+    }
+
+    /// <summary>
+    /// Subset of all known items reduced by the specified query parameter
+    /// </summary>
+    /// <param name="q">Query describing the desired subset</param>
+    /// <returns>Requested items</returns>
+    protected override IQueryable<BudgetTx> ForQuery(string q) => string.IsNullOrEmpty(q) ? OrderedQuery : OrderedQuery.Where(x => (x.Category != null && x.Category.Contains(q)) || (x.Memo != null && x.Memo.Contains(q)));
 }

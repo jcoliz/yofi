@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace YoFi.Core.Repositories.Wire
+namespace YoFi.Core.Repositories.Wire;
+
+public class WireQueryResult<T> : IWireQueryResult<T> where T : class
 {
-    public class WireQueryResult<T> : IWireQueryResult<T> where T : class
-    {
-        public IWireQueryParameters Parameters { get; set; }
+    public IWireQueryParameters Parameters { get; set; }
 
-        public IEnumerable<T> Items { get; set; }
+    public IEnumerable<T> Items { get; set; }
 
-        public IWirePageInfo PageInfo { get; set; }
-    }
+    public IWirePageInfo PageInfo { get; set; }
 }

@@ -1,9 +1,8 @@
-﻿namespace Common.DotNet
-{
-    public class ApiConfig
-    {
-        public const string Section = "Api";
+﻿namespace Common.DotNet;
 
-        public string Key { get; set; }
-    }
+public class ApiConfig
+{
+    public const string Section = "Api";
+
+    public string Key { get; set; }
 }
