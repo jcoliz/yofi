@@ -66,7 +66,7 @@ public class ReceiptRepositoryInDb : IReceiptRepository
         foreach (var receipt in receipts)
         {
             // If this receipt has ONLY ONE match
-            if (receipt.Matches.Any() && !receipt.Matches.Skip(1).Any())
+            if (receipt.Matches.Count > 0 && !receipt.Matches.Skip(1).Any())
             {
                 var tx = receipt.Matches.Single();
                 await AssignReceipt(receipt, tx);
@@ -101,7 +101,9 @@ public class ReceiptRepositoryInDb : IReceiptRepository
 
         // Copy over the memo, if exists
         if (!string.IsNullOrEmpty(receipt.Memo))
+        {
             tx.Memo = receipt.Memo;
+        }
 
         // Save the transaction
         await _txrepo.UpdateAsync(tx);
@@ -127,7 +129,9 @@ public class ReceiptRepositoryInDb : IReceiptRepository
     {
         var query = _context.Get<Receipt>().Where(x => x.ID == receipt.ID);
         if (await _context.AnyAsync(query))
+        {
             _context.Remove(receipt);
+        }
         await _context.SaveChangesAsync();
     }
 
@@ -152,12 +156,14 @@ public class ReceiptRepositoryInDb : IReceiptRepository
             var txs = await _context.ToListNoTrackingAsync(query);
 
             foreach (var receipt in receipts)
+            {
                 receipt.Matches = txs
                                     .Select(t => (quality: receipt.MatchesTransaction(t), t))
                                     .Where(x => x.quality > 0)
                                     .OrderByDescending(x => x.quality)
                                     .Select(x => x.t)
                                     .ToList();
+            }
         }
 
         return receipts;

@@ -29,7 +29,7 @@ public class SplitImporter
     /// <param name="target">Transaction to add queued splits</param>
     public async Task<IEnumerable<Split>> ProcessImportAsync(Transaction target)
     {
-        if (incoming.Any())
+        if (incoming.Count > 0)
         {
             // Why no has AddRange??
             foreach (var split in incoming)
@@ -67,7 +67,7 @@ public class SplitImporter
     /// <summary>
     /// Queue of items waiting to be imported
     /// </summary>
-    private readonly HashSet<Split> incoming = new();
+    private readonly HashSet<Split> incoming = [];
 
     /// <summary>
     /// Where should the target transaction be saved?

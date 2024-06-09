@@ -141,22 +141,34 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
                     {
                         if (component.StartsWith('(') && component.EndsWith("+)"))
                         {
-                            if (Int32.TryParse(component[1..^2], out var position))
+                            if (int.TryParse(component[1..^2], out var position))
+                            {
                                 if (originals.Length >= position)
+                                {
                                     result.AddRange(originals.Skip(position - 1));
+                                }
+                            }
                         }
                         else if (component.StartsWith('(') && component.EndsWith(')'))
                         {
-                            if (Int32.TryParse(component[1..^1], out var position))
+                            if (int.TryParse(component[1..^1], out var position))
+                            {
                                 if (originals.Length >= position)
+                                {
                                     result.AddRange(originals.Skip(position - 1).Take(1));
+                                }
+                            }
                         }
                         else
+                        {
                             result.Add(component);
+                        }
                     }
 
-                    if (result.Any())
+                    if (result.Count > 0)
+                    {
                         item.Category = string.Join(":", result);
+                    }
                 }
                 // It's just a simple replacement
                 else
@@ -234,7 +246,9 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         if (any)
         {
             foreach (var tx in needbankrefs)
+            {
                 tx.GenerateBankReference();
+            }
 
             await UpdateRangeAsync(needbankrefs);
         }
@@ -261,10 +275,8 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
     {
         var item = await GetByIdAsync(id);
 
-        var category = await _payeeRepository.GetCategoryMatchingPayeeAsync(item.StrippedPayee);
-        if (category == null)
-            throw new KeyNotFoundException($"No payee found for {item.StrippedPayee}");
-
+        var category = await _payeeRepository.GetCategoryMatchingPayeeAsync(item.StrippedPayee) 
+            ?? throw new KeyNotFoundException($"No payee found for {item.StrippedPayee}");
         var result = category;
 
         // Consider custom split rules based on matched category
@@ -275,7 +287,9 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
             result = "SPLIT"; // This is what we display in the UI to indicate a transaction has a split
         }
         else
+        {
             item.Category = category;
+        }
 
         await UpdateAsync(item);
 
@@ -330,7 +344,7 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
             ssw.Open(stream);
             ssw.Serialize(transactions, sheetname: nameof(Transaction));
 
-            if (splits.Any())
+            if (splits.Count > 0)
                 ssw.Serialize(splits);
         }
 
@@ -412,7 +426,7 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         // See Bug #991: Production bug: Receipts before 5/20/2021 don't download
         // If the ReceiptUrl contains an int value, use THAT for the blobname instead.
 
-        if (Int32.TryParse(transaction.ReceiptUrl, out _))
+        if (int.TryParse(transaction.ReceiptUrl, out _))
             name = transaction.ReceiptUrl;
 
         // User Story 1190: [User Can] Upload receipts independently of transactions
@@ -452,7 +466,7 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
 public async Task FinalizeImportAsync()
     {
         var accepted = All.Where(x => x.Imported == true && x.Selected == true);
-        await _context.BulkUpdateAsync(accepted, new Transaction() { Hidden = false, Imported = false, Selected = false }, new List<string>() { "Hidden", "Imported", "Selected" });
+        await _context.BulkUpdateAsync(accepted, new Transaction() { Hidden = false, Imported = false, Selected = false }, [ "Hidden", "Imported", "Selected" ]);
 
         var rejected = All.Where(x => x.Imported == true && x.Selected != true);
         await _context.BulkDeleteAsync(rejected);
@@ -463,7 +477,7 @@ public async Task FinalizeImportAsync()
     /// </summary>
     public Task CancelImportAsync()
     {
-        IQueryable<Transaction> allimported = OrderedQuery.Where(x => x.Imported == true);
+        var allimported = OrderedQuery.Where(x => x.Imported == true);
 
         return _context.BulkDeleteAsync(allimported);
     }
@@ -494,7 +508,7 @@ public async Task FinalizeImportAsync()
 
             var category = split[0].Trim();
 
-            var loan = JsonSerializer.Deserialize<Loan>(split[1], new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var loan = JsonSerializer.Deserialize<Loan>(split[1], jsonSerializerOptions);
             if (loan.Origination is null)
                 throw new ArgumentException("No loan origination found", nameof(rule));
 
@@ -526,17 +540,17 @@ public async Task FinalizeImportAsync()
     public async Task<IEnumerable<string>> CategoryAutocompleteAsync(string q)
     {
         if (string.IsNullOrEmpty(q))
-            return Enumerable.Empty<String>();
+            return Enumerable.Empty<string>();
 
         try
         {
             const int numresults = 10;
 
             // Look for top N recent categories in transactions, first.
-            var txd = All.Where(x => x.Timestamp > _clock.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
+            var txd = All.Where(x => x.Timestamp > _clock.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
 
             // There are also some categories in splits. Get the top N there too.
-            var spd = Splits.Where(x => x.Transaction.Timestamp > _clock.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { Key = g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
+            var spd = Splits.Where(x => x.Transaction.Timestamp > _clock.Now.AddMonths(-18) && x.Category.Contains(q)).GroupBy(x => x.Category).Select(g => new { g.Key, Value = g.Count() }).OrderByDescending(x => x.Value).Take(numresults);
 
             // Merge the results
 
@@ -552,7 +566,7 @@ public async Task FinalizeImportAsync()
         catch (Exception)
         {
             // TODO: I should log this
-            return Enumerable.Empty<String>();
+            return Enumerable.Empty<string>();
         }
     }
 
@@ -564,6 +578,8 @@ public async Task FinalizeImportAsync()
     private readonly IClock _clock;
     private readonly IPayeeRepository _payeeRepository;
     private readonly IRepository<Split> _splitRepository;
+    private readonly JsonSerializerOptions jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+
 
     #endregion
 
@@ -578,7 +594,7 @@ public async Task FinalizeImportAsync()
     /// <summary>
     /// The shape of transactions when excported to spreadsheet
     /// </summary>
-    class TransactionExportDto 
+    internal class TransactionExportDto 
     {
         public int ID { get; set; }
         public DateTime Timestamp { get; set; }

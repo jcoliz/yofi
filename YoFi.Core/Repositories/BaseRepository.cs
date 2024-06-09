@@ -163,7 +163,9 @@ public class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, n
             var count = await _context.CountAsync(query);
             pages = new WirePageInfo(totalitems: count, page: parms.Page ?? 1, pagesize: PageSize);
             if (count > PageSize)
+            {
                 query = query.Skip(pages.FirstItem - 1).Take(pages.NumItems);
+            }
         }
 
         var list = await _context.ToListNoTrackingAsync(query);
