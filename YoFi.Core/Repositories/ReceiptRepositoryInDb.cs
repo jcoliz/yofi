@@ -61,7 +61,7 @@ public class ReceiptRepositoryInDb : IReceiptRepository
 
     public async Task<int> AssignAll()
     {
-        int result = 0;
+        var result = 0;
         var receipts = await GetAllAsync();
         foreach (var receipt in receipts)
         {

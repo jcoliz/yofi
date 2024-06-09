@@ -370,7 +370,7 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         if (null == _storage)
             throw new ApplicationException("Storage is not defined");
 
-        string blobname = transaction.ID.ToString();
+        var blobname = transaction.ID.ToString();
 
         await _storage.UploadBlobAsync(blobname, stream, contenttype);
 
