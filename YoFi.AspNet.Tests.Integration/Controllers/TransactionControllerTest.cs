@@ -788,62 +788,6 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
 
         #region Edit
 
-        // TODO: Move to unit tests
-        [TestMethod]
-        public async Task EditModal()
-        {
-            // Given: There are 5 items in the database, one of which we care about
-            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
-            var id = expected.ID;
-
-            // When: Asking for the modal edit partial view
-            var document = await WhenGetAsync($"{urlroot}/EditModal/{id}");
-
-            // Then: That item is shown
-            var testkey = TestKey<Transaction>.Find().Name;
-            var actual = document.QuerySelector($"input[name={testkey}]").GetAttribute("value").Trim();
-            Assert.AreEqual(TestKey<Transaction>.Order()(expected), actual);
-        }
-
-        [DataRow("Edit")]
-        [DataRow("EditModal")]
-        [DataTestMethod]
-        public async Task EditPayeeMatch(string endpoint)
-        {
-            // Given: A transaction with no category
-            var tx = FakeObjects<Transaction>.Make(4).Add(1,x => x.Category = null).SaveTo(this).Group(1).Single();
-
-            // And: A payee which matches the category payee
-            var payee = FakeObjects<Payee>.Make(1,x => x.Name = tx.Payee).SaveTo(this).Single();
-
-            // When: Asking for the modal edit partial view
-            var document = await WhenGetAsync($"{urlroot}/{endpoint}/{tx.ID}");
-
-            // Then: The transaction gets the matching payee category
-            var actual = document.QuerySelector($"input[name=Category]").GetAttribute("value").Trim();
-            Assert.AreEqual(payee.Category, actual);
-        }
-
-        [DataRow("Edit")]
-        [DataRow("EditModal")]
-        [DataTestMethod]
-        public async Task EditNoPayeeMatch(string endpoint)
-        {
-            // Given: A transaction with an existing category
-            var tx = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
-
-            // And: A payee which matches the transaction payee, but has a different category
-            var unexpectedcategory = "Unexpected";
-            var payee = FakeObjects<Payee>.Make(1,x => { x.Name = tx.Payee; x.Category = unexpectedcategory; }).SaveTo(this).Single();
-
-            // When: Asking for the modal edit partial view
-            var document = await WhenGetAsync($"{urlroot}/{endpoint}/{tx.ID}");
-
-            // Then: The transaction DID NOT get the matching payee category
-            var actual = document.QuerySelector($"input[name=Category]").GetAttribute("value").Trim();
-            Assert.AreNotEqual(payee.Category, actual);
-        }
-
         [TestMethod]
         public async Task EditDuplicate()
         {

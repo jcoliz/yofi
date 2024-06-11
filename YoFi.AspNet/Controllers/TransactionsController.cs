@@ -160,18 +160,10 @@ namespace YoFi.AspNet.Controllers
         #region Action Handlers: Update (Edit)
 
         [ValidateTransactionExists]
-        public async Task<IActionResult> Edit(int? id, [FromServices] IPayeeRepository payeeRepository, [FromServices] IReceiptRepository rrepo)
+        public async Task<IActionResult> Edit(int? id, [FromServices] IReceiptRepository rrepo)
         {
-            var transaction = await _repository.GetWithSplitsByIdAsync(id);
-            if (string.IsNullOrEmpty(transaction.Category) && payeeRepository != null)
-            {
-                var category = await payeeRepository.GetCategoryMatchingPayeeAsync(transaction.StrippedPayee);
-                if (category != null)
-                {
-                    transaction.Category = category;
-                    ViewData["AutoCategory"] = true;
-                }
-            }
+            (var transaction, var auto_category) = await _repository.GetWithSplitsAndMatchCategoryByIdAsync(id);
+            ViewData["AutoCategory"] = auto_category;
 
             var matches = await rrepo.GetMatchingAsync(transaction);
             ViewData["Receipt.Any"] = matches.Any;
@@ -179,6 +171,7 @@ namespace YoFi.AspNet.Controllers
             ViewData["Receipt.Suggested"] = matches.Suggested;
 
             return View(transaction);
+
         }
 
         [ValidateTransactionExists]
@@ -434,7 +427,7 @@ namespace YoFi.AspNet.Controllers
         Task<IActionResult> IController<Transaction>.Edit(int id, Transaction item) => Edit(id, false, item);
         Task<IActionResult> IController<Transaction>.Download() => Download(false);
         Task<IActionResult> IController<Transaction>.Upload(List<IFormFile> files) => throw new NotImplementedException();
-        Task<IActionResult> IController<Transaction>.Edit(int? id) => Edit(id, null,null);
+        Task<IActionResult> IController<Transaction>.Edit(int? id) => Edit(id, null);
 
         Task<IActionResult> IController<Transaction>.Create() => Create(rrepo:null,rid:null);
 
@@ -442,3 +435,4 @@ namespace YoFi.AspNet.Controllers
 #endregion
     }
 }
+

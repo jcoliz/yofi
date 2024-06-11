@@ -176,40 +176,6 @@ namespace YoFi.Tests.Controllers.Slim
             var redirect = Assert.That.IsOfType<BadRequestResult>(actionresult);
         }
 
-        // TODO: Move to unit tests
-        // These don't make sense as controllers tests. However, do need to ensure there are matching unit tests!
-        //[DataRow(true)]
-        //[DataRow(false)]
-        //[DataTestMethod]
-        public async Task EditPayeeMatch(bool modal)
-        {
-            // Given: Mocked repositories
-            var txrepo = new Mock<ITransactionRepository>();
-            txrepo.Setup(x => x.GetWithSplitsByIdAsync(99)).Returns(Task.FromResult(new Transaction() { Payee = "PayeeName" } ));
-            controller = new TransactionsController(txrepo.Object, clock);
-
-            var payrepo = new Mock<IPayeeRepository>();
-            payrepo.Setup(x => x.GetCategoryMatchingPayeeAsync("PayeeName")).Returns(Task.FromResult("PayeeCategory"));
-
-            // When: Calling Edit with a category that should match
-            Transaction model;
-            if (modal)
-            {
-                var actionresult = await itemController.EditModal(99);
-                var viewresult = Assert.That.IsOfType<PartialViewResult>(actionresult);
-                model = Assert.That.IsOfType<Transaction>(viewresult.Model);
-            }
-            else
-            {
-                var actionresult = await itemController.Edit(99, payrepo.Object,null);
-                var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
-                model = Assert.That.IsOfType<Transaction>(viewresult.Model);
-            }
-
-            // Then: Resulting transaction has expected category
-            Assert.AreEqual("PayeeCategory", model.Category);
-        }
-
         [TestMethod]
         public async Task BulkEdit()
         {

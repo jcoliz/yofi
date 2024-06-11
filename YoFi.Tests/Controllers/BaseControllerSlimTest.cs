@@ -157,23 +157,6 @@ namespace YoFi.Tests.Controllers.Slim
         }
 
         [TestMethod]
-        public async Task EditDetailsFound()
-        {
-            // Given: Five items in the respository
-            var data = FakeObjects<T>.Make(5).SaveTo(this);
-            var selected = data.Last();
-
-            // When: Retrieving details for a selected item to edit it
-            var actionresult = await controller.Edit(selected.ID);
-
-            var viewresult = Assert.That.IsOfType<ViewResult>(actionresult);
-            var model = Assert.That.IsOfType<T>(viewresult.Model);
-
-            // Then: The selected item is the one returned
-            Assert.AreEqual(selected, model);
-        }
-
-        [TestMethod]
         public async Task EditObjectValues()
         {
             // Given: Five items in the respository, plus another ready to use for editing

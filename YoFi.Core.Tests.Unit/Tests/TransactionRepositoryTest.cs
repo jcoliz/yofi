@@ -1,5 +1,6 @@
 ﻿using Common.DotNet;
 using Common.DotNet.Test;
+using DocumentFormat.OpenXml.EMMA;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using jcoliz.FakeObjects;
 using jcoliz.OfficeOpenXml.Serializer;
@@ -556,6 +557,53 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(newvalues.Memo, actual.Memo);
             Assert.AreEqual(newvalues.Category, actual.Category);
             Assert.AreEqual(newvalues.Payee, actual.Payee);
+        }
+
+        [TestMethod]
+        public async Task EditModal()
+        {
+            // Given: There are 5 items in the database, one of which we care about
+            var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
+            var id = expected.ID;
+
+            // When: Asking for the modal edit partial view
+            (var actual, var _) = await transactionRepository.GetWithSplitsAndMatchCategoryByIdAsync(id);
+
+            // Then: That item is returned
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task EditPayeeMatch()
+        {
+            // Given: A transaction with no category
+            var tx = FakeObjects<Transaction>.Make(4).Add(1, x => x.Category = null).SaveTo(this).Group(1).Single();
+
+            // And: A payee which matches the category payee
+            var payee = FakeObjects<Payee>.Make(1, x => x.Name = tx.Payee).SaveTo(this).Single();
+
+            // When: Asking for the modal edit partial view
+            (var actual, var _) = await transactionRepository.GetWithSplitsAndMatchCategoryByIdAsync(tx.ID);
+
+            // Then: The transaction gets the matching payee category
+            Assert.AreEqual(payee.Category, actual.Category);
+        }
+
+        [TestMethod]
+        public async Task EditNoPayeeMatch()
+        {
+            // Given: A transaction with an existing category
+            var tx = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
+
+            // And: A payee which matches the transaction payee, but has a different category
+            var unexpectedcategory = "Unexpected";
+            var payee = FakeObjects<Payee>.Make(1, x => { x.Name = tx.Payee; x.Category = unexpectedcategory; }).SaveTo(this).Single();
+
+            // When: Asking for the modal edit partial view
+            (var actual, var _) = await transactionRepository.GetWithSplitsAndMatchCategoryByIdAsync(tx.ID);
+
+            // Then: The transaction DID NOT get the matching payee category
+            Assert.AreNotEqual(payee.Category, actual.Category);
         }
         #endregion
 
