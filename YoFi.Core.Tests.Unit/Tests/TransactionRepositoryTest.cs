@@ -1,6 +1,7 @@
 ﻿using Common.DotNet;
 using Common.DotNet.Test;
 using DocumentFormat.OpenXml.EMMA;
+using DocumentFormat.OpenXml.Math;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using jcoliz.FakeObjects;
 using jcoliz.OfficeOpenXml.Serializer;
@@ -604,6 +605,40 @@ namespace YoFi.Core.Tests.Unit
 
             // Then: The transaction DID NOT get the matching payee category
             Assert.AreNotEqual(payee.Category, actual.Category);
+        }
+
+
+        [TestMethod]
+        public async Task EditDuplicate()
+        {
+            // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
+            var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
+            var id = data.Group(0).Last().ID;
+            var newvalues = data.Group(1).Single();
+
+            // When: Editing the chosen item, with duplicate = true
+            await repository.AddAsync(newvalues);
+
+            // Then: The item was added, so the whole database now is the original items plus the expected
+            var actual = context.Get<Transaction>().OrderBy(TestKey<Transaction>.Order());
+            Assert.IsTrue(actual.SequenceEqual(data));
+        }
+
+        [TestMethod]
+        public async Task EditTransactionValues()
+        {
+            // Given: Five items in the respository, plus another ready to use for editing
+            var data = FakeObjects<Transaction>.Make(5).SaveTo(this).Add(1);
+
+            // When: Changing details for a selected item
+            var selected = data.Group(0).Last();
+            var newvalues = data.Group(1).Single();
+            var id = newvalues.ID = selected.ID;
+            await transactionRepository.UpdateTransactionAsync(id, newvalues);
+
+            // Then: Item has been updated
+            var actual = await repository.GetByIdAsync(id);
+            Assert.AreEqual(newvalues, actual);
         }
         #endregion
 
@@ -1318,11 +1353,11 @@ namespace YoFi.Core.Tests.Unit
             // only one, so the category is transferred to the parent transaction.
 
             // Given: There are two items in the database, one of which we care about
-            int nextid = 1;
+            var nextid = 1;
             var id = FakeObjects<Split>.Make(2, x => x.ID = nextid++).SaveTo(this).Last().ID;
 
             // When: Deleting the selected item
-            var result = transactionRepository.RemoveSplitAsync(id);
+            await transactionRepository.RemoveSplitAsync(id);
 
             // Then: Now is only one item in database
             Assert.AreEqual(1, context.Get<Split>().Count());

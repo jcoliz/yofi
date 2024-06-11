@@ -715,6 +715,76 @@ namespace YoFi.Core.Tests.Unit
             CollectionAssert.AreEquivalent(qresult.Select(x => x.Memo).ToArray(), rs.Select(x => x.Memo).ToArray());
         }
 
+        [TestMethod]
+        public async Task EditNoReceipts()
+        {
+            // Given: One transaction in the system
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: No receipts in the system
+            // ...
+
+            // When: Editing a transaction
+            var matches = await repository.GetMatchingAsync(tx);
+
+            // Then: No option to match is offered
+            Assert.AreEqual(matches.Matches,0);
+            Assert.IsNull(matches.Suggested);
+        }
+
+        [TestMethod]
+        public async Task EditAnyReceipts()
+        {
+            // Given: Some receipts in the system
+            _ = FakeObjects<Receipt>.Make(5).SaveTo(this);
+
+            // And: One transaction in the system
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // When: Editing the transaction
+            var matches = await repository.GetMatchingAsync(tx);
+
+            // Then: Option to match a receipt is offered
+            Assert.IsNotNull(matches.Suggested);
+        }
+
+        [TestMethod]
+        public async Task EditMatchingReceipt()
+        {
+            // Given: One transaction in the system
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Some receipts in the system where exactly one matches the transation
+            var r = FakeObjects<Receipt>.Make(1, x => x.Name = tx.Payee).Add(5, x => x.Timestamp += TimeSpan.FromDays(100)).SaveTo(this).First();
+
+            // When: Editing the transaction
+            var matches = await repository.GetMatchingAsync(tx);
+            //ViewData["Receipt.Any"] = matches.Any;
+            //ViewData["Receipt.Matches"] = matches.Matches;
+            //ViewData["Receipt.Suggested"] = matches.Suggested;
+
+            // Then: Option to apply the matching receipt is offered
+            var rid = matches.Suggested?.ID;
+            Assert.AreEqual(r.ID, rid);
+        }
+
+        [TestMethod]
+        public async Task EditBestMatchingReceipt()
+        {
+            // Given: One transaction in the system
+            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
+
+            // And: Some receipts in the system where many match the transation, butone mattches exactly
+            var r = FakeObjects<Receipt>.Make(1, x => { x.Name = tx.Payee; x.Timestamp = tx.Timestamp; }).Add(5, x => { x.Name = tx.Payee; x.Timestamp = tx.Timestamp + TimeSpan.FromDays(1); }).SaveTo(this).First();
+
+            // When: Editing the transaction
+            var matches = await repository.GetMatchingAsync(tx);
+
+            // Then: Option to apply the best matching receipt is offered
+            var rid = matches.Suggested?.ID;
+            Assert.AreEqual(r.ID, rid);
+        }
+
         #endregion
     }
 }

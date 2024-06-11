@@ -172,4 +172,15 @@ public interface ITransactionRepository: IRepository<Transaction>
     /// <param name="id">Transaction ID</param>
     /// <returns>The category which was applied, or null if none matched</returns>
     Task<string> ApplyPayeeAsync(int id);
+
+    /// <summary>
+    /// Update <paramref name="item"/> with new details
+    /// </summary>
+    /// <remarks>
+    /// This will preserve any existing receipt URL
+    /// <paramref name="item"/> should be an object already retrieved through one of the properties
+    /// or methods of this class.
+    /// </remarks>
+    /// <param name="item">New details</param>
+    Task UpdateTransactionAsync(int id, Transaction item);
 }

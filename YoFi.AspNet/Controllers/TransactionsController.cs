@@ -192,22 +192,11 @@ namespace YoFi.AspNet.Controllers
         {
             if (duplicate == true)
             {
-                transaction.ID = 0;
                 await _repository.AddAsync(transaction);
             }
             else
             {
-                // Bug #846: This Edit function is not allowed to alter the
-                // ReceiptUrl. So we must preserve whatever was there.
-
-                // Note that we need an as no tracking query here, or we'll have problems shortly when we query with one
-                // object but update another.
-                var oldtransaction = await _repository.GetByIdAsync(id);
-                var oldreceipturl = oldtransaction.ReceiptUrl;
-
-                transaction.ReceiptUrl = oldreceipturl;
-
-                await _repository.UpdateAsync(transaction);
+                await _repository.UpdateTransactionAsync(id, transaction);
             }
             return RedirectToAction(nameof(Index));
         }

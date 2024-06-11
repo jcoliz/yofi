@@ -788,32 +788,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
 
         #region Edit
 
-        [TestMethod]
-        public async Task EditDuplicate()
-        {
-            // Given: There are 5 items in the database, one of which we care about, plus an additional item to be use as edit values
-            var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
-            var id = data.Group(0).Last().ID;
-            var newvalues = data.Group(1).Single();
-
-            // When: Editing the chosen item, with duplicate = true
-            var formData = new Dictionary<string, string>(FormDataFromObject(newvalues))
-            {
-                { "ID", id.ToString() },
-                { "duplicate", "true" },
-            };
-            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", FormAction, formData);
-
-            // Then: Redirected to index
-            Assert.AreEqual(HttpStatusCode.Found, response.StatusCode);
-            var redirect = response.Headers.GetValues("Location").Single();
-            Assert.AreEqual($"{urlroot}", redirect);
-
-            // And: The item was added, so the whole database now is the original items plus the expected
-            var actual = context.Set<Transaction>().AsNoTracking().OrderBy(TestKey<Transaction>.Order());
-            Assert.IsTrue(actual.SequenceEqual(data));
-        }
-
+        // TODO: Also this needs to move to unit tests and run against repository
         [TestMethod]
         public async Task EditReceiptOverride_Bug846()
         {
@@ -852,82 +827,6 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
             // the receitpurl we set above.
             var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
             Assert.AreEqual(newreceipturl, actual.ReceiptUrl);
-        }
-
-        [TestMethod]
-        public async Task EditNoReceipts()
-        {
-            // Given: One transaction in the system
-            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
-
-            // And: No receipts in the system
-            // ...
-
-            // When: Editing a transaction
-            var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
-
-            // Then: No option to match is offered
-            var hasreceipts = document.QuerySelector("div[data-test-id=hasreceipts]");
-            Assert.IsNull(hasreceipts);
-        }
-
-        [TestMethod]
-        public async Task EditAnyReceipts()
-        {
-            // Given: Some receipts in the system
-            _ = FakeObjects<Receipt>.Make(5).SaveTo(this);
-
-            // And: One transaction in the system
-            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
-
-            // When: Editing the transaction
-            var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
-
-            // Then: Option to match a receipt is offered
-            var hasreceipts = document.QuerySelector("div[data-test-id=hasreceipts]");
-            Assert.IsNotNull(hasreceipts);
-        }
-
-        [TestMethod]
-        public async Task EditMatchingReceipt()
-        {
-            // Given: One transaction in the system
-            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
-
-            // And: Some receipts in the system where exactly one matches the transation
-            var r = FakeObjects<Receipt>.Make(1,x=>x.Name = tx.Payee).Add(5,x=>x.Timestamp += TimeSpan.FromDays(100)).SaveTo(this).First();
-
-            // When: Editing the transaction
-            var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
-
-            // Then: Option to apply the matching receipt is offered
-            var accept = document.QuerySelector("form[data-test-id=accept]");
-            Assert.IsNotNull(accept);
-
-            var rid_str = accept.GetAttribute("data-test-value");
-            var rid = int.Parse(rid_str);
-            Assert.AreEqual(r.ID,rid);
-        }
-
-        [TestMethod]
-        public async Task EditBestMatchingReceipt()
-        {
-            // Given: One transaction in the system
-            var tx = FakeObjects<Transaction>.Make(1).SaveTo(this).Single();
-
-            // And: Some receipts in the system where many match the transation, butone mattches exactly
-            var r = FakeObjects<Receipt>.Make(1,x=>{x.Name = tx.Payee;x.Timestamp = tx.Timestamp;}).Add(5,x=>{ x.Name = tx.Payee; x.Timestamp = tx.Timestamp + TimeSpan.FromDays(1);}).SaveTo(this).First();
-
-            // When: Editing the transaction
-            var document = await WhenGetAsync($"{urlroot}/Edit/{tx.ID}");
-
-            // Then: Option to apply the best matching receipt is offered
-            var accept = document.QuerySelector("form[data-test-id=accept]");
-            Assert.IsNotNull(accept);
-
-            var rid_str = accept.GetAttribute("data-test-value");
-            var rid = int.Parse(rid_str);
-            Assert.AreEqual(r.ID,rid);
         }
 
         #endregion

@@ -123,6 +123,7 @@ namespace YoFi.Tests.Helpers
 
         /// <inheritdoc/>
         public async Task DeleteReceiptAsync(int id) => throw new NotImplementedException();
+        public Task UpdateTransactionAsync(int id, Transaction item) => throw new NotImplementedException();
     }
 
 }

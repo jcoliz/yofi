@@ -80,6 +80,7 @@ public class BaseRepository<T> : IRepository<T> where T: class, IModelItem<T>, n
     /// <param name="item">Item we wish to add</param>
     public async Task AddAsync(T item)
     {
+        item.ID = 0;
         _context.Add(item);
         await _context.SaveChangesAsync();
     }

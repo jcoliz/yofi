@@ -570,6 +570,22 @@ public async Task FinalizeImportAsync()
         }
     }
 
+    /// <inheritdoc/>
+    public async Task UpdateTransactionAsync(int id, Transaction item)
+    {
+        // Bug #846: This Edit function is not allowed to alter the
+        // ReceiptUrl. So we must preserve whatever was there.
+
+        // Note that we need an as no tracking query here, or we'll have problems shortly when we query with one
+        // object but update another.
+        var oldtransaction = await GetByIdAsync(id);
+        var oldreceipturl = oldtransaction.ReceiptUrl;
+
+        item.ReceiptUrl = oldreceipturl;
+
+        await UpdateAsync(item);
+    }
+
     #endregion
 
     #region Fields
