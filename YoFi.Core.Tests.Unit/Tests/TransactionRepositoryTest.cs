@@ -640,6 +640,40 @@ namespace YoFi.Core.Tests.Unit
             var actual = await repository.GetByIdAsync(id);
             Assert.AreEqual(newvalues, actual);
         }
+
+        // TODO: Also this needs to move to unit tests and run against repository
+        [TestMethod]
+        public async Task EditReceiptOverride_Bug846()
+        {
+            // Bug 846: Save edited item overwrites uploaded receipt
+
+            // Given: There are 5 items in the database, one of which we care about
+            // Note that this does not have a receipturl, by default
+            var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
+            var original = data.Group(0).Last();
+            var id = original.ID;
+            var newvalues = data.Group(1).Single();
+            newvalues.ID = id;
+
+            // And: Separately committing a change to set the receipturl
+            // Note that we have not reflected this change in our in-memory version of the object
+            var newreceipturl = "SET";
+            var dbversion = context.Get<Transaction>().Where(x => x.ID == id).Single();
+            dbversion.ReceiptUrl = newreceipturl;
+            await context.SaveChangesAsync();
+
+            // When: Posting an edit to the chosen item using new edited values
+            // Note also no receipturl in this object
+            await transactionRepository.UpdateTransactionAsync(id, newvalues);
+
+            // Then: The in-database receipt url remains
+
+            // What SHOULD happen is that the "blank" recepturl in the updated object does not overwrite
+            // the receitpurl we set above.
+            var actual = context.Get<Transaction>().Single(x => x.ID == id);
+            Assert.AreEqual(newreceipturl, actual.ReceiptUrl);
+        }
+
         #endregion
 
         #region Index Tests

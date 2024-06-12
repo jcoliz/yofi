@@ -136,7 +136,15 @@ namespace YoFi.Tests.Helpers
             }
             else if (t == typeof(Transaction))
             {
-                TransactionData.AddRange(items as IEnumerable<Transaction>);
+                // In production code, ADDING a transaction will also automatically assign
+                // an ID to it. Some higher-level behavior counts on this, so we need to
+                // replicate it here.
+                var id = TransactionData.Count > 0 ? TransactionData.Max(x => x.ID) : 0;
+                foreach (var tx in items as IEnumerable<Transaction>)
+                {
+                    tx.ID = ++id;
+                    TransactionData.Add(tx);
+                }
             }
             else if (t == typeof(Split))
             {

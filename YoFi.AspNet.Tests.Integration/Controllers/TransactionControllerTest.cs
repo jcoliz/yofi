@@ -788,47 +788,6 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
 
         #region Edit
 
-        // TODO: Also this needs to move to unit tests and run against repository
-        [TestMethod]
-        public async Task EditReceiptOverride_Bug846()
-        {
-            // Bug 846: Save edited item overwrites uploaded receipt
-
-            // Given: There are 5 items in the database, one of which we care about
-            // Note that this does not have a receipturl, by default
-            var data = FakeObjects<Transaction>.Make(4).SaveTo(this).Add(1);
-            var original = data.Group(0).Last();
-            var id = original.ID;
-            var newvalues = data.Group(1).Single();
-
-            // Detach so our edits won't show up
-            context.Entry(original).State = EntityState.Detached;
-
-            // And: Separately committing a change to set the receipturl
-            // Note that we have not reflected this change in our in-memory version of the object
-            var newreceipturl = "SET";
-            var dbversion = context.Set<Transaction>().Where(x => x.ID == id).Single();
-            dbversion.ReceiptUrl = newreceipturl;
-            context.SaveChanges();
-            // Detach so the editing operation can work on this item
-            context.Entry(dbversion).State = EntityState.Detached;
-
-            // When: Posting an edit to the chosen item using new edited values
-            // Note also no receipturl in this object
-            var formData = new Dictionary<string, string>(FormDataFromObject(newvalues))
-            {
-                { "ID", id.ToString() },
-            };
-            var response = await WhenGettingAndPostingForm($"{urlroot}/Edit/{id}", FormAction, formData);
-
-            // Then: The in-database 
-
-            // What SHOULD happen is that the "blank" recepturl in the updated object does not overwrite
-            // the receitpurl we set above.
-            var actual = context.Set<Transaction>().Where(x => x.ID == id).AsNoTracking().Single();
-            Assert.AreEqual(newreceipturl, actual.ReceiptUrl);
-        }
-
         #endregion
 
         #region Receipts
