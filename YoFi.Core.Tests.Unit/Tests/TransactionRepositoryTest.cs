@@ -536,6 +536,10 @@ namespace YoFi.Core.Tests.Unit
             Assert.IsTrue(apiresult.OrderBy(x => x).SequenceEqual(chosen.Select(x => x.Category).OrderBy(x => x)));
         }
 
+        #endregion
+
+        #region Edit Tests
+
         [TestMethod]
         public async Task Edit()
         {
@@ -1318,6 +1322,7 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(expected.Amount, actual.Amount);
             Assert.AreEqual(category, actual.Category);
             Assert.IsNull(expected.Category);
+            Assert.IsTrue(expected.HasSplits);
         }
 
         [TestMethod]
@@ -1353,6 +1358,9 @@ namespace YoFi.Core.Tests.Unit
 
             // And: New split has no category
             Assert.IsNull(expected.Splits.Last().Category);
+
+            // And: Has splits shown correctly
+            Assert.IsTrue(expected.HasSplits);
         }
 
         [TestMethod]
@@ -1398,6 +1406,58 @@ namespace YoFi.Core.Tests.Unit
 
             // And: The deleted item cannot be found
             Assert.IsFalse(context.Get<Split>().Any(x => x.ID == id));
+        }
+
+        [TestMethod]
+        public async Task SplitsShownInEdit()
+        {
+            // Given: Single transaction with balanced splits
+            var chosen = FakeObjects<Transaction>
+                .Make(1, x =>
+                {
+                    x.Splits = FakeObjects<Split>.Make(2).Group(0);
+                    x.Amount = x.Splits.Sum(x => x.Amount);
+                })
+                .SaveTo(this);
+            var id = chosen.Single().ID;
+
+            // When: Getting the edit page for the transaction
+            (var actual, var _) = await transactionRepository.GetWithSplitsAndMatchCategoryByIdAsync(id);
+
+            // Then: Splits are shown
+            Assert.AreEqual(2, actual.Splits.Count);
+
+            // And: Amounts are correct
+            var amounts = actual.Splits.Select(x => x.Amount).OrderBy(x => x);
+            var expectedamounts = chosen.Single().Splits.Select(x => x.Amount).OrderBy(x => x);
+            Assert.IsTrue(amounts.SequenceEqual(expectedamounts));
+
+            // And: They're OK (not flagged as problematic)
+            Assert.IsTrue(actual.IsSplitsOK);
+        }
+
+        [TestMethod]
+        public async Task SplitsDontAddUpInEdit()
+        {
+            // Given: Single transaction with NOT balanced splits
+            var id = FakeObjects<Transaction>.Make(1,
+                x =>
+                {
+                    x.Splits = FakeObjects<Split>.Make(2).Group(0);
+                    x.Amount = 2 * x.Splits.Sum(x => x.Amount);
+                })
+                .SaveTo(this)
+                .Single()
+                .ID;
+
+            // When: Getting the edit page for the transaction
+            (var actual, var _) = await transactionRepository.GetWithSplitsAndMatchCategoryByIdAsync(id);
+
+            // Then: Splits are shown
+            Assert.AreEqual(2, actual.Splits.Count);
+
+            // And: They're NOT OK (yes flagged as problematic)
+            Assert.IsFalse(actual.IsSplitsOK);
         }
 
         #endregion

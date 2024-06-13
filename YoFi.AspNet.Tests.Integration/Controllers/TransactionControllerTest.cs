@@ -423,6 +423,8 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         [TestMethod]
         public async Task CreateSplit()
         {
+            // NOTE: Covered in unit tests
+
             // Given: There are 5 items in the database, one of which we care about
             var items = FakeObjects<Transaction>.Make(5).SaveTo(this);
             var expected = items.Last();
@@ -448,6 +450,9 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         [TestMethod]
         public async Task SplitsShownInIndex()
         {
+            // NOTE: This is just checking that the view successfully processed `HasSplits` property.
+            // Unit tests cover this
+
             // Given: Single transaction with balanced splits
             _ = FakeObjects<Transaction>
                 .Make(1, x =>
@@ -469,6 +474,7 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         [TestMethod]
         public async Task SplitsShownInIndexSearchCategory()
         {
+            // NOTE: Covered in unit tests by IndexQCategorySplits
             // Given: Some transactions, one of which has splits
             var expected = FakeObjects<Transaction>
                 .Make(5)
@@ -494,6 +500,8 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         [TestMethod]
         public async Task SplitsShownInEdit()
         {
+            // NOTE: Covered in unit tests by SplitsShownInEdit
+
             // Given: Single transaction with balanced splits
             var chosen = FakeObjects<Transaction>
                 .Make(1, x =>
@@ -524,6 +532,8 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         [TestMethod]
         public async Task SplitsDontAddUpInEdit()
         {
+            // NOTE: Covered by SplitsDontAddUpInEdit in unit tests
+
             // Given: Single transaction with NOT balanced splits
             var id = FakeObjects<Transaction>.Make(1,
                 x =>
@@ -795,6 +805,8 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         [TestMethod]
         public async Task GetReceipt()
         {
+            // NOTE: This test is covered by plenty unit tests
+
             // Given: A transaction with a receipt
             var filename = "1234";
             var expected = FakeObjects<Transaction>
@@ -832,6 +844,8 @@ namespace YoFi.AspNet.Tests.Integration.Controllers
         [TestMethod]
         public async Task PrintCheck()
         {
+            // NOTE: This simply performs a get, and returns the selected view.
+
             // Given: There are 5 items in the database, one of which we care about
             var expected = FakeObjects<Transaction>.Make(5).SaveTo(this).Last();
             var id = expected.ID;
