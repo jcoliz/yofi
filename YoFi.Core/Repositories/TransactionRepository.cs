@@ -224,8 +224,6 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
                 await UpdateAsync(tx);
             }
         }
-        //else
-        //    throw new ApplicationException("No matching Transaction");
    
         // else if dones't exist, something bizarre happened, but we'll not take any action 
 
