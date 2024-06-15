@@ -137,6 +137,10 @@ namespace YoFi.Tests.Controllers.Slim
         [TestMethod]
         public async Task Create()
         {
+            // Not implemented for transactions
+            if (typeof(T) == typeof(Transaction))
+                return;
+
             // Given: Five items in the respository, plus another ready to add
             var data = FakeObjects<T>.Make(5).SaveTo(this).Add(1);
 

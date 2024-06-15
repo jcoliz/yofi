@@ -805,6 +805,37 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(expected, actual);
         }
 
+        [TestMethod]
+        public async Task CreateTransactionFromReceipt()
+        {
+            // Given: A receipt, with a unique memo
+            var memo = "CreateTransactionWithReceiptMatch";
+            var r = FakeObjects<Receipt>.Make(1, x => { x.ID = 1; x.Memo = memo; }).SaveTo(this).Single();
+
+            // And: There is one transaction in the database
+            FakeObjects<Transaction>.Make(1).SaveTo(this);
+
+            // And: We have prepared a transaction to be created matching the receipt
+            var adding = r.AsTransaction();
+
+            // When: Creating a new item using those details
+            await repository.AddTransactionAsync(adding);
+
+            // Then: There are now two transaction in the database
+            Assert.AreEqual(2, txrepo.All.Count());
+
+            // And: The last one has a receipt matching the receipt we created.
+            var actual = txrepo.All.Last();
+            Assert.AreEqual(actual.ReceiptUrl, "r/1");
+
+            // And: The transaction memo matches the receipt memo
+            Assert.AreEqual(actual.Memo, memo);
+
+            // And: No more receipts in the database
+            var all = await repository.GetAllAsync();
+            Assert.AreEqual(all.Count(), 0);
+        }
+
         #endregion
     }
 }
