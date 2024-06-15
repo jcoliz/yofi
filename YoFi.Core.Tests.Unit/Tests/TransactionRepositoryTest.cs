@@ -1710,6 +1710,27 @@ namespace YoFi.Core.Tests.Unit
 
             // Then: ApplicationException
         }
+
+        [TestMethod]
+        public async Task DeleteReceiptAsync()
+        {
+            // Given: A transaction with a receipt
+            var filename = "1234";
+            var expected = FakeObjects<Transaction>
+                .Make(4)
+                .Add(1, x => { x.ID = 1; x.ReceiptUrl = filename; })
+                .SaveTo(this)
+                .Group(1)
+                .Single();
+
+            // When: Deleting the receipt from the transaction
+            await transactionRepository.DeleteReceiptAsync(1);
+
+            // Then: The transcation no longer has a receipt
+            var tx = await transactionRepository.GetByIdAsync(1);
+            Assert.IsNull(tx.ReceiptUrl);
+        }
+
         #endregion
 
     }
