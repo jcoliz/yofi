@@ -76,6 +76,23 @@ public interface ITransactionRepository: IRepository<Transaction>
     Task<int> RemoveSplitAsync(int id);
 
     /// <summary>
+    /// Retrieve a single split by its <paramref name="id"/>
+    /// </summary>
+    /// <param name="id">ID of split</param>
+    /// <returns>Requested Split</returns>
+    Task<Split> GetSplitByIdAsync(int id);
+
+    /// <summary>
+    /// Update spli<paramref name="split"/> with new details
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="item"/> should be an object already retrieved through one of the properties
+    /// or methods of this class.
+    /// </remarks>
+    /// <param name="item">New details</param>
+    Task UpdateSplitAsync(Split split);
+
+    /// <summary>
     /// Change category of all selected items to <paramref name="category"/>
     /// </summary>
     /// <param name="category">Next category</param>

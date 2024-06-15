@@ -27,14 +27,12 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         IDataProvider context,
         IClock clock,
         IPayeeRepository payeeRepository,
-        IRepository<Split> splitRepository,
         IStorageService storage = null
     ) : base(context)
     {
         _storage = storage;
         _clock = clock;
         _payeeRepository = payeeRepository;
-        _splitRepository = splitRepository;
     }
 
     #region Read
@@ -211,11 +209,11 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
     ///<inheritdoc/>
     public async Task<int> RemoveSplitAsync(int id)
     {
-        var split = await _splitRepository.GetByIdAsync(id);
+        var split = await GetSplitByIdAsync(id);
         var category = split.Category;
         var txid = split.TransactionID;
 
-        await _splitRepository.RemoveAsync(split);
+        await RemoveSplitAsync(split);
 
         if (await TestExistsByIdAsync(txid))
         {
@@ -226,9 +224,47 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
                 await UpdateAsync(tx);
             }
         }
+        //else
+        //    throw new ApplicationException("No matching Transaction");
+   
         // else if dones't exist, something bizarre happened, but we'll not take any action 
 
         return txid;
+    }
+
+    /// <summary>
+    /// Retrieve a single split by its <paramref name="id"/>
+    /// </summary>
+    /// <param name="id">ID of split</param>
+    /// <returns>Requested Split</returns>
+    public async Task<Split> GetSplitByIdAsync(int id)
+    {
+        var list = await _context.ToListNoTrackingAsync(_context.Get<Split>().Where(x => x.ID == id));
+        return list.Single();
+    }
+
+    /// <summary>
+    /// Update spli<paramref name="split"/> with new details
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="item"/> should be an object already retrieved through one of the properties
+    /// or methods of this class.
+    /// </remarks>
+    /// <param name="item">New details</param>
+    public Task UpdateSplitAsync(Split split)
+    {
+        _context.Update(split);
+        return _context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Remove <paramref name="item"/> from the repository
+    /// </summary>
+    /// <param name="item">Item to remove</param>
+    private Task RemoveSplitAsync(Split split)
+    {
+        _context.Remove(split);
+        return _context.SaveChangesAsync();
     }
 
     /// <summary>
@@ -593,7 +629,6 @@ public async Task FinalizeImportAsync()
     private readonly IStorageService _storage;
     private readonly IClock _clock;
     private readonly IPayeeRepository _payeeRepository;
-    private readonly IRepository<Split> _splitRepository;
     private readonly JsonSerializerOptions jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
 

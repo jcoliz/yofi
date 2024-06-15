@@ -12,20 +12,13 @@ using YoFi.Core.Repositories;
 namespace YoFi.AspNet.Controllers
 {
     [Authorize(Policy = "CanRead")]
-    public class SplitsController : Controller
+    public class SplitsController(ITransactionRepository _transactionRepository) : Controller
     {
-        private readonly IRepository<Split> _repository;
-
-        public SplitsController(IRepository<Split> repository)
-        {
-            _repository = repository;
-        }
 
         [ValidateSplitExists]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-
-            var split = await _repository.GetByIdAsync(id);
+            var split = await _transactionRepository.GetSplitByIdAsync(id);
             return View(split);
         }
 
@@ -36,11 +29,11 @@ namespace YoFi.AspNet.Controllers
         [ValidateSplitExists]
         public async Task<IActionResult> Edit(int id, [Bind("ID,TransactionID,Amount,Category,Memo")] Split split)
         {
-            await _repository.UpdateAsync(split);
+            await _transactionRepository.UpdateSplitAsync(split);
             return RedirectToAction("Edit","Transactions", new { id = split.TransactionID });
         }
 
-        public async Task<IActionResult> Delete(int? id) => await Edit(id);
+        public async Task<IActionResult> Delete(int id) => await Edit(id);
 
         [HttpPost, ActionName("Delete")]
         [Authorize(Policy = "CanWrite")]

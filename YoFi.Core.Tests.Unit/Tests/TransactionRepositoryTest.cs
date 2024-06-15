@@ -102,12 +102,11 @@ namespace YoFi.Core.Tests.Unit
             // TODO: It would be better to MOCK this dependency, however for expediency,
             // we will extend the test into payee repository
             payees = new PayeeRepository(context);
-            var splits = new BaseRepository<Split>(context);
 
             // This is the time supposed by the FakeObjects filler
             clock.Now = new DateTime(2001, 12, 31);
 
-            repository = new TransactionRepository(context, clock, payees, splits, storage);
+            repository = new TransactionRepository(context, clock, payees, storage);
         }
 
         #endregion
@@ -356,7 +355,7 @@ namespace YoFi.Core.Tests.Unit
         public async Task CategoryAutoCompleteError()
         {
             // Given: An error-generating setup
-            repository = new TransactionRepository(null, null, null, null, null);
+            repository = new TransactionRepository(null, null, null,  null);
 
             // When: Asking for the category autocomplete for anything
             var list = await transactionRepository.CategoryAutocompleteAsync("anything");
@@ -1394,9 +1393,24 @@ namespace YoFi.Core.Tests.Unit
             // TODO: This test misses the case where the transaction had two splits but now has
             // only one, so the category is transferred to the parent transaction.
 
-            // Given: There are two items in the database, one of which we care about
+            /*
+             * Splits and transactions have some subtlety that's hard to test.
+             * 
+             * Consider this case:
+             * * Create a transaction with two splits
+             * * Delete one of those split by ID
+             * * Retreive the transaction
+             * * Result: Transaction will have just one split
+             * 
+             * For testing, I currently implement splits as an indepenent 'table'. That's
+             * wrong, really. Instead, should just maintain transactions. Operations on splits
+             * should dig into the transactions store and work on them there.
+             */ 
+
+            // Given: There are splits in the database, one of which we care about
             var nextid = 1;
-            var id = FakeObjects<Split>.Make(2, x => x.ID = nextid++).SaveTo(this).Last().ID;
+            var splits = FakeObjects<Split>.Make(2, x => x.ID = nextid++).SaveTo(this);
+            var id = splits.Last().ID;
 
             // When: Deleting the selected item
             await transactionRepository.RemoveSplitAsync(id);
@@ -1583,7 +1597,7 @@ namespace YoFi.Core.Tests.Unit
                 .Single();
 
             // And: An error-generating setup
-            repository = new TransactionRepository(null, null, null, null, null);
+            repository = new TransactionRepository(null, null, null, null);
 
             // When: Getting the receipt
             _ = await transactionRepository.GetReceiptAsync(expected);
@@ -1606,7 +1620,7 @@ namespace YoFi.Core.Tests.Unit
             var stream = new MemoryStream(Enumerable.Repeat<byte>(0x60, length).ToArray());
 
             // And: An error-generating setup
-            repository = new TransactionRepository(null, null, null, null, null);
+            repository = new TransactionRepository(null, null, null, null);
 
             // When: Uploading it as a receipt
             await transactionRepository.UploadReceiptAsync(expected, stream, contenttype);
