@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Common.ChartJS;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,6 +50,11 @@ namespace YoFi.AspNet.Pages
 
                 // TODO: Make this Async()
                 Report = _reportengine.Build(parms);
+
+                // TODO: Too much logic in display layer
+                //
+                // All this logic is about creating a chartconfig. You could argue that chartconfig
+                // is display logic. Still, too much going on here.
 
                 // We show a pie chart to the side of the report when all of the following are true:
                 //  - There are no months being shown
