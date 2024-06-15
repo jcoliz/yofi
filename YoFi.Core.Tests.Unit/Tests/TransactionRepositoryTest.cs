@@ -1526,7 +1526,6 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(now.Date, actual.Timestamp);
         }
 
-
         [TestMethod]
         public async Task UpReceipt()
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoFi.Core.Models;
 
@@ -50,6 +51,35 @@ public class ReceiptRepositoryInDb : IReceiptRepository
         else
         {
             return await _txrepo.CreateAsync();
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task AddTransactionAsync(Transaction tx)
+    {
+        // Note that if a ReceiptUrl exists on creation, it was encoded there by Create(int) above, and so needs to be 
+        // handled here.
+
+        int? rid = null;
+        if (!string.IsNullOrEmpty(tx.ReceiptUrl))
+        {
+            // ID is encoded at the end of displayed receipt url as "... [ID 23]"
+            var idregex = new Regex("\\[ID (?<id>[0-9]+)\\]$");
+            var match = idregex.Match(tx.ReceiptUrl);
+            if (match.Success)
+            {
+                rid = int.Parse(match.Groups["id"].Value);
+            }
+            tx.ReceiptUrl = null;
+        }
+
+        await _txrepo.AddAsync(tx);
+
+        // Now, match the receipt to the newly-added transaction
+        if (rid.HasValue && await TestExistsByIdAsync(rid.Value))
+        {
+            var r = await GetByIdAsync(rid.Value);
+            await AssignReceipt(r, tx);
         }
     }
 

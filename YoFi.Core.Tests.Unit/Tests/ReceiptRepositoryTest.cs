@@ -785,6 +785,26 @@ namespace YoFi.Core.Tests.Unit
             Assert.AreEqual(r.ID, rid);
         }
 
+        [TestMethod]
+        public async Task CreateTransaction()
+        {
+            // Note that basic "create" test is a receipt test, due to potential for receipt matching
+            // on create.
+
+            // Given: There is one item in the database, and another one waiting to be created
+            var expected = FakeObjects<Transaction>.Make(1).SaveTo(this).Add(1).Last();
+
+            // When: Creating a new item
+            await repository.AddTransactionAsync(expected);
+
+            // Then: There are now two transaction in the database
+            Assert.AreEqual(2, txrepo.All.Count());
+
+            // And: The last one is the one we just added
+            var actual = txrepo.All.Last();
+            Assert.AreEqual(expected, actual);
+        }
+
         #endregion
     }
 }

@@ -79,30 +79,10 @@ namespace YoFi.AspNet.Controllers
         [ValidateModel]
         public async Task<IActionResult> Create([Bind("ID,Timestamp,Amount,Memo,Payee,Category,BankReference,ReceiptUrl")] Transaction transaction, [FromServices] IReceiptRepository rrepo)
         {
-            // Note that if a ReceiptUrl exists on creation, it was encoded there by Create(int) above, and so needs to be 
-            // handled here.
+            // We are handing off creating of transaction to receipt repository,
+            // so it can handle the case where receipt match is encoded in the creation.
 
-            int? rid = null;
-            if (!string.IsNullOrEmpty(transaction.ReceiptUrl))
-            {
-                // ID is encoded at the end of displayed receipt url as "... [ID 23]"
-                var idregex = new Regex("\\[ID (?<id>[0-9]+)\\]$");
-                var match = idregex.Match(transaction.ReceiptUrl);
-                if (match.Success)
-                {
-                    rid = int.Parse(match.Groups["id"].Value);
-                }
-                transaction.ReceiptUrl = null;
-            }
-
-            await _repository.AddAsync(transaction);
-
-            // Now, match the receipt to the newly-added transaction
-            if (rid.HasValue && await rrepo.TestExistsByIdAsync(rid.Value))
-            {
-                var r = await rrepo.GetByIdAsync(rid.Value);
-                await rrepo.AssignReceipt(r,transaction);
-            }
+            await rrepo.AddTransactionAsync(transaction);
 
             return RedirectToAction(nameof(Index));
         }

@@ -20,6 +20,15 @@ public interface IReceiptRepository
     Task AssignReceipt(int id, int txid);
     Task<int> AssignAll();
     Task<Transaction> CreateTransactionAsync(int? id);
+
+    /// <summary>
+    /// Basic function of adding a transaction to the system
+    /// </summary>
+    /// <remarks>
+    /// We handle this because there could be a receipt match encoded in it
+    /// </remarks>
+    /// <param name="tx">Details of transaction to create</param>
+    Task AddTransactionAsync(Transaction tx);
 }
 
 public record ReceiptMatchResult
