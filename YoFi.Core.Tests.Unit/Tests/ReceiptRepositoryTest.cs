@@ -786,7 +786,7 @@ namespace YoFi.Core.Tests.Unit
         }
 
         [TestMethod]
-        public async Task CreateTransaction()
+        public async Task AddTransaction()
         {
             // Note that basic "create" test is a receipt test, due to potential for receipt matching
             // on create.
@@ -806,7 +806,7 @@ namespace YoFi.Core.Tests.Unit
         }
 
         [TestMethod]
-        public async Task CreateTransactionFromReceipt()
+        public async Task AddTransactionFromReceipt()
         {
             // Given: A receipt, with a unique memo
             var memo = "CreateTransactionWithReceiptMatch";
@@ -834,6 +834,46 @@ namespace YoFi.Core.Tests.Unit
             // And: No more receipts in the database
             var all = await repository.GetAllAsync();
             Assert.AreEqual(all.Count(), 0);
+        }
+
+        [TestMethod]
+        public async Task CreateTransaction()
+        {
+            // Note that basic "create" test is a receipt test, due to potential for receipt matching
+            // on create.
+
+            // Given: One receipt in the database
+            var name = "CreateTransaction";
+            var r = FakeObjects<Receipt>.Make(1, x => { x.ID = 1; x.Name = name; } ).SaveTo(this).Single();
+
+            // When: Creating a transaction from it
+            var actual = await repository.CreateTransactionAsync(r.ID);
+
+            // Then: This transaction has the receipt ID in its URL
+            Assert.IsTrue(actual.ReceiptUrl.Contains("[ID 1]"));
+
+            // And: The transaction name matches the receipt name
+            Assert.AreEqual(actual.Payee,name);
+        }
+
+        [TestMethod]
+        public async Task CreateTransactionNoId()
+        {
+            // Note that basic "create" test is a receipt test, due to potential for receipt matching
+            // on create.
+
+            // Given: One receipt in the database
+            var name = "CreateTransctionNoId";
+            var r = FakeObjects<Receipt>.Make(1, x => { x.ID = 1; x.Name = name; }).SaveTo(this).Single();
+
+            // When: Creating a transaction from an ID that is NOT in the database
+            var actual = await repository.CreateTransactionAsync(int.MaxValue);
+
+            // Then: This transaction has no receipt ID in its URL
+            Assert.IsNull(actual.ReceiptUrl);
+
+            // And: The transaction name does not matche the receipt name
+            Assert.AreNotEqual(actual.Payee, r.Name);
         }
 
         #endregion

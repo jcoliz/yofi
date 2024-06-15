@@ -76,7 +76,7 @@ namespace YoFi.Tests.Helpers
             throw new NotImplementedException();
         }
 
-        public Task<Transaction> CreateAsync() => throw new NotImplementedException();
+        public Task<Transaction> CreateAsync() => Task.FromResult(new Transaction());
         public Task<Transaction> EditAsync(int id, Transaction newvalues) => throw new NotImplementedException();
 
         public Task FinalizeImportAsync()
