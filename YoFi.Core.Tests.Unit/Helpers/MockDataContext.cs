@@ -23,11 +23,7 @@ namespace YoFi.Tests.Helpers
 
         public List<Receipt> ReceiptData { get; } = new List<Receipt>();
 
-        public List<Split> SplitData { get; } = new List<Split>();
-
         private IQueryable<Transaction> Transactions => TransactionData.AsQueryable();
-
-        private IQueryable<Split> Splits => SplitData.AsQueryable();
 
         private IQueryable<Payee> Payees => PayeeData.AsQueryable();
 
@@ -70,7 +66,7 @@ namespace YoFi.Tests.Helpers
             }
             if (typeof(T) == typeof(Split))
             {
-                return Splits as IQueryable<T>;
+                return SplitsWithTransactions as IQueryable<T>;
             }
             if (typeof(T) == typeof(Receipt))
             {
@@ -146,10 +142,6 @@ namespace YoFi.Tests.Helpers
                     TransactionData.Add(tx);
                 }
             }
-            else if (t == typeof(Split))
-            {
-                SplitData.AddRange(items as IEnumerable<Split>);
-            }
             else if (t == typeof(Receipt))
             {
                 ReceiptData.AddRange(items as IEnumerable<Receipt>);
@@ -191,19 +183,28 @@ namespace YoFi.Tests.Helpers
                 var index = TransactionData.FindIndex(x => x.ID == btx.ID);
                 TransactionData.RemoveAt(index);
             }
+            else if (t == typeof(Split))
+            {
+                var r = item as Split;
+
+                // Splits are stored WITHIN transactions
+
+                // First, find the transaction with the split
+                var tx = Transactions.SingleOrDefault(x => x.Splits.Any(y => y.ID == r.ID));
+
+                if (tx is null)
+                {
+                    throw new ApplicationException($"No transaction found with this split ID {r.ID}");                
+                }
+
+                tx.Splits.Remove(tx.Splits.Single(x => x.ID == r.ID));
+            }
             else if (t == typeof(Receipt))
             {
                 var r = item as Receipt;
 
                 var index = ReceiptData.FindIndex(x => x.ID == r.ID);
                 ReceiptData.RemoveAt(index);
-            }
-            else if (t == typeof(Split))
-            {
-                var r = item as Split;
-
-                var index = SplitData.FindIndex(x => x.ID == r.ID);
-                SplitData.RemoveAt(index);
             }
             else
                 throw new NotImplementedException();

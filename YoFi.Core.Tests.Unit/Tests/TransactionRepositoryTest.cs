@@ -1390,36 +1390,47 @@ namespace YoFi.Core.Tests.Unit
         [TestMethod]
         public async Task DeleteSplit()
         {
-            // TODO: This test misses the case where the transaction had two splits but now has
-            // only one, so the category is transferred to the parent transaction.
-
-            /*
-             * Splits and transactions have some subtlety that's hard to test.
-             * 
-             * Consider this case:
-             * * Create a transaction with two splits
-             * * Delete one of those split by ID
-             * * Retreive the transaction
-             * * Result: Transaction will have just one split
-             * 
-             * For testing, I currently implement splits as an indepenent 'table'. That's
-             * wrong, really. Instead, should just maintain transactions. Operations on splits
-             * should dig into the transactions store and work on them there.
-             */ 
-
-            // Given: There are splits in the database, one of which we care about
+            // Given: A transaction in the database with two splits
+            var txid = 1;
             var nextid = 1;
-            var splits = FakeObjects<Split>.Make(2, x => x.ID = nextid++).SaveTo(this);
+            var splits = FakeObjects<Split>.Make(2, x => { x.ID = nextid++; x.TransactionID = txid; } );
+            FakeObjects<Transaction>.Make(1, x => { x.ID = txid; x.Splits = splits.ToList(); }).SaveTo(this);
             var id = splits.Last().ID;
 
-            // When: Deleting the selected item
+            // When: Deleting one of the splits 
             await transactionRepository.RemoveSplitAsync(id);
 
-            // Then: Now is only one item in database
+            // Then: Now is only one split in database
             Assert.AreEqual(1, context.Get<Split>().Count());
 
             // And: The deleted item cannot be found
             Assert.IsFalse(context.Get<Split>().Any(x => x.ID == id));
+        }
+
+        [TestMethod]
+        public async Task DeleteOnlySplit()
+        {
+            // Given: A transaction in the database with only one split
+            var txid = 1;
+            var nextid = 1;
+            var splits = FakeObjects<Split>.Make(1, x => 
+            { 
+                x.ID = nextid++; 
+                x.TransactionID = txid;
+                x.Category = "DeleteOnlySplit";
+            });
+            FakeObjects<Transaction>.Make(1, x => { x.ID = txid; x.Splits = splits.ToList(); }).SaveTo(this);
+            var id = splits.Last().ID;
+
+            // When: Deleting the split
+            await transactionRepository.RemoveSplitAsync(id);
+
+            // Then: Now is no splits in database
+            Assert.AreEqual(0, context.Get<Split>().Count());
+
+            // And: Transaction now has category from the split
+            var tx = await transactionRepository.GetByIdAsync(txid);
+            Assert.AreEqual(tx.Category, "DeleteOnlySplit");
         }
 
         [TestMethod]
