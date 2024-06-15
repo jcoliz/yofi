@@ -276,6 +276,23 @@ namespace YoFi.Tests.Helpers
                 var index = TransactionData.FindIndex(x => x.ID == btx.ID);
                 TransactionData[index] = btx;
             }
+            else if (t == typeof(Split))
+            {
+                var r = item as Split;
+
+                // Splits are stored WITHIN transactions
+
+                // First, find the transaction with the split
+                var tx = Transactions.SingleOrDefault(x => x.Splits.Any(y => y.ID == r.ID));
+
+                if (tx is null)
+                {
+                    throw new ApplicationException($"No transaction found with this split ID {r.ID}");
+                }
+
+                tx.Splits.Remove(tx.Splits.Single(x => x.ID == r.ID));
+                tx.Splits.Add(r);
+            }
             else
                 throw new NotImplementedException();
         }

@@ -1434,6 +1434,29 @@ namespace YoFi.Core.Tests.Unit
         }
 
         [TestMethod]
+        public async Task UpdateSplit()
+        {
+            // Given: A transaction in the database with two splits
+            var txid = 1;
+            var nextid = 1;
+            var splits = FakeObjects<Split>.Make(2, x => { x.ID = nextid++; x.TransactionID = txid; }).Add(1);
+            FakeObjects<Transaction>.Make(1, x => { x.ID = txid; x.Splits = splits.Group(0); }).SaveTo(this);
+            var id = splits.Group(0).Last().ID;
+            var newvals = splits.Group(1).Last();
+            newvals.ID = id;
+
+            // When: Updating one of the splits 
+            await transactionRepository.UpdateSplitAsync(newvals);
+
+            // Then: Now still two splits in database
+            Assert.AreEqual(2, context.Get<Split>().Count());
+
+            // And: Transaction now has splits with value totalling 400 (100+300, not 100+200 as before)
+            var tx = await transactionRepository.GetByIdAsync(txid);
+            Assert.AreEqual(tx.Splits.Sum(x=>x.Amount), 400m);
+        }
+
+        [TestMethod]
         public async Task SplitsShownInEdit()
         {
             // Given: Single transaction with balanced splits
