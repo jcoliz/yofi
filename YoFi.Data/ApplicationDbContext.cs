@@ -34,6 +34,11 @@ namespace YoFi.Data
 
             builder.Entity<Transaction>().HasIndex(p => new { p.Timestamp, p.Hidden, p.Category });
 
+            //
+            // Note that this isn't how I'd do this anymore. Now, I would have a separate YoFi.Data.Sqlite
+            // project with its own migrations.
+            // 
+
             // https://stackoverflow.com/questions/60503553/ef-core-linq-to-sqlite-could-not-be-translated-works-on-sql-server
             if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {
