@@ -27,6 +27,7 @@ using YoFi.Core.Repositories;
 using YoFi.Core.SampleData;
 using YoFi.Services;
 using System.Reflection;
+using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 
 #if __DEMO_OPEN_ACCESS__
 using Microsoft.AspNetCore.Authorization;
@@ -50,8 +51,22 @@ namespace YoFi.AspNet.Main
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var databaseAssemblyName = typeof(ApplicationDbContext).Assembly.GetName().Name!;
+            var connectionString =
+                Configuration.GetConnectionString(databaseAssemblyName) ??
+                Configuration.GetConnectionString("DefaultConnection") ??
+                throw new KeyNotFoundException("No connection string found. Please check config.");
+
+#if POSTGRES
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(connectionString));
+            logme.Enqueue("Using Postgres");
+#else
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+            logme.Enqueue("Using SQL Server");
+#endif
+
             services.AddDatabaseDeveloperPageExceptionFilter();
             
             services.AddIdentity<ApplicationUser, IdentityRole>()

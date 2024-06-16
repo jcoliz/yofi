@@ -1,0 +1,29 @@
+version: '3.4'
+x-name: pg_yofi_development
+services: 
+  db:
+    image: postgres:15.4-alpine
+    container_name: postgres_yofi
+    restart: always
+    ports:
+      - '5501:5432'
+    environment:
+      - POSTGRES_PASSWORD=yofi_development
+      - POSTGRES_DB=db
+      - POSTGRES_USER=postgres
+      - PGUSER=postgres
+#    volumes:
+#      - pg_lwa_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL" , "pg_isready" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pg_yofi_development
+
+#volumes:
+#  pg_lwa_pgdata:
+
+networks:
+  pg_yofi_development:
