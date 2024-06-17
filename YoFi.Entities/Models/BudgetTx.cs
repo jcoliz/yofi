@@ -42,6 +42,7 @@ namespace YoFi.Core.Models
         [Display(Name = "Date")]
         [DataType(DataType.Date)]
         [Editable(true)]
+        [Column(TypeName = "date")]
         public DateTime Timestamp { get; set; }
 
         /// <summary>
