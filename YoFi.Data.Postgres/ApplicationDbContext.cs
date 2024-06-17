@@ -24,6 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
         builder.Entity<Split>().ToTable("Split");
 
         builder.Entity<Transaction>().HasIndex(p => new { p.Timestamp, p.Hidden, p.Category });
+        builder.Entity<Transaction>().Property(b => b.Timestamp).HasColumnType("timestamp without time zone");
     }
 
     #region Entity Sets
