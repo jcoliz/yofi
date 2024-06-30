@@ -134,7 +134,11 @@ public class PayeeRepository : BaseRepository<Payee>, IPayeeRepository
         if (!string.IsNullOrEmpty(Name))
         {
             IQueryable<Payee> payees = payeecache?.AsQueryable<Payee>() ?? All;
-            regexpayees = payees.Where(x => x.Name.StartsWith('/') && x.Name.EndsWith('/'));
+
+            // Note that EFCore cannot translate StartsWith(char)
+#pragma warning disable CA1866 // Use char overload
+            regexpayees = payees.Where(x => x.Name.StartsWith("/") && x.Name.EndsWith("/"));
+#pragma warning restore CA1866 // Use char overload
 
             // Product Backlog Item 871: Match payee on regex, optionally
             Payee payee = null;
