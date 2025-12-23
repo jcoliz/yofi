@@ -68,14 +68,27 @@ interface IReportable
 ### 2. Hierarchical Category System (Colon-Separated) ⭐⭐⭐⭐
 
 **Current Implementation:**
+
+Categories stored and displayed identically (NO transformation):
 ```
 Income:Salary
-Expenses:Housing:Mortgage
-Expenses:Housing:Utilities:Electric
+Housing:Mortgage
+Housing:Utilities:Electric
+Food:Groceries
+Taxes:Federal
+Savings:Retirement
+[Blank]              ← Uncategorized
 ```
+
+Reports filter which categories to show based on scope:
+- **"All" reports**: Show everything (Income, Housing, Food, Taxes, Savings)
+- **"Expenses" reports**: Exclude special categories (Income, Taxes, Savings, Transfer, Unmapped)
+- **"Income" reports**: Include only Income and its children
 
 **Why Keep:**
 - **Simple string-based hierarchy** that's easy to understand and reason about
+- **No transformation** - categories stored and displayed identically
+- **Filtering not renaming** - report scope achieved through inclusion/exclusion
 - No complex parent/child ID relationships or foreign keys
 - Unlimited depth without schema changes
 - Easy to parse: `category.Split(':')`

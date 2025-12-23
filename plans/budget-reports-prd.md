@@ -112,35 +112,80 @@ Common interface for items that can be included in reports.
 
 ### 2.2 Category Hierarchy
 
-Categories use colon-separated strings to represent hierarchical structure:
+Categories use colon-separated strings to represent hierarchical structure. Categories are stored and displayed identically - there is NO transformation of category names.
+
+**Category Structure (Storage and Display are Identical):**
 
 ```
 Income
 Income:Salary
 Income:Bonus
-Expenses
-Expenses:Housing
-Expenses:Housing:Mortgage
-Expenses:Housing:Utilities
-Expenses:Housing:Utilities:Electric
-Expenses:Housing:Utilities:Water
-Expenses:Food
-Expenses:Food:Groceries
-Expenses:Food:Dining
+Housing
+Housing:Mortgage
+Housing:Utilities
+Housing:Utilities:Electric
+Housing:Utilities:Water
+Food
+Food:Groceries
+Food:Dining
 Taxes
 Taxes:Federal
 Taxes:State
 Savings
 Savings:Retirement
 Savings:Emergency
+[Blank]                     ← Uncategorized transactions
 ```
 
 **Special Categories:**
+
+Categories with special meanings that affect report filtering:
 - **Income**: Positive amounts, represents money coming in
 - **Taxes**: Negative amounts, tax payments
 - **Savings**: Negative amounts, money saved/invested
 - **Transfer**: Money moved between accounts (excluded from most reports)
 - **Unmapped**: Transactions without categories (excluded from most reports)
+
+**Report Scoping via Filtering (NOT Transformation):**
+
+Reports filter which top-level categories to include, but don't change category names:
+
+- **"All" Reports**: Show ALL categories as-is (Income, Housing, Food, Taxes, Savings)
+- **"Expenses" Reports**: EXCLUDE special categories (Income, Taxes, Savings, Transfer, Unmapped), show only Housing, Food, [Blank], etc.
+- **"Income" Reports**: INCLUDE only Income and its children
+
+**Level-Based Display:**
+
+When reports request a specific number of levels, they slice the hierarchy starting from the filtered top:
+
+- **"Income" report with NumLevels=1**: Shows children of Income PLUS items at Income level itself
+  - Example data: `Income` ($1K), `Income:Salary` ($10K), `Income:Bonus` ($2K)
+  - Report shows:
+    ```
+    Salary    $10,000    (77%)
+    Bonus     $2,000     (15%)
+    -         $1,000     (8%)    ← Items at "Income" level (no subcategory)
+    TOTAL     $13,000    (100%)
+    ```
+  
+- **"Expenses" report with NumLevels=1**: Shows `Housing`, `Food`, `[BLANK]` (top-level non-special categories; uncategorized shown as `[BLANK]` to highlight warning condition)
+
+- **"All" report with NumLevels=1**: Shows `Income`, `Housing`, `Food`, `Taxes`, `Savings`, `-` (all top-level categories)
+
+**Parent-Only Category Display:**
+
+Transactions at the parent level itself (without a subcategory) are displayed differently depending on context:
+
+- **In filtered reports** (e.g., Income report): Shown as **"-"** (dash)
+  - Example: Items categorized as just "Income" (not "Income:Something")
+  - Represents data at the filtered parent level
+  
+- **In expense reports**: Uncategorized transactions shown as **"[BLANK]"**
+  - Highlights warning condition requiring attention
+  - User should categorize these transactions
+  - Visually distinct to call out the issue
+
+**Important:** Category names like "Housing:Mortgage" are NEVER transformed. They appear identically in storage, display, and reports. The only difference between report types is which categories are FILTERED (included/excluded) based on scope.
 
 ### 2.3 Category Collector Pattern
 
@@ -1984,58 +2029,98 @@ Complete list of budget-related report definitions:
 
 ### 12.4 Category Examples
 
-**Standard Expense Categories:**
+**Categories (Identical in Storage and Display):**
 
 ```
-Expenses
-├── Housing
-│   ├── Mortgage
-│   ├── Utilities
-│   │   ├── Electric
-│   │   ├── Gas
-│   │   └── Water
-│   ├── Insurance
-│   └── Maintenance
-├── Food
-│   ├── Groceries
-│   └── Dining
-├── Transportation
+Housing
+├── Mortgage
+├── Utilities
+│   ├── Electric
 │   ├── Gas
-│   ├── Insurance
-│   └── Maintenance
-└── Entertainment
-    ├── Streaming
-    ├── Movies
-    └── Events
-```
-
-**Income Categories:**
-
-```
-Income
+│   └── Water
+├── Insurance
+└── Maintenance
+Food
+├── Groceries
+└── Dining
+Transportation
+├── Gas
+├── Insurance
+└── Maintenance
+Entertainment
+├── Streaming
+├── Movies
+└── Events
+Income                     ← Special category
 ├── Salary
 ├── Bonus
 └── Investment
-```
-
-**Tax Categories:**
-
-```
-Taxes
+Taxes                      ← Special category
 ├── Federal
 ├── State
 └── Property
-```
-
-**Savings Categories:**
-
-```
-Savings
+Savings                    ← Special category
 ├── Retirement
 │   ├── 401k
 │   └── IRA
 └── Emergency
+[Blank]                    ← Uncategorized
 ```
+
+**"All" Report Display (All Categories, NumLevels=1):**
+
+Shows all top-level categories:
+```
+Income
+Housing
+Food
+Transportation
+Entertainment
+Taxes
+Savings
+[Blank]
+```
+
+**"Expenses" Report Display (Filtered, NumLevels=1):**
+
+Shows only non-special categories (excludes Income, Taxes, Savings, Transfer, Unmapped):
+```
+Housing
+Food
+Transportation
+Entertainment
+[Blank]
+```
+
+**"Income" Report Display (Filtered, NumLevels=1):**
+
+Shows only Income children (skips "Income" level when NumLevels=1):
+```
+Salary
+Bonus
+Investment
+-           ← Items at "Income" level itself (no subcategory)
+```
+
+**Example with Parent-Only Items:**
+
+Given transactions:
+- `Income` (no subcategory): $1,000
+- `Income:Salary`: $10,000
+- `Income:Bonus`: $2,000
+
+An Income report with NumLevels=1 shows:
+
+| Category | Total | % Total |
+|----------|-------|---------|
+| Salary | $10,000 | 77% |
+| Bonus | $2,000 | 15% |
+| - | $1,000 | 8% |
+| **TOTAL** | **$13,000** | **100%** |
+
+The "-" row represents transactions categorized as just "Income" without a subcategory.
+
+**Key Point:** Category names are NEVER transformed. "Housing:Mortgage" is stored and displayed identically everywhere. Report scoping is achieved through FILTERING (including/excluding top-level categories), not by adding or removing prefixes.
 
 ### 12.5 Common Pitfalls
 
